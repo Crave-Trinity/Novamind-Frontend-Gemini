@@ -1,52 +1,62 @@
-## **Windsurf Local Rules (Concierge Psychiatry Platform)**
+# Windsurf Local Rules (Concierge Psychiatry Platform)
 
-1. **Domain Layer (Pure Clinical Logic)**  
-   - Represents psychiatry-relevant concepts: Patients, Appointments, Billing, Outcomes, Notes, etc.  
-   - Zero references to FastAPI, AWS, or any external frameworks.  
-   - All logic regarding patient flow, scheduling rules, or therapy features belongs here, untainted by infrastructure.
+## Domain Layer (Pure Clinical Logic)
 
-2. **Data Layer (Repositories & Persistence)**  
-   - Use a Repository Pattern for patient data, appointments, forms, and more.  
-   - Implement an ORM (e.g., SQLAlchemy, with a separate model) but keep it out of the Domain layer.  
-   - All data access calls (database queries, external APIs, file storage) remain in this layer.
+- Represents psychiatry-relevant concepts: Patients, Appointments, Billing, Outcomes, Notes, etc.
+- Zero references to FastAPI, AWS, or any external frameworks.
+- All logic regarding patient flow, scheduling rules, or therapy features belongs here, untainted by infrastructure.
 
-3. **Presentation Layer (FastAPI Endpoints & Schemas)**  
-   - FastAPI endpoints for patient onboarding, scheduling, secure messaging, and more.  
-   - **Pydantic v2** schemas for input/output validation (do not mix domain entities with Pydantic models).  
-   - Use **FastAPI’s `Depends()`** for dependency injection (fetching repositories, services).
+## Data Layer (Repositories & Persistence)
 
-4. **HIPAA & Security**  
-   - All endpoints must enforce authentication & role-based access (patient vs. admin/psychiatrist).  
-   - Use AWS Cognito (or another HIPAA-eligible auth) for login, MFA, JWT issuance.  
-   - No session state stored server-side; all user context is provided via validated JWT tokens.  
-   - All logs stripped of PHI. Any error or usage logs must anonymize or exclude patient identifiers.
+- Use a Repository Pattern for patient data, appointments, forms, and more.
+- Implement an ORM (e.g., SQLAlchemy, with a separate model) but keep it out of the Domain layer.
+- All data access calls (database queries, external APIs, file storage) remain in this layer.
 
-5. **Event-Driven & GoF Patterns**  
-   - **Observer Pattern** for triggering analytics or notifications when a patient record changes (e.g., appointment booked triggers an email or text reminder).  
-   - **Strategy Pattern** for optional AI-based modules (e.g., risk scoring, summarization) or any advanced logic that could have multiple interchangeable algorithms.  
-   - **Factory/Abstract Factory** for creating complex domain aggregates (e.g., building a patient record with multiple sub-objects, handling default settings).
+## Presentation Layer (FastAPI Endpoints & Schemas)
 
-6. **Testing & QA**  
-   - Provide unit tests that cover domain logic (pure, fast, no side effects).  
-   - Integration tests that mock out external dependencies but test layer interaction (e.g., ensuring repository calls persist the correct data).  
-   - Explicitly test the security boundaries—attempt unauthorized calls, expired tokens, role-based restrictions.
+- FastAPI endpoints for patient onboarding, scheduling, secure messaging, and more.
+- **Pydantic v2** schemas for input/output validation (do not mix domain entities with Pydantic models).
+- Use **FastAPI’s `Depends()`** for dependency injection (fetching repositories, services).
 
-7. **Error Handling & Custom Exceptions**  
-   - Create domain exceptions (e.g., `AppointmentConflictError`, `UnauthorizedAccessError`).  
-   - In the API layer, catch these domain exceptions and translate them to appropriate HTTP status codes (e.g., `409 Conflict`, `401 Unauthorized`).  
-   - Document all custom exceptions inline.
+## HIPAA & Security
 
-8. **Function Size & Responsibilities**  
-   - Each function ≤15 lines. For complex logic, break into smaller private helper methods.  
-   - No function or method should do more than one conceptual operation.  
-   - Aim for short, descriptive names and explicit docstrings for each method and class.
+- All endpoints must enforce authentication & role-based access (patient vs. admin/psychiatrist).
+- Use AWS Cognito (or another HIPAA-eligible auth) for login, MFA, JWT issuance.
+- No session state stored server-side; all user context is provided via validated JWT tokens.
+- All logs stripped of PHI. Any error or usage logs must anonymize or exclude patient identifiers.
 
-9. **Configuration**  
-   - Store HIPAA compliance settings (e.g., encryption, logging policies, BAA-related toggles) in `.env` or `settings.py`.  
-   - Document each variable (meaning, usage) in code or in a dedicated reference file.  
-   - No dynamic or runtime adjustments to global config.
+## Event-Driven & GoF Patterns
 
-10. **Luxury Concierge Quality**  
-   - The code, UX, and overall system must reflect a high-end “concierge psychiatry” experience—fast, reliable, impeccably designed.  
-   - Include thoughtful touches like automated text/email reminders (via HIPAA-compliant Twilio) or easy patient scheduling to justify premium fees.  
-   - Keep potential future expansion to a SaaS model in mind, but remain hyper-focused on immediate, impeccable performance for a single top-tier provider.
+- **Observer Pattern** for triggering analytics or notifications when a patient record changes (e.g., appointment booked triggers an email or text reminder).
+- **Strategy Pattern** for optional AI-based modules (e.g., risk scoring, summarization) or any advanced logic that could have multiple interchangeable algorithms.
+- **Factory/Abstract Factory** for creating complex domain aggregates (e.g., building a patient record with multiple sub-objects, handling default settings).
+
+## Testing & QA
+
+- Provide unit tests that cover domain logic (pure, fast, no side effects).
+- Integration tests that mock out external dependencies but test layer interaction (e.g., ensuring repository calls persist the correct data).
+- Explicitly test the security boundaries—attempt unauthorized calls, expired tokens, role-based restrictions.
+
+## Error Handling & Custom Exceptions
+
+- Create domain exceptions (e.g., `AppointmentConflictError`, `UnauthorizedAccessError`).
+- In the API layer, catch these domain exceptions and translate them to appropriate HTTP status codes (e.g., `409 Conflict`, `401 Unauthorized`).
+- Document all custom exceptions inline.
+
+## Function Size & Responsibilities
+
+- Each function **≤15 lines**. For complex logic, break into smaller private helper methods.
+- No function or method should do more than one conceptual operation.
+- Aim for short, descriptive names and explicit docstrings for each method and class.
+
+## Configuration
+
+- Store HIPAA compliance settings (e.g., encryption, logging policies, BAA-related toggles) in a **.env** file or `settings.py`.
+- Document each variable (meaning, usage) in code or in a dedicated reference file.
+- No dynamic or runtime adjustments to global config.
+
+## Luxury Concierge Quality
+
+- The code, UX, and overall system must reflect a high-end “concierge psychiatry” experience—fast, reliable, impeccably designed.
+- Include thoughtful touches like automated text/email reminders (via HIPAA-compliant Twilio) or easy patient scheduling to justify premium fees.
+- Keep potential future expansion to a SaaS model in mind, but remain hyper-focused on immediate, impeccable performance for a single top-tier provider.
