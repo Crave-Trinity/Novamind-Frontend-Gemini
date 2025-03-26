@@ -22,20 +22,22 @@ The NOVAMIND Digital Twin is implemented as a set of specialized microservices, 
 ### 1. Psychiatric Symptom Forecasting Microservice Stack
 
 **Core Components:**
+
 - **Model Service**: Ensemble approach combining Transformer-based forecasting with XGBoost for interpretability
 - **Feature Engineering Service**: Specialized time-series preprocessing with robust handling of irregular sampling
 - **Data Integration Service**: Real-time event streaming using Kafka for symptom updates
 - **Inference Service**: GPU-accelerated prediction with confidence interval calculation
 
 **Architecture:**
-```
+
+```ascii
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│ Symptom Data    │────▶│ Feature         │────▶│ Ensemble        │
+│ Symptom Data    │────▶│ Feature         │────▶│ Ensemble       │
 │ Collection API  │     │ Engineering     │     │ Prediction      │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
                                                         │
 ┌─────────────────┐     ┌─────────────────┐            ▼
-│ Clinician       │◀────│ Trajectory      │◀────┌─────────────────┐
+│ Clinician       │◀────│ Trajectory      │◀───┌────────────────┐
 │ Dashboard API   │     │ Analysis        │     │ Confidence      │
 └─────────────────┘     └─────────────────┘     │ Calculation     │
                                                 └─────────────────┘
@@ -44,13 +46,15 @@ The NOVAMIND Digital Twin is implemented as a set of specialized microservices, 
 ### 2. Biometric-Mental Health Correlation Microservice Stack
 
 **Core Components:**
+
 - **Data Synchronization Service**: Handles wearable device APIs with retry logic
 - **Multimodal Feature Service**: Processes heterogeneous biometric data streams
 - **Correlation Model Service**: Manages model inference and statistical validation
 - **Visualization Service**: Generates interpretable correlation outputs
 
 **Architecture:**
-```
+
+```ascii
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │ Device          │────▶│ Time-Alignment  │────▶│ Feature         │
 │ Integration API │     │ Service         │     │ Extraction      │
@@ -66,13 +70,15 @@ The NOVAMIND Digital Twin is implemented as a set of specialized microservices, 
 ### 3. Pharmacogenomics & Treatment Response Microservice Stack
 
 **Core Components:**
+
 - **Genetic Data Service**: Secure storage and processing of genetic markers
 - **Medication Knowledge Service**: Database of medication properties and interactions
 - **Graph Neural Network Service**: Processes molecular structures and interactions
 - **Recommendation Service**: Generates ranked medication suggestions
 
 **Architecture:**
-```
+
+```ascii
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │ Genetic Profile │────▶│ Feature         │────▶│ Graph Neural    │
 │ Repository      │     │ Engineering     │     │ Network Model   │
@@ -87,26 +93,29 @@ The NOVAMIND Digital Twin is implemented as a set of specialized microservices, 
 
 ## Psychiatric Symptom Tracking/Forecasting
 
-### Model Components
+### Symptom Forecasting Model Components
 
 Based on extensive research and benchmarking, the following represent the absolute best-in-class model components for psychiatric symptom forecasting:
 
 #### 1. Multi-Horizon Transformer with Quantile Regression
+
 - **Implementation**: PyTorch-based implementation with multi-head attention (8 heads) and 6 encoder/decoder layers
 - **Strengths**: Captures long-range temporal dependencies in symptom patterns; produces probabilistic forecasts with uncertainty bounds
 - **Paper Reference**: "State-of-The-Art Deep Learning Models are Superior for Time Series Forecasting" (SSRN, 2023)
 
 #### 2. XGBoost with Bayesian Hyperparameter Optimization
+
 - **Implementation**: XGBoost library (version 2.0+) with Optuna for hyperparameter tuning
 - **Strengths**: Excellent interpretability via feature importance; handles sparse symptom reporting data well
 - **Paper Reference**: "Improving Diagnosis of Depression With XGBOOST Machine Learning Model" (Frontiers in Big Data, 2021)
 
 #### 3. Ensemble Aggregation Layer
+
 - **Implementation**: Stacked generalization approach combining Transformer and XGBoost predictions
 - **Strengths**: Leverages the complementary strengths of both approaches; reduces model-specific biases
 - **Paper Reference**: "Comprehensive Symptom Prediction in Inpatients With Acute Psychiatric Disorders" (PubMed 39536315, 2024)
 
-### Implementation Details
+### Symptom Forecasting Implementation Details
 
 ```python
 # Domain Layer (models.py)
@@ -158,26 +167,29 @@ class SymptomForecastService:
 
 ## Biometric-Mental Health Correlation
 
-### Model Components
+### Biometric Correlation Model Components
 
-For correlating biometric data with mental health symptoms, the following models represent the most advanced approaches available:
+For correlating biometric data with mental health symptoms, the following represent the most advanced approaches available:
 
 #### 1. Hierarchical Feature-Based Network (HFBN)
+
 - **Implementation**: TensorFlow-based model with convolutional layers for local feature extraction and transformer layers for temporal dependencies
 - **Strengths**: 80-84% accuracy for mental health predictions from multimodal inputs; handles irregular sampling rates
 - **Paper Reference**: "Neuroimaging signatures and deep learning modeling for early prediction" (PubMed 39759571, 2024)
 
 #### 2. Temporal Fusion Transformer
+
 - **Implementation**: Based on TFT architecture (Google Cloud) with variable selection networks, gated residual networks, and multi-head attention
 - **Strengths**: Specifically designed for multivariate time series with different sampling rates; interpretable attention weights
 - **Paper Reference**: "AI-based personalized real-time risk prediction for behavioral outcomes" (ScienceDirect, 2024)
 
 #### 3. Multimodal Aligner with Self-Supervised Contrastive Loss
+
 - **Implementation**: PyTorch-based implementation with contrastive learning objectives to align different data modalities
 - **Strengths**: Handles misalignment between continuous biometric data and discrete symptom reports; learns without extensive labeled data
 - **Paper Reference**: "Multi modality fusion transformer with spatio-temporal feature fusion" (PubMed 38518412, 2024)
 
-### Implementation Details
+### Biometric Correlation Implementation Details
 
 ```python
 # Domain Layer (models.py)
@@ -234,26 +246,29 @@ class BiometricCorrelationService:
 
 ## Pharmacogenomics & Treatment Response
 
-### Model Components
+### Pharmacogenomics Model Components
 
 For predicting medication responses based on genetic profiles, the following models represent the state-of-the-art:
 
 #### 1. GPDRP_GIN_TRANSFORMER
+
 - **Implementation**: DGL (Deep Graph Library) implementation with Graph Isomorphism Network layers and transformer-based sequence processing
 - **Strengths**: State-of-the-art performance in benchmarks; processes both molecular structures and genetic markers
 - **Paper Reference**: "GPDRP: a multimodal framework for drug response prediction with graph neural networks" (BMC Bioinformatics, 2023)
 
 #### 2. MolTransGraphSAGE Hybrid
+
 - **Implementation**: Combined architecture using MolTrans for drug-target interaction and GraphSAGE for genetic pathway analysis
 - **Strengths**: Effectively captures molecular interactions while maintaining computational efficiency
 - **Paper Reference**: "MolTrans: Molecular Interaction Transformer for drug-target interaction prediction" (Bioinformatics, 2021)
 
 #### 3. Pharmacogenomic Attention Network
+
 - **Implementation**: Custom attention-based neural network model specifically trained on psychiatric medication response data
 - **Strengths**: Specialized for psychiatric medications; incorporates clinical domain knowledge
 - **Paper Reference**: "Machine learning, pharmacogenomics, and clinical psychiatry: predicting antidepressant response" (PubMed 35968639, 2022)
 
-### Implementation Details
+### Pharmacogenomics Implementation Details
 
 ```python
 # Domain Layer (models.py)
