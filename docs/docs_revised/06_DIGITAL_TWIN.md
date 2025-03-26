@@ -1,4 +1,97 @@
-# ... (rest of the code remains the same)
+# NOVAMIND: Digital Twin
+
+## Introduction to Psychiatric Digital Twins
+
+The NOVAMIND Digital Twin is a computational representation of a patient's psychiatric state that enables personalized medicine at an unprecedented level of precision. Unlike traditional psychiatric approaches that rely solely on subjective assessments, the Digital Twin integrates multimodal data sources to create a dynamic, evolving model of each patient's mental health.
+
+## Core Digital Twin Components
+
+| Component | Purpose | Primary Model | Implementation |
+|-----------|---------|---------------|----------------|
+| Symptom Trajectory Forecasting | Predict symptom progression and detect early warning signs | TimeGPT-1 | Zero-shot time series forecasting |
+| Biometric-Mental Correlation | Link physiological markers to mental states | MindGPT-Bio | Multimodal neural network |
+| Precision Medication Modeling | Personalize medication selection based on genetics and history | PharmacoTransformer | Attention-based sequence model |
+
+### System Architecture Overview
+
+```
+┌─────────────────────────┐       ┌─────────────────────────┐
+│                         │       │                         │
+│  Data Integration Layer │◄─────►│  Digital Twin Core      │
+│                         │       │                         │
+└───────────┬─────────────┘       └───────────┬─────────────┘
+            │                                 │
+            │                                 │
+            ▼                                 ▼
+┌─────────────────────────┐       ┌─────────────────────────┐
+│                         │       │                         │
+│  Wearable & EHR         │       │  Model Serving          │
+│  Integration Services   │       │  Infrastructure         │
+│                         │       │                         │
+└───────────┬─────────────┘       └───────────┬─────────────┘
+            │                                 │
+            │                                 │
+            ▼                                 ▼
+┌─────────────────────────┐       ┌─────────────────────────┐
+│                         │       │                         │
+│  Event-Driven Update    │◄─────►│  Clinical Application   │
+│  Pipeline               │       │  Services               │
+│                         │       │                         │
+└─────────────────────────┘       └─────────────────────────┘
+```
+
+## Clean Architecture Implementation
+
+The Digital Twin subsystem adheres to the NOVAMIND Clean Architecture principles:
+
+### Domain Layer
+- Pure business logic representing psychiatric concepts
+- Model-agnostic interfaces for prediction services
+- Value objects for various psychiatric assessments and biometric measures
+
+### Application Layer
+- Digital Twin orchestration services
+- Use cases for clinical applications (treatment simulation, risk detection)
+- Model-specific processing logic
+
+### Infrastructure Layer
+- AI model adapters and implementations
+- GPU resource management
+- Model registry and versioning
+- Wearable data integration services
+
+### Presentation Layer
+- RESTful API for Digital Twin interaction
+- Clinical dashboard data endpoints
+- Mobile app integration endpoints
+
+## Key Differentiators
+
+1. **Longitudinal Analysis**: Unlike traditional point-in-time assessments, the Digital Twin continuously evolves as new data is incorporated
+2. **Multimodal Integration**: Combines objective biometric data with subjective assessments and clinical observations
+3. **Predictive Capability**: Forecasts symptom trajectories and treatment responses before they become clinically apparent
+4. **Individualizes Treatment**: Moves beyond population-based guidelines to truly personalized psychiatric care
+
+## Implementation Roadmap
+
+| Phase | Focus | Timeline | Key Deliverable |
+|-------|-------|----------|-----------------|
+| 1 | Core Symptom Tracking | Month 1-2 | TimeGPT-1 integration, basic forecasting |
+| 2 | Biometric Integration | Month 3-4 | MindGPT-Bio implementation, wearable connections |
+| 3 | Pharmacogenomic Models | Month 5-6 | PharmacoTransformer deployment, treatment simulation |
+| 4 | Full Digital Twin | Month 7-8 | Integrated system with clinical dashboard |
+
+## HIPAA Compliance Summary
+
+| Component | HIPAA Requirement | Implementation Approach |
+|-----------|-------------------|-------------------------|
+| Data Storage | Encryption at rest | AWS S3 with server-side encryption (SSE-KMS) |
+| Data Transmission | Encryption in transit | TLS 1.3 for all API communications |
+| Model Training | Minimum necessary use | PHI-minimized feature extraction pipeline |
+| Access Controls | Role-based authorization | Fine-grained permissions for model interactions |
+| Audit Logging | Comprehensive tracking | All model operations logged with user, time, purpose |
+
+The Digital Twin architecture represents the core of NOVAMIND's value proposition, enabling a revolutionary approach to psychiatric care that combines the latest in AI technology with rigorous clinical standards and unwavering HIPAA compliance.
 
 ## Microservice Implementations
 
@@ -819,6 +912,1482 @@ The PharmacoTransformer model is an attention-based sequence model with the foll
    - Batch size: 16
    - Training epochs: 30 with early stopping
    - Weight decay: 0.01
+
+## Digital Twin API
+
+### API Design Principles
+
+The Digital Twin API follows these core principles:
+
+1. **Clean Architecture**: Presentation layer is separate from business logic
+2. **HIPAA Compliance**: Authentication, authorization, and audit logging for all endpoints
+3. **RESTful Design**: Resource-oriented endpoints with appropriate HTTP methods
+4. **Versioning**: Explicit versioning to support backwards compatibility
+5. **Documentation**: OpenAPI/Swagger documentation for all endpoints
+
+### API Endpoints
+
+#### Digital Twin Core
+
+##### Get Digital Twin
+
+```python
+@router.get(
+    "/patients/{patient_id}/digital-twin",
+    response_model=DigitalTwinResponse,
+    status_code=status.HTTP_200_OK,
+    description="Get a patient's digital twin model"
+)
+async def get_digital_twin(
+    patient_id: str,
+    current_user: User = Depends(get_current_user),
+    digital_twin_service: DigitalTwinService = Depends(),
+    rbac_service: RBACService = Depends(),
+    audit_service: AuditService = Depends()
+):
+    """
+    Retrieve a patient's digital twin model
+    
+    HIPAA Compliance:
+    - Validates user has permission to access patient data
+    - Logs access for audit purposes
+    """
+    # Verify permission to access patient data
+    if not rbac_service.can_access_patient_data(current_user, patient_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this patient's data"
+        )
+    
+    # Log access attempt
+    await audit_service.log_event(
+        event_type=AuditEventType.DATA_ACCESS,
+        action="digital_twin_access",
+        user_id=current_user.id,
+        resource_id=patient_id,
+        resource_type="patient"
+    )
+    
+    # Get digital twin
+    digital_twin = await digital_twin_service.get_by_patient_id(patient_id)
+    
+    if not digital_twin:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Digital twin not found for patient"
+        )
+    
+    # Map to response model
+    return DigitalTwinResponse(
+        id=digital_twin.id,
+        patient_id=digital_twin.patient_id,
+        created_at=digital_twin.created_at,
+        updated_at=digital_twin.updated_at,
+        version=digital_twin.version,
+        confidence_score=digital_twin.confidence_score,
+        models=[
+            DigitalTwinModelResponse(
+                id=model.id,
+                model_type=model.model_type.value,
+                version=model.version,
+                created_at=model.created_at,
+                confidence_score=model.confidence_score,
+                description=model.get_model_description()
+            )
+            for model in digital_twin.models
+        ],
+        last_calibration=digital_twin.last_calibration
+    )
+```
+
+##### Create Digital Twin
+
+```python
+@router.post(
+    "/patients/{patient_id}/digital-twin",
+    response_model=DigitalTwinResponse,
+    status_code=status.HTTP_201_CREATED,
+    description="Create a digital twin for a patient"
+)
+async def create_digital_twin(
+    patient_id: str,
+    request: CreateDigitalTwinRequest,
+    current_user: User = Depends(get_current_user),
+    digital_twin_factory: DigitalTwinFactory = Depends(),
+    digital_twin_repository: DigitalTwinRepository = Depends(),
+    rbac_service: RBACService = Depends(),
+    audit_service: AuditService = Depends()
+):
+    """
+    Create a new digital twin for a patient
+    
+    HIPAA Compliance:
+    - Validates user has clinical permission to create a digital twin
+    - Logs creation for audit purposes
+    """
+    # Verify permission
+    if not rbac_service.has_role(current_user, [Role.PSYCHIATRIST, Role.CLINICAL_ADMIN]):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only clinicians can create digital twins"
+        )
+    
+    # Check if digital twin already exists
+    existing_twin = await digital_twin_repository.get_by_patient_id(patient_id)
+    if existing_twin:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Digital twin already exists for patient"
+        )
+    
+    # Create digital twin
+    digital_twin = await digital_twin_factory.create_digital_twin(
+        patient_id=patient_id,
+        time_series_model_id=request.time_series_model_id,
+        biometric_model_id=request.biometric_model_id,
+        medication_model_id=request.medication_model_id
+    )
+    
+    # Save to repository
+    await digital_twin_repository.save(digital_twin)
+    
+    # Log creation for audit
+    await audit_service.log_event(
+        event_type=AuditEventType.CREATION,
+        action="digital_twin_creation",
+        user_id=current_user.id,
+        resource_id=digital_twin.id,
+        resource_type="digital_twin",
+        additional_data={"patient_id": patient_id}
+    )
+    
+    # Map to response model
+    return DigitalTwinResponse(
+        id=digital_twin.id,
+        patient_id=digital_twin.patient_id,
+        created_at=digital_twin.created_at,
+        updated_at=digital_twin.updated_at,
+        version=digital_twin.version,
+        confidence_score=digital_twin.confidence_score,
+        models=[
+            DigitalTwinModelResponse(
+                id=model.id,
+                model_type=model.model_type.value,
+                version=model.version,
+                created_at=model.created_at,
+                confidence_score=model.confidence_score,
+                description=model.get_model_description()
+            )
+            for model in digital_twin.models
+        ],
+        last_calibration=digital_twin.last_calibration
+    )
+```
+
+#### Symptom Forecasting API
+
+##### Generate Symptom Forecast
+
+```python
+@router.get(
+    "/patients/{patient_id}/symptom-forecast",
+    response_model=SymptomForecastResponse,
+    status_code=status.HTTP_200_OK,
+    description="Generate symptom forecast for patient"
+)
+async def generate_symptom_forecast(
+    patient_id: str,
+    symptom_type: SymptomType,
+    forecast_days: int = 14,
+    current_user: User = Depends(get_current_user),
+    time_series_service: TimeSeriesForecastingService = Depends(),
+    rbac_service: RBACService = Depends(),
+    audit_service: AuditService = Depends()
+):
+    """
+    Generate a forecast of symptom progression
+    
+    HIPAA Compliance:
+    - Validates user has permission to access patient data
+    - Logs prediction generation for audit purposes
+    """
+    # Verify permission to access patient data
+    if not rbac_service.can_access_patient_data(current_user, patient_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this patient's data"
+        )
+    
+    # Log access attempt
+    await audit_service.log_event(
+        event_type=AuditEventType.MODEL_INFERENCE,
+        action="symptom_forecast_generation",
+        user_id=current_user.id,
+        resource_id=patient_id,
+        resource_type="patient",
+        additional_data={
+            "symptom_type": symptom_type.value,
+            "forecast_days": forecast_days
+        }
+    )
+    
+    # Generate forecast
+    try:
+        trajectory = await time_series_service.generate_symptom_forecast(
+            patient_id=patient_id,
+            symptom_type=symptom_type,
+            forecast_days=forecast_days
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error generating forecast: {str(e)}"
+        )
+    
+    # Return formatted response
+    return SymptomForecastResponse(
+        patient_id=patient_id,
+        symptom_type=symptom_type.value,
+        forecast_days=forecast_days,
+        forecast_points=[
+            ForecastPointResponse(
+                date=point.date,
+                value=point.value,
+                confidence_lower=point.confidence_lower,
+                confidence_upper=point.confidence_upper
+            )
+            for point in trajectory.prediction_points
+        ],
+        confidence_score=trajectory.confidence_score,
+        model_version=trajectory.model_version,
+        generated_at=trajectory.created_at
+    )
+```
+
+#### Biometric Correlation API
+
+##### Get Biometric Correlations
+
+```python
+@router.get(
+    "/patients/{patient_id}/biometric-correlations",
+    response_model=BiometricCorrelationResponse,
+    status_code=status.HTTP_200_OK,
+    description="Get biometric correlations for patient"
+)
+async def get_biometric_correlations(
+    patient_id: str,
+    minimum_correlation: float = 0.5,
+    current_user: User = Depends(get_current_user),
+    biometric_service: BiometricCorrelationService = Depends(),
+    digital_twin_service: DigitalTwinService = Depends(),
+    rbac_service: RBACService = Depends(),
+    audit_service: AuditService = Depends()
+):
+    """
+    Get correlations between biometrics and mental health
+    
+    HIPAA Compliance:
+    - Validates user has permission to access patient data
+    - Logs correlation access for audit purposes
+    """
+    # Verify permission to access patient data
+    if not rbac_service.can_access_patient_data(current_user, patient_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this patient's data"
+        )
+    
+    # Log access attempt
+    await audit_service.log_event(
+        event_type=AuditEventType.DATA_ACCESS,
+        action="biometric_correlation_access",
+        user_id=current_user.id,
+        resource_id=patient_id,
+        resource_type="patient"
+    )
+    
+    # Get digital twin
+    digital_twin = await digital_twin_service.get_by_patient_id(patient_id)
+    
+    if not digital_twin:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Digital twin not found for patient"
+        )
+    
+    # Find biometric model
+    biometric_model = None
+    for model in digital_twin.models:
+        if model.model_type == ModelType.BIOMETRIC_CORRELATION:
+            biometric_model = model
+            break
+    
+    if not biometric_model:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Biometric correlation model not found for patient"
+        )
+    
+    # Get correlations above threshold
+    correlations = biometric_model.get_strongest_correlations(threshold=minimum_correlation)
+    
+    # Return formatted response
+    return BiometricCorrelationResponse(
+        patient_id=patient_id,
+        model_version=biometric_model.version,
+        correlations=[
+            BiometricCorrelationItemResponse(
+                biometric_type=correlation.biometric_type.value,
+                symptom_type=correlation.symptom_type.value,
+                correlation_strength=correlation.correlation_strength,
+                lag_days=correlation.lag_days
+            )
+            for correlation in correlations
+        ],
+        generated_at=biometric_model.created_at
+    )
+```
+
+#### Medication Recommendation API
+
+##### Get Medication Recommendations
+
+```python
+@router.get(
+    "/patients/{patient_id}/medication-recommendations",
+    response_model=MedicationRecommendationResponse,
+    status_code=status.HTTP_200_OK,
+    description="Get medication recommendations for patient"
+)
+async def get_medication_recommendations(
+    patient_id: str,
+    condition_type: ConditionType,
+    min_efficacy: float = 0.6,
+    max_side_effect_risk: float = 0.3,
+    current_user: User = Depends(get_current_user),
+    precision_medication_service: PrecisionMedicationService = Depends(),
+    rbac_service: RBACService = Depends(),
+    audit_service: AuditService = Depends()
+):
+    """
+    Get personalized medication recommendations
+    
+    HIPAA Compliance:
+    - Validates user has clinical role to access recommendations
+    - Logs recommendation access for audit purposes
+    """
+    # Verify clinical role
+    if not rbac_service.has_role(current_user, [Role.PSYCHIATRIST, Role.NURSE_PRACTITIONER]):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only clinical staff can access medication recommendations"
+        )
+    
+    # Log access attempt
+    await audit_service.log_event(
+        event_type=AuditEventType.CLINICAL_DECISION_SUPPORT,
+        action="medication_recommendation_access",
+        user_id=current_user.id,
+        resource_id=patient_id,
+        resource_type="patient",
+        additional_data={"condition_type": condition_type.value}
+    )
+    
+    # Get medication model
+    try:
+        medication_model = await precision_medication_service.get_medication_model(
+            patient_id=patient_id
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Medication model not found: {str(e)}"
+        )
+    
+    # Get optimal medications
+    recommendations = medication_model.get_optimal_medications(
+        min_efficacy=min_efficacy,
+        max_side_effect_risk=max_side_effect_risk
+    )
+    
+    # Filter for target condition
+    filtered_recommendations = [
+        r for r in recommendations
+        if r.medication_class in precision_medication_service.get_medication_classes_for_condition(condition_type)
+    ]
+    
+    # Return formatted response
+    return MedicationRecommendationResponse(
+        patient_id=patient_id,
+        condition_type=condition_type.value,
+        model_version=medication_model.version,
+        generated_at=medication_model.created_at,
+        recommendations=[
+            MedicationRecommendationItemResponse(
+                medication_class=rec.medication_class.value,
+                predicted_efficacy=rec.predicted_efficacy,
+                side_effect_risks=[
+                    SideEffectRiskResponse(
+                        effect_type=risk.effect_type.value,
+                        risk_level=risk.risk_level
+                    )
+                    for risk in rec.side_effect_risks
+                ],
+                net_benefit=rec.net_benefit
+            )
+            for rec in filtered_recommendations
+        ]
+    )
+```
+
+#### Clinical Insights API
+
+##### Get Clinical Insights
+
+```python
+@router.get(
+    "/patients/{patient_id}/clinical-insights",
+    response_model=ClinicalInsightsResponse,
+    status_code=status.HTTP_200_OK,
+    description="Get clinical insights from digital twin"
+)
+async def get_clinical_insights(
+    patient_id: str,
+    insight_types: List[InsightType] = Query(None),
+    days: int = 30,
+    current_user: User = Depends(get_current_user),
+    digital_twin_service: DigitalTwinService = Depends(),
+    rbac_service: RBACService = Depends(),
+    audit_service: AuditService = Depends()
+):
+    """
+    Get clinical insights derived from digital twin
+    
+    HIPAA Compliance:
+    - Validates user has permission to access patient data
+    - Logs insight access for audit purposes
+    """
+    # Verify permission to access patient data
+    if not rbac_service.can_access_patient_data(current_user, patient_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this patient's data"
+        )
+    
+    # Log access attempt
+    await audit_service.log_event(
+        event_type=AuditEventType.DATA_ACCESS,
+        action="clinical_insight_access",
+        user_id=current_user.id,
+        resource_id=patient_id,
+        resource_type="patient",
+        additional_data={
+            "insight_types": [it.value for it in insight_types] if insight_types else "all",
+            "days": days
+        }
+    )
+    
+    # Get digital twin
+    digital_twin = await digital_twin_service.get_by_patient_id(patient_id)
+    
+    if not digital_twin:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Digital twin not found for patient"
+        )
+    
+    # Generate insights
+    insights = await digital_twin_service.generate_clinical_insights(
+        digital_twin=digital_twin,
+        insight_types=insight_types
+    )
+    
+    # Return formatted response
+    return ClinicalInsightsResponse(
+        patient_id=patient_id,
+        insights=[
+            ClinicalInsightResponse(
+                id=insight.id,
+                insight_type=insight.insight_type.value,
+                description=insight.description,
+                confidence=insight.confidence,
+                generated_at=insight.generated_at,
+                supporting_evidence=[
+                    EvidencePointResponse(
+                        data_type=evidence.data_type.value,
+                        timestamp=evidence.timestamp,
+                        value=str(evidence.value),
+                        reference_range=(
+                            [evidence.reference_range[0], evidence.reference_range[1]]
+                            if evidence.reference_range else None
+                        ),
+                        deviation_severity=evidence.deviation_severity
+                    )
+                    for evidence in insight.supporting_evidence
+                ]
+            )
+            for insight in insights
+        ],
+        generated_at=datetime.now()
+    )
+```
+
+### Request & Response Models
+
+#### Digital Twin
+
+```python
+class DigitalTwinModelResponse(BaseModel):
+    """Response model for a digital twin model component"""
+    id: str
+    model_type: str
+    version: str
+    created_at: datetime
+    confidence_score: float
+    description: str
+
+class DigitalTwinResponse(BaseModel):
+    """Response model for a digital twin"""
+    id: str
+    patient_id: str
+    created_at: datetime
+    updated_at: datetime
+    version: int
+    confidence_score: float
+    models: List[DigitalTwinModelResponse]
+    last_calibration: datetime
+
+class CreateDigitalTwinRequest(BaseModel):
+    """Request model for creating a digital twin"""
+    time_series_model_id: Optional[str] = None
+    biometric_model_id: Optional[str] = None
+    medication_model_id: Optional[str] = None
+```
+
+#### Symptom Forecasting
+
+```python
+class ForecastPointResponse(BaseModel):
+    """Response model for a forecast point"""
+    date: datetime
+    value: float
+    confidence_lower: float
+    confidence_upper: float
+
+class SymptomForecastResponse(BaseModel):
+    """Response model for symptom forecast"""
+    patient_id: str
+    symptom_type: str
+    forecast_days: int
+    forecast_points: List[ForecastPointResponse]
+    confidence_score: float
+    model_version: str
+    generated_at: datetime
+```
+
+#### Biometric Correlations
+
+```python
+class BiometricCorrelationItemResponse(BaseModel):
+    """Response model for a biometric correlation"""
+    biometric_type: str
+    symptom_type: str
+    correlation_strength: float
+    lag_days: int
+
+class BiometricCorrelationResponse(BaseModel):
+    """Response model for biometric correlations"""
+    patient_id: str
+    model_version: str
+    correlations: List[BiometricCorrelationItemResponse]
+    generated_at: datetime
+```
+
+#### Medication Recommendations
+
+```python
+class SideEffectRiskResponse(BaseModel):
+    """Response model for side effect risk"""
+    effect_type: str
+    risk_level: float
+
+class MedicationRecommendationItemResponse(BaseModel):
+    """Response model for a medication recommendation"""
+    medication_class: str
+    predicted_efficacy: float
+    side_effect_risks: List[SideEffectRiskResponse]
+    net_benefit: float
+
+class MedicationRecommendationResponse(BaseModel):
+    """Response model for medication recommendations"""
+    patient_id: str
+    condition_type: str
+    model_version: str
+    recommendations: List[MedicationRecommendationItemResponse]
+    generated_at: datetime
+```
+
+#### Clinical Insights
+
+```python
+class EvidencePointResponse(BaseModel):
+    """Response model for an evidence point"""
+    data_type: str
+    timestamp: datetime
+    value: str
+    reference_range: Optional[List[float]] = None
+    deviation_severity: Optional[float] = None
+
+class ClinicalInsightResponse(BaseModel):
+    """Response model for a clinical insight"""
+    id: str
+    insight_type: str
+    description: str
+    confidence: float
+    generated_at: datetime
+    supporting_evidence: List[EvidencePointResponse]
+
+class ClinicalInsightsResponse(BaseModel):
+    """Response model for clinical insights"""
+    patient_id: str
+    insights: List[ClinicalInsightResponse]
+    generated_at: datetime
+```
+
+### API Security
+
+#### Authentication
+
+The Digital Twin API uses JWT-based authentication:
+
+```python
+class JWTAuthBackend(AuthenticationBackend):
+    """JWT authentication backend"""
+    
+    def __init__(self, secret_key: str, algorithm: str):
+        self.secret_key = secret_key
+        self.algorithm = algorithm
+        
+    async def authenticate(self, request: Request) -> Optional[User]:
+        """
+        Authenticate a request using JWT token
+        
+        Args:
+            request: HTTP request
+            
+        Returns:
+            Authenticated user if valid token, None otherwise
+        """
+        # Extract token from Authorization header
+        authorization = request.headers.get("Authorization")
+        if not authorization:
+            return None
+            
+        try:
+            scheme, token = authorization.split()
+            if scheme.lower() != "bearer":
+                return None
+        except ValueError:
+            return None
+            
+        # Validate token
+        try:
+            payload = jwt.decode(
+                token,
+                self.secret_key,
+                algorithms=[self.algorithm]
+            )
+            
+            # Extract user data from payload
+            user_id = payload.get("sub")
+            if not user_id:
+                return None
+                
+            # Create user object
+            return User(
+                id=user_id,
+                username=payload.get("username", ""),
+                roles=[Role(r) for r in payload.get("roles", [])],
+                permissions=payload.get("permissions", [])
+            )
+        except JWTError:
+            return None
+```
+
+#### Authorization
+
+Role-based access control is implemented using middleware:
+
+```python
+class RBACMiddleware(BaseHTTPMiddleware):
+    """RBAC middleware for endpoint authorization"""
+    
+    def __init__(
+        self,
+        app: ASGIApp,
+        rbac_service: RBACService
+    ):
+        super().__init__(app)
+        self.rbac_service = rbac_service
+        
+    async def dispatch(
+        self,
+        request: Request,
+        call_next: RequestResponseEndpoint
+    ) -> Response:
+        """
+        Dispatch request through RBAC middleware
+        
+        Args:
+            request: HTTP request
+            call_next: Next middleware or endpoint
+            
+        Returns:
+            HTTP response
+        """
+        # Skip RBAC for non-protected routes
+        path = request.url.path
+        if path.startswith("/api/docs") or path.startswith("/api/redoc") or path == "/api/health":
+            return await call_next(request)
+            
+        # Get authenticated user
+        user = request.scope.get("user")
+        if not user:
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Authentication required"}
+            )
+            
+        # Check if user has permission for endpoint
+        if not await self.rbac_service.can_access_endpoint(
+            user=user,
+            path=path,
+            method=request.method
+        ):
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "Not authorized to access this endpoint"}
+            )
+            
+        # Allow request to proceed
+        return await call_next(request)
+```
+
+### Audit Logging
+
+Comprehensive audit logging is implemented for all API access:
+
+```python
+class APIAuditMiddleware(BaseHTTPMiddleware):
+    """Middleware for API audit logging"""
+    
+    def __init__(
+        self,
+        app: ASGIApp,
+        audit_service: AuditService
+    ):
+        super().__init__(app)
+        self.audit_service = audit_service
+        
+    async def dispatch(
+        self,
+        request: Request,
+        call_next: RequestResponseEndpoint
+    ) -> Response:
+        """
+        Dispatch request through audit middleware
+        
+        Args:
+            request: HTTP request
+            call_next: Next middleware or endpoint
+            
+        Returns:
+            HTTP response
+        """
+        # Get request details
+        path = request.url.path
+        method = request.method
+        user_id = request.scope.get("user", None)
+        if user_id:
+            user_id = user_id.id
+            
+        # Skip audit for non-API routes
+        if not path.startswith("/api/v1"):
+            return await call_next(request)
+            
+        # Create audit context
+        context = {
+            "path": path,
+            "method": method,
+            "ip_address": request.client.host if request.client else None,
+            "user_agent": request.headers.get("User-Agent", ""),
+            "query_params": str(request.query_params)
+        }
+        
+        # Record API access
+        await self.audit_service.log_event(
+            event_type=AuditEventType.API_ACCESS,
+            user_id=user_id,
+            action=f"{method} {path}",
+            resource_id=None,
+            resource_type="api",
+            additional_data=context
+        )
+        
+        # Process request
+        start_time = time.time()
+        response = await call_next(request)
+        duration = time.time() - start_time
+        
+        # Record response details
+        context["status_code"] = response.status_code
+        context["duration_ms"] = int(duration * 1000)
+        
+        # Record API response
+        await self.audit_service.log_event(
+            event_type=AuditEventType.API_RESPONSE,
+            user_id=user_id,
+            action=f"{method} {path}",
+            resource_id=None,
+            resource_type="api",
+            additional_data=context
+        )
+        
+        return response
+```
+
+### Error Handling
+
+Robust error handling is implemented for all API endpoints:
+
+```python
+class ErrorHandlingMiddleware(BaseHTTPMiddleware):
+    """Middleware for API error handling"""
+    
+    async def dispatch(
+        self,
+        request: Request,
+        call_next: RequestResponseEndpoint
+    ) -> Response:
+        """
+        Dispatch request with error handling
+        
+        Args:
+            request: HTTP request
+            call_next: Next middleware or endpoint
+            
+        Returns:
+            HTTP response
+        """
+        try:
+            # Process request normally
+            return await call_next(request)
+        except HTTPException as e:
+            # FastAPI HTTP exceptions pass through
+            raise e
+        except ValidationError as e:
+            # Pydantic validation errors
+            return JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content={"detail": str(e)}
+            )
+        except Exception as e:
+            # Log unexpected errors
+            logger.error(
+                f"Unexpected error processing request",
+                exc_info=e,
+                extra={
+                    "path": request.url.path,
+                    "method": request.method,
+                    "user_id": getattr(request.scope.get("user"), "id", None)
+                }
+            )
+            
+            # Return sanitized error response
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"detail": "An unexpected error occurred"}
+            )
+```
+
+## Digital Twin Data Pipeline
+
+The Digital Twin Data Pipeline is responsible for collecting, processing, and preparing data for the AI models that power the Digital Twin functionality.
+
+### Data Pipeline Architecture
+
+```markdown
+┌───────────────────┐     ┌───────────────────┐     ┌───────────────────┐     ┌───────────────────┐
+│                   │     │                   │     │                   │     │                   │
+│  Data Sources     │────►│  Data Collection  │────►│  Data Processing  │────►│  Model Training   │
+│                   │     │                   │     │                   │     │                   │
+└───────────────────┘     └───────────────────┘     └───────────────────┘     └───────────────────┘
+        │                         │                         │                         │
+        │                         │                         │                         │
+        ▼                         ▼                         ▼                         ▼
+┌───────────────────┐     ┌───────────────────┐     ┌───────────────────┐     ┌───────────────────┐
+│  Clinical EHR     │     │  Event-Driven     │     │  Feature          │     │  Model Registry   │
+│  Wearable Devices │     │  Collection       │     │  Engineering      │     │  & Versioning     │
+│  Patient Reporting│     │  Service          │     │  Pipeline         │     │  Service          │
+└───────────────────┘     └───────────────────┘     └───────────────────┘     └───────────────────┘
+```
+
+### Data Source Integration
+
+#### Clinical EHR Integration
+
+```python
+class EHRIntegrationAdapter:
+    """Adapter for EHR system integration"""
+    
+    def __init__(
+        self,
+        ehr_client: EHRClient,
+        credentials_service: CredentialsService,
+        security_service: SecurityService
+    ):
+        self.ehr_client = ehr_client
+        self.credentials_service = credentials_service
+        self.security_service = security_service
+        
+    async def extract_clinical_data(
+        self,
+        patient_id: str,
+        data_types: List[ClinicalDataType],
+        date_range: DateRange
+    ) -> ClinicalDataBatch:
+        """
+        Extract clinical data from EHR system
+        
+        Args:
+            patient_id: Patient identifier
+            data_types: Types of clinical data to extract
+            date_range: Date range for extraction
+            
+        Returns:
+            Batch of clinical data
+        """
+        # Get credentials with minimal scope
+        credentials = await self.credentials_service.get_ehr_credentials(
+            system_id=self.ehr_client.system_id,
+            required_scopes=[f"read:{data_type.value}" for data_type in data_types]
+        )
+        
+        # Log data access attempt
+        await self.security_service.log_data_access(
+            user_id="system",
+            patient_id=patient_id,
+            data_types=[dt.value for dt in data_types],
+            purpose="digital_twin_update"
+        )
+        
+        # Extract data from EHR
+        raw_data = await self.ehr_client.extract_data(
+            patient_id=patient_id,
+            data_types=[dt.value for dt in data_types],
+            start_date=date_range.start,
+            end_date=date_range.end,
+            credentials=credentials
+        )
+        
+        # Transform to domain model
+        return self._transform_to_domain_model(raw_data)
+```
+
+#### Wearable Device Integration
+
+```python
+class WearableIntegrationService:
+    """Service for wearable device data integration"""
+    
+    def __init__(
+        self,
+        adapter_factory: WearableAdapterFactory,
+        patient_repository: PatientRepository,
+        biometric_repository: BiometricRepository,
+        oauth_service: OAuthService
+    ):
+        self.adapter_factory = adapter_factory
+        self.patient_repository = patient_repository
+        self.biometric_repository = biometric_repository
+        self.oauth_service = oauth_service
+        
+    async def sync_wearable_data(
+        self,
+        patient_id: str,
+        device_type: WearableDeviceType,
+        data_types: List[BiometricType],
+        days_to_sync: int = 30
+    ) -> SyncResult:
+        """
+        Synchronize data from a wearable device
+        
+        Args:
+            patient_id: Patient identifier
+            device_type: Type of wearable device
+            data_types: Types of biometric data to sync
+            days_to_sync: Number of days to synchronize
+            
+        Returns:
+            Results of the synchronization
+        """
+        # Get patient device info
+        patient = await self.patient_repository.get_by_id(patient_id)
+        device_info = patient.get_device_info(device_type)
+        
+        if not device_info:
+            raise DeviceNotLinkedError(f"Patient has no linked {device_type.value} device")
+        
+        # Get OAuth tokens for device
+        tokens = await self.oauth_service.get_tokens_for_device(
+            patient_id=patient_id,
+            device_type=device_type
+        )
+        
+        # Create appropriate adapter for device
+        adapter = self.adapter_factory.create_adapter(device_type)
+        
+        # Set date range
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days_to_sync)
+        date_range = DateRange(start=start_date, end=end_date)
+        
+        # Fetch data
+        biometric_data = await adapter.fetch_data(
+            user_id=device_info.external_user_id,
+            auth_tokens=tokens,
+            data_types=data_types,
+            date_range=date_range
+        )
+        
+        # Store in repository
+        for datapoint in biometric_data:
+            await self.biometric_repository.save(
+                BiometricDatapoint(
+                    id=str(uuid.uuid4()),
+                    patient_id=patient_id,
+                    biometric_type=datapoint.biometric_type,
+                    value=datapoint.value,
+                    unit=datapoint.unit,
+                    timestamp=datapoint.timestamp,
+                    source=device_type.value,
+                    source_device_id=device_info.device_id
+                )
+            )
+        
+        return SyncResult(
+            patient_id=patient_id,
+            device_type=device_type,
+            data_types=data_types,
+            points_synced=len(biometric_data),
+            sync_start=start_date,
+            sync_end=end_date
+        )
+```
+
+#### Patient Self-Reported Data Collection
+
+```python
+class PatientReportingService:
+    """Service for collecting patient self-reported data"""
+    
+    def __init__(
+        self,
+        symptom_repository: SymptomRepository,
+        assessment_repository: AssessmentRepository,
+        validation_service: DataValidationService,
+        audit_service: AuditService
+    ):
+        self.symptom_repository = symptom_repository
+        self.assessment_repository = assessment_repository
+        self.validation_service = validation_service
+        self.audit_service = audit_service
+        
+    async def record_symptom_report(
+        self,
+        patient_id: str,
+        symptom_report: SymptomReport
+    ) -> SymptomRecord:
+        """
+        Record a symptom report from a patient
+        
+        Args:
+            patient_id: Patient identifier
+            symptom_report: Patient reported symptoms
+            
+        Returns:
+            Created symptom record
+        """
+        # Validate report data
+        validation_result = self.validation_service.validate_symptom_report(symptom_report)
+        
+        if not validation_result.is_valid:
+            raise InvalidDataError(f"Invalid symptom report: {validation_result.error_message}")
+        
+        # Create symptom record
+        symptom_record = SymptomRecord(
+            id=str(uuid.uuid4()),
+            patient_id=patient_id,
+            symptom_type=symptom_report.symptom_type,
+            severity=symptom_report.severity,
+            recorded_at=datetime.now(),
+            context=symptom_report.context,
+            triggers=symptom_report.triggers,
+            notes=symptom_report.notes
+        )
+        
+        # Save to repository
+        await self.symptom_repository.save(symptom_record)
+        
+        # Log for audit
+        await self.audit_service.log_event(
+            event_type=AuditEventType.DATA_COLLECTION,
+            patient_id=patient_id,
+            data_category="symptom_report",
+            action="create"
+        )
+        
+        return symptom_record
+```
+
+### Data Processing Pipeline
+
+#### Feature Engineering
+
+```python
+class FeatureEngineeringPipeline:
+    """Pipeline for feature engineering from raw data"""
+    
+    def __init__(
+        self,
+        feature_transformers: Dict[DataType, FeatureTransformer],
+        feature_selectors: Dict[ModelType, FeatureSelector],
+        normalization_service: NormalizationService,
+        missing_data_handler: MissingDataHandler
+    ):
+        self.feature_transformers = feature_transformers
+        self.feature_selectors = feature_selectors
+        self.normalization_service = normalization_service
+        self.missing_data_handler = missing_data_handler
+        
+    async def process_timeseries_features(
+        self,
+        symptom_data: List[SymptomRecord],
+        target_symptoms: List[SymptomType]
+    ) -> TimeSeriesFeatureSet:
+        """
+        Process raw symptom data into features for time series models
+        
+        Args:
+            symptom_data: Raw symptom records
+            target_symptoms: Symptoms to include as features
+            
+        Returns:
+            Processed feature set for time series modeling
+        """
+        # Group data by symptom type
+        grouped_data = self._group_by_symptom_type(symptom_data)
+        
+        # Handle missing data points
+        completed_data = await self.missing_data_handler.fill_missing_symptom_data(grouped_data)
+        
+        # Extract features
+        features = {}
+        for symptom_type in target_symptoms:
+            if symptom_type in completed_data:
+                # Get appropriate transformer
+                transformer = self.feature_transformers.get(
+                    DataType.SYMPTOM,
+                    self.feature_transformers[DataType.DEFAULT]
+                )
+                
+                # Transform data
+                symptom_features = await transformer.transform(
+                    data=completed_data[symptom_type],
+                    feature_config=self._get_feature_config(symptom_type)
+                )
+                
+                features[symptom_type] = symptom_features
+        
+        # Normalize features
+        normalized_features = self.normalization_service.normalize_timeseries_features(features)
+        
+        return TimeSeriesFeatureSet(
+            features=normalized_features,
+            symptom_types=target_symptoms,
+            timestamp=datetime.now()
+        )
+```
+
+#### Data Quality Service
+
+```python
+class DataQualityService:
+    """Service for ensuring data quality"""
+    
+    def __init__(
+        self,
+        outlier_detector: OutlierDetector,
+        consistency_checker: ConsistencyChecker,
+        quality_metrics: QualityMetricsCalculator
+    ):
+        self.outlier_detector = outlier_detector
+        self.consistency_checker = consistency_checker
+        self.quality_metrics = quality_metrics
+        
+    async def validate_symptom_data(
+        self,
+        symptom_data: List[SymptomRecord]
+    ) -> DataQualityResult:
+        """
+        Validate symptom data quality
+        
+        Args:
+            symptom_data: Symptom records to validate
+            
+        Returns:
+            Data quality validation results
+        """
+        # Check for outliers
+        outlier_result = await self.outlier_detector.detect_outliers(
+            data=symptom_data,
+            data_type=DataType.SYMPTOM
+        )
+        
+        # Check data consistency
+        consistency_result = await self.consistency_checker.check_consistency(
+            data=symptom_data,
+            data_type=DataType.SYMPTOM
+        )
+        
+        # Calculate quality metrics
+        metrics = self.quality_metrics.calculate_metrics(
+            data=symptom_data,
+            data_type=DataType.SYMPTOM
+        )
+        
+        # Determine if data meets quality standards
+        meets_standards = (
+            outlier_result.outlier_percentage < 0.1 and
+            consistency_result.consistency_score > 0.8 and
+            metrics.completeness > 0.9
+        )
+        
+        return DataQualityResult(
+            data_type=DataType.SYMPTOM,
+            outlier_result=outlier_result,
+            consistency_result=consistency_result,
+            quality_metrics=metrics,
+            meets_quality_standards=meets_standards,
+            validation_timestamp=datetime.now()
+        )
+```
+
+### Training Data Preparation
+
+```python
+class TrainingDatasetService:
+    """Service for preparing model training datasets"""
+    
+    def __init__(
+        self,
+        feature_engineering_pipeline: FeatureEngineeringPipeline,
+        data_quality_service: DataQualityService,
+        train_test_splitter: TrainTestSplitter,
+        sampling_service: SamplingService
+    ):
+        self.feature_engineering_pipeline = feature_engineering_pipeline
+        self.data_quality_service = data_quality_service
+        self.train_test_splitter = train_test_splitter
+        self.sampling_service = sampling_service
+        
+    async def prepare_timeseries_dataset(
+        self,
+        patient_id: str,
+        symptom_data: List[SymptomRecord],
+        config: TimeSeriesTrainingConfig
+    ) -> TrainingDataset:
+        """
+        Prepare dataset for time series model training
+        
+        Args:
+            patient_id: Patient identifier
+            symptom_data: Raw symptom data
+            config: Training configuration
+            
+        Returns:
+            Prepared training dataset
+        """
+        # Validate data quality
+        quality_result = await self.data_quality_service.validate_symptom_data(symptom_data)
+        
+        if not quality_result.meets_quality_standards:
+            raise DataQualityError(
+                f"Symptom data does not meet quality standards: {quality_result.error_message}"
+            )
+        
+        # Process features
+        feature_set = await self.feature_engineering_pipeline.process_timeseries_features(
+            symptom_data=symptom_data,
+            target_symptoms=config.target_symptoms
+        )
+        
+        # Split into train/validation/test sets
+        train_data, val_data, test_data = self.train_test_splitter.split_time_series(
+            feature_set=feature_set,
+            train_ratio=config.train_ratio,
+            val_ratio=config.val_ratio,
+            test_ratio=config.test_ratio
+        )
+        
+        return TrainingDataset(
+            id=str(uuid.uuid4()),
+            patient_id=patient_id,
+            model_type=ModelType.TIME_SERIES,
+            training_data=train_data,
+            validation_data=val_data,
+            test_data=test_data,
+            feature_metadata=feature_set.metadata,
+            created_at=datetime.now(),
+            data_quality=quality_result
+        )
+```
+
+### Event-Driven Data Updates
+
+```python
+class DigitalTwinEventProcessor:
+    """Processor for events that trigger digital twin updates"""
+    
+    def __init__(
+        self,
+        event_bus: EventBus,
+        digital_twin_service: DigitalTwinService,
+        symptom_repository: SymptomRepository,
+        biometric_repository: BiometricRepository,
+        medication_repository: MedicationRepository
+    ):
+        self.event_bus = event_bus
+        self.digital_twin_service = digital_twin_service
+        self.symptom_repository = symptom_repository
+        self.biometric_repository = biometric_repository
+        self.medication_repository = medication_repository
+        
+        # Register event handlers
+        self.event_bus.subscribe(
+            event_type=EventType.SYMPTOM_RECORDED,
+            handler=self.handle_symptom_recorded
+        )
+        self.event_bus.subscribe(
+            event_type=EventType.BIOMETRIC_SYNCED,
+            handler=self.handle_biometric_synced
+        )
+        self.event_bus.subscribe(
+            event_type=EventType.MEDICATION_PRESCRIBED,
+            handler=self.handle_medication_prescribed
+        )
+        
+    async def handle_symptom_recorded(self, event: SymptomRecordedEvent):
+        """
+        Handle symptom recorded event
+        
+        Args:
+            event: Symptom recorded event
+        """
+        # Get recent symptoms for the patient
+        recent_symptoms = await self.symptom_repository.get_recent(
+            patient_id=event.patient_id,
+            days=30
+        )
+        
+        # Check if update is needed
+        if self._should_update_symptom_model(recent_symptoms):
+            # Update symptom forecasting model
+            await self.digital_twin_service.update_symptom_model(
+                patient_id=event.patient_id,
+                symptom_data=recent_symptoms
+            )
+```
+
+### Monitoring and Alerting
+
+```python
+class DataPipelineMonitor:
+    """Monitoring service for the data pipeline"""
+    
+    def __init__(
+        self,
+        metrics_service: MetricsService,
+        alert_service: AlertService,
+        logging_service: LoggingService
+    ):
+        self.metrics_service = metrics_service
+        self.alert_service = alert_service
+        self.logging_service = logging_service
+        
+    async def track_pipeline_execution(
+        self,
+        pipeline_id: str,
+        step_name: str,
+        status: StepStatus,
+        execution_time: float,
+        metadata: Dict[str, Any]
+    ):
+        """
+        Track execution of a pipeline step
+        
+        Args:
+            pipeline_id: Pipeline identifier
+            step_name: Name of the pipeline step
+            status: Execution status
+            execution_time: Execution time in seconds
+            metadata: Additional metadata
+        """
+        # Record metrics
+        await self.metrics_service.record_metric(
+            metric_name=f"pipeline.{step_name}.execution_time",
+            value=execution_time,
+            tags={"pipeline_id": pipeline_id, "status": status.value}
+        )
+        
+        # Log execution
+        await self.logging_service.log(
+            level=LogLevel.INFO,
+            message=f"Pipeline step {step_name} completed with status {status.value}",
+            context={
+                "pipeline_id": pipeline_id,
+                "step_name": step_name,
+                "status": status.value,
+                "execution_time": execution_time,
+                **metadata
+            }
+        )
+        
+        # Alert on failure
+        if status == StepStatus.FAILED:
+            await self.alert_service.send_alert(
+                alert_type=AlertType.PIPELINE_FAILURE,
+                severity=AlertSeverity.HIGH,
+                message=f"Pipeline step {step_name} failed",
+                context={
+                    "pipeline_id": pipeline_id,
+                    "step_name": step_name,
+                    "execution_time": execution_time,
+                    **metadata
+                }
+            )
+```
+
+### HIPAA Compliance
+
+The Digital Twin Data Pipeline incorporates these HIPAA safeguards:
+
+1. **Access Controls**: All data access is authenticated, authorized, and logged
+2. **Data Minimization**: Only necessary data is processed for each model
+3. **Encryption**: All data is encrypted at rest and in transit
+4. **Audit Logging**: Comprehensive logging of all data operations
+5. **De-identification**: PHI is removed from training datasets whenever possible
 
 ## Implementation Guidelines
 

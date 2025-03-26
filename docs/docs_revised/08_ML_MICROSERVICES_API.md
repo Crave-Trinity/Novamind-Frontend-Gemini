@@ -663,6 +663,38 @@ The API follows semantic versioning (MAJOR.MINOR.PATCH):
 - MINOR version for backward-compatible functionality additions
 - PATCH version for backward-compatible bug fixes
 
+## HIPAA Compliance
+
+All API endpoints adhere to HIPAA compliance requirements:
+
+1. **Authentication**: All requests must be authenticated with valid JWT tokens
+2. **Secure Transmission**: All data is transmitted over HTTPS
+3. **Data Protection**: No PHI is included in logs or error messages
+4. **Encryption**: All patient data is encrypted at rest and in transit
+5. **Access Control**: Access is restricted based on user roles and permissions
+6. **Audit Logging**: All API access is logged for audit purposes
+7. **Minimal Data**: Only necessary data is transmitted in requests and responses
+8. **Data Retention**: Data is retained according to HIPAA requirements
+9. **Breach Notification**: Systems are in place to detect and report potential breaches
+10. **Business Associate Agreements**: All third-party services have BAAs in place
+
+## Rate Limiting
+
+API endpoints are subject to rate limiting to prevent abuse and ensure system stability:
+
+- 100 requests per minute per user
+- 1000 requests per day per user
+
+Responses include rate limit headers:
+
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 99
+X-RateLimit-Reset: 1589547834
+```
+
+When rate limits are exceeded, the API returns a `429 Too Many Requests` status code.
+
 ## Implementation Guidelines
 
 1. **Error Handling**: Implement proper error handling with appropriate status codes and error messages.

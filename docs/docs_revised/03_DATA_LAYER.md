@@ -1147,3 +1147,228 @@ class TestPatientRepositoryIntegration:
 11. **Connection Pooling**: Configure appropriate connection pooling for production use
 12. **Use Caching Wisely**: When appropriate, implement caching for frequently accessed, non-sensitive data
 13. **Repository Isolation**: Repositories should be self-contained and not depend on each other
+
+## Data Integration Architecture
+
+The Data Integration Architecture component provides a secure, flexible framework for connecting diverse mental health data sources while maintaining strict HIPAA compliance and supporting the luxury experience expected by our concierge patients.
+
+### Core Integration Principles
+
+1. **Privacy by Design**: Privacy protections embedded in integration architecture, not added afterward
+2. **Minimal Necessary Data**: Only integrating data elements with clear clinical or analytical value
+3. **Standardized Interfaces**: Consistent integration patterns across all data sources
+4. **Consent-Driven Architecture**: Patient consent management integrated at every connection point
+5. **Data Lineage Tracking**: Complete visibility into data provenance and transformation
+6. **Security by Default**: End-to-end encryption and strict access controls for all integrations
+7. **Clean Separation**: Following Clean Architecture patterns for domain isolation
+8. **Luxury Experience**: Integration designed to be invisible to patients while enhancing their care
+
+### Data Source Integration Components
+
+#### Electronic Medical Record (EMR) Integration
+
+Our EMR integration component securely connects with various electronic medical record systems while maintaining strict HIPAA compliance and patient privacy.
+
+**Key Components:**
+
+- Standards-based connectivity (HL7, FHIR)
+- Role-based data access restrictions
+- Patient consent verification before data exchange
+- Configurable field-level privacy controls
+- Complete audit logging for all data access events
+
+**Implementation Notes:**
+
+- Utilizes a gateway pattern to abstract EMR-specific details
+- Incorporates health data standards for semantic interoperability
+- Features connection adapters for major EMR systems
+- Supports both pull and push integration models
+- Maintains HIPAA-compliant business associate agreements
+
+#### Patient-Generated Health Data Integration
+
+Our patient-generated health data (PGHD) integration framework securely incorporates patient-reported data from various sources, including questionnaires, journaling, and mobile applications.
+
+**Key Components:**
+
+- Standardized questionnaire data models
+- Secure journaling content storage
+- Mobile application data synchronization
+- Passive data collection mechanisms
+- Patient-controlled data sharing preferences
+
+**Implementation Notes:**
+
+- Features data validation for patient-generated inputs
+- Incorporates secure file storage for media uploads
+- Supports both structured and unstructured data
+- Implements data quality assessment mechanisms
+- Maintains comprehensive privacy controls
+
+#### Wearable Device Integration
+
+Our wearable device integration component enables secure connectivity with personal health devices while maintaining patient privacy and providing contextualized health metrics.
+
+**Key Components:**
+
+- Multi-device connectivity framework
+- Real-time and batch data synchronization
+- Privacy-preserving data aggregation
+- Consent-driven data sharing controls
+- Contextual health metric analysis
+
+**Implementation Notes:**
+
+- Supports major fitness and health tracking platforms
+- Implements OAuth 2.0 for secure authentication
+- Features device-specific data transformation
+- Includes data normalization across different sources
+- Maintains clear data provenance tracking
+
+### Integration Architecture Patterns
+
+#### Domain-Driven Data Gateway Design
+
+Our integration architecture employs a domain-driven gateway pattern that maintains clean domain boundaries while enabling efficient data flow.
+
+**Key Components:**
+
+- Domain-specific data gateways with clear boundaries
+- Repository interfaces abstracting data access
+- Rich domain models for integrated data
+- Anti-corruption layers preventing domain pollution
+- Infrastructure adapters for external systems
+
+#### Event-Driven Integration Approach
+
+Our event-driven integration architecture enables loose coupling between systems while maintaining data consistency and synchronization.
+
+**Key Components:**
+
+- Domain event publication for integration triggers
+- Event consumers for data synchronization
+- Message-based integration patterns
+- Idempotent processing for reliability
+- Eventual consistency management
+
+**Implementation Notes:**
+
+- Utilizes asynchronous processing for performance
+- Maintains event ordering guarantees when needed
+- Implements dead-letter queues for error handling
+- Features event sourcing for data lineage
+- Includes compensating transactions for rollbacks
+
+#### Secure Adapter Pattern Implementation
+
+Our secure adapter pattern implementation enables standardized connectivity with diverse data sources while maintaining consistent security controls.
+
+**Key Components:**
+
+- Standardized adapter interfaces by data source type
+- Security-focused adapter implementation
+- Adapter factories for dynamic instantiation
+- Monitoring and metrics collection
+- Request/response validation middleware
+
+### HIPAA-Compliant Integration Mechanisms
+
+#### De-identification and Tokenization Pipelines
+
+Our de-identification and tokenization pipelines protect sensitive patient data during integration while maintaining analytical utility and clinical relevance.
+
+**Key Components:**
+
+- Field-level tokenization for identifiers
+- Contextual de-identification based on data sensitivity
+- Re-identification capabilities for authorized access
+- Cryptographic token generation and management
+- Separation of identifiable and clinical data
+
+**Implementation Notes:**
+
+- Implements HIPAA Safe Harbor and Expert Determination methods
+- Features k-anonymity and differential privacy techniques
+- Includes privacy impact assessment for integration flows
+- Supports tokenization with varying security levels
+- Maintains token-to-identifier mapping in secure storage
+
+#### End-to-End Encryption Protocols
+
+Our end-to-end encryption protocols ensure that sensitive patient data remains protected throughout the integration process, from source to destination.
+
+**Key Components:**
+
+- Transport layer security for data in transit
+- Field-level encryption for sensitive data elements
+- Key management and rotation services
+- Encryption protocol version management
+- Secure key exchange mechanisms
+
+**Implementation Notes:**
+
+- Utilizes AES-256 encryption for field-level protection
+- Implements TLS 1.3 for all network communications
+- Features envelope encryption for key management
+- Includes perfect forward secrecy for transport security
+- Supports hardware security modules for key protection
+
+#### Access Control Integration Points
+
+Our access control integration points ensure that data access during integration processes adheres to the principle of least privilege and is appropriately authorized.
+
+**Key Components:**
+
+- Integration-specific access control policies
+- Role-based access control for integration operations
+- Purpose-based access limitations
+- Attribute-based access control for sensitive data
+- Access logging and auditability
+
+**Implementation Notes:**
+
+- Enforces separation of duties for integration tasks
+- Features purpose limitation for data access
+- Includes context-aware access policies
+- Supports temporary access elevation with approval
+- Maintains comprehensive access logs for compliance
+
+#### Audit Logging Integration Framework
+
+Our audit logging integration framework ensures comprehensive visibility into all data access and manipulation operations, supporting compliance requirements and security monitoring.
+
+**Key Components:**
+
+- Detailed event logging for all data operations
+- Actor-action-resource model for audit events
+- Time-synchronized logging infrastructure
+- Immutable audit trails with tamper detection
+- Contextual metadata capture for each event
+
+**Implementation Notes:**
+
+- Utilizes structured logging with consistent schema
+- Features centralized log aggregation and indexing
+- Includes query interfaces for compliance reporting
+- Supports real-time alerting on suspicious patterns
+- Maintains log retention based on compliance requirements
+
+#### Breach Prevention and Detection Mechanisms
+
+Our breach prevention and detection mechanisms provide proactive security controls and real-time monitoring to protect sensitive patient data during integration processes.
+
+**Key Components:**
+
+- Anomaly detection for integration operations
+- Behavioral analytics for access patterns
+- Rate limiting and throttling mechanisms
+- Automated intrusion detection and prevention
+- Integration-specific security monitoring
+
+**Implementation Notes:**
+
+- Utilizes machine learning for anomaly detection
+- Features baseline profiling for normal behavior
+- Includes correlation of security events across systems
+- Supports automated incident response workflows
+- Maintains comprehensive security metrics

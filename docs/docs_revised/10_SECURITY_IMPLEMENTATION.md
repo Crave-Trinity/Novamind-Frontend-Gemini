@@ -2128,135 +2128,675 @@ def _sanitize_details(details: Dict[str, Any]) -> Dict[str, Any]:
 
 ## Data Encryption
 
-NOVAMIND implements comprehensive data encryption to protect PHI:
+### HIPAA Requirements for Encryption
+
+The HIPAA Security Rule (§ 164.312(a)(2)(iv) and § 164.312(e)(2)(ii)) establishes encryption as an "addressable" implementation specification:
+
+> "Implement a mechanism to encrypt and decrypt electronic protected health information."
+
+While addressable, encryption is effectively required for any modern healthcare application to demonstrate compliance with HIPAA's requirement to implement "reasonable and appropriate" safeguards.
+
+### Multi-Layered Encryption Architecture
+
+NOVAMIND implements a defense-in-depth encryption strategy with multiple layers:
+
+1. **Transport Layer Security**: HTTPS/TLS 1.3 for all communications
+2. **Database Encryption**: Transparent Data Encryption (TDE) for the entire database
+3. **Field-Level Encryption**: Selective encryption of sensitive PHI fields
+4. **Encryption Key Management**: AWS KMS for secure key storage and rotation
+5. **Client-Side Encryption**: Additional encryption for highly sensitive data
+
+### Transport Layer Security
 
 ```python
-# app/core/utils/encryption.py
+# app/main.py
+from fastapi import FastAPI
+import uvicorn
+
+app = FastAPI()
+
+# Include API routers and other setup...
+
+if __name__ == "__main__":
+    # Development-only direct execution
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=8000,
+        ssl_keyfile="./certs/key.pem",
+        ssl_certfile="./certs/cert.pem",
+        ssl_ca_certs="./certs/ca.pem",
+        ssl_ciphers="TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256",
+        ssl_version=2,  # TLS 1.3
+    )
+```
+
+#### Secure Cookies Configuration
+
+```python
+# app/presentation/api/dependencies/auth.py
+from fastapi import Response
+
+# Set secure cookie
+def set_auth_cookie(response: Response, token: str):
+    """Set secure HTTP-only cookie with JWT token"""
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        secure=True,  # Only send over HTTPS
+        samesite="strict",  # Protect against CSRF
+        max_age=1800,  # 30 minutes
+        expires=1800,
+        path="/",
+    )
+```
+
+### Database Encryption
+
+```python
+# app/infrastructure/database/base.py
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+from app.config.settings import get_settings
+
+settings = get_settings()
+
+# Configure database connection with SSL
+DATABASE_URL = settings.DATABASE_URL
+ssl_args = {
+    "sslmode": "require",
+    "sslrootcert": settings.DB_CA_CERT_PATH,
+    "sslcert": settings.DB_CLIENT_CERT_PATH,
+    "sslkey": settings.DB_CLIENT_KEY_PATH,
+}
+
+engine = create_async_engine(
+    DATABASE_URL,
+    connect_args=ssl_args,
+    echo=settings.DB_ECHO,
+    pool_pre_ping=True,
+)
+
+# Create session factory
+async_session = sessionmaker(
+    engine, class_=AsyncSession, expire_on_commit=False
+)
+
+# Declarative base for models
+Base = declarative_base()
+
+# Dependency for getting DB session
+async def get_db():
+    """Dependency for getting DB session"""
+    async with async_session() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
+```
+
+#### RDS Configuration with AWS
+
+```python
+# Infrastructure as Code example (Terraform)
+resource "aws_db_instance" "novamind_db" {
+  allocated_storage       = 100
+  storage_type            = "gp3"
+  engine                  = "postgres"
+  engine_version          = "14.5"
+  instance_class          = "db.m6g.large"
+  db_name                 = "novamind"
+  username                = "novamind_app"
+  password                = var.db_password
+  parameter_group_name    = aws_db_parameter_group.postgres14-hipaa.name
+  db_subnet_group_name    = aws_db_subnet_group.private.name
+  vpc_security_group_ids  = [aws_security_group.db_sg.id]
+  storage_encrypted       = true                  # Enable TDE
+  kms_key_id              = aws_kms_key.db_key.arn # Use custom KMS key
+  backup_retention_period = 35                    # HIPAA requires long retention
+  copy_tags_to_snapshot   = true
+  deletion_protection     = true
+  multi_az                = true                  # High availability
+  monitoring_interval     = 60
+  performance_insights_enabled = true
+  skip_final_snapshot     = false
+
+  # Enable TLS/SSL
+  iam_database_authentication_enabled = true
+  enabled_cloudwatch_logs_exports     = ["postgresql", "upgrade"]
+}
+```
+
+### Field-Level Encryption
+
+```python
+# app/infrastructure/services/encryption_service.py
 import base64
 import os
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
+import boto3
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-from app.core.config import settings
-from app.core.utils.logging import logger
+from app.config.settings import get_settings
+from app.utils.logger import get_logger
+
+settings = get_settings()
+logger = get_logger(__name__)
+
 
 class EncryptionService:
-    """Service for encrypting and decrypting sensitive data."""
-    
+    """Service for field-level encryption of sensitive data"""
+
     def __init__(self):
-        """Initialize encryption service with key from environment."""
-        # Get encryption key from environment or generate one
-        encryption_key = settings.ENCRYPTION_KEY
-        
-        if encryption_key:
-            self.key = base64.urlsafe_b64decode(encryption_key)
+        self.use_kms = settings.USE_AWS_KMS
+
+        if self.use_kms:
+            # Initialize AWS KMS client
+            self.kms_client = boto3.client(
+                'kms',
+                region_name=settings.AWS_REGION,
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+            )
+            self.data_key_id = settings.KMS_DATA_KEY_ID
         else:
-            # Generate a key from password and salt
-            password = settings.ENCRYPTION_PASSWORD.encode()
-            salt = settings.ENCRYPTION_SALT.encode()
-            
+            # Local encryption key for development
+            salt = base64.b64decode(settings.ENCRYPTION_SALT)
             kdf = PBKDF2HMAC(
                 algorithm=hashes.SHA256(),
                 length=32,
                 salt=salt,
                 iterations=100000,
             )
-            self.key = base64.urlsafe_b64encode(kdf.derive(password))
-        
-        # Initialize Fernet cipher
-        self.cipher = Fernet(self.key)
-    
-    def encrypt(self, data: Union[str, bytes]) -> str:
-        """
-        Encrypt data and return base64-encoded string.
-        
-        Args:
-            data: Data to encrypt
-            
-        Returns:
-            Base64-encoded encrypted data
-        """
-        if isinstance(data, str):
-            data = data.encode()
-        
-        encrypted_data = self.cipher.encrypt(data)
-        return base64.urlsafe_b64encode(encrypted_data).decode()
-    
-    def decrypt(self, encrypted_data: Union[str, bytes]) -> str:
-        """
-        Decrypt base64-encoded encrypted data.
-        
-        Args:
-            encrypted_data: Encrypted data to decrypt
-            
-        Returns:
-            Decrypted data as string
-        """
-        if isinstance(encrypted_data, str):
-            encrypted_data = base64.urlsafe_b64decode(encrypted_data)
-        
-        decrypted_data = self.cipher.decrypt(encrypted_data)
-        return decrypted_data.decode()
-    
-    def encrypt_dict(self, data: Dict[str, Any], keys_to_encrypt: List[str]) -> Dict[str, Any]:
-        """
-        Encrypt specific keys in a dictionary.
-        
-        Args:
-            data: Dictionary to encrypt
-            keys_to_encrypt: Keys to encrypt
-            
-        Returns:
-            Dictionary with encrypted values
-        """
-        result = {}
-        
-        for key, value in data.items():
-            if key in keys_to_encrypt and value is not None:
-                if isinstance(value, (str, bytes)):
-                    result[key] = self.encrypt(value)
-                else:
-                    # Convert to string if not already
-                    result[key] = self.encrypt(str(value))
-            elif isinstance(value, dict):
-                result[key] = self.encrypt_dict(value, keys_to_encrypt)
-            else:
-                result[key] = value
-        
-        return result
-    
-    def decrypt_dict(self, data: Dict[str, Any], keys_to_decrypt: List[str]) -> Dict[str, Any]:
-        """
-        Decrypt specific keys in a dictionary.
-        
-        Args:
-            data: Dictionary to decrypt
-            keys_to_decrypt: Keys to decrypt
-            
-        Returns:
-            Dictionary with decrypted values
-        """
-        result = {}
-        
-        for key, value in data.items():
-            if key in keys_to_decrypt and value is not None and isinstance(value, str):
-                try:
-                    result[key] = self.decrypt(value)
-                except Exception as e:
-                    logger.warning(f"Failed to decrypt key {key}: {str(e)}")
-                    result[key] = value
-            elif isinstance(value, dict):
-                result[key] = self.decrypt_dict(value, keys_to_decrypt)
-            else:
-                result[key] = value
-        
-        return result
+            key = base64.urlsafe_b64encode(
+                kdf.derive(settings.ENCRYPTION_MASTER_KEY.encode())
+            )
+            self.cipher = Fernet(key)
 
-# Create singleton instance
+    def encrypt(self, plaintext: str) -> str:
+        """
+        Encrypt plaintext data
+
+        Args:
+            plaintext: String to encrypt
+
+        Returns:
+            Base64-encoded encrypted string
+        """
+        if not plaintext:
+            return plaintext
+
+        try:
+            if self.use_kms:
+                # Encrypt with AWS KMS
+                response = self.kms_client.encrypt(
+                    KeyId=self.data_key_id,
+                    Plaintext=plaintext.encode('utf-8')
+                )
+                ciphertext = base64.b64encode(response['CiphertextBlob']).decode('utf-8')
+            else:
+                # Encrypt with local Fernet key
+                ciphertext = self.cipher.encrypt(plaintext.encode('utf-8')).decode('utf-8')
+
+            return ciphertext
+
+        except Exception as e:
+            logger.error(f"Encryption error: {str(e)}")
+            raise
+
+    def decrypt(self, ciphertext: str) -> str:
+        """
+        Decrypt ciphertext data
+
+        Args:
+            ciphertext: Base64-encoded encrypted string
+
+        Returns:
+            Decrypted plaintext
+        """
+        if not ciphertext:
+            return ciphertext
+
+        try:
+            if self.use_kms:
+                # Decrypt with AWS KMS
+                response = self.kms_client.decrypt(
+                    CiphertextBlob=base64.b64decode(ciphertext)
+                )
+                plaintext = response['Plaintext'].decode('utf-8')
+            else:
+                # Decrypt with local Fernet key
+                plaintext = self.cipher.decrypt(ciphertext.encode('utf-8')).decode('utf-8')
+
+            return plaintext
+
+        except Exception as e:
+            logger.error(f"Decryption error: {str(e)}")
+            raise
+
+    def encrypt_dict(self, data: Dict[str, Any], fields_to_encrypt: List[str]) -> Dict[str, Any]:
+        """
+        Encrypt specified fields in a dictionary
+
+        Args:
+            data: Dictionary with data to encrypt
+            fields_to_encrypt: List of field names to encrypt
+
+        Returns:
+            Dictionary with encrypted fields
+        """
+        if not data:
+            return data
+
+        encrypted_data = data.copy()
+
+        for field in fields_to_encrypt:
+            if field in encrypted_data and encrypted_data[field]:
+                # Only encrypt strings
+                if isinstance(encrypted_data[field], str):
+                    encrypted_data[field] = self.encrypt(encrypted_data[field])
+
+        return encrypted_data
+
+    def decrypt_dict(self, data: Dict[str, Any], fields_to_decrypt: List[str]) -> Dict[str, Any]:
+        """
+        Decrypt specified fields in a dictionary
+
+        Args:
+            data: Dictionary with encrypted data
+            fields_to_decrypt: List of field names to decrypt
+
+        Returns:
+            Dictionary with decrypted fields
+        """
+        if not data:
+            return data
+
+        decrypted_data = data.copy()
+
+        for field in fields_to_decrypt:
+            if field in decrypted_data and decrypted_data[field]:
+                # Only decrypt strings
+                if isinstance(decrypted_data[field], str):
+                    decrypted_data[field] = self.decrypt(decrypted_data[field])
+
+        return decrypted_data
+```
+
+### SQLAlchemy Type for Encrypted Fields
+
+```python
+# app/infrastructure/database/types.py
+import json
+from typing import Any, Dict, Optional, Type
+
+from sqlalchemy import String, TypeDecorator
+
+from app.infrastructure.services.encryption_service import EncryptionService
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 encryption_service = EncryptionService()
+
+
+class EncryptedString(TypeDecorator):
+    """SQLAlchemy type for encrypted string fields"""
+
+    impl = String
+
+    def process_bind_parameter(self, value: Optional[str], dialect: Any) -> Optional[str]:
+        """Encrypt string before saving to database"""
+        if value is not None:
+            return encryption_service.encrypt(value)
+        return value
+
+    def process_result_value(self, value: Optional[str], dialect: Any) -> Optional[str]:
+        """Decrypt string when loading from database"""
+        if value is not None:
+            return encryption_service.decrypt(value)
+        return value
+
+
+class EncryptedJSON(TypeDecorator):
+    """SQLAlchemy type for encrypted JSON fields"""
+
+    impl = String
+
+    def process_bind_parameter(self, value: Optional[Dict[str, Any]], dialect: Any) -> Optional[str]:
+        """Encrypt JSON before saving to database"""
+        if value is not None:
+            json_str = json.dumps(value)
+            return encryption_service.encrypt(json_str)
+        return value
+
+    def process_result_value(self, value: Optional[str], dialect: Any) -> Optional[Dict[str, Any]]:
+        """Decrypt JSON when loading from database"""
+        if value is not None:
+            json_str = encryption_service.decrypt(value)
+            return json.loads(json_str)
+        return value
+```
+
+### Using Encrypted Fields in Models
+
+```python
+# app/infrastructure/database/models/patient.py
+import sqlalchemy as sa
+from sqlalchemy.orm import relationship
+
+from app.infrastructure.database.base import Base
+from app.infrastructure.database.types import EncryptedString, EncryptedJSON
+
+
+class Patient(Base):
+    """Database model for patients with encrypted PHI fields"""
+    __tablename__ = "patients"
+
+    id = sa.Column(sa.String(36), primary_key=True)
+    created_at = sa.Column(sa.DateTime, nullable=False)
+    updated_at = sa.Column(sa.DateTime, nullable=False)
+
+    # Regular fields (not encrypted)
+    status = sa.Column(sa.String(20), nullable=False, index=True)
+
+    # Encrypted PHI fields
+    first_name = sa.Column(EncryptedString(100), nullable=False)
+    last_name = sa.Column(EncryptedString(100), nullable=False)
+    date_of_birth = sa.Column(EncryptedString(10), nullable=False)
+    ssn = sa.Column(EncryptedString(11), nullable=True)
+    email = sa.Column(EncryptedString(255), nullable=False)
+    phone = sa.Column(EncryptedString(20), nullable=False)
+
+    # Encrypted address
+    address_line1 = sa.Column(EncryptedString(255), nullable=True)
+    address_line2 = sa.Column(EncryptedString(255), nullable=True)
+    city = sa.Column(EncryptedString(100), nullable=True)
+    state = sa.Column(EncryptedString(50), nullable=True)
+    postal_code = sa.Column(EncryptedString(20), nullable=True)
+    country = sa.Column(EncryptedString(50), nullable=True)
+
+    # Encrypted JSON field for additional data
+    additional_info = sa.Column(EncryptedJSON, nullable=True)
+
+    # Foreign keys and relationships
+    user_id = sa.Column(sa.String(36), sa.ForeignKey("users.id"), nullable=False)
+    user = relationship("User", back_populates="patient")
+
+    # Searchable fields (duplicated for search)
+    search_name = sa.Column(sa.String(255), nullable=False, index=True)
+    search_email = sa.Column(sa.String(255), nullable=False, index=True)
+
+    __table_args__ = (
+        sa.Index("ix_patients_search", "search_name", "search_email"),
+    )
+```
+
+### Encryption Key Management
+
+```python
+# app/config/settings.py
+from pydantic import BaseSettings, Field
+
+class Settings(BaseSettings):
+    # KMS configuration
+    USE_AWS_KMS: bool = Field(True, env="USE_AWS_KMS")
+    AWS_REGION: str = Field(..., env="AWS_REGION")
+    AWS_ACCESS_KEY_ID: str = Field(..., env="AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY: str = Field(..., env="AWS_SECRET_ACCESS_KEY")
+    KMS_DATA_KEY_ID: str = Field(..., env="KMS_DATA_KEY_ID")
+
+    # Local encryption fallback (for development only)
+    ENCRYPTION_MASTER_KEY: str = Field("", env="ENCRYPTION_MASTER_KEY")
+    ENCRYPTION_SALT: str = Field("", env="ENCRYPTION_SALT")
+
+    # Fields that should be encrypted
+    PHI_FIELDS: list = [
+        "first_name", "last_name", "date_of_birth", "ssn",
+        "email", "phone", "address_line1", "address_line2",
+        "city", "state", "postal_code", "country",
+        "diagnosis", "medication", "treatment_notes"
+    ]
+
+    class Config:
+        env_file = ".env"
+```
+
+### Key Rotation Strategy
+
+```python
+# app/infrastructure/tasks/key_rotation.py
+from datetime import datetime
+import boto3
+from typing import List, Tuple
+
+from app.config.settings import get_settings
+from app.infrastructure.database.dependencies import get_db
+from app.infrastructure.services.encryption_service import EncryptionService
+from app.utils.logger import get_logger
+
+settings = get_settings()
+logger = get_logger(__name__)
+
+
+async def rotate_encryption_keys(old_key_id: str, new_key_id: str):
+    """
+    Rotate encryption keys by re-encrypting all sensitive data
+
+    Args:
+        old_key_id: Current KMS key ID
+        new_key_id: New KMS key ID
+    """
+    try:
+        # Initialize AWS KMS client
+        kms_client = boto3.client(
+            'kms',
+            region_name=settings.AWS_REGION,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+        )
+
+        # Initialize encryption service with old key
+        old_encryption_service = EncryptionService()
+
+        # Create a new encryption service with new key
+        new_encryption_service = EncryptionService()
+        new_encryption_service.data_key_id = new_key_id
+
+        # Get database session
+        async with get_db() as db:
+            # Re-encrypt patient data (process in batches)
+            await _reencrypt_patient_data(
+                db, old_encryption_service, new_encryption_service
+            )
+
+            # Re-encrypt other sensitive data tables...
+            # [similar implementation for other tables]
+
+        logger.info(f"Successfully rotated encryption keys from {old_key_id} to {new_key_id}")
+
+    except Exception as e:
+        logger.error(f"Failed to rotate encryption keys: {str(e)}")
+        raise
+```
+
+### Client-Side Encryption
+
+For additional security of highly sensitive data:
+
+```typescript
+// frontend/src/utils/encryption.ts
+import CryptoJS from 'crypto-js';
+
+/**
+ * Encrypt sensitive data on the client side before sending to server
+ * Used for highest-sensitivity fields as an additional security layer
+ */
+export const clientEncrypt = (
+  data: string,
+  key: string
+): string => {
+  if (!data) return data;
+  return CryptoJS.AES.encrypt(data, key).toString();
+};
+
+/**
+ * Decrypt client-encrypted data
+ */
+export const clientDecrypt = (
+  encryptedData: string,
+  key: string
+): string => {
+  if (!encryptedData) return encryptedData;
+  const bytes = CryptoJS.AES.decrypt(encryptedData, key);
+  return bytes.toString(CryptoJS.enc.Utf8);
+};
+
+/**
+ * Derive encryption key from user password
+ * Uses key stretching with PBKDF2
+ */
+export const deriveEncryptionKey = (
+  password: string,
+  salt: string
+): string => {
+  return CryptoJS.PBKDF2(password, salt, {
+    keySize: 256 / 32,
+    iterations: 10000
+  }).toString();
+};
+```
+
+### Searchable Encryption
+
+To enable searching on encrypted fields:
+
+```python
+# app/infrastructure/repositories/patient_repository.py
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List, Optional
+
+from app.domain.entities.patient import Patient as PatientEntity
+from app.infrastructure.database.models.patient import Patient
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+class PatientRepository:
+    """Repository for patient data with searchable encryption"""
+
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def create_patient(self, patient: PatientEntity) -> PatientEntity:
+        """Create a new patient record"""
+        # Create search fields for encrypted data
+        search_name = f"{patient.first_name} {patient.last_name}".lower()
+        search_email = patient.email.lower()
+
+        db_patient = Patient(
+            id=patient.id,
+            created_at=patient.created_at,
+            updated_at=patient.updated_at,
+            status=patient.status,
+            first_name=patient.first_name,
+            last_name=patient.last_name,
+            date_of_birth=patient.date_of_birth,
+            ssn=patient.ssn,
+            email=patient.email,
+            phone=patient.phone,
+            address_line1=patient.address_line1,
+            address_line2=patient.address_line2,
+            city=patient.city,
+            state=patient.state,
+            postal_code=patient.postal_code,
+            country=patient.country,
+            additional_info=patient.additional_info,
+            user_id=patient.user_id,
+            # Searchable fields (not encrypted)
+            search_name=search_name,
+            search_email=search_email,
+        )
+
+        self.session.add(db_patient)
+        await self.session.commit()
+        await self.session.refresh(db_patient)
+
+        # Convert to domain entity
+        return self._to_entity(db_patient)
+
+    async def search_patients(self, search_term: str) -> List[PatientEntity]:
+        """
+        Search patients by name or email
+
+        Uses searchable non-encrypted fields for performance
+        """
+        # Normalize search term
+        search_term = f"%{search_term.lower()}%"
+
+        # Search using non-encrypted search fields
+        query = select(Patient).where(
+            (Patient.search_name.like(search_term)) |
+            (Patient.search_email.like(search_term))
+        )
+
+        result = await self.session.execute(query)
+        patients = result.scalars().all()
+
+        # Convert to domain entities
+        return [self._to_entity(p) for p in patients]
+```
+
+### Backup Encryption
+
+```python
+# app/infrastructure/tasks/backup.py
+import boto3
+import json
+from datetime import datetime
+from sqlalchemy import select
+from typing import Dict, List
+
+from app.config.settings import get_settings
+from app.utils.logger import get_logger
+
+settings = get_settings()
+logger = get_logger(__name__)
+
+
+async def backup_encrypted_data():
+    """Create encrypted backup of database data"""
+    try:
+        # Initialize S3 client
+        s3_client = boto3.client(
+            's3',
+            region_name=settings.AWS_REGION,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+        )
+
+        # Generate backup timestamp
+        timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+
+        # Get database session
+        async with get_db() as db:
+            # Backup patients (with encrypted fields)
+            await _backup_table(db, s3_client, "patients", timestamp)
+
+            # Backup other tables
+            # [similar implementation for other tables]
+
+        logger.info(f"Successfully created encrypted backup at {timestamp}")
+
+    except Exception as e:
+        logger.error(f"Failed to create backup: {str(e)}")
+        raise
 ```
 
 ### Encryption Implementation Details
@@ -2275,6 +2815,19 @@ encryption_service = EncryptionService()
    - AWS KMS for key storage and rotation
    - Separate keys for different data categories
    - Automatic key rotation every 90 days
+
+### Best Practices for HIPAA-Compliant Encryption
+
+1. **Defense in Depth**: Implement multiple layers of encryption
+2. **Key Management**: Use a robust key management system (AWS KMS)
+3. **Field-Level Encryption**: Encrypt PHI at the field level
+4. **Key Rotation**: Regularly rotate encryption keys
+5. **No PHI in Logs**: Ensure PHI is never logged, even in encrypted form
+6. **Secure Key Storage**: Never store encryption keys alongside encrypted data
+7. **Minimal Access**: Restrict access to encryption keys
+8. **Encryption in Transit**: Always use TLS 1.3 for data transmission
+9. **Backup Encryption**: Ensure all backups are encrypted
+10. **Documentation**: Maintain documentation of encryption methods for HIPAA audits
 
 ## API Security
 
@@ -2418,3 +2971,615 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
    - Risk assessment process
    - Notification templates and communication plan
    - Documentation and reporting requirements
+
+## Authentication API Endpoints
+
+### Authentication Flow
+
+The NOVAMIND platform implements a multi-stage authentication flow:
+
+1. **Registration**: User provides email and creates password
+2. **Confirmation**: Email verification via confirmation code
+3. **Login**: Credentials validated, tokens issued
+4. **Token Refresh**: Access token refreshed using refresh token
+5. **Password Reset**: Secure password recovery flow
+6. **MFA**: Multi-factor authentication for enhanced security
+
+### User Registration
+
+```python
+# app/presentation/api/v1/endpoints/auth.py
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+
+from app.domain.exceptions.auth import UserAlreadyExistsError
+from app.infrastructure.services.cognito_service import CognitoService
+from app.presentation.schemas.auth import RegisterUserRequest, RegisterUserResponse
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
+router = APIRouter()
+
+
+@router.post(
+   "/register",
+   response_model=RegisterUserResponse,
+   status_code=status.HTTP_201_CREATED,
+   description="Register a new user with email and password"
+)
+async def register_user(
+   request: RegisterUserRequest,
+   cognito_service: CognitoService = Depends(),
+):
+   """
+   Register a new user in the system
+
+   - Validates email format and password requirements
+   - Creates user in Cognito user pool
+   - Sends confirmation code to user's email
+   - Returns confirmation status and next steps
+
+   HIPAA Compliance:
+   - No PHI stored during registration
+   - Secured with HTTPS
+   - Password policy enforced via Cognito
+   """
+   try:
+       # Register user with Cognito
+       result = await cognito_service.register_user(
+           email=request.email,
+           password=request.password,
+           first_name=request.first_name,
+           last_name=request.last_name
+       )
+
+       # HIPAA-compliant audit logging (omitting sensitive data)
+       logger.info(
+           "User registration attempt",
+           extra={
+               "email_domain": request.email.split('@')[1],
+               "status": "success"
+           }
+       )
+
+       # Return success response with next steps
+       return RegisterUserResponse(
+           message="User registration successful. Please check your email for confirmation code.",
+           user_id=result["user_id"],
+           requires_confirmation=True
+       )
+
+   except UserAlreadyExistsError as e:
+       # Log the error (without exposing personal data)
+       logger.warning(
+           "User registration failed - email already exists",
+           extra={
+               "email_domain": request.email.split('@')[1],
+           }
+       )
+
+       # Return user-friendly error
+       raise HTTPException(
+           status_code=status.HTTP_409_CONFLICT,
+           detail="A user with this email already exists."
+       )
+
+   except Exception as e:
+       # Generic error logging (for debugging, without PHI)
+       logger.error(
+           f"User registration failed: {str(e)}",
+           extra={
+               "email_domain": request.email.split('@')[1],
+           }
+       )
+
+       # Return generic error to avoid information disclosure
+       raise HTTPException(
+           status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+           detail="An error occurred during registration. Please try again later."
+       )
+```
+
+### User Confirmation
+
+```python
+@router.post(
+   "/confirm",
+   status_code=status.HTTP_200_OK,
+   description="Confirm user registration with code from email"
+)
+async def confirm_registration(
+   user_id: str,
+   confirmation_code: str,
+   cognito_service: CognitoService = Depends(),
+):
+   """
+   Confirm user registration with verification code
+
+   - Validates confirmation code sent to user's email
+   - Activates user account if code is valid
+   - Returns confirmation success message
+
+   HIPAA Compliance:
+   - Secured with HTTPS
+   - Audit logging of confirmation attempts
+   """
+   try:
+       # Confirm registration with Cognito
+       await cognito_service.confirm_registration(
+           user_id=user_id,
+           confirmation_code=confirmation_code
+       )
+
+       # HIPAA-compliant audit logging
+       logger.info(
+           "User confirmation successful",
+           extra={
+               "user_id": user_id,
+               "status": "success"
+           }
+       )
+
+       # Return success response
+       return {"message": "User confirmed successfully. You can now login."}
+
+   except Exception as e:
+       # Log the error
+       logger.warning(
+           f"User confirmation failed: {str(e)}",
+           extra={
+               "user_id": user_id,
+               "status": "failure"
+           }
+       )
+
+       # Return user-friendly error
+       raise HTTPException(
+           status_code=status.HTTP_400_BAD_REQUEST,
+           detail="Invalid confirmation code. Please try again."
+       )
+```
+
+### User Login
+
+```python
+@router.post(
+   "/token",
+   status_code=status.HTTP_200_OK,
+   description="Login with email and password to receive JWT tokens"
+)
+async def login(
+   form_data: OAuth2PasswordRequestForm = Depends(),
+   cognito_service: CognitoService = Depends(),
+   jwt_service: JWTService = Depends(),
+):
+   """
+   Authenticate user and issue JWT tokens
+
+   - Validates user credentials against Cognito
+   - Issues access and refresh tokens
+   - Returns tokens and user information
+
+   HIPAA Compliance:
+   - Secured with HTTPS
+   - Audit logging of login attempts
+   - Short-lived access tokens (15-30 minutes)
+   - No PHI in token claims
+   """
+   try:
+       # Authenticate user with Cognito
+       auth_result = await cognito_service.login_user(
+           username=form_data.username,
+           password=form_data.password
+       )
+
+       # Extract user info from Cognito response
+       user_id = auth_result["user_id"]
+       email = auth_result["email"]
+
+       # Get user roles from database
+       user_roles = await role_service.get_user_roles(user_id)
+
+       # Create token payload with claims
+       token_data = {
+           "sub": user_id,
+           "email": email,
+           "roles": [role.value for role in user_roles]
+       }
+
+       # Generate JWT tokens
+       access_token = jwt_service.create_access_token(token_data)
+       refresh_token = jwt_service.create_refresh_token(token_data)
+
+       # HIPAA-compliant audit logging
+       logger.info(
+           "User login successful",
+           extra={
+               "user_id": user_id,
+               "roles": [role.value for role in user_roles],
+               "status": "success"
+           }
+       )
+
+       # Return tokens and user info
+       return {
+           "access_token": access_token,
+           "refresh_token": refresh_token,
+           "token_type": "bearer",
+           "user": {
+               "id": user_id,
+               "email": email,
+               "roles": [role.value for role in user_roles]
+           }
+       }
+
+   except Exception as e:
+       # Log the error (without exposing credentials)
+       logger.warning(
+           f"Login failed: {str(e)}",
+           extra={
+               "username_domain": form_data.username.split('@')[1] if '@' in form_data.username else None,
+               "status": "failure"
+           }
+       )
+
+       # Return user-friendly error
+       raise HTTPException(
+           status_code=status.HTTP_401_UNAUTHORIZED,
+           detail="Invalid credentials",
+           headers={"WWW-Authenticate": "Bearer"},
+       )
+```
+
+### Token Refresh
+
+```python
+@router.post(
+   "/refresh",
+   status_code=status.HTTP_200_OK,
+   description="Refresh access token using refresh token"
+)
+async def refresh_token(
+   refresh_token: str,
+   jwt_service: JWTService = Depends(),
+   token_blacklist: TokenBlacklistService = Depends(),
+):
+   """
+   Refresh access token using refresh token
+
+   - Validates refresh token
+   - Issues new access token
+   - Optionally rotates refresh token
+   - Returns new tokens
+
+   HIPAA Compliance:
+   - Secured with HTTPS
+   - Audit logging of token refresh
+   - Token blacklisting for revoked tokens
+   """
+   try:
+       # Verify refresh token
+       token_data = jwt_service.decode_token(refresh_token)
+
+       # Check if token is blacklisted
+       jti = token_data.get("jti")
+       if await token_blacklist.is_blacklisted(jti):
+           raise HTTPException(
+               status_code=status.HTTP_401_UNAUTHORIZED,
+               detail="Token has been revoked",
+               headers={"WWW-Authenticate": "Bearer"},
+           )
+
+       # Verify token type
+       if token_data.get("token_type") != "refresh":
+           raise HTTPException(
+               status_code=status.HTTP_401_UNAUTHORIZED,
+               detail="Invalid token type",
+               headers={"WWW-Authenticate": "Bearer"},
+           )
+
+       # Create new token payload
+       user_id = token_data.get("sub")
+       new_token_data = {
+           "sub": user_id,
+           "email": token_data.get("email"),
+           "roles": token_data.get("roles", []),
+           "refresh_jti": jti  # Link to original refresh token
+       }
+
+       # Generate new tokens
+       new_access_token = jwt_service.create_access_token(new_token_data)
+
+       # Optionally rotate refresh token for enhanced security
+       new_refresh_token = jwt_service.create_refresh_token(new_token_data)
+
+       # Blacklist old refresh token (token rotation)
+       await token_blacklist.blacklist_token(jti, token_data.get("exp"))
+
+       # HIPAA-compliant audit logging
+       logger.info(
+           "Token refresh successful",
+           extra={
+               "user_id": user_id,
+               "status": "success"
+           }
+       )
+
+       # Return new tokens
+       return {
+           "access_token": new_access_token,
+           "refresh_token": new_refresh_token,
+           "token_type": "bearer"
+       }
+
+   except Exception as e:
+       # Log the error
+       logger.warning(
+           f"Token refresh failed: {str(e)}",
+           extra={
+               "status": "failure"
+           }
+       )
+
+       # Return user-friendly error
+       raise HTTPException(
+           status_code=status.HTTP_401_UNAUTHORIZED,
+           detail="Invalid refresh token",
+           headers={"WWW-Authenticate": "Bearer"},
+       )
+```
+
+### Password Reset
+
+```python
+@router.post(
+   "/reset-password-request",
+   status_code=status.HTTP_200_OK,
+   description="Request password reset via email"
+)
+async def request_password_reset(
+   email: str,
+   cognito_service: CognitoService = Depends(),
+):
+   """
+   Request password reset code
+
+   - Sends reset code to user's email
+   - Returns success message
+
+   HIPAA Compliance:
+   - Secured with HTTPS
+   - Audit logging of reset requests
+   - No information disclosure on whether email exists
+   """
+   try:
+       # Request password reset from Cognito
+       await cognito_service.forgot_password(email)
+
+       # HIPAA-compliant audit logging
+       logger.info(
+           "Password reset requested",
+           extra={
+               "email_domain": email.split('@')[1],
+               "status": "initiated"
+           }
+       )
+
+       # Return success message
+       # Note: Always return success even if email doesn't exist
+       # This prevents user enumeration attacks
+       return {
+           "message": "If your email exists in our system, you will receive a password reset code."
+       }
+
+   except Exception as e:
+       # Log the error
+       logger.warning(
+           f"Password reset request failed: {str(e)}",
+           extra={
+               "email_domain": email.split('@')[1],
+               "status": "failure"
+           }
+       )
+
+       # Always return the same message to prevent user enumeration
+       return {
+           "message": "If your email exists in our system, you will receive a password reset code."
+       }
+```
+
+### Password Reset Confirmation
+
+```python
+@router.post(
+   "/reset-password-confirm",
+   status_code=status.HTTP_200_OK,
+   description="Complete password reset with code and new password"
+)
+async def confirm_password_reset(
+   email: str,
+   reset_code: str,
+   new_password: str,
+   cognito_service: CognitoService = Depends(),
+):
+   """
+   Confirm password reset with verification code
+
+   - Validates reset code
+   - Sets new password
+   - Returns success message
+
+   HIPAA Compliance:
+   - Secured with HTTPS
+   - Audit logging of password changes
+   - Password complexity requirements enforced
+   """
+   try:
+       # Confirm password reset with Cognito
+       await cognito_service.confirm_forgot_password(
+           email=email,
+           confirmation_code=reset_code,
+           new_password=new_password
+       )
+
+       # HIPAA-compliant audit logging
+       logger.info(
+           "Password reset completed",
+           extra={
+               "email_domain": email.split('@')[1],
+               "status": "success"
+           }
+       )
+
+       # Return success message
+       return {"message": "Password has been reset successfully. You can now login with your new password."}
+
+   except Exception as e:
+       # Log the error
+       logger.warning(
+           f"Password reset confirmation failed: {str(e)}",
+           extra={
+               "email_domain": email.split('@')[1],
+               "status": "failure"
+           }
+       )
+
+       # Return user-friendly error
+       raise HTTPException(
+           status_code=status.HTTP_400_BAD_REQUEST,
+           detail="Invalid reset code or password. Please try again."
+       )
+```
+
+### Logout
+
+```python
+@router.post(
+   "/logout",
+   status_code=status.HTTP_204_NO_CONTENT,
+   description="Logout user by blacklisting tokens"
+)
+async def logout(
+   token_blacklist: TokenBlacklistService = Depends(),
+   current_user: dict = Depends(get_current_user),
+   request: Request = None,
+):
+   """
+   Logout user by blacklisting current tokens
+
+   - Blacklists current access token
+   - Blacklists associated refresh token if available
+   - Returns no content on success
+
+   HIPAA Compliance:
+   - Secured with HTTPS
+   - Audit logging of logout events
+   - Complete session termination
+   """
+   try:
+       # Get token from authorization header
+       auth_header = request.headers.get("Authorization")
+       token = auth_header.split()[1] if auth_header else None
+
+       if token:
+           # Get token data
+           token_data = jwt_service.decode_token(token)
+           jti = token_data.get("jti")
+           exp = token_data.get("exp")
+
+           # Blacklist the current token
+           await token_blacklist.blacklist_token(jti, exp)
+
+           # Also blacklist the refresh token if linked
+           refresh_jti = token_data.get("refresh_jti")
+           if refresh_jti:
+               await token_blacklist.blacklist_token(refresh_jti)
+
+       # HIPAA-compliant audit logging
+       logger.info(
+           "User logout",
+           extra={
+               "user_id": current_user.get("sub"),
+               "status": "success"
+           }
+       )
+
+       # Return no content for successful logout
+       return None
+
+   except Exception as e:
+       # Log the error
+       logger.warning(
+           f"Logout failed: {str(e)}",
+           extra={
+               "user_id": current_user.get("sub") if current_user else None,
+               "status": "failure"
+           }
+       )
+
+       # Still return success to client
+       # This is to ensure session appears terminated to user
+       return None
+```
+
+### Request/Response Schemas
+
+```python
+# app/presentation/schemas/auth.py
+from datetime import datetime
+from typing import List, Optional
+from pydantic import BaseModel, EmailStr, Field, SecretStr, validator
+
+
+class RegisterUserRequest(BaseModel):
+   """Schema for user registration request"""
+   email: EmailStr = Field(..., description="User's email address")
+   password: SecretStr = Field(..., description="User's password")
+   first_name: str = Field(..., description="User's first name")
+   last_name: str = Field(..., description="User's last name")
+
+   @validator('password')
+   def password_strength(cls, v):
+       """Validate password strength"""
+       password = v.get_secret_value()
+       if len(password) < 8:
+           raise ValueError("Password must be at least 8 characters long")
+       if not any(c.isupper() for c in password):
+           raise ValueError("Password must contain at least one uppercase letter")
+       if not any(c.islower() for c in password):
+           raise ValueError("Password must contain at least one lowercase letter")
+       if not any(c.isdigit() for c in password):
+           raise ValueError("Password must contain at least one digit")
+       if not any(c in "!@#$%^&*()-_=+[]{}|;:'\",.<>/?`~" for c in password):
+           raise ValueError("Password must contain at least one special character")
+       return v
+
+
+class RegisterUserResponse(BaseModel):
+   """Schema for user registration response"""
+   message: str
+   user_id: str
+   requires_confirmation: bool
+
+
+class TokenResponse(BaseModel):
+   """Schema for token response"""
+   access_token: str
+   refresh_token: str
+   token_type: str
+   user: dict
+```
+
+### HIPAA Compliance Measures
+
+The authentication system implements these HIPAA-compliant security measures:
+
+1. **Secure Transmission**: All endpoints require HTTPS
+2. **Password Policies**: Enforced complexity and expiration
+3. **MFA**: Multi-factor authentication for all clinical users
+4. **Audit Logging**: Comprehensive logging of all authentication events
+5. **Session Management**: Short-lived access tokens (15-30 min)
+6. **Token Blacklisting**: Immediate invalidation of logged-out sessions
+7. **Failed Attempt Tracking**: Lockout after multiple failed attempts
+8. **Information Disclosure Prevention**: Generic error messages
+9. **Account Recovery**: Secure password reset flow

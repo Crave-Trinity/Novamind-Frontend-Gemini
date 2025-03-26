@@ -60,11 +60,23 @@ The Patient Analytics framework strictly adheres to Clean Architecture principle
 
 ## Multi-Dimensional Dashboards
 
+### Guiding Principles
+
+The design and implementation of our dashboard ecosystem adhere to these foundational principles:
+
+1. **Visual Clarity**: Complex information presented with elegant simplicity
+2. **Progressive Disclosure**: Information revealed in layers, from overview to detail
+3. **Personalization**: Dashboards tailored to individual patient journeys and preferences
+4. **Actionability**: Every visualization leads to clear next steps or insights
+5. **Privacy by Design**: Visual elements designed to protect sensitive information
+6. **Therapeutic Value**: Visualizations that contribute to the healing process
+7. **Clean Architecture**: Strict separation between data, domain logic, and presentation
+
 ### Patient-Facing Dashboards
 
 #### 1. Journey Timeline Dashboard
 
-The Journey Timeline provides patients with a visual narrative of their mental health progress.
+The Journey Timeline provides patients with a visual narrative of their mental health progress, celebrating milestones while contextualizing setbacks.
 
 ```python
 # Domain Layer - Entities
@@ -86,7 +98,7 @@ class JourneyMilestone:
         self.description = description
         self.significance_level = significance_level
         self.associated_metrics = associated_metrics or {}
-        self.is_public = is_public
+        self.is_public = is_public  # For sharing with support network
 
 # Domain Layer - Service Interface
 class JourneyAnalyticsService(ABC):
@@ -94,8 +106,8 @@ class JourneyAnalyticsService(ABC):
     
     @abstractmethod
     async def get_patient_journey_timeline(
-        self, 
-        patient_id: UUID, 
+        self,
+        patient_id: UUID,
         start_date: datetime = None,
         end_date: datetime = None,
         milestone_types: List[MilestoneType] = None
@@ -129,8 +141,8 @@ class JourneyAnalyticsServiceImpl(JourneyAnalyticsService):
         self.audit_logger = audit_logger
     
     async def get_patient_journey_timeline(
-        self, 
-        patient_id: UUID, 
+        self,
+        patient_id: UUID,
         start_date: datetime = None,
         end_date: datetime = None,
         milestone_types: List[MilestoneType] = None
@@ -160,6 +172,69 @@ class JourneyAnalyticsServiceImpl(JourneyAnalyticsService):
         )
         
         return milestones
+```
+
+**API Endpoint:**
+```python
+# Presentation Layer - API Endpoint
+@router.get(
+    "/patients/{patient_id}/journey-timeline",
+    response_model=JourneyTimelineResponse,
+    status_code=status.HTTP_200_OK,
+    description="Get the patient's journey timeline with milestones and metrics"
+)
+async def get_journey_timeline(
+    patient_id: str,
+    start_date: datetime = None,
+    end_date: datetime = None,
+    include_metrics: List[str] = Query(None),
+    include_milestone_types: List[str] = Query(None),
+    current_user: User = Depends(get_current_user),
+    journey_service: JourneyTimelineService = Depends(),
+    rbac_service: RBACService = Depends(),
+    audit_service: AuditService = Depends(),
+):
+    """
+    Get a patient's journey timeline with milestones, metrics, and events
+
+    - Validates user has permission to view patient data
+    - Retrieves timeline data within specified date range
+    - Filters by requested metrics and milestone types
+    - Returns formatted timeline for visualization
+
+    HIPAA Compliance:
+    - Permission verification ensures minimum necessary access
+    - All access is logged for audit purposes
+    - Data is filtered based on user's role and relationship to patient
+    """
+    # Verify permissions
+    if not rbac_service.can_view_patient_data(current_user, patient_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to view this patient's data"
+        )
+
+    # Log the access attempt for HIPAA compliance
+    await audit_service.log_event(
+        event_type=AuditEventType.DATA_ACCESS,
+        action="view_journey_timeline",
+        user_id=current_user.id,
+        resource_id=patient_id,
+        resource_type="patient_timeline",
+        success=True
+    )
+
+    # Generate timeline using domain service
+    timeline = await journey_service.generate_timeline(
+        patient_id=patient_id,
+        start_date=start_date or (datetime.now() - timedelta(days=90)),
+        end_date=end_date or datetime.now(),
+        include_metrics=include_metrics,
+        include_milestone_types=[MilestoneType(t) for t in include_milestone_types] if include_milestone_types else None
+    )
+
+    # Return formatted response
+    return timeline
 ```
 
 **Key Features:**
@@ -327,7 +402,19 @@ class PracticeAnalyticsService(ABC):
 
 ## AI-Enhanced Therapeutic Insights
 
-The NOVAMIND platform leverages advanced AI algorithms to generate therapeutic insights from patient data.
+The NOVAMIND platform leverages advanced AI algorithms to generate therapeutic insights from patient data while maintaining strict HIPAA compliance and upholding the luxury, concierge experience our platform promises.
+
+### Guiding Principles
+
+Our implementation of AI in the therapeutic context adheres to these foundational principles:
+
+1. **Augmentation, Not Replacement**: AI serves to enhance human expertise, not replace clinical judgment
+2. **Explainable Insights**: All AI-generated insights include clear explanations of their derivation
+3. **Clinical Validity**: Insights are grounded in established psychiatric principles and evidence-based practice
+4. **Privacy by Design**: All AI processing incorporates privacy-preserving techniques from the ground up
+5. **Continuous Validation**: AI models undergo regular evaluation against clinical outcomes
+6. **Ethical Deployment**: Careful consideration of bias, fairness, and appropriate use cases
+7. **Therapeutic Alliance Support**: Technology designed to strengthen, not diminish, the therapeutic relationship
 
 ### 1. Pattern Recognition Engine
 
@@ -438,9 +525,53 @@ class TherapeuticNLPService(ABC):
 - Therapeutic insight generation
 - Progress narrative construction
 
+### 4. Privacy-Preserving AI Techniques
+
+Our AI implementation adheres to strict HIPAA requirements while delivering sophisticated insights:
+
+- **Federated Learning**: Models trained across distributed devices without centralizing sensitive data
+- **Differential Privacy**: Mathematical noise added to protect individual privacy while maintaining statistical validity
+- **On-Device Processing**: Local execution of sensitive AI operations to minimize data transmission
+- **Homomorphic Encryption**: Processing encrypted data without decryption for select operations
+- **Secure Enclaves**: Protected execution environments for sensitive AI computations
+
+### 5. Ethical Considerations and Safeguards
+
+Our AI implementation incorporates these ethical safeguards:
+
+- **Bias Mitigation**
+  - Diverse training data covering various demographics
+  - Regular bias audits with corrective measures
+  - Transparency about potential limitations
+  - Cultural competency reviews of generated insights
+
+- **Clinical Oversight**
+  - Human-in-the-loop review for sensitive insights
+  - Clinician approval for treatment recommendations
+  - Clear documentation of AI limitations
+  - Emergency override capabilities
+
+- **Patient Autonomy**
+  - Opt-in consent for all AI processing
+  - Transparent explanation of AI capabilities
+  - Patient-friendly explanations of all insights
+  - Right to access and delete AI-processed data
+
 ## Engagement & Behavioral Economics
 
-The NOVAMIND platform incorporates behavioral economics principles to enhance patient engagement.
+The NOVAMIND platform incorporates behavioral economics principles to enhance patient engagement, applying advanced behavioral science to drive meaningful patient participation in their mental health journey.
+
+### Guiding Principles
+
+Our engagement approach is built on these foundational principles:
+
+1. **Choice Architecture**: Thoughtfully designed options that guide without restricting patient autonomy
+2. **Personalized Motivation**: Targeting individual values and drivers rather than generic incentives
+3. **Friction Reduction**: Removing barriers to therapeutic activities through elegant experience design
+4. **Meaningful Feedback**: Providing reinforcement that connects actions to therapeutic outcomes
+5. **Ethical Nudging**: Using behavioral insights to support clinical goals while respecting patient agency
+6. **Luxury Experience**: Delivering behavioral interventions with the sophistication of premium service
+7. **Empirical Validation**: Continuously testing and refining engagement mechanisms based on outcomes
 
 ### 1. Engagement Framework
 
@@ -476,7 +607,50 @@ class EngagementService(ABC):
 - Engagement analytics and optimization
 - Adaptive intervention scheduling
 
-### 2. Behavioral Economics Implementation
+### 2. Personalized Behavioral Profiles
+
+Our system builds sophisticated behavioral profiles for each patient to drive tailored engagement strategies.
+
+```python
+# Domain Layer - Entities
+class BehavioralProfile:
+    """Domain entity representing a patient's behavioral tendencies"""
+    def __init__(
+        self,
+        id: str,
+        patient_id: str,
+        creation_date: datetime,
+        last_updated: datetime,
+        motivational_orientation: MotivationalOrientation,
+        temporal_discounting_pattern: TemporalDiscountingPattern,
+        social_influence_factor: float,
+        reward_sensitivity: Dict[RewardType, float],
+        decision_style: DecisionStyle,
+        habit_formation_propensity: float,
+        confidence_levels: Dict[str, float]
+    ):
+        self.id = id
+        self.patient_id = patient_id
+        self.creation_date = creation_date
+        self.last_updated = last_updated
+        self.motivational_orientation = motivational_orientation
+        self.temporal_discounting_pattern = temporal_discounting_pattern
+        self.social_influence_factor = social_influence_factor  # 0-1 scale
+        self.reward_sensitivity = reward_sensitivity
+        self.decision_style = decision_style
+        self.habit_formation_propensity = habit_formation_propensity  # 0-1 scale
+        self.confidence_levels = confidence_levels  # Confidence in each assessment
+```
+
+**Key Features:**
+- Motivational orientation assessment (prevention vs. promotion focus)
+- Temporal discounting pattern identification
+- Social influence responsiveness profiling
+- Reward sensitivity classification
+- Decision-making style analysis
+- Habit formation propensity assessment
+
+### 3. Behavioral Economics Implementation
 
 ```python
 # Domain Layer - Service Interface
@@ -503,12 +677,21 @@ class BehavioralEconomicsService(ABC):
 ```
 
 **Key Features:**
- 
 - Personalized incentive structures
 - Habit formation support
 - Cognitive bias mitigation
 - Choice architecture optimization
 - Motivation enhancement strategies
+
+### 4. Ethical Behavioral Design
+
+Our engagement framework incorporates these ethical safeguards:
+
+- **Transparency**: Clear disclosure of behavioral techniques being employed
+- **Autonomy Protection**: Preservation of patient choice in all behavioral interventions
+- **Value Alignment**: Engagement mechanisms aligned with patient values and goals
+- **Anti-Manipulation Safeguards**: Careful constraints on nudge frequency and intensity
+- **Well-being Prioritization**: Engagement designed to enhance therapeutic outcomes and patient welfare
 
 ## Data Integration Architecture
 
@@ -593,6 +776,61 @@ class DataIntegrationService(ABC):
 - Data quality validation and cleansing
 - Secure API integrations with external systems
 - HIPAA-compliant data transformation and storage
+## Technology Stack
+
+### Frontend Visualization
+
+- **Core Framework**: React with TypeScript
+- **Visualization Libraries**:
+  - D3.js for custom visualizations
+  - Recharts for standard charts
+  - Nivo for data-rich visualizations
+  - Three.js for advanced 3D visualizations where appropriate
+- **State Management**: Redux with Redux Toolkit
+- **Styling**: Styled Components with a luxury-focused design system
+
+### Backend Services
+
+- **Analytics Engine**: Python with NumPy, Pandas, and SciPy
+- **Machine Learning**: TensorFlow with Federated Learning capabilities
+- **API Layer**: FastAPI with comprehensive security middleware
+- **Performance Optimization**: Redis for caching derived insights
+
+### Data Storage
+
+- **Time-Series Database**: InfluxDB for efficient storage of sequential metrics
+- **Document Store**: MongoDB for flexible schema storage of complex visualization configurations
+- **Graph Database**: Neo4j for relationship-based data visualization (optional)
+
+## Best Practices for Dashboard Design
+
+### Color Psychology
+
+- Use blue tones for calming, trust-building elements
+- Implement green for progress and growth indicators
+- Use red sparingly and only for critical alerts
+- Ensure all color schemes pass WCAG AA accessibility standards
+
+### Information Hierarchy
+
+- Place most critical information at top-left (F-pattern reading)
+- Group related metrics visually
+- Use size and contrast to indicate importance
+- Implement progressive disclosure for complex data
+
+### Narrative Design
+
+- Structure dashboards to tell a coherent story
+- Provide context for all visualizations
+- Include interpretive text alongside complex charts
+- Design for both emotional impact and clinical utility
+
+### Luxury Experience Elements
+
+- Implement subtle animations for state transitions
+- Use whitespace generously for an uncluttered feel
+- Select premium typography with excellent readability
+- Ensure responsive design for all device sizes
 
 ## Implementation Guidelines
 
@@ -611,6 +849,12 @@ class DataIntegrationService(ABC):
 3. **Secure Visualization**
    - Context-aware privacy filters for shared screens
    - Role-based access controls for dashboard components
+   - Audit logging for all analytics access
+
+4. **Field-Level Encryption**
+   - Sensitive data elements encrypted individually before visualization
+   - Role-based access controls determining exactly which visualizations are accessible
+   - De-identification of PHI in exportable or shareable visualizations
    - Audit logging for all analytics access
 
 ### Performance Optimization
@@ -632,22 +876,47 @@ class DataIntegrationService(ABC):
 
 ### Implementation Roadmap
 
-1. **Phase 1: Foundation**
-   - Implement core data integration architecture
+1. **Phase 1: Foundation (Weeks 1-6)**
+   - Establish secure data pipelines
+   - Implement basic visualization components
+   - Set up authentication and authorization
    - Deploy basic patient and clinician dashboards
-   - Establish security and privacy controls
+   - Implement core data integration architecture
 
-2. **Phase 2: Advanced Analytics**
-   - Implement AI-enhanced therapeutic insights
+2. **Phase 2: Enhancement (Weeks 7-12)**
+   - Develop advanced visualization components
+   - Implement correlation analysis visualizations
    - Deploy predictive analytics engine
-   - Enhance visualization components
+   - Integrate with data sources (wearables, journaling)
+   - Implement AI-enhanced therapeutic insights
 
-3. **Phase 3: Engagement Optimization**
-   - Implement behavioral economics framework
+3. **Phase 3: Refinement (Weeks 13-16)**
+   - Conduct usability testing with patients and clinicians
+   - Refine visualizations based on feedback
+   - Optimize performance for various devices
+   - Implement personalized insight generation
    - Deploy personalized engagement strategies
-   - Optimize user experience based on analytics
 
-4. **Phase 4: Research and Innovation**
+4. **Phase 4: Research and Innovation (Ongoing)**
    - Implement anonymized research analytics
    - Deploy comparative effectiveness tools
    - Enhance machine learning models with expanded datasets
+   - Develop adaptive dashboard layouts
+   - Optimize user experience based on analytics
+
+### Key Performance Indicators
+
+1. **Usage Metrics**:
+   - Dashboard engagement frequency (target: 3+ sessions per week for patients)
+   - Time spent analyzing visualizations (target: 5+ minutes per session)
+   - Feature utilization breadth (target: 70% of features used monthly)
+
+2. **Clinical Impact Metrics**:
+   - Correlation between dashboard engagement and symptom improvement (target: r > 0.4)
+   - Clinician-reported decision influence (target: 80% report dashboards inform decisions)
+   - Time to insight (target: <30 seconds for clinicians to identify key patterns)
+
+3. **Experience Metrics**:
+   - User satisfaction surveys (target: >85% satisfaction)
+   - System Usability Scale (SUS) scores (target: >85)
+   - Feature request fulfillment rate (target: implementation of top 25% of requests quarterly)
