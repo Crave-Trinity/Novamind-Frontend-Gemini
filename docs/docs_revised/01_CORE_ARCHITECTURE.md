@@ -101,6 +101,26 @@ novamind/
 6. **Adapter Pattern**: Connects incompatible interfaces
 7. **Command Pattern**: Encapsulates requests as objects
 
+## Design Patterns Integration
+
+NOVAMIND implements several design patterns to ensure clean, maintainable code:
+
+- **Factory Pattern**: For creating complex domain objects (e.g., `PatientFactory`, `AppointmentFactory`)
+- **Repository Pattern**: Data access abstraction (e.g., `PatientRepository`, `AppointmentRepository`)
+- **Strategy Pattern**: For interchangeable algorithms (e.g., billing strategies, notification methods)
+- **Observer Pattern**: For event handling (e.g., appointment created/changed notifications)
+- **Command Pattern**: For operations that need audit trail (e.g., patient record changes)
+
+## Technology Stack
+
+- **Backend Framework**: FastAPI (Python)
+- **Database**: PostgreSQL with SQLAlchemy ORM
+- **Authentication**: AWS Cognito
+- **File Storage**: AWS S3
+- **Messaging**: Twilio for SMS, AWS SES for Email
+- **Hosting**: AWS ECS Fargate (containers)
+- **CI/CD**: AWS CodePipeline & CodeBuild
+
 ## HIPAA Compliance Requirements
 
 1. **Authentication and Authorization**: Role-based access control
@@ -110,11 +130,3 @@ novamind/
 5. **Error Handling**: Secure error handling without exposing PHI
 6. **Session Management**: Secure session handling with timeouts
 7. **Backup and Recovery**: Regular backups with secure storage
-
-## Technology Stack
-
-1. **Backend**: FastAPI (Python), PostgreSQL, SQLAlchemy
-2. **Authentication**: JWT, AWS Cognito
-3. **Storage**: AWS S3 (encrypted)
-4. **Deployment**: Docker, AWS ECS/Fargate
-5. **Monitoring**: AWS CloudWatch, Prometheus
