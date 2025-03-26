@@ -1,6 +1,8 @@
 """
-Symptom Forecasting ML Service implementation.
+/mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend/app/infrastructure/ml_services/symptom_forecasting/__init__.py
 
-This package contains the implementation of the SymptomForecastingService
-interface defined in the domain layer.
+Initialization file for the Symptom Forecasting Service module.
 """
+from app.infrastructure.ml_services.symptom_forecasting.service import SymptomForecastingServiceImpl
+
+__all__ = ["SymptomForecastingServiceImpl"]
