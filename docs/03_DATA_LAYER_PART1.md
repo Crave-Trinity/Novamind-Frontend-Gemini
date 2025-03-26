@@ -15,7 +15,7 @@ The Data Layer implements persistence mechanisms for our domain entities while e
 
 ## 3. Architecture Structure
 
-```
+```text
 app/
 ├── data/
 │   ├── repositories/          # Repository implementations
