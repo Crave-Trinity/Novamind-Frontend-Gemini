@@ -4,6 +4,49 @@
 
 The NOVAMIND platform implements comprehensive security measures and HIPAA compliance controls to protect patient data. This document outlines the security architecture, encryption mechanisms, access controls, and audit logging required for a compliant psychiatric platform.
 
+## Security Architecture Overview
+
+```python
+┌─────────────────────────────────────────────────────────────────────┐
+│                        SECURITY ARCHITECTURE                         │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────────────┐    │
+│  │             │     │             │     │                     │    │
+│  │    User     │────▶│ AWS Cognito │────▶│  JWT Authentication │    │
+│  │             │     │    + MFA    │     │                     │    │
+│  └─────────────┘     └─────────────┘     └─────────────────────┘    │
+│        │                                           │                │
+│        ▼                                           ▼                │
+│  ┌─────────────┐                         ┌─────────────────────┐    │
+│  │             │                         │                     │    │
+│  │   HTTPS     │                         │  Role-Based Access  │    │
+│  │ Encryption  │                         │     Control         │    │
+│  │             │                         │                     │    │
+│  └─────────────┘                         └─────────────────────┘    │
+│                                                     │                │
+│                                                     ▼                │
+│                                          ┌─────────────────────┐    │
+│                                          │                     │    │
+│                                          │  Data Encryption    │    │
+│                                          │  at Rest & Transit  │    │
+│                                          │                     │    │
+│                                          └─────────────────────┘    │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+## Security Components
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| Authentication | AWS Cognito | User management, MFA, password policies |
+| Authorization | JWT-based RBAC | Role-based access control for APIs |
+| Transport Security | HTTPS/TLS | Secure data transmission |
+| Data Security | Field-level encryption | Protection of sensitive PHI |
+| Audit Logging | Custom middleware | Track all access to PHI |
+| Session Management | Short-lived JWTs | Prevent unauthorized access |
+
 ## HIPAA Compliance Requirements
 
 ### Protected Health Information (PHI)
@@ -37,6 +80,16 @@ The following data elements are considered PHI and require special protection:
    - Audit controls
    - Integrity controls
    - Transmission security
+
+### HIPAA Security Implementation
+
+| HIPAA Requirement | Implementation |
+|-------------------|----------------|
+| Access Controls (§164.312(a)(1)) | Role-based access control with AWS Cognito |
+| Audit Controls (§164.312(b)) | Comprehensive audit logging for all PHI access |
+| Integrity (§164.312(c)(1)) | SHA-256 hashing to verify data integrity |
+| Person/Entity Authentication (§164.312(d)) | Multi-factor authentication with Cognito |
+| Transmission Security (§164.312(e)(1)) | TLS 1.2+ for all data in transit |
 
 ## Authentication and Authorization
 

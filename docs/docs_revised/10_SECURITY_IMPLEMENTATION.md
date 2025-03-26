@@ -175,6 +175,24 @@ class CognitoService:
    - Compromised credential checking
    - Adaptive authentication
    - Risk-based challenges
+   
+4. **User Pool Configuration**
+   - Advanced Security: Enable to detect compromised credentials
+   - Account Recovery: Email only, no phone recovery
+   - Sign-in Options: Email (no username option to prevent PHI in usernames)
+
+5. **App Client Settings**
+   - OAuth 2.0: Authorization code grant flow
+   - Callback URL: HTTPS only endpoints
+   - Sign out URL: Configured for proper session termination
+   - Identity Providers: Email/password only initially
+
+6. **HIPAA Compliance Considerations**
+   - Automatic Session Timeouts: Set Cognito session timeouts to 15 minutes of inactivity
+   - Audit Logging: Log all auth-related events (login, logout, token refresh) in a HIPAA-compliant manner
+   - Failed Login Attempts: Lock accounts after 5 failed login attempts
+   - Password Rotation: Enforce 90-day password rotation policy
+   - MFA Enforcement: Require MFA for all user types (patients, providers, admins)
 
 ### JWT Token Management
 
@@ -331,6 +349,177 @@ class JWTHandler:
    - `exp` (expiration time): Token expiry timestamp
    - `jti` (JWT ID): Unique token identifier for revocation
    - `iat` (issued at): Token issuance timestamp
+
+### Authentication Routes and Schemas
+
+The following routes and schemas are implemented for authentication:
+
+```python
+# app/presentation/api/v1/endpoints/auth.py
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+
+from app.infrastructure.services.cognito_service import CognitoService
+from app.presentation.schemas.auth import (
+    RegisterUserRequest,
+    ConfirmRegistrationRequest,
+    AuthResponse,
+    MFARequest,
+    RefreshTokenRequest,
+)
+
+router = APIRouter()
+cognito_service = CognitoService()
+
+
+@router.post("/register", response_model=dict, status_code=status.HTTP_201_CREATED)
+async def register_user(request: RegisterUserRequest):
+    """Register a new user"""
+    try:
+        result = await cognito_service.register_user(
+            email=request.email,
+            password=request.password,
+            first_name=request.first_name,
+            last_name=request.last_name,
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+
+
+@router.post("/confirm", response_model=dict)
+async def confirm_registration(request: ConfirmRegistrationRequest):
+    """Confirm user registration with confirmation code"""
+    try:
+        result = await cognito_service.confirm_registration(
+            email=request.email,
+            confirmation_code=request.confirmation_code,
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+
+
+@router.post("/token", response_model=AuthResponse)
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    """OAuth2 compatible token login, get an access token for future requests"""
+    try:
+        result = await cognito_service.authenticate_user(
+            email=form_data.username,  # OAuth2 uses username field for email
+            password=form_data.password,
+        )
+
+        # Check if MFA is required
+        if result.get("status") == "MFA_REQUIRED":
+            return {
+                "status": "MFA_REQUIRED",
+                "session": result.get("session"),
+            }
+
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+@router.post("/verify-mfa", response_model=AuthResponse)
+async def verify_mfa(request: MFARequest):
+    """Verify MFA code to complete authentication"""
+    try:
+        result = await cognito_service.verify_mfa(
+            session=request.session,
+            email=request.email,
+            mfa_code=request.mfa_code,
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+@router.post("/refresh", response_model=AuthResponse)
+async def refresh_token(request: RefreshTokenRequest):
+    """Refresh access token using refresh token"""
+    try:
+        result = await cognito_service.refresh_tokens(
+            refresh_token=request.refresh_token,
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+```
+
+```python
+# app/presentation/schemas/auth.py
+from typing import Optional
+
+from pydantic import BaseModel, EmailStr, Field
+
+
+class RegisterUserRequest(BaseModel):
+    """Schema for user registration request"""
+    email: EmailStr
+    password: str = Field(..., min_length=12)
+    first_name: str
+    last_name: str
+
+
+class ConfirmRegistrationRequest(BaseModel):
+    """Schema for confirming user registration"""
+    email: EmailStr
+    confirmation_code: str = Field(..., min_length=6, max_length=6)
+
+
+class MFARequest(BaseModel):
+    """Schema for MFA verification request"""
+    email: EmailStr
+    session: str
+    mfa_code: str = Field(..., min_length=6, max_length=6)
+
+
+class RefreshTokenRequest(BaseModel):
+    """Schema for token refresh request"""
+    refresh_token: str
+
+
+class AuthResponse(BaseModel):
+    """Schema for authentication response"""
+    status: str
+    access_token: Optional[str] = None
+    id_token: Optional[str] = None
+    refresh_token: Optional[str] = None
+    expires_in: Optional[int] = None
+    session: Optional[str] = None
+```
+
+### Authentication Flow Testing
+
+The authentication flow follows these steps:
+
+1. Register a new user
+2. Confirm registration with the verification code
+3. Login to receive MFA challenge
+4. Complete MFA verification to get tokens
+5. Use access token for authenticated API calls
+6. Refresh token when expired
+
+This authentication flow uses AWS Cognito best practices and is designed to meet all HIPAA requirements for healthcare applications.
 
 ## Role-Based Access Control (RBAC)
 

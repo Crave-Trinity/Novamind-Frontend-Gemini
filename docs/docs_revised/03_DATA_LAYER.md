@@ -534,6 +534,604 @@ else:
     run_migrations_online()
 ```
 
+## Clinical Note Model
+
+```python
+# app/infrastructure/persistence/models/clinical_note_model.py
+from sqlalchemy import Column, Text, ForeignKey, DateTime, Integer
+from sqlalchemy.dialects.postgresql import UUID, ENUM, JSONB
+from sqlalchemy.orm import relationship
+
+from app.infrastructure.persistence.models.base_model import BaseModel
+
+class ClinicalNoteModel(BaseModel):
+    """SQLAlchemy model for clinical notes."""
+    
+    __tablename__ = "clinical_notes"
+    
+    patient_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("patients.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    
+    appointment_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("appointments.id", ondelete="SET NULL"),
+        nullable=True
+    )
+    
+    author_id = Column(UUID(as_uuid=True), nullable=False)
+    content = Column(Text, nullable=False)
+    note_type = Column(String, nullable=False)
+    version = Column(Integer, default=1, nullable=False)
+    previous_versions = Column(JSONB, nullable=True)
+    
+    # Relationships
+    patient = relationship("PatientModel", backref="clinical_notes")
+    appointment = relationship("AppointmentModel", backref="clinical_notes")
+    
+    def __repr__(self) -> str:
+        return f"<ClinicalNote {self.id} - {self.note_type}>"
+```
+
+## Medication Model
+
+```python
+# app/infrastructure/persistence/models/medication_model.py
+from sqlalchemy import Column, String, Text, ForeignKey, DateTime
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+
+from app.infrastructure.persistence.models.base_model import BaseModel
+
+class MedicationModel(BaseModel):
+    """SQLAlchemy model for medications."""
+    
+    __tablename__ = "medications"
+    
+    patient_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("patients.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    
+    prescriber_id = Column(UUID(as_uuid=True), nullable=False)
+    name = Column(String, nullable=False)
+    dosage = Column(String, nullable=False)
+    frequency = Column(String, nullable=False)
+    instructions = Column(Text, nullable=True)
+    start_date = Column(DateTime, nullable=False)
+    end_date = Column(DateTime, nullable=True)
+    status = Column(String, nullable=False, default="active")
+    reason = Column(Text, nullable=True)
+    
+    # Relationships
+    patient = relationship("PatientModel", backref="medications")
+    
+    def __repr__(self) -> str:
+        return f"<Medication {self.id} - {self.name}>"
+```
+
+## Appointment Repository Implementation
+
+```python
+# app/infrastructure/persistence/repositories/appointment_repository.py
+from datetime import datetime
+from typing import List, Optional
+from uuid import UUID
+
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import Session
+
+from app.domain.entities.appointment import Appointment, AppointmentStatus
+from app.domain.repositories.appointment_repository import AppointmentRepository
+from app.infrastructure.persistence.models.appointment_model import AppointmentModel
+from app.infrastructure.persistence.repositories.base_repository import BaseRepository
+
+class SQLAlchemyAppointmentRepository(BaseRepository[AppointmentModel, Appointment], AppointmentRepository):
+    """SQLAlchemy implementation of the AppointmentRepository interface."""
+    
+    def __init__(self, db_session: Session):
+        super().__init__(db_session, AppointmentModel)
+    
+    async def get_for_patient(self, patient_id: UUID) -> List[Appointment]:
+        """Get all appointments for a patient."""
+        models = self.db_session.query(AppointmentModel) \
+            .filter(AppointmentModel.patient_id == patient_id) \
+            .order_by(AppointmentModel.start_time.desc()) \
+            .all()
+        
+        return [self._to_entity(model) for model in models]
+    
+    async def get_in_time_range(
+        self,
+        start_time: datetime,
+        end_time: datetime,
+        status: Optional[List[AppointmentStatus]] = None
+    ) -> List[Appointment]:
+        """Get appointments in a time range with optional status filter."""
+        query = self.db_session.query(AppointmentModel).filter(
+            or_(
+                # Appointment starts during the range
+                and_(
+                    AppointmentModel.start_time >= start_time,
+                    AppointmentModel.start_time < end_time
+                ),
+                # Appointment ends during the range
+                and_(
+                    AppointmentModel.end_time > start_time,
+                    AppointmentModel.end_time <= end_time
+                ),
+                # Appointment spans the entire range
+                and_(
+                    AppointmentModel.start_time <= start_time,
+                    AppointmentModel.end_time >= end_time
+                )
+            )
+        )
+        
+        # Apply status filter if provided
+        if status:
+            query = query.filter(AppointmentModel.status.in_([s.value for s in status]))
+        
+        # Order by start time
+        query = query.order_by(AppointmentModel.start_time)
+        
+        # Execute query and convert to domain entities
+        models = query.all()
+        return [self._to_entity(model) for model in models]
+    
+    def _to_entity(self, model: AppointmentModel) -> Appointment:
+        """Convert from ORM model to domain entity."""
+        return Appointment(
+            id=model.id,
+            patient_id=model.patient_id,
+            start_time=model.start_time,
+            end_time=model.end_time,
+            appointment_type=model.appointment_type,
+            status=model.status,
+            notes=model.notes,
+            virtual=model.virtual,
+            location=model.location
+        )
+    
+    def _to_model(self, entity: Appointment) -> AppointmentModel:
+        """Convert from domain entity to ORM model."""
+        return AppointmentModel(
+            id=entity.id,
+            patient_id=entity.patient_id,
+            start_time=entity.start_time,
+            end_time=entity.end_time,
+            appointment_type=entity.appointment_type,
+            status=entity.status,
+            notes=entity.notes,
+            virtual=entity.virtual,
+            location=entity.location
+        )
+```
+
+## Clinical Note Repository Implementation
+
+```python
+# app/infrastructure/persistence/repositories/clinical_note_repository.py
+from typing import List, Optional
+from uuid import UUID
+
+from sqlalchemy.orm import Session
+
+from app.domain.entities.clinical_note import ClinicalNote, NoteType
+from app.domain.repositories.clinical_note_repository import ClinicalNoteRepository
+from app.infrastructure.persistence.models.clinical_note_model import ClinicalNoteModel
+from app.infrastructure.persistence.repositories.base_repository import BaseRepository
+
+class SQLAlchemyClinicalNoteRepository(BaseRepository[ClinicalNoteModel, ClinicalNote], ClinicalNoteRepository):
+    """SQLAlchemy implementation of the ClinicalNoteRepository interface."""
+    
+    def __init__(self, db_session: Session):
+        super().__init__(db_session, ClinicalNoteModel)
+    
+    async def get_for_patient(self, patient_id: UUID) -> List[ClinicalNote]:
+        """Get all clinical notes for a patient."""
+        models = self.db_session.query(ClinicalNoteModel) \
+            .filter(ClinicalNoteModel.patient_id == patient_id) \
+            .order_by(ClinicalNoteModel.created_at.desc()) \
+            .all()
+        
+        return [self._to_entity(model) for model in models]
+    
+    async def get_for_appointment(self, appointment_id: UUID) -> List[ClinicalNote]:
+        """Get all clinical notes for an appointment."""
+        models = self.db_session.query(ClinicalNoteModel) \
+            .filter(ClinicalNoteModel.appointment_id == appointment_id) \
+            .order_by(ClinicalNoteModel.created_at.desc()) \
+            .all()
+        
+        return [self._to_entity(model) for model in models]
+    
+    async def get_latest_by_type(self, patient_id: UUID, note_type: NoteType) -> Optional[ClinicalNote]:
+        """Get the most recent clinical note of a specific type."""
+        model = self.db_session.query(ClinicalNoteModel) \
+            .filter(
+                ClinicalNoteModel.patient_id == patient_id,
+                ClinicalNoteModel.note_type == note_type
+            ) \
+            .order_by(ClinicalNoteModel.created_at.desc()) \
+            .first()
+        
+        return self._to_entity(model) if model else None
+    
+    def _to_entity(self, model: ClinicalNoteModel) -> ClinicalNote:
+        """Convert from ORM model to domain entity."""
+        return ClinicalNote(
+            id=model.id,
+            patient_id=model.patient_id,
+            content=model.content,
+            note_type=model.note_type,
+            author_id=model.author_id,
+            appointment_id=model.appointment_id,
+            created_at=model.created_at,
+            version=model.version,
+            previous_versions=model.previous_versions
+        )
+    
+    def _to_model(self, entity: ClinicalNote) -> ClinicalNoteModel:
+        """Convert from domain entity to ORM model."""
+        return ClinicalNoteModel(
+            id=entity.id,
+            patient_id=entity.patient_id,
+            appointment_id=entity.appointment_id,
+            author_id=entity.author_id,
+            content=entity.content,
+            note_type=entity.note_type,
+            version=entity.version,
+            previous_versions=entity.previous_versions
+        )
+```
+
+## Medication Repository Implementation
+
+```python
+# app/infrastructure/persistence/repositories/medication_repository.py
+from typing import List, Optional
+from uuid import UUID
+
+from sqlalchemy.orm import Session
+
+from app.domain.entities.medication import Medication, MedicationStatus
+from app.domain.repositories.medication_repository import MedicationRepository
+from app.infrastructure.persistence.models.medication_model import MedicationModel
+from app.infrastructure.persistence.repositories.base_repository import BaseRepository
+
+class SQLAlchemyMedicationRepository(BaseRepository[MedicationModel, Medication], MedicationRepository):
+    """SQLAlchemy implementation of the MedicationRepository interface."""
+    
+    def __init__(self, db_session: Session):
+        super().__init__(db_session, MedicationModel)
+    
+    async def get_active_medications(self, patient_id: UUID) -> List[Medication]:
+        """Get all active medications for a patient."""
+        models = self.db_session.query(MedicationModel) \
+            .filter(
+                MedicationModel.patient_id == patient_id,
+                MedicationModel.status == "active"
+            ) \
+            .order_by(MedicationModel.name) \
+            .all()
+        
+        return [self._to_entity(model) for model in models]
+    
+    async def get_medication_history(self, patient_id: UUID) -> List[Medication]:
+        """Get full medication history for a patient."""
+        models = self.db_session.query(MedicationModel) \
+            .filter(MedicationModel.patient_id == patient_id) \
+            .order_by(MedicationModel.start_date.desc()) \
+            .all()
+        
+        return [self._to_entity(model) for model in models]
+    
+    def _to_entity(self, model: MedicationModel) -> Medication:
+        """Convert from ORM model to domain entity."""
+        return Medication(
+            id=model.id,
+            patient_id=model.patient_id,
+            name=model.name,
+            dosage=model.dosage,
+            frequency=model.frequency,
+            prescriber_id=model.prescriber_id,
+            instructions=model.instructions,
+            start_date=model.start_date,
+            end_date=model.end_date,
+            status=model.status,
+            reason=model.reason
+        )
+    
+    def _to_model(self, entity: Medication) -> MedicationModel:
+        """Convert from domain entity to ORM model."""
+        return MedicationModel(
+            id=entity.id,
+            patient_id=entity.patient_id,
+            name=entity.name,
+            dosage=entity.dosage,
+            frequency=entity.frequency,
+            prescriber_id=entity.prescriber_id,
+            instructions=entity.instructions,
+            start_date=entity.start_date,
+            end_date=entity.end_date,
+            status=entity.status,
+            reason=entity.reason
+        )
+```
+
+## Transaction Management
+
+```python
+# app/infrastructure/persistence/unit_of_work.py
+from contextlib import contextmanager
+from typing import Generator
+
+from sqlalchemy.orm import Session
+
+from app.infrastructure.persistence.database import SessionFactory
+from app.infrastructure.persistence.repositories.patient_repository import SQLAlchemyPatientRepository
+from app.infrastructure.persistence.repositories.appointment_repository import SQLAlchemyAppointmentRepository
+from app.infrastructure.persistence.repositories.clinical_note_repository import SQLAlchemyClinicalNoteRepository
+from app.infrastructure.persistence.repositories.medication_repository import SQLAlchemyMedicationRepository
+
+class UnitOfWork:
+    """
+    Implements the Unit of Work pattern to manage database transactions.
+    Provides a consistent interface to all repositories.
+    """
+    def __init__(self, session: Session = None):
+        self.session = session or SessionFactory()
+        
+        # Create repositories
+        self.patients = SQLAlchemyPatientRepository(self.session)
+        self.appointments = SQLAlchemyAppointmentRepository(self.session)
+        self.clinical_notes = SQLAlchemyClinicalNoteRepository(self.session)
+        self.medications = SQLAlchemyMedicationRepository(self.session)
+    
+    def commit(self) -> None:
+        """Commit the current transaction."""
+        self.session.commit()
+    
+    def rollback(self) -> None:
+        """Rollback the current transaction."""
+        self.session.rollback()
+    
+    def close(self) -> None:
+        """Close the session."""
+        self.session.close()
+
+@contextmanager
+def get_unit_of_work() -> Generator[UnitOfWork, None, None]:
+    """
+    Context manager for UnitOfWork.
+    Ensures proper transaction handling with automatic rollback on errors.
+    """
+    uow = UnitOfWork()
+    try:
+        yield uow
+        uow.commit()
+    except Exception:
+        uow.rollback()
+        raise
+    finally:
+        uow.close()
+```
+
+## Data Access Auditing
+
+```python
+# app/infrastructure/persistence/audit.py
+import json
+from datetime import datetime
+from typing import Dict, Any, Optional
+from uuid import UUID
+
+from sqlalchemy.orm import Session
+
+from app.infrastructure.persistence.models.audit_model import DataAccessAuditModel
+
+class DataAccessAudit:
+    """
+    Audits all data access operations for HIPAA compliance.
+    Records who accessed what data and when.
+    """
+    @staticmethod
+    def record_access(
+        db: Session,
+        user_id: UUID,
+        entity_type: str,
+        entity_id: UUID,
+        action: str,
+        details: Optional[Dict[str, Any]] = None
+    ) -> None:
+        """
+        Record a data access event.
+        
+        Args:
+            db: Database session
+            user_id: ID of user performing the action
+            entity_type: Type of entity being accessed (Patient, Appointment, etc.)
+            entity_id: ID of the entity being accessed
+            action: Type of access (view, create, update, delete)
+            details: Additional details about the access
+        """
+        audit_record = DataAccessAuditModel(
+            user_id=user_id,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            action=action,
+            timestamp=datetime.utcnow(),
+            details=json.dumps(details) if details else None,
+            created_by=str(user_id),
+            updated_by=str(user_id)
+        )
+        
+        db.add(audit_record)
+        db.flush()
+```
+
+## Dependency Injection
+
+```python
+# app/infrastructure/persistence/container.py
+from typing import Callable
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+from app.infrastructure.persistence.database import get_db_session
+from app.infrastructure.persistence.repositories.patient_repository import SQLAlchemyPatientRepository
+from app.infrastructure.persistence.repositories.appointment_repository import SQLAlchemyAppointmentRepository
+from app.infrastructure.persistence.repositories.clinical_note_repository import SQLAlchemyClinicalNoteRepository
+from app.infrastructure.persistence.repositories.medication_repository import SQLAlchemyMedicationRepository
+from app.domain.repositories.patient_repository import PatientRepository
+from app.domain.repositories.appointment_repository import AppointmentRepository
+from app.domain.repositories.clinical_note_repository import ClinicalNoteRepository
+from app.domain.repositories.medication_repository import MedicationRepository
+
+def get_patient_repository(session: Session = Depends(get_db_session)) -> PatientRepository:
+    """Dependency provider for PatientRepository."""
+    return SQLAlchemyPatientRepository(session)
+
+def get_appointment_repository(session: Session = Depends(get_db_session)) -> AppointmentRepository:
+    """Dependency provider for AppointmentRepository."""
+    return SQLAlchemyAppointmentRepository(session)
+
+def get_clinical_note_repository(session: Session = Depends(get_db_session)) -> ClinicalNoteRepository:
+    """Dependency provider for ClinicalNoteRepository."""
+    return SQLAlchemyClinicalNoteRepository(session)
+
+def get_medication_repository(session: Session = Depends(get_db_session)) -> MedicationRepository:
+    """Dependency provider for MedicationRepository."""
+    return SQLAlchemyMedicationRepository(session)
+```
+
+## Testing the Data Layer
+
+### Unit Testing Repositories
+
+```python
+# tests/unit/infrastructure/persistence/repositories/test_patient_repository.py
+import pytest
+from datetime import date
+from unittest.mock import Mock
+from uuid import uuid4
+
+from app.domain.entities.patient import Patient
+from app.infrastructure.persistence.repositories.patient_repository import SQLAlchemyPatientRepository
+
+class TestPatientRepository:
+    """Unit tests for the SQLAlchemyPatientRepository."""
+    
+    def test_add_patient(self):
+        """Test adding a patient to the repository."""
+        # Setup
+        mock_session = Mock()
+        mock_session.add.return_value = None
+        mock_session.flush.return_value = None
+        
+        repository = SQLAlchemyPatientRepository(mock_session)
+        
+        patient = Patient(
+            first_name="John",
+            last_name="Doe",
+            date_of_birth=date(1990, 1, 15),
+            email="john.doe@example.com",
+            phone="555-123-4567"
+        )
+        
+        # Exercise
+        result = repository.add(patient)
+        
+        # Verify
+        assert mock_session.add.called
+        assert mock_session.flush.called
+        assert result.first_name == "John"
+        assert result.last_name == "Doe"
+```
+
+### Integration Testing
+
+```python
+# tests/integration/infrastructure/persistence/repositories/test_patient_repository.py
+import pytest
+from datetime import date
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from uuid import uuid4
+
+from app.infrastructure.persistence.database import Base
+from app.infrastructure.persistence.repositories.patient_repository import SQLAlchemyPatientRepository
+from app.domain.entities.patient import Patient
+
+@pytest.fixture(scope="function")
+def db_session():
+    """Create a clean database session for each test."""
+    # Use in-memory SQLite for testing
+    engine = create_engine("sqlite:///:memory:")
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Create all tables
+    Base.metadata.create_all(bind=engine)
+    
+    # Create session
+    session = TestingSessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+        # Drop all tables after the test
+        Base.metadata.drop_all(bind=engine)
+
+class TestPatientRepositoryIntegration:
+    """Integration tests for the SQLAlchemyPatientRepository."""
+    
+    def test_patient_lifecycle(self, db_session):
+        """Test full patient lifecycle: create, read, update, delete."""
+        # Setup
+        repository = SQLAlchemyPatientRepository(db_session)
+        
+        # Create
+        patient = Patient(
+            first_name="John",
+            last_name="Doe",
+            date_of_birth=date(1990, 1, 15),
+            email="john.doe@example.com",
+            phone="555-123-4567"
+        )
+        
+        created_patient = repository.add(patient)
+        db_session.commit()
+        
+        # Read
+        retrieved_patient = repository.get_by_id(created_patient.id)
+        assert retrieved_patient is not None
+        assert retrieved_patient.first_name == "John"
+        assert retrieved_patient.last_name == "Doe"
+        
+        # Update
+        retrieved_patient.email = "john.updated@example.com"
+        updated_patient = repository.update(retrieved_patient)
+        db_session.commit()
+        
+        # Verify update
+        fresh_patient = repository.get_by_id(created_patient.id)
+        assert fresh_patient.email == "john.updated@example.com"
+        
+        # Delete
+        repository.delete(created_patient.id)
+        db_session.commit()
+        
+        # Verify deletion
+        deleted_patient = repository.get_by_id(created_patient.id)
+        assert deleted_patient is None
+```
+
 ## Implementation Guidelines
 
 1. **Repository Pattern**: Always use repositories to access data, never direct ORM queries in application code
@@ -544,3 +1142,8 @@ else:
 6. **Transactions**: Ensure all related database operations are wrapped in transactions
 7. **Error Handling**: Implement proper error handling and rollback for database operations
 8. **Type Safety**: Use type hints and generics for repository implementations
+9. **Security**: Encrypt sensitive PHI at all times, both in transit and at rest
+10. **Audit Logs**: Maintain comprehensive audit logs for all data access operations
+11. **Connection Pooling**: Configure appropriate connection pooling for production use
+12. **Use Caching Wisely**: When appropriate, implement caching for frequently accessed, non-sensitive data
+13. **Repository Isolation**: Repositories should be self-contained and not depend on each other
