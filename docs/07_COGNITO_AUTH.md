@@ -11,7 +11,7 @@ AWS Cognito provides a secure, scalable user directory that can be integrated wi
 Required configurations for HIPAA compliance:
 
 - **MFA**: Required for all users
-- **Password Policy**: 
+- **Password Policy**:
   - Minimum length: 12 characters
   - Require uppercase, lowercase, numbers, and special characters
   - Password expiration: 90 days
@@ -40,7 +40,7 @@ from app.config.settings import get_settings
 
 class CognitoService:
     """Service for AWS Cognito operations"""
-    
+
     def __init__(
         self,
         user_pool_id: str = None,
@@ -51,13 +51,13 @@ class CognitoService:
         self.user_pool_id = user_pool_id or settings.AWS_COGNITO_USER_POOL_ID
         self.client_id = client_id or settings.AWS_COGNITO_CLIENT_ID
         self.region = region or settings.AWS_REGION
-        
+
         # Initialize Cognito Identity Provider client
         self.client = boto3.client(
             'cognito-idp',
             region_name=self.region
         )
-    
+
     async def register_user(
         self,
         email: str,
@@ -73,12 +73,12 @@ class CognitoService:
             {'Name': 'family_name', 'Value': last_name},
             {'Name': 'email_verified', 'Value': 'true'},  # Auto-verify for testing only
         ]
-        
+
         # Add any additional attributes
         if user_attributes:
             for name, value in user_attributes.items():
                 attributes.append({'Name': name, 'Value': value})
-        
+
         try:
             response = self.client.sign_up(
                 ClientId=self.client_id,
@@ -95,7 +95,7 @@ class CognitoService:
             error_code = e.response['Error']['Code']
             error_message = e.response['Error']['Message']
             raise Exception(f"Cognito Error: {error_code} - {error_message}")
-    
+
     async def confirm_registration(self, email: str, confirmation_code: str) -> Dict:
         """Confirm user registration with the confirmation code"""
         try:
@@ -109,7 +109,7 @@ class CognitoService:
             error_code = e.response['Error']['Code']
             error_message = e.response['Error']['Message']
             raise Exception(f"Cognito Error: {error_code} - {error_message}")
-    
+
     async def authenticate_user(self, email: str, password: str) -> Dict:
         """Authenticate a user and return tokens"""
         try:
@@ -121,14 +121,14 @@ class CognitoService:
                     'PASSWORD': password
                 }
             )
-            
+
             # Check if MFA is required
             if response.get('ChallengeName') == 'SOFTWARE_TOKEN_MFA':
                 return {
                     'status': 'MFA_REQUIRED',
                     'session': response.get('Session')
                 }
-            
+
             # Return authentication tokens
             auth_result = response['AuthenticationResult']
             return {
@@ -142,7 +142,7 @@ class CognitoService:
             error_code = e.response['Error']['Code']
             error_message = e.response['Error']['Message']
             raise Exception(f"Cognito Error: {error_code} - {error_message}")
-    
+
     async def verify_mfa(self, session: str, email: str, mfa_code: str) -> Dict:
         """Verify MFA code to complete authentication"""
         try:
@@ -155,7 +155,7 @@ class CognitoService:
                     'SOFTWARE_TOKEN_MFA_CODE': mfa_code
                 }
             )
-            
+
             # Return authentication tokens
             auth_result = response['AuthenticationResult']
             return {
@@ -169,7 +169,7 @@ class CognitoService:
             error_code = e.response['Error']['Code']
             error_message = e.response['Error']['Message']
             raise Exception(f"Cognito Error: {error_code} - {error_message}")
-    
+
     async def refresh_tokens(self, refresh_token: str) -> Dict:
         """Refresh access token using refresh token"""
         try:
@@ -180,7 +180,7 @@ class CognitoService:
                     'REFRESH_TOKEN': refresh_token
                 }
             )
-            
+
             auth_result = response['AuthenticationResult']
             return {
                 'status': 'REFRESHED',
@@ -192,19 +192,19 @@ class CognitoService:
             error_code = e.response['Error']['Code']
             error_message = e.response['Error']['Message']
             raise Exception(f"Cognito Error: {error_code} - {error_message}")
-    
+
     async def get_user_info(self, access_token: str) -> Dict:
         """Get user information using access token"""
         try:
             response = self.client.get_user(
                 AccessToken=access_token
             )
-            
+
             # Parse user attributes
             user_attrs = {}
             for attr in response['UserAttributes']:
                 user_attrs[attr['Name']] = attr['Value']
-            
+
             return {
                 'username': response['Username'],
                 'user_attributes': user_attrs
@@ -213,7 +213,7 @@ class CognitoService:
             error_code = e.response['Error']['Code']
             error_message = e.response['Error']['Message']
             raise Exception(f"Cognito Error: {error_code} - {error_message}")
-```
+```python
 
 ## 4. FastAPI Integration
 
@@ -243,7 +243,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     try:
         # Verify the JWT token
         payload = jwt_service.decode_token(token)
@@ -252,7 +252,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             raise credentials_exception
     except Exception:
         raise credentials_exception
-    
+
     # Get user info from Cognito
     try:
         user_info = await cognito_service.get_user_info(token)
@@ -281,7 +281,7 @@ async def get_admin_user(current_user = Depends(get_current_active_user)):
             detail="Admin access required",
         )
     return current_user
-```
+```python
 
 ## 5. Authentication Routes
 
@@ -292,7 +292,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.infrastructure.services.cognito_service import CognitoService
 from app.presentation.schemas.auth import (
-    RegisterUserRequest, 
+    RegisterUserRequest,
     ConfirmRegistrationRequest,
     AuthResponse,
     MFARequest,
@@ -345,14 +345,14 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             email=form_data.username,  # OAuth2 uses username field for email
             password=form_data.password,
         )
-        
+
         # Check if MFA is required
         if result.get("status") == "MFA_REQUIRED":
             return {
                 "status": "MFA_REQUIRED",
                 "session": result.get("session"),
             }
-        
+
         return result
     except Exception as e:
         raise HTTPException(
@@ -394,7 +394,7 @@ async def refresh_token(request: RefreshTokenRequest):
             detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
         )
-```
+```python
 
 ## 6. Authentication Schemas
 
@@ -439,7 +439,7 @@ class AuthResponse(BaseModel):
     refresh_token: Optional[str] = None
     expires_in: Optional[int] = None
     session: Optional[str] = None
-```
+```python
 
 ## 7. HIPAA Compliance Considerations
 
@@ -452,10 +452,10 @@ class AuthResponse(BaseModel):
 ## 8. Testing the Authentication Flow
 
 1. Register a new user
-2. Confirm registration with the verification code
-3. Login to receive MFA challenge
-4. Complete MFA verification to get tokens
-5. Use access token for authenticated API calls
-6. Refresh token when expired
+1. Confirm registration with the verification code
+1. Login to receive MFA challenge
+1. Complete MFA verification to get tokens
+1. Use access token for authenticated API calls
+1. Refresh token when expired
 
 The authentication flow uses AWS Cognito best practices and is designed to meet all HIPAA requirements for healthcare applications.

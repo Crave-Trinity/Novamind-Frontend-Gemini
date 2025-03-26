@@ -56,12 +56,12 @@ class Patient:
         self._appointments = []  # Stored separately to maintain domain purity
         self._notes = []  # Clinical notes
         self._medications = []  # Prescribed medications
-    
+
     @property
     def full_name(self) -> str:
         """Returns patient's full name."""
         return f"{self.first_name} {self.last_name}"
-    
+
     @property
     def age(self) -> int:
         """Calculate patient age based on date of birth."""
@@ -69,23 +69,23 @@ class Patient:
         return today.year - self.date_of_birth.year - (
             (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
         )
-    
+
     def update_contact_info(self, contact_info: ContactInfo) -> None:
         """Update patient contact information."""
         self.contact_info = contact_info
-    
+
     def update_address(self, address: Address) -> None:
         """Update patient address."""
         self.address = address
-    
+
     def deactivate(self) -> None:
         """Deactivate a patient."""
         self.active = False
-    
+
     def reactivate(self) -> None:
         """Reactivate a patient."""
         self.active = True
-```
+```python
 
 ### 3.2 Appointment Entity
 
@@ -143,11 +143,11 @@ class Appointment:
         self.status = status
         self.virtual = virtual
         self.location = location
-        
+
         # Validate appointment time
         if start_time >= end_time:
             raise ValueError("End time must be after start time")
-        
+
         # Validate duration based on appointment type
         min_duration = self._get_min_duration_for_type()
         actual_duration = (end_time - start_time).total_seconds() / 60  # minutes
@@ -155,7 +155,7 @@ class Appointment:
             raise ValueError(
                 f"{appointment_type.value} requires at least {min_duration} minutes"
             )
-    
+
     def _get_min_duration_for_type(self) -> int:
         """Return minimum duration in minutes based on appointment type."""
         durations = {
@@ -166,58 +166,58 @@ class Appointment:
             AppointmentType.EMERGENCY: 20
         }
         return durations.get(self.appointment_type, 15)
-    
+
     def cancel(self, cancellation_reason: Optional[str] = None) -> None:
         """Cancel an appointment with optional reason."""
         if self.status in (AppointmentStatus.COMPLETED, AppointmentStatus.NO_SHOW):
             raise ValueError("Cannot cancel a completed or no-show appointment")
-        
+
         self.status = AppointmentStatus.CANCELLED
         if cancellation_reason:
             self.notes = f"{self.notes or ''}\nCancellation reason: {cancellation_reason}"
-    
+
     def reschedule(self, new_start: datetime, new_end: datetime) -> None:
         """Reschedule appointment to a new time."""
         if self.status in (AppointmentStatus.COMPLETED, AppointmentStatus.NO_SHOW):
             raise ValueError("Cannot reschedule a completed or no-show appointment")
-        
+
         if new_start >= new_end:
             raise ValueError("End time must be after start time")
-        
+
         self.start_time = new_start
         self.end_time = new_end
         self.status = AppointmentStatus.SCHEDULED
-    
+
     def confirm(self) -> None:
         """Confirm an appointment."""
         if self.status != AppointmentStatus.SCHEDULED:
             raise ValueError("Only scheduled appointments can be confirmed")
-        
+
         self.status = AppointmentStatus.CONFIRMED
-    
+
     def complete(self, session_notes: Optional[str] = None) -> None:
         """Mark appointment as completed with optional session notes."""
         if self.status in (AppointmentStatus.CANCELLED, AppointmentStatus.NO_SHOW):
             raise ValueError("Cannot complete a cancelled or no-show appointment")
-        
+
         self.status = AppointmentStatus.COMPLETED
         if session_notes:
             self.notes = f"{self.notes or ''}\n\nSession notes: {session_notes}"
-    
+
     def mark_no_show(self) -> None:
         """Mark appointment as no-show."""
         if self.status != AppointmentStatus.SCHEDULED and self.status != AppointmentStatus.CONFIRMED:
             raise ValueError("Only scheduled or confirmed appointments can be marked no-show")
-        
+
         self.status = AppointmentStatus.NO_SHOW
-    
+
     def overlaps_with(self, other: 'Appointment') -> bool:
         """Check if this appointment overlaps with another."""
         return (
             (self.start_time < other.end_time and self.end_time > other.start_time) or
             (other.start_time < self.end_time and other.end_time > self.start_time)
         )
-```
+```python
 
 ### 3.3 Clinical Note Entity
 
@@ -265,7 +265,7 @@ class ClinicalNote:
         self.updated_at = self.created_at
         self.version = version
         self.previous_versions = previous_versions or []
-    
+
     def update_content(self, new_content: str, editor_id: UUID) -> None:
         """
         Update note content, preserving previous version.
@@ -279,13 +279,13 @@ class ClinicalNote:
             "editor_id": self.author_id
         }
         self.previous_versions.append(previous_version)
-        
+
         # Update with new content
         self.content = new_content
         self.version += 1
         self.updated_at = datetime.utcnow()
         self.author_id = editor_id
-    
+
     def get_version_history(self) -> List[dict]:
         """Get complete version history of this note."""
         history = self.previous_versions.copy()
@@ -297,7 +297,7 @@ class ClinicalNote:
             "editor_id": self.author_id
         })
         return sorted(history, key=lambda x: x["version"])
-```
+```python
 
 ### 3.4 Medication Entity
 
@@ -358,45 +358,45 @@ class Medication:
         self.end_date = end_date
         self.status = status
         self.reason = reason
-    
+
     def discontinue(self, reason: str) -> None:
         """
         Discontinue medication with reason.
         """
         if self.status != MedicationStatus.ACTIVE:
             raise ValueError("Can only discontinue active medications")
-        
+
         self.status = MedicationStatus.DISCONTINUED
         self.end_date = datetime.utcnow()
         self.reason = reason
-    
+
     def complete(self) -> None:
         """
         Mark medication as completed (course finished).
         """
         if self.status != MedicationStatus.ACTIVE:
             raise ValueError("Can only complete active medications")
-        
+
         self.status = MedicationStatus.COMPLETED
         self.end_date = datetime.utcnow()
-    
+
     def update_dosage(self, new_dosage: str, new_instructions: Optional[str] = None) -> None:
         """
         Update medication dosage and instructions.
         """
         if self.status != MedicationStatus.ACTIVE:
             raise ValueError("Can only update active medications")
-        
+
         self.dosage = new_dosage
         if new_instructions:
             self.instructions = new_instructions
-    
+
     def is_active(self) -> bool:
         """
         Check if medication is currently active.
         """
         return self.status == MedicationStatus.ACTIVE
-```
+```python
 
 ## 4. Value Objects
 
@@ -418,11 +418,11 @@ class Address:
     city: str
     state: str
     zip_code: str
-    
+
     def __str__(self) -> str:
         """String representation of address."""
         return f"{self.street}, {self.city}, {self.state} {self.zip_code}"
-```
+```python
 
 ### 4.2 ContactInfo Value Object
 
@@ -440,15 +440,15 @@ class ContactInfo:
     email: str
     phone: str
     preferred_contact_method: Optional[str] = "email"
-    
+
     def __post_init__(self):
         # Basic validation
         if not self.email or '@' not in self.email:
             raise ValueError("Invalid email address")
-        
+
         if not self.phone or len(self.phone) < 10:
             raise ValueError("Invalid phone number")
-```
+```python
 
 ### 4.3 Insurance Value Object
 
@@ -470,28 +470,28 @@ class Insurance:
     policy_holder: Optional[str] = None
     valid_from: Optional[date] = None
     valid_to: Optional[date] = None
-    
+
     def is_valid(self, check_date: Optional[date] = None) -> bool:
         """
         Check if insurance is valid on the given date.
         Defaults to current date if none provided.
         """
         check_date = check_date or date.today()
-        
+
         # If no dates are set, assume it's valid
         if not self.valid_from and not self.valid_to:
             return True
-        
+
         # Check start date if set
         if self.valid_from and check_date < self.valid_from:
             return False
-        
+
         # Check end date if set
         if self.valid_to and check_date > self.valid_to:
             return False
-        
+
         return True
-```
+```python
 
 ## 5. Domain Repository Interfaces
 
@@ -510,32 +510,32 @@ from app.domain.entities.patient import Patient
 
 class PatientRepository(ABC):
     """Interface for patient data access"""
-    
+
     @abstractmethod
     def add(self, patient: Patient) -> Patient:
         """Add a new patient"""
         pass
-    
+
     @abstractmethod
     def get_by_id(self, patient_id: UUID) -> Optional[Patient]:
         """Get patient by ID"""
         pass
-    
+
     @abstractmethod
     def update(self, patient: Patient) -> Patient:
         """Update patient information"""
         pass
-    
+
     @abstractmethod
     def list_active_patients(self, limit: int, offset: int) -> List[Patient]:
         """List active patients with pagination"""
         pass
-    
+
     @abstractmethod
     def search_by_name(self, name: str) -> List[Patient]:
         """Search patients by name"""
         pass
-```
+```python
 
 ### 5.2 Appointment Repository Interface
 
@@ -551,42 +551,42 @@ from app.domain.entities.appointment import Appointment, AppointmentStatus
 
 class AppointmentRepository(ABC):
     """Interface for appointment data access"""
-    
+
     @abstractmethod
     def add(self, appointment: Appointment) -> Appointment:
         """Add a new appointment"""
         pass
-    
+
     @abstractmethod
     def get_by_id(self, appointment_id: UUID) -> Optional[Appointment]:
         """Get appointment by ID"""
         pass
-    
+
     @abstractmethod
     def update(self, appointment: Appointment) -> Appointment:
         """Update an appointment"""
         pass
-    
+
     @abstractmethod
     def delete(self, appointment_id: UUID) -> None:
         """Delete an appointment"""
         pass
-    
+
     @abstractmethod
     def get_for_patient(self, patient_id: UUID) -> List[Appointment]:
         """Get all appointments for a patient"""
         pass
-    
+
     @abstractmethod
     def get_in_time_range(
-        self, 
-        start_time: datetime, 
+        self,
+        start_time: datetime,
         end_time: datetime,
         status: Optional[List[AppointmentStatus]] = None
     ) -> List[Appointment]:
         """Get appointments in a time range with optional status filter"""
         pass
-```
+```python
 
 ## 6. Domain Services
 
@@ -610,22 +610,22 @@ class AppointmentService:
     Domain service for appointment business logic.
     Contains rules for scheduling, checking availability, etc.
     """
-    
+
     def schedule_appointment(
-        self, 
+        self,
         appointment: Appointment,
         appointment_repository: AppointmentRepository
     ) -> Appointment:
         """
         Schedule a new appointment, checking for conflicts.
-        
+
         Args:
             appointment: The appointment to schedule
             appointment_repository: Repository for persistence
-            
+
         Returns:
             The scheduled appointment
-            
+
         Raises:
             AppointmentConflictError: If appointment conflicts with existing one
         """
@@ -635,16 +635,16 @@ class AppointmentService:
             appointment.end_time,
             [AppointmentStatus.SCHEDULED, AppointmentStatus.CONFIRMED]
         )
-        
+
         for existing in existing_appointments:
             if appointment.overlaps_with(existing):
                 raise AppointmentConflictError(
                     f"Appointment conflicts with existing appointment at {existing.start_time}"
                 )
-        
+
         # Schedule the appointment
         return appointment_repository.add(appointment)
-    
+
     def get_available_slots(
         self,
         date: datetime.date,
@@ -656,7 +656,7 @@ class AppointmentService:
     ) -> List[dict]:
         """
         Find available appointment slots for a given date.
-        
+
         Args:
             date: The date to check for availability
             duration_minutes: Duration of the appointment in minutes
@@ -664,21 +664,21 @@ class AppointmentService:
             start_hour: Hour to start checking (default: 9 AM)
             end_hour: Hour to end checking (default: 5 PM)
             slot_interval_minutes: Interval between slots in minutes (default: 15)
-            
+
         Returns:
             List of available time slots as {start_time, end_time} dictionaries
         """
         # Create day boundaries
         day_start = datetime.combine(date, datetime.time(start_hour, 0))
         day_end = datetime.combine(date, datetime.time(end_hour, 0))
-        
+
         # Get existing appointments for that day
         existing_appointments = appointment_repository.get_in_time_range(
             day_start,
             day_end,
             [AppointmentStatus.SCHEDULED, AppointmentStatus.CONFIRMED]
         )
-        
+
         # Generate all possible slots
         all_slots = []
         current_time = day_start
@@ -689,7 +689,7 @@ class AppointmentService:
                 "end_time": slot_end
             })
             current_time += timedelta(minutes=slot_interval_minutes)
-        
+
         # Filter out slots that conflict with existing appointments
         available_slots = []
         for slot in all_slots:
@@ -699,18 +699,18 @@ class AppointmentService:
                 end_time=slot["end_time"],
                 appointment_type=None  # Dummy type for checking overlaps
             )
-            
+
             has_conflict = False
             for existing in existing_appointments:
                 if temp_appointment.overlaps_with(existing):
                     has_conflict = True
                     break
-            
+
             if not has_conflict:
                 available_slots.append(slot)
-        
+
         return available_slots
-```
+```python
 
 ## 7. Domain Exceptions
 
@@ -743,16 +743,16 @@ class PatientValidationError(Exception):
 class MedicationValidationError(Exception):
     """Raised when medication data fails validation."""
     pass
-```
+```python
 
 ## 8. Implementation Steps
 
 1. Create the basic directory structure for the domain layer
-2. Implement value objects first (Address, ContactInfo, Insurance)
-3. Create domain exceptions
-4. Implement core entities (Patient, Appointment, ClinicalNote, Medication)
-5. Define repository interfaces
-6. Implement domain services
+1. Implement value objects first (Address, ContactInfo, Insurance)
+1. Create domain exceptions
+1. Implement core entities (Patient, Appointment, ClinicalNote, Medication)
+1. Define repository interfaces
+1. Implement domain services
 
 ## 9. Testing Strategy for Domain Layer
 
@@ -771,7 +771,7 @@ from app.domain.value_objects.address import Address
 
 class TestPatient:
     """Tests for Patient entity"""
-    
+
     def test_patient_creation(self):
         """Test that a patient can be created with valid data"""
         contact = ContactInfo(email="patient@example.com", phone="555-123-4567")
@@ -781,14 +781,14 @@ class TestPatient:
             date_of_birth=date(1990, 1, 15),
             contact_info=contact
         )
-        
+
         assert patient.first_name == "John"
         assert patient.last_name == "Doe"
         assert patient.date_of_birth == date(1990, 1, 15)
         assert patient.contact_info == contact
         assert patient.active is True
         assert patient.id is not None
-    
+
     def test_patient_full_name(self):
         """Test full_name property"""
         contact = ContactInfo(email="patient@example.com", phone="555-123-4567")
@@ -798,9 +798,9 @@ class TestPatient:
             date_of_birth=date(1990, 1, 15),
             contact_info=contact
         )
-        
+
         assert patient.full_name == "John Doe"
-    
+
     def test_patient_age_calculation(self):
         """Test age calculation logic"""
         contact = ContactInfo(email="patient@example.com", phone="555-123-4567")
@@ -810,13 +810,13 @@ class TestPatient:
             date_of_birth=date(1990, 1, 15),
             contact_info=contact
         )
-        
+
         # This test needs to account for the current date
         today = date.today()
         expected_age = today.year - 1990 - ((today.month, today.day) < (1, 15))
-        
+
         assert patient.age == expected_age
-    
+
     def test_patient_deactivation(self):
         """Test patient deactivation"""
         contact = ContactInfo(email="patient@example.com", phone="555-123-4567")
@@ -826,12 +826,12 @@ class TestPatient:
             date_of_birth=date(1990, 1, 15),
             contact_info=contact
         )
-        
+
         assert patient.active is True
         patient.deactivate()
         assert patient.active is False
         patient.reactivate()
         assert patient.active is True
-```
+```python
 
 These tests ensure that the domain entities work correctly and enforce business rules as expected.

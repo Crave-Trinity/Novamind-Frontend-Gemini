@@ -60,7 +60,7 @@ async def get_patient(
         raise HTTPException(status_code=404, detail="Patient not found")
     return patient
 """
-```
+```python
 
 ## 12. Database Migrations
 
@@ -81,7 +81,7 @@ config = context.config
 target_metadata = Base.metadata
 
 # ... rest of Alembic configuration ...
-```
+```python
 
 ## 13. Testing the Data Layer
 
@@ -101,16 +101,16 @@ from app.data.repositories.patient_repository import SQLAlchemyPatientRepository
 
 class TestPatientRepository:
     """Unit tests for the SQLAlchemyPatientRepository"""
-    
+
     def test_add_patient(self):
         """Test adding a patient to the repository"""
         # Setup
         mock_session = Mock()
         mock_session.add.return_value = None
         mock_session.flush.return_value = None
-        
+
         repository = SQLAlchemyPatientRepository(mock_session)
-        
+
         contact_info = ContactInfo(email="test@example.com", phone="555-123-4567")
         patient = Patient(
             first_name="John",
@@ -118,16 +118,16 @@ class TestPatientRepository:
             date_of_birth=date(1990, 1, 15),
             contact_info=contact_info
         )
-        
+
         # Exercise
         result = repository.add(patient)
-        
+
         # Verify
         assert mock_session.add.called
         assert mock_session.flush.called
         assert result.first_name == "John"
         assert result.last_name == "Doe"
-    
+
     def test_get_by_id(self):
         """Test retrieving a patient by ID"""
         # Setup
@@ -135,7 +135,7 @@ class TestPatientRepository:
         mock_query = Mock()
         mock_filter = Mock()
         mock_first = Mock()
-        
+
         mock_session = Mock()
         mock_session.query.return_value = mock_query
         mock_query.filter.return_value = mock_filter
@@ -156,18 +156,18 @@ class TestPatientRepository:
             created_by="system",
             updated_by="system"
         )
-        
+
         repository = SQLAlchemyPatientRepository(mock_session)
-        
+
         # Exercise
         result = repository.get_by_id(patient_id)
-        
+
         # Verify
         assert mock_session.query.called
         assert result.id == patient_id
         assert result.first_name == "John"
         assert result.last_name == "Doe"
-```
+```python
 
 ### 13.2 Integration Testing
 
@@ -192,10 +192,10 @@ def db_session():
     # Use in-memory SQLite for testing
     engine = create_engine("sqlite:///:memory:")
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    
+
     # Create all tables
     Base.metadata.create_all(bind=engine)
-    
+
     # Create session
     session = TestingSessionLocal()
     try:
@@ -208,15 +208,15 @@ def db_session():
 
 class TestPatientRepositoryIntegration:
     """Integration tests for the SQLAlchemyPatientRepository"""
-    
+
     def test_patient_lifecycle(self, db_session):
         """Test full patient lifecycle: create, read, update, delete"""
         # Setup
         repository = SQLAlchemyPatientRepository(db_session)
-        
+
         contact_info = ContactInfo(email="test@example.com", phone="555-123-4567")
         address = Address(street="123 Main St", city="Anytown", state="CA", zip_code="12345")
-        
+
         # Create
         patient = Patient(
             first_name="John",
@@ -225,43 +225,43 @@ class TestPatientRepositoryIntegration:
             contact_info=contact_info,
             address=address
         )
-        
+
         created_patient = repository.add(patient)
         db_session.commit()
-        
+
         # Read
         retrieved_patient = repository.get_by_id(created_patient.id)
         assert retrieved_patient is not None
         assert retrieved_patient.first_name == "John"
         assert retrieved_patient.last_name == "Doe"
         assert retrieved_patient.address.street == "123 Main St"
-        
+
         # Update
         new_contact_info = ContactInfo(email="updated@example.com", phone="555-987-6543")
         retrieved_patient.update_contact_info(new_contact_info)
-        
+
         updated_patient = repository.update(retrieved_patient)
         db_session.commit()
-        
+
         # Verify update
         fresh_patient = repository.get_by_id(created_patient.id)
         assert fresh_patient.contact_info.email == "updated@example.com"
-        
+
         # Search by name
         search_results = repository.search_by_name("Doe")
         assert len(search_results) == 1
         assert search_results[0].id == created_patient.id
-```
+```python
 
 ## 14. Data Layer Best Practices
 
 1. **Error Handling**: Always use domain-specific exceptions rather than generic database errors.
-2. **Transaction Management**: Use the Unit of Work pattern to maintain data consistency.
-3. **Repository Isolation**: Repositories should be self-contained and not depend on each other.
-4. **Security**: Encrypt sensitive PHI at all times, both in transit and at rest.
-5. **Audit Logs**: Maintain comprehensive audit logs for all data access operations.
-6. **Connection Pooling**: Configure appropriate connection pooling for production use.
-7. **Use Caching Wisely**: When appropriate, implement caching for frequently accessed, non-sensitive data.
+1. **Transaction Management**: Use the Unit of Work pattern to maintain data consistency.
+1. **Repository Isolation**: Repositories should be self-contained and not depend on each other.
+1. **Security**: Encrypt sensitive PHI at all times, both in transit and at rest.
+1. **Audit Logs**: Maintain comprehensive audit logs for all data access operations.
+1. **Connection Pooling**: Configure appropriate connection pooling for production use.
+1. **Use Caching Wisely**: When appropriate, implement caching for frequently accessed, non-sensitive data.
 
 ## 15. Implementing the Repository Pattern with Generics
 
@@ -282,10 +282,10 @@ E = TypeVar('E')  # Domain entity type
 
 class GenericRepository(Generic[T, E]):
     """Generic repository for common CRUD operations"""
-    
+
     def __init__(
-        self, 
-        db_session: Session, 
+        self,
+        db_session: Session,
         model_class: Type[T],
         to_entity_fn,  # Function to convert model to entity
         to_model_fn   # Function to convert entity to model
@@ -294,24 +294,24 @@ class GenericRepository(Generic[T, E]):
         self.model = model_class
         self._to_entity = to_entity_fn
         self._to_model = to_model_fn
-    
+
     def add(self, entity: E) -> E:
         """Add a new entity"""
         model = self._to_model(entity)
         self.db.add(model)
         self.db.flush()
         return self._to_entity(model)
-    
+
     def get_by_id(self, entity_id: UUID) -> Optional[E]:
         """Get entity by ID"""
         model = self.db.query(self.model).filter(self.model.id == entity_id).first()
         return self._to_entity(model) if model else None
-    
+
     def list_all(self, limit: int = 100, offset: int = 0) -> List[E]:
         """List all entities with pagination"""
         models = self.db.query(self.model).limit(limit).offset(offset).all()
         return [self._to_entity(model) for model in models]
-    
+
     def update(self, entity: E) -> E:
         """Update an existing entity"""
         model = self._to_model(entity)
@@ -319,22 +319,22 @@ class GenericRepository(Generic[T, E]):
         self.db.flush()
         updated_model = self.db.query(self.model).filter(self.model.id == model.id).first()
         return self._to_entity(updated_model)
-    
+
     def delete(self, entity_id: UUID) -> None:
         """Delete an entity by ID"""
         model = self.db.query(self.model).filter(self.model.id == entity_id).first()
         if model:
             self.db.delete(model)
             self.db.flush()
-```
+```python
 
 ## 16. Conclusion
 
 The Data Layer is responsible for implementing the persistence mechanisms while adhering to the interfaces defined in the Domain Layer. By clearly separating these concerns, we ensure that:
 
 1. The Domain Layer remains pure and focused on business rules
-2. Implementation details like databases can be swapped out if needed
-3. Testing is simplified through proper dependency injection
-4. HIPAA compliance requirements are properly addressed
+1. Implementation details like databases can be swapped out if needed
+1. Testing is simplified through proper dependency injection
+1. HIPAA compliance requirements are properly addressed
 
 In the next section, we will explore the Application Layer, which serves as a coordination layer between the Domain/Data Layers and the Presentation Layer.

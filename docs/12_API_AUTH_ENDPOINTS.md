@@ -9,11 +9,11 @@ This document details the implementation of authentication endpoints for the NOV
 The NOVAMIND platform implements a multi-stage authentication flow:
 
 1. **Registration**: User provides email and creates password
-2. **Confirmation**: Email verification via confirmation code
-3. **Login**: Credentials validated, tokens issued
-4. **Token Refresh**: Access token refreshed using refresh token
-5. **Password Reset**: Secure password recovery flow
-6. **MFA**: Multi-factor authentication for enhanced security
+1. **Confirmation**: Email verification via confirmation code
+1. **Login**: Credentials validated, tokens issued
+1. **Token Refresh**: Access token refreshed using refresh token
+1. **Password Reset**: Secure password recovery flow
+1. **MFA**: Multi-factor authentication for enhanced security
 
 ## 3. Authentication Endpoints
 
@@ -45,12 +45,12 @@ async def register_user(
 ):
     """
     Register a new user in the system
-    
+
     - Validates email format and password requirements
     - Creates user in Cognito user pool
     - Sends confirmation code to user's email
     - Returns confirmation status and next steps
-    
+
     HIPAA Compliance:
     - No PHI stored during registration
     - Secured with HTTPS
@@ -64,7 +64,7 @@ async def register_user(
             first_name=request.first_name,
             last_name=request.last_name
         )
-        
+
         # HIPAA-compliant audit logging (omitting sensitive data)
         logger.info(
             "User registration attempt",
@@ -73,14 +73,14 @@ async def register_user(
                 "status": "success"
             }
         )
-        
+
         # Return success response with next steps
         return RegisterUserResponse(
             message="User registration successful. Please check your email for confirmation code.",
             user_id=result["user_id"],
             requires_confirmation=True
         )
-        
+
     except UserAlreadyExistsError as e:
         # Log the error (without exposing personal data)
         logger.warning(
@@ -89,13 +89,13 @@ async def register_user(
                 "email_domain": request.email.split('@')[1],
             }
         )
-        
+
         # Return user-friendly error
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="A user with this email already exists."
         )
-        
+
     except Exception as e:
         # Generic error logging (for debugging, without PHI)
         logger.error(
@@ -104,13 +104,13 @@ async def register_user(
                 "email_domain": request.email.split('@')[1],
             }
         )
-        
+
         # Return generic error to avoid information disclosure
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred during registration. Please try again later."
         )
-```
+```python
 
 ### 3.2 User Confirmation
 
@@ -127,11 +127,11 @@ async def confirm_registration(
 ):
     """
     Confirm user registration with verification code
-    
+
     - Validates confirmation code sent to user's email
     - Activates user account if code is valid
     - Returns confirmation success message
-    
+
     HIPAA Compliance:
     - Secured with HTTPS
     - Audit logging of confirmation attempts
@@ -142,7 +142,7 @@ async def confirm_registration(
             user_id=user_id,
             confirmation_code=confirmation_code
         )
-        
+
         # HIPAA-compliant audit logging
         logger.info(
             "User confirmation successful",
@@ -151,10 +151,10 @@ async def confirm_registration(
                 "status": "success"
             }
         )
-        
+
         # Return success response
         return {"message": "User confirmed successfully. You can now login."}
-        
+
     except Exception as e:
         # Log the error
         logger.warning(
@@ -164,13 +164,13 @@ async def confirm_registration(
                 "status": "failure"
             }
         )
-        
+
         # Return user-friendly error
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid confirmation code. Please try again."
         )
-```
+```python
 
 ### 3.3 User Login
 
@@ -187,11 +187,11 @@ async def login(
 ):
     """
     Authenticate user and issue JWT tokens
-    
+
     - Validates user credentials against Cognito
     - Issues access and refresh tokens
     - Returns tokens and user information
-    
+
     HIPAA Compliance:
     - Secured with HTTPS
     - Audit logging of login attempts
@@ -204,25 +204,25 @@ async def login(
             username=form_data.username,
             password=form_data.password
         )
-        
+
         # Extract user info from Cognito response
         user_id = auth_result["user_id"]
         email = auth_result["email"]
-        
+
         # Get user roles from database
         user_roles = await role_service.get_user_roles(user_id)
-        
+
         # Create token payload with claims
         token_data = {
             "sub": user_id,
             "email": email,
             "roles": [role.value for role in user_roles]
         }
-        
+
         # Generate JWT tokens
         access_token = jwt_service.create_access_token(token_data)
         refresh_token = jwt_service.create_refresh_token(token_data)
-        
+
         # HIPAA-compliant audit logging
         logger.info(
             "User login successful",
@@ -232,7 +232,7 @@ async def login(
                 "status": "success"
             }
         )
-        
+
         # Return tokens and user info
         return {
             "access_token": access_token,
@@ -244,7 +244,7 @@ async def login(
                 "roles": [role.value for role in user_roles]
             }
         }
-        
+
     except Exception as e:
         # Log the error (without exposing credentials)
         logger.warning(
@@ -254,14 +254,14 @@ async def login(
                 "status": "failure"
             }
         )
-        
+
         # Return user-friendly error
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-```
+```python
 
 ### 3.4 Token Refresh
 
@@ -278,12 +278,12 @@ async def refresh_token(
 ):
     """
     Refresh access token using refresh token
-    
+
     - Validates refresh token
     - Issues new access token
     - Optionally rotates refresh token
     - Returns new tokens
-    
+
     HIPAA Compliance:
     - Secured with HTTPS
     - Audit logging of token refresh
@@ -292,7 +292,7 @@ async def refresh_token(
     try:
         # Verify refresh token
         token_data = jwt_service.decode_token(refresh_token)
-        
+
         # Check if token is blacklisted
         jti = token_data.get("jti")
         if await token_blacklist.is_blacklisted(jti):
@@ -301,7 +301,7 @@ async def refresh_token(
                 detail="Token has been revoked",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         # Verify token type
         if token_data.get("token_type") != "refresh":
             raise HTTPException(
@@ -309,7 +309,7 @@ async def refresh_token(
                 detail="Invalid token type",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         # Create new token payload
         user_id = token_data.get("sub")
         new_token_data = {
@@ -318,16 +318,16 @@ async def refresh_token(
             "roles": token_data.get("roles", []),
             "refresh_jti": jti  # Link to original refresh token
         }
-        
+
         # Generate new tokens
         new_access_token = jwt_service.create_access_token(new_token_data)
-        
+
         # Optionally rotate refresh token for enhanced security
         new_refresh_token = jwt_service.create_refresh_token(new_token_data)
-        
+
         # Blacklist old refresh token (token rotation)
         await token_blacklist.blacklist_token(jti, token_data.get("exp"))
-        
+
         # HIPAA-compliant audit logging
         logger.info(
             "Token refresh successful",
@@ -336,14 +336,14 @@ async def refresh_token(
                 "status": "success"
             }
         )
-        
+
         # Return new tokens
         return {
             "access_token": new_access_token,
             "refresh_token": new_refresh_token,
             "token_type": "bearer"
         }
-        
+
     except Exception as e:
         # Log the error
         logger.warning(
@@ -352,14 +352,14 @@ async def refresh_token(
                 "status": "failure"
             }
         )
-        
+
         # Return user-friendly error
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-```
+```python
 
 ### 3.5 Password Reset Request
 
@@ -375,10 +375,10 @@ async def request_password_reset(
 ):
     """
     Request password reset code
-    
+
     - Sends reset code to user's email
     - Returns success message
-    
+
     HIPAA Compliance:
     - Secured with HTTPS
     - Audit logging of reset requests
@@ -387,7 +387,7 @@ async def request_password_reset(
     try:
         # Request password reset from Cognito
         await cognito_service.forgot_password(email)
-        
+
         # HIPAA-compliant audit logging
         logger.info(
             "Password reset requested",
@@ -396,14 +396,14 @@ async def request_password_reset(
                 "status": "initiated"
             }
         )
-        
+
         # Return success message
         # Note: Always return success even if email doesn't exist
         # This prevents user enumeration attacks
         return {
             "message": "If your email exists in our system, you will receive a password reset code."
         }
-        
+
     except Exception as e:
         # Log the error
         logger.warning(
@@ -413,12 +413,12 @@ async def request_password_reset(
                 "status": "failure"
             }
         )
-        
+
         # Always return the same message to prevent user enumeration
         return {
             "message": "If your email exists in our system, you will receive a password reset code."
         }
-```
+```python
 
 ### 3.6 Password Reset Confirmation
 
@@ -436,11 +436,11 @@ async def confirm_password_reset(
 ):
     """
     Confirm password reset with verification code
-    
+
     - Validates reset code
     - Sets new password
     - Returns success message
-    
+
     HIPAA Compliance:
     - Secured with HTTPS
     - Audit logging of password changes
@@ -453,7 +453,7 @@ async def confirm_password_reset(
             confirmation_code=reset_code,
             new_password=new_password
         )
-        
+
         # HIPAA-compliant audit logging
         logger.info(
             "Password reset completed",
@@ -462,10 +462,10 @@ async def confirm_password_reset(
                 "status": "success"
             }
         )
-        
+
         # Return success message
         return {"message": "Password has been reset successfully. You can now login with your new password."}
-        
+
     except Exception as e:
         # Log the error
         logger.warning(
@@ -475,13 +475,13 @@ async def confirm_password_reset(
                 "status": "failure"
             }
         )
-        
+
         # Return user-friendly error
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid reset code or password. Please try again."
         )
-```
+```python
 
 ### 3.7 Logout
 
@@ -498,11 +498,11 @@ async def logout(
 ):
     """
     Logout user by blacklisting current tokens
-    
+
     - Blacklists current access token
     - Blacklists associated refresh token if available
     - Returns no content on success
-    
+
     HIPAA Compliance:
     - Secured with HTTPS
     - Audit logging of logout events
@@ -512,21 +512,21 @@ async def logout(
         # Get token from authorization header
         auth_header = request.headers.get("Authorization")
         token = auth_header.split()[1] if auth_header else None
-        
+
         if token:
             # Get token data
             token_data = jwt_service.decode_token(token)
             jti = token_data.get("jti")
             exp = token_data.get("exp")
-            
+
             # Blacklist the current token
             await token_blacklist.blacklist_token(jti, exp)
-            
+
             # Also blacklist the refresh token if linked
             refresh_jti = token_data.get("refresh_jti")
             if refresh_jti:
                 await token_blacklist.blacklist_token(refresh_jti)
-        
+
         # HIPAA-compliant audit logging
         logger.info(
             "User logout",
@@ -535,10 +535,10 @@ async def logout(
                 "status": "success"
             }
         )
-        
+
         # Return no content for successful logout
         return None
-        
+
     except Exception as e:
         # Log the error
         logger.warning(
@@ -548,11 +548,11 @@ async def logout(
                 "status": "failure"
             }
         )
-        
+
         # Still return success to client
         # This is to ensure session appears terminated to user
         return None
-```
+```python
 
 ## 4. Request/Response Schemas
 
@@ -569,7 +569,7 @@ class RegisterUserRequest(BaseModel):
     password: SecretStr = Field(..., description="User's password")
     first_name: str = Field(..., description="User's first name")
     last_name: str = Field(..., description="User's last name")
-    
+
     @validator('password')
     def password_strength(cls, v):
         """Validate password strength"""
@@ -600,21 +600,21 @@ class TokenResponse(BaseModel):
     refresh_token: str
     token_type: str
     user: dict
-```
+```python
 
 ## 5. HIPAA Compliance Measures
 
 The authentication system implements these HIPAA-compliant security measures:
 
 1. **Secure Transmission**: All endpoints require HTTPS
-2. **Password Policies**: Enforced complexity and expiration
-3. **MFA**: Multi-factor authentication for all clinical users
-4. **Audit Logging**: Comprehensive logging of all authentication events
-5. **Session Management**: Short-lived access tokens (15-30 min)
-6. **Token Blacklisting**: Immediate invalidation of logged-out sessions
-7. **Failed Attempt Tracking**: Lockout after multiple failed attempts
-8. **Information Disclosure Prevention**: Generic error messages
-9. **Account Recovery**: Secure password reset flow
+1. **Password Policies**: Enforced complexity and expiration
+1. **MFA**: Multi-factor authentication for all clinical users
+1. **Audit Logging**: Comprehensive logging of all authentication events
+1. **Session Management**: Short-lived access tokens (15-30 min)
+1. **Token Blacklisting**: Immediate invalidation of logged-out sessions
+1. **Failed Attempt Tracking**: Lockout after multiple failed attempts
+1. **Information Disclosure Prevention**: Generic error messages
+1. **Account Recovery**: Secure password reset flow
 
 ## 6. Authentication Middleware
 
@@ -632,12 +632,12 @@ logger = get_logger(__name__)
 
 class AuthMiddleware(BaseHTTPMiddleware):
     """Middleware for JWT authentication and verification"""
-    
+
     def __init__(self, app, jwt_service: JWTService, token_blacklist: TokenBlacklistService):
         super().__init__(app)
         self.jwt_service = jwt_service
         self.token_blacklist = token_blacklist
-        
+
         # Paths that don't require authentication
         self.public_paths = [
             "/api/v1/auth/token",
@@ -650,31 +650,31 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/api/redoc",
             "/openapi.json",
         ]
-    
+
     async def dispatch(self, request: Request, call_next):
         # Skip authentication for public paths
         if any(request.url.path.startswith(path) for path in self.public_paths):
             return await call_next(request)
-        
+
         # Get token from authorization header
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
             return self._return_unauthorized("Missing or invalid authorization header")
-        
+
         token = auth_header.split(" ")[1]
-        
+
         try:
             # Decode and verify token
             payload = self.jwt_service.decode_token(token)
-            
+
             # Check token blacklist
             jti = payload.get("jti")
             if await self.token_blacklist.is_blacklisted(jti):
                 return self._return_unauthorized("Token has been revoked")
-            
+
             # Add user data to request state
             request.state.user = payload
-            
+
             # HIPAA-compliant audit logging
             if request.url.path not in ["/api/healthcheck"]:
                 logger.info(
@@ -685,10 +685,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
                         "method": request.method,
                     }
                 )
-            
+
             # Continue processing request
             return await call_next(request)
-            
+
         except Exception as e:
             # Log authentication failure
             logger.warning(
@@ -698,9 +698,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     "method": request.method,
                 }
             )
-            
+
             return self._return_unauthorized("Invalid authentication token")
-    
+
     def _return_unauthorized(self, detail: str):
         """Return 401 Unauthorized response"""
         return JSONResponse(
@@ -708,7 +708,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             content={"detail": detail},
             headers={"WWW-Authenticate": "Bearer"}
         )
-```
+```python
 
 ## 7. User Management Service
 
@@ -726,7 +726,7 @@ logger = get_logger(__name__)
 
 class UserService:
     """Service for user management operations"""
-    
+
     def __init__(
         self,
         user_repository: UserRepository,
@@ -734,11 +734,11 @@ class UserService:
     ):
         self.user_repository = user_repository
         self.cognito_service = cognito_service
-    
+
     async def get_user(self, user_id: str) -> Optional[User]:
         """Get user by ID"""
         return await self.user_repository.get_user_by_id(user_id)
-    
+
     async def create_user_profile(
         self,
         user_id: str,
@@ -757,10 +757,10 @@ class UserService:
             additional_data=additional_data or {},
             is_active=True,
         )
-        
+
         # Save to database
         created_user = await self.user_repository.create_user(user)
-        
+
         # HIPAA-compliant audit logging
         logger.info(
             "User profile created",
@@ -769,9 +769,9 @@ class UserService:
                 "status": "success"
             }
         )
-        
+
         return created_user
-    
+
     async def update_user_profile(
         self,
         user_id: str,
@@ -782,15 +782,15 @@ class UserService:
         user = await self.get_user(user_id)
         if not user:
             return None
-        
+
         # Update user fields
         for key, value in data.items():
             if hasattr(user, key):
                 setattr(user, key, value)
-        
+
         # Save to database
         updated_user = await self.user_repository.update_user(user)
-        
+
         # HIPAA-compliant audit logging
         logger.info(
             "User profile updated",
@@ -800,20 +800,20 @@ class UserService:
                 "status": "success"
             }
         )
-        
+
         return updated_user
-    
+
     async def deactivate_user(self, user_id: str) -> bool:
         """Deactivate user account"""
         # Deactivate in Cognito
         await self.cognito_service.disable_user(user_id)
-        
+
         # Update database status
         user = await self.get_user(user_id)
         if user:
             user.is_active = False
             await self.user_repository.update_user(user)
-            
+
             # HIPAA-compliant audit logging
             logger.info(
                 "User deactivated",
@@ -822,10 +822,10 @@ class UserService:
                     "status": "success"
                 }
             )
-            
+
             return True
-            
+
         return False
-```
+```python
 
 The authentication system forms the foundation of HIPAA compliance by ensuring proper user identification, authorization, and audit logging throughout the application.

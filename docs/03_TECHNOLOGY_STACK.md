@@ -70,19 +70,19 @@ opentelemetry-sdk==1.20.0
 
 # AWS Specific
 boto3-stubs[cognito,s3,ses]==1.28.65  # Type hints for boto3
-```
+```python
 
 ## 4. Implementation Sequence
 
 The following documents provide detailed implementation guidance for each component of the technology stack:
 
 1. **[Core Framework Setup](04_CORE_FRAMEWORK.md)** - FastAPI, Pydantic, and project structure
-2. **[Database Layer](05_DATABASE_LAYER.md)** - SQLAlchemy, Alembic, and repository implementations
-3. **[Security & Authentication](06_SECURITY_AUTH.md)** - Cognito integration, JWT handling, and RBAC
-4. **[Event-Driven Architecture](07_EVENT_DRIVEN.md)** - Redis, Observer pattern implementation
-5. **[AWS Integration](08_AWS_INTEGRATION.md)** - S3, SES, and other AWS services
-6. **[Testing Strategy](09_TESTING.md)** - pytest setup, mocking, and test coverage
-7. **[Deployment Pipeline](10_DEPLOYMENT.md)** - Containerization and CI/CD workflow
+1. **[Database Layer](05_DATABASE_LAYER.md)** - SQLAlchemy, Alembic, and repository implementations
+1. **[Security & Authentication](06_SECURITY_AUTH.md)** - Cognito integration, JWT handling, and RBAC
+1. **[Event-Driven Architecture](07_EVENT_DRIVEN.md)** - Redis, Observer pattern implementation
+1. **[AWS Integration](08_AWS_INTEGRATION.md)** - S3, SES, and other AWS services
+1. **[Testing Strategy](09_TESTING.md)** - pytest setup, mocking, and test coverage
+1. **[Deployment Pipeline](10_DEPLOYMENT.md)** - Containerization and CI/CD workflow
 
 See each document for specific implementation details and code examples.
 

@@ -9,12 +9,12 @@ The AI-Enhanced Therapeutic Insights component of the NOVAMIND platform leverage
 Our implementation of AI in the therapeutic context adheres to these foundational principles:
 
 1. **Augmentation, Not Replacement**: AI serves to enhance human expertise, not replace clinical judgment
-2. **Explainable Insights**: All AI-generated insights include clear explanations of their derivation
-3. **Clinical Validity**: Insights are grounded in established psychiatric principles and evidence-based practice
-4. **Privacy by Design**: All AI processing incorporates privacy-preserving techniques from the ground up
-5. **Continuous Validation**: AI models undergo regular evaluation against clinical outcomes
-6. **Ethical Deployment**: Careful consideration of bias, fairness, and appropriate use cases
-7. **Therapeutic Alliance Support**: Technology designed to strengthen, not diminish, the therapeutic relationship
+1. **Explainable Insights**: All AI-generated insights include clear explanations of their derivation
+1. **Clinical Validity**: Insights are grounded in established psychiatric principles and evidence-based practice
+1. **Privacy by Design**: All AI processing incorporates privacy-preserving techniques from the ground up
+1. **Continuous Validation**: AI models undergo regular evaluation against clinical outcomes
+1. **Ethical Deployment**: Careful consideration of bias, fairness, and appropriate use cases
+1. **Therapeutic Alliance Support**: Technology designed to strengthen, not diminish, the therapeutic relationship
 
 ## 3. Key AI-Enhanced Insight Components
 
@@ -74,7 +74,7 @@ class TherapeuticTextAnalysisService:
         self.content_repository = content_repository
         self.clinical_model_service = clinical_model_service
         self.audit_service = audit_service
-    
+
     async def analyze_journal_entry(
         self,
         journal_entry_id: str,
@@ -82,7 +82,7 @@ class TherapeuticTextAnalysisService:
     ) -> TherapeuticTextAnalysis:
         """
         Analyze a journal entry with specified analysis types
-        
+
         Types include:
         - Sentiment analysis
         - Topic identification
@@ -93,11 +93,11 @@ class TherapeuticTextAnalysisService:
         journal_entry = await self.content_repository.get_journal_entry(journal_entry_id)
         if not journal_entry:
             raise EntityNotFoundError(f"Journal entry {journal_entry_id} not found")
-            
+
         # Perform on-device processing when possible to minimize PHI transmission
         local_analysis_types = self._get_local_analysis_types(analysis_types)
         cloud_analysis_types = self._get_cloud_analysis_types(analysis_types)
-        
+
         # Process local analyses
         local_results = {}
         if local_analysis_types:
@@ -105,27 +105,27 @@ class TherapeuticTextAnalysisService:
                 text=journal_entry.content,
                 analysis_types=local_analysis_types
             )
-        
+
         # Process cloud analyses with de-identified text when necessary
         cloud_results = {}
         if cloud_analysis_types:
             # De-identify text before cloud processing
             deidentified_text = self._deidentify_text(journal_entry.content)
-            
+
             cloud_results = await self.nlp_adapter.process_text_cloud(
                 text=deidentified_text,
                 analysis_types=cloud_analysis_types
             )
-        
+
         # Combine results
         combined_results = {**local_results, **cloud_results}
-        
+
         # Map to clinical indicators using domain models
         clinical_indicators = await self.clinical_model_service.map_nlp_results_to_indicators(
             combined_results,
             patient_id=journal_entry.patient_id
         )
-        
+
         # Create analysis entity
         analysis = TherapeuticTextAnalysis(
             id=str(uuid.uuid4()),
@@ -139,7 +139,7 @@ class TherapeuticTextAnalysisService:
             language_metrics=LanguageMetrics(**combined_results.get('metrics', {})),
             privacy_level=PrivacyLevel.FULL if not cloud_analysis_types else PrivacyLevel.DEIDENTIFIED
         )
-        
+
         # Log for HIPAA compliance
         await self.audit_service.log_event(
             event_type=AuditEventType.AI_PROCESSING,
@@ -152,9 +152,9 @@ class TherapeuticTextAnalysisService:
                 "processing_location": "local" if not cloud_analysis_types else "hybrid"
             }
         )
-        
+
         return analysis
-```
+```python
 
 **API Endpoint:**
 
@@ -176,11 +176,11 @@ async def analyze_therapeutic_content(
 ):
     """
     Analyze therapeutic content using NLP
-    
+
     - Validates user has permission to access the content
     - Processes content through appropriate NLP pipelines
     - Returns insights with clinical relevance and explanations
-    
+
     HIPAA Compliance:
     - Permission verification ensures minimum necessary access
     - PHI protection through local processing when possible
@@ -189,7 +189,7 @@ async def analyze_therapeutic_content(
     """
     # Verify permissions based on content type
     content_type = analysis_request.content_type
-    
+
     if content_type == ContentType.JOURNAL:
         # For journal entries, verify patient or clinician access
         journal_entry = await content_repository.get_journal_entry(content_id)
@@ -210,7 +210,7 @@ async def analyze_therapeutic_content(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not authorized to analyze session notes"
             )
-    
+
     # Log access attempt for audit
     await audit_service.log_event(
         event_type=AuditEventType.DATA_ACCESS,
@@ -222,7 +222,7 @@ async def analyze_therapeutic_content(
             "analysis_types": [t.value for t in analysis_request.analysis_types]
         }
     )
-    
+
     # Perform analysis based on content type
     if content_type == ContentType.JOURNAL:
         analysis_result = await text_analysis_service.analyze_journal_entry(
@@ -239,7 +239,7 @@ async def analyze_therapeutic_content(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Unsupported content type: {content_type.value}"
         )
-    
+
     # Return formatted response
     return TherapeuticTextAnalysisResponse(
         content_id=content_id,
@@ -248,13 +248,13 @@ async def analyze_therapeutic_content(
         sentiment=analysis_result.sentiment_scores,
         topics=[TopicResponse.from_domain(t) for t in analysis_result.identified_topics],
         clinical_indicators=[
-            ClinicalIndicatorResponse.from_domain(i) 
+            ClinicalIndicatorResponse.from_domain(i)
             for i in analysis_result.clinical_indicators
         ],
         language_metrics=LanguageMetricsResponse.from_domain(analysis_result.language_metrics),
         timestamp=analysis_result.timestamp
     )
-```
+```python
 
 ### 3.2 Voice Analysis for Emotional Biomarkers
 
@@ -326,7 +326,7 @@ class PredictiveOutcomeService:
         self.treatment_repository = treatment_repository
         self.federated_learning_service = federated_learning_service
         self.audit_service = audit_service
-    
+
     async def predict_treatment_response(
         self,
         patient_id: str,
@@ -335,48 +335,48 @@ class PredictiveOutcomeService:
     ) -> TreatmentResponsePrediction:
         """
         Predict response to a specific treatment based on patient data
-        
+
         Applies appropriate predictive models based on the treatment type
         and patient characteristics to forecast likely outcomes.
         """
         # Retrieve patient and treatment
         patient = await self.patient_repository.get_patient_by_id(patient_id)
         treatment = await self.treatment_repository.get_treatment_by_id(treatment_id)
-        
+
         if not patient:
             raise EntityNotFoundError(f"Patient {patient_id} not found")
         if not treatment:
             raise EntityNotFoundError(f"Treatment {treatment_id} not found")
-            
+
         # Select appropriate model based on treatment type
         model = await self.model_repository.get_latest_model(
             model_type=ModelType.TREATMENT_RESPONSE,
             treatment_type=treatment.type
         )
-        
+
         if not model:
             raise ModelNotFoundError(f"No model available for {treatment.type} treatment response prediction")
-        
+
         # Prepare features while maintaining privacy
         # Use federated learning to avoid central storage of patient data
         prediction_input = await self.federated_learning_service.prepare_inference_features(
             patient_id=patient_id,
             model_id=model.id
         )
-        
+
         # Generate prediction
         prediction_result = await self.federated_learning_service.predict(
             model_id=model.id,
             features=prediction_input
         )
-        
+
         # Apply confidence threshold
         filtered_predictions = {
-            outcome: score 
-            for outcome, score in prediction_result.outcome_probabilities.items() 
+            outcome: score
+            for outcome, score in prediction_result.outcome_probabilities.items()
             if score >= confidence_threshold
         }
-        
+
         # Log prediction for audit
         await self.audit_service.log_event(
             event_type=AuditEventType.AI_PROCESSING,
@@ -391,7 +391,7 @@ class PredictiveOutcomeService:
                 "confidence_threshold": confidence_threshold
             }
         )
-        
+
         return TreatmentResponsePrediction(
             id=str(uuid.uuid4()),
             patient_id=patient_id,
@@ -404,7 +404,7 @@ class PredictiveOutcomeService:
             model_id=model.id,
             model_version=model.version
         )
-```
+```python
 
 ### 3.4 Therapeutic Recommendation Engine
 
@@ -480,7 +480,7 @@ class BehavioralPatternService:
         self.data_point_repository = data_point_repository
         self.behavioral_model_service = behavioral_model_service
         self.audit_service = audit_service
-    
+
     async def detect_sleep_patterns(
         self,
         patient_id: str,
@@ -490,7 +490,7 @@ class BehavioralPatternService:
     ) -> List[BehavioralPattern]:
         """
         Detect sleep patterns for a patient within a date range
-        
+
         Analyzes sleep data to identify patterns such as:
         - Irregular sleep schedule
         - Insufficient sleep duration
@@ -504,20 +504,20 @@ class BehavioralPatternService:
             start_date=start_date,
             end_date=end_date
         )
-        
+
         if not sleep_data:
             return []
-            
+
         # Process data through behavioral models
         patterns = await self.behavioral_model_service.detect_sleep_patterns(
             sleep_data=sleep_data,
             min_confidence=min_confidence
         )
-        
+
         # Store detected patterns
         for pattern in patterns:
             await self.pattern_repository.save_behavioral_pattern(pattern)
-        
+
         # Log for audit
         await self.audit_service.log_event(
             event_type=AuditEventType.AI_PROCESSING,
@@ -531,9 +531,9 @@ class BehavioralPatternService:
                 "min_confidence": min_confidence
             }
         )
-        
+
         return patterns
-```
+```python
 
 ## 4. HIPAA-Compliant AI Implementation
 
@@ -585,7 +585,7 @@ Our AI implementation adheres to strict HIPAA requirements while delivering soph
 
 Our AI implementation follows Clean Architecture principles with strict separation of concerns:
 
-```
+```python
 ┌─────────────────────┐     ┌────────────────────┐     ┌─────────────────────┐
 │                     │     │                    │     │                     │
 │  Presentation Layer │     │    Domain Layer    │     │     Data Layer      │
@@ -608,7 +608,7 @@ Our AI implementation follows Clean Architecture principles with strict separati
 │  Controllers        │     │  Algorithms        │     │  Adapters           │
 │                     │     │                    │     │                     │
 └─────────────────────┘     └────────────────────┘     └─────────────────────┘
-```
+```python
 
 This architecture ensures:
 - **Separation of Concerns**: AI logic separated from data access and presentation
@@ -626,7 +626,7 @@ This architecture ensures:
    - Establish model validation pipeline
    - Set up privacy-preserving processing environment
 
-2. **Initial Model Development**
+1. **Initial Model Development**
    - Develop NLP sentiment analysis models
    - Create baseline behavioral pattern recognition
    - Implement foundational treatment response prediction
@@ -639,7 +639,7 @@ This architecture ensures:
    - Develop comprehensive recommendation engine
    - Create explainable AI interfaces
 
-2. **Clinical Validation**
+1. **Clinical Validation**
    - Conduct validation studies with synthetic data
    - Perform clinician review of AI-generated insights
    - Refine models based on clinical feedback
@@ -653,7 +653,7 @@ This architecture ensures:
    - Improve explainability components
    - Fine-tune model accuracy and relevance
 
-2. **Integration with Overall Analytics**
+1. **Integration with Overall Analytics**
    - Connect AI insights to visualization dashboards
    - Implement insight notification system
    - Create clinician decision support interface
@@ -669,19 +669,19 @@ Our AI implementation incorporates these ethical safeguards:
    - Transparency about potential limitations
    - Cultural competency reviews of generated insights
 
-2. **Clinical Oversight**
+1. **Clinical Oversight**
    - Human-in-the-loop review for sensitive insights
    - Clinician approval for treatment recommendations
    - Clear documentation of AI limitations
    - Emergency override capabilities
 
-3. **Patient Autonomy**
+1. **Patient Autonomy**
    - Opt-in consent for all AI processing
    - Transparent explanation of AI capabilities
    - Patient-friendly explanations of all insights
    - Right to access and delete AI-processed data
 
-4. **Continuous Improvement**
+1. **Continuous Improvement**
    - Regular ethics committee review
    - Patient and clinician feedback integration
    - Updated documentation of model cards
@@ -697,13 +697,13 @@ We will measure the success of our AI-enhanced therapeutic insights using these 
    - Impact on treatment decisions (target: influences >50% of plans)
    - Time saved in assessment (target: >25% reduction)
 
-2. **Patient Experience**
+1. **Patient Experience**
    - Insight comprehension rate (target: >85%)
    - Perceived usefulness (target: >4.2/5 rating)
    - Patient-reported insight accuracy (target: >80%)
    - Impact on treatment engagement (target: >30% increase)
 
-3. **Technical Performance**
+1. **Technical Performance**
    - Prediction accuracy (target: >85% for primary models)
    - Processing latency (target: <500ms for on-device, <2s for cloud)
    - Privacy preservation (target: zero PHI exposure)

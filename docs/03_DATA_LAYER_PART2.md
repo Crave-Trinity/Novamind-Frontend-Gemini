@@ -17,39 +17,39 @@ from app.data.models.base import BaseModel
 class PatientModel(BaseModel):
     """SQLAlchemy ORM model for patients"""
     __tablename__ = "patients"
-    
+
     # Basic patient information
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
     date_of_birth = Column(Date, nullable=False)
     active = Column(Boolean, server_default=expression.true(), nullable=False)
-    
+
     # Value objects stored as JSON
     contact_info = Column(JSONB, nullable=False)
     address = Column(JSONB, nullable=True)
     insurance = Column(JSONB, nullable=True)
     emergency_contact = Column(JSONB, nullable=True)
-    
+
     # Relationships
     appointments = relationship(
-        "AppointmentModel", 
+        "AppointmentModel",
         back_populates="patient",
         cascade="all, delete-orphan"
     )
     clinical_notes = relationship(
-        "ClinicalNoteModel", 
+        "ClinicalNoteModel",
         back_populates="patient",
         cascade="all, delete-orphan"
     )
     medications = relationship(
-        "MedicationModel", 
+        "MedicationModel",
         back_populates="patient",
         cascade="all, delete-orphan"
     )
-    
+
     def __repr__(self):
         return f"<Patient {self.first_name} {self.last_name}>"
-```
+```python
 
 ### 7.2 Appointment Model
 
@@ -66,14 +66,14 @@ from app.domain.entities.appointment import AppointmentStatus, AppointmentType
 class AppointmentModel(BaseModel):
     """SQLAlchemy ORM model for appointments"""
     __tablename__ = "appointments"
-    
+
     # Foreign keys
     patient_id = Column(
-        UUID(as_uuid=True), 
+        UUID(as_uuid=True),
         ForeignKey("patients.id", ondelete="CASCADE"),
         nullable=False
     )
-    
+
     # Appointment details
     start_time = Column(DateTime, nullable=False, index=True)
     end_time = Column(DateTime, nullable=False, index=True)
@@ -88,18 +88,18 @@ class AppointmentModel(BaseModel):
     notes = Column(Text, nullable=True)
     virtual = Column(Boolean, default=False, nullable=False)
     location = Column(String(100), nullable=True)
-    
+
     # Relationships
     patient = relationship("PatientModel", back_populates="appointments")
     clinical_notes = relationship(
-        "ClinicalNoteModel", 
+        "ClinicalNoteModel",
         back_populates="appointment",
         cascade="all, delete-orphan"
     )
-    
+
     def __repr__(self):
         return f"<Appointment {self.id}: {self.start_time} - {self.end_time}>"
-```
+```python
 
 ### 7.3 Clinical Note Model
 
@@ -116,33 +116,33 @@ from app.domain.entities.clinical_note import NoteType
 class ClinicalNoteModel(BaseModel):
     """SQLAlchemy ORM model for clinical notes"""
     __tablename__ = "clinical_notes"
-    
+
     # Foreign keys
     patient_id = Column(
-        UUID(as_uuid=True), 
+        UUID(as_uuid=True),
         ForeignKey("patients.id", ondelete="CASCADE"),
         nullable=False
     )
     appointment_id = Column(
-        UUID(as_uuid=True), 
+        UUID(as_uuid=True),
         ForeignKey("appointments.id", ondelete="SET NULL"),
         nullable=True
     )
     author_id = Column(UUID(as_uuid=True), nullable=False)
-    
+
     # Note content
     content = Column(Text, nullable=False)
     note_type = Column(ENUM(NoteType, name="note_type_enum"), nullable=False)
     version = Column(Integer, default=1, nullable=False)
     previous_versions = Column(JSONB, default=list, nullable=False)
-    
+
     # Relationships
     patient = relationship("PatientModel", back_populates="clinical_notes")
     appointment = relationship("AppointmentModel", back_populates="clinical_notes")
-    
+
     def __repr__(self):
         return f"<ClinicalNote {self.id}: {self.note_type.value} v{self.version}>"
-```
+```python
 
 ### 7.4 Medication Model
 
@@ -159,15 +159,15 @@ from app.domain.entities.medication import MedicationStatus, MedicationFrequency
 class MedicationModel(BaseModel):
     """SQLAlchemy ORM model for medications"""
     __tablename__ = "medications"
-    
+
     # Foreign keys
     patient_id = Column(
-        UUID(as_uuid=True), 
+        UUID(as_uuid=True),
         ForeignKey("patients.id", ondelete="CASCADE"),
         nullable=False
     )
     prescriber_id = Column(UUID(as_uuid=True), nullable=False)
-    
+
     # Medication details
     name = Column(String(100), nullable=False)
     dosage = Column(String(50), nullable=False)
@@ -183,13 +183,13 @@ class MedicationModel(BaseModel):
         nullable=False
     )
     reason = Column(Text, nullable=True)
-    
+
     # Relationships
     patient = relationship("PatientModel", back_populates="medications")
-    
+
     def __repr__(self):
         return f"<Medication {self.id}: {self.name} {self.dosage}>"
-```
+```python
 
 ## 8. Repository Implementations
 
@@ -215,10 +215,10 @@ from app.domain.exceptions.patient_exceptions import PatientNotFoundError
 
 class SQLAlchemyPatientRepository(BaseRepository[PatientModel, Patient], PatientRepository):
     """SQLAlchemy implementation of the PatientRepository interface"""
-    
+
     def __init__(self, db_session: Session):
         super().__init__(db_session, PatientModel)
-    
+
     def _to_model(self, entity: Patient) -> PatientModel:
         """Convert Patient domain entity to PatientModel"""
         # Convert value objects to dictionaries for JSON storage
@@ -227,7 +227,7 @@ class SQLAlchemyPatientRepository(BaseRepository[PatientModel, Patient], Patient
             "phone": entity.contact_info.phone,
             "preferred_contact_method": entity.contact_info.preferred_contact_method
         }
-        
+
         address_dict = None
         if entity.address:
             address_dict = {
@@ -236,7 +236,7 @@ class SQLAlchemyPatientRepository(BaseRepository[PatientModel, Patient], Patient
                 "state": entity.address.state,
                 "zip_code": entity.address.zip_code
             }
-        
+
         insurance_dict = None
         if entity.insurance:
             insurance_dict = {
@@ -247,7 +247,7 @@ class SQLAlchemyPatientRepository(BaseRepository[PatientModel, Patient], Patient
                 "valid_from": entity.insurance.valid_from.isoformat() if entity.insurance.valid_from else None,
                 "valid_to": entity.insurance.valid_to.isoformat() if entity.insurance.valid_to else None
             }
-        
+
         emergency_contact_dict = None
         if entity.emergency_contact:
             emergency_contact_dict = {
@@ -255,7 +255,7 @@ class SQLAlchemyPatientRepository(BaseRepository[PatientModel, Patient], Patient
                 "phone": entity.emergency_contact.phone,
                 "preferred_contact_method": entity.emergency_contact.preferred_contact_method
             }
-        
+
         return PatientModel(
             id=entity.id,
             first_name=entity.first_name,
@@ -270,7 +270,7 @@ class SQLAlchemyPatientRepository(BaseRepository[PatientModel, Patient], Patient
             created_by="system",
             updated_by="system"
         )
-    
+
     def _to_entity(self, model: PatientModel) -> Patient:
         """Convert PatientModel to Patient domain entity"""
         # Convert JSON dictionaries back to value objects
@@ -279,7 +279,7 @@ class SQLAlchemyPatientRepository(BaseRepository[PatientModel, Patient], Patient
             phone=model.contact_info["phone"],
             preferred_contact_method=model.contact_info.get("preferred_contact_method", "email")
         )
-        
+
         address = None
         if model.address:
             address = Address(
@@ -288,20 +288,20 @@ class SQLAlchemyPatientRepository(BaseRepository[PatientModel, Patient], Patient
                 state=model.address["state"],
                 zip_code=model.address["zip_code"]
             )
-        
+
         insurance = None
         if model.insurance:
             from datetime import date, datetime
-            
+
             # Convert string dates back to date objects
             valid_from = None
             if model.insurance.get("valid_from"):
                 valid_from = datetime.fromisoformat(model.insurance["valid_from"]).date()
-                
+
             valid_to = None
             if model.insurance.get("valid_to"):
                 valid_to = datetime.fromisoformat(model.insurance["valid_to"]).date()
-                
+
             insurance = Insurance(
                 provider=model.insurance["provider"],
                 policy_number=model.insurance["policy_number"],
@@ -310,7 +310,7 @@ class SQLAlchemyPatientRepository(BaseRepository[PatientModel, Patient], Patient
                 valid_from=valid_from,
                 valid_to=valid_to
             )
-        
+
         emergency_contact = None
         if model.emergency_contact:
             emergency_contact = ContactInfo(
@@ -318,7 +318,7 @@ class SQLAlchemyPatientRepository(BaseRepository[PatientModel, Patient], Patient
                 phone=model.emergency_contact["phone"],
                 preferred_contact_method=model.emergency_contact.get("preferred_contact_method", "email")
             )
-        
+
         return Patient(
             id=model.id,
             first_name=model.first_name,
@@ -330,7 +330,7 @@ class SQLAlchemyPatientRepository(BaseRepository[PatientModel, Patient], Patient
             active=model.active,
             emergency_contact=emergency_contact
         )
-    
+
     def list_active_patients(self, limit: int = 100, offset: int = 0) -> List[Patient]:
         """List active patients with pagination"""
         models = self.db.query(PatientModel) \
@@ -339,13 +339,13 @@ class SQLAlchemyPatientRepository(BaseRepository[PatientModel, Patient], Patient
             .limit(limit) \
             .offset(offset) \
             .all()
-        
+
         return [self._to_entity(model) for model in models]
-    
+
     def search_by_name(self, name: str) -> List[Patient]:
         """Search patients by name (first or last)"""
         search_term = f"%{name}%"
-        
+
         models = self.db.query(PatientModel) \
             .filter(
                 or_(
@@ -355,6 +355,6 @@ class SQLAlchemyPatientRepository(BaseRepository[PatientModel, Patient], Patient
             ) \
             .order_by(PatientModel.last_name, PatientModel.first_name) \
             .all()
-        
+
         return [self._to_entity(model) for model in models]
 ```

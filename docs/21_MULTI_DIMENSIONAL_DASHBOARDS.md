@@ -9,12 +9,12 @@ Multi-dimensional dashboards serve as the primary interface through which patien
 The design and implementation of our dashboard ecosystem adhere to these foundational principles:
 
 1. **Visual Clarity**: Complex information presented with elegant simplicity
-2. **Progressive Disclosure**: Information revealed in layers, from overview to detail
-3. **Personalization**: Dashboards tailored to individual patient journeys and preferences
-4. **Actionability**: Every visualization leads to clear next steps or insights
-5. **Privacy by Design**: Visual elements designed to protect sensitive information
-6. **Therapeutic Value**: Visualizations that contribute to the healing process
-7. **Clean Architecture**: Strict separation between data, domain logic, and presentation
+1. **Progressive Disclosure**: Information revealed in layers, from overview to detail
+1. **Personalization**: Dashboards tailored to individual patient journeys and preferences
+1. **Actionability**: Every visualization leads to clear next steps or insights
+1. **Privacy by Design**: Visual elements designed to protect sensitive information
+1. **Therapeutic Value**: Visualizations that contribute to the healing process
+1. **Clean Architecture**: Strict separation between data, domain logic, and presentation
 
 ## 3. Patient-Facing Dashboards
 
@@ -35,7 +35,7 @@ The Journey Timeline provides patients with a visual narrative of their mental h
 class JourneyMilestone:
     """Domain entity representing a significant point in the patient's journey"""
     def __init__(
-        self, 
+        self,
         id: str,
         timestamp: datetime,
         milestone_type: MilestoneType,
@@ -58,10 +58,10 @@ class JourneyTimelineService:
         self.milestone_repository = milestone_repository
         self.metric_repository = metric_repository
         self.event_repository = event_repository
-    
+
     def generate_timeline(
-        self, 
-        patient_id: str, 
+        self,
+        patient_id: str,
         start_date: datetime,
         end_date: datetime,
         include_metrics: List[str] = None,
@@ -70,7 +70,7 @@ class JourneyTimelineService:
         """Generate a comprehensive timeline with milestones, metrics, and events"""
         # Core implementation logic
         # ...
-```
+```python
 
 **API Endpoint:**
 ```python
@@ -94,12 +94,12 @@ async def get_journey_timeline(
 ):
     """
     Get a patient's journey timeline with milestones, metrics, and events
-    
+
     - Validates user has permission to view patient data
     - Retrieves timeline data within specified date range
     - Filters by requested metrics and milestone types
     - Returns formatted timeline for visualization
-    
+
     HIPAA Compliance:
     - Permission verification ensures minimum necessary access
     - All access is logged for audit purposes
@@ -111,7 +111,7 @@ async def get_journey_timeline(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to view this patient's data"
         )
-    
+
     # Log the access attempt for HIPAA compliance
     await audit_service.log_event(
         event_type=AuditEventType.DATA_ACCESS,
@@ -121,7 +121,7 @@ async def get_journey_timeline(
         resource_type="patient_timeline",
         success=True
     )
-    
+
     # Generate timeline using domain service
     timeline = await journey_service.generate_timeline(
         patient_id=patient_id,
@@ -130,10 +130,10 @@ async def get_journey_timeline(
         include_metrics=include_metrics,
         include_milestone_types=[MilestoneType(t) for t in include_milestone_types] if include_milestone_types else None
     )
-    
+
     # Return formatted response
     return timeline
-```
+```python
 
 ### 3.2 Mood and Symptom Visualization Dashboard
 
@@ -189,12 +189,12 @@ class TreatmentResponse:
         self.subjective_ratings = subjective_ratings
         self.side_effects = side_effects
         self.adherence_data = adherence_data
-    
+
     def calculate_efficacy_score(self) -> float:
         """Calculate overall efficacy score based on multiple factors"""
         # Implementation with weighting of various factors
         # ...
-```
+```python
 
 ### 3.4 Lifestyle Correlation Dashboard
 
@@ -242,14 +242,14 @@ class ClinicalInsightService:
         self.assessment_repository = assessment_repository
         self.treatment_repository = treatment_repository
         self.analytics_engine = analytics_engine
-    
+
     async def generate_patient_risk_assessment(
         self,
         patient_id: str
     ) -> RiskAssessment:
         """
         Generate a comprehensive risk assessment for a patient
-        
+
         Uses multiple data points including:
         - Recent assessment scores
         - Medication adherence
@@ -259,7 +259,7 @@ class ClinicalInsightService:
         """
         # Implementation logic
         # ...
-```
+```python
 
 ### 4.2 Treatment Efficacy Dashboard
 
@@ -317,7 +317,7 @@ class TherapeuticAllianceMetric:
         self.task_agreement_score = task_agreement_score  # Agreement on approach
         self.communication_quality_score = communication_quality_score
         self.source_type = source_type  # Survey, NLP, behavioral, etc.
-```
+```python
 
 ## 5. HIPAA-Compliant Implementation Considerations
 
@@ -333,7 +333,7 @@ The implementation of our multi-dimensional dashboards must adhere to strict HIP
 
 ### 5.2 Architecture Pattern
 
-```
+```python
 ┌─────────────────────┐     ┌────────────────────┐     ┌─────────────────────┐
 │                     │     │                    │     │                     │
 │  Presentation Layer │     │    Domain Layer    │     │     Data Layer      │
@@ -356,7 +356,7 @@ The implementation of our multi-dimensional dashboards must adhere to strict HIP
 │  Controllers        │     │  Generators        │     │  Optimizers         │
 │                     │     │                    │     │                     │
 └─────────────────────┘     └────────────────────┘     └─────────────────────┘
-```
+```python
 
 Our architecture strictly separates concerns:
 - **Presentation Layer**: Handles rendering and user interaction
@@ -398,7 +398,7 @@ Our architecture strictly separates concerns:
    - Implement basic visualization components
    - Set up authentication and authorization
 
-2. **MVP Dashboard Implementation**
+1. **MVP Dashboard Implementation**
    - Develop Journey Timeline prototype
    - Create basic Mood and Symptom visualization
    - Implement Clinician Overview dashboard
@@ -410,7 +410,7 @@ Our architecture strictly separates concerns:
    - Implement predictive insight displays
    - Create interactive filtering and exploration tools
 
-2. **Integration with Data Sources**
+1. **Integration with Data Sources**
    - Connect wearable device data streams
    - Implement journaling analysis visualization
    - Integrate standardized assessment visualization
@@ -422,7 +422,7 @@ Our architecture strictly separates concerns:
    - Refine visualization based on feedback
    - Optimize performance for various devices
 
-2. **Advanced Analytics Integration**
+1. **Advanced Analytics Integration**
    - Implement predictive modeling visualizations
    - Develop personalized insight generation
    - Create adaptive dashboard layouts
@@ -436,12 +436,12 @@ We will evaluate our dashboards using these specific metrics:
    - Time spent analyzing visualizations (target: 5+ minutes per session)
    - Feature utilization breadth (target: 70% of features used monthly)
 
-2. **Clinical Impact Metrics**:
+1. **Clinical Impact Metrics**:
    - Correlation between dashboard engagement and symptom improvement (target: r > 0.4)
    - Clinician-reported decision influence (target: 80% report dashboards inform decisions)
    - Time to insight (target: <30 seconds for clinicians to identify key patterns)
 
-3. **Experience Metrics**:
+1. **Experience Metrics**:
    - User satisfaction surveys (target: >85% satisfaction)
    - System Usability Scale (SUS) scores (target: >85)
    - Feature request fulfillment rate (target: implementation of top 25% of requests quarterly)
@@ -454,19 +454,19 @@ We will evaluate our dashboards using these specific metrics:
    - Use red sparingly and only for critical alerts
    - Ensure all color schemes pass WCAG AA accessibility standards
 
-2. **Information Hierarchy**
+1. **Information Hierarchy**
    - Place most critical information at top-left (F-pattern reading)
    - Group related metrics visually
    - Use size and contrast to indicate importance
    - Implement progressive disclosure for complex data
 
-3. **Narrative Design**
+1. **Narrative Design**
    - Structure dashboards to tell a coherent story
    - Provide context for all visualizations
    - Include interpretive text alongside complex charts
    - Design for both emotional impact and clinical utility
 
-4. **Luxury Experience Elements**
+1. **Luxury Experience Elements**
    - Implement subtle animations for state transitions
    - Use whitespace generously for an uncluttered feel
    - Select premium typography with excellent readability

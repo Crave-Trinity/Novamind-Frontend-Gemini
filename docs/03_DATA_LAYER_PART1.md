@@ -35,7 +35,7 @@ app/
 │   │   ├── __init__.py
 │   │   └── database.py
 │   └── __init__.py
-```
+```python
 
 ## 4. Database Configuration
 
@@ -79,7 +79,7 @@ def get_db():
         yield db
     finally:
         db.close()
-```
+```python
 
 ## 5. Base Model with Audit Fields
 
@@ -102,20 +102,20 @@ class AuditMixin:
     @declared_attr
     def created_by(cls):
         return Column(String(50), nullable=False)
-    
+
     @declared_attr
     def updated_by(cls):
         return Column(String(50), nullable=False)
-    
+
     @declared_attr
     def created_at(cls):
         return Column(DateTime, default=datetime.utcnow, nullable=False)
-    
+
     @declared_attr
     def updated_at(cls):
         return Column(
-            DateTime, 
-            default=datetime.utcnow, 
+            DateTime,
+            default=datetime.utcnow,
             onupdate=datetime.utcnow,
             nullable=False
         )
@@ -126,14 +126,14 @@ class BaseModel(Base, AuditMixin):
     Base model class that includes GUID primary keys and audit fields.
     """
     __abstract__ = True
-    
+
     id = Column(
-        UUID(as_uuid=True), 
-        primary_key=True, 
-        default=uuid.uuid4, 
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
         index=True
     )
-```
+```python
 
 ## 6. Repository Base Class
 
@@ -155,7 +155,7 @@ class BaseRepository(Generic[T, E]):
     """
     Base repository with common CRUD operations.
     Generic implementation for all repositories.
-    
+
     Type parameters:
         T: The SQLAlchemy model type
         E: The domain entity type
@@ -163,45 +163,45 @@ class BaseRepository(Generic[T, E]):
     def __init__(self, db_session: Session, model_class: Type[T]):
         self.db = db_session
         self.model = model_class
-    
+
     def _to_model(self, entity: E) -> T:
         """
         Convert domain entity to database model.
         Must be implemented by child classes.
         """
         raise NotImplementedError("Must be implemented by child classes")
-    
+
     def _to_entity(self, model: T) -> E:
         """
         Convert database model to domain entity.
         Must be implemented by child classes.
         """
         raise NotImplementedError("Must be implemented by child classes")
-    
+
     def add(self, entity: E) -> E:
         """Add a new entity"""
         model = self._to_model(entity)
         self.db.add(model)
         self.db.flush()  # Generate ID without committing transaction
         return self._to_entity(model)
-    
+
     def get_by_id(self, entity_id: UUID) -> Optional[E]:
         """Get entity by ID"""
         model = self.db.query(self.model).filter(self.model.id == entity_id).first()
         return self._to_entity(model) if model else None
-    
+
     def update(self, entity: E) -> E:
         """Update an existing entity"""
         model = self._to_model(entity)
-        
+
         # Merge the updated entity with the session
         self.db.merge(model)
         self.db.flush()
-        
+
         # Return the updated entity
         updated_model = self.db.query(self.model).filter(self.model.id == model.id).first()
         return self._to_entity(updated_model)
-    
+
     def delete(self, entity_id: UUID) -> None:
         """Delete an entity by ID"""
         model = self.db.query(self.model).filter(self.model.id == entity_id).first()

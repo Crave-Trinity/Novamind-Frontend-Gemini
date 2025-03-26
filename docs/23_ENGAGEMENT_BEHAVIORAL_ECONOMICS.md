@@ -9,12 +9,12 @@ The Engagement and Behavioral Economics component of the NOVAMIND platform appli
 Our engagement approach is built on these foundational principles:
 
 1. **Choice Architecture**: Thoughtfully designed options that guide without restricting patient autonomy
-2. **Personalized Motivation**: Targeting individual values and drivers rather than generic incentives
-3. **Friction Reduction**: Removing barriers to therapeutic activities through elegant experience design
-4. **Meaningful Feedback**: Providing reinforcement that connects actions to therapeutic outcomes
-5. **Ethical Nudging**: Using behavioral insights to support clinical goals while respecting patient agency
-6. **Luxury Experience**: Delivering behavioral interventions with the sophistication of premium service
-7. **Empirical Validation**: Continuously testing and refining engagement mechanisms based on outcomes
+1. **Personalized Motivation**: Targeting individual values and drivers rather than generic incentives
+1. **Friction Reduction**: Removing barriers to therapeutic activities through elegant experience design
+1. **Meaningful Feedback**: Providing reinforcement that connects actions to therapeutic outcomes
+1. **Ethical Nudging**: Using behavioral insights to support clinical goals while respecting patient agency
+1. **Luxury Experience**: Delivering behavioral interventions with the sophistication of premium service
+1. **Empirical Validation**: Continuously testing and refining engagement mechanisms based on outcomes
 
 ## 3. Key Behavioral Economics Components
 
@@ -61,7 +61,7 @@ class BehavioralProfile:
         self.decision_style = decision_style
         self.habit_formation_propensity = habit_formation_propensity  # 0-1 scale
         self.confidence_levels = confidence_levels  # Confidence in each assessment
-        
+
 class BehavioralProfileService:
     """Domain service for generating and updating behavioral profiles"""
     def __init__(
@@ -75,7 +75,7 @@ class BehavioralProfileService:
         self.patient_repository = patient_repository
         self.interaction_repository = interaction_repository
         self.audit_service = audit_service
-    
+
     async def generate_initial_profile(
         self,
         patient_id: str,
@@ -84,7 +84,7 @@ class BehavioralProfileService:
     ) -> BehavioralProfile:
         """
         Generate initial behavioral profile based on available information
-        
+
         Uses:
         - Initial assessment responses if available
         - Early platform interactions if available
@@ -94,7 +94,7 @@ class BehavioralProfileService:
         patient = await self.patient_repository.get_patient_by_id(patient_id)
         if not patient:
             raise EntityNotFoundError(f"Patient {patient_id} not found")
-        
+
         # Get interaction history if not provided
         if not interaction_history:
             interaction_history = await self.interaction_repository.get_patient_interactions(
@@ -103,41 +103,41 @@ class BehavioralProfileService:
                 order_by="timestamp",
                 order_direction="desc"
             )
-        
+
         # Calculate initial behavioral dimensions
         motivational_orientation = self._calculate_motivational_orientation(
             assessment_responses,
             interaction_history,
             patient
         )
-        
+
         temporal_pattern = self._calculate_temporal_discounting(
             assessment_responses,
             interaction_history
         )
-        
+
         social_factor = self._calculate_social_influence_factor(
             assessment_responses,
             interaction_history,
             patient
         )
-        
+
         reward_sensitivity = self._calculate_reward_sensitivity(
             assessment_responses,
             interaction_history
         )
-        
+
         decision_style = self._calculate_decision_style(
             assessment_responses,
             interaction_history
         )
-        
+
         habit_propensity = self._calculate_habit_formation_propensity(
             assessment_responses,
             interaction_history,
             patient
         )
-        
+
         # Calculate confidence levels for each dimension
         confidence_levels = {
             "motivational_orientation": self._calculate_confidence(
@@ -159,7 +159,7 @@ class BehavioralProfileService:
                 habit_propensity, assessment_responses, interaction_history
             )
         }
-        
+
         # Create profile entity
         profile = BehavioralProfile(
             id=str(uuid.uuid4()),
@@ -174,10 +174,10 @@ class BehavioralProfileService:
             habit_formation_propensity=habit_propensity,
             confidence_levels=confidence_levels
         )
-        
+
         # Save the profile
         await self.profile_repository.save_behavioral_profile(profile)
-        
+
         # Log for audit
         await self.audit_service.log_event(
             event_type=AuditEventType.PROFILE_CREATION,
@@ -190,9 +190,9 @@ class BehavioralProfileService:
                 "confidence_levels": confidence_levels
             }
         )
-        
+
         return profile
-```
+```python
 
 **API Endpoint:**
 
@@ -213,11 +213,11 @@ async def get_behavioral_profile(
 ):
     """
     Get a patient's behavioral profile for personalizing engagement strategies
-    
+
     - Validates user has permission to view patient profile
     - Returns profile if exists or generates initial profile
     - Includes confidence levels for each behavioral dimension
-    
+
     HIPAA Compliance:
     - Permission verification ensures minimum necessary access
     - All access is logged for audit purposes
@@ -229,7 +229,7 @@ async def get_behavioral_profile(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to view this patient's behavioral profile"
         )
-    
+
     # Log the access attempt for HIPAA compliance
     await audit_service.log_event(
         event_type=AuditEventType.DATA_ACCESS,
@@ -239,17 +239,17 @@ async def get_behavioral_profile(
         resource_type="behavioral_profile",
         success=True
     )
-    
+
     # Get or generate profile
     try:
         profile = await profile_service.get_current_profile(patient_id)
     except EntityNotFoundError:
         # Generate initial profile if not found
         profile = await profile_service.generate_initial_profile(patient_id)
-    
+
     # Return formatted response
     return BehavioralProfileResponse.from_domain(profile)
-```
+```python
 
 ### 3.2 Intelligent Nudge Engine
 
@@ -316,7 +316,7 @@ class NudgeEngineService:
         self.content_service = content_service
         self.notification_service = notification_service
         self.audit_service = audit_service
-    
+
     async def generate_personalized_nudges(
         self,
         patient_id: str,
@@ -326,7 +326,7 @@ class NudgeEngineService:
     ) -> List[TherapeuticNudge]:
         """
         Generate personalized nudges for a specific target behavior
-        
+
         Examples of target behaviors:
         - Medication adherence
         - Therapy homework completion
@@ -338,26 +338,26 @@ class NudgeEngineService:
         patient = await self.patient_repository.get_patient_by_id(patient_id)
         if not patient:
             raise EntityNotFoundError(f"Patient {patient_id} not found")
-            
+
         profile = await self.profile_repository.get_current_profile(patient_id)
         if not profile:
             raise EntityNotFoundError(f"Behavioral profile for patient {patient_id} not found")
-        
+
         # Determine optimal nudge types based on profile
         optimal_nudge_types = self._determine_optimal_nudge_types(
             profile, target_behavior, clinical_context
         )
-        
+
         # Determine optimal delivery channels
         optimal_channels = self._determine_optimal_channels(
             patient, profile, target_behavior, urgency_level
         )
-        
+
         # Determine optimal timing
         delivery_times = self._calculate_optimal_timing(
             patient, profile, target_behavior, urgency_level
         )
-        
+
         # Generate nudges
         nudges = []
         for nudge_type in optimal_nudge_types:
@@ -369,22 +369,22 @@ class NudgeEngineService:
                     delivery_channel=channel,
                     patient_profile=profile
                 )
-                
+
                 # Personalize parameters
                 personalization_params = self._generate_personalization_params(
                     patient, profile, nudge_type, target_behavior, clinical_context
                 )
-                
+
                 # Calculate expiration time based on nudge type
                 expiration_time = self._calculate_expiration_time(
                     delivery_times[channel], nudge_type, urgency_level
                 )
-                
+
                 # Determine behavioral technique
                 technique = self._determine_behavioral_technique(
                     profile, nudge_type, target_behavior
                 )
-                
+
                 # Create nudge entity
                 nudge = TherapeuticNudge(
                     id=str(uuid.uuid4()),
@@ -401,12 +401,12 @@ class NudgeEngineService:
                     clinical_context=clinical_context or {},
                     ethical_review_status=EthicalReviewStatus.APPROVED if template.pre_approved else EthicalReviewStatus.PENDING
                 )
-                
+
                 nudges.append(nudge)
-                
+
                 # Save nudge
                 await self.nudge_repository.save_therapeutic_nudge(nudge)
-        
+
         # Log for audit
         await self.audit_service.log_event(
             event_type=AuditEventType.NUDGE_GENERATION,
@@ -420,9 +420,9 @@ class NudgeEngineService:
                 "urgency_level": urgency_level.value
             }
         )
-        
+
         return nudges
-```
+```python
 
 ### 3.3 Motivational Framework and Reward System
 
@@ -494,7 +494,7 @@ class SocialEngagementService:
     def __init__(
         self,
         opportunity_repository: SocialOpportunityRepository,
-        profile_repository: BehavioralProfileRepository, 
+        profile_repository: BehavioralProfileRepository,
         patient_repository: PatientRepository,
         content_moderation_service: ContentModerationService,
         audit_service: AuditService
@@ -504,7 +504,7 @@ class SocialEngagementService:
         self.patient_repository = patient_repository
         self.content_moderation_service = content_moderation_service
         self.audit_service = audit_service
-    
+
     async def find_matching_opportunities(
         self,
         patient_id: str,
@@ -514,7 +514,7 @@ class SocialEngagementService:
     ) -> List[SocialEngagementOpportunity]:
         """
         Find social engagement opportunities matching a patient's profile
-        
+
         Uses behavioral profile to identify opportunities likely to be
         effective and aligned with the patient's preferences and needs.
         """
@@ -522,48 +522,48 @@ class SocialEngagementService:
         patient = await self.patient_repository.get_patient_by_id(patient_id)
         if not patient:
             raise EntityNotFoundError(f"Patient {patient_id} not found")
-            
+
         profile = await self.profile_repository.get_current_profile(patient_id)
         if not profile:
             raise EntityNotFoundError(f"Behavioral profile for patient {patient_id} not found")
-        
+
         # Get all active opportunities
         active_opportunities = await self.opportunity_repository.get_active_opportunities()
-        
+
         # Filter by type if specified
         if include_types:
             active_opportunities = [
-                o for o in active_opportunities 
+                o for o in active_opportunities
                 if o.opportunity_type in include_types
             ]
-        
+
         if exclude_types:
             active_opportunities = [
-                o for o in active_opportunities 
+                o for o in active_opportunities
                 if o.opportunity_type not in exclude_types
             ]
-        
+
         # Check eligibility for each opportunity
         eligible_opportunities = []
         for opportunity in active_opportunities:
             if self._check_eligibility(patient, profile, opportunity):
                 eligible_opportunities.append(opportunity)
-        
+
         # Score opportunities based on profile match
         scored_opportunities = [
             (opportunity, self._calculate_opportunity_score(profile, opportunity))
             for opportunity in eligible_opportunities
         ]
-        
+
         # Sort by score and take top matches
         top_opportunities = [
             opportunity for opportunity, score in sorted(
-                scored_opportunities, 
-                key=lambda x: x[1], 
+                scored_opportunities,
+                key=lambda x: x[1],
                 reverse=True
             )[:limit]
         ]
-        
+
         # Log for audit
         await self.audit_service.log_event(
             event_type=AuditEventType.RECOMMENDATION,
@@ -576,9 +576,9 @@ class SocialEngagementService:
                 "opportunities_considered": len(active_opportunities)
             }
         )
-        
+
         return top_opportunities
-```
+```python
 
 ### 3.5 Habit Formation Architecture
 
@@ -641,7 +641,7 @@ Our engagement framework adheres to strict HIPAA compliance requirements while d
 
 Our behavioral economics implementation follows Clean Architecture principles:
 
-```
+```python
 ┌─────────────────────┐     ┌────────────────────┐     ┌─────────────────────┐
 │                     │     │                    │     │                     │
 │  Presentation Layer │     │    Domain Layer    │     │     Data Layer      │
@@ -664,7 +664,7 @@ Our behavioral economics implementation follows Clean Architecture principles:
 │  Components         │     │  Generators        │     │  Access             │
 │                     │     │                    │     │                     │
 └─────────────────────┘     └────────────────────┘     └─────────────────────┘
-```
+```python
 
 This architecture ensures:
 - **Separation of Concerns**: Engagement logic separated from data access and presentation
@@ -682,7 +682,7 @@ This architecture ensures:
    - Implement profile generation and update services
    - Build profile visualization for clinicians
 
-2. **Basic Engagement Framework**
+1. **Basic Engagement Framework**
    - Implement notification infrastructure
    - Create foundational nudge templates
    - Develop basic reward mechanisms
@@ -696,7 +696,7 @@ This architecture ensures:
    - Develop context-aware intervention timing
    - Build personalized reward preferences
 
-2. **Social and Habit Framework**
+1. **Social and Habit Framework**
    - Implement privacy-preserving social architecture
    - Create habit formation programming tools
    - Develop social proof mechanisms
@@ -710,7 +710,7 @@ This architecture ensures:
    - Develop engagement effectiveness metrics
    - Build adaptive intervention optimization
 
-2. **Experience Enhancement**
+1. **Experience Enhancement**
    - Refine luxury visual and content elements
    - Optimize notification frequency and timing
    - Enhance personalization algorithms
@@ -726,13 +726,13 @@ We will measure the success of our behavioral engagement framework using these m
    - Nudge response rate (target: >60%)
    - Habit maintenance duration (target: >70% at 60 days)
 
-2. **Clinical Impact Metrics**
+1. **Clinical Impact Metrics**
    - Correlation between engagement and symptom improvement (target: r > 0.5)
    - Treatment adherence improvement (target: >40% over baseline)
    - Clinician satisfaction with engagement tools (target: >85%)
    - Patient-reported relevance of engagement features (target: >80%)
 
-3. **Experience Metrics**
+1. **Experience Metrics**
    - Engagement feature satisfaction (target: >85%)
    - Perceived intrusiveness (target: <15% reporting too intrusive)
    - Personalization accuracy (target: >80% reporting "relevant to me")

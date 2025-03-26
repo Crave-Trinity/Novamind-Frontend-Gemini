@@ -10,7 +10,7 @@ NOVAMIND is a premium, HIPAA-compliant concierge psychiatry platform designed fo
 
 NOVAMIND follows the Clean Architecture (also known as Onion or Hexagonal Architecture) principles:
 
-```
+```python
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                        NOVAMIND ARCHITECTURE                            │
 ├─────────────────────────────────────────────────────────────────────────┤
@@ -37,7 +37,7 @@ NOVAMIND follows the Clean Architecture (also known as Onion or Hexagonal Archit
 │                      └─────────────┘      └─────────────────────────┘   │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
-```
+```python
 
 - **Domain-Centric Design**: Business logic isolated in domain layer, free from infrastructure dependencies
 - **Dependency Rule**: Dependencies always point inward toward domain layer
@@ -62,12 +62,12 @@ NOVAMIND follows the Clean Architecture (also known as Onion or Hexagonal Archit
 
 ## 3. High-Level Directory Structure
 
-```
+```python
 novamind-backend/
 ├── alembic/                   # Database migration scripts
 ├── app/
 │   ├── domain/                # Domain layer (business logic)
-│   ├── application/           # Application layer 
+│   ├── application/           # Application layer
 │   ├── infrastructure/        # Infrastructure layer
 │   ├── presentation/          # Presentation layer (API)
 │   ├── config/                # Configuration
@@ -76,7 +76,7 @@ novamind-backend/
 ├── scripts/                   # Utility scripts
 ├── docs/                      # Documentation
 └── [configuration files]      # Various configuration files
-```
+```python
 
 ## 4. Technology Stack
 
@@ -91,11 +91,11 @@ novamind-backend/
 ## 5. Implementation Sequence Documents
 
 1. **Domain Layer** - Core business entities and logic
-2. **Data Layer** - Database models and repositories 
-3. **Application Layer** - Services and use cases
-4. **API Layer** - FastAPI routes and schemas
-5. **Authentication & Security** - HIPAA compliance implementation
-6. **Infrastructure Components** - AWS service integrations
-7. **Testing & Quality Assurance** - Testing strategy and implementation
+1. **Data Layer** - Database models and repositories
+1. **Application Layer** - Services and use cases
+1. **API Layer** - FastAPI routes and schemas
+1. **Authentication & Security** - HIPAA compliance implementation
+1. **Infrastructure Components** - AWS service integrations
+1. **Testing & Quality Assurance** - Testing strategy and implementation
 
 Each document provides detailed implementation guidance for its respective layer.

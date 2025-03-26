@@ -21,10 +21,10 @@ from app.domain.interfaces.appointment_repository import AppointmentRepository
 
 class SQLAlchemyAppointmentRepository(BaseRepository[AppointmentModel, Appointment], AppointmentRepository):
     """SQLAlchemy implementation of the AppointmentRepository interface"""
-    
+
     def __init__(self, db_session: Session):
         super().__init__(db_session, AppointmentModel)
-    
+
     def _to_model(self, entity: Appointment) -> AppointmentModel:
         """Convert Appointment domain entity to AppointmentModel"""
         return AppointmentModel(
@@ -41,7 +41,7 @@ class SQLAlchemyAppointmentRepository(BaseRepository[AppointmentModel, Appointme
             created_by="system",
             updated_by="system"
         )
-    
+
     def _to_entity(self, model: AppointmentModel) -> Appointment:
         """Convert AppointmentModel to Appointment domain entity"""
         return Appointment(
@@ -55,19 +55,19 @@ class SQLAlchemyAppointmentRepository(BaseRepository[AppointmentModel, Appointme
             virtual=model.virtual,
             location=model.location
         )
-    
+
     def get_for_patient(self, patient_id: UUID) -> List[Appointment]:
         """Get all appointments for a patient"""
         models = self.db.query(AppointmentModel) \
             .filter(AppointmentModel.patient_id == patient_id) \
             .order_by(AppointmentModel.start_time.desc()) \
             .all()
-        
+
         return [self._to_entity(model) for model in models]
-    
+
     def get_in_time_range(
-        self, 
-        start_time: datetime, 
+        self,
+        start_time: datetime,
         end_time: datetime,
         status: Optional[List[AppointmentStatus]] = None
     ) -> List[Appointment]:
@@ -91,18 +91,18 @@ class SQLAlchemyAppointmentRepository(BaseRepository[AppointmentModel, Appointme
                 )
             )
         )
-        
+
         # Apply status filter if provided
         if status:
             query = query.filter(AppointmentModel.status.in_([s for s in status]))
-        
+
         # Order by start time
         query = query.order_by(AppointmentModel.start_time)
-        
+
         # Execute query and convert to domain entities
         models = query.all()
         return [self._to_entity(model) for model in models]
-```
+```python
 
 ### 8.3 Clinical Note Repository Implementation
 
@@ -121,10 +121,10 @@ from app.domain.interfaces.clinical_note_repository import ClinicalNoteRepositor
 
 class SQLAlchemyClinicalNoteRepository(BaseRepository[ClinicalNoteModel, ClinicalNote], ClinicalNoteRepository):
     """SQLAlchemy implementation of the ClinicalNoteRepository interface"""
-    
+
     def __init__(self, db_session: Session):
         super().__init__(db_session, ClinicalNoteModel)
-    
+
     def _to_model(self, entity: ClinicalNote) -> ClinicalNoteModel:
         """Convert ClinicalNote domain entity to ClinicalNoteModel"""
         return ClinicalNoteModel(
@@ -140,7 +140,7 @@ class SQLAlchemyClinicalNoteRepository(BaseRepository[ClinicalNoteModel, Clinica
             created_by="system",
             updated_by="system"
         )
-    
+
     def _to_entity(self, model: ClinicalNoteModel) -> ClinicalNote:
         """Convert ClinicalNoteModel to ClinicalNote domain entity"""
         return ClinicalNote(
@@ -154,25 +154,25 @@ class SQLAlchemyClinicalNoteRepository(BaseRepository[ClinicalNoteModel, Clinica
             version=model.version,
             previous_versions=model.previous_versions
         )
-    
+
     def get_for_patient(self, patient_id: UUID) -> List[ClinicalNote]:
         """Get all clinical notes for a patient"""
         models = self.db.query(ClinicalNoteModel) \
             .filter(ClinicalNoteModel.patient_id == patient_id) \
             .order_by(ClinicalNoteModel.created_at.desc()) \
             .all()
-        
+
         return [self._to_entity(model) for model in models]
-    
+
     def get_for_appointment(self, appointment_id: UUID) -> List[ClinicalNote]:
         """Get all clinical notes for an appointment"""
         models = self.db.query(ClinicalNoteModel) \
             .filter(ClinicalNoteModel.appointment_id == appointment_id) \
             .order_by(ClinicalNoteModel.created_at.desc()) \
             .all()
-        
+
         return [self._to_entity(model) for model in models]
-    
+
     def get_latest_by_type(self, patient_id: UUID, note_type: NoteType) -> Optional[ClinicalNote]:
         """Get the most recent clinical note of a specific type"""
         model = self.db.query(ClinicalNoteModel) \
@@ -182,9 +182,9 @@ class SQLAlchemyClinicalNoteRepository(BaseRepository[ClinicalNoteModel, Clinica
             ) \
             .order_by(ClinicalNoteModel.created_at.desc()) \
             .first()
-        
+
         return self._to_entity(model) if model else None
-```
+```python
 
 ### 8.4 Medication Repository Implementation
 
@@ -203,10 +203,10 @@ from app.domain.interfaces.medication_repository import MedicationRepository
 
 class SQLAlchemyMedicationRepository(BaseRepository[MedicationModel, Medication], MedicationRepository):
     """SQLAlchemy implementation of the MedicationRepository interface"""
-    
+
     def __init__(self, db_session: Session):
         super().__init__(db_session, MedicationModel)
-    
+
     def _to_model(self, entity: Medication) -> MedicationModel:
         """Convert Medication domain entity to MedicationModel"""
         return MedicationModel(
@@ -225,7 +225,7 @@ class SQLAlchemyMedicationRepository(BaseRepository[MedicationModel, Medication]
             created_by="system",
             updated_by="system"
         )
-    
+
     def _to_entity(self, model: MedicationModel) -> Medication:
         """Convert MedicationModel to Medication domain entity"""
         return Medication(
@@ -241,7 +241,7 @@ class SQLAlchemyMedicationRepository(BaseRepository[MedicationModel, Medication]
             status=model.status,
             reason=model.reason
         )
-    
+
     def get_active_medications(self, patient_id: UUID) -> List[Medication]:
         """Get all active medications for a patient"""
         models = self.db.query(MedicationModel) \
@@ -251,18 +251,18 @@ class SQLAlchemyMedicationRepository(BaseRepository[MedicationModel, Medication]
             ) \
             .order_by(MedicationModel.name) \
             .all()
-        
+
         return [self._to_entity(model) for model in models]
-    
+
     def get_medication_history(self, patient_id: UUID) -> List[Medication]:
         """Get full medication history for a patient"""
         models = self.db.query(MedicationModel) \
             .filter(MedicationModel.patient_id == patient_id) \
             .order_by(MedicationModel.start_date.desc()) \
             .all()
-        
+
         return [self._to_entity(model) for model in models]
-```
+```python
 
 ## 9. Transaction Management
 
@@ -289,21 +289,21 @@ class UnitOfWork:
     """
     def __init__(self, session: Optional[Session] = None):
         self.session = session or SessionLocal()
-        
+
         # Create repositories
         self.patients = SQLAlchemyPatientRepository(self.session)
         self.appointments = SQLAlchemyAppointmentRepository(self.session)
         self.clinical_notes = SQLAlchemyClinicalNoteRepository(self.session)
         self.medications = SQLAlchemyMedicationRepository(self.session)
-    
+
     def commit(self) -> None:
         """Commit the current transaction"""
         self.session.commit()
-    
+
     def rollback(self) -> None:
         """Rollback the current transaction"""
         self.session.rollback()
-    
+
     def close(self) -> None:
         """Close the session"""
         self.session.close()
@@ -324,7 +324,7 @@ def get_unit_of_work() -> Generator[UnitOfWork, None, None]:
         raise
     finally:
         uow.close()
-```
+```python
 
 ## 10. Data Layer Security and HIPAA Compliance
 
@@ -368,7 +368,7 @@ def decrypt_sensitive_data(encrypted_data: str) -> str:
     if not encrypted_data:
         return encrypted_data
     return cipher.decrypt(encrypted_data.encode()).decode()
-```
+```python
 
 ### 10.2 Data Access Auditing
 
@@ -397,7 +397,7 @@ class DataAccessAudit:
     ) -> None:
         """
         Record a data access event
-        
+
         Args:
             db: Database session
             user_id: ID of user performing the action
@@ -407,7 +407,7 @@ class DataAccessAudit:
             details: Additional details about the access
         """
         from app.data.models.audit import DataAccessAuditModel
-        
+
         audit_record = DataAccessAuditModel(
             user_id=user_id,
             entity_type=entity_type,
@@ -419,7 +419,7 @@ class DataAccessAudit:
             created_by=str(user_id),
             updated_by=str(user_id)
         )
-        
+
         db.add(audit_record)
         db.flush()
 ```

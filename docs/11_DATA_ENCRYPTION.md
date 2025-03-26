@@ -17,10 +17,10 @@ While addressable, encryption is effectively required for any modern healthcare 
 NOVAMIND implements a defense-in-depth encryption strategy with multiple layers:
 
 1. **Transport Layer Security**: HTTPS/TLS 1.3 for all communications
-2. **Database Encryption**: Transparent Data Encryption (TDE) for the entire database
-3. **Field-Level Encryption**: Selective encryption of sensitive PHI fields
-4. **Encryption Key Management**: AWS KMS for secure key storage and rotation
-5. **Client-Side Encryption**: Additional encryption for highly sensitive data
+1. **Database Encryption**: Transparent Data Encryption (TDE) for the entire database
+1. **Field-Level Encryption**: Selective encryption of sensitive PHI fields
+1. **Encryption Key Management**: AWS KMS for secure key storage and rotation
+1. **Client-Side Encryption**: Additional encryption for highly sensitive data
 
 ## 4. Transport Layer Security
 
@@ -47,7 +47,7 @@ if __name__ == "__main__":
         ssl_ciphers="TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256",
         ssl_version=2,  # TLS 1.3
     )
-```
+```python
 
 ### 4.2 Secure Cookies Configuration
 
@@ -68,7 +68,7 @@ def set_auth_cookie(response: Response, token: str):
         expires=1800,
         path="/",
     )
-```
+```python
 
 ## 5. Database Encryption
 
@@ -115,7 +115,7 @@ async def get_db():
             yield session
         finally:
             await session.close()
-```
+```python
 
 ### 5.2 RDS Configuration with AWS
 
@@ -142,12 +142,12 @@ resource "aws_db_instance" "novamind_db" {
   monitoring_interval     = 60
   performance_insights_enabled = true
   skip_final_snapshot     = false
-  
+
   # Enable TLS/SSL
   iam_database_authentication_enabled = true
   enabled_cloudwatch_logs_exports     = ["postgresql", "upgrade"]
 }
-```
+```python
 
 ## 6. Field-Level Encryption
 
@@ -173,10 +173,10 @@ logger = get_logger(__name__)
 
 class EncryptionService:
     """Service for field-level encryption of sensitive data"""
-    
+
     def __init__(self):
         self.use_kms = settings.USE_AWS_KMS
-        
+
         if self.use_kms:
             # Initialize AWS KMS client
             self.kms_client = boto3.client(
@@ -199,20 +199,20 @@ class EncryptionService:
                 kdf.derive(settings.ENCRYPTION_MASTER_KEY.encode())
             )
             self.cipher = Fernet(key)
-    
+
     def encrypt(self, plaintext: str) -> str:
         """
         Encrypt plaintext data
-        
+
         Args:
             plaintext: String to encrypt
-            
+
         Returns:
             Base64-encoded encrypted string
         """
         if not plaintext:
             return plaintext
-            
+
         try:
             if self.use_kms:
                 # Encrypt with AWS KMS
@@ -224,26 +224,26 @@ class EncryptionService:
             else:
                 # Encrypt with local Fernet key
                 ciphertext = self.cipher.encrypt(plaintext.encode('utf-8')).decode('utf-8')
-                
+
             return ciphertext
-            
+
         except Exception as e:
             logger.error(f"Encryption error: {str(e)}")
             raise
-    
+
     def decrypt(self, ciphertext: str) -> str:
         """
         Decrypt ciphertext data
-        
+
         Args:
             ciphertext: Base64-encoded encrypted string
-            
+
         Returns:
             Decrypted plaintext
         """
         if not ciphertext:
             return ciphertext
-            
+
         try:
             if self.use_kms:
                 # Decrypt with AWS KMS
@@ -254,61 +254,61 @@ class EncryptionService:
             else:
                 # Decrypt with local Fernet key
                 plaintext = self.cipher.decrypt(ciphertext.encode('utf-8')).decode('utf-8')
-                
+
             return plaintext
-            
+
         except Exception as e:
             logger.error(f"Decryption error: {str(e)}")
             raise
-    
+
     def encrypt_dict(self, data: Dict[str, Any], fields_to_encrypt: List[str]) -> Dict[str, Any]:
         """
         Encrypt specified fields in a dictionary
-        
+
         Args:
             data: Dictionary with data to encrypt
             fields_to_encrypt: List of field names to encrypt
-            
+
         Returns:
             Dictionary with encrypted fields
         """
         if not data:
             return data
-            
+
         encrypted_data = data.copy()
-        
+
         for field in fields_to_encrypt:
             if field in encrypted_data and encrypted_data[field]:
                 # Only encrypt strings
                 if isinstance(encrypted_data[field], str):
                     encrypted_data[field] = self.encrypt(encrypted_data[field])
-                    
+
         return encrypted_data
-    
+
     def decrypt_dict(self, data: Dict[str, Any], fields_to_decrypt: List[str]) -> Dict[str, Any]:
         """
         Decrypt specified fields in a dictionary
-        
+
         Args:
             data: Dictionary with encrypted data
             fields_to_decrypt: List of field names to decrypt
-            
+
         Returns:
             Dictionary with decrypted fields
         """
         if not data:
             return data
-            
+
         decrypted_data = data.copy()
-        
+
         for field in fields_to_decrypt:
             if field in decrypted_data and decrypted_data[field]:
                 # Only decrypt strings
                 if isinstance(decrypted_data[field], str):
                     decrypted_data[field] = self.decrypt(decrypted_data[field])
-                    
+
         return decrypted_data
-```
+```python
 
 ### 6.2 SQLAlchemy Type for Encrypted Fields
 
@@ -328,15 +328,15 @@ encryption_service = EncryptionService()
 
 class EncryptedString(TypeDecorator):
     """SQLAlchemy type for encrypted string fields"""
-    
+
     impl = String
-    
+
     def process_bind_parameter(self, value: Optional[str], dialect: Any) -> Optional[str]:
         """Encrypt string before saving to database"""
         if value is not None:
             return encryption_service.encrypt(value)
         return value
-    
+
     def process_result_value(self, value: Optional[str], dialect: Any) -> Optional[str]:
         """Decrypt string when loading from database"""
         if value is not None:
@@ -346,23 +346,23 @@ class EncryptedString(TypeDecorator):
 
 class EncryptedJSON(TypeDecorator):
     """SQLAlchemy type for encrypted JSON fields"""
-    
+
     impl = String
-    
+
     def process_bind_parameter(self, value: Optional[Dict[str, Any]], dialect: Any) -> Optional[str]:
         """Encrypt JSON before saving to database"""
         if value is not None:
             json_str = json.dumps(value)
             return encryption_service.encrypt(json_str)
         return value
-    
+
     def process_result_value(self, value: Optional[str], dialect: Any) -> Optional[Dict[str, Any]]:
         """Decrypt JSON when loading from database"""
         if value is not None:
             json_str = encryption_service.decrypt(value)
             return json.loads(json_str)
         return value
-```
+```python
 
 ### 6.3 Using Encrypted Fields in Models
 
@@ -378,14 +378,14 @@ from app.infrastructure.database.types import EncryptedString, EncryptedJSON
 class Patient(Base):
     """Database model for patients with encrypted PHI fields"""
     __tablename__ = "patients"
-    
+
     id = sa.Column(sa.String(36), primary_key=True)
     created_at = sa.Column(sa.DateTime, nullable=False)
     updated_at = sa.Column(sa.DateTime, nullable=False)
-    
+
     # Regular fields (not encrypted)
     status = sa.Column(sa.String(20), nullable=False, index=True)
-    
+
     # Encrypted PHI fields
     first_name = sa.Column(EncryptedString(100), nullable=False)
     last_name = sa.Column(EncryptedString(100), nullable=False)
@@ -393,7 +393,7 @@ class Patient(Base):
     ssn = sa.Column(EncryptedString(11), nullable=True)
     email = sa.Column(EncryptedString(255), nullable=False)
     phone = sa.Column(EncryptedString(20), nullable=False)
-    
+
     # Encrypted address
     address_line1 = sa.Column(EncryptedString(255), nullable=True)
     address_line2 = sa.Column(EncryptedString(255), nullable=True)
@@ -401,22 +401,22 @@ class Patient(Base):
     state = sa.Column(EncryptedString(50), nullable=True)
     postal_code = sa.Column(EncryptedString(20), nullable=True)
     country = sa.Column(EncryptedString(50), nullable=True)
-    
+
     # Encrypted JSON field for additional data
     additional_info = sa.Column(EncryptedJSON, nullable=True)
-    
+
     # Foreign keys and relationships
     user_id = sa.Column(sa.String(36), sa.ForeignKey("users.id"), nullable=False)
     user = relationship("User", back_populates="patient")
-    
+
     # Searchable fields (duplicated for search)
     search_name = sa.Column(sa.String(255), nullable=False, index=True)
     search_email = sa.Column(sa.String(255), nullable=False, index=True)
-    
+
     __table_args__ = (
         sa.Index("ix_patients_search", "search_name", "search_email"),
     )
-```
+```python
 
 ## 7. Encryption Key Management
 
@@ -433,22 +433,22 @@ class Settings(BaseSettings):
     AWS_ACCESS_KEY_ID: str = Field(..., env="AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY: str = Field(..., env="AWS_SECRET_ACCESS_KEY")
     KMS_DATA_KEY_ID: str = Field(..., env="KMS_DATA_KEY_ID")
-    
+
     # Local encryption fallback (for development only)
     ENCRYPTION_MASTER_KEY: str = Field("", env="ENCRYPTION_MASTER_KEY")
     ENCRYPTION_SALT: str = Field("", env="ENCRYPTION_SALT")
-    
+
     # Fields that should be encrypted
     PHI_FIELDS: list = [
-        "first_name", "last_name", "date_of_birth", "ssn", 
+        "first_name", "last_name", "date_of_birth", "ssn",
         "email", "phone", "address_line1", "address_line2",
         "city", "state", "postal_code", "country",
         "diagnosis", "medication", "treatment_notes"
     ]
-    
+
     class Config:
         env_file = ".env"
-```
+```python
 
 ### 7.2 Key Rotation Strategy
 
@@ -470,7 +470,7 @@ logger = get_logger(__name__)
 async def rotate_encryption_keys(old_key_id: str, new_key_id: str):
     """
     Rotate encryption keys by re-encrypting all sensitive data
-    
+
     Args:
         old_key_id: Current KMS key ID
         new_key_id: New KMS key ID
@@ -483,26 +483,26 @@ async def rotate_encryption_keys(old_key_id: str, new_key_id: str):
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
         )
-        
+
         # Initialize encryption service with old key
         old_encryption_service = EncryptionService()
-        
+
         # Create a new encryption service with new key
         new_encryption_service = EncryptionService()
         new_encryption_service.data_key_id = new_key_id
-        
+
         # Get database session
         async with get_db() as db:
             # Re-encrypt patient data (process in batches)
             await _reencrypt_patient_data(
                 db, old_encryption_service, new_encryption_service
             )
-            
+
             # Re-encrypt other sensitive data tables...
             # [similar implementation for other tables]
-            
+
         logger.info(f"Successfully rotated encryption keys from {old_key_id} to {new_key_id}")
-        
+
     except Exception as e:
         logger.error(f"Failed to rotate encryption keys: {str(e)}")
         raise
@@ -515,16 +515,16 @@ async def _reencrypt_patient_data(
     # Query patients in batches
     batch_size = 100
     offset = 0
-    
+
     while True:
         # Get batch of patients
         query = sa.select(Patient).offset(offset).limit(batch_size)
         result = await db.execute(query)
         patients = result.scalars().all()
-        
+
         if not patients:
             break
-            
+
         # Process each patient
         for patient in patients:
             # Re-encrypt all PHI fields
@@ -534,25 +534,25 @@ async def _reencrypt_patient_data(
                     encrypted_value = getattr(patient.__table__.c, field_name).expression.compile(
                         compile_kwargs={"literal_binds": True}
                     )
-                    
+
                     # Decrypt with old key
                     plaintext = old_encryption_service.decrypt(encrypted_value)
-                    
+
                     # Encrypt with new key
                     new_encrypted = new_encryption_service.encrypt(plaintext)
-                    
+
                     # Update field
                     setattr(patient, field_name, new_encrypted)
-            
+
             # Update patient
             db.add(patient)
-        
+
         # Commit batch
         await db.commit()
-        
+
         # Move to next batch
         offset += batch_size
-```
+```python
 
 ## 8. Client-Side Encryption
 
@@ -599,7 +599,7 @@ export const deriveEncryptionKey = (
     iterations: 10000
   }).toString();
 };
-```
+```python
 
 ## 9. Searchable Encryption
 
@@ -620,16 +620,16 @@ logger = get_logger(__name__)
 
 class PatientRepository:
     """Repository for patient data with searchable encryption"""
-    
+
     def __init__(self, session: AsyncSession):
         self.session = session
-    
+
     async def create_patient(self, patient: PatientEntity) -> PatientEntity:
         """Create a new patient record"""
         # Create search fields for encrypted data
         search_name = f"{patient.first_name} {patient.last_name}".lower()
         search_email = patient.email.lower()
-        
+
         db_patient = Patient(
             id=patient.id,
             created_at=patient.created_at,
@@ -653,35 +653,35 @@ class PatientRepository:
             search_name=search_name,
             search_email=search_email,
         )
-        
+
         self.session.add(db_patient)
         await self.session.commit()
         await self.session.refresh(db_patient)
-        
+
         # Convert to domain entity
         return self._to_entity(db_patient)
-    
+
     async def search_patients(self, search_term: str) -> List[PatientEntity]:
         """
         Search patients by name or email
-        
+
         Uses searchable non-encrypted fields for performance
         """
         # Normalize search term
         search_term = f"%{search_term.lower()}%"
-        
+
         # Search using non-encrypted search fields
         query = select(Patient).where(
             (Patient.search_name.like(search_term)) |
             (Patient.search_email.like(search_term))
         )
-        
+
         result = await self.session.execute(query)
         patients = result.scalars().all()
-        
+
         # Convert to domain entities
         return [self._to_entity(p) for p in patients]
-    
+
     def _to_entity(self, db_patient: Patient) -> PatientEntity:
         """Convert DB model to domain entity"""
         return PatientEntity(
@@ -704,7 +704,7 @@ class PatientRepository:
             additional_info=db_patient.additional_info,
             user_id=db_patient.user_id,
         )
-```
+```python
 
 ## 10. Backup Encryption
 
@@ -733,20 +733,20 @@ async def backup_encrypted_data():
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
         )
-        
+
         # Generate backup timestamp
         timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-        
+
         # Get database session
         async with get_db() as db:
             # Backup patients (with encrypted fields)
             await _backup_table(db, s3_client, "patients", timestamp)
-            
+
             # Backup other tables
             # [similar implementation for other tables]
-        
+
         logger.info(f"Successfully created encrypted backup at {timestamp}")
-        
+
     except Exception as e:
         logger.error(f"Failed to create backup: {str(e)}")
         raise
@@ -759,32 +759,32 @@ async def _backup_table(db, s3_client, table_name: str, timestamp: str):
         "patients": Patient,
         # Add other tables
     }
-    
+
     model = model_map.get(table_name)
     if not model:
         logger.error(f"Unknown table for backup: {table_name}")
         return
-    
+
     # Query all records (in batches)
     batch_size = 1000
     offset = 0
     batch_num = 0
-    
+
     while True:
         # Get batch of records
         query = select(model).offset(offset).limit(batch_size)
         result = await db.execute(query)
         records = result.scalars().all()
-        
+
         if not records:
             break
-            
+
         # Convert to dictionaries
         data = [
             {c.name: getattr(record, c.name) for c in record.__table__.columns}
             for record in records
         ]
-        
+
         # Save to S3 (data is already encrypted at field level)
         key = f"backups/{timestamp}/{table_name}/batch_{batch_num}.json"
         s3_client.put_object(
@@ -793,24 +793,24 @@ async def _backup_table(db, s3_client, table_name: str, timestamp: str):
             Body=json.dumps(data, default=str),
             ServerSideEncryption='AES256'  # Additional S3 encryption
         )
-        
+
         # Move to next batch
         offset += batch_size
         batch_num += 1
-```
+```python
 
 ## 11. Best Practices for HIPAA-Compliant Encryption
 
 1. **Defense in Depth**: Implement multiple layers of encryption
-2. **Key Management**: Use a robust key management system (AWS KMS)
-3. **Field-Level Encryption**: Encrypt PHI at the field level
-4. **Key Rotation**: Regularly rotate encryption keys
-5. **No PHI in Logs**: Ensure PHI is never logged, even in encrypted form
-6. **Secure Key Storage**: Never store encryption keys alongside encrypted data
-7. **Minimal Access**: Restrict access to encryption keys
-8. **Encryption in Transit**: Always use TLS 1.3 for data transmission
-9. **Backup Encryption**: Ensure all backups are encrypted
-10. **Documentation**: Maintain documentation of encryption methods for HIPAA audits
+1. **Key Management**: Use a robust key management system (AWS KMS)
+1. **Field-Level Encryption**: Encrypt PHI at the field level
+1. **Key Rotation**: Regularly rotate encryption keys
+1. **No PHI in Logs**: Ensure PHI is never logged, even in encrypted form
+1. **Secure Key Storage**: Never store encryption keys alongside encrypted data
+1. **Minimal Access**: Restrict access to encryption keys
+1. **Encryption in Transit**: Always use TLS 1.3 for data transmission
+1. **Backup Encryption**: Ensure all backups are encrypted
+1. **Documentation**: Maintain documentation of encryption methods for HIPAA audits
 
 ## 12. Conclusion
 

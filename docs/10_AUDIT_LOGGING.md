@@ -31,9 +31,9 @@ The audit logging system must track:
 NOVAMIND implements a multi-layered audit logging strategy:
 
 1. **Application Level**: Detailed events within the application
-2. **Database Level**: Data access and changes
-3. **Infrastructure Level**: Network and system events
-4. **Storage Level**: S3/CloudWatch secure storage
+1. **Database Level**: Data access and changes
+1. **Infrastructure Level**: Network and system events
+1. **Storage Level**: S3/CloudWatch secure storage
 
 ## 4. Core Components
 
@@ -55,7 +55,7 @@ class AuditEventType(Enum):
     PHI_CREATE = "phi_create"
     PHI_UPDATE = "phi_update"
     PHI_DELETE = "phi_delete"
-    
+
     # Authentication events
     LOGIN_SUCCESS = "login_success"
     LOGIN_FAILURE = "login_failure"
@@ -64,28 +64,28 @@ class AuditEventType(Enum):
     PASSWORD_RESET_COMPLETE = "password_reset_complete"
     MFA_SUCCESS = "mfa_success"
     MFA_FAILURE = "mfa_failure"
-    
+
     # Authorization events
     ROLE_ASSIGNED = "role_assigned"
     ROLE_REMOVED = "role_removed"
     PERMISSION_GRANTED = "permission_granted"
     PERMISSION_DENIED = "permission_denied"
-    
+
     # User management events
     USER_CREATED = "user_created"
     USER_UPDATED = "user_updated"
     USER_DISABLED = "user_disabled"
     USER_ENABLED = "user_enabled"
-    
+
     # System events
     SYSTEM_STARTUP = "system_startup"
     SYSTEM_SHUTDOWN = "system_shutdown"
     SYSTEM_CONFIGURATION_CHANGE = "system_configuration_change"
-    
+
     # API events
     API_REQUEST = "api_request"
     API_RESPONSE = "api_response"
-    
+
     # Data export events
     DATA_EXPORT = "data_export"
     REPORT_GENERATED = "report_generated"
@@ -104,10 +104,10 @@ class AuditEvent(BaseModel):
     action: str
     status: str  # 'success', 'failure', 'error'
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    
+
     class Config:
         from_attributes = True
-```
+```python
 
 ### 4.2 Audit Database Model
 
@@ -123,7 +123,7 @@ from app.infrastructure.database.base import Base
 class AuditLog(Base):
     """Database model for audit logs"""
     __tablename__ = "audit_logs"
-    
+
     id = sa.Column(sa.String(36), primary_key=True)
     timestamp = sa.Column(sa.DateTime, nullable=False, index=True)
     event_type = sa.Column(sa.String(50), nullable=False, index=True)
@@ -135,17 +135,17 @@ class AuditLog(Base):
     action = sa.Column(sa.String(100), nullable=False)
     status = sa.Column(sa.String(20), nullable=False, index=True)
     metadata = sa.Column(JSONB, nullable=True)
-    
+
     # Relationships
     user = relationship("User", back_populates="audit_logs")
-    
+
     __table_args__ = (
         # Index for efficient access pattern queries
         sa.Index("ix_audit_logs_user_timestamp", "user_id", "timestamp"),
         sa.Index("ix_audit_logs_resource_timestamp", "resource_type", "resource_id", "timestamp"),
         sa.Index("ix_audit_logs_event_type_timestamp", "event_type", "timestamp"),
     )
-```
+```python
 
 ## 5. Audit Service Implementation
 
@@ -177,10 +177,10 @@ logger = get_logger(__name__)
 
 class AuditService:
     """Service for creating and managing audit logs"""
-    
+
     def __init__(self, db: AsyncSession = Depends(get_db)):
         self.db = db
-        
+
         # Optional AWS CloudWatch integration for redundant logging
         if settings.CLOUDWATCH_ENABLED:
             self.cloudwatch = boto3.client(
@@ -193,7 +193,7 @@ class AuditService:
             self.log_stream = f"novamind-audit-{datetime.utcnow().strftime('%Y-%m-%d')}"
         else:
             self.cloudwatch = None
-    
+
     async def log_event(
         self,
         event_type: AuditEventType,
@@ -207,7 +207,7 @@ class AuditService:
     ) -> AuditEvent:
         """
         Log an audit event
-        
+
         Args:
             event_type: Type of audit event
             action: Description of the action
@@ -217,7 +217,7 @@ class AuditService:
             status: Outcome status (success, failure, error)
             metadata: Additional data about the event
             request: FastAPI request object (for extracting IP, user agent)
-            
+
         Returns:
             Created audit event
         """
@@ -228,12 +228,12 @@ class AuditService:
             if request:
                 ip_address = request.client.host if request.client else None
                 user_agent = request.headers.get("user-agent")
-            
+
             # Sanitize metadata to remove PHI
             safe_metadata = {}
             if metadata:
                 safe_metadata = sanitize_phi(metadata, settings.PHI_FIELDS)
-            
+
             # Create audit event
             event = AuditEvent(
                 id=str(uuid.uuid4()),
@@ -248,7 +248,7 @@ class AuditService:
                 status=status,
                 metadata=safe_metadata,
             )
-            
+
             # Save to database
             db_event = AuditLog(
                 id=event.id,
@@ -263,16 +263,16 @@ class AuditService:
                 status=event.status,
                 metadata=event.metadata,
             )
-            
+
             self.db.add(db_event)
             await self.db.commit()
-            
+
             # Also log to CloudWatch if enabled
             if self.cloudwatch:
                 self._log_to_cloudwatch(event)
-            
+
             return event
-            
+
         except Exception as e:
             # Fallback to regular logging if audit logging fails
             logger.error(
@@ -287,7 +287,7 @@ class AuditService:
             )
             # Re-raise to allow calling code to handle the error
             raise
-    
+
     def _log_to_cloudwatch(self, event: AuditEvent):
         """Log an event to AWS CloudWatch (non-async backup)"""
         try:
@@ -299,12 +299,12 @@ class AuditService:
                 )
             except self.cloudwatch.exceptions.ResourceAlreadyExistsException:
                 pass  # Stream already exists
-            
+
             # Convert event to JSON string
             event_dict = event.dict()
             event_dict["event_type"] = event.event_type.value
             event_json = json.dumps(event_dict)
-            
+
             # Send to CloudWatch
             self.cloudwatch.put_log_events(
                 logGroupName=self.log_group,
@@ -316,11 +316,11 @@ class AuditService:
                     }
                 ]
             )
-            
+
         except Exception as e:
             # Failure to log to CloudWatch should not break the application
             logger.error(f"Failed to log to CloudWatch: {str(e)}")
-    
+
     async def get_audit_logs(
         self,
         user_id: Optional[str] = None,
@@ -334,7 +334,7 @@ class AuditService:
     ) -> List[AuditEvent]:
         """
         Query audit logs with filters
-        
+
         Args:
             user_id: Filter by user ID
             resource_type: Filter by resource type
@@ -344,46 +344,46 @@ class AuditService:
             end_time: Filter by end time
             limit: Maximum number of results
             offset: Pagination offset
-            
+
         Returns:
             List of matching audit events
         """
         query = select(AuditLog)
-        
+
         # Apply filters
         filters = []
         if user_id:
             filters.append(AuditLog.user_id == user_id)
-        
+
         if resource_type:
             filters.append(AuditLog.resource_type == resource_type)
-        
+
         if resource_id:
             filters.append(AuditLog.resource_id == resource_id)
-        
+
         if event_type:
             if isinstance(event_type, AuditEventType):
                 filters.append(AuditLog.event_type == event_type.value)
             else:
                 filters.append(AuditLog.event_type == event_type)
-        
+
         if start_time:
             filters.append(AuditLog.timestamp >= start_time)
-        
+
         if end_time:
             filters.append(AuditLog.timestamp <= end_time)
-        
+
         # Combine filters and apply pagination
         if filters:
             query = query.where(and_(*filters))
-        
+
         query = query.order_by(AuditLog.timestamp.desc())
         query = query.limit(limit).offset(offset)
-        
+
         # Execute query
         result = await self.db.execute(query)
         audit_logs = result.scalars().all()
-        
+
         # Convert to domain entities
         return [
             AuditEvent(
@@ -401,7 +401,7 @@ class AuditService:
             )
             for log in audit_logs
         ]
-```
+```python
 
 ## 6. Audit Middleware for API Requests
 
@@ -424,11 +424,11 @@ logger = get_logger(__name__)
 
 class AuditMiddleware(BaseHTTPMiddleware):
     """Middleware for auditing all API requests"""
-    
+
     def __init__(self, app, audit_service: AuditService):
         super().__init__(app)
         self.audit_service = audit_service
-        
+
         # Paths that should not be audited (to avoid noise)
         self.skip_paths = [
             "/api/healthcheck",
@@ -436,20 +436,20 @@ class AuditMiddleware(BaseHTTPMiddleware):
             "/api/redoc",
             "/openapi.json",
         ]
-    
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         # Skip auditing for excluded paths
         if any(request.url.path.startswith(path) for path in self.skip_paths):
             return await call_next(request)
-        
+
         # Record start time
         start_time = time.time()
-        
+
         # Try to extract user ID from request state
         user_id = None
         if hasattr(request.state, "user") and request.state.user:
             user_id = request.state.user.get("sub")
-        
+
         # Create response and catch exceptions
         status_code = 500
         try:
@@ -463,10 +463,10 @@ class AuditMiddleware(BaseHTTPMiddleware):
         finally:
             # Calculate request duration
             duration_ms = round((time.time() - start_time) * 1000)
-            
+
             # Determine status based on status code
             status = "success" if 200 <= status_code < 400 else "failure"
-            
+
             # Log the request
             try:
                 await self.audit_service.log_event(
@@ -485,7 +485,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
                 )
             except Exception as e:
                 logger.error(f"Failed to audit request: {str(e)}")
-```
+```python
 
 ## 7. Integrating Audit Logging
 
@@ -512,19 +512,19 @@ def create_app() -> FastAPI:
         description="HIPAA-compliant concierge psychiatry platform API",
         version="1.0.0",
     )
-    
+
     # Add audit middleware
     @app.on_event("startup")
     async def startup_audit():
         # Get audit service
         audit_service = AuditService()
-        
+
         # Add middleware
         app.add_middleware(
             AuditMiddleware,
             audit_service=audit_service
         )
-        
+
         # Log application startup
         await audit_service.log_event(
             event_type=AuditEventType.SYSTEM_STARTUP,
@@ -535,7 +535,7 @@ def create_app() -> FastAPI:
                 "version": "1.0.0",
             }
         )
-    
+
     # Log application shutdown
     @app.on_event("shutdown")
     async def shutdown_audit():
@@ -545,12 +545,12 @@ def create_app() -> FastAPI:
             action="Application shutdown",
             status="success"
         )
-    
+
     # Include API routers
     # ...
-    
+
     return app
-```
+```python
 
 ### 7.2 Examples of Common Audit Logging
 
@@ -571,7 +571,7 @@ await audit_service.log_event(
     },
     request=request
 )
-```
+```python
 
 #### Failed Login Attempt
 
@@ -590,7 +590,7 @@ await audit_service.log_event(
     },
     request=request
 )
-```
+```python
 
 ## 8. Audit Log Retention and Archiving
 
@@ -617,7 +617,7 @@ logger = get_logger(__name__)
 async def archive_audit_logs(db: AsyncSession = Depends(get_db)):
     """
     Archive audit logs older than the retention period
-    
+
     This moves logs to S3 for long-term HIPAA-compliant storage
     """
     try:
@@ -625,16 +625,16 @@ async def archive_audit_logs(db: AsyncSession = Depends(get_db)):
         cutoff_date = datetime.datetime.utcnow() - datetime.timedelta(
             days=settings.AUDIT_ACTIVE_RETENTION_DAYS
         )
-        
+
         # Query logs older than cutoff date
         query = select(AuditLog).where(AuditLog.timestamp < cutoff_date)
         result = await db.execute(query)
         old_logs = result.scalars().all()
-        
+
         if not old_logs:
             logger.info("No audit logs to archive")
             return
-        
+
         # Connect to S3
         s3_client = boto3.client(
             's3',
@@ -642,16 +642,16 @@ async def archive_audit_logs(db: AsyncSession = Depends(get_db)):
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
         )
-        
+
         # Process in batches to avoid memory issues
         batch_size = 1000
         for i in range(0, len(old_logs), batch_size):
             batch = old_logs[i:i+batch_size]
-            
+
             # Archive to S3
             archive_date = datetime.datetime.utcnow().strftime('%Y-%m-%d')
             archive_key = f"audit-archives/{archive_date}/batch-{i}.json"
-            
+
             # Convert logs to JSON
             logs_json = json.dumps([
                 {
@@ -668,7 +668,7 @@ async def archive_audit_logs(db: AsyncSession = Depends(get_db)):
                 }
                 for log in batch
             ], default=str)
-            
+
             # Upload to S3 with encryption
             s3_client.put_object(
                 Bucket=settings.AUDIT_ARCHIVE_BUCKET,
@@ -676,19 +676,19 @@ async def archive_audit_logs(db: AsyncSession = Depends(get_db)):
                 Body=logs_json,
                 ServerSideEncryption='AES256'
             )
-            
+
             # Delete archived logs
             for log in batch:
                 await db.delete(log)
-            
+
             await db.commit()
-            
+
             logger.info(f"Archived {len(batch)} audit logs to S3: {archive_key}")
-        
+
     except Exception as e:
         logger.error(f"Failed to archive audit logs: {str(e)}")
         raise
-```
+```python
 
 ## 9. Audit Log Reporting and Analysis
 
@@ -739,7 +739,7 @@ async def get_audit_logs(
         limit=limit,
         offset=offset,
     )
-    
+
     return [AuditLogResponse.from_orm(log) for log in audit_logs]
 
 
@@ -767,22 +767,22 @@ async def get_patient_audit_logs(
         limit=limit,
         offset=offset,
     )
-    
+
     return [AuditLogResponse.from_orm(log) for log in audit_logs]
-```
+```python
 
 ## 10. Best Practices for HIPAA-Compliant Audit Logging
 
 1. **Record Complete Histories**: Log all create, read, update, delete (CRUD) operations on PHI.
-2. **Log Failed Access Attempts**: Record failed login attempts and unauthorized access attempts.
-3. **Never Log PHI**: Audit logs should reference resource IDs but not include actual PHI.
-4. **Immutable Logs**: Ensure logs cannot be modified or deleted by users.
-5. **Secure Transmission**: Encrypt logs during transmission to storage.
-6. **Secure Storage**: Store logs in encrypted, access-controlled storage.
-7. **Regular Reviews**: Establish a process for regular review of audit logs.
-8. **Alerts for Suspicious Activity**: Set up alerts for unusual access patterns.
-9. **Separation of Duties**: Ensure administrators can't modify their own audit trails.
-10. **Automated Reporting**: Create regular compliance reports for review.
+1. **Log Failed Access Attempts**: Record failed login attempts and unauthorized access attempts.
+1. **Never Log PHI**: Audit logs should reference resource IDs but not include actual PHI.
+1. **Immutable Logs**: Ensure logs cannot be modified or deleted by users.
+1. **Secure Transmission**: Encrypt logs during transmission to storage.
+1. **Secure Storage**: Store logs in encrypted, access-controlled storage.
+1. **Regular Reviews**: Establish a process for regular review of audit logs.
+1. **Alerts for Suspicious Activity**: Set up alerts for unusual access patterns.
+1. **Separation of Duties**: Ensure administrators can't modify their own audit trails.
+1. **Automated Reporting**: Create regular compliance reports for review.
 
 ## 11. Integration with Other Systems
 
@@ -806,25 +806,25 @@ logger = get_logger(__name__)
 
 class SIEMService:
     """Service for sending audit events to SIEM"""
-    
+
     def __init__(self):
         self.enabled = settings.SIEM_ENABLED
         self.endpoint = settings.SIEM_ENDPOINT
         self.api_key = settings.SIEM_API_KEY
-    
+
     async def send_event(self, event: AuditEvent) -> bool:
         """
         Send an audit event to SIEM
-        
+
         Args:
             event: Audit event to send
-            
+
         Returns:
             Success status
         """
         if not self.enabled:
             return False
-        
+
         try:
             # Convert event to SIEM format
             siem_event = {
@@ -841,7 +841,7 @@ class SIEMService:
                 "source_application": "novamind",
                 "environment": settings.ENVIRONMENT,
             }
-            
+
             # Send to SIEM
             response = requests.post(
                 self.endpoint,
@@ -852,19 +852,19 @@ class SIEMService:
                 json=siem_event,
                 timeout=5,  # Short timeout to avoid blocking
             )
-            
+
             if response.status_code != 200:
                 logger.warning(
                     f"Failed to send event to SIEM: {response.status_code} {response.text}"
                 )
                 return False
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Error sending event to SIEM: {str(e)}")
             return False
-```
+```python
 
 ## 12. Conclusion
 

@@ -10,7 +10,7 @@ Role-Based Access Control (RBAC) is a critical security feature for our HIPAA-co
 
 Our concierge psychiatry platform implements a granular RBAC system with the following role hierarchy:
 
-```
+```text
 SuperAdmin
 ├── Administrator
 │   └── OfficeManager
@@ -18,7 +18,7 @@ SuperAdmin
 └── Psychiatrist
     └── Therapist
         └── Patient
-```
+```python
 
 Each role inherits permissions from roles below it in the hierarchy and grants additional specific permissions.
 
@@ -39,29 +39,29 @@ class Permission(Enum):
     CREATE_PATIENT = "create_patient"
     UPDATE_PATIENT = "update_patient"
     DELETE_PATIENT = "delete_patient"
-    
+
     # Appointment permissions
     VIEW_APPOINTMENT = "view_appointment"
     CREATE_APPOINTMENT = "create_appointment"
     UPDATE_APPOINTMENT = "update_appointment"
     CANCEL_APPOINTMENT = "cancel_appointment"
-    
+
     # Billing permissions
     VIEW_BILLING = "view_billing"
     CREATE_BILLING = "create_billing"
     UPDATE_BILLING = "update_billing"
     PROCESS_PAYMENT = "process_payment"
-    
+
     # Prescription permissions
     VIEW_PRESCRIPTION = "view_prescription"
     CREATE_PRESCRIPTION = "create_prescription"
     UPDATE_PRESCRIPTION = "update_prescription"
-    
+
     # Treatment permissions
     VIEW_TREATMENT = "view_treatment"
     CREATE_TREATMENT = "create_treatment"
     UPDATE_TREATMENT = "update_treatment"
-    
+
     # Admin permissions
     MANAGE_USERS = "manage_users"
     MANAGE_ROLES = "manage_roles"
@@ -84,7 +84,7 @@ class RolePermissionMapping(BaseModel):
     """Maps roles to their assigned permissions"""
     role: Role
     permissions: List[Permission]
-    
+
     class Config:
         from_attributes = True
 
@@ -97,10 +97,10 @@ class UserRole(BaseModel):
     assigned_by: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
-```
+```python
 
 ## 3. RBAC Service Implementation
 
@@ -118,11 +118,11 @@ logger = get_logger(__name__)
 
 class RBACService:
     """Service to manage role-based access control"""
-    
+
     def __init__(self):
         self._role_permissions: Dict[Role, Set[Permission]] = self._initialize_role_permissions()
         self._role_hierarchy: Dict[Role, List[Role]] = self._initialize_role_hierarchy()
-    
+
     def _initialize_role_permissions(self) -> Dict[Role, Set[Permission]]:
         """Define base permissions for each role"""
         permissions = {
@@ -136,7 +136,7 @@ class RBACService:
                 Permission.VIEW_PRESCRIPTION,
                 Permission.VIEW_TREATMENT,
             },
-            
+
             # Therapist permissions
             Role.THERAPIST: {
                 Permission.VIEW_PATIENT,
@@ -148,7 +148,7 @@ class RBACService:
                 Permission.CREATE_TREATMENT,
                 Permission.UPDATE_TREATMENT,
             },
-            
+
             # Psychiatrist permissions
             Role.PSYCHIATRIST: {
                 Permission.VIEW_PATIENT,
@@ -164,7 +164,7 @@ class RBACService:
                 Permission.CREATE_TREATMENT,
                 Permission.UPDATE_TREATMENT,
             },
-            
+
             # Staff permissions
             Role.STAFF: {
                 Permission.VIEW_PATIENT,
@@ -177,7 +177,7 @@ class RBACService:
                 Permission.CREATE_BILLING,
                 Permission.UPDATE_BILLING,
             },
-            
+
             # Office Manager permissions
             Role.OFFICE_MANAGER: {
                 Permission.VIEW_PATIENT,
@@ -193,7 +193,7 @@ class RBACService:
                 Permission.PROCESS_PAYMENT,
                 Permission.VIEW_AUDIT_LOG,
             },
-            
+
             # Administrator permissions
             Role.ADMINISTRATOR: {
                 Permission.VIEW_PATIENT,
@@ -212,13 +212,13 @@ class RBACService:
                 Permission.MANAGE_ROLES,
                 Permission.VIEW_AUDIT_LOG,
             },
-            
+
             # Super Admin permissions (all permissions)
             Role.SUPER_ADMIN: set(Permission),
         }
-        
+
         return permissions
-    
+
     def _initialize_role_hierarchy(self) -> Dict[Role, List[Role]]:
         """Define role hierarchy for permission inheritance"""
         return {
@@ -230,29 +230,29 @@ class RBACService:
             Role.STAFF: [],
             Role.PATIENT: [],
         }
-    
+
     def get_role_permissions(self, role: Role) -> Set[Permission]:
         """
         Get all permissions for a role including inherited permissions
-        
+
         Args:
             role: The role to get permissions for
-            
+
         Returns:
             Set of all permissions for the role
         """
         # Start with direct permissions
         all_permissions = self._role_permissions.get(role, set()).copy()
-        
+
         # Add inherited permissions through recursion
         self._add_inherited_permissions(role, all_permissions)
-        
+
         return all_permissions
-    
+
     def _add_inherited_permissions(self, role: Role, permissions_set: Set[Permission]):
         """
         Recursively add permissions from child roles
-        
+
         Args:
             role: Current role
             permissions_set: Set to add permissions to
@@ -261,15 +261,15 @@ class RBACService:
             child_permissions = self._role_permissions.get(child_role, set())
             permissions_set.update(child_permissions)
             self._add_inherited_permissions(child_role, permissions_set)
-    
+
     def has_permission(self, user_roles: List[Role], permission: Permission) -> bool:
         """
         Check if any of the user's roles grants a specific permission
-        
+
         Args:
             user_roles: List of roles assigned to the user
             permission: Permission to check
-            
+
         Returns:
             True if permission is granted
         """
@@ -277,9 +277,9 @@ class RBACService:
             role_permissions = self.get_role_permissions(role)
             if permission in role_permissions:
                 return True
-        
+
         return False
-```
+```python
 
 ## 4. Applying RBAC in FastAPI Endpoints
 
@@ -305,7 +305,7 @@ def get_current_user(request: Request) -> dict:
     """Dependency to extract current user from request state"""
     if not hasattr(request.state, "user"):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated"
         )
     return request.state.user
@@ -314,20 +314,20 @@ def get_current_user(request: Request) -> dict:
 def requires_permission(permission: Permission):
     """
     Dependency factory to check for a specific permission
-    
+
     Args:
         permission: Required permission
-        
+
     Returns:
         Dependency function that checks the permission
     """
     def dependency(current_user: dict = Depends(get_current_user)) -> dict:
         # Extract roles from user info
         user_roles = current_user.get("roles", [])
-        
+
         # Convert string roles to Role enum
         roles = [Role(role) for role in user_roles if role in [r.value for r in Role]]
-        
+
         # Check if user has the required permission
         if not rbac_service.has_permission(roles, permission):
             # HIPAA-compliant audit logging
@@ -339,31 +339,31 @@ def requires_permission(permission: Permission):
                     "roles": user_roles,
                 }
             )
-            
+
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Permission denied: {permission.value}"
             )
-        
+
         return current_user
-    
+
     return dependency
 
 
 def requires_role(role: Role):
     """
     Dependency factory to check for a specific role
-    
+
     Args:
         role: Required role
-        
+
     Returns:
         Dependency function that checks the role
     """
     def dependency(current_user: dict = Depends(get_current_user)) -> dict:
         # Extract roles from user info
         user_roles = current_user.get("roles", [])
-        
+
         # Check if user has the required role
         if role.value not in user_roles:
             # HIPAA-compliant audit logging
@@ -375,16 +375,16 @@ def requires_role(role: Role):
                     "user_roles": user_roles,
                 }
             )
-            
+
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Role required: {role.value}"
             )
-        
+
         return current_user
-    
+
     return dependency
-```
+```python
 
 ### 4.2 Usage in API Endpoints
 
@@ -396,7 +396,7 @@ from fastapi import APIRouter, Depends, status
 from app.domain.entities.rbac import Permission, Role
 from app.presentation.api.dependencies.auth import requires_permission, requires_role
 from app.presentation.schemas.patient import (
-    PatientCreate, 
+    PatientCreate,
     PatientResponse,
     PatientUpdate
 )
@@ -474,7 +474,7 @@ async def get_patient_audit_log(
 ):
     """Get patient audit log (requires ADMINISTRATOR role)"""
     return await audit_service.get_patient_audit_log(patient_id)
-```
+```python
 
 ## 5. Role Assignment
 
@@ -498,21 +498,21 @@ logger = get_logger(__name__)
 
 class RoleRepository:
     """Repository for managing user roles"""
-    
+
     def __init__(self, session: AsyncSession):
         self.session = session
-    
+
     async def assign_role(
         self, user_id: str, role: Role, assigned_by: Optional[str] = None
     ) -> UserRole:
         """
         Assign a role to a user
-        
+
         Args:
             user_id: User ID
             role: Role to assign
             assigned_by: ID of user making the assignment
-            
+
         Returns:
             Created user role
         """
@@ -522,39 +522,39 @@ class RoleRepository:
             assigned_by=assigned_by,
             created_at=datetime.utcnow()
         )
-        
+
         self.session.add(user_role)
         await self.session.commit()
         await self.session.refresh(user_role)
-        
+
         # Convert to domain entity
         return UserRole.from_orm(user_role)
-    
+
     async def get_user_roles(self, user_id: str) -> List[UserRole]:
         """
         Get all roles assigned to a user
-        
+
         Args:
             user_id: User ID
-            
+
         Returns:
             List of user roles
         """
         query = select(UserRoleModel).where(UserRoleModel.user_id == user_id)
         result = await self.session.execute(query)
         user_roles = result.scalars().all()
-        
+
         # Convert to domain entities
         return [UserRole.from_orm(ur) for ur in user_roles]
-    
+
     async def remove_role(self, user_id: str, role: Role) -> bool:
         """
         Remove a role from a user
-        
+
         Args:
             user_id: User ID
             role: Role to remove
-            
+
         Returns:
             True if role was removed
         """
@@ -564,15 +564,15 @@ class RoleRepository:
         )
         result = await self.session.execute(query)
         user_role = result.scalar_one_or_none()
-        
+
         if not user_role:
             return False
-        
+
         await self.session.delete(user_role)
         await self.session.commit()
-        
+
         return True
-```
+```python
 
 ### 5.2 Role Management Endpoints
 
@@ -611,14 +611,14 @@ async def assign_role(
     try:
         # Convert string role to enum
         role = Role(role_assignment.role)
-        
+
         # Assign role to user
         user_role = await role_repository.assign_role(
             user_id=user_id,
             role=role,
             assigned_by=current_user.get("sub")
         )
-        
+
         # HIPAA-compliant audit logging
         logger.info(
             "Role assigned",
@@ -628,9 +628,9 @@ async def assign_role(
                 "role": role.value,
             }
         )
-        
+
         return UserRoleResponse.from_orm(user_role)
-        
+
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -667,16 +667,16 @@ async def remove_role(
     try:
         # Convert string role to enum
         role_enum = Role(role)
-        
+
         # Remove role from user
         success = await role_repository.remove_role(user_id, role_enum)
-        
+
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Role not found: {role}"
             )
-        
+
         # HIPAA-compliant audit logging
         logger.info(
             "Role removed",
@@ -686,15 +686,15 @@ async def remove_role(
                 "role": role,
             }
         )
-        
+
         return None
-        
+
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid role: {role}"
         )
-```
+```python
 
 ## 6. Client-Side RBAC Implementation
 
@@ -749,7 +749,7 @@ const rolePermissions: Record<Role, Permission[]> = {
 // Helper to get all permissions for a role
 const getRolePermissions = (role: Role): Set<Permission> => {
   const permissions = new Set<Permission>(rolePermissions[role] || []);
-  
+
   // Add inherited permissions
   const addInheritedPermissions = (currentRole: Role) => {
     const childRoles = roleHierarchy[currentRole] || [];
@@ -759,7 +759,7 @@ const getRolePermissions = (role: Role): Set<Permission> => {
       addInheritedPermissions(childRole);
     }
   };
-  
+
   addInheritedPermissions(role);
   return permissions;
 };
@@ -767,10 +767,10 @@ const getRolePermissions = (role: Role): Set<Permission> => {
 // React hook for permission checks
 export const usePermission = () => {
   const { user } = useAuth();
-  
+
   const hasPermission = (permission: Permission): boolean => {
     if (!user || !user.roles) return false;
-    
+
     // Check each user role
     for (const roleStr of user.roles) {
       try {
@@ -781,15 +781,15 @@ export const usePermission = () => {
         console.error(`Invalid role: ${roleStr}`);
       }
     }
-    
+
     return false;
   };
-  
+
   const hasRole = (role: Role): boolean => {
     if (!user || !user.roles) return false;
     return user.roles.includes(role);
   };
-  
+
   return { hasPermission, hasRole };
 };
 
@@ -799,7 +799,7 @@ export const PermissionGate: React.FC<{
   children: React.ReactNode;
 }> = ({ permission, children }) => {
   const { hasPermission } = usePermission();
-  
+
   if (!hasPermission(permission)) return null;
   return <>{children}</>;
 };
@@ -810,11 +810,11 @@ export const RoleGate: React.FC<{
   children: React.ReactNode;
 }> = ({ role, children }) => {
   const { hasRole } = usePermission();
-  
+
   if (!hasRole(role)) return null;
   return <>{children}</>;
 };
-```
+```python
 
 ## 7. HIPAA-Compliant RBAC Audit Logging
 
@@ -848,7 +848,7 @@ async def log_rbac_action(
 ):
     """
     Log RBAC-related actions for HIPAA compliance
-    
+
     Args:
         session: Database session
         action: Action performed (e.g., 'assign_role', 'check_permission')
@@ -865,21 +865,21 @@ async def log_rbac_action(
             "action": action,
             "success": success,
         }
-        
+
         if role:
             metadata["role"] = role
-            
+
         if permission:
             metadata["permission"] = permission
-            
+
         if additional_data:
             # Ensure no PHI is included in additional data
             safe_additional_data = {
-                k: v for k, v in additional_data.items() 
+                k: v for k, v in additional_data.items()
                 if k not in settings.PHI_FIELDS
             }
             metadata.update(safe_additional_data)
-        
+
         # Create audit log entry
         audit_log = AuditLogModel(
             id=str(uuid.uuid4()),
@@ -889,10 +889,10 @@ async def log_rbac_action(
             action=action,
             metadata=json.dumps(metadata),
         )
-        
+
         session.add(audit_log)
         await session.commit()
-        
+
     except Exception as e:
         # Fallback to regular logging if database logging fails
         logger.error(
@@ -903,18 +903,18 @@ async def log_rbac_action(
                 "target_user_id": target_user_id,
             }
         )
-```
+```python
 
 ## 8. Best Practices for HIPAA-Compliant RBAC
 
 1. **Principle of Least Privilege**: Assign the minimum permissions necessary for each role.
-2. **Separation of Duties**: Critical operations should require multiple roles.
-3. **Regular Access Reviews**: Audit role assignments periodically.
-4. **Context-Aware Permissions**: Consider implementing additional checks based on patient relationships.
-5. **Attribute-Based Access Control (ABAC)**: Extend RBAC with attributes like time, location, and patient relationship.
-6. **Role Rotation**: Change administrative roles periodically.
-7. **Monitor and Alert**: Set up alerts for suspicious permission usage patterns.
-8. **User Interface Protection**: Hide UI elements for unauthorized actions, but always enforce permissions on the server.
+1. **Separation of Duties**: Critical operations should require multiple roles.
+1. **Regular Access Reviews**: Audit role assignments periodically.
+1. **Context-Aware Permissions**: Consider implementing additional checks based on patient relationships.
+1. **Attribute-Based Access Control (ABAC)**: Extend RBAC with attributes like time, location, and patient relationship.
+1. **Role Rotation**: Change administrative roles periodically.
+1. **Monitor and Alert**: Set up alerts for suspicious permission usage patterns.
+1. **User Interface Protection**: Hide UI elements for unauthorized actions, but always enforce permissions on the server.
 
 ## 9. Conclusion
 

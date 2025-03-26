@@ -5,7 +5,7 @@
 The Database Layer implements the repository interfaces defined in the domain layer and provides concrete database operations using SQLAlchemy. This layer is responsible for:
 
 - Defining ORM models
-- Implementing repository pattern 
+- Implementing repository pattern
 - Managing database connections
 - Handling migrations with Alembic
 
@@ -62,7 +62,7 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
         raise
     finally:
         await session.close()
-```
+```python
 
 ### 2.2 Base Model
 
@@ -80,12 +80,12 @@ from sqlalchemy.orm import DeclarativeBase
 
 class Base(DeclarativeBase):
     """Base class for all SQLAlchemy models"""
-    
+
     # Make tablename automatically derived from class name
     @declared_attr.directive
     def __tablename__(cls) -> str:
         return cls.__name__.lower()
-    
+
     # Add common methods here
     def to_dict(self) -> Dict[str, Any]:
         """Convert model to dictionary"""
@@ -94,9 +94,9 @@ class Base(DeclarativeBase):
 
 class BaseModel(Base):
     """Base model with common columns"""
-    
+
     __abstract__ = True
-    
+
     id = Column(
         UUID(as_uuid=True),
         primary_key=True,
@@ -114,7 +114,7 @@ class BaseModel(Base):
         onupdate=func.now(),
         nullable=False,
     )
-```
+```python
 
 ## 3. ORM Models
 
@@ -134,22 +134,22 @@ from app.infrastructure.database.base import BaseModel
 
 class Patient(BaseModel):
     """ORM model for Patient entity"""
-    
+
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
     date_of_birth: Mapped[date] = mapped_column(Date, nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    
+
     # Store complex data as JSON
     contact_info: Mapped[dict] = mapped_column(JSONB, nullable=False)
     address: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     insurance: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     emergency_contact: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
-    
+
     # Relationships
     appointments = relationship("Appointment", back_populates="patient", cascade="all, delete-orphan")
     medical_records = relationship("MedicalRecord", back_populates="patient", cascade="all, delete-orphan")
-```
+```python
 
 ## 4. Repository Implementation
 
@@ -172,38 +172,38 @@ M = TypeVar("M", bound=BaseModel)
 
 class BaseRepository(Generic[T, M], IBaseRepository[T]):
     """Base repository implementation with SQLAlchemy"""
-    
+
     def __init__(self, session: AsyncSession, model_class: Type[M]):
         self.session = session
         self.model_class = model_class
-    
+
     async def get_by_id(self, id: UUID) -> Optional[T]:
         """Get entity by id"""
         stmt = select(self.model_class).where(self.model_class.id == id)
         result = await self.session.execute(stmt)
         db_obj = result.scalars().first()
         return self._map_to_entity(db_obj) if db_obj else None
-    
+
     async def list(self) -> List[T]:
         """List all entities"""
         stmt = select(self.model_class)
         result = await self.session.execute(stmt)
         return [self._map_to_entity(obj) for obj in result.scalars().all()]
-    
+
     async def create(self, entity: T) -> T:
         """Create a new entity"""
         db_obj = self._map_to_model(entity)
         self.session.add(db_obj)
         await self.session.flush()
         return self._map_to_entity(db_obj)
-    
+
     async def update(self, entity: T) -> T:
         """Update an existing entity"""
         db_obj = await self._get_model_by_id(entity.id)
         self._update_model(db_obj, entity)
         await self.session.flush()
         return self._map_to_entity(db_obj)
-    
+
     async def delete(self, id: UUID) -> bool:
         """Delete an entity by id"""
         db_obj = await self._get_model_by_id(id)
@@ -212,25 +212,25 @@ class BaseRepository(Generic[T, M], IBaseRepository[T]):
         await self.session.delete(db_obj)
         await self.session.flush()
         return True
-    
+
     async def _get_model_by_id(self, id: UUID) -> Optional[M]:
         """Get model instance by id"""
         stmt = select(self.model_class).where(self.model_class.id == id)
         result = await self.session.execute(stmt)
         return result.scalars().first()
-    
+
     def _map_to_entity(self, model: M) -> T:
         """Map ORM model to domain entity - Override in child classes"""
         raise NotImplementedError
-    
+
     def _map_to_model(self, entity: T) -> M:
         """Map domain entity to ORM model - Override in child classes"""
         raise NotImplementedError
-    
+
     def _update_model(self, model: M, entity: T) -> None:
         """Update ORM model from domain entity - Override in child classes"""
         raise NotImplementedError
-```
+```python
 
 ### 4.2 Patient Repository
 
@@ -254,10 +254,10 @@ from app.infrastructure.repositories.base_repository import BaseRepository
 
 class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepository):
     """SQLAlchemy implementation of patient repository"""
-    
+
     def __init__(self, session: AsyncSession):
         super().__init__(session, PatientModel)
-    
+
     async def get_by_email(self, email: str) -> Optional[Patient]:
         """Get patient by email address"""
         stmt = select(PatientModel).where(
@@ -266,13 +266,13 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
         result = await self.session.execute(stmt)
         db_obj = result.scalars().first()
         return self._map_to_entity(db_obj) if db_obj else None
-    
+
     async def get_active_patients(self) -> List[Patient]:
         """Get all active patients"""
         stmt = select(PatientModel).where(PatientModel.active == True)
         result = await self.session.execute(stmt)
         return [self._map_to_entity(obj) for obj in result.scalars().all()]
-    
+
     def _map_to_entity(self, model: PatientModel) -> Patient:
         """Map ORM model to domain entity"""
         # Map contact info
@@ -281,7 +281,7 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
             phone=model.contact_info["phone"],
             alternative_phone=model.contact_info.get("alternative_phone"),
         )
-        
+
         # Map address if present
         address = None
         if model.address:
@@ -291,7 +291,7 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
                 state=model.address["state"],
                 zip_code=model.address["zip_code"],
             )
-        
+
         # Map insurance if present
         insurance = None
         if model.insurance:
@@ -300,7 +300,7 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
                 policy_number=model.insurance["policy_number"],
                 group_number=model.insurance.get("group_number"),
             )
-        
+
         # Map emergency contact if present
         emergency_contact = None
         if model.emergency_contact:
@@ -309,7 +309,7 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
                 phone=model.emergency_contact["phone"],
                 alternative_phone=model.emergency_contact.get("alternative_phone"),
             )
-        
+
         # Create and return patient entity
         return Patient(
             id=model.id,
@@ -322,7 +322,7 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
             active=model.active,
             emergency_contact=emergency_contact,
         )
-    
+
     def _map_to_model(self, entity: Patient) -> PatientModel:
         """Map domain entity to ORM model"""
         # Create contact info dict
@@ -332,7 +332,7 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
         }
         if entity.contact_info.alternative_phone:
             contact_info["alternative_phone"] = entity.contact_info.alternative_phone
-        
+
         # Create address dict if present
         address = None
         if entity.address:
@@ -342,7 +342,7 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
                 "state": entity.address.state,
                 "zip_code": entity.address.zip_code,
             }
-        
+
         # Create insurance dict if present
         insurance = None
         if entity.insurance:
@@ -352,7 +352,7 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
             }
             if entity.insurance.group_number:
                 insurance["group_number"] = entity.insurance.group_number
-        
+
         # Create emergency contact dict if present
         emergency_contact = None
         if entity.emergency_contact:
@@ -363,7 +363,7 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
                 emergency_contact["email"] = entity.emergency_contact.email
             if entity.emergency_contact.alternative_phone:
                 emergency_contact["alternative_phone"] = entity.emergency_contact.alternative_phone
-        
+
         # Create and return patient model
         return PatientModel(
             id=entity.id,
@@ -376,14 +376,14 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
             active=entity.active,
             emergency_contact=emergency_contact,
         )
-    
+
     def _update_model(self, model: PatientModel, entity: Patient) -> None:
         """Update ORM model from domain entity"""
         model.first_name = entity.first_name
         model.last_name = entity.last_name
         model.date_of_birth = entity.date_of_birth
         model.active = entity.active
-        
+
         # Update contact info
         model.contact_info = {
             "email": entity.contact_info.email,
@@ -391,7 +391,7 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
         }
         if entity.contact_info.alternative_phone:
             model.contact_info["alternative_phone"] = entity.contact_info.alternative_phone
-        
+
         # Update address
         if entity.address:
             model.address = {
@@ -402,7 +402,7 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
             }
         else:
             model.address = None
-        
+
         # Update insurance
         if entity.insurance:
             model.insurance = {
@@ -413,7 +413,7 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
                 model.insurance["group_number"] = entity.insurance.group_number
         else:
             model.insurance = None
-        
+
         # Update emergency contact
         if entity.emergency_contact:
             model.emergency_contact = {
@@ -425,7 +425,7 @@ class PatientRepository(BaseRepository[Patient, PatientModel], IPatientRepositor
                 model.emergency_contact["alternative_phone"] = entity.emergency_contact.alternative_phone
         else:
             model.emergency_contact = None
-```
+```python
 
 ## 5. Database Migrations with Alembic
 
@@ -439,7 +439,7 @@ pip install alembic
 
 # Initialize alembic
 alembic init alembic
-```
+```python
 
 Update the `alembic.ini` file:
 
@@ -484,7 +484,7 @@ formatter = generic
 [formatter_generic]
 format = %(levelname)-5.5s [%(name)s] %(message)s
 datefmt = %H:%M:%S
-```
+```python
 
 Update the `alembic/env.py` file:
 
@@ -558,7 +558,7 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     asyncio.run(run_migrations_online())
-```
+```python
 
 ### 5.2 Creating Migrations
 
@@ -573,7 +573,7 @@ alembic upgrade head
 
 # Rollback one migration
 alembic downgrade -1
-```
+```python
 
 ## 6. Using Repositories in Application Services
 
@@ -590,22 +590,22 @@ from app.domain.value_objects.contact_info import ContactInfo
 
 class PatientService:
     """Service for patient operations"""
-    
+
     def __init__(self, patient_repository: IPatientRepository):
         self.patient_repository = patient_repository
-    
+
     async def get_patient(self, patient_id: UUID) -> Optional[Patient]:
         """Get a patient by ID"""
         return await self.patient_repository.get_by_id(patient_id)
-    
+
     async def get_patients(self) -> List[Patient]:
         """Get all patients"""
         return await self.patient_repository.list()
-    
+
     async def get_active_patients(self) -> List[Patient]:
         """Get all active patients"""
         return await self.patient_repository.get_active_patients()
-    
+
     async def create_patient(
         self,
         first_name: str,
@@ -618,7 +618,7 @@ class PatientService:
         """Create a new patient"""
         # Create contact info
         contact_info = ContactInfo(email=email, phone=phone)
-        
+
         # Create address if provided
         patient_address = None
         if address:
@@ -628,7 +628,7 @@ class PatientService:
                 state=address["state"],
                 zip_code=address["zip_code"],
             )
-        
+
         # Create patient entity
         patient = Patient(
             first_name=first_name,
@@ -637,10 +637,10 @@ class PatientService:
             contact_info=contact_info,
             address=patient_address,
         )
-        
+
         # Save to repository
         return await self.patient_repository.create(patient)
-```
+```python
 
 ## 7. HIPAA Considerations
 
@@ -668,9 +668,9 @@ def decrypt_phi(data: str) -> str:
     if not data:
         return data
     return fernet.decrypt(data.encode()).decode()
-```
+```python
 
-2. **Audit Logging**: Implement database-level auditing for access to PHI:
+1. **Audit Logging**: Implement database-level auditing for access to PHI:
 
 ```python
 # app/infrastructure/database/audit.py
@@ -688,7 +688,7 @@ from app.infrastructure.database.base import BaseModel
 
 class AuditLog(BaseModel):
     """Audit log for tracking database operations"""
-    
+
     user_id: Mapped[Optional[UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
     action: Mapped[str] = mapped_column(String(50), nullable=False)
     entity_type: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -717,12 +717,12 @@ async def log_audit(
     )
     session.add(audit_log)
     await session.flush()
-```
+```python
 
 ## 8. Database Security Best Practices
 
 1. **Use TLS for Database Connections**
-2. **Implement Connection Pooling with Appropriate Timeouts**
-3. **Use a Dedicated Database User with Limited Permissions**
-4. **Regularly Backup and Test Restore Procedures**
-5. **Monitor Database Access and Performance**
+1. **Implement Connection Pooling with Appropriate Timeouts**
+1. **Use a Dedicated Database User with Limited Permissions**
+1. **Regularly Backup and Test Restore Procedures**
+1. **Monitor Database Access and Performance**

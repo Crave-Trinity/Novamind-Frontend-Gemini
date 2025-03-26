@@ -6,7 +6,7 @@ Security is a paramount concern for NOVAMIND as a HIPAA-compliant psychiatry pla
 
 ## 2. Security Architecture Overview
 
-```
+```python
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        SECURITY ARCHITECTURE                         │
 ├─────────────────────────────────────────────────────────────────────┤
@@ -34,7 +34,7 @@ Security is a paramount concern for NOVAMIND as a HIPAA-compliant psychiatry pla
 │                                          └─────────────────────┘    │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
-```
+```python
 
 ## 3. Security Components
 
@@ -60,7 +60,7 @@ Security is a paramount concern for NOVAMIND as a HIPAA-compliant psychiatry pla
 ## 5. Related Security Documents
 
 1. **[Authentication with Cognito](07_COGNITO_AUTH.md)** - AWS Cognito integration
-2. **[JWT Token Management](08_JWT_TOKENS.md)** - JWT implementation details
-3. **[Role-Based Access Control](09_RBAC.md)** - Permission system implementation
-4. **[Data Encryption](10_DATA_ENCRYPTION.md)** - PHI encryption strategies
-5. **[Audit Logging](11_AUDIT_LOGGING.md)** - HIPAA-compliant activity logging
+1. **[JWT Token Management](08_JWT_TOKENS.md)** - JWT implementation details
+1. **[Role-Based Access Control](09_RBAC.md)** - Permission system implementation
+1. **[Data Encryption](10_DATA_ENCRYPTION.md)** - PHI encryption strategies
+1. **[Audit Logging](11_AUDIT_LOGGING.md)** - HIPAA-compliant activity logging
