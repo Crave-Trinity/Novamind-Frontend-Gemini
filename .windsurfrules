@@ -1,5 +1,6 @@
 # Windsurf Local Rules (Concierge Psychiatry Platform)
-
+IF YOU GET STUCK READ ALL THE DOCS IN HERE 
+C:\Users\JJ\Desktop\NOVAMIND-WEB\Novamind-Backend\docs
 ## Development Environment Setup
 
 - **WSL2-Windows Integration**: Create proper symbolic links between WSL2 and Windows paths to ensure seamless file visibility and editing:
