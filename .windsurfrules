@@ -1,5 +1,27 @@
 # Windsurf Local Rules (Concierge Psychiatry Platform)
 
+## Development Environment Setup
+
+- **WSL2-Windows Integration**: Create proper symbolic links between WSL2 and Windows paths to ensure seamless file visibility and editing:
+
+  ```bash
+  # From WSL2, create symlinks for all project directories
+  ln -s /mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend /home/username/novamind-backend
+  
+  # For specific directories that need Windows visibility
+  mkdir -p /mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend/app/core/utils
+  cp -r /home/username/novamind-backend/app/core/utils/* /mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend/app/core/utils/
+  ```
+
+- **File Permissions**: Ensure all files created in WSL2 have proper permissions to be visible and editable in Windows:
+
+  ```bash
+  # Set appropriate permissions
+  chmod -R 755 /mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend
+  ```
+
+- **IDE Configuration**: Configure VSCode to properly recognize both Windows and WSL2 paths for the same project.
+
 ## Domain Layer (Pure Clinical Logic)
 
 - Represents psychiatry-relevant concepts: Patients, Appointments, Billing, Outcomes, Notes, etc.
@@ -16,7 +38,7 @@
 
 - FastAPI endpoints for patient onboarding, scheduling, secure messaging, and more.
 - **Pydantic v2** schemas for input/output validation (do not mix domain entities with Pydantic models).
-- Use **FastAPI’s `Depends()`** for dependency injection (fetching repositories, services).
+- Use **FastAPI's `Depends()`** for dependency injection (fetching repositories, services).
 
 ## HIPAA & Security
 
@@ -57,6 +79,6 @@
 
 ## Luxury Concierge Quality
 
-- The code, UX, and overall system must reflect a high-end “concierge psychiatry” experience—fast, reliable, impeccably designed.
+- The code, UX, and overall system must reflect a high-end "concierge psychiatry" experience—fast, reliable, impeccably designed.
 - Include thoughtful touches like automated text/email reminders (via HIPAA-compliant Twilio) or easy patient scheduling to justify premium fees.
 - Keep potential future expansion to a SaaS model in mind, but remain hyper-focused on immediate, impeccable performance for a single top-tier provider.
