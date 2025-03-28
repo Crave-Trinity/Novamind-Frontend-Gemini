@@ -1,278 +1,224 @@
+# -*- coding: utf-8 -*-
 """
-NOVAMIND HIPAA-Compliant Logging Utility
-========================================
-Provides secure, compliant logging with PHI redaction for the NOVAMIND platform.
-Maintains audit trails and ensures no sensitive information is exposed in logs.
+HIPAA-compliant logging utilities.
+
+This module provides enhanced logging capabilities with HIPAA-compliant PHI sanitization
+to ensure protected health information is never exposed in logs.
 """
 
+import asyncio
 import logging
-import re
-import time
-import uuid
-import os
 import json
-import functools
 from datetime import datetime
-from typing import Any, Dict, Optional, Callable, List, Union, TypeVar, cast
+from typing import Any, Dict, Optional, Union, List
+from functools import wraps
 
-from ..config import settings
+from app.core.config import Settings
+from app.core.utils.phi_sanitizer import PHISanitizer, sanitize_log_message
 
-# Type variables for generic function decorators
-F = TypeVar('F', bound=Callable[..., Any])
-
-# PHI pattern detection regexes
-PHI_PATTERNS = {
-    'email': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
-    'ssn': r'\b\d{3}[-]?\d{2}[-]?\d{4}\b',
-    'phone': r'\b(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b',
-    'address': r'\b\d+\s+[A-Za-z0-9\s,]+\b(?:street|st|avenue|ave|road|rd|highway|hwy|square|sq|trail|trl|drive|dr|court|ct|parkway|pkwy|circle|cir|boulevard|blvd)\b',
-    'dob': r'\b(0[1-9]|1[0-2])[-/](0[1-9]|[12]\d|3[01])[-/](19|20)\d{2}\b',
-    'mrn': r'\b(MRN|mrn)[:# ]\s*\d{5,10}\b',
-    'patient_id': r'\b(patient|pt)[:# ]\s*\d{5,10}\b'
-}
-
-
-class PHIRedactor:
-    """Handles redaction of PHI from log messages."""
-    
-    def __init__(self, patterns: Optional[Dict[str, str]] = None):
-        """Initialize with PHI detection patterns."""
-        self.patterns = patterns or PHI_PATTERNS
-        self.compiled_patterns = {
-            name: re.compile(pattern, re.IGNORECASE) 
-            for name, pattern in self.patterns.items()
-        }
-    
-    def redact(self, message: str) -> str:
-        """
-        Redact all PHI from the given message.
-        
-        Args:
-            message: The log message to redact
-            
-        Returns:
-            Redacted message with PHI replaced by [REDACTED:{type}]
-        """
-        if not settings.security.ENABLE_PHI_REDACTION:
-            return message
-            
-        redacted = message
-        for name, pattern in self.compiled_patterns.items():
-            redacted = pattern.sub(f"[REDACTED:{name}]", redacted)
-        
-        return redacted
-
+settings = Settings()
 
 class HIPAACompliantLogger:
     """
-    HIPAA-compliant logger that ensures PHI is properly redacted.
-    Provides audit trail capabilities and secure logging practices.
+    HIPAA-compliant logger that ensures sensitive information is properly masked.
+    
+    Features:
+    - PHI masking
+    - Audit trail
+    - Configurable outputs (file/console)
+    - Structured logging
     """
     
-    def __init__(
-        self, 
-        name: str, 
-        log_level: Optional[str] = None,
-        enable_console: Optional[bool] = None,
-        enable_file: Optional[bool] = None,
-        log_file: Optional[str] = None,
-        enable_audit: Optional[bool] = None,
-        audit_file: Optional[str] = None
-    ):
-        """
-        Initialize the HIPAA-compliant logger.
-        
-        Args:
-            name: Logger name (typically module name)
-            log_level: Logging level (DEBUG, INFO, etc.)
-            enable_console: Whether to log to console
-            enable_file: Whether to log to file
-            log_file: Path to log file
-            enable_audit: Whether to enable audit logging
-            audit_file: Path to audit log file
-        """
-        self.name = name
-        self.log_level = log_level or settings.logging.LOG_LEVEL
-        self.enable_console = enable_console if enable_console is not None else settings.logging.LOG_TO_CONSOLE
-        self.enable_file = enable_file if enable_file is not None else settings.logging.LOG_TO_FILE
-        self.log_file = log_file or settings.logging.LOG_FILE
-        self.enable_audit = enable_audit if enable_audit is not None else settings.logging.ENABLE_AUDIT_LOGGING
-        self.audit_file = audit_file or settings.logging.AUDIT_LOG_FILE
-        
-        # Create the logger
+    def __init__(self, name: str) -> None:
+        """Initialize logger with name."""
         self.logger = logging.getLogger(name)
-        self.logger.setLevel(getattr(logging, self.log_level))
+        self.logger.setLevel(logging.DEBUG if settings.DEBUG else logging.INFO)
         
-        # Clear existing handlers to avoid duplicates
-        if self.logger.hasHandlers():
-            self.logger.handlers.clear()
-        
-        # Configure handlers
-        if self.enable_console:
+        # Configure handlers based on settings
+        if settings.logging.LOG_TO_CONSOLE:
             console_handler = logging.StreamHandler()
-            console_handler.setFormatter(logging.Formatter(settings.logging.LOG_FORMAT))
+            console_handler.setFormatter(self._get_formatter())
             self.logger.addHandler(console_handler)
         
-        if self.enable_file and self.log_file:
-            # Ensure directory exists
-            os.makedirs(os.path.dirname(os.path.abspath(self.log_file)), exist_ok=True)
-            
-            file_handler = logging.FileHandler(self.log_file)
-            file_handler.setFormatter(logging.Formatter(settings.logging.LOG_FORMAT))
+        if settings.logging.LOG_TO_FILE:
+            file_handler = logging.FileHandler(settings.logging.LOG_FILE_PATH)
+            file_handler.setFormatter(self._get_formatter())
             self.logger.addHandler(file_handler)
-        
-        # Set up audit logger if enabled
-        self.audit_logger = None
-        if self.enable_audit and self.audit_file:
-            # Ensure directory exists
-            os.makedirs(os.path.dirname(os.path.abspath(self.audit_file)), exist_ok=True)
-            
-            self.audit_logger = logging.getLogger(f"{name}.audit")
-            self.audit_logger.setLevel(logging.INFO)
-            
-            # Clear existing handlers to avoid duplicates
-            if self.audit_logger.hasHandlers():
-                self.audit_logger.handlers.clear()
-            
-            audit_handler = logging.FileHandler(self.audit_file)
-            audit_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
-            self.audit_logger.addHandler(audit_handler)
-        
-        # Create PHI redactor
-        self.redactor = PHIRedactor()
     
-    def _log(self, level: int, msg: str, *args, **kwargs) -> None:
+    def _get_formatter(self) -> logging.Formatter:
+        """Get HIPAA-compliant log formatter."""
+        return logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+    
+    def _mask_phi(self, message: str) -> str:
         """
-        Internal logging method with PHI redaction.
+        Mask PHI in log messages using the comprehensive PHI sanitizer.
+        
+        This method ensures that all Protected Health Information (PHI)
+        is properly sanitized before being logged, in accordance with
+        HIPAA requirements.
         
         Args:
-            level: Logging level
-            msg: Message to log
-            *args: Additional positional arguments
-            **kwargs: Additional keyword arguments
+            message: The message to sanitize
+            
+        Returns:
+            A sanitized version of the message with PHI removed
         """
-        # Redact PHI from message and any string args
-        redacted_msg = self.redactor.redact(str(msg))
-        
-        # Redact PHI from args if they are strings
-        redacted_args = []
-        for arg in args:
-            if isinstance(arg, str):
-                redacted_args.append(self.redactor.redact(arg))
-            else:
-                redacted_args.append(arg)
-        
-        # Redact PHI from kwargs if they are strings
-        redacted_kwargs = {}
-        for key, value in kwargs.items():
-            if isinstance(value, str):
-                redacted_kwargs[key] = self.redactor.redact(value)
-            else:
-                redacted_kwargs[key] = value
-        
-        # Log the redacted message
-        self.logger.log(level, redacted_msg, *redacted_args, **redacted_kwargs)
+        if not isinstance(message, str):
+            return str(message)
+            
+        return PHISanitizer.sanitize_text(message)
     
-    def debug(self, msg: str, *args, **kwargs) -> None:
-        """Log a debug message with PHI redaction."""
-        self._log(logging.DEBUG, msg, *args, **kwargs)
-    
-    def info(self, msg: str, *args, **kwargs) -> None:
-        """Log an info message with PHI redaction."""
-        self._log(logging.INFO, msg, *args, **kwargs)
-    
-    def warning(self, msg: str, *args, **kwargs) -> None:
-        """Log a warning message with PHI redaction."""
-        self._log(logging.WARNING, msg, *args, **kwargs)
-    
-    def error(self, msg: str, *args, **kwargs) -> None:
-        """Log an error message with PHI redaction."""
-        self._log(logging.ERROR, msg, *args, **kwargs)
-    
-    def critical(self, msg: str, *args, **kwargs) -> None:
-        """Log a critical message with PHI redaction."""
-        self._log(logging.CRITICAL, msg, *args, **kwargs)
-    
-    def audit(
-        self, 
-        action: str, 
-        user_id: str, 
-        resource_type: str, 
-        resource_id: str, 
-        details: Optional[Dict[str, Any]] = None,
-        status: str = "success"
-    ) -> None:
+    def _create_audit_log(
+        self,
+        level: int,
+        message: str,
+        extra: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
-        Log an audit event for HIPAA compliance.
+        Create an audit log entry with comprehensive PHI sanitization.
+        
+        Ensures that all PHI is sanitized not only in the main message
+        but also in any structured data or extra fields.
         
         Args:
-            action: The action being performed (e.g., "view", "edit", "delete")
-            user_id: ID of the user performing the action
-            resource_type: Type of resource being accessed (e.g., "patient", "record")
-            resource_id: ID of the resource being accessed
-            details: Additional details about the action
-            status: Outcome status ("success", "failure", "error")
+            level: Log level (DEBUG, INFO, etc.)
+            message: The log message to be sanitized
+            extra: Additional structured data for the log entry
+            
+        Returns:
+            PHI-sanitized structured audit log entry
         """
-        if not self.enable_audit or not self.audit_logger:
-            return
-        
-        # Create audit record
-        audit_record = {
+        audit_log = {
             "timestamp": datetime.utcnow().isoformat(),
-            "event_id": str(uuid.uuid4()),
-            "action": action,
-            "user_id": user_id,
-            "resource_type": resource_type,
-            "resource_id": resource_id,
-            "status": status,
-            "details": details or {}
+            "level": logging.getLevelName(level),
+            "message": self._mask_phi(message),
+            "source": self.logger.name
         }
         
-        # Log audit record as JSON
-        self.audit_logger.info(json.dumps(audit_record))
+        if extra:
+            # Use PHISanitizer for complex structured data
+            audit_log["extra"] = PHISanitizer.sanitize_structured_data(extra)
+        
+        return audit_log
+    
+    def _log(
+        self,
+        level: int,
+        message: str,
+        extra: Optional[Dict[str, Any]] = None,
+        *args: Any,
+        **kwargs: Any
+    ) -> None:
+        """Base logging method with PHI masking and audit trail."""
+        # Create audit log
+        audit_log = self._create_audit_log(level, message, extra)
+        
+        # Log the message
+        self.logger.log(
+            level,
+            json.dumps(audit_log),
+            *args,
+            **kwargs
+        )
+        
+        # Store audit log if enabled
+        if settings.logging.ENABLE_AUDIT_LOGGING:
+            self._store_audit_log(audit_log)
+    
+    def _store_audit_log(self, audit_log: Dict[str, Any]) -> None:
+        """Store audit log entry."""
+        import os
+        import json
+        from datetime import datetime
+        
+        # Ensure audit log directory exists
+        audit_log_dir = os.path.join(
+            os.path.dirname(settings.logging.LOG_FILE_PATH),
+            'audit_logs'
+        )
+        os.makedirs(audit_log_dir, exist_ok=True)
+        
+        # Create filename with timestamp for better organization
+        timestamp = datetime.now().strftime('%Y%m%d')
+        audit_filename = f'audit_{timestamp}.jsonl'
+        audit_path = os.path.join(audit_log_dir, audit_filename)
+        
+        # Append audit log to file
+        with open(audit_path, 'a') as f:
+            f.write(json.dumps(audit_log) + '\n')
+    
+    def debug(self, message: str, extra: Optional[Dict[str, Any]] = None, *args: Any, **kwargs: Any) -> None:
+        """Log debug message."""
+        self._log(logging.DEBUG, message, extra, *args, **kwargs)
+    
+    def info(self, message: str, extra: Optional[Dict[str, Any]] = None, *args: Any, **kwargs: Any) -> None:
+        """Log info message."""
+        self._log(logging.INFO, message, extra, *args, **kwargs)
+    
+    def warning(self, message: str, extra: Optional[Dict[str, Any]] = None, *args: Any, **kwargs: Any) -> None:
+        """Log warning message."""
+        self._log(logging.WARNING, message, extra, *args, **kwargs)
+    
+    def error(self, message: str, extra: Optional[Dict[str, Any]] = None, *args: Any, **kwargs: Any) -> None:
+        """Log error message."""
+        self._log(logging.ERROR, message, extra, *args, **kwargs)
+    
+    def critical(self, message: str, extra: Optional[Dict[str, Any]] = None, *args: Any, **kwargs: Any) -> None:
+        """Log critical message."""
+        self._log(logging.CRITICAL, message, extra, *args, **kwargs)
 
-
-def log_function_call(logger: Optional[HIPAACompliantLogger] = None) -> Callable[[F], F]:
+def audit_log(event_type: str) -> Any:
     """
-    Decorator to log function calls with timing information.
+    Decorator to create audit log entries for function calls.
     
     Args:
-        logger: Logger to use. If None, creates a new logger.
-        
-    Returns:
-        Decorated function
+        event_type: Type of event being audited
     """
-    def decorator(func: F) -> F:
-        # Get function module and name for logger
-        module_name = func.__module__
-        func_name = func.__qualname__
-        
-        # Create logger if not provided
-        nonlocal logger
-        if logger is None:
-            logger = HIPAACompliantLogger(module_name)
-        
-        @functools.wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            # Log function call
-            logger.debug(f"Calling {func_name}")
-            
-            # Time the function execution
-            start_time = time.time()
+    def decorator(func: Any) -> Any:
+        @wraps(func)
+        async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+            logger = HIPAACompliantLogger(func.__module__)
             try:
-                result = func(*args, **kwargs)
-                execution_time = time.time() - start_time
-                logger.debug(f"{func_name} completed in {execution_time:.4f}s")
+                result = await func(*args, **kwargs)
+                logger.info(
+                    f"{event_type} completed successfully",
+                    {"function": func.__name__}
+                )
                 return result
             except Exception as e:
-                execution_time = time.time() - start_time
-                logger.error(f"{func_name} failed after {execution_time:.4f}s: {str(e)}")
+                logger.error(
+                    f"{event_type} failed",
+                    {
+                        "function": func.__name__,
+                        "error": str(e)
+                    }
+                )
                 raise
         
-        return cast(F, wrapper)
+        @wraps(func)
+        def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
+            logger = HIPAACompliantLogger(func.__module__)
+            try:
+                result = func(*args, **kwargs)
+                logger.info(
+                    f"{event_type} completed successfully",
+                    {"function": func.__name__}
+                )
+                return result
+            except Exception as e:
+                logger.error(
+                    f"{event_type} failed",
+                    {
+                        "function": func.__name__,
+                        "error": str(e)
+                    }
+                )
+                raise
+        
+        if asyncio.iscoroutinefunction(func):
+            return async_wrapper
+        return sync_wrapper
     
     return decorator
-
-
-# Create a default logger for the module
-default_logger = HIPAACompliantLogger(__name__)

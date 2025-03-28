@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # app/domain/entities/digital_twin/digital_twin.py
 from dataclasses import dataclass
 from datetime import datetime
@@ -14,6 +15,7 @@ class DigitalTwin:
     Core entity representing a patient's digital twin model.
     Immutable by design to ensure state transitions are tracked.
     """
+
     id: UUID
     patient_id: UUID
     created_at: datetime
@@ -23,14 +25,14 @@ class DigitalTwin:
     models: List[DigitalTwinModel]
     clinical_insights: List[ClinicalInsight]
     last_calibration: datetime
-    
+
     @classmethod
     def create(
         cls,
         patient_id: UUID,
         models: List[DigitalTwinModel],
         confidence_score: float = 0.0,
-    ) -> 'DigitalTwin':
+    ) -> "DigitalTwin":
         """Factory method to create a new DigitalTwin"""
         now = datetime.now()
         return cls(
@@ -42,16 +44,16 @@ class DigitalTwin:
             confidence_score=confidence_score,
             models=models,
             clinical_insights=[],
-            last_calibration=now
+            last_calibration=now,
         )
-    
-    def add_clinical_insight(self, insight: ClinicalInsight) -> 'DigitalTwin':
+
+    def add_clinical_insight(self, insight: ClinicalInsight) -> "DigitalTwin":
         """
         Adds a clinical insight to the digital twin, returning a new instance.
-        
+
         Args:
             insight: The clinical insight to add
-            
+
         Returns:
             A new DigitalTwin instance with the updated insights
         """
@@ -64,21 +66,19 @@ class DigitalTwin:
             confidence_score=self.confidence_score,
             models=self.models.copy(),
             clinical_insights=[*self.clinical_insights, insight],
-            last_calibration=self.last_calibration
+            last_calibration=self.last_calibration,
         )
-    
+
     def recalibrate(
-        self, 
-        models: List[DigitalTwinModel], 
-        confidence_score: float
-    ) -> 'DigitalTwin':
+        self, models: List[DigitalTwinModel], confidence_score: float
+    ) -> "DigitalTwin":
         """
         Recalibrates the digital twin with updated models.
-        
+
         Args:
             models: Updated model list
             confidence_score: New overall confidence score
-            
+
         Returns:
             A new DigitalTwin instance with updated models
         """
@@ -91,5 +91,5 @@ class DigitalTwin:
             confidence_score=confidence_score,
             models=models,
             clinical_insights=self.clinical_insights.copy(),
-            last_calibration=datetime.now()
+            last_calibration=datetime.now(),
         )

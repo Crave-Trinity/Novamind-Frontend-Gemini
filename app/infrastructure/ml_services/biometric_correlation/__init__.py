@@ -3,6 +3,9 @@
 
 Initialization file for the Biometric Correlation Service module.
 """
-from app.infrastructure.ml_services.biometric_correlation.service import BiometricCorrelationServiceImpl
+
+from app.infrastructure.ml_services.biometric_correlation.service import (
+    BiometricCorrelationServiceImpl,
+)
 
 __all__ = ["BiometricCorrelationServiceImpl"]

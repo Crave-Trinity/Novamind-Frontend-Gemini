@@ -1,68 +1,58 @@
-# app/domain/value_objects/psychiatric_assessment.py
-# Value object representing a psychiatric assessment
-# Value objects are immutable and equality is based on their attributes
+# -*- coding: utf-8 -*-
+"""Psychiatric assessment value object."""
 
-from dataclasses import dataclass
-from datetime import datetime
+from dataclasses import dataclass, field
+from datetime import date
 from typing import Dict, List, Optional
-from uuid import UUID
-
+from uuid import UUID, uuid4
 
 @dataclass(frozen=True)
 class PsychiatricAssessment:
     """
-    Value object representing a psychiatric assessment
-    Immutable and equality is based on attributes
+    Immutable value object for psychiatric assessment data.
+    
+    Contains PHI that must be handled according to HIPAA regulations.
     """
-    assessment_id: UUID
-    patient_id: UUID
-    assessment_date: datetime
-    assessment_type: str  # e.g., "Initial", "Follow-up", "Emergency"
-    mood_score: int  # Scale 1-10
-    anxiety_score: int  # Scale 1-10
-    sleep_quality_score: int  # Scale 1-10
-    medication_adherence_score: Optional[int] = None  # Scale 1-10
-    side_effects: Optional[List[str]] = None
-    notes: Optional[str] = None
     
-    def __post_init__(self):
-        """Validate assessment data"""
-        for score_name, score_value in [
-            ("mood_score", self.mood_score),
-            ("anxiety_score", self.anxiety_score),
-            ("sleep_quality_score", self.sleep_quality_score),
-        ]:
-            if score_value is not None and not (1 <= score_value <= 10):
-                raise ValueError(f"{score_name} must be between 1 and 10")
-                
-        if self.medication_adherence_score is not None and not (1 <= self.medication_adherence_score <= 10):
-            raise ValueError("medication_adherence_score must be between 1 and 10")
+    assessment_date: date
+    psychiatrist_id: UUID
+    diagnoses: List[str]
+    assessment_notes: str
+    treatment_plan: str
+    id: UUID = field(default_factory=uuid4)
+    severity_score: Optional[int] = None
+    medications: List[Dict[str, str]] = field(default_factory=list)
+    follow_up_date: Optional[date] = None
     
-    def get_overall_score(self) -> float:
-        """
-        Calculate an overall wellness score based on assessment metrics
+    def __post_init__(self) -> None:
+        """Validate assessment data."""
+        # Validate severity score if provided
+        if self.severity_score is not None and not (0 <= self.severity_score <= 10):
+            raise ValueError("Severity score must be between 0 and 10")
         
-        Returns:
-            Float representing overall wellness (higher is better)
-        """
-        # Simple average of available scores
-        scores = [self.mood_score, self.anxiety_score, self.sleep_quality_score]
-        
-        if self.medication_adherence_score is not None:
-            scores.append(self.medication_adherence_score)
-            
-        return sum(scores) / len(scores)
+        # Validate medication format
+        for med in self.medications:
+            if "name" not in med or "dosage" not in med:
+                raise ValueError("Medications must include name and dosage")
     
-    def has_concerning_symptoms(self) -> bool:
-        """
-        Check if assessment shows concerning symptoms that need attention
-        
-        Returns:
-            Boolean indicating if there are concerning symptoms
-        """
-        # Example implementation - would be more sophisticated in real system
-        return (
-            self.mood_score <= 3 or
-            self.anxiety_score >= 8 or
-            self.sleep_quality_score <= 2
-        )
+    def get_primary_diagnosis(self) -> Optional[str]:
+        """Get primary diagnosis if available."""
+        return self.diagnoses[0] if self.diagnoses else None
+    
+    def requires_follow_up(self) -> bool:
+        """Check if assessment requires follow-up."""
+        return self.follow_up_date is not None
+    
+    def to_dict(self) -> dict:
+        """Convert to dictionary with PHI masking."""
+        return {
+            "id": str(self.id),
+            "assessment_date": str(self.assessment_date),
+            "psychiatrist_id": str(self.psychiatrist_id),
+            "diagnoses": self.diagnoses,
+            "assessment_notes": "[REDACTED]",  # PHI masked
+            "treatment_plan": "[REDACTED]",  # PHI masked
+            "severity_score": self.severity_score,
+            "medications": self.medications,
+            "follow_up_date": str(self.follow_up_date) if self.follow_up_date else None
+        }

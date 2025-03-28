@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Alembic environment configuration for NOVAMIND database migrations.
 

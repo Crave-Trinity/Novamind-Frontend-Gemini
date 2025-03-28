@@ -1,304 +1,168 @@
+# -*- coding: utf-8 -*-
 """
-NOVAMIND Domain Exceptions
-=========================
-Centralized exception definitions for the NOVAMIND platform.
-Follows Clean Architecture principles with domain-specific exceptions.
+Domain-specific exceptions for the Novamind concierge psychiatry platform.
+
+This module defines custom exceptions for the domain layer,
+ensuring clear error handling and separation of concerns.
 """
 
-from typing import Dict, Any, Optional, List, Union
+from typing import Optional
 
 
-class NovaBaseException(Exception):
-    """Base exception for all NOVAMIND custom exceptions."""
-    
-    status_code: int = 500
-    
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
-        """
-        Initialize with an error message and optional details.
-        
-        Args:
-            message: Human-readable error description
-            details: Additional structured information about the error
-        """
+class DomainException(Exception):
+    """Base exception class for all domain-specific exceptions."""
+
+    def __init__(self, message: str = "Domain error occurred"):
         self.message = message
-        self.details = details
+        super().__init__(self.message)
+
+
+class AuthenticationError(DomainException):
+    """
+    Raised when authentication fails due to invalid credentials or tokens.
+
+    This exception is typically thrown during JWT validation or login attempts
+    with incorrect credentials.
+    """
+
+    def __init__(self, message: str = "Invalid authentication credentials"):
         super().__init__(message)
 
 
-class EntityNotFoundException(NovaBaseException):
-    """Exception raised when an entity cannot be found."""
-    
-    status_code: int = 404
-    
-    def __init__(
-        self, 
-        message: str, 
-        entity_type: Optional[str] = None, 
-        entity_id: Optional[Union[str, int]] = None
-    ):
-        """
-        Initialize with entity information.
-        
-        Args:
-            message: Human-readable error description
-            entity_type: Type of entity that wasn't found
-            entity_id: ID of entity that wasn't found
-        """
-        self.entity_type = entity_type
-        self.entity_id = entity_id
-        details = {"entity_type": entity_type, "entity_id": entity_id} if entity_type else None
-        super().__init__(message, details)
+class TokenExpiredError(AuthenticationError):
+    """
+    Raised when an authentication token has expired.
 
+    This is a specific type of authentication error indicating that
+    the user needs to refresh their token or log in again.
+    """
 
-class ValidationException(NovaBaseException):
-    """Exception raised when input validation fails."""
-    
-    status_code: int = 422
-    
-    def __init__(
-        self, 
-        message: str, 
-        field_errors: Optional[Dict[str, List[str]]] = None
-    ):
-        """
-        Initialize with validation details.
-        
-        Args:
-            message: Human-readable error description
-            field_errors: Mapping of field names to error messages
-        """
-        self.field_errors = field_errors
-        details = {"field_errors": field_errors} if field_errors else None
-        super().__init__(message, details)
-
-
-class AuthenticationException(NovaBaseException):
-    """Exception raised when authentication fails."""
-    
-    status_code: int = 401
-    
-    def __init__(self, message: str = "Authentication failed"):
-        """
-        Initialize with authentication error message.
-        
-        Args:
-            message: Human-readable error description
-        """
+    def __init__(self, message: str = "Token has expired"):
         super().__init__(message)
 
 
-class AuthorizationException(NovaBaseException):
-    """Exception raised when user is not authorized for an action."""
-    
-    status_code: int = 403
-    
-    def __init__(
-        self, 
-        message: str = "Not authorized", 
-        required_role: Optional[str] = None,
-        required_permission: Optional[str] = None
-    ):
-        """
-        Initialize with authorization details.
-        
-        Args:
-            message: Human-readable error description
-            required_role: Role that would be required for access
-            required_permission: Permission that would be required for access
-        """
-        details = {}
-        if required_role:
-            details["required_role"] = required_role
-        if required_permission:
-            details["required_permission"] = required_permission
-            
-        self.required_role = required_role
-        self.required_permission = required_permission
-        super().__init__(message, details)
+class AuthorizationError(DomainException):
+    """
+    Raised when a user attempts to access a resource they don't have permission for.
+
+    This exception is used for role-based access control violations.
+    """
+
+    def __init__(self, message: str = "Not authorized to access this resource"):
+        super().__init__(message)
 
 
-class BusinessRuleException(NovaBaseException):
-    """Exception raised when a business rule is violated."""
-    
-    status_code: int = 400
-    
+class ResourceNotFoundError(DomainException):
+    """
+    Raised when a requested resource cannot be found.
+
+    This exception is used when attempting to retrieve entities that don't exist.
+    """
+
     def __init__(
-        self, 
-        message: str, 
-        rule_name: Optional[str] = None,
-        error_code: Optional[str] = None
+        self,
+        resource_type: str,
+        resource_id: Optional[str] = None,
+        message: Optional[str] = None,
     ):
-        """
-        Initialize with business rule details.
-        
-        Args:
-            message: Human-readable error description
-            rule_name: Name of the business rule that was violated
-            error_code: Optional error code for the specific rule
-        """
-        details = {}
-        if rule_name:
-            details["rule_name"] = rule_name
-        if error_code:
-            details["error_code"] = error_code
-            
+        if message is None:
+            message = f"{resource_type} not found"
+            if resource_id:
+                message = f"{resource_type} with ID {resource_id} not found"
+        super().__init__(message)
+        self.resource_type = resource_type
+        self.resource_id = resource_id
+
+
+class ValidationError(DomainException):
+    """
+    Raised when domain validation rules are violated.
+
+    This exception is used for business logic validation failures.
+    """
+
+    def __init__(
+        self, message: str = "Validation error", errors: Optional[dict] = None
+    ):
+        super().__init__(message)
+        self.errors = errors or {}
+
+
+class AppointmentConflictError(DomainException):
+    """
+    Raised when there is a scheduling conflict with appointments.
+
+    This exception is used when trying to book an appointment that conflicts
+    with an existing one.
+    """
+
+    def __init__(
+        self,
+        message: str = "Appointment scheduling conflict",
+        conflicting_appointment_id: Optional[str] = None,
+    ):
+        super().__init__(message)
+        self.conflicting_appointment_id = conflicting_appointment_id
+
+
+class PatientDataAccessError(DomainException):
+    """
+    Raised when there is an error accessing patient data.
+
+    This exception is used for HIPAA-related access violations or data integrity issues.
+    """
+
+    def __init__(self, message: str = "Error accessing patient data"):
+        super().__init__(message)
+
+
+class BusinessRuleViolationError(DomainException):
+    """
+    Raised when a business rule is violated.
+
+    This exception is used for enforcing domain-specific rules that aren't
+    simple validation errors.
+    """
+
+    def __init__(self, rule_name: str, message: Optional[str] = None):
+        if message is None:
+            message = f"Business rule violation: {rule_name}"
+        super().__init__(message)
         self.rule_name = rule_name
-        self.error_code = error_code
-        super().__init__(message, details)
 
 
-class DataIntegrityException(NovaBaseException):
-    """Exception raised when data integrity is compromised."""
-    
-    status_code: int = 409
-    
+class ConcurrencyError(DomainException):
+    """
+    Raised when concurrent modifications to a resource cause conflicts.
+
+    This exception is used for optimistic concurrency control failures.
+    """
+
     def __init__(
-        self, 
-        message: str,
-        entity_type: Optional[str] = None,
-        entity_id: Optional[Union[str, int]] = None,
-        conflict_reason: Optional[str] = None
+        self,
+        message: str = "Resource was modified by another process",
+        resource_id: Optional[str] = None,
     ):
-        """
-        Initialize with data integrity details.
-        
-        Args:
-            message: Human-readable error description
-            entity_type: Type of entity with integrity issues
-            entity_id: ID of entity with integrity issues
-            conflict_reason: Description of the integrity conflict
-        """
-        details = {}
-        if entity_type:
-            details["entity_type"] = entity_type
-        if entity_id:
-            details["entity_id"] = entity_id
-        if conflict_reason:
-            details["conflict_reason"] = conflict_reason
-            
-        self.entity_type = entity_type
-        self.entity_id = entity_id
-        self.conflict_reason = conflict_reason
-        super().__init__(message, details)
+        super().__init__(message)
+        self.resource_id = resource_id
 
 
-class ExternalServiceException(NovaBaseException):
-    """Exception raised when an external service fails."""
-    
-    status_code: int = 502
-    
+class ExternalServiceError(DomainException):
+    """
+    Raised when an external service dependency fails.
+
+    This exception wraps errors from external services while keeping
+    domain logic independent.
+    """
+
     def __init__(
-        self, 
-        message: str,
-        service_name: Optional[str] = None,
-        error_details: Optional[Dict[str, Any]] = None
+        self,
+        service_name: str,
+        message: Optional[str] = None,
+        original_error: Optional[Exception] = None,
     ):
-        """
-        Initialize with external service details.
-        
-        Args:
-            message: Human-readable error description
-            service_name: Name of the external service
-            error_details: Detailed error information from the service
-        """
-        details = {}
-        if service_name:
-            details["service_name"] = service_name
-        if error_details:
-            details["error_details"] = error_details
-            
+        if message is None:
+            message = f"External service error: {service_name}"
+        super().__init__(message)
         self.service_name = service_name
-        self.error_details = error_details
-        super().__init__(message, details)
-
-
-class ConfigurationException(NovaBaseException):
-    """Exception raised when system configuration is invalid."""
-    
-    status_code: int = 500
-    
-    def __init__(
-        self, 
-        message: str,
-        config_key: Optional[str] = None
-    ):
-        """
-        Initialize with configuration details.
-        
-        Args:
-            message: Human-readable error description
-            config_key: The configuration key that caused the issue
-        """
-        details = {"config_key": config_key} if config_key else None
-        self.config_key = config_key
-        super().__init__(message, details)
-
-
-class MLModelException(NovaBaseException):
-    """Exception raised when an ML model operation fails."""
-    
-    status_code: int = 500
-    
-    def __init__(
-        self, 
-        message: str,
-        model_name: Optional[str] = None,
-        operation: Optional[str] = None,
-        error_details: Optional[Dict[str, Any]] = None
-    ):
-        """
-        Initialize with ML model details.
-        
-        Args:
-            message: Human-readable error description
-            model_name: Name of the ML model
-            operation: Operation that was being performed
-            error_details: Detailed error information
-        """
-        details = {}
-        if model_name:
-            details["model_name"] = model_name
-        if operation:
-            details["operation"] = operation
-        if error_details:
-            details["error_details"] = error_details
-            
-        self.model_name = model_name
-        self.operation = operation
-        self.error_details = error_details
-        super().__init__(message, details)
-
-
-class PHISecurityException(NovaBaseException):
-    """
-    Exception raised for PHI (Protected Health Information) security violations.
-    This is specifically for HIPAA compliance issues.
-    """
-    
-    status_code: int = 403
-    
-    def __init__(
-        self, 
-        message: str,
-        phi_type: Optional[str] = None,
-        security_violation: Optional[str] = None
-    ):
-        """
-        Initialize with PHI security violation details.
-        
-        Args:
-            message: Human-readable error description
-            phi_type: Type of PHI involved (e.g., 'medical_record', 'prescription')
-            security_violation: Description of security violation
-        """
-        # NEVER include actual PHI in error details or messages
-        details = {}
-        if phi_type:
-            details["phi_type"] = phi_type
-        if security_violation:
-            details["security_violation"] = security_violation
-            
-        self.phi_type = phi_type
-        self.security_violation = security_violation
-        super().__init__(message, details)
+        self.original_error = original_error

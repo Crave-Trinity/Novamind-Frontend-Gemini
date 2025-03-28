@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 """
 /mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend/app/infrastructure/ml_services/pharmacogenomics/service.py
 
 Implementation of the Pharmacogenomics Service that connects to ML models
 for predicting medication responses based on genetic markers and patient history.
 """
+
 import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -14,10 +16,20 @@ from pydantic import BaseModel, Field
 
 from app.core.config import settings
 from app.domain.interfaces.ml_services import PharmacogenomicsService
-from app.infrastructure.ml.pharmacogenomics.gene_medication_model import GeneMedicationModel
-from app.infrastructure.ml.pharmacogenomics.treatment_model import TreatmentResponseModel
-from app.infrastructure.ml.utils.preprocessing import preprocess_genetic_data, preprocess_medication_history
-from app.infrastructure.ml.utils.serialization import deserialize_model, serialize_prediction
+from app.infrastructure.ml.pharmacogenomics.gene_medication_model import (
+    GeneMedicationModel,
+)
+from app.infrastructure.ml.pharmacogenomics.treatment_model import (
+    TreatmentResponseModel,
+)
+from app.infrastructure.ml.utils.preprocessing import (
+    preprocess_genetic_data,
+    preprocess_medication_history,
+)
+from app.infrastructure.ml.utils.serialization import (
+    deserialize_model,
+    serialize_prediction,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -25,69 +37,67 @@ logger = logging.getLogger(__name__)
 class PharmacogenomicsServiceImpl(PharmacogenomicsService):
     """
     Implementation of the Pharmacogenomics Service.
-    
+
     This service connects to ML models for predicting medication responses
     based on genetic markers and patient history, supporting personalized
     treatment planning.
-    
+
     Attributes:
         gene_medication_model: Model for gene-medication interaction analysis
         treatment_model: Model for treatment response prediction
     """
-    
+
     def __init__(self):
         """Initialize the Pharmacogenomics Service with required models."""
         self.gene_medication_model = GeneMedicationModel()
         self.treatment_model = TreatmentResponseModel()
-        
+
         # Load models
         self._load_models()
-        
+
         logger.info("Pharmacogenomics Service initialized successfully")
-    
+
     def _load_models(self) -> None:
         """Load all required models from storage."""
         try:
             model_path = settings.PHARMACOGENOMICS_MODEL_PATH
-            
+
             # Load individual models
             self.gene_medication_model.load(f"{model_path}/gene_medication_model.pkl")
             self.treatment_model.load(f"{model_path}/treatment_response_model.pkl")
-            
+
             logger.info("All pharmacogenomics models loaded successfully")
         except Exception as e:
             logger.error(f"Error loading pharmacogenomics models: {str(e)}")
             raise RuntimeError(f"Failed to load pharmacogenomics models: {str(e)}")
-    
+
     async def predict_medication_response(
-        self, 
-        patient_id: UUID, 
-        genetic_data: Dict[str, Any], 
-        medication_id: str
+        self, patient_id: UUID, genetic_data: Dict[str, Any], medication_id: str
     ) -> Dict[str, Any]:
         """
         Predict patient's response to a specific medication based on genetic markers.
-        
+
         Args:
             patient_id: UUID of the patient
             genetic_data: Dictionary containing patient's genetic markers
             medication_id: Identifier for the medication
-            
+
         Returns:
             Dictionary containing predicted response with confidence scores
         """
-        logger.info(f"Predicting medication response for patient {patient_id}, medication: {medication_id}")
-        
+        logger.info(
+            f"Predicting medication response for patient {patient_id}, medication: {medication_id}"
+        )
+
         try:
             # Preprocess the genetic data
             processed_genetic_data = preprocess_genetic_data(genetic_data)
-            
+
             # Predict medication response
             response_prediction = self.gene_medication_model.predict_response(
-                processed_genetic_data, 
-                medication_id
+                processed_genetic_data, medication_id
             )
-            
+
             # Format the results
             result = {
                 "patient_id": str(patient_id),
@@ -97,51 +107,55 @@ class PharmacogenomicsServiceImpl(PharmacogenomicsService):
                 "response_probability": response_prediction["probability"],
                 "confidence_score": response_prediction["confidence"],
                 "relevant_genetic_markers": response_prediction["relevant_markers"],
-                "recommendation": self._generate_medication_recommendation(response_prediction)
+                "recommendation": self._generate_medication_recommendation(
+                    response_prediction
+                ),
             }
-            
-            logger.info(f"Medication response prediction completed for patient {patient_id}")
+
+            logger.info(
+                f"Medication response prediction completed for patient {patient_id}"
+            )
             return result
-            
+
         except Exception as e:
-            logger.error(f"Error predicting medication response for patient {patient_id}: {str(e)}")
+            logger.error(
+                f"Error predicting medication response for patient {patient_id}: {str(e)}"
+            )
             raise RuntimeError(f"Failed to predict medication response: {str(e)}")
-    
+
     async def analyze_gene_interactions(
-        self, 
-        patient_id: UUID, 
-        genetic_data: Dict[str, Any], 
-        medications: List[str]
+        self, patient_id: UUID, genetic_data: Dict[str, Any], medications: List[str]
     ) -> Dict[str, Any]:
         """
         Analyze interactions between genetic markers and multiple medications.
-        
+
         Args:
             patient_id: UUID of the patient
             genetic_data: Dictionary containing patient's genetic markers
             medications: List of medication identifiers
-            
+
         Returns:
             Dictionary containing interaction analysis for each medication
         """
-        logger.info(f"Analyzing gene interactions for patient {patient_id}, medications: {medications}")
-        
+        logger.info(
+            f"Analyzing gene interactions for patient {patient_id}, medications: {medications}"
+        )
+
         try:
             # Preprocess the genetic data
             processed_genetic_data = preprocess_genetic_data(genetic_data)
-            
+
             # Analyze interactions for each medication
             interactions = {}
             for medication_id in medications:
                 interaction = self.gene_medication_model.analyze_interaction(
-                    processed_genetic_data, 
-                    medication_id
+                    processed_genetic_data, medication_id
                 )
                 interactions[medication_id] = interaction
-            
+
             # Identify potential contraindications
             contraindications = self._identify_contraindications(interactions)
-            
+
             # Format the results
             result = {
                 "patient_id": str(patient_id),
@@ -149,49 +163,53 @@ class PharmacogenomicsServiceImpl(PharmacogenomicsService):
                 "medications_analyzed": medications,
                 "gene_interactions": interactions,
                 "contraindications": contraindications,
-                "summary": self._generate_interaction_summary(interactions, contraindications)
+                "summary": self._generate_interaction_summary(
+                    interactions, contraindications
+                ),
             }
-            
+
             logger.info(f"Gene interaction analysis completed for patient {patient_id}")
             return result
-            
+
         except Exception as e:
-            logger.error(f"Error analyzing gene interactions for patient {patient_id}: {str(e)}")
+            logger.error(
+                f"Error analyzing gene interactions for patient {patient_id}: {str(e)}"
+            )
             raise RuntimeError(f"Failed to analyze gene interactions: {str(e)}")
-    
+
     async def generate_treatment_plan(
-        self, 
-        patient_id: UUID, 
-        genetic_data: Dict[str, Any], 
-        medication_history: Dict[str, Any], 
-        condition: str
+        self,
+        patient_id: UUID,
+        genetic_data: Dict[str, Any],
+        medication_history: Dict[str, Any],
+        condition: str,
     ) -> Dict[str, Any]:
         """
         Generate personalized treatment plan based on genetic data and medication history.
-        
+
         Args:
             patient_id: UUID of the patient
             genetic_data: Dictionary containing patient's genetic markers
             medication_history: Dictionary containing patient's medication history
             condition: The psychiatric condition to generate treatment plan for
-            
+
         Returns:
             Dictionary containing personalized treatment plan recommendations
         """
-        logger.info(f"Generating treatment plan for patient {patient_id}, condition: {condition}")
-        
+        logger.info(
+            f"Generating treatment plan for patient {patient_id}, condition: {condition}"
+        )
+
         try:
             # Preprocess the input data
             processed_genetic_data = preprocess_genetic_data(genetic_data)
             processed_history = preprocess_medication_history(medication_history)
-            
+
             # Generate treatment plan
             treatment_plan = self.treatment_model.generate_plan(
-                processed_genetic_data,
-                processed_history,
-                condition
+                processed_genetic_data, processed_history, condition
             )
-            
+
             # Format the results
             result = {
                 "patient_id": str(patient_id),
@@ -202,47 +220,47 @@ class PharmacogenomicsServiceImpl(PharmacogenomicsService):
                 "expected_efficacy": treatment_plan["efficacy_scores"],
                 "potential_side_effects": treatment_plan["side_effects"],
                 "monitoring_recommendations": treatment_plan["monitoring"],
-                "summary": treatment_plan["summary"]
+                "summary": treatment_plan["summary"],
             }
-            
+
             logger.info(f"Treatment plan generated for patient {patient_id}")
             return result
-            
+
         except Exception as e:
-            logger.error(f"Error generating treatment plan for patient {patient_id}: {str(e)}")
+            logger.error(
+                f"Error generating treatment plan for patient {patient_id}: {str(e)}"
+            )
             raise RuntimeError(f"Failed to generate treatment plan: {str(e)}")
-    
+
     def _identify_contraindications(
-        self, 
-        interactions: Dict[str, Any]
+        self, interactions: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Identify contraindications from gene-medication interactions."""
         contraindications = []
-        
+
         for medication_id, interaction in interactions.items():
             if interaction["risk_level"] >= 3:  # High risk level
-                contraindications.append({
-                    "medication_id": medication_id,
-                    "risk_level": interaction["risk_level"],
-                    "reason": interaction["risk_reason"],
-                    "recommendation": "Avoid use"
-                })
-        
+                contraindications.append(
+                    {
+                        "medication_id": medication_id,
+                        "risk_level": interaction["risk_level"],
+                        "reason": interaction["risk_reason"],
+                        "recommendation": "Avoid use",
+                    }
+                )
+
         return contraindications
-    
+
     def _generate_medication_recommendation(
-        self, 
-        response_prediction: Dict[str, Any]
+        self, response_prediction: Dict[str, Any]
     ) -> str:
         """Generate a recommendation based on predicted medication response."""
         # Implementation would create a recommendation based on the prediction
         # This is a placeholder for the actual implementation
         return "Medication recommendation would be generated here."
-    
+
     def _generate_interaction_summary(
-        self, 
-        interactions: Dict[str, Any], 
-        contraindications: List[Dict[str, Any]]
+        self, interactions: Dict[str, Any], contraindications: List[Dict[str, Any]]
     ) -> str:
         """Generate a human-readable summary of gene-medication interactions."""
         # Implementation would create a natural language summary of interactions

@@ -1,413 +1,320 @@
+# -*- coding: utf-8 -*-
 """
-NOVAMIND Data Validation Utility
-===============================
-Comprehensive data validation for patient information in the NOVAMIND platform.
-Implements HIPAA-compliant validation with proper error handling.
+PHI Detection and Validation Utility.
+
+This module provides utilities for detecting and validating Protected Health Information (PHI)
+in various formats to ensure HIPAA compliance across the platform.
 """
 
 import re
-import json
-from typing import Any, Dict, List, Optional, Union, Callable, TypeVar, Generic, cast
-from datetime import datetime
-from enum import Enum
-from pydantic import BaseModel, Field, validator, ValidationError
-
-# Type variables for generic validation
-T = TypeVar('T')
+from typing import List, Optional, Union, Dict, Any, Pattern
 
 
-class ValidationResult(Generic[T]):
-    """Result of a validation operation."""
-    
-    def __init__(self, is_valid: bool, value: Optional[T] = None, errors: Optional[List[str]] = None):
+class PHIMatch:
+    """Represents a matched PHI instance in text content."""
+
+    def __init__(self, phi_type: str, value: str, position: int):
         """
-        Initialize validation result.
-        
+        Initialize a PHI match.
+
         Args:
-            is_valid: Whether validation passed
-            value: Validated value (if validation passed)
-            errors: List of validation error messages (if validation failed)
+            phi_type: Type of PHI detected (e.g., SSN, NAME, EMAIL)
+            value: The PHI value that was detected
+            position: Character position in the text where PHI was found
         """
-        self.is_valid = is_valid
+        self.phi_type = phi_type
         self.value = value
-        self.errors = errors or []
-    
-    def __bool__(self) -> bool:
-        """Allow using validation result in boolean context."""
-        return self.is_valid
-    
-    def __str__(self) -> str:
-        """String representation of validation result."""
-        if self.is_valid:
-            return f"Valid: {self.value}"
-        else:
-            return f"Invalid: {', '.join(self.errors)}"
+        self.position = position
+
+    def __repr__(self) -> str:
+        """Return string representation of the PHI match."""
+        # Mask the actual PHI value in logs
+        return f"PHIMatch(type={self.phi_type}, value=[REDACTED], position={self.position})"
 
 
-class PatientIdentifierType(str, Enum):
-    """Types of patient identifiers."""
-    MRN = "mrn"
-    SSN = "ssn"
-    INSURANCE_ID = "insurance_id"
-    EXTERNAL_ID = "external_id"
-
-
-class ValidationPatterns:
-    """Regular expression patterns for validating common data types."""
-    
-    # Contact information
-    EMAIL = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    PHONE_US = r'^\+?1?\s*\(?(\d{3})\)?[-.\s]?(\d{3})[-.\s]?(\d{4})$'
-    ZIP_CODE_US = r'^\d{5}(?:-\d{4})?$'
-    
-    # Personal identifiers
-    SSN = r'^\d{3}-\d{2}-\d{4}$'
-    MRN = r'^[A-Z0-9]{6,10}$'
-    INSURANCE_ID = r'^[A-Z0-9]{8,15}$'
-    
-    # Name components
-    NAME = r'^[A-Za-z\'\-\s]{2,50}$'
-    
-    # Dates
-    DATE_ISO = r'^\d{4}-\d{2}-\d{2}$'
-    DATE_US = r'^(0[1-9]|1[0-2])/(0[1-9]|[12]\d|3[01])/\d{4}$'
-    
-    # Medical
-    ICD10_CODE = r'^[A-Z]\d{2}(?:\.\d{1,2})?$'
-    MEDICATION_CODE = r'^[A-Z0-9]{5,10}$'
-    
-    # Security
-    PASSWORD = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
-
-
-class DataValidator:
+class PHIDetector:
     """
-    Validates data according to HIPAA-compliant rules.
-    Provides methods for validating common data types.
+    Detects and validates Protected Health Information (PHI) in content.
+    
+    This class provides robust pattern matching to identify various types of PHI
+    including SSNs, names, addresses, phone numbers, etc. to ensure HIPAA compliance.
     """
-    
-    @staticmethod
-    def validate_pattern(value: str, pattern: str, error_message: Optional[str] = None) -> ValidationResult[str]:
+
+    def __init__(self, custom_patterns: Optional[Dict[str, Pattern]] = None):
         """
-        Validate a string against a regex pattern.
+        Initialize the PHI detector with configurable patterns.
+
+        Args:
+            custom_patterns: Optional dictionary of custom regex patterns to use
+                            instead of or in addition to the default patterns
+        """
+        # Default patterns for various PHI types
+        self.patterns = {
+            # Social Security Numbers in various formats
+            'SSN': re.compile(
+                r'\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b|'  # Basic formats: 123-45-6789, 123 45 6789
+                r'"\d{3}-\d{2}-\d{4}"|'              # Double-quoted: "123-45-6789"
+                r'"\d{3}\s\d{2}\s\d{4}"|'            # Double-quoted with spaces: "123 45 6789"
+                r'\'\d{3}-\d{2}-\d{4}\'|'            # Single-quoted: '123-45-6789'
+                r'\'(?:\d{3})[- ]?(?:\d{2})[- ]?(?:\d{4})\'|'  # General single-quoted
+                r'[=:]\s*[\'"]?\d{3}-\d{2}-\d{4}[\'"]?|'       # Assignment with quotes
+                r'ssn\s*[=:]\s*[\'"]?\d{3}[- ]?\d{2}[- ]?\d{4}[\'"]?',  # Explicit SSN assignment
+                re.IGNORECASE
+            ),
+            
+            # Email addresses
+            'EMAIL': re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'),
+            
+            # Phone numbers in various formats
+            'PHONE': re.compile(
+                r'\b(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b|'  # Standard formats
+                r'phone\s*[=:]\s*[\'"]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}[\'"]?',  # Assignments
+                re.IGNORECASE
+            ),
+            
+            # Medical Record Numbers
+            'MRN': re.compile(
+                r'\bMRN\s*[#:]?\s*\d{5,10}\b|'  # Basic MRN format
+                r'medical[\s_-]*record[\s_-]*number[\s_-]*[#:]?\s*\d{5,10}',  # Explicit MRN
+                re.IGNORECASE
+            ),
+            
+            # Full names (2+ words starting with capital letters)
+            'NAME': re.compile(
+                r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b|'  # Basic name format: John Doe
+                r'name\s*[=:]\s*[\'"]?[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+[\'"]?',  # Assignment
+                re.IGNORECASE
+            ),
+            
+            # Dates of birth
+            'DOB': re.compile(
+                r'\b\d{1,2}/\d{1,2}/\d{4}\b|'  # MM/DD/YYYY
+                r'\b\d{4}-\d{1,2}-\d{1,2}\b|'  # YYYY-MM-DD
+                r'(?:DOB|Date\s+of\s+Birth)[:\s]+\d{1,2}[/.-]\d{1,2}[/.-]\d{4}',  # Labeled DOB
+                re.IGNORECASE
+            ),
+            
+            # Addresses with street information
+            'ADDRESS': re.compile(
+                r'\b\d+\s+[A-Za-z\s]+(?:St|Street|Ave|Avenue|Blvd|Boulevard|Rd|Road|Dr|Drive|Lane|Ln|Place|Pl|Court|Ct|Circle|Cir|Highway|Hwy|Way)\b',
+                re.IGNORECASE
+            ),
+            
+            # Credit card numbers
+            'CREDIT_CARD': re.compile(
+                r'\b(?:\d{4}[- ]?){3}\d{4}\b|'  # Basic 16-digit format with separators
+                r'\b\d{13,16}\b'  # Continuous digit format
+            )
+        }
+        
+        # Merge or replace with custom patterns if provided
+        if custom_patterns:
+            for key, pattern in custom_patterns.items():
+                self.patterns[key] = pattern
+
+    def detect_phi(self, content: str) -> List[PHIMatch]:
+        """
+        Detect PHI in the provided content.
         
         Args:
-            value: String to validate
-            pattern: Regex pattern to validate against
-            error_message: Custom error message
+            content: Text content to scan for PHI
             
         Returns:
-            ValidationResult with validation status
+            List of PHIMatch objects for each detected PHI instance
         """
-        if not value:
-            return ValidationResult(False, None, ["Value cannot be empty"])
-        
-        if re.match(pattern, value):
-            return ValidationResult(True, value)
-        else:
-            return ValidationResult(False, None, [error_message or "Invalid format"])
+        if not isinstance(content, str):
+            return []
+            
+        found_phi = []
+        for phi_type, pattern in self.patterns.items():
+            matches = pattern.finditer(content)
+            for match in matches:
+                found_phi.append(PHIMatch(
+                    phi_type=phi_type,
+                    value=match.group(0),
+                    position=match.start()
+                ))
+                
+        return found_phi
     
-    @staticmethod
-    def validate_email(email: str) -> ValidationResult[str]:
-        """Validate email address format."""
-        return DataValidator.validate_pattern(
-            email, 
-            ValidationPatterns.EMAIL,
-            "Invalid email address format"
-        )
-    
-    @staticmethod
-    def validate_phone(phone: str) -> ValidationResult[str]:
-        """Validate US phone number format."""
-        return DataValidator.validate_pattern(
-            phone, 
-            ValidationPatterns.PHONE_US,
-            "Invalid phone number format"
-        )
-    
-    @staticmethod
-    def validate_ssn(ssn: str) -> ValidationResult[str]:
-        """Validate US Social Security Number format."""
-        return DataValidator.validate_pattern(
-            ssn, 
-            ValidationPatterns.SSN,
-            "Invalid SSN format (must be XXX-XX-XXXX)"
-        )
-    
-    @staticmethod
-    def validate_mrn(mrn: str) -> ValidationResult[str]:
-        """Validate Medical Record Number format."""
-        return DataValidator.validate_pattern(
-            mrn, 
-            ValidationPatterns.MRN,
-            "Invalid MRN format"
-        )
-    
-    @staticmethod
-    def validate_name(name: str) -> ValidationResult[str]:
-        """Validate person name format."""
-        return DataValidator.validate_pattern(
-            name, 
-            ValidationPatterns.NAME,
-            "Invalid name format (2-50 characters, letters, spaces, hyphens, and apostrophes only)"
-        )
-    
-    @staticmethod
-    def validate_date(date_str: str, format_str: str = "%Y-%m-%d") -> ValidationResult[datetime]:
+    def contains_phi(self, content: str) -> bool:
         """
-        Validate date string and convert to datetime.
+        Check if the content contains any PHI.
         
         Args:
-            date_str: Date string to validate
-            format_str: Expected date format
+            content: Text content to check
             
         Returns:
-            ValidationResult with parsed datetime if valid
+            True if PHI is detected, False otherwise
         """
-        if not date_str:
-            return ValidationResult(False, None, ["Date cannot be empty"])
-        
-        try:
-            date_obj = datetime.strptime(date_str, format_str)
-            return ValidationResult(True, date_obj)
-        except ValueError:
-            return ValidationResult(False, None, [f"Invalid date format (expected {format_str})"])
+        return len(self.detect_phi(content)) > 0
     
-    @staticmethod
-    def validate_age(age: Union[int, str]) -> ValidationResult[int]:
+    def sanitize_phi(self, content: str) -> str:
         """
-        Validate age is a reasonable value.
+        Replace all detected PHI with [REDACTED] marker.
         
         Args:
-            age: Age value to validate
+            content: Text content to sanitize
             
         Returns:
-            ValidationResult with age as int if valid
+            Sanitized content with PHI replaced by [REDACTED]
         """
-        try:
-            age_int = int(age)
-            if 0 <= age_int <= 120:
-                return ValidationResult(True, age_int)
-            else:
-                return ValidationResult(False, None, ["Age must be between 0 and 120"])
-        except (ValueError, TypeError):
-            return ValidationResult(False, None, ["Age must be a number"])
-    
-    @staticmethod
-    def validate_password(password: str) -> ValidationResult[str]:
-        """
-        Validate password strength.
-        
-        Args:
-            password: Password to validate
+        if not isinstance(content, str):
+            return content
             
-        Returns:
-            ValidationResult with password if valid
-        """
-        if not password:
-            return ValidationResult(False, None, ["Password cannot be empty"])
+        # Detect all PHI
+        phi_matches = self.detect_phi(content)
         
-        errors = []
-        
-        if len(password) < 8:
-            errors.append("Password must be at least 8 characters long")
-        
-        if not re.search(r'[A-Z]', password):
-            errors.append("Password must contain at least one uppercase letter")
-        
-        if not re.search(r'[a-z]', password):
-            errors.append("Password must contain at least one lowercase letter")
-        
-        if not re.search(r'\d', password):
-            errors.append("Password must contain at least one digit")
-        
-        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-            errors.append("Password must contain at least one special character")
-        
-        if errors:
-            return ValidationResult(False, None, errors)
-        else:
-            return ValidationResult(True, password)
-    
-    @staticmethod
-    def sanitize_input(input_str: str) -> str:
-        """
-        Sanitize input string to prevent injection attacks.
-        
-        Args:
-            input_str: String to sanitize
+        # If no PHI, return original content
+        if not phi_matches:
+            return content
             
-        Returns:
-            Sanitized string
-        """
-        if not input_str:
-            return ""
+        # Sort matches by position (reversed to avoid messing up positions)
+        phi_matches.sort(key=lambda m: m.position, reverse=True)
         
-        # Remove potentially dangerous characters
-        sanitized = re.sub(r'[<>"\';]', '', input_str)
-        
-        # Escape HTML entities
-        sanitized = (
-            sanitized
-            .replace('&', '&amp;')
-            .replace('<', '&lt;')
-            .replace('>', '&gt;')
-            .replace('"', '&quot;')
-            .replace("'", '&#x27;')
-        )
-        
+        # Replace each match with [REDACTED]
+        sanitized = content
+        for match in phi_matches:
+            start = match.position
+            end = start + len(match.value)
+            sanitized = sanitized[:start] + "[REDACTED]" + sanitized[end:]
+            
         return sanitized
     
-    @staticmethod
-    def validate_json(json_str: str) -> ValidationResult[Dict[str, Any]]:
+    def is_phi_test_context(self, file_path: str, content: str) -> bool:
         """
-        Validate JSON string and parse to dictionary.
+        Determine if the file is a legitimate PHI test context.
         
         Args:
-            json_str: JSON string to validate
+            file_path: Path to the file
+            content: Content of the file
             
         Returns:
-            ValidationResult with parsed JSON if valid
+            True if the file appears to be testing PHI detection, False otherwise
         """
-        if not json_str:
-            return ValidationResult(False, None, ["JSON string cannot be empty"])
+        # PHI Test patterns
+        phi_test_patterns = [
+            r"test_phi_",
+            r"phi_test",
+            r"test_sanitiz",
+            r"sanitiz.*test",
+            r"test.*phi.*detect",
+            r"phi.*detect.*test",
+            r"test_audit_detects_phi",
+            r"test_phi_audit",
+            r"test.*audit.*phi"
+        ]
         
-        try:
-            parsed = json.loads(json_str)
-            if not isinstance(parsed, dict):
-                return ValidationResult(False, None, ["JSON must represent an object"])
-            return ValidationResult(True, parsed)
-        except json.JSONDecodeError as e:
-            return ValidationResult(False, None, [f"Invalid JSON: {str(e)}"])
-    
-    @staticmethod
-    def validate_enum(value: str, enum_class: Any) -> ValidationResult[Any]:
-        """
-        Validate value against an Enum class.
+        # Check filename for PHI test patterns
+        filename = file_path.split("/")[-1]
+        if any(re.search(pattern, filename, re.IGNORECASE) for pattern in phi_test_patterns):
+            return True
         
-        Args:
-            value: Value to validate
-            enum_class: Enum class to validate against
-            
-        Returns:
-            ValidationResult with enum value if valid
-        """
-        try:
-            enum_value = enum_class(value)
-            return ValidationResult(True, enum_value)
-        except ValueError:
-            valid_values = [e.value for e in enum_class]
-            return ValidationResult(
-                False, 
-                None, 
-                [f"Invalid value. Must be one of: {', '.join(str(v) for v in valid_values)}"]
-            )
+        # Check for test-specific imports and context
+        test_indicators = [
+            "import pytest",
+            "from pytest",
+            "unittest",
+            "PHIDetector",
+            "LogSanitizer",
+            "PHISanitizer",
+            "test_detect_phi",
+            "test_phi_detection",
+            "test_phi_in_code"
+        ]
+        
+        # Is this code in a test context?
+        test_files = "/tests/" in file_path or file_path.endswith("_test.py") or file_path.endswith("test.py")
+        test_content = any(indicator in content for indicator in test_indicators)
+        
+        return test_files and test_content
 
 
-# Pydantic models for structured validation
-
-class PatientIdentifier(BaseModel):
-    """Patient identifier model."""
-    
-    id_type: PatientIdentifierType
-    id_value: str
-    issuer: Optional[str] = None
-    
-    @validator('id_value')
-    def validate_id_value(cls, v, values):
-        """Validate ID value based on ID type."""
-        id_type = values.get('id_type')
-        if id_type == PatientIdentifierType.MRN:
-            if not re.match(ValidationPatterns.MRN, v):
-                raise ValueError("Invalid MRN format")
-        elif id_type == PatientIdentifierType.SSN:
-            if not re.match(ValidationPatterns.SSN, v):
-                raise ValueError("Invalid SSN format")
-        elif id_type == PatientIdentifierType.INSURANCE_ID:
-            if not re.match(ValidationPatterns.INSURANCE_ID, v):
-                raise ValueError("Invalid insurance ID format")
-        return v
-
-
-class PatientContact(BaseModel):
-    """Patient contact information model."""
-    
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    address_line1: Optional[str] = None
-    address_line2: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    zip_code: Optional[str] = None
-    country: str = "USA"
-    
-    @validator('email')
-    def validate_email(cls, v):
-        """Validate email format."""
-        if v and not re.match(ValidationPatterns.EMAIL, v):
-            raise ValueError("Invalid email format")
-        return v
-    
-    @validator('phone')
-    def validate_phone(cls, v):
-        """Validate phone format."""
-        if v and not re.match(ValidationPatterns.PHONE_US, v):
-            raise ValueError("Invalid phone format")
-        return v
-    
-    @validator('zip_code')
-    def validate_zip_code(cls, v):
-        """Validate ZIP code format."""
-        if v and not re.match(ValidationPatterns.ZIP_CODE_US, v):
-            raise ValueError("Invalid ZIP code format")
-        return v
-
-
-class PatientDemographics(BaseModel):
-    """Patient demographics model."""
-    
-    first_name: str
-    last_name: str
-    middle_name: Optional[str] = None
-    date_of_birth: datetime
-    gender: str
-    ethnicity: Optional[str] = None
-    race: Optional[str] = None
-    preferred_language: Optional[str] = None
-    
-    @validator('first_name', 'last_name', 'middle_name')
-    def validate_name(cls, v):
-        """Validate name format."""
-        if v and not re.match(ValidationPatterns.NAME, v):
-            raise ValueError("Invalid name format")
-        return v
-    
-    @validator('gender')
-    def validate_gender(cls, v):
-        """Validate gender."""
-        valid_genders = ["male", "female", "non-binary", "other", "prefer not to say"]
-        if v.lower() not in valid_genders:
-            raise ValueError(f"Invalid gender. Must be one of: {', '.join(valid_genders)}")
-        return v.lower()
-
-
-def validate_model(model_class: Any, data: Dict[str, Any]) -> ValidationResult[Any]:
+def validate_us_phone(phone_number: str) -> bool:
     """
-    Validate data against a Pydantic model.
+    Validate if a string is a properly formatted US phone number.
     
     Args:
-        model_class: Pydantic model class to validate against
-        data: Dictionary data to validate
+        phone_number: Phone number string to validate
         
     Returns:
-        ValidationResult with model instance if valid
+        True if valid US phone number, False otherwise
     """
-    try:
-        model_instance = model_class(**data)
-        return ValidationResult(True, model_instance)
-    except ValidationError as e:
-        errors = []
-        for error in e.errors():
-            location = ".".join(str(loc) for loc in error["loc"])
-            errors.append(f"{location}: {error['msg']}")
-        return ValidationResult(False, None, errors)
+    # Remove any non-digit characters for validation
+    digits_only = re.sub(r'\D', '', phone_number)
+    
+    # US phone numbers should have 10 digits (or 11 with country code 1)
+    return (len(digits_only) == 10 or 
+            (len(digits_only) == 11 and digits_only.startswith('1')))
+
+
+def validate_ssn(ssn: str) -> bool:
+    """
+    Validate if a string is a properly formatted US Social Security Number.
+    
+    Args:
+        ssn: SSN string to validate
+        
+    Returns:
+        True if valid SSN, False otherwise
+    """
+    # Remove any non-digit characters for validation
+    digits_only = re.sub(r'\D', '', ssn)
+    
+    # Check basic format
+    if len(digits_only) != 9:
+        return False
+    
+    # Check for invalid values:
+    # - SSNs don't start with 000, 666, or 900-999
+    # - The middle two digits can't be 00
+    # - The last four digits can't be 0000
+    if (digits_only.startswith('000') or
+        digits_only.startswith('666') or
+        digits_only.startswith('9') or
+        digits_only[3:5] == '00' or
+        digits_only[5:] == '0000'):
+        return False
+        
+    return True
+
+
+def validate_email(email: str) -> bool:
+    """
+    Validate if a string is a properly formatted email address.
+    
+    Args:
+        email: Email string to validate
+        
+    Returns:
+        True if valid email, False otherwise
+    """
+    # Basic email validation pattern
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email))
+
+
+def validate_date_of_birth(dob: str) -> bool:
+    """
+    Validate if a string is a properly formatted date of birth.
+    
+    Args:
+        dob: Date of birth string to validate
+        
+    Returns:
+        True if valid date of birth, False otherwise
+    """
+    # Try common date formats
+    date_patterns = [
+        r'^\d{1,2}/\d{1,2}/\d{4}$',  # MM/DD/YYYY
+        r'^\d{4}-\d{1,2}-\d{1,2}$',  # YYYY-MM-DD
+        r'^\d{1,2}-\d{1,2}-\d{4}$'   # MM-DD-YYYY
+    ]
+    
+    for pattern in date_patterns:
+        if re.match(pattern, dob):
+            # Additional logic could be added to validate the date values
+            # (e.g., valid month/day ranges, no future dates for DOB)
+            return True
+            
+    return False

@@ -1,0 +1,229 @@
+name: HIPAA Security Checks
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  schedule:
+    # Run nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  hipaa-security-tests:
+    name: HIPAA Security Compliance Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          pip install -r requirements-security.txt
+      
+      - name: Check dependencies for vulnerabilities
+        run: |
+          pip install safety
+          safety check -r requirements.txt -r requirements-dev.txt --output json > safety-report.json || true
+      
+      - name: Run Bandit security linter
+        run: |
+          pip install bandit
+          bandit -r app/ -f json -o bandit-report.json || true
+      
+      - name: Run security unit tests
+        run: |
+          python -m pytest tests/security/ -v --junitxml=test-results.xml
+      
+      - name: Create security report directory
+        run: mkdir -p security-reports
+      
+      - name: Run comprehensive security analysis
+        run: |
+          python security_test_runner.py --report-dir security-reports
+          chmod -R 755 security-reports
+      
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            security-reports/
+            bandit-report.json
+            safety-report.json
+            test-results.xml
+      
+      - name: Check for critical security issues
+        run: |
+          # Extract compliance status and critical findings from the security report
+          if [ -f "security-reports/security-report.json" ]; then
+            COMPLIANCE_STATUS=$(python -c "import json; f=open('security-reports/security-report.json'); data=json.load(f); print(data.get('summary', {}).get('compliance_status', 'Unknown'))")
+            CRITICAL_FINDINGS=$(python -c "import json; f=open('security-reports/security-report.json'); data=json.load(f); print(data.get('summary', {}).get('critical_findings', 0))")
+            
+            echo "Compliance Status: $COMPLIANCE_STATUS"
+            echo "Critical Findings: $CRITICAL_FINDINGS"
+            
+            # Only fail on critical findings in PR checks and main branch pushes
+            if [[ "$GITHUB_EVENT_NAME" == "pull_request" || "$GITHUB_REF" == "refs/heads/main" || "$GITHUB_REF" == "refs/heads/master" ]]; then
+              if [[ "$COMPLIANCE_STATUS" == "Non-Compliant" || $CRITICAL_FINDINGS -gt 0 ]]; then
+                echo "::error::HIPAA Security check failed: $CRITICAL_FINDINGS critical findings found"
+                exit 1
+              fi
+            fi
+          else
+            echo "::warning::Could not find security report. Test execution may have failed."
+            exit 1
+          fi
+
+  penetration-tests:
+    name: HIPAA Penetration Tests
+    runs-on: ubuntu-latest
+    # Only run penetration tests on schedule or manual trigger, not on every PR
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: hipaa-security-tests
+    
+    # Use a matrix to test against multiple environments
+    strategy:
+      matrix:
+        environment: [staging]
+        # Add production only for scheduled runs
+        include:
+          - environment: production
+            if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-security.txt
+      
+      - name: Start test server
+        if: matrix.environment == 'staging'
+        run: |
+          # Start a local test server for penetration testing
+          # Only needed for staging environment tests
+          pip install -r requirements.txt
+          python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 10  # Give the server time to start
+      
+      - name: Run penetration tests
+        run: |
+          # Use different URLs based on environment
+          if [[ "${{ matrix.environment }}" == "staging" ]]; then
+            # Use local server for staging
+            PENTEST_URL="http://localhost:8000"
+          else
+            # Use actual production URL for production tests
+            # This would typically be fetched from secrets
+            PENTEST_URL=${{ secrets.PRODUCTION_API_URL }}
+          fi
+          
+          mkdir -p security-reports/pentest-${{ matrix.environment }}
+          python hipaa_pentest.py $PENTEST_URL --output-dir security-reports/pentest-${{ matrix.environment }}
+      
+      - name: Upload Penetration Test Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: penetration-test-reports-${{ matrix.environment }}
+          path: security-reports/pentest-${{ matrix.environment }}
+      
+      - name: Check for critical penetration test findings
+        run: |
+          if [ -f "security-reports/pentest-${{ matrix.environment }}/pentest_results.json" ]; then
+            CRITICAL_VULNS=$(python -c "import json; f=open('security-reports/pentest-${{ matrix.environment }}/pentest_results.json'); data=json.load(f); print(len([v for v in data.get('vulnerabilities', []) if v.get('severity') == 'Critical']))")
+            
+            echo "Critical Vulnerabilities: $CRITICAL_VULNS"
+            
+            # Always report but only fail on production
+            if [[ "${{ matrix.environment }}" == "production" && $CRITICAL_VULNS -gt 0 ]]; then
+              echo "::error::HIPAA Penetration testing failed: $CRITICAL_VULNS critical vulnerabilities found in production"
+              exit 1
+            elif [[ $CRITICAL_VULNS -gt 0 ]]; then
+              echo "::warning::HIPAA Penetration testing found $CRITICAL_VULNS critical vulnerabilities in ${{ matrix.environment }}"
+            fi
+          else
+            echo "::warning::Could not find penetration test results."
+            exit 1
+          fi
+
+  security-report:
+    name: Generate Security Compliance Report
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [hipaa-security-tests, penetration-tests]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: all-artifacts
+      
+      - name: Generate consolidated report
+        run: |
+          echo "# HIPAA Security Compliance Report" > hipaa-compliance-summary.md
+          echo "Generated on $(date)" >> hipaa-compliance-summary.md
+          echo "" >> hipaa-compliance-summary.md
+          
+          # Add security test results
+          if [ -d "all-artifacts/security-reports" ]; then
+            echo "## Security Test Results" >> hipaa-compliance-summary.md
+            if [ -f "all-artifacts/security-reports/security-report.md" ]; then
+              cat all-artifacts/security-reports/security-report.md >> hipaa-compliance-summary.md
+            else
+              echo "Security report not found." >> hipaa-compliance-summary.md
+            fi
+          fi
+          
+          # Add penetration test results
+          echo "## Penetration Test Results" >> hipaa-compliance-summary.md
+          for env in staging production; do
+            if [ -d "all-artifacts/penetration-test-reports-$env" ]; then
+              echo "### $env Environment" >> hipaa-compliance-summary.md
+              if [ -f "all-artifacts/penetration-test-reports-$env/pentest_results.json" ]; then
+                VULNS=$(python -c "import json, sys; f=open('all-artifacts/penetration-test-reports-$env/pentest_results.json'); data=json.load(f); print(len(data.get('vulnerabilities', [])))")
+                echo "- Vulnerabilities found: $VULNS" >> hipaa-compliance-summary.md
+              else
+                echo "- Penetration test results not found." >> hipaa-compliance-summary.md
+              fi
+            fi
+          done
+      
+      - name: Upload consolidated report
+        uses: actions/upload-artifact@v3
+        with:
+          name: hipaa-compliance-summary
+          path: hipaa-compliance-summary.md
+      
+      - name: Check workflow status
+        if: always()
+        run: |
+          if [[ "${{ needs.hipaa-security-tests.result }}" == "failure" || "${{ needs.penetration-tests.result }}" == "failure" ]]; then
+            echo "::error::HIPAA Security compliance checks failed!"
+            exit 1
+          else
+            echo "HIPAA Security compliance checks passed."
+          fi

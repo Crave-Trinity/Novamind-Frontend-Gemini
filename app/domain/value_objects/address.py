@@ -1,6 +1,6 @@
+# -*- coding: utf-8 -*-
 # app/domain/value_objects/address.py
-# Value object representing a physical address
-# Value objects are immutable and equality is based on their attributes
+"""Address value object."""
 
 from dataclasses import dataclass
 from typing import Optional
@@ -9,42 +9,41 @@ from typing import Optional
 @dataclass(frozen=True)
 class Address:
     """
-    Value object representing a physical address
-    Immutable and equality is based on attributes
+    Immutable value object representing a physical address.
+    
+    Follows HIPAA best practices for storing address information.
     """
-    street_line_1: str
+    
+    street: str
     city: str
     state: str
-    postal_code: str
-    street_line_2: Optional[str] = None
-    country: str = "USA"
+    zip_code: str
+    country: Optional[str] = "USA"
     
-    def __post_init__(self):
-        """Validate address data"""
-        if not self.street_line_1:
-            raise ValueError("Street line 1 cannot be empty")
+    def __post_init__(self) -> None:
+        """Validate address after initialization."""
+        if not self.street:
+            raise ValueError("Street is required")
+        
         if not self.city:
-            raise ValueError("City cannot be empty")
+            raise ValueError("City is required")
+        
         if not self.state:
-            raise ValueError("State cannot be empty")
-        if not self.postal_code:
-            raise ValueError("Postal code cannot be empty")
+            raise ValueError("State is required")
+        
+        if not self.zip_code:
+            raise ValueError("ZIP code is required")
     
-    def formatted(self) -> str:
-        """
-        Return a formatted address string
-        
-        Returns:
-            Formatted address string
-        """
-        address_parts = [self.street_line_1]
-        
-        if self.street_line_2:
-            address_parts.append(self.street_line_2)
-            
-        address_parts.append(f"{self.city}, {self.state} {self.postal_code}")
-        
-        if self.country != "USA":
-            address_parts.append(self.country)
-            
-        return "\n".join(address_parts)
+    def to_dict(self) -> dict:
+        """Convert to dictionary."""
+        return {
+            "street": self.street,
+            "city": self.city,
+            "state": self.state,
+            "zip_code": self.zip_code,
+            "country": self.country
+        }
+    
+    def __str__(self) -> str:
+        """Get string representation."""
+        return f"{self.street}, {self.city}, {self.state} {self.zip_code}"

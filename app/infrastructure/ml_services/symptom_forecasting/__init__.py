@@ -3,6 +3,9 @@
 
 Initialization file for the Symptom Forecasting Service module.
 """
-from app.infrastructure.ml_services.symptom_forecasting.service import SymptomForecastingServiceImpl
+
+from app.infrastructure.ml_services.symptom_forecasting.service import (
+    SymptomForecastingServiceImpl,
+)
 
 __all__ = ["SymptomForecastingServiceImpl"]

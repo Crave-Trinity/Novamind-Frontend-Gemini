@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Initial database schema for NOVAMIND
 
 Revision ID: 001_initial_schema

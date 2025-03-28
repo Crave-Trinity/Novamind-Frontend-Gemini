@@ -1,0 +1,60 @@
+# PHI detection patterns for HIPAA compliance
+patterns:
+  - name: "Patient ID"
+    pattern: "PT\\d{6,8}"
+    type: "regex"
+    priority: 10
+    partial_redaction_length: 4
+    examples: ["PT12345678", "PT987654"]
+    
+  - name: "Social Security Number"
+    pattern: "\\b\\d{3}-\\d{2}-\\d{4}\\b"
+    type: "regex" 
+    priority: 10
+    partial_redaction_length: 4
+    examples: ["123-45-6789"]
+    
+  - name: "Email Address"
+    pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"
+    type: "regex"
+    priority: 8
+    partial_format: "xxxx@{domain}"
+    examples: ["patient@example.com", "doctor.name@hospital.org"]
+    
+  - name: "Phone Number"
+    pattern: "\\(\\d{3}\\)\\s*\\d{3}-\\d{4}|\\d{3}-\\d{3}-\\d{4}"
+    type: "regex"
+    priority: 7
+    partial_redaction_length: 4
+    examples: ["(555) 123-4567", "555-123-4567"]
+
+  - name: "Medical Record Number"
+    pattern: "MRN\\d{6,10}"
+    type: "regex"
+    priority: 9
+    examples: ["MRN123456", "MRN9876543210"]
+
+sensitive_keys:
+  - name: "SSN"
+    keys: ["ssn", "social_security", "social_security_number"]
+    priority: 10
+    
+  - name: "DOB"
+    keys: ["dob", "date_of_birth", "birth_date"]
+    priority: 9
+    
+  - name: "Credit Card"
+    keys: ["credit_card", "cc_number", "card_number"]
+    priority: 10
+    
+  - name: "Patient ID"
+    keys: ["patient_id", "id", "identifier", "mrn", "medical_record_number"]
+    priority: 8
+    
+  - name: "Name"
+    keys: ["name", "full_name", "first_name", "last_name", "patient_name"]
+    priority: 7
+    
+  - name: "Contact"
+    keys: ["email", "phone", "address", "contact"]
+    priority: 6

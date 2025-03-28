@@ -1,0 +1,153 @@
+name: HIPAA Security Check
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  # Allow manual triggering
+  workflow_dispatch:
+  # Scheduled security scan once per week
+  schedule:
+    - cron: '0 4 * * 1'  # Every Monday at 4 AM UTC
+
+jobs:
+  security-compliance-check:
+    name: HIPAA Security Compliance
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-security.txt
+          pip install bandit safety pytest pytest-cov
+      
+      - name: Run HIPAA compliance tests
+        run: |
+          pytest tests/security/test_hipaa_compliance.py -v
+      
+      - name: Check for security vulnerabilities with Bandit
+        run: |
+          bandit -r app -f json -o bandit-results.json
+          echo "Bandit scan completed. See artifacts for results."
+      
+      - name: Check for dependency vulnerabilities with Safety
+        run: |
+          safety check --json -o safety-results.json -r requirements.txt -r requirements-security.txt || true
+          echo "Safety scan completed. See artifacts for results."
+      
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'NOVAMIND'
+          path: '.'
+          format: 'HTML'
+          out: 'owasp-reports'
+          args: >
+            --enableExperimental
+            --enableRetired
+      
+      - name: Run code quality checks
+        run: |
+          # Run flake8 for code style issues that might impact security
+          pip install flake8
+          flake8 app --count --select=E9,F63,F7,F82 --show-source --statistics
+      
+      - name: Run security scan script
+        run: |
+          # Make the script executable
+          chmod +x scripts/run_security_tests.py
+          # Run the script with full scan enabled
+          python scripts/run_security_tests.py --full --report-path security-report.html
+        continue-on-error: true  # Don't fail the build here, we'll analyze results later
+      
+      - name: Upload security reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            security-report.html
+            bandit-results.json
+            safety-results.json
+            owasp-reports/
+      
+      - name: Check for critical security issues
+        run: |
+          # Check if any critical security issues were found
+          if grep -q "severity.*critical" bandit-results.json || grep -q "severity.*critical" safety-results.json; then
+            echo "::error::Critical security vulnerabilities found. See reports for details."
+            exit 1
+          fi
+          
+          # Look for hardcoded secrets or credentials
+          if grep -r -E "(password|secret|key|token).*=.*(\"|\')[a-zA-Z0-9]+(\"|\')(?!.*PLACEHOLDER)" --include="*.py" app; then
+            echo "::error::Potential hardcoded secrets found in code. Please review."
+            exit 1
+          fi
+          
+          echo "No critical security issues found."
+
+  compliance-report:
+    name: Generate HIPAA Compliance Report
+    needs: security-compliance-check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Download security reports
+        uses: actions/download-artifact@v3
+        with:
+          name: security-reports
+          path: security-reports
+      
+      - name: Generate compliance summary
+        run: |
+          echo "# HIPAA Compliance Summary" > compliance-summary.md
+          echo "Generated on $(date)" >> compliance-summary.md
+          echo "" >> compliance-summary.md
+          echo "## Security Scan Results" >> compliance-summary.md
+          
+          # Extract key metrics from reports and add to summary
+          echo "See attached HTML report for full details." >> compliance-summary.md
+          
+          echo "" >> compliance-summary.md
+          echo "## Recommendations" >> compliance-summary.md
+          echo "1. Review all findings marked as critical or high priority" >> compliance-summary.md
+          echo "2. Address any PHI protection concerns immediately" >> compliance-summary.md
+          echo "3. Ensure all access controls are properly implemented" >> compliance-summary.md
+          
+          echo "" >> compliance-summary.md
+          echo "## Compliance Status" >> compliance-summary.md
+          echo "The following regulatory requirements have been checked:" >> compliance-summary.md
+          echo "- § 164.308(a)(4): Information Access Management" >> compliance-summary.md
+          echo "- § 164.312(a)(1): Access Control" >> compliance-summary.md
+          echo "- § 164.312(b): Audit Controls" >> compliance-summary.md
+          echo "- § 164.312(c)(1): Integrity" >> compliance-summary.md
+          echo "- § 164.312(e)(1): Transmission Security" >> compliance-summary.md
+      
+      - name: Upload compliance summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: compliance-summary
+          path: compliance-summary.md
+      
+      # If this is a scheduled run, we could add steps to email the report
+      # or integrate with a compliance tracking system

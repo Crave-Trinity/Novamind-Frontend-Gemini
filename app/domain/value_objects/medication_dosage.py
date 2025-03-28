@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 """
 Medication dosage value object for the NOVAMIND backend.
 
 This module contains the MedicationDosage value object, which represents
 a medication dosage with immutable properties and validation.
 """
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
@@ -11,6 +13,7 @@ from typing import Optional
 
 class DosageUnit(Enum):
     """Enumeration of medication dosage units"""
+
     MG = "mg"
     MCG = "mcg"
     G = "g"
@@ -29,37 +32,53 @@ class DosageUnit(Enum):
 class MedicationDosage:
     """
     Value object representing a medication dosage.
-    
+
     This is an immutable value object with validation logic.
     """
+
     value: float
     unit: DosageUnit
     frequency_per_day: float
     max_daily_value: Optional[float] = None
-    
+
     def __post_init__(self):
         """Validate the dosage values"""
         if self.value <= 0:
             raise ValueError("Dosage value must be positive")
-        
+
         if self.frequency_per_day <= 0:
             raise ValueError("Frequency must be positive")
-        
+
         if self.max_daily_value is not None and self.max_daily_value < self.value:
-            raise ValueError("Maximum daily value cannot be less than single dose value")
-    
+            raise ValueError(
+                "Maximum daily value cannot be less than single dose value"
+            )
+
+    def validate_dosage(self) -> None:
+        """
+        Validate that the dosage amount and unit are valid.
+        
+        Raises:
+            ValueError: If dosage amount is negative or unit is invalid
+        """
+        if self.value < 0:
+            raise ValueError("Dosage amount cannot be negative")
+            
+        if self.unit not in DosageUnit:
+            raise ValueError(f"Invalid dosage unit. Must be one of: {', '.join([unit.value for unit in DosageUnit])}")
+
     @property
     def daily_value(self) -> float:
         """Calculate the total daily value"""
         return self.value * self.frequency_per_day
-    
+
     @property
     def is_within_max_daily(self) -> bool:
         """Check if the daily value is within the maximum daily value"""
         if self.max_daily_value is None:
             return True
         return self.daily_value <= self.max_daily_value
-    
+
     def __str__(self) -> str:
         """String representation of the dosage"""
         base = f"{self.value} {self.unit.value}"
