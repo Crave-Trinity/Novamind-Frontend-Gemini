@@ -1,94 +1,32 @@
-# Pretrained Actigraphy Transformer (PAT) Implementation Guide
+# PAT Implementation Guide
 
-## Table of Contents
-1. [Introduction](#introduction)
-2. [Environment Setup](#environment-setup)
-3. [Dependencies](#dependencies)
-4. [Implementation Structure](#implementation-structure)
-5. [Integration with Digital Twin](#integration-with-digital-twin)
-6. [HIPAA Compliance](#hipaa-compliance)
-7. [Testing Strategy](#testing-strategy)
-8. [Deployment](#deployment)
-9. [Troubleshooting](#troubleshooting)
-10. [References](#references)
+## Overview
 
-## Introduction
+This implementation guide provides detailed instructions for integrating the Pretrained Actigraphy Transformer (PAT) into the Novamind digital twin psychiatry platform. It covers all aspects of implementation, from environment setup to code integration, testing, and deployment, ensuring HIPAA compliance and adherence to clean architecture principles.
 
-This implementation guide provides detailed instructions for integrating the Pretrained Actigraphy Transformer (PAT) into the Novamind digital twin psychiatry platform. PAT is a specialized transformer model designed to analyze actigraphy data for psychiatric assessment and monitoring.
+## Prerequisites
 
-The integration follows clean architecture principles, ensuring separation of concerns between domain logic, data handling, and infrastructure. This document complements the architecture overview (01_PAT_ARCHITECTURE_AND_INTEGRATION.md), AWS deployment guide (02_PAT_AWS_DEPLOYMENT_HIPAA.md), and API specifications (04_PAT_MICROSERVICE_API.md).
+Before implementing PAT, ensure the following prerequisites are met:
 
-## Environment Setup
+1. **Development Environment**:
+   - Python 3.9+ with virtual environment
+   - TensorFlow 2.18.0 with CUDA 12.2 and cuDNN 8.9
+   - Boto3 1.34.0+ for AWS Bedrock support
+   - FastAPI 0.109.0+ with Pydantic v2 compatibility
+   - SQLAlchemy 2.0.25+ for async support
+   - Docker with NVIDIA Container Toolkit
+   - AWS CLI configured with appropriate permissions
 
-### Prerequisites
+2. **Knowledge Requirements**:
+   - Understanding of transformer architecture
+   - Experience with FastAPI and RESTful API design
+   - Familiarity with AWS services (EC2, S3, DynamoDB, etc.)
+   - Knowledge of HIPAA compliance requirements
 
-- Python 3.9+ with virtual environment
-- TensorFlow 2.18.0 with GPU support (recommended for production)
-- AWS CLI configured with appropriate IAM permissions
-- Docker and Docker Compose for containerized deployment
-- Access to AWS Bedrock service for model hosting
-
-### Local Development Environment
-
-1. **WSL2 Configuration**
-   - Ensure proper symbolic links between WSL2 and Windows paths
-   - Set appropriate file permissions (chmod -R 755) for cross-platform development
-   - Configure VSCode to recognize both Windows and WSL2 paths
-
-2. **Virtual Environment**
-   - Create a dedicated virtual environment for PAT development
-   - Install dependencies from requirements.txt with specific version pinning
-
-3. **Environment Variables**
-   - Configure the following in your .env file:
-     - `PAT_MODEL_PROVIDER`: AWS service provider (default: 'bedrock')
-     - `PAT_MODEL_ID`: Model identifier in AWS Bedrock
-     - `PAT_AWS_REGION`: AWS region for Bedrock service
-     - `PAT_BATCH_SIZE`: Processing batch size (default: 32)
-     - `PAT_MAX_SEQUENCE_LENGTH`: Maximum sequence length for transformer input
-     - `PAT_PHI_DETECTION_LEVEL`: PHI detection sensitivity (strict/moderate/relaxed)
-
-4. **AWS Configuration**
-   - Configure AWS credentials with permissions for Bedrock API access
-   - Ensure IAM roles have appropriate permissions for model invocation
-   - Set up AWS SDK with proper retry and timeout configurations
-
-## Dependencies
-
-### Core Dependencies
-
-- **TensorFlow (2.18.0)**: Required for model inference and preprocessing
-- **AWS SDK for Python (Boto3)**: For AWS Bedrock integration
-- **FastAPI**: For RESTful API endpoints
-- **Pydantic**: For data validation and settings management
-- **SQLAlchemy**: For database interactions
-- **PyArrow**: For efficient data transformation and serialization
-- **Pandas**: For data manipulation and analysis
-
-### HIPAA Compliance Dependencies
-
-- **cryptography**: For encryption of PHI data
-- **python-jose**: For JWT token handling
-- **passlib**: For password hashing
-- **PHI Detection Utilities**: Custom utilities for PHI detection and sanitization
-
-### Development Dependencies
-
-- **pytest**: For unit and integration testing
-- **pytest-cov**: For test coverage reporting
-- **black**: For code formatting
-- **isort**: For import sorting
-- **mypy**: For static type checking
-- **flake8**: For linting
-
-### Version Compatibility
-
-Ensure all dependencies are compatible with the specified versions to avoid conflicts. The following combinations have been tested and verified:
-
-- TensorFlow 2.18.0 with CUDA 12.2 and cuDNN 8.9
-- Boto3 1.34.0+ for AWS Bedrock support
-- FastAPI 0.109.0+ with Pydantic v2 compatibility
-- SQLAlchemy 2.0.25+ for async support
+3. **Access Requirements**:
+   - Access to PAT model weights and configuration
+   - AWS account with appropriate permissions
+   - Access to the Novamind codebase repository
 
 ## Implementation Structure
 
@@ -142,6 +80,486 @@ Pydantic models for data validation:
 - Input models for actigraphy data
 - Output models for analysis results
 - Configuration models for service settings
+
+## Implementation Steps
+
+### 1. Environment Setup
+
+#### Local Development Environment
+
+```bash
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/macOS
+venv\Scripts\activate     # Windows
+
+# Install required packages
+pip install tensorflow==2.18.0
+pip install fastapi uvicorn pydantic boto3 aiohttp
+pip install pytest pytest-asyncio pytest-cov
+
+# Install NVIDIA drivers and CUDA toolkit
+# Follow NVIDIA's official documentation for your OS
+```
+
+#### Docker Development Environment
+
+Create a `Dockerfile` for local development:
+
+```dockerfile
+FROM tensorflow/tensorflow:2.18.0-gpu
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Expose port for API
+EXPOSE 8000
+
+# Command to run the application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+Create a `requirements.txt` file:
+
+```
+tensorflow==2.18.0
+fastapi==0.109.0
+uvicorn==0.24.0
+pydantic==2.5.2
+boto3==1.34.0
+aiohttp==3.9.1
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+```
+
+### 2. Code Implementation
+
+#### Interface Definition
+
+Create a PAT interface that extends the base MLService interface:
+
+```python
+# app/core/services/ml/pat_interface.py
+
+from abc import abstractmethod
+from typing import Any, Dict, List, Optional, Union
+
+from app.core.services.ml.interface import MLService
+
+
+class PATInterface(MLService):
+    """
+    Interface for Pretrained Actigraphy Transformer (PAT) services.
+    
+    This interface defines the contract that PAT implementations must follow.
+    """
+    
+    @abstractmethod
+    def analyze_actigraphy(
+        self,
+        patient_id: str,
+        readings: List[Dict[str, Any]],
+        start_time: str,
+        end_time: str,
+        sampling_rate_hz: float,
+        device_info: Dict[str, str],
+        analysis_types: List[str],
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        Analyze actigraphy data using the PAT model.
+        
+        Args:
+            patient_id: Patient identifier
+            readings: Accelerometer readings with timestamp and x,y,z values
+            start_time: Start time of recording (ISO 8601 format)
+            end_time: End time of recording (ISO 8601 format)
+            sampling_rate_hz: Sampling rate in Hz
+            device_info: Information about the device used
+            analysis_types: Types of analysis to perform (e.g., "sleep", "activity", "mood")
+            **kwargs: Additional parameters
+            
+        Returns:
+            Dict containing analysis results and metadata
+            
+        Raises:
+            ServiceUnavailableError: If service is not initialized
+            InvalidRequestError: If request is invalid
+        """
+        ...
+```
+
+#### AWS Bedrock Implementation
+
+Implement the PAT interface using AWS Bedrock:
+
+```python
+# app/core/services/ml/providers/bedrock_pat.py
+
+import json
+import time
+from typing import Any, Dict, List, Optional, Union
+
+import boto3
+from botocore.exceptions import ClientError
+
+from app.core.exceptions import InvalidConfigurationError, ServiceUnavailableError
+from app.core.services.ml.pat_interface import PATInterface
+from app.core.utils.logging import get_logger
+
+
+# Create logger
+logger = get_logger(__name__)
+
+
+class BedrockPAT(PATInterface):
+    """
+    AWS Bedrock implementation of the PAT interface.
+    
+    This class implements the PAT interface using AWS Bedrock services.
+    """
+    
+    def __init__(self):
+        """Initialize the BedrockPAT service."""
+        self.bedrock_runtime = None
+        self.s3_client = None
+        self.dynamodb_client = None
+        self.config = {}
+        self.initialized = False
+        self.model_mapping = {}
+        self.bucket_name = ""
+        self.table_name = ""
+    
+    def initialize(self, config: Dict[str, Any]) -> None:
+        """
+        Initialize the service with configuration.
+        
+        Args:
+            config: Service configuration parameters
+            
+        Raises:
+            InvalidConfigurationError: If configuration is invalid
+        """
+        logger.info("Initializing BedrockPAT service")
+        
+        # Implementation details...
+```
+
+#### Mock Implementation for Testing
+
+Create a mock implementation for testing:
+
+```python
+# app/core/services/ml/providers/mock_pat.py
+
+import json
+import time
+from datetime import datetime, timedelta
+import random
+from typing import Any, Dict, List, Optional, Union
+
+from app.core.services.ml.pat_interface import PATInterface
+from app.core.utils.logging import get_logger
+
+
+# Create logger
+logger = get_logger(__name__)
+
+
+class MockPAT(PATInterface):
+    """
+    Mock implementation of the PAT interface.
+    
+    This class provides a mock implementation of the PAT interface for testing purposes.
+    """
+    
+    # Implementation details...
+```
+
+#### Factory Integration
+
+Update the ML service factory to include the PAT service:
+
+```python
+# app/core/services/ml/factory.py
+
+from app.core.services.ml.interface import (
+    DigitalTwinService,
+    MentaLLaMAInterface,
+    MLService,
+    PHIDetectionService,
+)
+from app.core.services.ml.pat_interface import PATInterface
+from app.core.services.ml.providers import (
+    BedrockDigitalTwin,
+    BedrockMentaLLaMA,
+    BedrockPAT,
+    BedrockPHIDetection,
+)
+
+
+class MLServiceFactory:
+    """Factory for creating ML service instances."""
+    
+    # Existing factory methods...
+    
+    @classmethod
+    def create_pat_service(cls, config: Optional[Dict[str, Any]] = None) -> PATInterface:
+        """
+        Create a PAT service instance.
+        
+        Args:
+            config: Service configuration parameters
+            
+        Returns:
+            Initialized PAT service
+            
+        Raises:
+            InvalidConfigurationError: If configuration is invalid
+        """
+        # Get default configuration from settings
+        if config is None:
+            config = settings.ml_config.pat
+        
+        # Get provider from configuration
+        provider = config.get("provider")
+        if not provider:
+            raise InvalidConfigurationError("Provider not specified in PAT configuration")
+        
+        # Create service based on provider
+        if provider == "bedrock":
+            service = BedrockPAT()
+        elif provider == "mock":
+            from app.core.services.ml.providers.mock_pat import MockPAT
+            service = MockPAT()
+        else:
+            raise InvalidConfigurationError(f"Unsupported PAT provider: {provider}")
+        
+        # Initialize service
+        service.initialize(config)
+        
+        return service
+```
+
+### 3. API Implementation
+
+Create FastAPI endpoints for the PAT service:
+
+```python
+# app/api/routes/actigraphy.py
+
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from pydantic import BaseModel
+
+from app.api.dependencies.auth import get_current_user
+from app.api.dependencies.ml import get_pat_service
+from app.core.exceptions import InvalidRequestError, ServiceUnavailableError
+from app.core.services.ml.pat_interface import PATInterface
+
+
+router = APIRouter(prefix="/api/v1/actigraphy", tags=["actigraphy"])
+
+
+class AccelerometerReading(BaseModel):
+    timestamp: str
+    x: float
+    y: float
+    z: float
+    source_device: Optional[str] = None
+
+
+class AnalyzeRequest(BaseModel):
+    patient_id: str
+    readings: List[AccelerometerReading]
+    start_time: str
+    end_time: str
+    sampling_rate_hz: float
+    device_info: Dict[str, str]
+    analysis_types: List[str]
+
+
+@router.post("/upload", status_code=201)
+async def upload_actigraphy_data(
+    file: UploadFile = File(...),
+    patient_id: str = Form(...),
+    device_type: str = Form(...),
+    start_time: str = Form(...),
+    end_time: str = Form(...),
+    metadata: Optional[str] = Form(None),
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    pat_service: PATInterface = Depends(get_pat_service)
+):
+    """Upload actigraphy data from wearable devices."""
+    # Implementation details...
+
+
+@router.post("/analyze")
+async def analyze_actigraphy_data(
+    request: AnalyzeRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    pat_service: PATInterface = Depends(get_pat_service)
+):
+    """Analyze actigraphy data to extract biometric insights."""
+    try:
+        # Convert Pydantic model to dict
+        readings = [reading.dict() for reading in request.readings]
+        
+        # Call PAT service
+        result = pat_service.analyze_actigraphy(
+            patient_id=request.patient_id,
+            readings=readings,
+            start_time=request.start_time,
+            end_time=request.end_time,
+            sampling_rate_hz=request.sampling_rate_hz,
+            device_info=request.device_info,
+            analysis_types=request.analysis_types
+        )
+        
+        return result
+    except ServiceUnavailableError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except InvalidRequestError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error analyzing actigraphy data: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+```
+
+### 4. Dependencies Configuration
+
+Create a dependency for the PAT service:
+
+```python
+# app/api/dependencies/ml.py
+
+from fastapi import Depends
+
+from app.core.services.ml.factory import MLServiceFactory
+from app.core.services.ml.pat_interface import PATInterface
+
+
+def get_pat_service() -> PATInterface:
+    """
+    Get a PAT service instance.
+    
+    Returns:
+        Initialized PAT service
+    """
+    return MLServiceFactory.create_pat_service()
+```
+
+### 5. Configuration Settings
+
+Update the application settings to include PAT configuration:
+
+```python
+# app/core/config.py
+
+class MLConfig(BaseSettings):
+    # Existing ML configuration...
+    
+    pat: Dict[str, Any] = {
+        "provider": "bedrock",
+        "region": "us-east-1",
+        "model_mapping": {
+            "sleep": "amazon.pat-sleep-analysis-v1",
+            "activity": "amazon.pat-activity-analysis-v1",
+            "mood": "amazon.pat-mood-prediction-v1",
+            "anomaly_detection": "amazon.pat-anomaly-detection-v1",
+            "digital_twin_integration": "amazon.pat-digital-twin-v1"
+        },
+        "bucket_name": "novamind-actigraphy-data",
+        "table_name": "novamind-actigraphy-analysis",
+        "kms_key_id": "alias/novamind-actigraphy-key"
+    }
+```
+
+### 6. Digital Twin Integration
+
+Implement the integration between PAT and the Digital Twin service:
+
+```python
+# app/core/services/ml/digital_twin_integration.py
+
+from typing import Any, Dict
+
+from app.core.services.ml.pat_interface import PATInterface
+from app.core.services.ml.interface import DigitalTwinService
+
+
+class DigitalTwinIntegrator:
+    """
+    Integrates PAT analysis results with the Digital Twin service.
+    
+    This class provides methods for integrating actigraphy analysis results
+    with the Digital Twin service to create a comprehensive patient profile.
+    """
+    
+    def __init__(
+        self,
+        pat_service: PATInterface,
+        digital_twin_service: DigitalTwinService
+    ):
+        """
+        Initialize the integrator.
+        
+        Args:
+            pat_service: PAT service instance
+            digital_twin_service: Digital Twin service instance
+        """
+        self.pat_service = pat_service
+        self.digital_twin_service = digital_twin_service
+    
+    def integrate_analysis_with_profile(
+        self,
+        patient_id: str,
+        profile_id: str,
+        actigraphy_analysis: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Integrate actigraphy analysis with a digital twin profile.
+        
+        Args:
+            patient_id: Patient identifier
+            profile_id: Digital twin profile identifier
+            actigraphy_analysis: Results from actigraphy analysis
+            
+        Returns:
+            Updated digital twin profile
+        """
+        # Get existing profile
+        profile = self.digital_twin_service.get_patient_profile(profile_id)
+        
+        # Integrate actigraphy analysis
+        integrated_profile = self.pat_service.integrate_with_digital_twin(
+            patient_id=patient_id,
+            profile_id=profile_id,
+            actigraphy_analysis=actigraphy_analysis
+        )
+        
+        # Update profile in digital twin service
+        updated_profile = self.digital_twin_service.update_patient_profile(
+            profile_id=profile_id,
+            patient_info=integrated_profile.get("integrated_profile", {})
+        )
+        
+        return updated_profile
+```
 
 ## HIPAA Compliance
 
@@ -270,7 +688,6 @@ The integration maintains HIPAA compliance through:
 The PAT service is configured through environment variables that can be adjusted based on deployment environment:
 
 ```env
-# PAT Configuration
 PAT_MODEL_PROVIDER=bedrock
 PAT_MODEL_ID=actigraphy-transformer-v1
 PAT_AWS_REGION=us-west-2
@@ -286,246 +703,39 @@ AWS_REGION=us-west-2
 # HIPAA Compliance
 HIPAA_LOG_SANITIZATION_ENABLED=true
 HIPAA_PHI_DETECTION_LEVEL=strict
-```
 
-### Dependency Injection Setup
+# Example Implementation
 
-The PAT service is registered in the dependency injection container:
+from typing import Dict, List, Any, Optional
+from app.core.services.ml.pat_interface import PATInterface
+from app.core.services.ml.factory import MLServiceFactory
+from app.core.config import settings
 
-1. Register the PAT interface in the DI container
-
-2. Configure the appropriate implementation (Bedrock or Mock)
-
-3. Inject the PAT service into controllers and services that need it
-
-## Testing Strategy
-
-### Unit Testing
-
-Unit tests ensure that individual components function correctly in isolation:
-
-1. **Interface Testing**: Test the PAT interface implementation
-2. **Mock Testing**: Use the MockPAT implementation for testing without external dependencies
-3. **Factory Testing**: Test the MLServiceFactory for correct service creation
-
-Example unit test:
-
-```python
-def test_pat_analysis():
-    # Arrange
-    mock_pat = MockPAT()
-    mock_pat.initialize({
-        "phi_detection_level": "strict"
-    })
-    
-    # Act
-    result = mock_pat.analyze_actigraphy(
-        patient_id="test-patient",
-        readings=[
-            {"timestamp": "2023-01-01T00:00:00Z", "x": 0.1, "y": 0.2, "z": 0.3}
-        ]
-    )
-    
-    # Assert
-    assert "activity_score" in result
-    assert "sleep_quality" in result
-    assert "behavioral_patterns" in result
-```
-
-### Integration Testing
-
-Integration tests verify that components work together correctly:
-
-1. **API Testing**: Test the PAT API endpoints
-2. **Service Integration**: Test the integration between PAT and other services
-3. **Data Flow Testing**: Test the complete data flow from input to output
-
-Example integration test:
-
-```python
-async def test_pat_api_integration():
-    # Arrange
-    client = TestClient(app)
-    test_data = {
-        "patient_id": "test-patient",
-        "readings": [
-            {"timestamp": "2023-01-01T00:00:00Z", "x": 0.1, "y": 0.2, "z": 0.3}
-        ]
+# Create PAT service instance
+pat_service: PATInterface = MLServiceFactory.create_pat_service(
+    config={
+        "provider": settings.PAT_MODEL_PROVIDER,
+        "model_id": settings.PAT_MODEL_ID,
+        "region": settings.PAT_AWS_REGION,
+        "batch_size": settings.PAT_BATCH_SIZE,
+        "max_sequence_length": settings.PAT_MAX_SEQUENCE_LENGTH,
+        "phi_detection_level": settings.PAT_PHI_DETECTION_LEVEL
     }
-    
-    # Act
-    response = client.post("/api/v1/pat/analyze", json=test_data)
-    
-    # Assert
-    assert response.status_code == 200
-    result = response.json()
-    assert "activity_score" in result
-    assert "sleep_quality" in result
-```
+)
 
-### HIPAA Compliance Testing
-
-Specialized tests ensure HIPAA compliance:
-
-1. **PHI Detection Testing**: Test the PHI detection and sanitization capabilities
-2. **Access Control Testing**: Test role-based access controls
-3. **Encryption Testing**: Test data encryption at rest and in transit
-4. **Audit Logging Testing**: Test comprehensive audit logging
-
-Example HIPAA compliance test:
-
-```python
-def test_phi_detection_and_sanitization():
-    # Arrange
-    phi_detector = PHIDetector(level="strict")
-    text_with_phi = "Patient John Doe (DOB: 01/01/1980) reports sleep disturbances."
-    
-    # Act
-    detected_phi = phi_detector.detect(text_with_phi)
-    sanitized_text = phi_detector.sanitize(text_with_phi)
-    
-    # Assert
-    assert len(detected_phi) == 2  # Name and DOB
-    assert "John Doe" not in sanitized_text
-    assert "01/01/1980" not in sanitized_text
-```
-
-## Deployment
-
-### Containerization
-
-The PAT service is containerized using Docker:
-
-1. **Base Image**: Use the TensorFlow GPU image as the base
-2. **Dependencies**: Install all required dependencies
-3. **Configuration**: Configure environment variables
-4. **Entrypoint**: Set the entrypoint to the FastAPI application
-
-Example Dockerfile:
-
-```dockerfile
-FROM tensorflow/tensorflow:2.18.0-gpu
-
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-ENV PAT_MODEL_PROVIDER=bedrock
-ENV PAT_MODEL_ID=actigraphy-transformer-v1
-ENV PAT_AWS_REGION=us-west-2
-ENV PAT_BATCH_SIZE=32
-ENV PAT_MAX_SEQUENCE_LENGTH=1024
-ENV PAT_PHI_DETECTION_LEVEL=strict
-
-EXPOSE 8000
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-### AWS Deployment
-
-Deploy the PAT service to AWS using ECS or EKS:
-
-1. **ECR Repository**: Create an ECR repository for the PAT service
-2. **ECS Cluster**: Create an ECS cluster for running the service
-3. **Task Definition**: Define the ECS task with appropriate resources
-4. **Service Definition**: Define the ECS service with desired count and scaling policies
-
-Example AWS CLI commands:
-
-```bash
-# Create ECR repository
-aws ecr create-repository --repository-name pat-service
-
-# Build and push Docker image
-docker build -t pat-service .
-docker tag pat-service:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/pat-service:latest
-aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/pat-service:latest
-
-# Create ECS cluster
-aws ecs create-cluster --cluster-name pat-cluster
-
-# Create task definition
-aws ecs register-task-definition --cli-input-json file://task-definition.json
-
-# Create service
-aws ecs create-service --cli-input-json file://service-definition.json
-```
-
-### Monitoring and Logging
-
-Configure monitoring and logging for the PAT service:
-
-1. **CloudWatch Logs**: Configure CloudWatch Logs for centralized logging
-2. **CloudWatch Metrics**: Configure CloudWatch Metrics for performance monitoring
-3. **X-Ray Tracing**: Enable X-Ray tracing for request tracking
-4. **Alarms**: Set up CloudWatch Alarms for alerting on issues
-
-Example monitoring configuration:
-
-```python
-# Configure AWS X-Ray
-app.add_middleware(XRayMiddleware)
-
-# Configure CloudWatch Logs
-logger = logging.getLogger("pat_service")
-handler = watchtower.CloudWatchLogHandler(log_group="pat-service-logs")
-logger.addHandler(handler)
-
-# Configure CloudWatch Metrics
-metrics = cloudwatch.MetricsLogger(namespace="PAT/Service")
-```
-
-## Troubleshooting
-
-### Common Issues
-
-#### 1. AWS Bedrock Access Issues
-
-**Symptoms**: 
-- Error messages about AWS Bedrock access denied
-- Unable to invoke the model
-
-**Solutions**:
-- Verify IAM permissions for the AWS Bedrock service
-- Check AWS credentials configuration
-- Ensure the model ID is correct and available in your region
-- Verify that the AWS Bedrock service is available in your region
-
-#### 2. Performance Issues
-
-**Symptoms**:
-- Slow response times for actigraphy analysis
-- High memory usage
-
-**Solutions**:
-- Adjust batch size for optimal performance
-- Optimize preprocessing pipeline
-- Consider GPU acceleration for inference
-- Scale the service horizontally for higher throughput
-
-#### 3. HIPAA Compliance Issues
-
-**Symptoms**:
-- PHI detected in logs
-- Failed compliance audits
-
-**Solutions**:
-- Verify PHI detection and sanitization configuration
-- Ensure all logs are properly sanitized
-- Check encryption configuration for data at rest and in transit
-- Review access controls and permissions
-
-### Debugging Strategies
-
-1. **Logging**: Enable detailed logging for troubleshooting
-2. **Tracing**: Use AWS X-Ray for request tracing
-3. **Metrics**: Monitor performance metrics in CloudWatch
-4. **Testing**: Use the MockPAT implementation for isolated testing
+# Analyze actigraphy data
+results = pat_service.analyze_actigraphy(
+    patient_id="patient-123",
+    readings=[
+        {"timestamp": "2023-01-01T00:00:00Z", "x": 0.1, "y": 0.2, "z": 0.3},
+        {"timestamp": "2023-01-01T00:00:01Z", "x": 0.2, "y": 0.3, "z": 0.4},
+        # More readings...
+    ],
+    options={
+        "include_raw_metrics": True,
+        "generate_visualizations": True
+    }
+)
 
 ## References
 
@@ -600,3 +810,277 @@ results = pat_service.analyze_actigraphy(
     }
 )
 ```
+
+## Testing Strategy
+
+### Unit Testing
+
+Create unit tests for the PAT service:
+
+```python
+# tests/unit/services/ml/test_pat_service.py
+
+import pytest
+from unittest.mock import MagicMock, patch
+
+from app.core.services.ml.providers.mock_pat import MockPAT
+
+
+@pytest.fixture
+def mock_pat_service():
+    """Create a mock PAT service for testing."""
+    service = MockPAT()
+    service.initialize({})
+    return service
+
+
+def test_analyze_actigraphy(mock_pat_service):
+    """Test analyzing actigraphy data."""
+    # Prepare test data
+    patient_id = "test-patient"
+    readings = [
+        {
+            "timestamp": "2025-03-28T12:00:00Z",
+            "x": 0.1,
+            "y": 0.2,
+            "z": 0.9
+        }
+    ]
+    
+    # Call service
+    result = mock_pat_service.analyze_actigraphy(
+        patient_id=patient_id,
+        readings=readings,
+        start_time="2025-03-28T12:00:00Z",
+        end_time="2025-03-28T13:00:00Z",
+        sampling_rate_hz=30.0,
+        device_info={"type": "fitbit", "model": "sense"},
+        analysis_types=["sleep", "activity"]
+    )
+    
+    # Verify result
+    assert result["patient_id"] == patient_id
+    assert "analysis_id" in result
+    assert "results" in result
+    assert "sleep" in result["results"]
+    assert "activity" in result["results"]
+```
+
+### Integration Testing
+
+Create integration tests for the PAT API:
+
+```python
+# tests/integration/api/test_actigraphy_api.py
+
+import pytest
+from fastapi.testclient import TestClient
+
+from app.main import app
+
+
+client = TestClient(app)
+
+
+@pytest.fixture
+def auth_headers():
+    """Create authentication headers for testing."""
+    # Mock authentication logic
+    return {"Authorization": "Bearer test-token"}
+
+
+def test_analyze_actigraphy_endpoint(auth_headers):
+    """Test the analyze actigraphy endpoint."""
+    # Prepare test data
+    request_data = {
+        "patient_id": "test-patient",
+        "readings": [
+            {
+                "timestamp": "2025-03-28T12:00:00Z",
+                "x": 0.1,
+                "y": 0.2,
+                "z": 0.9,
+                "source_device": "fitbit"
+            }
+        ],
+        "start_time": "2025-03-28T12:00:00Z",
+        "end_time": "2025-03-28T13:00:00Z",
+        "sampling_rate_hz": 30.0,
+        "device_info": {"type": "fitbit", "model": "sense"},
+        "analysis_types": ["sleep", "activity"]
+    }
+    
+    # Call API
+    response = client.post(
+        "/api/v1/actigraphy/analyze",
+        json=request_data,
+        headers=auth_headers
+    )
+    
+    # Verify response
+    assert response.status_code == 200
+    data = response.json()
+    assert data["patient_id"] == "test-patient"
+    assert "analysis_id" in data
+    assert "results" in data
+```
+
+## Deployment
+
+### Docker Deployment
+
+Create a production-ready Dockerfile:
+
+```dockerfile
+FROM tensorflow/tensorflow:2.18.0-gpu
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Set environment variables
+ENV MODULE_NAME="app.main"
+ENV VARIABLE_NAME="app"
+ENV PORT=8000
+
+# Expose port for API
+EXPOSE 8000
+
+# Command to run the application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+```
+
+### AWS Deployment
+
+Follow these steps to deploy the PAT service on AWS:
+
+1. Build and push the Docker image to ECR:
+
+```bash
+# Authenticate Docker to ECR
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <account-id>.dkr.ecr.us-east-1.amazonaws.com
+
+# Build the Docker image
+docker build -t novamind-pat .
+
+# Tag the image
+docker tag novamind-pat:latest <account-id>.dkr.ecr.us-east-1.amazonaws.com/novamind-pat:latest
+
+# Push the image to ECR
+docker push <account-id>.dkr.ecr.us-east-1.amazonaws.com/novamind-pat:latest
+```
+
+2. Create an ECS task definition:
+
+```json
+{
+  "family": "novamind-pat",
+  "executionRoleArn": "arn:aws:iam::<account-id>:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::<account-id>:role/novamind-pat-task-role",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "novamind-pat",
+      "image": "<account-id>.dkr.ecr.us-east-1.amazonaws.com/novamind-pat:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "hostPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/novamind-pat",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "environment": [
+        {
+          "name": "AWS_REGION",
+          "value": "us-east-1"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "arn:aws:ssm:us-east-1:<account-id>:parameter/novamind/database_url"
+        }
+      ],
+      "resourceRequirements": [
+        {
+          "type": "GPU",
+          "value": "1"
+        }
+      ]
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "4096",
+  "memory": "16384"
+}
+```
+
+3. Create an ECS service:
+
+```json
+{
+  "cluster": "novamind-cluster",
+  "serviceName": "novamind-pat-service",
+  "taskDefinition": "novamind-pat",
+  "desiredCount": 2,
+  "launchType": "FARGATE",
+  "platformVersion": "LATEST",
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "subnet-12345678",
+        "subnet-87654321"
+      ],
+      "securityGroups": [
+        "sg-12345678"
+      ],
+      "assignPublicIp": "DISABLED"
+    }
+  },
+  "loadBalancers": [
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:<account-id>:targetgroup/novamind-pat/12345678",
+      "containerName": "novamind-pat",
+      "containerPort": 8000
+    }
+  ],
+  "healthCheckGracePeriodSeconds": 60,
+  "schedulingStrategy": "REPLICA",
+  "deploymentController": {
+    "type": "ECS"
+  },
+  "enableECSManagedTags": true,
+  "propagateTags": "SERVICE"
+}
+```
+
+## Conclusion
+
+This implementation guide provides a comprehensive approach to integrating the Pretrained Actigraphy Transformer (PAT) into the Novamind digital twin psychiatry platform. By following these guidelines, you can ensure that the PAT component is implemented in a way that is HIPAA-compliant, follows clean architecture principles, and integrates seamlessly with the existing digital twin architecture.
+
+For additional information, refer to the following documents:
+- [01_PAT_ARCHITECTURE_AND_INTEGRATION.md](01_PAT_ARCHITECTURE_AND_INTEGRATION.md)
+- [02_PAT_AWS_DEPLOYMENT_HIPAA.md](02_PAT_AWS_DEPLOYMENT_HIPAA.md)
+- [04_PAT_MICROSERVICE_API.md](04_PAT_MICROSERVICE_API.md)
