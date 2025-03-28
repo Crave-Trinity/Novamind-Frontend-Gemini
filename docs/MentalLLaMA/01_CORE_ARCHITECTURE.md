@@ -273,13 +273,14 @@ boto3-stubs[cognito,s3,ses]==1.28.65  # Type hints for boto3
 
 ## AI Layer
 
-- **AI and NLP**: Azure OpenAI (GPT-4) with PHI Anonymization
-- **PHI Detection**: AWS Comprehend Medical (to detect and mask PHI identifiers)
+- **Mental Health Analysis Model**: MentaLLaMA-33B-lora (hosted on AWS GPU instances, e.g., SageMaker or EC2)
+- **PHI Detection**: AWS Comprehend Medical (used to detect and mask PHI identifiers *before* sending text data to MentaLLaMA)
 - **Use Cases**:
-  - Clinical note summarization
-  - Diagnostic insight generation
-  - Risk assessment
-  - Treatment recommendation support
+  - Risk assessment (e.g., suicidality) from patient text
+  - Interpretable mental health analysis (sentiment, psycho-linguistic indicators)
+  - Rationale generation for classifications
+  - Contextual support suggestions
+  - Potential for clinical note summarization (requires careful prompting and validation)
 
 ## Security & HIPAA Compliance
 
@@ -342,7 +343,7 @@ The NOVAMIND platform uses a carefully selected stack of technologies and servic
 - **Form System:** JotForm HIPAA (online forms with BAA, data encrypted end-to-end)
 - **Analytics:** Amazon QuickSight (embedded BI dashboards, pay-per-session pricing)
 - **EMR Features:** Custom FastAPI EMR (rich text notes with versioning) + Redox API (lab/imaging results, eRx integration)
-- **AI Layer:** Azure OpenAI GPT-4 (for NLP on de-identified data) + AWS Comprehend Medical (PHI scrubbing and entity extraction)
+- **AI Layer:** MentaLLaMA-33B-lora (hosted on AWS GPU instances for mental health analysis) + AWS Comprehend Medical (PHI scrubbing before analysis)
 - **Security:** AWS Security Suite – KMS encryption, IAM, CloudTrail logs, AWS WAF firewall & rate limiting, CloudWatch monitoring, GuardDuty & Security Hub checks
 - **Payments:** Stripe (credit card processing & subscriptions; used only for payments to stay HIPAA-exempt)
 

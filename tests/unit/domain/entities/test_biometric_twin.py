@@ -1,423 +1,277 @@
 # -*- coding: utf-8 -*-
 """
-Unit tests for the BiometricTwin entity.
+Unit tests for BiometricTwin domain entities.
 
-This module contains tests for the BiometricTwin entity and its associated
-BiometricDataPoint class, ensuring they function correctly and maintain
-data integrity.
+These tests verify that the BiometricTwin and BiometricDataPoint entities
+correctly handle data and maintain their integrity.
 """
 
-import pytest
 from datetime import datetime, timedelta
 from uuid import UUID, uuid4
+import pytest
 
-from app.domain.entities.digital_twin.biometric_twin import BiometricTwin, BiometricDataPoint
-from app.domain.exceptions import ValidationError
+from app.domain.entities.biometric_twin import BiometricDataPoint, BiometricTwin
+
+
+@pytest.fixture
+def sample_patient_id():
+    """Create a sample patient ID."""
+    return UUID("12345678-1234-5678-1234-567812345678")
+
+
+@pytest.fixture
+def sample_data_point(sample_patient_id):
+    """Create a sample biometric data point."""
+    return BiometricDataPoint(
+        data_id=UUID("00000000-0000-0000-0000-000000000001"),
+        patient_id=sample_patient_id,
+        data_type="heart_rate",
+        value=75.0,
+        timestamp=datetime.utcnow(),
+        source="apple_watch",
+        metadata={"activity": "resting"},
+        confidence=0.95
+    )
+
+
+@pytest.fixture
+def sample_twin(sample_patient_id):
+    """Create a sample biometric twin."""
+    now = datetime.utcnow()
+    return BiometricTwin(
+        twin_id=UUID("00000000-0000-0000-0000-000000000002"),
+        patient_id=sample_patient_id,
+        created_at=now,
+        updated_at=now,
+        status="active"
+    )
 
 
 class TestBiometricDataPoint:
-    """Tests for the BiometricDataPoint class."""
+    """Tests for the BiometricDataPoint entity."""
     
-    def test_create_data_point_with_valid_data(self):
-        """Test creating a data point with valid data."""
-        # Arrange
+    def test_initialization(self, sample_patient_id):
+        """Test that a BiometricDataPoint can be initialized with all required attributes."""
         data_id = uuid4()
         timestamp = datetime.utcnow()
         
-        # Act
         data_point = BiometricDataPoint(
+            data_id=data_id,
+            patient_id=sample_patient_id,
             data_type="heart_rate",
-            value=75,
+            value=75.0,
             timestamp=timestamp,
-            source="smartwatch",
-            metadata={"activity": "resting"},
-            confidence=0.95,
-            data_id=data_id
+            source="apple_watch"
         )
         
-        # Assert
         assert data_point.data_id == data_id
+        assert data_point.patient_id == sample_patient_id
         assert data_point.data_type == "heart_rate"
-        assert data_point.value == 75
+        assert data_point.value == 75.0
         assert data_point.timestamp == timestamp
-        assert data_point.source == "smartwatch"
-        assert data_point.metadata == {"activity": "resting"}
-        assert data_point.confidence == 0.95
-    
-    def test_create_data_point_with_default_values(self):
-        """Test creating a data point with default values."""
-        # Act
-        data_point = BiometricDataPoint(
-            data_type="blood_pressure",
-            value="120/80",
-            timestamp=datetime.utcnow(),
-            source="blood_pressure_monitor"
-        )
-        
-        # Assert
-        assert isinstance(data_point.data_id, UUID)
+        assert data_point.source == "apple_watch"
         assert data_point.metadata == {}
         assert data_point.confidence == 1.0
     
-    def test_create_data_point_with_invalid_confidence(self):
-        """Test creating a data point with invalid confidence value."""
-        # Arrange & Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
-            BiometricDataPoint(
-                data_type="heart_rate",
-                value=75,
-                timestamp=datetime.utcnow(),
-                source="smartwatch",
-                confidence=1.5  # Invalid: > 1.0
-            )
-        
-        assert "Confidence must be between 0.0 and 1.0" in str(exc_info.value)
-        
-        with pytest.raises(ValidationError) as exc_info:
-            BiometricDataPoint(
-                data_type="heart_rate",
-                value=75,
-                timestamp=datetime.utcnow(),
-                source="smartwatch",
-                confidence=-0.1  # Invalid: < 0.0
-            )
-        
-        assert "Confidence must be between 0.0 and 1.0" in str(exc_info.value)
-    
-    def test_create_data_point_with_empty_data_type(self):
-        """Test creating a data point with empty data type."""
-        # Arrange & Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
-            BiometricDataPoint(
-                data_type="",  # Invalid: empty string
-                value=75,
-                timestamp=datetime.utcnow(),
-                source="smartwatch"
-            )
-        
-        assert "Biometric data type cannot be empty" in str(exc_info.value)
-    
-    def test_to_dict_method(self):
-        """Test the to_dict method returns the correct dictionary representation."""
-        # Arrange
+    def test_initialization_with_optional_attributes(self, sample_patient_id):
+        """Test that a BiometricDataPoint can be initialized with optional attributes."""
         data_id = uuid4()
         timestamp = datetime.utcnow()
+        metadata = {"activity": "running", "location": "outdoors"}
+        
         data_point = BiometricDataPoint(
+            data_id=data_id,
+            patient_id=sample_patient_id,
             data_type="heart_rate",
-            value=75,
+            value=120.0,
             timestamp=timestamp,
-            source="smartwatch",
-            metadata={"activity": "resting"},
-            confidence=0.95,
-            data_id=data_id
+            source="apple_watch",
+            metadata=metadata,
+            confidence=0.85
         )
         
-        # Act
-        result = data_point.to_dict()
+        assert data_point.metadata == metadata
+        assert data_point.confidence == 0.85
+    
+    def test_equality(self, sample_patient_id):
+        """Test that BiometricDataPoint equality works correctly."""
+        data_id = uuid4()
+        timestamp = datetime.utcnow()
         
-        # Assert
-        assert result["data_id"] == str(data_id)
-        assert result["data_type"] == "heart_rate"
-        assert result["value"] == 75
-        assert result["timestamp"] == timestamp.isoformat()
-        assert result["source"] == "smartwatch"
-        assert result["metadata"] == {"activity": "resting"}
-        assert result["confidence"] == 0.95
+        data_point1 = BiometricDataPoint(
+            data_id=data_id,
+            patient_id=sample_patient_id,
+            data_type="heart_rate",
+            value=75.0,
+            timestamp=timestamp,
+            source="apple_watch"
+        )
+        
+        data_point2 = BiometricDataPoint(
+            data_id=data_id,
+            patient_id=sample_patient_id,
+            data_type="heart_rate",
+            value=75.0,
+            timestamp=timestamp,
+            source="apple_watch"
+        )
+        
+        data_point3 = BiometricDataPoint(
+            data_id=uuid4(),  # Different ID
+            patient_id=sample_patient_id,
+            data_type="heart_rate",
+            value=75.0,
+            timestamp=timestamp,
+            source="apple_watch"
+        )
+        
+        assert data_point1 == data_point2
+        assert data_point1 != data_point3
+        assert data_point1 != "not a data point"
+    
+    def test_representation(self, sample_data_point):
+        """Test that the string representation of a BiometricDataPoint is correct."""
+        repr_str = repr(sample_data_point)
+        
+        assert "BiometricDataPoint" in repr_str
+        assert str(sample_data_point.data_id) in repr_str
+        assert str(sample_data_point.patient_id) in repr_str
+        assert sample_data_point.data_type in repr_str
+        assert str(sample_data_point.value) in repr_str
 
 
 class TestBiometricTwin:
-    """Tests for the BiometricTwin class."""
+    """Tests for the BiometricTwin entity."""
     
-    def test_create_biometric_twin_with_valid_data(self):
-        """Test creating a biometric twin with valid data."""
-        # Arrange
-        patient_id = uuid4()
+    def test_initialization(self, sample_patient_id):
+        """Test that a BiometricTwin can be initialized with all required attributes."""
         twin_id = uuid4()
-        created_at = datetime.utcnow()
+        now = datetime.utcnow()
         
-        # Act
         twin = BiometricTwin(
-            patient_id=patient_id,
             twin_id=twin_id,
-            created_at=created_at,
-            baseline_established=True,
-            connected_devices={"smartwatch", "glucose_monitor"}
+            patient_id=sample_patient_id,
+            created_at=now,
+            updated_at=now,
+            status="initializing"
         )
         
-        # Assert
         assert twin.twin_id == twin_id
-        assert twin.patient_id == patient_id
-        assert twin.created_at == created_at
-        assert twin.updated_at == created_at
-        assert twin.baseline_established is True
-        assert twin.connected_devices == {"smartwatch", "glucose_monitor"}
-        assert twin.data_points == []
+        assert twin.patient_id == sample_patient_id
+        assert twin.created_at == now
+        assert twin.updated_at == now
+        assert twin.status == "initializing"
+        assert twin.data_points == {}
+        assert twin.models == {}
+        assert twin.insights == {}
     
-    def test_create_biometric_twin_with_default_values(self):
-        """Test creating a biometric twin with default values."""
-        # Arrange
-        patient_id = uuid4()
+    def test_add_data_point(self, sample_twin, sample_data_point):
+        """Test that a data point can be added to a twin."""
+        # Add the data point
+        sample_twin.add_data_point(sample_data_point)
         
-        # Act
-        twin = BiometricTwin(patient_id=patient_id)
+        # Check that it was added correctly
+        assert sample_data_point.data_type in sample_twin.data_points
+        assert sample_data_point.timestamp in sample_twin.data_points[sample_data_point.data_type]
+        assert sample_twin.data_points[sample_data_point.data_type][sample_data_point.timestamp] == sample_data_point
         
-        # Assert
-        assert isinstance(twin.twin_id, UUID)
-        assert twin.patient_id == patient_id
-        assert isinstance(twin.created_at, datetime)
-        assert twin.updated_at == twin.created_at
-        assert twin.baseline_established is False
-        assert twin.connected_devices == set()
-        assert twin.data_points == []
+        # Check that updated_at was updated
+        assert sample_twin.updated_at > sample_twin.created_at
     
-    def test_add_data_point(self):
-        """Test adding a data point to a biometric twin."""
-        # Arrange
-        patient_id = uuid4()
-        twin = BiometricTwin(patient_id=patient_id)
-        data_point = BiometricDataPoint(
+    def test_add_data_point_wrong_patient(self, sample_twin):
+        """Test that adding a data point with the wrong patient ID raises an error."""
+        wrong_patient_data_point = BiometricDataPoint(
+            data_id=uuid4(),
+            patient_id=uuid4(),  # Different patient ID
             data_type="heart_rate",
-            value=75,
+            value=75.0,
             timestamp=datetime.utcnow(),
-            source="smartwatch"
+            source="apple_watch"
         )
-        original_updated_at = twin.updated_at
         
-        # Act
-        twin.add_data_point(data_point)
-        
-        # Assert
-        assert len(twin.data_points) == 1
-        assert twin.data_points[0] == data_point
-        assert twin.updated_at > original_updated_at
+        with pytest.raises(ValueError):
+            sample_twin.add_data_point(wrong_patient_data_point)
     
-    def test_get_data_points_by_type(self):
-        """Test retrieving data points by type."""
-        # Arrange
-        patient_id = uuid4()
-        twin = BiometricTwin(patient_id=patient_id)
+    def test_get_latest_data_point(self, sample_twin, sample_data_point):
+        """Test that the latest data point can be retrieved."""
+        # Add the data point
+        sample_twin.add_data_point(sample_data_point)
         
-        # Add heart rate data points
-        for i in range(3):
-            twin.add_data_point(BiometricDataPoint(
-                data_type="heart_rate",
-                value=70 + i,
-                timestamp=datetime.utcnow() - timedelta(hours=i),
-                source="smartwatch"
-            ))
+        # Add another data point with a later timestamp
+        later_data_point = BiometricDataPoint(
+            data_id=uuid4(),
+            patient_id=sample_twin.patient_id,
+            data_type=sample_data_point.data_type,
+            value=80.0,
+            timestamp=sample_data_point.timestamp + timedelta(minutes=5),
+            source=sample_data_point.source
+        )
+        sample_twin.add_data_point(later_data_point)
         
-        # Add blood pressure data points
-        for i in range(2):
-            twin.add_data_point(BiometricDataPoint(
-                data_type="blood_pressure",
-                value=f"{120+i}/{80+i}",
-                timestamp=datetime.utcnow() - timedelta(hours=i),
-                source="blood_pressure_monitor"
-            ))
+        # Get the latest data point
+        latest = sample_twin.get_latest_data_point(sample_data_point.data_type)
         
-        # Act
-        heart_rate_points = twin.get_data_points_by_type("heart_rate")
-        blood_pressure_points = twin.get_data_points_by_type("blood_pressure")
-        sleep_points = twin.get_data_points_by_type("sleep_quality")
-        
-        # Assert
-        assert len(heart_rate_points) == 3
-        assert all(dp.data_type == "heart_rate" for dp in heart_rate_points)
-        assert len(blood_pressure_points) == 2
-        assert all(dp.data_type == "blood_pressure" for dp in blood_pressure_points)
-        assert len(sleep_points) == 0
+        # Check that it's the later one
+        assert latest == later_data_point
     
-    def test_get_data_points_by_type_with_time_range(self):
-        """Test retrieving data points by type with time range filtering."""
-        # Arrange
-        patient_id = uuid4()
-        twin = BiometricTwin(patient_id=patient_id)
+    def test_get_latest_data_point_no_data(self, sample_twin):
+        """Test that get_latest_data_point returns None when no data points exist."""
+        assert sample_twin.get_latest_data_point("heart_rate") is None
+    
+    def test_get_data_points_in_range(self, sample_twin):
+        """Test that data points within a time range can be retrieved."""
+        # Create data points at different times
         now = datetime.utcnow()
+        data_type = "heart_rate"
         
-        # Add data points at different times
-        for i in range(5):
-            twin.add_data_point(BiometricDataPoint(
-                data_type="heart_rate",
-                value=70 + i,
-                timestamp=now - timedelta(hours=i),
-                source="smartwatch"
-            ))
+        data_points = [
+            BiometricDataPoint(
+                data_id=uuid4(),
+                patient_id=sample_twin.patient_id,
+                data_type=data_type,
+                value=75.0 + i,
+                timestamp=now + timedelta(hours=i),
+                source="apple_watch"
+            )
+            for i in range(5)
+        ]
         
-        # Act
-        # Get points from the last 2 hours
-        recent_points = twin.get_data_points_by_type(
+        # Add the data points to the twin
+        for dp in data_points:
+            sample_twin.add_data_point(dp)
+        
+        # Get data points in a specific range
+        start_time = now + timedelta(hours=1)
+        end_time = now + timedelta(hours=3)
+        range_points = sample_twin.get_data_points_in_range(data_type, start_time, end_time)
+        
+        # Check that only the points in the range were returned
+        assert len(range_points) == 3
+        for i in range(1, 4):
+            assert (now + timedelta(hours=i)) in range_points
+            assert range_points[now + timedelta(hours=i)] == data_points[i]
+    
+    def test_get_data_points_in_range_no_data(self, sample_twin):
+        """Test that get_data_points_in_range returns an empty dict when no data points exist."""
+        now = datetime.utcnow()
+        range_points = sample_twin.get_data_points_in_range(
             "heart_rate",
-            start_time=now - timedelta(hours=2),
-            end_time=now
+            now,
+            now + timedelta(hours=1)
         )
-        
-        # Get points from 3-4 hours ago
-        older_points = twin.get_data_points_by_type(
-            "heart_rate",
-            start_time=now - timedelta(hours=4),
-            end_time=now - timedelta(hours=3)
-        )
-        
-        # Assert
-        assert len(recent_points) == 3  # Points from 0, 1, and 2 hours ago
-        assert len(older_points) == 1   # Point from 3 hours ago
+        assert range_points == {}
     
-    def test_establish_baseline(self):
-        """Test establishing a baseline for a biometric twin."""
-        # This is a simplified test as the actual implementation would be more complex
-        # Arrange
-        patient_id = uuid4()
-        twin = BiometricTwin(patient_id=patient_id)
-        now = datetime.utcnow()
+    def test_representation(self, sample_twin, sample_data_point):
+        """Test that the string representation of a BiometricTwin is correct."""
+        # Add a data point
+        sample_twin.add_data_point(sample_data_point)
         
-        # Add required data points for baseline
-        for i in range(7):
-            # Heart rate data
-            twin.add_data_point(BiometricDataPoint(
-                data_type="heart_rate",
-                value=70 + i,
-                timestamp=now - timedelta(days=i),
-                source="smartwatch"
-            ))
-            
-            # Sleep quality data
-            twin.add_data_point(BiometricDataPoint(
-                data_type="sleep_quality",
-                value=0.8 - (i * 0.05),
-                timestamp=now - timedelta(days=i),
-                source="sleep_tracker"
-            ))
-            
-            # Activity level data
-            twin.add_data_point(BiometricDataPoint(
-                data_type="activity_level",
-                value=5000 + (i * 500),
-                timestamp=now - timedelta(days=i),
-                source="fitness_tracker"
-            ))
+        # Get the representation
+        repr_str = repr(sample_twin)
         
-        # Act
-        result = twin.establish_baseline()
-        
-        # Assert
-        assert result is True
-        assert twin.baseline_established is True
-    
-    def test_establish_baseline_insufficient_data(self):
-        """Test establishing a baseline with insufficient data."""
-        # Arrange
-        patient_id = uuid4()
-        twin = BiometricTwin(patient_id=patient_id)
-        
-        # Add some data but not enough for baseline
-        twin.add_data_point(BiometricDataPoint(
-            data_type="heart_rate",
-            value=75,
-            timestamp=datetime.utcnow(),
-            source="smartwatch"
-        ))
-        
-        # Act
-        result = twin.establish_baseline()
-        
-        # Assert
-        assert result is False
-        assert twin.baseline_established is False
-    
-    def test_detect_anomalies(self):
-        """Test detecting anomalies in biometric data."""
-        # Arrange
-        patient_id = uuid4()
-        twin = BiometricTwin(
-            patient_id=patient_id,
-            baseline_established=True  # Assume baseline is established
-        )
-        now = datetime.utcnow()
-        
-        # Add normal heart rate data
-        for i in range(5):
-            twin.add_data_point(BiometricDataPoint(
-                data_type="heart_rate",
-                value=70 + i,  # Normal range: 70-74
-                timestamp=now - timedelta(hours=i),
-                source="smartwatch"
-            ))
-        
-        # Add an anomalous heart rate
-        anomalous_point = BiometricDataPoint(
-            data_type="heart_rate",
-            value=120,  # Anomalous value
-            timestamp=now - timedelta(hours=5),
-            source="smartwatch"
-        )
-        twin.add_data_point(anomalous_point)
-        
-        # Act
-        anomalies = twin.detect_anomalies("heart_rate")
-        
-        # Assert
-        assert len(anomalies) == 1
-        assert anomalies[0] == anomalous_point
-    
-    def test_to_dict_method(self):
-        """Test the to_dict method returns the correct dictionary representation."""
-        # Arrange
-        patient_id = uuid4()
-        twin_id = uuid4()
-        created_at = datetime.utcnow()
-        updated_at = created_at + timedelta(hours=1)
-        
-        twin = BiometricTwin(
-            patient_id=patient_id,
-            twin_id=twin_id,
-            created_at=created_at,
-            updated_at=updated_at,
-            baseline_established=True,
-            connected_devices={"smartwatch", "glucose_monitor"}
-        )
-        
-        # Add some data points
-        for i in range(3):
-            twin.add_data_point(BiometricDataPoint(
-                data_type="heart_rate",
-                value=70 + i,
-                timestamp=datetime.utcnow() - timedelta(hours=i),
-                source="smartwatch"
-            ))
-        
-        # Act
-        result = twin.to_dict()
-        
-        # Assert
-        assert result["twin_id"] == str(twin_id)
-        assert result["patient_id"] == str(patient_id)
-        assert result["created_at"] == created_at.isoformat()
-        assert result["updated_at"] == updated_at.isoformat()
-        assert result["baseline_established"] is True
-        assert set(result["connected_devices"]) == {"smartwatch", "glucose_monitor"}
-        assert result["data_points_count"] == 3
-    
-    def test_connect_and_disconnect_device(self):
-        """Test connecting and disconnecting devices."""
-        # Arrange
-        patient_id = uuid4()
-        twin = BiometricTwin(patient_id=patient_id)
-        
-        # Act - Connect devices
-        twin.connect_device("smartwatch")
-        twin.connect_device("glucose_monitor")
-        
-        # Assert
-        assert twin.connected_devices == {"smartwatch", "glucose_monitor"}
-        
-        # Act - Disconnect a device
-        twin.disconnect_device("smartwatch")
-        
-        # Assert
-        assert twin.connected_devices == {"glucose_monitor"}
-        
-        # Act - Disconnect a non-existent device (should not raise an error)
-        twin.disconnect_device("non_existent_device")
-        
-        # Assert
-        assert twin.connected_devices == {"glucose_monitor"}
+        # Check that it contains the expected information
+        assert "BiometricTwin" in repr_str
+        assert str(sample_twin.twin_id) in repr_str
+        assert str(sample_twin.patient_id) in repr_str
+        assert sample_twin.status in repr_str
+        assert "data_points=1" in repr_str

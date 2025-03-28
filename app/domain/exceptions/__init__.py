@@ -36,3 +36,42 @@ class TokenExpiredError(AuthenticationError):
 
     def __init__(self, message: str = "Token has expired"):
         super().__init__(message)
+
+
+class ValidationError(DomainException):
+    """
+    Raised when input data fails validation rules.
+
+    This exception is used for domain-level validation errors, such as
+    invalid biometric rule conditions, invalid parameter values, or
+    other constraint violations in the domain model.
+    """
+
+    def __init__(self, message: str = "Validation error occurred"):
+        super().__init__(message)
+
+
+class BiometricIntegrationError(DomainException):
+    """
+    Raised when there's an error processing biometric data.
+
+    This exception is used for errors related to biometric data processing,
+    such as invalid data formats, integration issues with biometric devices,
+    or errors in the biometric data pipeline.
+    """
+
+    def __init__(self, message: str = "Error processing biometric data"):
+        super().__init__(message)
+
+
+class ModelInferenceError(DomainException):
+    """
+    Raised when there's an error during model inference or prediction.
+    
+    This exception is used for errors related to ML model inference,
+    such as incompatible input data, model loading failures, or
+    unexpected errors during prediction.
+    """
+    
+    def __init__(self, message: str = "Error during model inference"):
+        super().__init__(message)

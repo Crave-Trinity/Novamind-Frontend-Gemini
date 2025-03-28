@@ -1,7 +1,19 @@
+# -*- coding: utf-8 -*-
 """
-Utilities for ML models in the NOVAMIND system.
+ML utilities package.
 
-This module provides common utilities for machine learning models
-used in the Digital Twin system, including serialization, preprocessing,
-and other shared functionality.
+This package provides common utilities for ML/AI services including
+text preprocessing, entity extraction, and prompt formatting.
 """
+
+from app.infrastructure.ml.utils.preprocessing import (
+    sanitize_text,
+    extract_clinical_entities,
+    format_as_clinical_prompt
+)
+
+__all__ = [
+    'sanitize_text',
+    'extract_clinical_entities',
+    'format_as_clinical_prompt'
+]

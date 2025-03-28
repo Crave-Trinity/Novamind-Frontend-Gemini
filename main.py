@@ -25,7 +25,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import settings
 from app.core.utils.logging import HIPAACompliantLogger
-from app.presentation.api.v1.endpoints import patients, appointments, digital_twins, auth
+from app.presentation.api.v1.endpoints import patients, appointments, digital_twins, auth, biometric_alerts, biometric_alert_system
 from app.infrastructure.di.container import get_container
 from app.domain.exceptions import (
     NovaBaseException, 
@@ -248,6 +248,8 @@ api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 api_router.include_router(patients.router, prefix="/patients", tags=["Patients"])
 api_router.include_router(appointments.router, prefix="/appointments", tags=["Appointments"])
 api_router.include_router(digital_twins.router, prefix="/digital-twins", tags=["Digital Twins"])
+api_router.include_router(biometric_alerts.router, prefix="/biometric-alerts", tags=["Biometric Alerts"])
+api_router.include_router(biometric_alert_system.router, prefix="/biometric-alert-system", tags=["Biometric Alert System"])
 
 app.include_router(api_router)
 

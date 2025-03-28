@@ -13,22 +13,22 @@ The NOVAMIND platform is deployed using a containerized approach with AWS servic
 │                           AWS Cloud                                     │
 │                                                                         │
 │  ┌───────────────┐     ┌───────────────┐     ┌───────────────┐          │
-│  │   AWS Route53  │────▶   AWS CloudFront │────▶   AWS S3      │          │
-│  │   (DNS)       │     │   (CDN)        │     │   (Frontend)  │          │
+│  │   AWS Route53 │────▶ AWS CloudFront │────▶   AWS S3      │          │
+│  │   (DNS)       │     │   (CDN)       │     │   (Frontend)  │          │
 │  └───────────────┘     └───────────────┘     └───────────────┘          │
 │          │                                                              │
 │          │                                                              │
 │          ▼                                                              │
 │  ┌───────────────┐     ┌───────────────┐     ┌───────────────┐          │
-│  │   AWS ALB     │────▶   AWS ECS      │────▶   AWS ECR      │          │
-│  │   (Load      │     │   (Fargate)    │     │   (Container  │          │
-│  │   Balancer)  │     │                │     │   Registry)   │          │
+│  │   AWS ALB     │────▶   AWS ECS      │────▶   AWS ECR     │          │
+│  │   (Load       │     │   (Fargate)    │     │   (Container │          │
+│  │   Balancer)   │     │                │     │   Registry)  │          │
 │  └───────────────┘     └───────────────┘     └───────────────┘          │
 │          │                     │                                        │
 │          │                     │                                        │
 │          ▼                     ▼                                        │
 │  ┌───────────────┐     ┌───────────────┐     ┌───────────────┐          │
-│  │   AWS RDS     │◀────▶   AWS S3      │◀────▶   AWS Cognito  │          │
+│  │   AWS RDS     │◀────▶   AWS S3     │◀────▶ AWS Cognito  │          │
 │  │   (PostgreSQL)│     │   (Storage)   │     │   (Auth)      │          │
 │  └───────────────┘     └───────────────┘     └───────────────┘          │
 │                                                                         │
