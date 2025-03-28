@@ -1,393 +1,687 @@
 # -*- coding: utf-8 -*-
 """
-Appointment service module for the NOVAMIND backend.
+Appointment Service
 
-This module contains the AppointmentService, which encapsulates complex business logic
-related to appointment management in the concierge psychiatry practice.
+This module provides services for managing appointments, including scheduling,
+rescheduling, and cancellation, as well as checking for conflicts.
 """
 
 from datetime import datetime, timedelta
-from typing import List, Optional, Tuple
+from typing import List, Optional, Dict, Any, Union
 from uuid import UUID
 
 from app.domain.entities.appointment import (
     Appointment,
     AppointmentStatus,
     AppointmentType,
+    AppointmentPriority
+)
+from app.domain.exceptions import (
+    AppointmentNotFoundException,
+    AppointmentConflictError,
+    InvalidAppointmentStateError,
+    InvalidAppointmentTimeError,
+    PatientNotFoundException,
+    ProviderNotFoundException
 )
 from app.domain.repositories.appointment_repository import AppointmentRepository
 from app.domain.repositories.patient_repository import PatientRepository
-
-
-class AppointmentConflictError(Exception):
-    """Exception raised when there is a scheduling conflict"""
-
-    pass
+from app.domain.repositories.provider_repository import ProviderRepository
 
 
 class AppointmentService:
     """
-    Service for managing appointments in the concierge psychiatry practice.
-
-    This service encapsulates complex business logic related to appointment
-    scheduling, availability checking, and conflict resolution.
+    Service for managing appointments.
+    
+    This service encapsulates business logic for appointment management,
+    including scheduling, rescheduling, and cancellation, as well as
+    checking for conflicts.
     """
-
+    
     def __init__(
         self,
         appointment_repository: AppointmentRepository,
         patient_repository: PatientRepository,
+        provider_repository: ProviderRepository,
+        default_appointment_duration: int = 60,  # minutes
+        min_reschedule_notice: int = 24,  # hours
+        max_appointments_per_day: int = 8,
+        buffer_between_appointments: int = 15  # minutes
     ):
         """
-        Initialize the appointment service
-
+        Initialize the appointment service.
+        
         Args:
-            appointment_repository: Repository for appointment data access
-            patient_repository: Repository for patient data access
+            appointment_repository: Repository for appointment data
+            patient_repository: Repository for patient data
+            provider_repository: Repository for provider data
+            default_appointment_duration: Default appointment duration in minutes
+            min_reschedule_notice: Minimum notice for rescheduling in hours
+            max_appointments_per_day: Maximum appointments per day for a provider
+            buffer_between_appointments: Buffer time between appointments in minutes
         """
-        self._appointment_repo = appointment_repository
-        self._patient_repo = patient_repository
-
-        # Define standard appointment durations by type (in minutes)
-        self._standard_durations = {
-            AppointmentType.INITIAL_CONSULTATION: 60,
-            AppointmentType.FOLLOW_UP: 30,
-            AppointmentType.MEDICATION_REVIEW: 20,
-            AppointmentType.THERAPY: 50,
-            AppointmentType.EMERGENCY: 45,
-            AppointmentType.TELEHEALTH: 30,
-            AppointmentType.IN_PERSON: 45,
-        }
-
-    async def schedule_appointment(
+        self.appointment_repository = appointment_repository
+        self.patient_repository = patient_repository
+        self.provider_repository = provider_repository
+        self.default_appointment_duration = default_appointment_duration
+        self.min_reschedule_notice = min_reschedule_notice
+        self.max_appointments_per_day = max_appointments_per_day
+        self.buffer_between_appointments = buffer_between_appointments
+    
+    def get_appointment(self, appointment_id: Union[UUID, str]) -> Appointment:
+        """
+        Get an appointment by ID.
+        
+        Args:
+            appointment_id: ID of the appointment
+            
+        Returns:
+            Appointment entity
+            
+        Raises:
+            AppointmentNotFoundException: If the appointment is not found
+        """
+        appointment = self.appointment_repository.get_by_id(appointment_id)
+        
+        if not appointment:
+            raise AppointmentNotFoundException(f"Appointment with ID {appointment_id} not found")
+        
+        return appointment
+    
+    def get_appointments_for_patient(
         self,
-        patient_id: UUID,
-        provider_id: UUID,
+        patient_id: Union[UUID, str],
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        status: Optional[Union[AppointmentStatus, str]] = None
+    ) -> List[Appointment]:
+        """
+        Get appointments for a patient.
+        
+        Args:
+            patient_id: ID of the patient
+            start_date: Optional start date for filtering
+            end_date: Optional end date for filtering
+            status: Optional status for filtering
+            
+        Returns:
+            List of appointments
+            
+        Raises:
+            PatientNotFoundException: If the patient is not found
+        """
+        # Check if patient exists
+        patient = self.patient_repository.get_by_id(patient_id)
+        
+        if not patient:
+            raise PatientNotFoundException(f"Patient with ID {patient_id} not found")
+        
+        # Convert string status to enum if necessary
+        if isinstance(status, str):
+            status = AppointmentStatus(status)
+        
+        # Get appointments
+        return self.appointment_repository.get_by_patient_id(
+            patient_id,
+            start_date,
+            end_date,
+            status
+        )
+    
+    def get_appointments_for_provider(
+        self,
+        provider_id: Union[UUID, str],
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        status: Optional[Union[AppointmentStatus, str]] = None
+    ) -> List[Appointment]:
+        """
+        Get appointments for a provider.
+        
+        Args:
+            provider_id: ID of the provider
+            start_date: Optional start date for filtering
+            end_date: Optional end date for filtering
+            status: Optional status for filtering
+            
+        Returns:
+            List of appointments
+            
+        Raises:
+            ProviderNotFoundException: If the provider is not found
+        """
+        # Check if provider exists
+        provider = self.provider_repository.get_by_id(provider_id)
+        
+        if not provider:
+            raise ProviderNotFoundException(f"Provider with ID {provider_id} not found")
+        
+        # Convert string status to enum if necessary
+        if isinstance(status, str):
+            status = AppointmentStatus(status)
+        
+        # Get appointments
+        return self.appointment_repository.get_by_provider_id(
+            provider_id,
+            start_date,
+            end_date,
+            status
+        )
+    
+    def create_appointment(
+        self,
+        patient_id: Union[UUID, str],
+        provider_id: Union[UUID, str],
         start_time: datetime,
-        appointment_type: AppointmentType,
+        end_time: Optional[datetime] = None,
+        appointment_type: Union[AppointmentType, str] = AppointmentType.FOLLOW_UP,
+        priority: Union[AppointmentPriority, str] = AppointmentPriority.NORMAL,
         location: Optional[str] = None,
-        virtual_meeting_link: Optional[str] = None,
-        custom_duration: Optional[int] = None,
+        notes: Optional[str] = None,
+        reason: Optional[str] = None
     ) -> Appointment:
         """
-        Schedule a new appointment
-
+        Create a new appointment.
+        
         Args:
-            patient_id: UUID of the patient
-            provider_id: UUID of the provider
+            patient_id: ID of the patient
+            provider_id: ID of the provider
             start_time: Start time of the appointment
+            end_time: Optional end time of the appointment
             appointment_type: Type of appointment
-            location: Optional physical location for the appointment
-            virtual_meeting_link: Optional link for telehealth appointments
-            custom_duration: Optional custom duration in minutes
-
+            priority: Priority of the appointment
+            location: Optional location of the appointment
+            notes: Optional notes about the appointment
+            reason: Optional reason for the appointment
+            
         Returns:
-            The created appointment entity
-
+            Created appointment
+            
         Raises:
-            AppointmentConflictError: If there is a scheduling conflict
-            ValueError: If the appointment data is invalid
+            PatientNotFoundException: If the patient is not found
+            ProviderNotFoundException: If the provider is not found
+            AppointmentConflictError: If there is a conflict with another appointment
+            InvalidAppointmentTimeError: If the appointment time is invalid
         """
-        # Verify patient exists
-        patient = await self._patient_repo.get_by_id(patient_id)
+        # Check if patient exists
+        patient = self.patient_repository.get_by_id(patient_id)
+        
         if not patient:
-            raise ValueError(f"Patient with ID {patient_id} does not exist")
-
-        # Calculate end time based on appointment type or custom duration
-        duration_minutes = custom_duration or self._standard_durations.get(
-            appointment_type, 30
-        )
-        end_time = start_time + timedelta(minutes=duration_minutes)
-
-        # Check for scheduling conflicts
-        is_available = await self._appointment_repo.check_availability(
-            start_time, end_time, provider_id
-        )
-
-        if not is_available:
-            raise AppointmentConflictError(
-                f"Provider {provider_id} is not available from {start_time} to {end_time}"
-            )
-
-        # Create appointment
+            raise PatientNotFoundException(f"Patient with ID {patient_id} not found")
+        
+        # Check if provider exists
+        provider = self.provider_repository.get_by_id(provider_id)
+        
+        if not provider:
+            raise ProviderNotFoundException(f"Provider with ID {provider_id} not found")
+        
+        # Set end time if not provided
+        if not end_time:
+            end_time = start_time + timedelta(minutes=self.default_appointment_duration)
+        
+        # Check for conflicts
+        self._check_for_conflicts(provider_id, start_time, end_time)
+        
+        # Check provider's daily appointment limit
+        self._check_daily_appointment_limit(provider_id, start_time)
+        
+        # Create the appointment
         appointment = Appointment(
             patient_id=patient_id,
             provider_id=provider_id,
             start_time=start_time,
             end_time=end_time,
             appointment_type=appointment_type,
-            location=location,
-            virtual_meeting_link=virtual_meeting_link,
             status=AppointmentStatus.SCHEDULED,
+            priority=priority,
+            location=location,
+            notes=notes,
+            reason=reason
         )
-
-        # Save to repository
-        return await self._appointment_repo.create(appointment)
-
-    async def reschedule_appointment(
+        
+        # Save the appointment
+        return self.appointment_repository.save(appointment)
+    
+    def reschedule_appointment(
         self,
-        appointment_id: UUID,
+        appointment_id: Union[UUID, str],
         new_start_time: datetime,
-        custom_duration: Optional[int] = None,
+        new_end_time: Optional[datetime] = None,
+        reason: Optional[str] = None,
+        user_id: Union[UUID, str] = None
     ) -> Appointment:
         """
-        Reschedule an existing appointment
-
+        Reschedule an appointment.
+        
         Args:
-            appointment_id: UUID of the appointment to reschedule
-            new_start_time: New start time for the appointment
-            custom_duration: Optional custom duration in minutes
-
+            appointment_id: ID of the appointment
+            new_start_time: New start time
+            new_end_time: Optional new end time
+            reason: Optional reason for rescheduling
+            user_id: ID of the user performing the rescheduling
+            
         Returns:
-            The updated appointment entity
-
+            Updated appointment
+            
         Raises:
-            AppointmentConflictError: If there is a scheduling conflict
-            ValueError: If the appointment cannot be rescheduled
+            AppointmentNotFoundException: If the appointment is not found
+            InvalidAppointmentStateError: If the appointment cannot be rescheduled
+            InvalidAppointmentTimeError: If the new time is invalid
+            AppointmentConflictError: If there is a conflict with another appointment
         """
-        # Retrieve the appointment
-        appointment = await self._appointment_repo.get_by_id(appointment_id)
-        if not appointment:
-            raise ValueError(f"Appointment with ID {appointment_id} does not exist")
-
-        # Check if appointment can be rescheduled
-        if appointment.status in [
-            AppointmentStatus.COMPLETED,
-            AppointmentStatus.CANCELLED,
-        ]:
-            raise ValueError(
-                f"Cannot reschedule appointment with status {appointment.status}"
-            )
-
-        # Calculate new end time
-        if custom_duration:
-            new_end_time = new_start_time + timedelta(minutes=custom_duration)
-        else:
-            # Keep the same duration as before
-            original_duration = (
-                appointment.end_time - appointment.start_time
-            ).total_seconds() / 60
-            new_end_time = new_start_time + timedelta(minutes=original_duration)
-
-        # Check for scheduling conflicts (excluding this appointment)
-        is_available = await self._check_availability_excluding_current(
-            new_start_time, new_end_time, appointment.provider_id, appointment_id
-        )
-
-        if not is_available:
-            raise AppointmentConflictError(
-                f"Provider {appointment.provider_id} is not available from {new_start_time} to {new_end_time}"
-            )
-
-        # Update appointment times
-        appointment.reschedule(new_start_time, new_end_time)
-
-        # Save to repository
-        return await self._appointment_repo.update(appointment)
-
-    async def cancel_appointment(self, appointment_id: UUID) -> Appointment:
+        # Get the appointment
+        appointment = self.get_appointment(appointment_id)
+        
+        # Set new end time if not provided
+        if not new_end_time:
+            duration = (appointment.end_time - appointment.start_time).total_seconds() / 60
+            new_end_time = new_start_time + timedelta(minutes=duration)
+        
+        # Check for minimum notice period
+        self._check_reschedule_notice_period(appointment)
+        
+        # Check for conflicts
+        self._check_for_conflicts(appointment.provider_id, new_start_time, new_end_time, appointment_id)
+        
+        # Reschedule the appointment
+        appointment.reschedule(new_start_time, new_end_time, reason)
+        
+        # Save the appointment
+        return self.appointment_repository.save(appointment)
+    
+    def cancel_appointment(
+        self,
+        appointment_id: Union[UUID, str],
+        cancelled_by: Union[UUID, str],
+        reason: Optional[str] = None
+    ) -> Appointment:
         """
-        Cancel an appointment
-
+        Cancel an appointment.
+        
         Args:
-            appointment_id: UUID of the appointment to cancel
-
+            appointment_id: ID of the appointment
+            cancelled_by: ID of the user cancelling the appointment
+            reason: Optional reason for cancellation
+            
         Returns:
-            The updated appointment entity
-
+            Updated appointment
+            
         Raises:
-            ValueError: If the appointment cannot be cancelled
+            AppointmentNotFoundException: If the appointment is not found
+            InvalidAppointmentStateError: If the appointment cannot be cancelled
         """
-        # Retrieve the appointment
-        appointment = await self._appointment_repo.get_by_id(appointment_id)
-        if not appointment:
-            raise ValueError(f"Appointment with ID {appointment_id} does not exist")
-
+        # Get the appointment
+        appointment = self.get_appointment(appointment_id)
+        
         # Cancel the appointment
-        appointment.cancel()
-
-        # Save to repository
-        return await self._appointment_repo.update(appointment)
-
-    async def complete_appointment(self, appointment_id: UUID) -> Appointment:
+        appointment.cancel(cancelled_by, reason)
+        
+        # Save the appointment
+        return self.appointment_repository.save(appointment)
+    
+    def confirm_appointment(
+        self,
+        appointment_id: Union[UUID, str]
+    ) -> Appointment:
         """
-        Mark an appointment as completed
-
+        Confirm an appointment.
+        
         Args:
-            appointment_id: UUID of the appointment to mark as completed
-
+            appointment_id: ID of the appointment
+            
         Returns:
-            The updated appointment entity
-
+            Updated appointment
+            
         Raises:
-            ValueError: If the appointment cannot be marked as completed
+            AppointmentNotFoundException: If the appointment is not found
+            InvalidAppointmentStateError: If the appointment cannot be confirmed
         """
-        # Retrieve the appointment
-        appointment = await self._appointment_repo.get_by_id(appointment_id)
-        if not appointment:
-            raise ValueError(f"Appointment with ID {appointment_id} does not exist")
-
+        # Get the appointment
+        appointment = self.get_appointment(appointment_id)
+        
+        # Confirm the appointment
+        appointment.confirm()
+        
+        # Save the appointment
+        return self.appointment_repository.save(appointment)
+    
+    def check_in_appointment(
+        self,
+        appointment_id: Union[UUID, str]
+    ) -> Appointment:
+        """
+        Check in an appointment.
+        
+        Args:
+            appointment_id: ID of the appointment
+            
+        Returns:
+            Updated appointment
+            
+        Raises:
+            AppointmentNotFoundException: If the appointment is not found
+            InvalidAppointmentStateError: If the appointment cannot be checked in
+        """
+        # Get the appointment
+        appointment = self.get_appointment(appointment_id)
+        
+        # Check in the appointment
+        appointment.check_in()
+        
+        # Save the appointment
+        return self.appointment_repository.save(appointment)
+    
+    def start_appointment(
+        self,
+        appointment_id: Union[UUID, str]
+    ) -> Appointment:
+        """
+        Start an appointment.
+        
+        Args:
+            appointment_id: ID of the appointment
+            
+        Returns:
+            Updated appointment
+            
+        Raises:
+            AppointmentNotFoundException: If the appointment is not found
+            InvalidAppointmentStateError: If the appointment cannot be started
+        """
+        # Get the appointment
+        appointment = self.get_appointment(appointment_id)
+        
+        # Start the appointment
+        appointment.start()
+        
+        # Save the appointment
+        return self.appointment_repository.save(appointment)
+    
+    def complete_appointment(
+        self,
+        appointment_id: Union[UUID, str]
+    ) -> Appointment:
+        """
+        Complete an appointment.
+        
+        Args:
+            appointment_id: ID of the appointment
+            
+        Returns:
+            Updated appointment
+            
+        Raises:
+            AppointmentNotFoundException: If the appointment is not found
+            InvalidAppointmentStateError: If the appointment cannot be completed
+        """
+        # Get the appointment
+        appointment = self.get_appointment(appointment_id)
+        
         # Complete the appointment
         appointment.complete()
-
-        # Save to repository
-        return await self._appointment_repo.update(appointment)
-
-    async def get_available_slots(
+        
+        # Save the appointment
+        return self.appointment_repository.save(appointment)
+    
+    def mark_no_show(
         self,
-        provider_id: UUID,
-        date: datetime,
-        appointment_type: AppointmentType,
-        custom_duration: Optional[int] = None,
-    ) -> List[Tuple[datetime, datetime]]:
+        appointment_id: Union[UUID, str]
+    ) -> Appointment:
         """
-        Get available appointment slots for a provider on a specific date
-
+        Mark an appointment as a no-show.
+        
         Args:
-            provider_id: UUID of the provider
-            date: The date to check availability for
+            appointment_id: ID of the appointment
+            
+        Returns:
+            Updated appointment
+            
+        Raises:
+            AppointmentNotFoundException: If the appointment is not found
+            InvalidAppointmentStateError: If the appointment cannot be marked as no-show
+        """
+        # Get the appointment
+        appointment = self.get_appointment(appointment_id)
+        
+        # Mark as no-show
+        appointment.mark_no_show()
+        
+        # Save the appointment
+        return self.appointment_repository.save(appointment)
+    
+    def schedule_follow_up(
+        self,
+        appointment_id: Union[UUID, str],
+        follow_up_start_time: datetime,
+        follow_up_end_time: Optional[datetime] = None,
+        appointment_type: Union[AppointmentType, str] = AppointmentType.FOLLOW_UP,
+        priority: Union[AppointmentPriority, str] = AppointmentPriority.NORMAL,
+        location: Optional[str] = None,
+        notes: Optional[str] = None,
+        reason: Optional[str] = None
+    ) -> Appointment:
+        """
+        Schedule a follow-up appointment.
+        
+        Args:
+            appointment_id: ID of the original appointment
+            follow_up_start_time: Start time of the follow-up
+            follow_up_end_time: Optional end time of the follow-up
             appointment_type: Type of appointment
-            custom_duration: Optional custom duration in minutes
-
+            priority: Priority of the appointment
+            location: Optional location of the appointment
+            notes: Optional notes about the appointment
+            reason: Optional reason for the appointment
+            
         Returns:
-            List of available time slots as (start_time, end_time) tuples
+            Created follow-up appointment
+            
+        Raises:
+            AppointmentNotFoundException: If the original appointment is not found
+            InvalidAppointmentStateError: If a follow-up cannot be scheduled
+            AppointmentConflictError: If there is a conflict with another appointment
         """
-        # Set business hours (9 AM to 5 PM by default)
-        business_start = datetime.combine(
-            date.date(), datetime.min.time().replace(hour=9)
-        )
-        business_end = datetime.combine(
-            date.date(), datetime.min.time().replace(hour=17)
-        )
-
-        # Get appointment duration
-        duration_minutes = custom_duration or self._standard_durations.get(
-            appointment_type, 30
-        )
-        slot_duration = timedelta(minutes=duration_minutes)
-
-        # Get all appointments for the provider on this date
-        start_of_day = datetime.combine(date.date(), datetime.min.time())
-        end_of_day = datetime.combine(date.date(), datetime.max.time())
-        existing_appointments = await self._appointment_repo.list_by_date_range(
-            start_of_day, end_of_day, provider_id
-        )
-
-        # Filter out cancelled appointments
-        existing_appointments = [
-            appt
-            for appt in existing_appointments
-            if appt.status != AppointmentStatus.CANCELLED
-        ]
-
-        # Generate all possible slots
-        current_slot_start = business_start
-        available_slots = []
-
-        while current_slot_start + slot_duration <= business_end:
-            current_slot_end = current_slot_start + slot_duration
-
-            # Check if slot conflicts with any existing appointment
-            is_available = True
-            for appt in existing_appointments:
-                # Check for overlap
-                if (
-                    current_slot_start < appt.end_time
-                    and current_slot_end > appt.start_time
-                ):
-                    is_available = False
-                    break
-
-            if is_available:
-                available_slots.append((current_slot_start, current_slot_end))
-
-            # Move to next slot (30-minute increments)
-            current_slot_start += timedelta(minutes=30)
-
-        return available_slots
-
-    async def get_upcoming_appointments_for_patient(
-        self, patient_id: UUID, days: int = 30
-    ) -> List[Appointment]:
-        """
-        Get upcoming appointments for a specific patient
-
-        Args:
-            patient_id: UUID of the patient
-            days: Number of days to look ahead
-
-        Returns:
-            List of upcoming appointment entities
-        """
-        # Verify patient exists
-        patient = await self._patient_repo.get_by_id(patient_id)
-        if not patient:
-            raise ValueError(f"Patient with ID {patient_id} does not exist")
-
-        # Get all appointments for the patient
-        appointments = await self._appointment_repo.list_by_patient(patient_id)
-
-        # Filter for upcoming appointments within the specified days
-        now = datetime.utcnow()
-        end_date = now + timedelta(days=days)
-
-        upcoming_appointments = [
-            appt
-            for appt in appointments
-            if (
-                appt.start_time >= now
-                and appt.start_time <= end_date
-                and appt.status
-                not in [AppointmentStatus.CANCELLED, AppointmentStatus.COMPLETED]
+        # Get the original appointment
+        original_appointment = self.get_appointment(appointment_id)
+        
+        # Check if the original appointment is completed
+        if original_appointment.status != AppointmentStatus.COMPLETED:
+            raise InvalidAppointmentStateError(
+                f"Cannot schedule follow-up for appointment with status {original_appointment.status.value}"
             )
-        ]
-
-        # Sort by start time
-        upcoming_appointments.sort(key=lambda x: x.start_time)
-
-        return upcoming_appointments
-
-    async def _check_availability_excluding_current(
+        
+        # Set end time if not provided
+        if not follow_up_end_time:
+            follow_up_end_time = follow_up_start_time + timedelta(minutes=self.default_appointment_duration)
+        
+        # Check for conflicts
+        self._check_for_conflicts(original_appointment.provider_id, follow_up_start_time, follow_up_end_time)
+        
+        # Create the follow-up appointment
+        follow_up_appointment = Appointment(
+            patient_id=original_appointment.patient_id,
+            provider_id=original_appointment.provider_id,
+            start_time=follow_up_start_time,
+            end_time=follow_up_end_time,
+            appointment_type=appointment_type,
+            status=AppointmentStatus.SCHEDULED,
+            priority=priority,
+            location=location or original_appointment.location,
+            notes=notes,
+            reason=reason or original_appointment.reason,
+            previous_appointment_id=original_appointment.id
+        )
+        
+        # Save the follow-up appointment
+        follow_up_appointment = self.appointment_repository.save(follow_up_appointment)
+        
+        # Update the original appointment
+        original_appointment.schedule_follow_up(follow_up_appointment.id)
+        self.appointment_repository.save(original_appointment)
+        
+        return follow_up_appointment
+    
+    def send_reminder(
         self,
+        appointment_id: Union[UUID, str]
+    ) -> Appointment:
+        """
+        Send a reminder for an appointment.
+        
+        Args:
+            appointment_id: ID of the appointment
+            
+        Returns:
+            Updated appointment
+            
+        Raises:
+            AppointmentNotFoundException: If the appointment is not found
+        """
+        # Get the appointment
+        appointment = self.get_appointment(appointment_id)
+        
+        # Send reminder
+        appointment.send_reminder()
+        
+        # Save the appointment
+        return self.appointment_repository.save(appointment)
+    
+    def update_notes(
+        self,
+        appointment_id: Union[UUID, str],
+        notes: str
+    ) -> Appointment:
+        """
+        Update the notes for an appointment.
+        
+        Args:
+            appointment_id: ID of the appointment
+            notes: New notes
+            
+        Returns:
+            Updated appointment
+            
+        Raises:
+            AppointmentNotFoundException: If the appointment is not found
+        """
+        # Get the appointment
+        appointment = self.get_appointment(appointment_id)
+        
+        # Update notes
+        appointment.update_notes(notes)
+        
+        # Save the appointment
+        return self.appointment_repository.save(appointment)
+    
+    def _check_for_conflicts(
+        self,
+        provider_id: Union[UUID, str],
         start_time: datetime,
         end_time: datetime,
-        provider_id: UUID,
-        current_appointment_id: UUID,
-    ) -> bool:
+        exclude_appointment_id: Optional[Union[UUID, str]] = None
+    ) -> None:
         """
-        Check if a time slot is available, excluding the current appointment
-
+        Check for conflicts with other appointments.
+        
         Args:
-            start_time: Start time of the slot
-            end_time: End time of the slot
-            provider_id: UUID of the provider
-            current_appointment_id: UUID of the current appointment to exclude
-
-        Returns:
-            True if the slot is available, False otherwise
+            provider_id: ID of the provider
+            start_time: Start time to check
+            end_time: End time to check
+            exclude_appointment_id: Optional ID of an appointment to exclude
+            
+        Raises:
+            AppointmentConflictError: If there is a conflict
         """
-        # Get all appointments for the provider on this date
-        day_start = datetime.combine(start_time.date(), datetime.min.time())
-        day_end = datetime.combine(start_time.date(), datetime.max.time())
-
-        existing_appointments = await self._appointment_repo.list_by_date_range(
-            day_start, day_end, provider_id
+        # Get provider's appointments for the day
+        day_start = datetime(start_time.year, start_time.month, start_time.day)
+        day_end = day_start + timedelta(days=1)
+        
+        appointments = self.appointment_repository.get_by_provider_id(
+            provider_id,
+            day_start,
+            day_end
         )
-
-        # Filter out cancelled appointments and the current appointment
-        existing_appointments = [
-            appt
-            for appt in existing_appointments
-            if (
-                appt.status != AppointmentStatus.CANCELLED
-                and appt.id != current_appointment_id
-            )
-        ]
-
+        
+        # Add buffer to start and end times
+        buffered_start = start_time - timedelta(minutes=self.buffer_between_appointments)
+        buffered_end = end_time + timedelta(minutes=self.buffer_between_appointments)
+        
         # Check for conflicts
-        for appt in existing_appointments:
+        for appointment in appointments:
+            # Skip the appointment being rescheduled
+            if exclude_appointment_id and str(appointment.id) == str(exclude_appointment_id):
+                continue
+            
+            # Skip cancelled appointments
+            if appointment.status in [
+                AppointmentStatus.CANCELLED,
+                AppointmentStatus.NO_SHOW
+            ]:
+                continue
+            
             # Check for overlap
-            if start_time < appt.end_time and end_time > appt.start_time:
-                return False
-
-        return True
+            if (
+                (buffered_start <= appointment.start_time < buffered_end) or
+                (buffered_start < appointment.end_time <= buffered_end) or
+                (appointment.start_time <= buffered_start and appointment.end_time >= buffered_end)
+            ):
+                raise AppointmentConflictError(
+                    f"Appointment conflicts with existing appointment at {appointment.start_time}"
+                )
+    
+    def _check_daily_appointment_limit(
+        self,
+        provider_id: Union[UUID, str],
+        date: datetime
+    ) -> None:
+        """
+        Check if a provider has reached their daily appointment limit.
+        
+        Args:
+            provider_id: ID of the provider
+            date: Date to check
+            
+        Raises:
+            AppointmentConflictError: If the limit has been reached
+        """
+        # Get provider's appointments for the day
+        day_start = datetime(date.year, date.month, date.day)
+        day_end = day_start + timedelta(days=1)
+        
+        appointments = self.appointment_repository.get_by_provider_id(
+            provider_id,
+            day_start,
+            day_end
+        )
+        
+        # Count active appointments
+        active_count = sum(
+            1 for a in appointments
+            if a.status not in [AppointmentStatus.CANCELLED, AppointmentStatus.NO_SHOW]
+        )
+        
+        if active_count >= self.max_appointments_per_day:
+            raise AppointmentConflictError(
+                f"Provider has reached the maximum of {self.max_appointments_per_day} appointments for the day"
+            )
+    
+    def _check_reschedule_notice_period(
+        self,
+        appointment: Appointment
+    ) -> None:
+        """
+        Check if an appointment can be rescheduled based on notice period.
+        
+        Args:
+            appointment: Appointment to check
+            
+        Raises:
+            InvalidAppointmentTimeError: If the notice period is insufficient
+        """
+        # Check if the appointment is within the minimum notice period
+        if (
+            appointment.start_time - datetime.now()
+        ).total_seconds() / 3600 < self.min_reschedule_notice:
+            raise InvalidAppointmentTimeError(
+                f"Appointments must be rescheduled at least {self.min_reschedule_notice} hours in advance"
+            )

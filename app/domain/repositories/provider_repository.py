@@ -1,286 +1,239 @@
 # -*- coding: utf-8 -*-
 """
-Provider repository interface for the NOVAMIND backend.
+Provider Repository Interface
 
-This module defines the interface for provider data access operations.
-Following the Dependency Inversion Principle, the domain layer depends on
-this abstraction rather than concrete implementations.
+This module defines the interface for provider repositories.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Set
+from datetime import datetime
+from typing import List, Optional, Union, Dict, Any
 from uuid import UUID
 
-from app.domain.entities.provider import Provider, ProviderRole, ProviderSpecialty
+from app.domain.entities.provider import Provider
 
 
 class ProviderRepository(ABC):
     """
-    Repository interface for Provider entity operations.
-
-    This abstract class defines the contract that any provider repository
-    implementation must fulfill, ensuring the domain layer remains
-    independent of data access technologies.
+    Interface for provider repositories.
+    
+    This abstract class defines the contract that all provider repositories
+    must implement, ensuring consistent access to provider data regardless
+    of the underlying storage mechanism.
     """
-
+    
     @abstractmethod
-    async def create(self, provider: Provider) -> Provider:
+    def get_by_id(self, provider_id: Union[UUID, str]) -> Optional[Provider]:
         """
-        Create a new provider record
-
+        Get a provider by ID.
+        
         Args:
-            provider: The provider entity to create
-
+            provider_id: ID of the provider
+            
         Returns:
-            The created provider with any system-generated fields populated
-
-        Raises:
-            RepositoryError: If there's an error during creation
+            Provider if found, None otherwise
         """
         pass
-
+    
     @abstractmethod
-    async def get_by_id(self, provider_id: UUID) -> Optional[Provider]:
+    def get_by_email(self, email: str) -> Optional[Provider]:
         """
-        Retrieve a provider by ID
-
+        Get a provider by email.
+        
         Args:
-            provider_id: The UUID of the provider to retrieve
-
+            email: Email of the provider
+            
         Returns:
-            The provider entity if found, None otherwise
-
-        Raises:
-            RepositoryError: If there's an error during retrieval
+            Provider if found, None otherwise
         """
         pass
-
+    
     @abstractmethod
-    async def update(self, provider: Provider) -> Provider:
+    def get_by_license_number(self, license_number: str) -> Optional[Provider]:
         """
-        Update an existing provider record
-
+        Get a provider by license number.
+        
         Args:
-            provider: The provider entity with updated fields
-
+            license_number: License number of the provider
+            
         Returns:
-            The updated provider entity
-
-        Raises:
-            RepositoryError: If there's an error during update
-            EntityNotFoundError: If the provider doesn't exist
+            Provider if found, None otherwise
         """
         pass
-
+    
     @abstractmethod
-    async def delete(self, provider_id: UUID) -> bool:
+    def save(self, provider: Provider) -> Provider:
         """
-        Delete a provider record
-
+        Save a provider.
+        
         Args:
-            provider_id: The UUID of the provider to delete
-
+            provider: Provider to save
+            
         Returns:
-            True if the provider was deleted, False otherwise
-
-        Raises:
-            RepositoryError: If there's an error during deletion
+            Saved provider
         """
         pass
-
+    
     @abstractmethod
-    async def list_all(self, limit: int = 100, offset: int = 0) -> List[Provider]:
+    def delete(self, provider_id: Union[UUID, str]) -> bool:
         """
-        List all providers with pagination
-
+        Delete a provider.
+        
         Args:
-            limit: Maximum number of providers to return
-            offset: Number of providers to skip
-
+            provider_id: ID of the provider to delete
+            
         Returns:
-            List of provider entities
-
-        Raises:
-            RepositoryError: If there's an error during retrieval
+            True if deleted, False otherwise
         """
         pass
-
+    
     @abstractmethod
-    async def list_by_role(
-        self, role: ProviderRole, limit: int = 100, offset: int = 0
+    def search(
+        self,
+        query: str,
+        limit: int = 10,
+        offset: int = 0
     ) -> List[Provider]:
         """
-        List all providers with a specific role
-
+        Search for providers.
+        
         Args:
-            role: The provider role to filter by
-            limit: Maximum number of providers to return
-            offset: Number of providers to skip
-
+            query: Search query
+            limit: Maximum number of results
+            offset: Offset for pagination
+            
         Returns:
-            List of provider entities
-
-        Raises:
-            RepositoryError: If there's an error during retrieval
+            List of matching providers
         """
         pass
-
+    
     @abstractmethod
-    async def list_by_specialty(
-        self, specialty: ProviderSpecialty, limit: int = 100, offset: int = 0
+    def get_all(
+        self,
+        limit: int = 100,
+        offset: int = 0,
+        sort_by: str = "last_name",
+        sort_order: str = "asc"
     ) -> List[Provider]:
         """
-        List all providers with a specific specialty
-
+        Get all providers with pagination.
+        
         Args:
-            specialty: The provider specialty to filter by
-            limit: Maximum number of providers to return
-            offset: Number of providers to skip
-
+            limit: Maximum number of results
+            offset: Offset for pagination
+            sort_by: Field to sort by
+            sort_order: Sort order (asc or desc)
+            
         Returns:
-            List of provider entities
-
-        Raises:
-            RepositoryError: If there's an error during retrieval
+            List of providers
         """
         pass
-
+    
     @abstractmethod
-    async def list_active(self, limit: int = 100, offset: int = 0) -> List[Provider]:
+    def count(self) -> int:
         """
-        List all active providers
-
-        Args:
-            limit: Maximum number of providers to return
-            offset: Number of providers to skip
-
+        Count all providers.
+        
         Returns:
-            List of active provider entities
-
-        Raises:
-            RepositoryError: If there's an error during retrieval
+            Number of providers
         """
         pass
-
+    
     @abstractmethod
-    async def list_accepting_patients(
-        self, limit: int = 100, offset: int = 0
+    def exists(self, provider_id: Union[UUID, str]) -> bool:
+        """
+        Check if a provider exists.
+        
+        Args:
+            provider_id: ID of the provider
+            
+        Returns:
+            True if exists, False otherwise
+        """
+        pass
+    
+    @abstractmethod
+    def exists_by_email(self, email: str) -> bool:
+        """
+        Check if a provider exists by email.
+        
+        Args:
+            email: Email of the provider
+            
+        Returns:
+            True if exists, False otherwise
+        """
+        pass
+    
+    @abstractmethod
+    def exists_by_license_number(self, license_number: str) -> bool:
+        """
+        Check if a provider exists by license number.
+        
+        Args:
+            license_number: License number of the provider
+            
+        Returns:
+            True if exists, False otherwise
+        """
+        pass
+    
+    @abstractmethod
+    def get_available_providers(
+        self,
+        start_time: datetime,
+        end_time: datetime,
+        specialties: Optional[List[str]] = None
     ) -> List[Provider]:
         """
-        List all providers accepting new patients
-
+        Get providers available during a time range.
+        
         Args:
-            limit: Maximum number of providers to return
-            offset: Number of providers to skip
-
+            start_time: Start time
+            end_time: End time
+            specialties: Optional list of specialties to filter by
+            
         Returns:
-            List of provider entities accepting new patients
-
-        Raises:
-            RepositoryError: If there's an error during retrieval
+            List of available providers
         """
         pass
-
+    
     @abstractmethod
-    async def search(
-        self, query: str, limit: int = 100, offset: int = 0
+    def get_providers_by_specialty(
+        self,
+        specialty: str,
+        limit: int = 100,
+        offset: int = 0
     ) -> List[Provider]:
         """
-        Search for providers by name or other fields
-
+        Get providers by specialty.
+        
         Args:
-            query: The search query
-            limit: Maximum number of providers to return
-            offset: Number of providers to skip
-
+            specialty: Specialty to filter by
+            limit: Maximum number of results
+            offset: Offset for pagination
+            
         Returns:
-            List of matching provider entities
-
-        Raises:
-            RepositoryError: If there's an error during search
+            List of providers with the specified specialty
         """
         pass
-
+    
     @abstractmethod
-    async def get_by_email(self, email: str) -> Optional[Provider]:
+    def get_provider_availability(
+        self,
+        provider_id: Union[UUID, str],
+        start_date: datetime,
+        end_date: datetime
+    ) -> Dict[str, List[Dict[str, datetime]]]:
         """
-        Retrieve a provider by email address
-
+        Get a provider's availability.
+        
         Args:
-            email: The email address to search for
-
+            provider_id: ID of the provider
+            start_date: Start date
+            end_date: End date
+            
         Returns:
-            The provider entity if found, None otherwise
-
-        Raises:
-            RepositoryError: If there's an error during retrieval
-        """
-        pass
-
-    @abstractmethod
-    async def get_by_npi(self, npi_number: str) -> Optional[Provider]:
-        """
-        Retrieve a provider by NPI number
-
-        Args:
-            npi_number: The National Provider Identifier to search for
-
-        Returns:
-            The provider entity if found, None otherwise
-
-        Raises:
-            RepositoryError: If there's an error during retrieval
-        """
-        pass
-
-    @abstractmethod
-    async def get_prescribers(
-        self, limit: int = 100, offset: int = 0
-    ) -> List[Provider]:
-        """
-        Get all providers who can prescribe medications
-
-        Args:
-            limit: Maximum number of providers to return
-            offset: Number of providers to skip
-
-        Returns:
-            List of provider entities who can prescribe
-
-        Raises:
-            RepositoryError: If there's an error during retrieval
-        """
-        pass
-
-    @abstractmethod
-    async def count_all(self) -> int:
-        """
-        Count all providers in the repository
-
-        Returns:
-            The total number of providers
-
-        Raises:
-            RepositoryError: If there's an error during counting
-        """
-        pass
-
-    @abstractmethod
-    async def get_available_on_day(
-        self, day_of_week: int, limit: int = 100, offset: int = 0
-    ) -> List[Provider]:
-        """
-        Get all providers available on a specific day of the week
-
-        Args:
-            day_of_week: Day of the week (0 = Monday, 6 = Sunday)
-            limit: Maximum number of providers to return
-            offset: Number of providers to skip
-
-        Returns:
-            List of provider entities available on the specified day
-
-        Raises:
-            RepositoryError: If there's an error during retrieval
+            Dictionary mapping dates to lists of available time slots
         """
         pass

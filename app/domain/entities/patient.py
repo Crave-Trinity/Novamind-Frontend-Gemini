@@ -1,276 +1,568 @@
 # -*- coding: utf-8 -*-
 """
-Patient entity module for the NOVAMIND backend.
+Patient Entity
 
-This module contains the Patient entity, which is a core domain entity
-representing a patient in the concierge psychiatry practice.
+This module defines the Patient entity for the domain layer,
+representing a patient in the system.
 """
 
-from dataclasses import dataclass, field
-from datetime import date
-from typing import Dict, List, Optional
+from datetime import datetime, date
+from enum import Enum
+from typing import Dict, List, Optional, Any, Union
 from uuid import UUID, uuid4
 
-from app.domain.value_objects.address import Address
-from app.domain.value_objects.contact_info import ContactInfo
-from app.domain.value_objects.emergency_contact import EmergencyContact
-from app.domain.value_objects.psychiatric_assessment import PsychiatricAssessment
-from app.infrastructure.security.encryption import EncryptionService
+from app.domain.exceptions import ValidationException
 
 
-@dataclass
-class InsuranceInfo:
-    """Value object for patient insurance information"""
+class Gender(Enum):
+    """Gender enum for patients."""
+    
+    MALE = "male"
+    FEMALE = "female"
+    NON_BINARY = "non_binary"
+    OTHER = "other"
+    PREFER_NOT_TO_SAY = "prefer_not_to_say"
 
-    provider: str
-    policy_number: str
-    group_number: Optional[str] = None
-    coverage_details: Optional[Dict[str, str]] = None
+
+class InsuranceStatus(Enum):
+    """Insurance status enum for patients."""
+    
+    VERIFIED = "verified"
+    PENDING = "pending"
+    EXPIRED = "expired"
+    NONE = "none"
 
 
-@dataclass
-class EmergencyContact:
-    """Value object for patient emergency contact"""
-
-    name: str
-    relationship: str
-    phone: str
-    email: Optional[str] = None
+class PatientStatus(Enum):
+    """Status enum for patients."""
+    
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    ARCHIVED = "archived"
+    PENDING = "pending"
 
 
 class Patient:
     """
-    Patient entity representing a patient in the concierge psychiatry practice.
-
-    This is a rich domain entity containing business logic related to patient management.
-    It follows DDD principles and is framework-independent.
+    Patient entity representing a patient in the system.
+    
+    This entity encapsulates all the business logic related to patients,
+    including personal information, medical history, and insurance details.
     """
-
+    
     def __init__(
         self,
-        id: UUID,
-        first_name: str,
-        last_name: str,
-        date_of_birth: date,
-        contact_info: ContactInfo,
-        address: Address,
-        encryption_service: Optional[EncryptionService] = None,
-        gender: Optional[str] = None,
-        insurance_info: Optional[InsuranceInfo] = None,
-        emergency_contacts: List[EmergencyContact] = None,
-        assessments: List[PsychiatricAssessment] = None,
-        medical_history: Dict[str, str] = None,
-        medication_allergies: List[str] = None,
-        active: bool = True
-    ) -> None:
-        """Initialize a new patient."""
-        self.id = id
-        self._encryption = encryption_service or EncryptionService()
+        id: Optional[Union[UUID, str]] = None,
+        first_name: str = None,
+        last_name: str = None,
+        date_of_birth: Union[date, str] = None,
+        gender: Union[Gender, str] = None,
+        email: Optional[str] = None,
+        phone: Optional[str] = None,
+        address: Optional[Dict[str, Any]] = None,
+        emergency_contacts: Optional[List[Dict[str, Any]]] = None,
+        insurance_info: Optional[Dict[str, Any]] = None,
+        insurance_status: Union[InsuranceStatus, str] = InsuranceStatus.NONE,
+        medical_history: Optional[List[Dict[str, Any]]] = None,
+        medications: Optional[List[Dict[str, Any]]] = None,
+        allergies: Optional[List[str]] = None,
+        notes: Optional[str] = None,
+        status: Union[PatientStatus, str] = PatientStatus.ACTIVE,
+        created_at: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None,
+        last_appointment: Optional[datetime] = None,
+        next_appointment: Optional[datetime] = None,
+        preferred_provider_id: Optional[Union[UUID, str]] = None,
+        metadata: Optional[Dict[str, Any]] = None
+    ):
+        """
+        Initialize a patient.
         
-        # Encrypt PHI fields
-        self._first_name = self._encryption.encrypt(first_name)
-        self._last_name = self._encryption.encrypt(last_name)
-        self._date_of_birth = date_of_birth
+        Args:
+            id: Unique identifier for the patient
+            first_name: First name of the patient
+            last_name: Last name of the patient
+            date_of_birth: Date of birth of the patient
+            gender: Gender of the patient
+            email: Email address of the patient
+            phone: Phone number of the patient
+            address: Address of the patient
+            emergency_contacts: Emergency contacts for the patient
+            insurance_info: Insurance information for the patient
+            insurance_status: Status of the patient's insurance
+            medical_history: Medical history of the patient
+            medications: Medications the patient is taking
+            allergies: Allergies the patient has
+            notes: Notes about the patient
+            status: Status of the patient
+            created_at: Time the patient was created
+            updated_at: Time the patient was last updated
+            last_appointment: Time of the patient's last appointment
+            next_appointment: Time of the patient's next appointment
+            preferred_provider_id: ID of the patient's preferred provider
+            metadata: Additional metadata
+        """
+        self.id = id if id else uuid4()
+        self.first_name = first_name
+        self.last_name = last_name
         
-        # Encrypt contact info
-        self._contact_info = ContactInfo(
-            email=self._encryption.encrypt(contact_info.email),
-            phone=self._encryption.encrypt(contact_info.phone)
-        )
+        # Convert string date to date object if necessary
+        if isinstance(date_of_birth, str):
+            self.date_of_birth = date.fromisoformat(date_of_birth)
+        else:
+            self.date_of_birth = date_of_birth
         
-        # Store address
-        self._address = address
+        # Convert string to enum if necessary
+        if isinstance(gender, str):
+            self.gender = Gender(gender)
+        else:
+            self.gender = gender
         
-        self.gender = gender
-        self.insurance_info = insurance_info
-        self.emergency_contacts = emergency_contacts if emergency_contacts else []
-        self.assessments = assessments if assessments else []
-        self.medical_history = medical_history if medical_history else {}
-        self.medication_allergies = medication_allergies if medication_allergies else []
-        self.active = active
+        self.email = email
+        self.phone = phone
+        self.address = address or {}
+        self.emergency_contacts = emergency_contacts or []
+        self.insurance_info = insurance_info or {}
+        
+        # Convert string to enum if necessary
+        if isinstance(insurance_status, str):
+            self.insurance_status = InsuranceStatus(insurance_status)
+        else:
+            self.insurance_status = insurance_status
+        
+        self.medical_history = medical_history or []
+        self.medications = medications or []
+        self.allergies = allergies or []
+        self.notes = notes
+        
+        # Convert string to enum if necessary
+        if isinstance(status, str):
+            self.status = PatientStatus(status)
+        else:
+            self.status = status
+        
+        self.created_at = created_at or datetime.now()
+        self.updated_at = updated_at or datetime.now()
+        self.last_appointment = last_appointment
+        self.next_appointment = next_appointment
+        self.preferred_provider_id = preferred_provider_id
+        self.metadata = metadata or {}
+        
+        # Validate the patient
+        self._validate()
     
-    @property
-    def first_name(self) -> str:
-        """Get decrypted first name."""
-        return self._encryption.decrypt(self._first_name)
+    def _validate(self) -> None:
+        """
+        Validate the patient.
+        
+        Raises:
+            ValidationException: If the patient is invalid
+        """
+        # Check required fields
+        if not self.first_name:
+            raise ValidationException("First name is required")
+        
+        if not self.last_name:
+            raise ValidationException("Last name is required")
+        
+        if not self.date_of_birth:
+            raise ValidationException("Date of birth is required")
+        
+        if not self.gender:
+            raise ValidationException("Gender is required")
+        
+        # Check that at least one contact method is provided
+        if not self.email and not self.phone:
+            raise ValidationException("At least one contact method (email or phone) is required")
+        
+        # Validate email format if provided
+        if self.email and not self._is_valid_email(self.email):
+            raise ValidationException(f"Invalid email format: {self.email}")
+        
+        # Validate phone format if provided
+        if self.phone and not self._is_valid_phone(self.phone):
+            raise ValidationException(f"Invalid phone format: {self.phone}")
     
-    @property
-    def last_name(self) -> str:
-        """Get decrypted last name."""
-        return self._encryption.decrypt(self._last_name)
+    def _is_valid_email(self, email: str) -> bool:
+        """
+        Check if an email is valid.
+        
+        Args:
+            email: Email to check
+            
+        Returns:
+            True if valid, False otherwise
+        """
+        # Simple email validation
+        return "@" in email and "." in email.split("@")[1]
     
-    @property
-    def date_of_birth(self) -> date:
-        """Get date of birth."""
-        return self._date_of_birth
+    def _is_valid_phone(self, phone: str) -> bool:
+        """
+        Check if a phone number is valid.
+        
+        Args:
+            phone: Phone number to check
+            
+        Returns:
+            True if valid, False otherwise
+        """
+        # Simple phone validation (digits, spaces, dashes, parentheses)
+        return all(c.isdigit() or c in " -.()" for c in phone)
     
-    @property
-    def contact_info(self) -> ContactInfo:
-        """Get decrypted contact info."""
-        return ContactInfo(
-            email=self._encryption.decrypt(self._contact_info.email),
-            phone=self._encryption.decrypt(self._contact_info.phone)
-        )
-    
-    @property
-    def address(self) -> Address:
-        """Get address."""
-        return self._address
-    
-    @property
-    def full_name(self) -> str:
-        """Get the patient's full name"""
-        return f"{self.first_name} {self.last_name}"
-    
-    @property
-    def age(self) -> int:
-        """Calculate the patient's age based on date of birth"""
-        today = date.today()
-        return (
-            today.year
-            - self.date_of_birth.year
-            - (
-                (today.month, today.day)
-                < (self.date_of_birth.month, self.date_of_birth.day)
-            )
-        )
-    
-    def update(
+    def update_personal_info(
         self,
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
-        contact_info: Optional[ContactInfo] = None,
-        address: Optional[Address] = None,
-        gender: Optional[str] = None,
-        insurance_info: Optional[InsuranceInfo] = None,
-        emergency_contacts: Optional[List[EmergencyContact]] = None,
-        assessments: Optional[List[PsychiatricAssessment]] = None,
-        medical_history: Optional[Dict[str, str]] = None,
-        medication_allergies: Optional[List[str]] = None,
-        active: Optional[bool] = None
+        date_of_birth: Optional[Union[date, str]] = None,
+        gender: Optional[Union[Gender, str]] = None,
+        email: Optional[str] = None,
+        phone: Optional[str] = None,
+        address: Optional[Dict[str, Any]] = None
     ) -> None:
         """
-        Update patient information.
+        Update personal information.
         
-        Only provided fields will be updated.
+        Args:
+            first_name: New first name
+            last_name: New last name
+            date_of_birth: New date of birth
+            gender: New gender
+            email: New email
+            phone: New phone
+            address: New address
+            
+        Raises:
+            ValidationException: If the updated information is invalid
         """
+        # Update fields if provided
         if first_name is not None:
-            self._first_name = self._encryption.encrypt(first_name)
+            self.first_name = first_name
         
         if last_name is not None:
-            self._last_name = self._encryption.encrypt(last_name)
+            self.last_name = last_name
         
-        if contact_info is not None:
-            self._contact_info = ContactInfo(
-                email=self._encryption.encrypt(contact_info.email),
-                phone=self._encryption.encrypt(contact_info.phone)
-            )
-        
-        if address is not None:
-            self._address = address
+        if date_of_birth is not None:
+            if isinstance(date_of_birth, str):
+                self.date_of_birth = date.fromisoformat(date_of_birth)
+            else:
+                self.date_of_birth = date_of_birth
         
         if gender is not None:
-            self.gender = gender
+            if isinstance(gender, str):
+                self.gender = Gender(gender)
+            else:
+                self.gender = gender
         
-        if insurance_info is not None:
-            self.insurance_info = insurance_info
+        if email is not None:
+            self.email = email
         
-        if emergency_contacts is not None:
-            self.emergency_contacts = emergency_contacts
+        if phone is not None:
+            self.phone = phone
         
-        if assessments is not None:
-            self.assessments = assessments
+        if address is not None:
+            self.address = address
         
-        if medical_history is not None:
-            self.medical_history = medical_history
+        # Update timestamp
+        self.updated_at = datetime.now()
         
-        if medication_allergies is not None:
-            self.medication_allergies = medication_allergies
-        
-        if active is not None:
-            self.active = active
+        # Validate the updated patient
+        self._validate()
     
-    def add_assessment(self, assessment: PsychiatricAssessment) -> None:
+    def update_insurance_info(
+        self,
+        insurance_info: Dict[str, Any],
+        insurance_status: Union[InsuranceStatus, str] = None
+    ) -> None:
         """
-        Add a psychiatric assessment to the patient's record
-
+        Update insurance information.
+        
         Args:
-            assessment: The psychiatric assessment to add
+            insurance_info: New insurance information
+            insurance_status: New insurance status
+            
+        Raises:
+            ValidationException: If the updated information is invalid
         """
-        self.assessments.append(assessment)
+        self.insurance_info = insurance_info
+        
+        if insurance_status is not None:
+            if isinstance(insurance_status, str):
+                self.insurance_status = InsuranceStatus(insurance_status)
+            else:
+                self.insurance_status = insurance_status
+        
+        # Update timestamp
+        self.updated_at = datetime.now()
     
-    def get_latest_assessment(self) -> Optional[PsychiatricAssessment]:
+    def add_emergency_contact(self, contact: Dict[str, Any]) -> None:
         """
-        Get the patient's most recent psychiatric assessment
-
-        Returns:
-            The most recent assessment or None if no assessments exist
-        """
-        if not self.assessments:
-            return None
-
-        return max(self.assessments, key=lambda a: a.assessment_date)
-    
-    def add_emergency_contact(self, contact: EmergencyContact) -> None:
-        """
-        Add an emergency contact for the patient
-
+        Add an emergency contact.
+        
         Args:
-            contact: The emergency contact to add
+            contact: Emergency contact information
+            
+        Raises:
+            ValidationException: If the contact is invalid
         """
+        # Validate contact
+        if not contact.get("name"):
+            raise ValidationException("Emergency contact name is required")
+        
+        if not contact.get("phone") and not contact.get("email"):
+            raise ValidationException("Emergency contact must have phone or email")
+        
+        # Add contact
         self.emergency_contacts.append(contact)
+        
+        # Update timestamp
+        self.updated_at = datetime.now()
     
-    def add_medication_allergy(self, medication: str) -> None:
+    def remove_emergency_contact(self, contact_index: int) -> None:
         """
-        Add a medication allergy to the patient's record
-
+        Remove an emergency contact.
+        
         Args:
-            medication: The medication the patient is allergic to
+            contact_index: Index of the contact to remove
+            
+        Raises:
+            IndexError: If the index is out of range
         """
-        if medication not in self.medication_allergies:
-            self.medication_allergies.append(medication)
+        if contact_index < 0 or contact_index >= len(self.emergency_contacts):
+            raise IndexError("Emergency contact index out of range")
+        
+        # Remove contact
+        self.emergency_contacts.pop(contact_index)
+        
+        # Update timestamp
+        self.updated_at = datetime.now()
     
-    def deactivate(self) -> None:
-        """Deactivate the patient (e.g., if they are no longer a client)"""
-        self.active = False
-    
-    def reactivate(self) -> None:
-        """Reactivate a previously deactivated patient"""
-        self.active = True
-    
-    def is_allergic_to(self, medication: str) -> bool:
+    def add_medical_history_item(self, item: Dict[str, Any]) -> None:
         """
-        Check if the patient is allergic to a specific medication
-
+        Add a medical history item.
+        
         Args:
-            medication: The medication to check
-
+            item: Medical history item
+            
+        Raises:
+            ValidationException: If the item is invalid
+        """
+        # Validate item
+        if not item.get("condition"):
+            raise ValidationException("Medical history condition is required")
+        
+        # Add item
+        self.medical_history.append(item)
+        
+        # Update timestamp
+        self.updated_at = datetime.now()
+    
+    def add_medication(self, medication: Dict[str, Any]) -> None:
+        """
+        Add a medication.
+        
+        Args:
+            medication: Medication information
+            
+        Raises:
+            ValidationException: If the medication is invalid
+        """
+        # Validate medication
+        if not medication.get("name"):
+            raise ValidationException("Medication name is required")
+        
+        if not medication.get("dosage"):
+            raise ValidationException("Medication dosage is required")
+        
+        # Add medication
+        self.medications.append(medication)
+        
+        # Update timestamp
+        self.updated_at = datetime.now()
+    
+    def remove_medication(self, medication_index: int) -> None:
+        """
+        Remove a medication.
+        
+        Args:
+            medication_index: Index of the medication to remove
+            
+        Raises:
+            IndexError: If the index is out of range
+        """
+        if medication_index < 0 or medication_index >= len(self.medications):
+            raise IndexError("Medication index out of range")
+        
+        # Remove medication
+        self.medications.pop(medication_index)
+        
+        # Update timestamp
+        self.updated_at = datetime.now()
+    
+    def add_allergy(self, allergy: str) -> None:
+        """
+        Add an allergy.
+        
+        Args:
+            allergy: Allergy to add
+        """
+        if allergy not in self.allergies:
+            self.allergies.append(allergy)
+            
+            # Update timestamp
+            self.updated_at = datetime.now()
+    
+    def remove_allergy(self, allergy: str) -> None:
+        """
+        Remove an allergy.
+        
+        Args:
+            allergy: Allergy to remove
+        """
+        if allergy in self.allergies:
+            self.allergies.remove(allergy)
+            
+            # Update timestamp
+            self.updated_at = datetime.now()
+    
+    def update_status(self, status: Union[PatientStatus, str]) -> None:
+        """
+        Update the patient's status.
+        
+        Args:
+            status: New status
+        """
+        if isinstance(status, str):
+            self.status = PatientStatus(status)
+        else:
+            self.status = status
+        
+        # Update timestamp
+        self.updated_at = datetime.now()
+    
+    def update_notes(self, notes: str) -> None:
+        """
+        Update the patient's notes.
+        
+        Args:
+            notes: New notes
+        """
+        self.notes = notes
+        
+        # Update timestamp
+        self.updated_at = datetime.now()
+    
+    def update_appointment_times(
+        self,
+        last_appointment: Optional[datetime] = None,
+        next_appointment: Optional[datetime] = None
+    ) -> None:
+        """
+        Update appointment times.
+        
+        Args:
+            last_appointment: Time of the last appointment
+            next_appointment: Time of the next appointment
+        """
+        if last_appointment is not None:
+            self.last_appointment = last_appointment
+        
+        if next_appointment is not None:
+            self.next_appointment = next_appointment
+        
+        # Update timestamp
+        self.updated_at = datetime.now()
+    
+    def set_preferred_provider(self, provider_id: Union[UUID, str]) -> None:
+        """
+        Set the preferred provider.
+        
+        Args:
+            provider_id: ID of the preferred provider
+        """
+        self.preferred_provider_id = provider_id
+        
+        # Update timestamp
+        self.updated_at = datetime.now()
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convert the patient to a dictionary.
+        
         Returns:
-            True if the patient is allergic, False otherwise
+            Dictionary representation of the patient
         """
-        return medication in self.medication_allergies
-    
-    def to_dict(self) -> dict:
-        """Convert patient to dictionary with masked PHI."""
         return {
             "id": str(self.id),
-            "first_name": "[REDACTED]",
-            "last_name": "[REDACTED]",
-            "date_of_birth": str(self.date_of_birth),
-            "contact_info": {
-                "email": "[REDACTED]",
-                "phone": "[REDACTED]"
-            },
-            "address": self.address.to_dict(),
-            "gender": self.gender,
-            "insurance_info": self.insurance_info,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "date_of_birth": self.date_of_birth.isoformat() if self.date_of_birth else None,
+            "gender": self.gender.value if self.gender else None,
+            "email": self.email,
+            "phone": self.phone,
+            "address": self.address,
             "emergency_contacts": self.emergency_contacts,
-            "assessments": self.assessments,
+            "insurance_info": self.insurance_info,
+            "insurance_status": self.insurance_status.value if self.insurance_status else None,
             "medical_history": self.medical_history,
-            "medication_allergies": self.medication_allergies,
-            "active": self.active
+            "medications": self.medications,
+            "allergies": self.allergies,
+            "notes": self.notes,
+            "status": self.status.value if self.status else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "last_appointment": self.last_appointment.isoformat() if self.last_appointment else None,
+            "next_appointment": self.next_appointment.isoformat() if self.next_appointment else None,
+            "preferred_provider_id": str(self.preferred_provider_id) if self.preferred_provider_id else None,
+            "metadata": self.metadata
         }
     
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'Patient':
+        """
+        Create a patient from a dictionary.
+        
+        Args:
+            data: Dictionary representation of a patient
+            
+        Returns:
+            Patient instance
+        """
+        # Convert ISO format strings to datetime objects
+        for field in ["created_at", "updated_at", "last_appointment", "next_appointment"]:
+            if data.get(field):
+                data[field] = datetime.fromisoformat(data[field])
+        
+        return cls(**data)
+    
+    def __eq__(self, other: object) -> bool:
+        """
+        Check if two patients are equal.
+        
+        Args:
+            other: Other object to compare with
+            
+        Returns:
+            True if equal, False otherwise
+        """
+        if not isinstance(other, Patient):
+            return False
+        
+        return str(self.id) == str(other.id)
+    
+    def __hash__(self) -> int:
+        """
+        Get the hash of the patient.
+        
+        Returns:
+            Hash value
+        """
+        return hash(str(self.id))
+    
     def __str__(self) -> str:
-        """Get string representation with masked PHI."""
-        return f"Patient(id={self.id}, name=[REDACTED], dob=[REDACTED])"
+        """
+        Get a string representation of the patient.
+        
+        Returns:
+            String representation
+        """
+        return f"Patient(id={self.id}, name={self.first_name} {self.last_name})"

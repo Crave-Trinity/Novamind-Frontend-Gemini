@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Patient repository interface for the NOVAMIND backend.
+Patient Repository Interface
 
-This module defines the interface for patient data access operations.
-Following the Dependency Inversion Principle, the domain layer depends on
-this abstraction rather than concrete implementations.
+This module defines the interface for patient repositories.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Union, Dict, Any
 from uuid import UUID
 
 from app.domain.entities.patient import Patient
@@ -16,140 +14,181 @@ from app.domain.entities.patient import Patient
 
 class PatientRepository(ABC):
     """
-    Repository interface for Patient entity operations.
-
-    This abstract class defines the contract that any patient repository
-    implementation must fulfill, ensuring the domain layer remains
-    independent of data access technologies.
+    Interface for patient repositories.
+    
+    This abstract class defines the contract that all patient repositories
+    must implement, ensuring consistent access to patient data regardless
+    of the underlying storage mechanism.
     """
-
+    
     @abstractmethod
-    async def create(self, patient: Patient) -> Patient:
+    def get_by_id(self, patient_id: Union[UUID, str]) -> Optional[Patient]:
         """
-        Create a new patient record
-
+        Get a patient by ID.
+        
         Args:
-            patient: The patient entity to create
-
+            patient_id: ID of the patient
+            
         Returns:
-            The created patient with any system-generated fields populated
-
-        Raises:
-            RepositoryError: If there's an error during creation
+            Patient if found, None otherwise
         """
         pass
-
+    
     @abstractmethod
-    async def get_by_id(self, patient_id: UUID) -> Optional[Patient]:
+    def get_by_email(self, email: str) -> Optional[Patient]:
         """
-        Retrieve a patient by ID
-
+        Get a patient by email.
+        
         Args:
-            patient_id: The UUID of the patient to retrieve
-
+            email: Email of the patient
+            
         Returns:
-            The patient entity if found, None otherwise
-
-        Raises:
-            RepositoryError: If there's an error during retrieval
+            Patient if found, None otherwise
         """
         pass
-
+    
     @abstractmethod
-    async def update(self, patient: Patient) -> Patient:
+    def get_by_phone(self, phone: str) -> Optional[Patient]:
         """
-        Update an existing patient record
-
+        Get a patient by phone number.
+        
         Args:
-            patient: The patient entity with updated fields
-
+            phone: Phone number of the patient
+            
         Returns:
-            The updated patient entity
-
-        Raises:
-            RepositoryError: If there's an error during update
-            EntityNotFoundError: If the patient doesn't exist
+            Patient if found, None otherwise
         """
         pass
-
+    
     @abstractmethod
-    async def delete(self, patient_id: UUID) -> bool:
+    def save(self, patient: Patient) -> Patient:
         """
-        Delete a patient record
-
+        Save a patient.
+        
         Args:
-            patient_id: The UUID of the patient to delete
-
+            patient: Patient to save
+            
         Returns:
-            True if the patient was deleted, False otherwise
-
-        Raises:
-            RepositoryError: If there's an error during deletion
+            Saved patient
         """
         pass
-
+    
     @abstractmethod
-    async def list_all(self, limit: int = 100, offset: int = 0) -> List[Patient]:
+    def delete(self, patient_id: Union[UUID, str]) -> bool:
         """
-        List all patients with pagination
-
+        Delete a patient.
+        
         Args:
-            limit: Maximum number of patients to return
-            offset: Number of patients to skip
-
+            patient_id: ID of the patient to delete
+            
         Returns:
-            List of patient entities
-
-        Raises:
-            RepositoryError: If there's an error during retrieval
+            True if deleted, False otherwise
         """
         pass
-
+    
     @abstractmethod
-    async def search(
-        self, query: str, limit: int = 100, offset: int = 0
+    def search(
+        self,
+        query: str,
+        limit: int = 10,
+        offset: int = 0
     ) -> List[Patient]:
         """
-        Search for patients by name, email, or phone
-
+        Search for patients.
+        
         Args:
-            query: The search query
-            limit: Maximum number of patients to return
-            offset: Number of patients to skip
-
+            query: Search query
+            limit: Maximum number of results
+            offset: Offset for pagination
+            
         Returns:
-            List of matching patient entities
-
-        Raises:
-            RepositoryError: If there's an error during search
+            List of matching patients
         """
         pass
-
+    
     @abstractmethod
-    async def get_by_email(self, email: str) -> Optional[Patient]:
+    def get_all(
+        self,
+        limit: int = 100,
+        offset: int = 0,
+        sort_by: str = "last_name",
+        sort_order: str = "asc"
+    ) -> List[Patient]:
         """
-        Retrieve a patient by email address
-
+        Get all patients with pagination.
+        
         Args:
-            email: The email address to search for
-
+            limit: Maximum number of results
+            offset: Offset for pagination
+            sort_by: Field to sort by
+            sort_order: Sort order (asc or desc)
+            
         Returns:
-            The patient entity if found, None otherwise
-
-        Raises:
-            RepositoryError: If there's an error during retrieval
+            List of patients
         """
         pass
-
+    
     @abstractmethod
-    async def count_all(self) -> int:
+    def count(self) -> int:
         """
-        Count all patients in the repository
-
+        Count all patients.
+        
         Returns:
-            The total number of patients
-
-        Raises:
-            RepositoryError: If there's an error during counting
+            Number of patients
+        """
+        pass
+    
+    @abstractmethod
+    def exists(self, patient_id: Union[UUID, str]) -> bool:
+        """
+        Check if a patient exists.
+        
+        Args:
+            patient_id: ID of the patient
+            
+        Returns:
+            True if exists, False otherwise
+        """
+        pass
+    
+    @abstractmethod
+    def exists_by_email(self, email: str) -> bool:
+        """
+        Check if a patient exists by email.
+        
+        Args:
+            email: Email of the patient
+            
+        Returns:
+            True if exists, False otherwise
+        """
+        pass
+    
+    @abstractmethod
+    def exists_by_phone(self, phone: str) -> bool:
+        """
+        Check if a patient exists by phone number.
+        
+        Args:
+            phone: Phone number of the patient
+            
+        Returns:
+            True if exists, False otherwise
+        """
+        pass
+    
+    @abstractmethod
+    def get_patients_with_upcoming_appointments(
+        self,
+        days: int = 7
+    ) -> List[Patient]:
+        """
+        Get patients with upcoming appointments.
+        
+        Args:
+            days: Number of days to look ahead
+            
+        Returns:
+            List of patients with upcoming appointments
         """
         pass
