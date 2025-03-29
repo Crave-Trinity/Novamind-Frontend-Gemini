@@ -1,11 +1,13 @@
 # Novamind Digital Twin: HIPAA Compliance in Frontend
 
 ## Overview
+
 This document outlines the HIPAA compliance implementation for the Novamind Digital Twin frontend. As a premium concierge psychiatry platform handling electronic protected health information (ePHI), maintaining HIPAA compliance is not just a legal requirement but a core aspect of our luxury patient experience and clinical excellence.
 
 ## HIPAA Compliance Framework
 
 ### Key Requirements Addressed
+
 1. **Privacy Rule**: Protecting PHI with proper controls
 2. **Security Rule**: Technical safeguards for data
 3. **Breach Notification**: Detection and reporting mechanisms
@@ -17,6 +19,7 @@ This document outlines the HIPAA compliance implementation for the Novamind Digi
 ### Authentication & Authorization
 
 #### Secure Authentication Flow
+
 ```typescript
 // In application/contexts/AuthContext.tsx
 export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -53,6 +56,7 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
 ```
 
 #### Role-Based Access Control
+
 ```typescript
 // In presentation/templates/AuthRoute.tsx
 export const AuthRoute: React.FC<AuthRouteProps> = ({ 
@@ -97,6 +101,7 @@ export const AuthRoute: React.FC<AuthRouteProps> = ({
 ### Secure Data Management
 
 #### PHI Sanitization
+
 ```typescript
 // In utils/hipaaUtils.ts
 export function sanitizePatientData(data: any): any {
@@ -136,6 +141,7 @@ export function sanitizePatientData(data: any): any {
 ```
 
 #### Secure Data Transmission
+
 ```typescript
 // In infrastructure/api/ApiClient.ts
 export class ApiClient {
@@ -229,6 +235,9 @@ export class ApiClient {
     });
   }
 }
+
+// Create singleton instance
+export const apiClient = new ApiClient();
 ```
 
 ### Auto-Logout & Session Management
@@ -292,7 +301,8 @@ export function useInactivityTimeout(timeoutMs: number = 30 * 60 * 1000) {
 ### Secure Component Rendering
 
 #### PHI-Safe Error Boundaries
-```tsx
+
+```typescript
 // In presentation/templates/HIPAAErrorBoundary.tsx
 export class HIPAAErrorBoundary extends React.Component<
   PropsWithChildren<{}>,
@@ -352,7 +362,8 @@ export class HIPAAErrorBoundary extends React.Component<
 ```
 
 #### Secure Rendering for Clinical Data
-```tsx
+
+```typescript
 // In presentation/molecules/ClinicalMetricsCard.tsx
 export const ClinicalMetricsCard: React.FC<ClinicalMetricsCardProps> = ({
   patientId,
@@ -419,7 +430,7 @@ export const ClinicalMetricsCard: React.FC<ClinicalMetricsCardProps> = ({
 
 ### Secure Navigation & URL Management
 
-```tsx
+```typescript
 // In routes/AppRoutes.tsx
 export const AppRoutes: React.FC = () => {
   return (
@@ -473,6 +484,7 @@ export const AppRoutes: React.FC = () => {
 ## Audit Logging & Compliance Monitoring
 
 ### HIPAA Audit Logger
+
 ```typescript
 // In infrastructure/services/AuditLogService.ts
 export class AuditLogService {
@@ -536,6 +548,7 @@ export const auditLogService = new AuditLogService();
 ```
 
 ### Audit Hook for Component-Level Tracking
+
 ```typescript
 // In application/hooks/useAuditLog.ts
 export function useAuditLog() {
@@ -571,6 +584,7 @@ useEffect(() => {
 ## Secure Storage Practices
 
 ### No PHI in Browser Storage
+
 ```typescript
 // In utils/storageUtils.ts
 export const secureStorage = {
@@ -636,7 +650,8 @@ function containsPHI(value: string): boolean {
 ## Form Security
 
 ### Secure Form Handling
-```tsx
+
+```typescript
 // In presentation/organisms/SecureForm.tsx
 export const SecureForm: React.FC<SecureFormProps> = ({
   onSubmit,
@@ -713,7 +728,8 @@ function sanitizeString(value: string): string {
 ## Digital Twin Visualization HIPAA Compliance
 
 ### Secure Brain Visualization
-```tsx
+
+```typescript
 // In presentation/organisms/BrainVisualization.tsx
 export const BrainVisualization: React.FC<BrainVisualizationProps> = ({
   patientId,
@@ -770,6 +786,7 @@ useEffect(() => {
 ## Deployment & Runtime HIPAA Considerations
 
 ### Content Security Policy
+
 ```typescript
 // In config/csp.ts
 export const contentSecurityPolicy = {
@@ -794,6 +811,7 @@ export const contentSecurityPolicy = {
 ```
 
 ### Runtime Safeguards
+
 ```typescript
 // In main.tsx
 // Set up runtime safeguards before rendering
@@ -898,6 +916,7 @@ function isPotentialPHI(text: string): boolean {
 ## Testing for HIPAA Compliance
 
 ### HIPAA Compliance Testing
+
 ```typescript
 // In tests/hipaa/HIPAACompliance.test.tsx
 describe('HIPAA Compliance', () => {

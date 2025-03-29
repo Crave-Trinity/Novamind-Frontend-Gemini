@@ -13,7 +13,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.routes import actigraphy, auth, patients, appointments, digital_twin
+from app.api.routes import actigraphy, auth, patients, appointments, digital_twin, xgboost
 from app.core.config import settings
 from app.core.exceptions import (
     InvalidConfigurationError,
@@ -101,6 +101,7 @@ app.include_router(patients.router, prefix="/api")
 app.include_router(appointments.router, prefix="/api")
 app.include_router(digital_twin.router, prefix="/api")
 app.include_router(actigraphy.router, prefix="/api")  # Add actigraphy routes
+app.include_router(xgboost.router)  # XGBoost ML service routes (prefix included in router)
 
 
 @app.get("/api/health", tags=["health"])
