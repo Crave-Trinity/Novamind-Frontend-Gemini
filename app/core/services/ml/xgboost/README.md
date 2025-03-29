@@ -1,251 +1,219 @@
 # XGBoost Service Module
 
-A HIPAA-compliant machine learning service for psychiatric predictions built for the Novamind Digital Twin platform.
-
-## Overview
-
-The XGBoost service provides psychiatric risk assessment, treatment outcome prediction, and digital twin integration using AWS SageMaker-hosted XGBoost models. This service is designed with an emphasis on both clinical excellence and robust security to meet the high standards of concierge psychiatry and HIPAA compliance.
+This module provides a comprehensive solution for machine learning capabilities in the Concierge Psychiatry Platform using XGBoost models. It is designed to support psychiatric risk assessment, treatment response prediction, and clinical outcome forecasting.
 
 ## Architecture
 
-This module is built following **Clean Architecture** principles with strict HIPAA compliance guardrails:
+The XGBoost service follows Clean Architecture principles and incorporates both the Strategy and Observer design patterns:
 
-- **Domain Layer**: The core interface (`XGBoostInterface`) defines the contract without implementation details
-- **Implementation Layer**: Concrete implementations (`AWSXGBoostService`, `MockXGBoostService`) provide specific functionality
-- **Factory Pattern**: Service creation is handled through factory functions for easy dependency injection
+- **Strategy Pattern**: Multiple implementations of the same interface (AWS, Mock)
+- **Observer Pattern**: Notification system for events like predictions and errors
+- **Factory Pattern**: Creation of service instances based on configuration
 
-### Design Patterns
+### Components
 
-- **Strategy Pattern**: Different service implementations can be swapped out without changing client code
-- **Observer Pattern**: Events from the service can be observed by other components for notifications and logging
-- **Factory Pattern**: Creation logic encapsulated in factory functions
+- `interface.py`: Abstract interface and type definitions
+- `exceptions.py`: Domain-specific exception hierarchy
+- `factory.py`: Factory functions for creating service instances
+- `aws.py`: AWS SageMaker implementation
+- `mock.py`: Mock implementation for testing/development
+- `__init__.py`: Module exports and configuration helpers
 
 ## Features
 
-- **Risk Prediction**: Predict psychiatric risk for relapse, suicide, hospitalization
-- **Treatment Response**: Predict response to different treatment options (medication, therapy)
-- **Outcome Prediction**: Project clinical outcomes based on treatment plans and patient factors
-- **Feature Importance**: Analyze what factors contribute most to predictions
-- **Digital Twin Integration**: Connect predictions with digital twin profiles
-- **Model Information**: Access metadata about available models
+- **Risk Prediction**: Predict relapse, suicide, or hospitalization risk
+- **Treatment Response**: Predict response to medications or therapy
+- **Outcome Prediction**: Forecast symptom, functional, or quality of life outcomes
+- **Feature Importance**: Explain which factors influenced predictions
+- **Digital Twin Integration**: Integrate predictions with neurological digital twin models
+- **Model Information**: Retrieve model metadata, performance metrics, and features
 
 ## HIPAA Compliance
 
-This service includes robust HIPAA compliance features:
+The module implements several HIPAA safeguards:
 
-- **PHI Detection**: Automatic scanning of input data to prevent PHI transmission
-- **Data Minimization**: Only essential data is processed and stored
-- **Audit Logging**: Observer pattern enables compliant audit logging
-- **Error Sanitization**: Errors are sanitized to prevent PHI leakage
-- **Secure AWS Integration**: Uses HIPAA-eligible AWS services
+- PHI detection to prevent sensitive data in requests
+- Anonymized logging without PHI
+- Configurable privacy levels
+- Token-based authentication requirements
+- Role-based access control
 
-## Usage
+## Usage Examples
 
-### Basic Usage
+### Creating and Initializing the Service
 
 ```python
-from app.core.services.ml.xgboost import create_xgboost_service_from_env
+from app.core.services.ml.xgboost import create_xgboost_service, get_xgboost_service
 
-# Create service from environment variables
-service = create_xgboost_service_from_env()
+# Create from environment variables (recommended for production)
+service = get_xgboost_service()
 
-# Predict risk
-risk_prediction = service.predict_risk(
-    patient_id="patient-123",
+# Or create with explicit configuration
+service = create_xgboost_service("aws")
+service.initialize({
+    "region_name": "us-east-1",
+    "endpoint_prefix": "xgboost-prod",
+    "bucket_name": "novamind-ml-models",
+    "privacy_level": PrivacyLevel.ENHANCED
+})
+```
+
+### Predicting Risk
+
+```python
+result = service.predict_risk(
+    patient_id="P12345",
     risk_type="relapse",
     clinical_data={
-        "symptom_severity": "moderate",
-        "treatment_adherence": "good",
+        "symptom_severity": 7,
+        "medication_adherence": 0.8,
+        "previous_episodes": 2,
+        "social_support": 5,
+        "stress_level": 6
+    },
+    time_frame_days=30
+)
+
+print(f"Risk level: {result['risk_level']}")
+print(f"Prediction score: {result['prediction_score']}")
+print(f"Confidence: {result['confidence']}")
+```
+
+### Predicting Treatment Response
+
+```python
+result = service.predict_treatment_response(
+    patient_id="P12345",
+    treatment_type="medication_ssri",
+    treatment_details={
+        "medication": "Fluoxetine",
+        "dosage": "20mg",
+        "frequency": "daily",
+        "duration_weeks": 8
+    },
+    clinical_data={
+        "symptom_severity": 7,
+        "medication_adherence": 0.8,
         "previous_episodes": 2
     }
 )
 
-# Predict treatment response
-treatment_prediction = service.predict_treatment_response(
-    patient_id="patient-123",
-    treatment_type="ssri",
-    treatment_details={
-        "medication": "fluoxetine",
-        "dosage": "20mg"
-    },
-    clinical_data={
-        "depression_severity": "moderate",
-        "previous_ssri_response": "good"
-    }
-)
+print(f"Response probability: {result['response_probability']}")
+print(f"Expected time to response: {result['time_to_response_weeks']} weeks")
 ```
 
 ### Using the Observer Pattern
 
 ```python
-from app.core.services.ml.xgboost import (
-    create_xgboost_service,
-    EventType
-)
+class PredictionLogger(Observer):
+    def update(self, event_type: EventType, data: Dict[str, Any]) -> None:
+        if event_type == EventType.PREDICTION:
+            print(f"New prediction: {data['prediction_type']} for {data['patient_id']}")
 
-# Create an observer
-class PredictionLogger:
-    def update(self, event_type, data):
-        print(f"Event: {event_type}, Data: {data}")
+# Register the observer
+observer = PredictionLogger()
+service.register_observer(EventType.PREDICTION, observer)
 
-# Create service
-service = create_xgboost_service("aws", {
-    "region_name": "us-east-1"
-})
-
-# Register observer
-logger = PredictionLogger()
-service.register_observer(EventType.RISK_PREDICTION, logger)
-service.register_observer(EventType.SERVICE_ERROR, logger)
-
-# Use service as normal
-prediction = service.predict_risk(...)
-# Observer will be notified automatically
+# Make predictions as usual - observer will be notified
 ```
 
-## Configuration
-
-The service can be configured with the following options:
+## Configuration Options
 
 ### Environment Variables
 
-Set these environment variables to configure the service when using `create_xgboost_service_from_env()`:
+The service can be configured using environment variables:
 
-- `XGBOOST_SERVICE_TYPE`: Service implementation (`aws` or `mock`)
-- `XGBOOST_AWS_REGION`: AWS region for services
-- `XGBOOST_PRIVACY_LEVEL`: Privacy level (1=Standard, 2=Enhanced, 3=Maximum)
+- `XGBOOST_IMPLEMENTATION`: Service implementation to use (aws, mock)
 - `XGBOOST_LOG_LEVEL`: Logging level (DEBUG, INFO, WARNING, ERROR)
-- `XGBOOST_DYNAMODB_TABLE`: DynamoDB table for prediction storage
-- `XGBOOST_DIGITAL_TWIN_FUNCTION`: Lambda function for digital twin integration
-- `XGBOOST_MODEL_ENDPOINTS_*`: SageMaker endpoint mappings for models
+- `XGBOOST_PRIVACY_LEVEL`: PHI detection level (STANDARD, ENHANCED, MAXIMUM)
 
-### Direct Configuration
+AWS-specific settings:
+- `XGBOOST_AWS_REGION`: AWS region
+- `XGBOOST_AWS_ENDPOINT_PREFIX`: Prefix for SageMaker endpoints
+- `XGBOOST_AWS_BUCKET`: S3 bucket name
+- `XGBOOST_AWS_MODEL_*`: Model type to SageMaker model name mappings
 
-You can also configure the service directly:
+Mock-specific settings:
+- `XGBOOST_MOCK_DELAY_MS`: Delay in milliseconds to simulate network latency
+
+### Programmatic Configuration
+
+When initializing the service directly:
 
 ```python
-from app.core.services.ml.xgboost import (
-    create_xgboost_service,
-    PrivacyLevel
-)
-
-service = create_xgboost_service("aws", {
-    "region_name": "us-east-1",
-    "privacy_level": PrivacyLevel.ENHANCED,
+config = {
     "log_level": "INFO",
-    "model_endpoints": {
-        "relapse-risk": "xgboost-relapse-endpoint",
-        "suicide-risk": "xgboost-suicide-endpoint"
-    },
-    "predictions_table": "xgboost-predictions",
-    "digital_twin_function": "xgboost-digital-twin-lambda"
-})
-```
+    "privacy_level": PrivacyLevel.STANDARD,
+    
+    # AWS-specific configuration
+    "region_name": "us-east-1",
+    "endpoint_prefix": "xgboost-prod",
+    "bucket_name": "novamind-ml-models",
+    "model_mappings": {
+        "risk-relapse": "relapse-risk-model-v2",
+        "risk-suicide": "suicide-risk-model-v1",
+        # ... other model mappings
+    }
+}
 
-## Module Structure
-
-```
-app/core/services/ml/xgboost/
-├── __init__.py           # Public exports and module initialization
-├── interface.py          # Abstract interface and constants
-├── exceptions.py         # Domain-specific exceptions
-├── factory.py            # Factory pattern implementation
-├── aws.py                # AWS SageMaker implementation
-├── mock.py               # Mock implementation for testing
-└── README.md             # This documentation
+service.initialize(config)
 ```
 
 ## Error Handling
 
-The service uses domain-specific exceptions that should be handled by clients:
+The service uses a comprehensive hierarchy of domain-specific exceptions:
+
+- `XGBoostServiceError`: Base exception class
+  - `ValidationError`: Invalid parameters
+  - `DataPrivacyError`: PHI detected in data
+  - `ResourceNotFoundError`: Resource not found
+    - `ModelNotFoundError`: Model not found
+  - `PredictionError`: Error during prediction
+  - `ServiceConnectionError`: Error connecting to service
+  - `ConfigurationError`: Invalid configuration
+
+Example error handling:
 
 ```python
-from app.core.services.ml.xgboost import (
-    XGBoostServiceError,
-    ValidationError,
-    DataPrivacyError
-)
-
 try:
-    prediction = service.predict_risk(...)
+    result = service.predict_risk(...)
 except ValidationError as e:
-    # Handle validation errors (e.g., missing required fields)
-    print(f"Validation error: {e}")
+    print(f"Invalid parameters: {e}")
 except DataPrivacyError as e:
-    # Handle PHI detection
-    print(f"Privacy error: {e}")
+    print(f"PHI detected: {e.pattern_types}")
+except ModelNotFoundError as e:
+    print(f"Model not found: {e.model_type}")
+except ServiceConnectionError as e:
+    print(f"Service connection error: {e.service} - {e.error_type}")
 except XGBoostServiceError as e:
-    # Base class for all service errors
-    print(f"Service error: {e}")
+    print(f"General error: {e}")
 ```
 
 ## Testing
 
-The service includes comprehensive unit tests. To run the tests:
+The service includes comprehensive testing utilities:
 
-```bash
-# Unit tests for the service implementation
-pytest tests/unit/app/core/services/ml/xgboost/test_aws.py
+- `MockXGBoostService`: Full mock implementation for testing
+- Unit tests for all components
+- Integration tests using AWS SDK mocks
 
-# Unit tests for API endpoints
-pytest tests/unit/app/api/routes/test_xgboost_routes.py
-```
+## Integration with FastAPI
 
-When writing tests that use the XGBoost service, you should:
-
-1. Use the mock implementation for unit tests
-2. Mock AWS dependencies when testing the AWS implementation
-3. Test error conditions and edge cases
-4. Ensure no PHI is used in test data
-
-Example test setup:
+The service is designed to be easily integrated with FastAPI endpoints using dependency injection:
 
 ```python
-import pytest
-from app.core.services.ml.xgboost import create_xgboost_service
+from fastapi import Depends
+from app.core.services.ml.xgboost import XGBoostInterface, get_xgboost_service
 
-@pytest.fixture
-def xgboost_service():
-    """Test fixture providing a mock XGBoost service."""
-    return create_xgboost_service("mock", {})
-
-def test_predict_risk(xgboost_service):
-    """Test risk prediction."""
+@router.post("/risk/{risk_type}")
+async def predict_risk(
+    risk_type: str,
+    request: RiskPredictionRequest,
+    xgboost_service: XGBoostInterface = Depends(get_xgboost_service)
+):
     result = xgboost_service.predict_risk(
-        patient_id="test-123",
-        risk_type="relapse",
-        clinical_data={
-            "symptom_severity": "moderate", 
-            "treatment_adherence": "good"
-        }
+        patient_id=request.patient_id,
+        risk_type=risk_type,
+        clinical_data=request.clinical_data
     )
-    
-    assert "prediction_id" in result
-    assert "risk_level" in result
-    assert "risk_score" in result
-```
-
-## API Integration
-
-The service is exposed through FastAPI endpoints in `app/api/routes/xgboost.py`, with Pydantic schemas in `app/api/schemas/xgboost.py`. These endpoints provide a RESTful interface for the service functionality.
-
-## HIPAA Security Features
-
-The service implements several security features to ensure HIPAA compliance:
-
-1. **PHI Detection**: Automatic scanning of input data for PHI patterns
-2. **Privacy Levels**: Configurable privacy levels for different environments
-3. **Secure AWS Integration**: Uses HIPAA-eligible AWS services
-4. **Data Minimization**: Only necessary data is collected and processed
-5. **Audit Logging**: Observer pattern enables comprehensive audit logging
-
-## Contributing
-
-When contributing to this module:
-
-1. Follow the existing architecture and design patterns
-2. Ensure HIPAA compliance in all changes
-3. Write comprehensive unit tests
-4. Document all public APIs
-5. Keep methods under 15 lines
-6. Use domain-specific exceptions
+    return RiskPredictionResponse(**result)

@@ -1,20 +1,20 @@
 """
 AWS implementation of the XGBoost service interface.
 
-This module provides an implementation of the XGBoost service
-that uses AWS SageMaker for model inference, DynamoDB for storage,
-and Lambda for digital twin integration.
+This module provides an AWS-based implementation of the XGBoost service
+that uses SageMaker for model hosting and prediction with comprehensive
+HIPAA compliance and security considerations.
 """
 
 import json
 import logging
-import time
+import os
 import re
-from typing import Dict, List, Any, Optional, Set, Union
+import time
 from datetime import datetime
-
+from typing import Dict, List, Any, Optional, Set, Union
 import boto3
-from botocore.exceptions import ClientError
+import botocore.exceptions
 
 from app.core.services.ml.xgboost.interface import (
     XGBoostInterface,
@@ -35,29 +35,35 @@ from app.core.services.ml.xgboost.exceptions import (
 
 
 class AWSXGBoostService(XGBoostInterface):
-    """AWS implementation of the XGBoost service interface."""
+    """
+    AWS implementation of the XGBoost service interface using SageMaker.
     
+    This class provides a secure, HIPAA-compliant implementation of the XGBoost
+    service using AWS SageMaker for model hosting and prediction. It includes
+    robust error handling, PHI detection, and follows the Observer pattern for
+    event notifications.
+    """
+
     def __init__(self):
         """Initialize a new AWS XGBoost service."""
         super().__init__()
         
         # AWS clients
         self._sagemaker_runtime = None
+        self._sagemaker = None
+        self._s3 = None
         self._dynamodb = None
-        self._lambda_client = None
         
         # Configuration
-        self._model_endpoints = {}
-        self._predictions_table = None
-        self._digital_twin_function = None
         self._region_name = None
+        self._endpoint_prefix = None
+        self._bucket_name = None
+        self._model_mappings = {}
         self._privacy_level = PrivacyLevel.STANDARD
+        self._audit_table_name = None
         
-        # PHI patterns for different privacy levels
-        self._phi_patterns = self._initialize_phi_patterns()
-        
-        # Observers for event notifications
-        self._observers = {}
+        # Observer pattern support
+        self._observers: Dict[Union[EventType, str], Set[Observer]] = {}
         
         # Logger
         self._logger = logging.getLogger(__name__)
@@ -67,10 +73,10 @@ class AWSXGBoostService(XGBoostInterface):
         Initialize the AWS XGBoost service with configuration.
         
         Args:
-            config: Configuration dictionary
+            config: Configuration dictionary containing AWS settings
             
         Raises:
-            ConfigurationError: If configuration is invalid
+            ConfigurationError: If configuration is invalid or AWS clients cannot be created
         """
         try:
             # Configure logging
@@ -85,8 +91,8 @@ class AWSXGBoostService(XGBoostInterface):
             
             self._logger.setLevel(numeric_level)
             
-            # Set region
-            self._region_name = config.get("region_name", "us-east-1")
+            # Extract required configuration
+            self._validate_aws_config(config)
             
             # Set privacy level
             privacy_level = config.get("privacy_level", PrivacyLevel.STANDARD)
@@ -98,27 +104,8 @@ class AWSXGBoostService(XGBoostInterface):
                 )
             self._privacy_level = privacy_level
             
-            # Set model endpoints
-            self._model_endpoints = config.get("model_endpoints", {})
-            
-            # Set predictions table name
-            self._predictions_table = config.get("predictions_table")
-            
-            # Set digital twin function name
-            self._digital_twin_function = config.get("digital_twin_function")
-            
             # Initialize AWS clients
             self._initialize_aws_clients()
-            
-            # Check if DynamoDB table exists if table name is provided
-            if self._predictions_table and self._dynamodb:
-                try:
-                    table = self._dynamodb.Table(self._predictions_table)
-                    table.table_status  # This will raise an exception if the table doesn't exist
-                except ClientError as e:
-                    error_code = e.response.get("Error", {}).get("Code")
-                    if error_code == "ResourceNotFoundException":
-                        self._logger.warning(f"DynamoDB table {self._predictions_table} not found")
             
             # Mark as initialized
             self._initialized = True
@@ -127,15 +114,30 @@ class AWSXGBoostService(XGBoostInterface):
             self._notify_observers(EventType.INITIALIZATION, {"status": "initialized"})
             
             self._logger.info("AWS XGBoost service initialized successfully")
+        
+        except botocore.exceptions.ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_message = e.response.get("Error", {}).get("Message", str(e))
+            
+            self._logger.error(f"AWS client error during initialization: {error_code} - {error_message}")
+            
+            raise ServiceConnectionError(
+                f"Failed to connect to AWS services: {error_message}",
+                service="AWS",
+                error_type=error_code,
+                details=str(e)
+            ) from e
+        
         except Exception as e:
             self._logger.error(f"Failed to initialize AWS XGBoost service: {e}")
-            if isinstance(e, ConfigurationError):
+            
+            if isinstance(e, (ConfigurationError, ServiceConnectionError)):
                 raise
             else:
                 raise ConfigurationError(
                     f"Failed to initialize AWS XGBoost service: {str(e)}",
                     details=str(e)
-                )
+                ) from e
     
     def register_observer(self, event_type: Union[EventType, str], observer: Observer) -> None:
         """
@@ -188,62 +190,69 @@ class AWSXGBoostService(XGBoostInterface):
         Raises:
             ValidationError: If parameters are invalid
             DataPrivacyError: If PHI is detected in data
+            ModelNotFoundError: If the model is not found
+            ServiceConnectionError: If there's an AWS service error
             PredictionError: If prediction fails
-            ServiceConnectionError: If connection to SageMaker fails
         """
         self._ensure_initialized()
         
         # Validate parameters
-        self._validate_risk_type(risk_type)
+        self._validate_prediction_params(risk_type, patient_id, clinical_data)
         
-        # Check for PHI in data
-        self._check_phi_in_data(clinical_data)
-        
-        # Prepare request data
-        model_type = f"{risk_type}-risk"
-        time_frame_days = kwargs.get("time_frame_days", 30)
-        
-        request_data = {
+        # Add additional parameters to input data
+        input_data = {
             "patient_id": patient_id,
-            "risk_type": risk_type,
-            "time_frame_days": time_frame_days,
-            "clinical_data": clinical_data
+            "clinical_data": clinical_data,
+            "time_frame_days": kwargs.get("time_frame_days", 30)
         }
         
-        # Invoke SageMaker endpoint
         try:
-            self._logger.info(f"Predicting {risk_type} risk for patient {self._anonymize_id(patient_id)}")
-            result = self._invoke_sagemaker_endpoint(model_type, request_data)
+            # Get endpoint name for this risk type
+            endpoint_name = self._get_endpoint_name(f"risk-{risk_type}")
             
-            # Store prediction in DynamoDB
-            if self._predictions_table:
-                self._store_prediction(result, model_type)
+            # Invoke SageMaker endpoint for prediction
+            result = self._invoke_endpoint(endpoint_name, input_data)
+            
+            # Add predictionId and timestamp if not provided
+            if "prediction_id" not in result:
+                result["prediction_id"] = f"risk-{int(time.time())}-{patient_id[:8]}"
+            
+            if "timestamp" not in result:
+                result["timestamp"] = datetime.now().isoformat()
             
             # Notify observers
             self._notify_observers(EventType.PREDICTION, {
                 "prediction_type": "risk",
                 "risk_type": risk_type,
                 "patient_id": patient_id,
-                "prediction_id": result.get("prediction_id")
+                "prediction_id": result["prediction_id"]
             })
             
             return result
+        
+        except botocore.exceptions.ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_message = e.response.get("Error", {}).get("Message", str(e))
             
-        except (ClientError, ConnectionError, json.JSONDecodeError) as e:
-            if isinstance(e, ClientError):
-                aws_error = self._handle_aws_error(e, "predict_risk")
-                raise aws_error
-            elif isinstance(e, json.JSONDecodeError):
+            self._logger.error(f"AWS client error during risk prediction: {error_code} - {error_message}")
+            
+            if error_code == "ModelError":
                 raise PredictionError(
-                    f"Failed to decode prediction result: {str(e)}",
-                    model_type=model_type
-                )
+                    f"Model prediction failed: {error_message}",
+                    model_type=f"risk-{risk_type}"
+                ) from e
+            elif error_code == "ValidationError":
+                raise ValidationError(
+                    f"Invalid prediction parameters: {error_message}",
+                    details=str(e)
+                ) from e
             else:
                 raise ServiceConnectionError(
-                    f"Failed to connect to SageMaker: {str(e)}",
+                    f"Failed to connect to AWS services: {error_message}",
                     service="SageMaker",
-                    error_type=type(e).__name__
-                )
+                    error_type=error_code,
+                    details=str(e)
+                ) from e
     
     def predict_treatment_response(
         self,
@@ -258,7 +267,7 @@ class AWSXGBoostService(XGBoostInterface):
         
         Args:
             patient_id: Patient identifier
-            treatment_type: Type of treatment (e.g., medication_ssri)
+            treatment_type: Type of treatment
             treatment_details: Treatment details
             clinical_data: Clinical data for prediction
             **kwargs: Additional prediction parameters
@@ -269,66 +278,70 @@ class AWSXGBoostService(XGBoostInterface):
         Raises:
             ValidationError: If parameters are invalid
             DataPrivacyError: If PHI is detected in data
+            ModelNotFoundError: If the model is not found
+            ServiceConnectionError: If there's an AWS service error
             PredictionError: If prediction fails
-            ServiceConnectionError: If connection to SageMaker fails
         """
         self._ensure_initialized()
         
         # Validate parameters
-        self._validate_treatment_type(treatment_type, treatment_details)
+        self._validate_prediction_params(treatment_type, patient_id, clinical_data)
         
-        # Check for PHI in data
-        self._check_phi_in_data(clinical_data)
-        self._check_phi_in_data(treatment_details)
-        
-        # Prepare request data
-        model_type = f"{treatment_type}-response"
-        
-        request_data = {
+        # Add additional parameters to input data
+        input_data = {
             "patient_id": patient_id,
-            "treatment_type": treatment_type,
+            "clinical_data": clinical_data,
             "treatment_details": treatment_details,
-            "clinical_data": clinical_data
+            "prediction_horizon": kwargs.get("prediction_horizon", "8_weeks")
         }
         
-        # Add optional parameters
-        if "prediction_horizon" in kwargs:
-            request_data["prediction_horizon"] = kwargs["prediction_horizon"]
-        
-        # Invoke SageMaker endpoint
         try:
-            self._logger.info(f"Predicting {treatment_type} response for patient {self._anonymize_id(patient_id)}")
-            result = self._invoke_sagemaker_endpoint(model_type, request_data)
+            # Get endpoint name for this treatment type
+            endpoint_name = self._get_endpoint_name(f"treatment-{treatment_type}")
             
-            # Store prediction in DynamoDB
-            if self._predictions_table:
-                self._store_prediction(result, model_type)
+            # Invoke SageMaker endpoint for prediction
+            result = self._invoke_endpoint(endpoint_name, input_data)
+            
+            # Add predictionId and timestamp if not provided
+            if "prediction_id" not in result:
+                result["prediction_id"] = f"treatment-{int(time.time())}-{patient_id[:8]}"
+            
+            if "timestamp" not in result:
+                result["timestamp"] = datetime.now().isoformat()
             
             # Notify observers
             self._notify_observers(EventType.PREDICTION, {
                 "prediction_type": "treatment_response",
                 "treatment_type": treatment_type,
                 "patient_id": patient_id,
-                "prediction_id": result.get("prediction_id")
+                "prediction_id": result["prediction_id"]
             })
             
             return result
+        
+        except botocore.exceptions.ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_message = e.response.get("Error", {}).get("Message", str(e))
             
-        except (ClientError, ConnectionError, json.JSONDecodeError) as e:
-            if isinstance(e, ClientError):
-                aws_error = self._handle_aws_error(e, "predict_treatment_response")
-                raise aws_error
-            elif isinstance(e, json.JSONDecodeError):
+            self._logger.error(f"AWS client error during treatment response prediction: {error_code} - {error_message}")
+            
+            if error_code == "ModelError":
                 raise PredictionError(
-                    f"Failed to decode prediction result: {str(e)}",
-                    model_type=model_type
-                )
+                    f"Model prediction failed: {error_message}",
+                    model_type=f"treatment-{treatment_type}"
+                ) from e
+            elif error_code == "ValidationError":
+                raise ValidationError(
+                    f"Invalid prediction parameters: {error_message}",
+                    details=str(e)
+                ) from e
             else:
                 raise ServiceConnectionError(
-                    f"Failed to connect to SageMaker: {str(e)}",
+                    f"Failed to connect to AWS services: {error_message}",
                     service="SageMaker",
-                    error_type=type(e).__name__
-                )
+                    error_type=error_code,
+                    details=str(e)
+                ) from e
     
     def predict_outcome(
         self,
@@ -354,76 +367,77 @@ class AWSXGBoostService(XGBoostInterface):
         Raises:
             ValidationError: If parameters are invalid
             DataPrivacyError: If PHI is detected in data
+            ModelNotFoundError: If the model is not found
+            ServiceConnectionError: If there's an AWS service error
             PredictionError: If prediction fails
-            ServiceConnectionError: If connection to SageMaker fails
         """
         self._ensure_initialized()
         
         # Validate parameters
-        self._validate_outcome_params(outcome_timeframe)
+        self._validate_outcome_params(patient_id, outcome_timeframe, clinical_data, treatment_plan)
         
-        # Check for PHI in data
-        self._check_phi_in_data(clinical_data)
-        self._check_phi_in_data(treatment_plan)
+        # Calculate total days from timeframe
+        time_frame_days = self._calculate_timeframe_days(outcome_timeframe)
         
-        # Prepare request data
+        # Get outcome type from kwargs or default to symptom
         outcome_type = kwargs.get("outcome_type", "symptom")
-        model_type = f"{outcome_type}-outcome"
         
-        # Convert timeframe to days for consistent representation
-        time_frame_days = 0
-        if "days" in outcome_timeframe:
-            time_frame_days += outcome_timeframe["days"]
-        if "weeks" in outcome_timeframe:
-            time_frame_days += outcome_timeframe["weeks"] * 7
-        if "months" in outcome_timeframe:
-            time_frame_days += outcome_timeframe["months"] * 30
-        
-        request_data = {
+        # Add additional parameters to input data
+        input_data = {
             "patient_id": patient_id,
-            "outcome_type": outcome_type,
-            "time_frame_days": time_frame_days,
             "clinical_data": clinical_data,
-            "treatment_plan": treatment_plan
+            "treatment_plan": treatment_plan,
+            "time_frame_days": time_frame_days,
+            "outcome_type": outcome_type
         }
         
-        # Invoke SageMaker endpoint
         try:
-            self._logger.info(f"Predicting {outcome_type} outcome for patient {self._anonymize_id(patient_id)}")
-            result = self._invoke_sagemaker_endpoint(model_type, request_data)
+            # Get endpoint name for this outcome type
+            endpoint_name = self._get_endpoint_name(f"outcome-{outcome_type}")
             
-            # Add time frame days to result
-            result["time_frame_days"] = time_frame_days
+            # Invoke SageMaker endpoint for prediction
+            result = self._invoke_endpoint(endpoint_name, input_data)
             
-            # Store prediction in DynamoDB
-            if self._predictions_table:
-                self._store_prediction(result, model_type)
+            # Add predictionId and timestamp if not provided
+            if "prediction_id" not in result:
+                result["prediction_id"] = f"outcome-{int(time.time())}-{patient_id[:8]}"
+            
+            if "timestamp" not in result:
+                result["timestamp"] = datetime.now().isoformat()
             
             # Notify observers
             self._notify_observers(EventType.PREDICTION, {
                 "prediction_type": "outcome",
                 "outcome_type": outcome_type,
                 "patient_id": patient_id,
-                "prediction_id": result.get("prediction_id")
+                "prediction_id": result["prediction_id"]
             })
             
             return result
+        
+        except botocore.exceptions.ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_message = e.response.get("Error", {}).get("Message", str(e))
             
-        except (ClientError, ConnectionError, json.JSONDecodeError) as e:
-            if isinstance(e, ClientError):
-                aws_error = self._handle_aws_error(e, "predict_outcome")
-                raise aws_error
-            elif isinstance(e, json.JSONDecodeError):
+            self._logger.error(f"AWS client error during outcome prediction: {error_code} - {error_message}")
+            
+            if error_code == "ModelError":
                 raise PredictionError(
-                    f"Failed to decode prediction result: {str(e)}",
-                    model_type=model_type
-                )
+                    f"Model prediction failed: {error_message}",
+                    model_type=f"outcome-{outcome_type}"
+                ) from e
+            elif error_code == "ValidationError":
+                raise ValidationError(
+                    f"Invalid prediction parameters: {error_message}",
+                    details=str(e)
+                ) from e
             else:
                 raise ServiceConnectionError(
-                    f"Failed to connect to SageMaker: {str(e)}",
+                    f"Failed to connect to AWS services: {error_message}",
                     service="SageMaker",
-                    error_type=type(e).__name__
-                )
+                    error_type=error_code,
+                    details=str(e)
+                ) from e
     
     def get_feature_importance(
         self,
@@ -443,104 +457,61 @@ class AWSXGBoostService(XGBoostInterface):
             Feature importance data
             
         Raises:
-            ResourceNotFoundError: If prediction not found
             ValidationError: If parameters are invalid
-            ServiceConnectionError: If connection to DynamoDB fails
+            ResourceNotFoundError: If prediction data is not found
+            ServiceConnectionError: If there's an AWS service error
         """
         self._ensure_initialized()
         
-        # Check if DynamoDB is configured
-        if not self._dynamodb or not self._predictions_table:
-            raise ConfigurationError(
-                "DynamoDB not configured for predictions storage",
-                field="predictions_table"
-            )
+        # Validate parameters
+        if not patient_id:
+            raise ValidationError("Patient ID cannot be empty", field="patient_id")
+        
+        if not model_type:
+            raise ValidationError("Model type cannot be empty", field="model_type")
+        
+        if not prediction_id:
+            raise ValidationError("Prediction ID cannot be empty", field="prediction_id")
+        
+        # Input data for feature importance calculation
+        input_data = {
+            "patient_id": patient_id,
+            "model_type": model_type,
+            "prediction_id": prediction_id
+        }
         
         try:
-            self._logger.info(f"Getting feature importance for prediction {prediction_id}")
+            # Get endpoint name for feature importance
+            endpoint_name = self._get_endpoint_name("feature-importance")
             
-            # Get prediction data from DynamoDB
-            table = self._dynamodb.Table(self._predictions_table)
-            response = table.get_item(Key={"prediction_id": prediction_id})
+            # Invoke SageMaker endpoint for feature importance
+            result = self._invoke_endpoint(endpoint_name, input_data)
             
-            # Check if prediction exists
-            if "Item" not in response:
+            # Add timestamp if not provided
+            if "timestamp" not in result:
+                result["timestamp"] = datetime.now().isoformat()
+            
+            return result
+        
+        except botocore.exceptions.ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_message = e.response.get("Error", {}).get("Message", str(e))
+            
+            self._logger.error(f"AWS client error during feature importance calculation: {error_code} - {error_message}")
+            
+            if error_code == "ResourceNotFoundException":
                 raise ResourceNotFoundError(
                     f"Prediction not found: {prediction_id}",
                     resource_type="prediction",
                     resource_id=prediction_id
-                )
-            
-            item = response["Item"]
-            
-            # Verify patient ID
-            if item.get("patient_id") != patient_id:
-                raise ValidationError(
-                    "Patient ID mismatch",
-                    field="patient_id",
-                    value=patient_id
-                )
-            
-            # Parse prediction data
-            prediction_data = json.loads(item.get("data", "{}"))
-            
-            # Extract features and their values
-            features = prediction_data.get("features", {})
-            
-            # Generate feature importance
-            # In a real implementation, this would use a SHAP or similar method
-            # For now, we'll generate a mock importance based on the features
-            feature_importance = {}
-            
-            # Sort features by name for consistent results
-            sorted_features = sorted(features.items(), key=lambda x: x[0])
-            
-            # Generate mock feature importance based on feature values
-            # Higher absolute values = higher importance
-            for i, (feature, value) in enumerate(sorted_features):
-                # Generate a deterministic importance value based on the feature name and value
-                # This is just for demonstration - real importance would come from the model
-                if isinstance(value, (int, float)):
-                    importance = (value / 10.0) * 0.8 + 0.2
-                    if importance > 1.0:
-                        importance = 1.0
-                elif isinstance(value, bool):
-                    importance = 0.7 if value else 0.3
-                else:
-                    # Generate a simple hash of the feature name for deterministic results
-                    hash_value = sum(ord(c) for c in feature) % 100
-                    importance = hash_value / 100.0
-                
-                # Occasionally make some features negative to show that they reduce risk
-                if i % 3 == 0:
-                    importance = -importance
-                
-                feature_importance[feature] = importance
-            
-            # Create visualization data
-            visualization = {
-                "type": "bar_chart",
-                "data": {
-                    "labels": list(feature_importance.keys()),
-                    "values": list(feature_importance.values())
-                }
-            }
-            
-            # Create result
-            result = {
-                "prediction_id": prediction_id,
-                "patient_id": patient_id,
-                "model_type": model_type,
-                "feature_importance": feature_importance,
-                "visualization": visualization,
-                "timestamp": datetime.now().isoformat()
-            }
-            
-            return result
-            
-        except ClientError as e:
-            aws_error = self._handle_aws_error(e, "get_feature_importance")
-            raise aws_error
+                ) from e
+            else:
+                raise ServiceConnectionError(
+                    f"Failed to connect to AWS services: {error_message}",
+                    service="SageMaker",
+                    error_type=error_code,
+                    details=str(e)
+                ) from e
     
     def integrate_with_digital_twin(
         self,
@@ -560,71 +531,77 @@ class AWSXGBoostService(XGBoostInterface):
             Integration result
             
         Raises:
-            ResourceNotFoundError: If prediction not found
-            ConfigurationError: If Lambda function not configured
             ValidationError: If parameters are invalid
-            ServiceConnectionError: If connection to Lambda fails
+            ResourceNotFoundError: If prediction or profile not found
+            ServiceConnectionError: If there's an AWS service error
         """
         self._ensure_initialized()
         
-        # Check if Lambda is configured
-        if not self._lambda_client or not self._digital_twin_function:
-            raise ConfigurationError(
-                "Lambda not configured for digital twin integration",
-                field="digital_twin_function"
-            )
+        # Validate parameters
+        if not patient_id:
+            raise ValidationError("Patient ID cannot be empty", field="patient_id")
+        
+        if not profile_id:
+            raise ValidationError("Profile ID cannot be empty", field="profile_id")
+        
+        if not prediction_id:
+            raise ValidationError("Prediction ID cannot be empty", field="prediction_id")
+        
+        # Input data for digital twin integration
+        input_data = {
+            "patient_id": patient_id,
+            "profile_id": profile_id,
+            "prediction_id": prediction_id
+        }
         
         try:
-            self._logger.info(
-                f"Integrating prediction {prediction_id} with digital twin profile {profile_id}"
-            )
+            # Get endpoint name for digital twin integration
+            endpoint_name = self._get_endpoint_name("digital-twin-integration")
             
-            # Prepare request data
-            request_data = {
-                "action": "integrate_prediction",
+            # Invoke SageMaker endpoint for digital twin integration
+            result = self._invoke_endpoint(endpoint_name, input_data)
+            
+            # Add timestamp if not provided
+            if "timestamp" not in result:
+                result["timestamp"] = datetime.now().isoformat()
+            
+            # Notify observers
+            self._notify_observers(EventType.INTEGRATION, {
+                "integration_type": "digital_twin",
                 "patient_id": patient_id,
                 "profile_id": profile_id,
                 "prediction_id": prediction_id,
-                "timestamp": datetime.now().isoformat()
-            }
+                "status": result.get("status", "unknown")
+            })
             
-            # Invoke Lambda function
-            response = self._lambda_client.invoke(
-                FunctionName=self._digital_twin_function,
-                InvocationType="RequestResponse",
-                Payload=json.dumps(request_data).encode()
-            )
+            return result
+        
+        except botocore.exceptions.ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_message = e.response.get("Error", {}).get("Message", str(e))
             
-            # Parse response
-            if "Payload" in response:
-                payload = response["Payload"].read()
-                result = json.loads(payload)
+            self._logger.error(f"AWS client error during digital twin integration: {error_code} - {error_message}")
+            
+            if error_code == "ResourceNotFoundException":
+                resource_id = prediction_id
+                resource_type = "prediction"
                 
-                # Add request data to result
-                result["patient_id"] = patient_id
-                result["profile_id"] = profile_id
-                result["prediction_id"] = prediction_id
+                if "profile not found" in error_message.lower():
+                    resource_id = profile_id
+                    resource_type = "profile"
                 
-                # Notify observers
-                self._notify_observers(EventType.INTEGRATION, {
-                    "integration_type": "digital_twin",
-                    "patient_id": patient_id,
-                    "profile_id": profile_id,
-                    "prediction_id": prediction_id,
-                    "status": result.get("status")
-                })
-                
-                return result
+                raise ResourceNotFoundError(
+                    f"{resource_type.capitalize()} not found: {resource_id}",
+                    resource_type=resource_type,
+                    resource_id=resource_id
+                ) from e
             else:
                 raise ServiceConnectionError(
-                    "No payload in Lambda response",
-                    service="Lambda",
-                    error_type="EmptyPayload"
-                )
-            
-        except ClientError as e:
-            aws_error = self._handle_aws_error(e, "integrate_with_digital_twin")
-            raise aws_error
+                    f"Failed to connect to AWS services: {error_message}",
+                    service="SageMaker",
+                    error_type=error_code,
+                    details=str(e)
+                ) from e
     
     def get_model_info(self, model_type: str) -> Dict[str, Any]:
         """
@@ -638,320 +615,485 @@ class AWSXGBoostService(XGBoostInterface):
             
         Raises:
             ModelNotFoundError: If model not found
+            ServiceConnectionError: If there's an AWS service error
         """
         self._ensure_initialized()
         
-        # Check if model type is valid
-        if model_type not in self._model_endpoints and "default" not in self._model_endpoints:
+        # Normalize model type
+        normalized_type = model_type.lower().replace("_", "-")
+        
+        try:
+            # Check if model exists in mapping
+            if normalized_type not in self._model_mappings:
+                raise ModelNotFoundError(
+                    f"Model not found: {model_type}",
+                    model_type=model_type
+                )
+            
+            # Get SageMaker model information
+            model_name = self._model_mappings[normalized_type]
+            
+            response = self._sagemaker.describe_model(
+                ModelName=model_name
+            )
+            
+            # Extract relevant model information
+            model_info = {
+                "model_type": model_type,
+                "version": response.get("ModelVersion", "1.0.0"),
+                "last_updated": response.get("CreationTime", datetime.now()).isoformat(),
+                "description": response.get("ModelDescription", f"XGBoost model for {model_type}"),
+                "features": [],  # This would need to be stored elsewhere or exposed by the model
+                "performance_metrics": {},  # This would need to be stored elsewhere
+                "hyperparameters": {},  # This would need to be extracted from model artifacts
+                "status": "active" if response.get("ModelStatus") == "InService" else "inactive"
+            }
+            
+            # For demo/mock purposes, set some placeholder values
+            model_info["performance_metrics"] = {
+                "accuracy": 0.85,
+                "precision": 0.82,
+                "recall": 0.80,
+                "f1_score": 0.81,
+                "auc_roc": 0.88
+            }
+            
+            # Set features based on model type
+            if "risk" in normalized_type:
+                model_info["features"] = [
+                    "symptom_severity",
+                    "medication_adherence",
+                    "previous_episodes",
+                    "social_support",
+                    "stress_level"
+                ]
+            elif "treatment" in normalized_type:
+                model_info["features"] = [
+                    "previous_treatment_response",
+                    "symptom_severity",
+                    "duration_of_illness",
+                    "medication_adherence"
+                ]
+            elif "outcome" in normalized_type:
+                model_info["features"] = [
+                    "baseline_severity",
+                    "treatment_adherence",
+                    "treatment_type",
+                    "functional_status"
+                ]
+            
+            # Set hyperparameters
+            model_info["hyperparameters"] = {
+                "n_estimators": 100,
+                "max_depth": 5,
+                "learning_rate": 0.1,
+                "subsample": 0.8,
+                "colsample_bytree": 0.8
+            }
+            
+            return model_info
+        
+        except botocore.exceptions.ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_message = e.response.get("Error", {}).get("Message", str(e))
+            
+            self._logger.error(f"AWS client error during model info retrieval: {error_code} - {error_message}")
+            
+            if error_code == "ValidationError" or error_code == "ResourceNotFoundException":
+                raise ModelNotFoundError(
+                    f"Model not found: {model_type}",
+                    model_type=model_type
+                ) from e
+            else:
+                raise ServiceConnectionError(
+                    f"Failed to connect to AWS services: {error_message}",
+                    service="SageMaker",
+                    error_type=error_code,
+                    details=str(e)
+                ) from e
+    
+    def _validate_aws_config(self, config: Dict[str, Any]) -> None:
+        """
+        Validate AWS configuration parameters.
+        
+        Args:
+            config: Configuration dictionary
+            
+        Raises:
+            ConfigurationError: If required parameters are missing or invalid
+        """
+        # Check required parameters
+        required_params = ["region_name", "endpoint_prefix", "bucket_name"]
+        for param in required_params:
+            if param not in config:
+                raise ConfigurationError(
+                    f"Missing required AWS parameter: {param}",
+                    field=param
+                )
+        
+        # Set configuration values
+        self._region_name = config["region_name"]
+        self._endpoint_prefix = config["endpoint_prefix"]
+        self._bucket_name = config["bucket_name"]
+        
+        # Set model mappings if provided
+        if "model_mappings" in config:
+            self._model_mappings = config["model_mappings"]
+        
+        # Set audit table name if provided (for compliance logging)
+        if "audit_table_name" in config:
+            self._audit_table_name = config["audit_table_name"]
+    
+    def _initialize_aws_clients(self) -> None:
+        """
+        Initialize AWS clients for SageMaker and S3.
+        
+        Raises:
+            ServiceConnectionError: If clients cannot be initialized
+        """
+        try:
+            # Create SageMaker runtime client for invoking endpoints
+            self._sagemaker_runtime = boto3.client(
+                "sagemaker-runtime",
+                region_name=self._region_name
+            )
+            
+            # Create SageMaker client for model management
+            self._sagemaker = boto3.client(
+                "sagemaker",
+                region_name=self._region_name
+            )
+            
+            # Create S3 client for data storage
+            self._s3 = boto3.client(
+                "s3",
+                region_name=self._region_name
+            )
+            
+            # Create DynamoDB client for compliance logging if table is specified
+            if self._audit_table_name:
+                self._dynamodb = boto3.client(
+                    "dynamodb",
+                    region_name=self._region_name
+                )
+            
+            self._logger.debug("AWS clients initialized successfully")
+        
+        except botocore.exceptions.ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_message = e.response.get("Error", {}).get("Message", str(e))
+            
+            self._logger.error(f"AWS client initialization error: {error_code} - {error_message}")
+            
+            raise ServiceConnectionError(
+                f"Failed to initialize AWS clients: {error_message}",
+                service="AWS",
+                error_type=error_code,
+                details=str(e)
+            ) from e
+        
+        except Exception as e:
+            self._logger.error(f"Unexpected error initializing AWS clients: {e}")
+            
+            raise ServiceConnectionError(
+                f"Failed to initialize AWS clients: {str(e)}",
+                service="AWS",
+                error_type="UnexpectedError",
+                details=str(e)
+            ) from e
+    
+    def _get_endpoint_name(self, model_type: str) -> str:
+        """
+        Get the SageMaker endpoint name for a model type.
+        
+        Args:
+            model_type: Type of model
+            
+        Returns:
+            SageMaker endpoint name
+            
+        Raises:
+            ModelNotFoundError: If endpoint is not found for the model type
+        """
+        # Normalize model type
+        normalized_type = model_type.lower().replace("_", "-")
+        
+        # Check if model exists in mapping
+        if normalized_type not in self._model_mappings:
             raise ModelNotFoundError(
                 f"Model not found: {model_type}",
                 model_type=model_type
             )
         
-        # Get endpoint name
-        endpoint = self._model_endpoints.get(
-            model_type,
-            self._model_endpoints.get("default")
-        )
+        # Construct endpoint name from prefix and model name
+        endpoint_name = f"{self._endpoint_prefix}-{self._model_mappings[normalized_type]}"
         
-        # For a real implementation, we would retrieve model info from SageMaker
-        # or a model registry. For now, we'll return mock data.
-        
-        # Generate mock features based on model type
-        features = []
-        if "risk" in model_type:
-            features = [
-                "symptom_severity",
-                "medication_adherence",
-                "previous_episodes",
-                "social_support",
-                "stress_level",
-                "sleep_quality",
-                "substance_use"
-            ]
-        elif "ssri" in model_type or "snri" in model_type:
-            features = [
-                "previous_medication_response",
-                "age",
-                "weight_kg",
-                "symptom_severity",
-                "medication_adherence",
-                "liver_function",
-                "kidney_function"
-            ]
-        elif "therapy" in model_type:
-            features = [
-                "previous_therapy_response",
-                "motivation",
-                "insight",
-                "social_support",
-                "symptom_severity",
-                "functional_impairment"
-            ]
-        elif "outcome" in model_type:
-            features = [
-                "baseline_severity",
-                "treatment_adherence",
-                "social_support",
-                "functional_status",
-                "comorbidity_burden"
-            ]
-        else:
-            features = [
-                "symptom_severity",
-                "functional_status",
-                "quality_of_life"
-            ]
-        
-        # Generate mock performance metrics
-        performance_metrics = {
-            "accuracy": 0.85,
-            "precision": 0.83,
-            "recall": 0.87,
-            "f1_score": 0.85,
-            "auc_roc": 0.92
-        }
-        
-        # Generate mock hyperparameters
-        hyperparameters = {
-            "n_estimators": 100,
-            "max_depth": 5,
-            "learning_rate": 0.1,
-            "subsample": 0.8,
-            "colsample_bytree": 0.8
-        }
-        
-        # Create result
-        result = {
-            "model_type": model_type,
-            "version": "1.0.0",
-            "last_updated": "2025-03-01T00:00:00Z",
-            "description": f"XGBoost model for {model_type}",
-            "features": features,
-            "performance_metrics": performance_metrics,
-            "hyperparameters": hyperparameters,
-            "status": "active",
-            "endpoint": endpoint
-        }
-        
-        return result
+        return endpoint_name
     
-    def _initialize_aws_clients(self):
+    def _invoke_endpoint(self, endpoint_name: str, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Initialize AWS clients.
-        """
-        # Initialize SageMaker runtime client
-        self._sagemaker_runtime = boto3.client(
-            "sagemaker-runtime",
-            region_name=self._region_name
-        )
-        
-        # Initialize DynamoDB client if predictions table is configured
-        if self._predictions_table:
-            self._dynamodb = boto3.resource(
-                "dynamodb",
-                region_name=self._region_name
-            )
-        
-        # Initialize Lambda client if digital twin function is configured
-        if self._digital_twin_function:
-            self._lambda_client = boto3.client(
-                "lambda",
-                region_name=self._region_name
-            )
-    
-    def _initialize_phi_patterns(self) -> Dict[PrivacyLevel, List[Dict[str, Any]]]:
-        """
-        Initialize PHI detection patterns for different privacy levels.
-        
-        Returns:
-            Dictionary mapping privacy levels to patterns
-        """
-        # Define patterns for each privacy level
-        patterns = {
-            PrivacyLevel.STANDARD: [
-                {"type": "SSN", "pattern": r"\b\d{3}-\d{2}-\d{4}\b"},
-                {"type": "MRN", "pattern": r"\bMRN\s*\d{5,10}\b"},
-                {"type": "NAME", "pattern": r"\b(Dr\.?\s+)?[A-Z][a-z]+\s+[A-Z][a-z]+\b"}
-            ],
-            PrivacyLevel.ENHANCED: [
-                {"type": "SSN", "pattern": r"\b\d{3}-\d{2}-\d{4}\b"},
-                {"type": "MRN", "pattern": r"\bMRN\s*\d{5,10}\b"},
-                {"type": "NAME", "pattern": r"\b(Dr\.?\s+)?[A-Z][a-z]+\s+[A-Z][a-z]+\b"},
-                {"type": "EMAIL", "pattern": r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b"},
-                {"type": "PHONE", "pattern": r"\b\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"},
-                {"type": "ADDRESS", "pattern": r"\b\d+\s+[A-Za-z\s]+\b(Road|Rd|Street|St|Avenue|Ave|Drive|Dr)\b"}
-            ],
-            PrivacyLevel.MAXIMUM: [
-                {"type": "SSN", "pattern": r"\b\d{3}-\d{2}-\d{4}\b"},
-                {"type": "MRN", "pattern": r"\bMRN\s*\d{5,10}\b"},
-                {"type": "NAME", "pattern": r"\b(Dr\.?\s+)?[A-Z][a-z]+\s+[A-Z][a-z]+\b"},
-                {"type": "EMAIL", "pattern": r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b"},
-                {"type": "PHONE", "pattern": r"\b\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b"},
-                {"type": "ADDRESS", "pattern": r"\b\d+\s+[A-Za-z\s]+\b(Road|Rd|Street|St|Avenue|Ave|Drive|Dr)\b"},
-                {"type": "ZIP", "pattern": r"\b\d{5}(-\d{4})?\b"},
-                {"type": "DOB", "pattern": r"\b\d{1,2}/\d{1,2}/\d{2,4}\b"},
-                {"type": "PHI_KEYS", "pattern": r"\b(ssn|social|security|dob|birth|email|phone|address|zip|postal)\b"}
-            ]
-        }
-        
-        # Compile patterns
-        for level, level_patterns in patterns.items():
-            for pattern in level_patterns:
-                pattern["compiled"] = re.compile(pattern["pattern"], re.IGNORECASE)
-        
-        return patterns
-    
-    def _invoke_sagemaker_endpoint(
-        self,
-        model_type: str,
-        request_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        Invoke a SageMaker endpoint for prediction.
+        Invoke a SageMaker endpoint with input data.
         
         Args:
-            model_type: Type of model (endpoint mapping)
-            request_data: Request data
+            endpoint_name: SageMaker endpoint name
+            input_data: Input data for the endpoint
             
         Returns:
             Prediction result
             
         Raises:
+            ServiceConnectionError: If endpoint invocation fails
+            ModelNotFoundError: If endpoint is not found
             PredictionError: If prediction fails
-            ServiceConnectionError: If connection to SageMaker fails
+            DataPrivacyError: If PHI is detected in input data
         """
-        # Get endpoint name
-        if model_type in self._model_endpoints:
-            endpoint_name = self._model_endpoints[model_type]
-        elif "default" in self._model_endpoints:
-            endpoint_name = self._model_endpoints["default"]
-            self._logger.warning(f"Using default endpoint for model type {model_type}")
-        else:
-            raise ConfigurationError(
-                f"No endpoint configured for model type {model_type}",
-                field="model_endpoints",
-                details=f"Available endpoints: {list(self._model_endpoints.keys())}"
-            )
+        # Check for PHI in input data based on privacy level
+        self._check_phi_in_data(input_data)
         
-        # Invoke endpoint
+        # Convert input data to JSON
+        input_json = json.dumps(input_data)
+        
         try:
-            self._logger.debug(f"Invoking SageMaker endpoint {endpoint_name}")
+            # Invoke endpoint
             response = self._sagemaker_runtime.invoke_endpoint(
                 EndpointName=endpoint_name,
                 ContentType="application/json",
-                Body=json.dumps(request_data).encode()
+                Body=input_json
             )
             
             # Parse response
-            if "Body" in response:
-                payload = response["Body"].read()
-                result = json.loads(payload)
-                return result
-            else:
+            response_body = response["Body"].read().decode("utf-8")
+            result = json.loads(response_body)
+            
+            # Log the audit record if DynamoDB is configured
+            self._log_audit_record(endpoint_name, input_data, result)
+            
+            return result
+        
+        except botocore.exceptions.ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "Unknown")
+            error_message = e.response.get("Error", {}).get("Message", str(e))
+            
+            self._logger.error(f"AWS endpoint invocation error: {error_code} - {error_message}")
+            
+            if error_code == "ValidationError":
+                if "Endpoint" in error_message and "not found" in error_message:
+                    raise ModelNotFoundError(
+                        f"Endpoint not found: {endpoint_name}",
+                        model_type=endpoint_name
+                    ) from e
+                else:
+                    raise ValidationError(
+                        f"Invalid input: {error_message}",
+                        details=str(e)
+                    ) from e
+            elif error_code == "ModelError":
                 raise PredictionError(
-                    "No body in SageMaker response",
-                    model_type=model_type
-                )
-                
-        except json.JSONDecodeError as e:
-            raise PredictionError(
-                f"Failed to decode prediction result: {str(e)}",
-                model_type=model_type
-            )
+                    f"Model prediction failed: {error_message}",
+                    model_type=endpoint_name
+                ) from e
+            else:
+                raise ServiceConnectionError(
+                    f"Failed to invoke endpoint: {error_message}",
+                    service="SageMaker",
+                    error_type=error_code,
+                    details=str(e)
+                ) from e
     
-    def _store_prediction(
-        self,
-        prediction: Dict[str, Any],
-        model_type: str
-    ) -> None:
+    def _log_audit_record(self, endpoint_name: str, input_data: Dict[str, Any], result: Dict[str, Any]) -> None:
         """
-        Store prediction data in DynamoDB.
+        Log an audit record of the prediction request and response.
         
         Args:
-            prediction: Prediction data
-            model_type: Type of model
-            
-        Raises:
-            ServiceConnectionError: If connection to DynamoDB fails
+            endpoint_name: SageMaker endpoint name
+            input_data: Input data for the prediction
+            result: Prediction result
         """
+        if not self._dynamodb or not self._audit_table_name:
+            return
+        
         try:
-            # Check required fields
-            required_fields = ["prediction_id", "patient_id"]
-            for field in required_fields:
-                if field not in prediction:
-                    self._logger.warning(f"Missing required field {field} in prediction data")
-                    prediction[field] = f"generated-{int(time.time())}"
+            # Create a sanitized version of input and output for audit
+            sanitized_input = self._sanitize_data_for_audit(input_data)
+            sanitized_result = self._sanitize_data_for_audit(result)
             
-            # Create item to store
-            item = {
-                "prediction_id": prediction["prediction_id"],
-                "patient_id": prediction["patient_id"],
-                "model_type": model_type,
-                "timestamp": datetime.now().isoformat(),
-                "data": json.dumps(prediction)
+            # Create audit record
+            audit_record = {
+                "audit_id": {"S": f"audit-{int(time.time())}-{input_data.get('patient_id', 'unknown')[:8]}"},
+                "timestamp": {"S": datetime.now().isoformat()},
+                "endpoint_name": {"S": endpoint_name},
+                "patient_id": {"S": input_data.get("patient_id", "unknown")},
+                "request_type": {"S": self._get_request_type_from_endpoint(endpoint_name)},
+                "input_summary": {"S": json.dumps(sanitized_input)},
+                "output_summary": {"S": json.dumps(sanitized_result)},
+                "privacy_level": {"S": self._privacy_level.value}
             }
             
             # Store in DynamoDB
-            table = self._dynamodb.Table(self._predictions_table)
-            table.put_item(Item=item)
+            self._dynamodb.put_item(
+                TableName=self._audit_table_name,
+                Item=audit_record
+            )
             
-            self._logger.debug(f"Stored prediction {prediction['prediction_id']} in DynamoDB")
+            self._logger.debug(f"Audit record created for prediction: {audit_record['audit_id']['S']}")
+        
+        except Exception as e:
+            # Don't fail the operation if audit logging fails
+            self._logger.error(f"Failed to log audit record: {e}")
+    
+    def _sanitize_data_for_audit(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Sanitize data for audit logging, removing sensitive details.
+        
+        Args:
+            data: Data to sanitize
             
-        except ClientError as e:
-            aws_error = self._handle_aws_error(e, "store_prediction")
-            self._logger.error(f"Failed to store prediction: {aws_error}")
-            # Don't re-raise - we don't want storage failures to break the API
+        Returns:
+            Sanitized data
+        """
+        # Create a copy to avoid modifying the original
+        sanitized = {}
+        
+        # Extract only the metadata and summary information
+        if isinstance(data, dict):
+            # Include select fields that are safe for audit logging
+            safe_fields = [
+                "patient_id", "prediction_id", "model_type", "risk_type",
+                "treatment_type", "outcome_type", "timestamp", "status"
+            ]
+            
+            for field in safe_fields:
+                if field in data:
+                    sanitized[field] = data[field]
+            
+            # Include high-level metrics without detailed clinical data
+            if "risk_level" in data:
+                sanitized["risk_level"] = data["risk_level"]
+            
+            if "risk_score" in data:
+                sanitized["risk_score"] = data["risk_score"]
+            
+            if "confidence" in data:
+                sanitized["confidence"] = data["confidence"]
+            
+            # For input data, just record the fields that were present but not values
+            if "clinical_data" in data:
+                sanitized["clinical_data_fields"] = list(data["clinical_data"].keys())
+            
+            if "treatment_details" in data:
+                sanitized["treatment_details_fields"] = list(data["treatment_details"].keys())
+            
+            if "treatment_plan" in data:
+                sanitized["treatment_plan_fields"] = list(data["treatment_plan"].keys())
+        
+        return sanitized
+    
+    def _get_request_type_from_endpoint(self, endpoint_name: str) -> str:
+        """
+        Get request type from endpoint name.
+        
+        Args:
+            endpoint_name: SageMaker endpoint name
+            
+        Returns:
+            Request type
+        """
+        if "risk" in endpoint_name:
+            return "risk_prediction"
+        elif "treatment" in endpoint_name:
+            return "treatment_response"
+        elif "outcome" in endpoint_name:
+            return "outcome_prediction"
+        elif "feature-importance" in endpoint_name:
+            return "feature_importance"
+        elif "digital-twin" in endpoint_name:
+            return "digital_twin_integration"
+        else:
+            return "unknown"
     
     def _check_phi_in_data(self, data: Dict[str, Any]) -> None:
         """
-        Check for PHI in data.
+        Check for PHI in data based on privacy level setting.
         
         Args:
-            data: Data to check
+            data: Data to check for PHI
             
         Raises:
             DataPrivacyError: If PHI is detected
         """
-        if not data:
+        # Skip if privacy level is NONE
+        if self._privacy_level == PrivacyLevel.NONE:
             return
         
-        # Get patterns for current privacy level
-        patterns = []
-        for level in PrivacyLevel:
-            if level.value <= self._privacy_level.value:
-                patterns.extend(self._phi_patterns[level])
+        # Extract all string values from the data
+        string_values = []
+        self._extract_strings(data, string_values)
         
-        # Check each key and value in the data
-        phi_found = []
+        # Define PHI patterns based on privacy level
+        phi_patterns = []
         
-        for key, value in data.items():
-            # For MAXIMUM privacy level, check key names for PHI indicators
-            if self._privacy_level == PrivacyLevel.MAXIMUM:
-                for pattern in patterns:
-                    if pattern["type"] == "PHI_KEYS" and pattern["compiled"].search(key):
-                        phi_found.append(pattern["type"])
-            
-            # Check values for PHI
-            if isinstance(value, str):
-                for pattern in patterns:
-                    if pattern["compiled"].search(value):
-                        phi_found.append(pattern["type"])
-            
-            # Recursively check nested dictionaries
-            elif isinstance(value, dict):
-                try:
-                    self._check_phi_in_data(value)
-                except DataPrivacyError as e:
-                    phi_found.extend(e.pattern_types)
+        # All privacy levels check for these basic patterns
+        basic_patterns = [
+            (r"\b\d{3}-\d{2}-\d{4}\b", "SSN"),              # Social Security Number
+            (r"\b\d{3}[-.\s]?\d{2}[-.\s]?\d{4}\b", "SSN")   # Social Security Number (alt format)
+        ]
+        phi_patterns.extend(basic_patterns)
         
-        # If PHI found, raise exception
-        if phi_found:
-            unique_phi_types = list(set(phi_found))
+        # Standard level adds more patterns
+        if self._privacy_level >= PrivacyLevel.STANDARD:
+            standard_patterns = [
+                (r"\bMRN\s*\d{5,10}\b", "MRN"),                    # Medical Record Number
+                (r"\b([A-Z][a-z]+\s){2,}[A-Z][a-z]+\b", "Name"),   # Full Name (very simplified)
+                (r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", "Email") # Email address
+            ]
+            phi_patterns.extend(standard_patterns)
+        
+        # Strict level adds even more patterns
+        if self._privacy_level == PrivacyLevel.STRICT:
+            strict_patterns = [
+                (r"\b\d{10}\b", "Phone"),                           # Phone number
+                (r"\b\d{5}(?:-\d{4})?\b", "ZIP"),                   # ZIP code
+                (r"\b(\d{1,2}\/\d{1,2}\/\d{2,4})\b", "Date"),       # Date
+                (r"\b[A-Z][a-z]+\s+[A-Z][a-z]+\b", "Name")          # Name (simplified)
+            ]
+            phi_patterns.extend(strict_patterns)
+        
+        # Check all string values against patterns
+        detected_patterns = []
+        for string_value in string_values:
+            for pattern, pattern_type in phi_patterns:
+                if re.search(pattern, string_value):
+                    detected_patterns.append(pattern_type)
+                    # If not in strict mode, return after first detection
+                    if self._privacy_level != PrivacyLevel.STRICT:
+                        raise DataPrivacyError(
+                            f"PHI detected in input data: {pattern_type}",
+                            pattern_types=[pattern_type]
+                        )
+        
+        # If any patterns were detected in strict mode, raise error with all detected types
+        if detected_patterns:
             raise DataPrivacyError(
-                f"PHI detected in input data: {', '.join(unique_phi_types)}",
-                pattern_types=unique_phi_types
+                f"PHI detected in input data: {', '.join(set(detected_patterns))}",
+                pattern_types=list(set(detected_patterns))
             )
+    
+    def _extract_strings(self, data: Any, result: List[str]) -> None:
+        """
+        Extract all string values from a nested data structure.
+        
+        Args:
+            data: Data to extract strings from
+            result: List to store extracted strings
+        """
+        if isinstance(data, str):
+            result.append(data)
+        elif isinstance(data, dict):
+            for value in data.values():
+                self._extract_strings(value, result)
+        elif isinstance(data, list):
+            for item in data:
+                self._extract_strings(item, result)
     
     def _notify_observers(self, event_type: EventType, data: Dict[str, Any]) -> None:
         """
@@ -981,87 +1123,60 @@ class AWSXGBoostService(XGBoostInterface):
                 except Exception as e:
                     self._logger.error(f"Error notifying wildcard observer: {e}")
     
-    def _validate_risk_type(self, risk_type: str) -> None:
-        """
-        Validate risk type.
-        
-        Args:
-            risk_type: Risk type to validate
-            
-        Raises:
-            ValidationError: If risk type is invalid
-        """
-        valid_risk_types = ["relapse", "suicide", "hospitalization"]
-        
-        if risk_type not in valid_risk_types:
-            raise ValidationError(
-                f"Invalid risk type: {risk_type}. Valid risk types: {', '.join(valid_risk_types)}",
-                field="risk_type",
-                value=risk_type
-            )
-    
-    def _validate_treatment_type(
+    def _validate_prediction_params(
         self,
-        treatment_type: str,
-        treatment_details: Dict[str, Any]
+        prediction_type: str,
+        patient_id: str,
+        clinical_data: Dict[str, Any]
     ) -> None:
         """
-        Validate treatment type and details.
+        Validate prediction parameters.
         
         Args:
-            treatment_type: Treatment type to validate
-            treatment_details: Treatment details to validate
-            
-        Raises:
-            ValidationError: If treatment type or details are invalid
-        """
-        # Check if treatment type is valid
-        valid_medication_types = ["medication_ssri", "medication_snri", "medication_atypical"]
-        valid_therapy_types = ["therapy_cbt", "therapy_dbt", "therapy_ipt", "therapy_psychodynamic"]
-        
-        valid_treatment_types = valid_medication_types + valid_therapy_types
-        
-        if treatment_type not in valid_treatment_types:
-            raise ValidationError(
-                f"Invalid treatment type: {treatment_type}. Valid treatment types: {', '.join(valid_treatment_types)}",
-                field="treatment_type",
-                value=treatment_type
-            )
-        
-        # Check required details for medication
-        if treatment_type in valid_medication_types:
-            if "medication" not in treatment_details:
-                raise ValidationError(
-                    "Missing required field 'medication' in treatment_details",
-                    field="treatment_details.medication"
-                )
-        
-        # Check required details for therapy
-        if treatment_type in valid_therapy_types:
-            if "frequency" not in treatment_details:
-                raise ValidationError(
-                    "Missing required field 'frequency' in treatment_details",
-                    field="treatment_details.frequency"
-                )
-    
-    def _validate_outcome_params(self, outcome_timeframe: Dict[str, int]) -> None:
-        """
-        Validate outcome prediction parameters.
-        
-        Args:
-            outcome_timeframe: Outcome timeframe to validate
+            prediction_type: Type of prediction
+            patient_id: Patient identifier
+            clinical_data: Clinical data
             
         Raises:
             ValidationError: If parameters are invalid
         """
+        if not patient_id:
+            raise ValidationError("Patient ID cannot be empty", field="patient_id")
+        
+        if not prediction_type:
+            raise ValidationError("Prediction type cannot be empty", field="prediction_type")
+        
+        if not clinical_data:
+            raise ValidationError("Clinical data cannot be empty", field="clinical_data")
+    
+    def _validate_outcome_params(
+        self,
+        patient_id: str,
+        outcome_timeframe: Dict[str, int],
+        clinical_data: Dict[str, Any],
+        treatment_plan: Dict[str, Any]
+    ) -> None:
+        """
+        Validate outcome prediction parameters.
+        
+        Args:
+            patient_id: Patient identifier
+            outcome_timeframe: Timeframe for outcome prediction
+            clinical_data: Clinical data
+            treatment_plan: Treatment plan
+            
+        Raises:
+            ValidationError: If parameters are invalid
+        """
+        # Validate patient ID
+        if not patient_id:
+            raise ValidationError("Patient ID cannot be empty", field="patient_id")
+        
+        # Validate outcome timeframe
         if not outcome_timeframe:
-            raise ValidationError(
-                "Empty outcome timeframe",
-                field="outcome_timeframe"
-            )
+            raise ValidationError("Outcome timeframe cannot be empty", field="outcome_timeframe")
         
         valid_units = ["days", "weeks", "months"]
-        
         if not any(unit in outcome_timeframe for unit in valid_units):
             raise ValidationError(
                 f"Invalid outcome timeframe. Must include at least one of: {', '.join(valid_units)}",
@@ -1082,73 +1197,46 @@ class AWSXGBoostService(XGBoostInterface):
                     field=f"outcome_timeframe.{unit}",
                     value=value
                 )
+        
+        # Validate clinical data
+        if not clinical_data:
+            raise ValidationError("Clinical data cannot be empty", field="clinical_data")
+        
+        # Validate treatment plan
+        if not treatment_plan:
+            raise ValidationError("Treatment plan cannot be empty", field="treatment_plan")
     
-    def _handle_aws_error(self, e: Exception, operation: str) -> Exception:
+    def _calculate_timeframe_days(self, timeframe: Dict[str, int]) -> int:
         """
-        Handle AWS errors by mapping them to domain exceptions.
+        Calculate total days from a timeframe.
         
         Args:
-            e: AWS exception
-            operation: Operation that caused the error
+            timeframe: Timeframe dictionary with days, weeks, and/or months
             
         Returns:
-            Domain exception
+            Total days
         """
-        self._logger.error(f"AWS error during {operation}: {str(e)}")
+        total_days = 0
         
-        # If it's a ClientError, get the error code
-        if isinstance(e, ClientError):
-            error_code = e.response.get("Error", {}).get("Code", "")
-            error_message = e.response.get("Error", {}).get("Message", str(e))
-            
-            # Map error codes to domain exceptions
-            if error_code == "ResourceNotFoundException":
-                return ResourceNotFoundError(
-                    f"Resource not found: {error_message}",
-                    resource_type="aws",
-                    resource_id=error_code
-                )
-            elif error_code == "ValidationException":
-                return ValidationError(
-                    f"Validation error: {error_message}",
-                    field="aws",
-                    value=error_code
-                )
-            elif error_code == "ModelError":
-                return PredictionError(
-                    f"Model error: {error_message}",
-                    model_type=operation
-                )
-            else:
-                return ServiceConnectionError(
-                    f"AWS error: {error_message}",
-                    service="AWS",
-                    error_type=error_code
-                )
+        if "days" in timeframe:
+            total_days += timeframe["days"]
         
-        # For other exceptions, return a generic ServiceConnectionError
-        return ServiceConnectionError(
-            f"Error during {operation}: {str(e)}",
-            service="AWS",
-            error_type=type(e).__name__
-        )
+        if "weeks" in timeframe:
+            total_days += timeframe["weeks"] * 7
+        
+        if "months" in timeframe:
+            total_days += timeframe["months"] * 30
+        
+        return total_days
     
-    def _anonymize_id(self, id_value: str) -> str:
+    def _ensure_initialized(self) -> None:
         """
-        Anonymize an identifier for logging.
+        Ensure that the service is initialized before use.
         
-        Args:
-            id_value: Identifier to anonymize
-            
-        Returns:
-            Anonymized identifier
+        Raises:
+            ConfigurationError: If service is not initialized
         """
-        if not id_value:
-            return "unknown"
-        
-        # Get first character and last character
-        first = id_value[0]
-        last = id_value[-1] if len(id_value) > 1 else ""
-        
-        # Replace middle characters with *
-        return f"{first}{'*' * (len(id_value) - 2)}{last}" if len(id_value) > 2 else f"{first}*"
+        if not hasattr(self, '_initialized') or not self._initialized:
+            raise ConfigurationError(
+                "XGBoost service not initialized. Call initialize() first."
+            )

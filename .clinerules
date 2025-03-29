@@ -1,71 +1,156 @@
-# Local Rules (Concierge Psychiatry Platform)
-IF YOU GET STUCK READ ALL THE DOCS IN HERE 
-\docs\
-## Development Environment Setup
+# Novamind Digital Twin: Concierge Psychiatry Platform
 
-- **WSL2-Windows Integration**: Create proper symbolic links between WSL2 and Windows paths to ensure seamless file visibility and editing (completed already)
+IF YOU GET STUCK READ ALL THE DOCS IN `/docs/` and `/frontend/docs/`
 
-- **File Permissions**: Ensure all files created in WSL2 have proper permissions to be visible and editable in Windows:
+## Full-Stack Architecture (Backend + Frontend)
 
-- **IDE Configuration**: Configure VSCode to properly recognize both Windows and WSL2 paths for the same project.
+### Clean Architecture Across the Stack
 
-## Domain Layer (Pure Clinical Logic)
+- **Domain Layer**: Pure business logic, no framework dependencies
+- **Application Layer**: Use cases, services, state management
+- **Presentation Layer**: UI components (React) and API endpoints (FastAPI)
+- **Infrastructure Layer**: External services, database, API clients
 
-- Represents psychiatry-relevant concepts: Patients, Appointments, Billing, Outcomes, Notes, etc.
-- Zero references to FastAPI, AWS, or any external frameworks.
-- All logic regarding patient flow, scheduling rules, or therapy features belongs here, untainted by infrastructure.
+### Component Integration
 
-## Data Layer (Repositories & Persistence)
+- **Backend-Frontend Contracts**: Strong typing for API requests/responses
+- **Digital Twin Model**: Seamless data flow between brain visualization and ML models
+- **Event-Driven Communication**: Use Observer pattern for cross-component notification
 
-- Use a Repository Pattern for patient data, appointments, forms, and more.
-- Implement an ORM (e.g., SQLAlchemy, with a separate model) but keep it out of the Domain layer.
-- All data access calls (database queries, external APIs, file storage) remain in this layer.
+## Frontend Specific Guidelines
 
-## Presentation Layer (FastAPI Endpoints & Schemas)
+### React Component Architecture
 
-- FastAPI endpoints for patient onboarding, scheduling, secure messaging, and more.
-- **Pydantic v2** schemas for input/output validation (do not mix domain entities with Pydantic models).
-- Use **FastAPI's `Depends()`** for dependency injection (fetching repositories, services).
+- **Atomic Design Pattern**: atoms → molecules → organisms → templates → pages
+- **Container/Presentation Pattern**: Separate data-fetching from UI rendering
+- **Single Responsibility Principle**: Every component has one clear purpose
+- **Code Splitting**: Use React.lazy() for expensive visualization components
+- **Error Boundaries**: Implement at strategic points for graceful failures
 
-## HIPAA & Security
+### TypeScript Best Practices
 
-- All endpoints must enforce authentication & role-based access (patient vs. admin/psychiatrist).
-- Use AWS Cognito (or another HIPAA-eligible auth) for login, MFA, JWT issuance.
-- No session state stored server-side; all user context is provided via validated JWT tokens.
-- All logs stripped of PHI. Any error or usage logs must anonymize or exclude patient identifiers.
+- **Strict Type Checking**: Enable strictNullChecks and noImplicitAny
+- **Explicit Interfaces**: Define interfaces for all component props, API responses
+- **Discriminated Unions**: Use for state management with reducers
+- **Type Guards**: Implement for complex data structures and API responses
 
-## Event-Driven & GoF Patterns
+### Performance Optimizations
 
-- **Observer Pattern** for triggering analytics or notifications when a patient record changes (e.g., appointment booked triggers an email or text reminder).
-- **Strategy Pattern** for optional AI-based modules (e.g., risk scoring, summarization) or any advanced logic that could have multiple interchangeable algorithms.
-- **Factory/Abstract Factory** for creating complex domain aggregates (e.g., building a patient record with multiple sub-objects, handling default settings).
+- **Memoization**: Use React.memo() for expensive components
+- **Callback References**: useCallback() for event handlers
+- **Computed Values**: useMemo() for data transformations
+- **Virtualization**: Use windowing (react-window) for large lists or tables
+- **Suspense & Concurrent Mode**: Implement for smoother user experience
 
-## Testing & QA
+### Data Visualization Excellence
 
-- Provide unit tests that cover domain logic (pure, fast, no side effects).
-- Integration tests that mock out external dependencies but test layer interaction (e.g., ensuring repository calls persist the correct data).
-- Explicitly test the security boundaries—attempt unauthorized calls, expired tokens, role-based restrictions.
+- **Three.js Best Practices**: Use instancing for neural nodes, dispose geometries
+- **WebGL Optimizations**: Optimize shaders for brain visualization effects
+- **Progressive Loading**: Implement for large datasets in visualizations
+- **Precomputation**: Transform complex data outside render cycles
 
-## Error Handling & Custom Exceptions
+### State Management
 
-- Create domain exceptions (e.g., `AppointmentConflictError`, `UnauthorizedAccessError`).
-- In the API layer, catch these domain exceptions and translate them to appropriate HTTP status codes (e.g., `409 Conflict`, `401 Unauthorized`).
-- Document all custom exceptions inline.
+- **React Context API**: Use for global theme, auth, and preferences only
+- **Local Component State**: Prefer for UI-specific states
+- **useReducer Pattern**: Implement for complex state logic
+- **Form State**: Use React Hook Form for performance and validation
+- **Query Caching**: Implement for API data with proper invalidation
 
-## Function Size & Responsibilities
+### Styling with Tailwind
 
-- Each function **≤15 lines**. For complex logic, break into smaller private helper methods.
-- No function or method should do more than one conceptual operation.
-- Aim for short, descriptive names and explicit docstrings for each method and class.
+- **Custom Theme**: Extend Tailwind for our luxury aesthetic
+- **Component Abstractions**: Extract common patterns to components
+- **Dark Mode Support**: Consistent dark: variant implementation
+- **Responsive Design**: Mobile-first with deliberate breakpoints
+- **Accessibility**: Ensure proper contrast, focus states, and ARIA attributes
 
-## Configuration
+### HIPAA Compliance in Frontend
 
-- Store HIPAA compliance settings (e.g., encryption, logging policies, BAA-related toggles) in a **.env** file or `settings.py`.
-- Document each variable (meaning, usage) in code or in a dedicated reference file.
-- No dynamic or runtime adjustments to global config.
+- **No PHI in URLs**: Use POST for sensitive data, never GET params
+- **Secure Storage**: No PHI in localStorage or sessionStorage
+- **Auto-Logout**: Implement timeouts for inactive sessions
+- **Secure Forms**: Validate and sanitize inputs, prevent XSS
+- **Audit Logging**: Track all data access in compliance with HIPAA
 
-## Luxury Concierge Quality
+### API Integration
 
-- The code, UX, and overall system must reflect a high-end "concierge psychiatry" experience—fast, reliable, impeccably designed.
-- Include thoughtful touches like automated text/email reminders (via HIPAA-compliant Twilio) or easy patient scheduling to justify premium fees.
-- Keep potential future expansion to a SaaS model in mind, but remain hyper-focused on immediate, impeccable performance for a single top-tier provider.
+- **Typed API Clients**: Strong typing for all API interactions
+- **Error Handling**: Graceful degradation for API failures
+- **Loading States**: Consistent loading indicators across the application
+- **Retry Logic**: Implement with exponential backoff
+- **Request Batching**: Combine related requests where appropriate
+
+## Backend Guidelines (FastAPI)
+
+### Domain Layer
+
+- Zero references to FastAPI, AWS, or external frameworks
+- Patient, Appointment, Digital Twin, and Treatment models here
+- Clinical logic for risk assessment, outcomes, and predictions
+
+### Data Layer
+
+- Repository Pattern for data access
+- ORM models separate from domain entities
+- Efficient database queries with proper indexing
+
+### Presentation Layer (API)
+
+- Pydantic v2 schemas for request/response validation
+- FastAPI Depends() for dependency injection
+- Comprehensive OpenAPI documentation
+
+### Security & HIPAA
+
+- Authentication & role-based access control
+- AWS Cognito integration with MFA
+- JWT token validation for all protected endpoints
+- PHI exclusion from logs and error messages
+
+## Integration Points
+
+### XGBoost ML Service
+
+- Real-time risk prediction integration
+- Treatment response forecasting
+- Digital brain model data exchange
+- Feature importance visualization
+
+### DigitalTwin Integration
+
+- Bidirectional data flow with 3D brain visualization
+- Dynamic region highlighting based on ML predictions
+- Temporal modeling of treatment effects
+- Patient-specific neural network modeling
+
+### MentalLLaMA Integration
+
+- Context-aware patient data analysis
+- Natural language processing for notes and assessments
+- Semantic search across patient history
+- Clinical decision support with explainable AI
+
+## Testing & Quality
+
+### Frontend Testing
+
+- React Testing Library for component tests
+- Cypress for E2E testing
+- Storybook for component documentation
+- Accessibility testing (axe-core)
+
+### Backend Testing
+
+- Pytest with explicit coverage
+- Mock external dependencies
+- Integration tests for API endpoints
+- Security boundary testing
+
+## Luxury Concierge Experience
+
+- **Seamless UX**: Fluid transitions, optimistic updates
+- **Aesthetic Excellence**: Consistent, premium visual language
+- **Performance**: Near-instant responses for critical functions
+- **Personalization**: Tailored experience for each provider and patient
+- **Trust Signals**: Clear security indicators throughout the interface

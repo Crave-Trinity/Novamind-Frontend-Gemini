@@ -1,105 +1,82 @@
 """
-Interface definitions for the XGBoost service.
+Interface definition for the XGBoost service.
 
-This module defines the abstract interfaces and common types
-for the XGBoost machine learning service.
+This module defines the abstract base class, enums, and observer pattern
+for the XGBoost service.
 """
 
 import abc
-import logging
+from abc import ABC, abstractmethod
 from enum import Enum, auto
 from typing import Dict, List, Any, Optional, Set, Union
 
 
 class ModelType(str, Enum):
-    """Types of models supported by the XGBoost service."""
+    """Types of XGBoost models available in the service."""
     
-    RELAPSE_RISK = "relapse-risk"
-    SUICIDE_RISK = "suicide-risk"
-    HOSPITALIZATION_RISK = "hospitalization-risk"
-    MEDICATION_SSRI_RESPONSE = "medication_ssri-response"
-    MEDICATION_SNRI_RESPONSE = "medication_snri-response"
-    THERAPY_CBT_RESPONSE = "therapy_cbt-response"
-    THERAPY_DBT_RESPONSE = "therapy_dbt-response"
-    SYMPTOM_OUTCOME = "symptom-outcome"
-    FUNCTIONAL_OUTCOME = "functional-outcome"
-    QUALITY_OF_LIFE_OUTCOME = "quality_of_life-outcome"
+    RISK_RELAPSE = "relapse-risk"
+    RISK_SUICIDE = "suicide-risk"
+    RISK_HOSPITALIZATION = "hospitalization-risk"
+    TREATMENT_MEDICATION_SSRI = "medication_ssri-response"
+    TREATMENT_MEDICATION_SNRI = "medication_snri-response"
+    TREATMENT_MEDICATION_ATYPICAL = "medication_atypical-response"
+    TREATMENT_THERAPY_CBT = "therapy_cbt-response"
+    TREATMENT_THERAPY_DBT = "therapy_dbt-response"
+    TREATMENT_THERAPY_IPT = "therapy_ipt-response"
+    TREATMENT_THERAPY_PSYCHODYNAMIC = "therapy_psychodynamic-response"
+    OUTCOME_SYMPTOM = "symptom-outcome"
+    OUTCOME_FUNCTIONAL = "functional-outcome"
+    OUTCOME_QUALITY_OF_LIFE = "quality_of_life-outcome"
 
 
 class EventType(str, Enum):
-    """Types of events that can be observed in the XGBoost service."""
+    """Types of events emitted by the XGBoost service."""
     
     INITIALIZATION = "initialization"
     PREDICTION = "prediction"
     INTEGRATION = "integration"
     ERROR = "error"
-    CONFIG_CHANGE = "config_change"
 
 
 class PrivacyLevel(Enum):
-    """Privacy levels for PHI detection."""
+    """Privacy level for PHI detection and handling."""
     
-    STANDARD = 1
-    ENHANCED = 2
-    MAXIMUM = 3
+    STANDARD = 1  # Basic PHI detection (SSNs, MRNs, names)
+    ENHANCED = 2  # Enhanced detection (includes contact info)
+    MAXIMUM = 3   # Maximum detection (includes demographic info)
 
 
-class Observer(abc.ABC):
-    """
-    Observer interface for the Observer pattern.
+class Observer(ABC):
+    """Observer interface for the Observer pattern."""
     
-    This interface defines the contract for observers that want to be notified
-    of events in the XGBoost service.
-    """
-    
-    @abc.abstractmethod
+    @abstractmethod
     def update(self, event_type: EventType, data: Dict[str, Any]) -> None:
         """
-        Receive updates from the observed service.
+        Receive an update from the observed subject.
         
         Args:
-            event_type: Type of event that occurred
-            data: Data associated with the event
+            event_type: Type of event
+            data: Event data
         """
         pass
 
 
-class XGBoostInterface(abc.ABC):
+class XGBoostInterface(ABC):
     """
     Abstract interface for the XGBoost service.
     
-    This interface defines the contract for all XGBoost service implementations,
-    regardless of the underlying infrastructure (AWS, Azure, GCP, local, etc.).
+    This interface defines the contract that all XGBoost service
+    implementations must follow.
     """
     
     def __init__(self):
-        """Initialize a new XGBoost service instance."""
+        """Initialize a new XGBoost service interface."""
         self._initialized = False
-        self._logger = logging.getLogger(__name__)
     
-    def is_initialized(self) -> bool:
-        """
-        Check if the service is initialized.
-        
-        Returns:
-            True if initialized, False otherwise
-        """
-        return self._initialized
-    
-    def _ensure_initialized(self) -> None:
-        """
-        Ensure the service is initialized before use.
-        
-        Raises:
-            RuntimeError: If the service is not initialized
-        """
-        if not self._initialized:
-            raise RuntimeError("XGBoost service is not initialized")
-    
-    @abc.abstractmethod
+    @abstractmethod
     def initialize(self, config: Dict[str, Any]) -> None:
         """
-        Initialize the service with configuration.
+        Initialize the XGBoost service with configuration.
         
         Args:
             config: Configuration dictionary
@@ -109,7 +86,7 @@ class XGBoostInterface(abc.ABC):
         """
         pass
     
-    @abc.abstractmethod
+    @abstractmethod
     def register_observer(self, event_type: Union[EventType, str], observer: Observer) -> None:
         """
         Register an observer for a specific event type.
@@ -120,7 +97,7 @@ class XGBoostInterface(abc.ABC):
         """
         pass
     
-    @abc.abstractmethod
+    @abstractmethod
     def unregister_observer(self, event_type: Union[EventType, str], observer: Observer) -> None:
         """
         Unregister an observer for a specific event type.
@@ -131,7 +108,7 @@ class XGBoostInterface(abc.ABC):
         """
         pass
     
-    @abc.abstractmethod
+    @abstractmethod
     def predict_risk(
         self,
         patient_id: str,
@@ -155,11 +132,10 @@ class XGBoostInterface(abc.ABC):
             ValidationError: If parameters are invalid
             DataPrivacyError: If PHI is detected in data
             PredictionError: If prediction fails
-            ServiceConnectionError: If connection to prediction service fails
         """
         pass
     
-    @abc.abstractmethod
+    @abstractmethod
     def predict_treatment_response(
         self,
         patient_id: str,
@@ -185,11 +161,10 @@ class XGBoostInterface(abc.ABC):
             ValidationError: If parameters are invalid
             DataPrivacyError: If PHI is detected in data
             PredictionError: If prediction fails
-            ServiceConnectionError: If connection to prediction service fails
         """
         pass
     
-    @abc.abstractmethod
+    @abstractmethod
     def predict_outcome(
         self,
         patient_id: str,
@@ -215,11 +190,10 @@ class XGBoostInterface(abc.ABC):
             ValidationError: If parameters are invalid
             DataPrivacyError: If PHI is detected in data
             PredictionError: If prediction fails
-            ServiceConnectionError: If connection to prediction service fails
         """
         pass
     
-    @abc.abstractmethod
+    @abstractmethod
     def get_feature_importance(
         self,
         patient_id: str,
@@ -240,11 +214,10 @@ class XGBoostInterface(abc.ABC):
         Raises:
             ResourceNotFoundError: If prediction not found
             ValidationError: If parameters are invalid
-            ServiceConnectionError: If connection to storage fails
         """
         pass
     
-    @abc.abstractmethod
+    @abstractmethod
     def integrate_with_digital_twin(
         self,
         patient_id: str,
@@ -264,13 +237,11 @@ class XGBoostInterface(abc.ABC):
             
         Raises:
             ResourceNotFoundError: If prediction not found
-            ConfigurationError: If digital twin integration not configured
             ValidationError: If parameters are invalid
-            ServiceConnectionError: If connection to digital twin service fails
         """
         pass
     
-    @abc.abstractmethod
+    @abstractmethod
     def get_model_info(self, model_type: str) -> Dict[str, Any]:
         """
         Get information about a model.
@@ -285,3 +256,16 @@ class XGBoostInterface(abc.ABC):
             ModelNotFoundError: If model not found
         """
         pass
+    
+    def _ensure_initialized(self) -> None:
+        """
+        Ensure the service is initialized before use.
+        
+        Raises:
+            ConfigurationError: If service is not initialized
+        """
+        if not self._initialized:
+            from app.core.services.ml.xgboost.exceptions import ConfigurationError
+            raise ConfigurationError(
+                "XGBoost service not initialized. Call initialize() first."
+            )

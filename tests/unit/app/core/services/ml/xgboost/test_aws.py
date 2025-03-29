@@ -1,742 +1,665 @@
 """
 Unit tests for the AWS XGBoost service implementation.
-
-These tests verify that the AWS implementation of the XGBoost service
-works correctly, with all AWS services properly mocked.
 """
 
 import json
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, patch, call
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Union
-
-import boto3
 from botocore.exceptions import ClientError
 
 from app.core.services.ml.xgboost.aws import AWSXGBoostService
-from app.core.services.ml.xgboost.interface import ModelType, EventType, Observer, PrivacyLevel
+from app.core.services.ml.xgboost.interface import EventType, PrivacyLevel, Observer
 from app.core.services.ml.xgboost.exceptions import (
-    ValidationError, DataPrivacyError, ResourceNotFoundError,
-    ModelNotFoundError, PredictionError, ServiceConnectionError, ConfigurationError
+    ValidationError,
+    DataPrivacyError,
+    ResourceNotFoundError,
+    ModelNotFoundError,
+    PredictionError,
+    ServiceConnectionError,
+    ConfigurationError
 )
 
 
 class TestObserver(Observer):
-    """Test observer implementation for testing the Observer pattern."""
+    """Test implementation of the Observer interface."""
     
     def __init__(self):
-        """Initialize the observer with an empty events list."""
+        """Initialize the test observer."""
         self.events = []
     
-    def update(self, event_type: EventType, data: Dict[str, Any]) -> None:
-        """
-        Receive updates from the observed service.
-        
-        Args:
-            event_type: Type of event that occurred
-            data: Data associated with the event
-        """
+    def update(self, event_type, data):
+        """Record events for testing."""
         self.events.append((event_type, data))
-    
-    def clear(self) -> None:
-        """Clear the events list."""
-        self.events = []
 
 
 @pytest.fixture
-def mock_sagemaker_client():
-    """Fixture for mocking the SageMaker runtime client."""
-    with patch("boto3.client") as mock_client:
-        # Setup the mock client
-        sagemaker_runtime = MagicMock()
-        
-        # Mock successful response from SageMaker
-        mock_response = {
-            "Body": MagicMock()
-        }
-        mock_response["Body"].read.return_value = json.dumps({
-            "prediction_id": "test-prediction-id",
-            "risk_level": "moderate",
-            "risk_score": 0.5,
-            "confidence": 0.8,
-            "features": {
-                "symptom_severity": 0.7,
-                "medication_adherence": 0.4
-            },
-            "contributing_factors": [
-                {
-                    "name": "symptom_severity",
-                    "impact": 0.7,
-                    "description": "Symptom Severity is significantly increasing the risk."
-                }
-            ]
-        }).encode()
-        
-        sagemaker_runtime.invoke_endpoint.return_value = mock_response
-        mock_client.return_value = sagemaker_runtime
-        
-        yield mock_client
-
-
-@pytest.fixture
-def mock_dynamodb_resource():
-    """Fixture for mocking the DynamoDB resource."""
-    with patch("boto3.resource") as mock_resource:
-        # Setup the mock resource
-        dynamodb = MagicMock()
-        table = MagicMock()
-        
-        # Mock successful response from DynamoDB
-        table.get_item.return_value = {
-            "Item": {
-                "prediction_id": "test-prediction-id",
-                "patient_id": "test-patient-id",
-                "model_type": "relapse-risk",
-                "timestamp": "2025-03-01T00:00:00Z",
-                "data": json.dumps({
-                    "prediction_id": "test-prediction-id",
-                    "patient_id": "test-patient-id",
-                    "risk_level": "moderate",
-                    "risk_score": 0.5,
-                    "confidence": 0.8,
-                    "features": {
-                        "symptom_severity": 0.7,
-                        "medication_adherence": 0.4
-                    }
-                })
-            }
-        }
-        
-        table.put_item.return_value = {}
-        dynamodb.Table.return_value = table
-        mock_resource.return_value = dynamodb
-        
-        yield mock_resource
-
-
-@pytest.fixture
-def mock_lambda_client():
-    """Fixture for mocking the Lambda client."""
-    with patch("boto3.client") as mock_client:
-        # Setup the mock client
-        lambda_client = MagicMock()
-        
-        # Mock successful response from Lambda
-        mock_response = {
-            "Payload": MagicMock()
-        }
-        mock_response["Payload"].read.return_value = json.dumps({
-            "integration_id": "test-integration-id",
-            "status": "success",
-            "details": {
-                "digital_twin_updated": True
-            }
-        }).encode()
-        
-        lambda_client.invoke.return_value = mock_response
-        mock_client.return_value = lambda_client
-        
-        yield mock_client
-
-
-@pytest.fixture
-def aws_service(mock_sagemaker_client, mock_dynamodb_resource, mock_lambda_client):
-    """Fixture for creating an AWS XGBoost service with mocked dependencies."""
-    # Initialize the service
-    service = AWSXGBoostService()
-    
-    # Initialize with basic config
-    service.initialize({
+def aws_config():
+    """Fixture for AWS configuration."""
+    return {
         "region_name": "us-east-1",
-        "predictions_table": "test-predictions-table",
-        "digital_twin_function": "test-digital-twin-function",
+        "endpoint_prefix": "xgboost",
+        "bucket_name": "novamind-ml-models",
         "log_level": "INFO",
         "privacy_level": PrivacyLevel.STANDARD,
-        "model_endpoints": {
-            "relapse-risk": "relapse-risk-endpoint",
-            "suicide-risk": "suicide-risk-endpoint",
-            "hospitalization-risk": "hospitalization-risk-endpoint",
-            "ssri-response": "ssri-response-endpoint",
-            "default": "default-endpoint"
+        "model_mappings": {
+            "risk-relapse": "relapse-risk-model",
+            "risk-suicide": "suicide-risk-model",
+            "treatment-medication_ssri": "ssri-response-model",
+            "feature-importance": "feature-importance-model",
+            "digital-twin-integration": "digital-twin-integration-model"
         }
-    })
-    
-    yield service
+    }
 
 
 @pytest.fixture
-def observer():
-    """Fixture for creating a test observer."""
+def test_observer():
+    """Fixture for test observer."""
     return TestObserver()
 
 
+@pytest.fixture
+def boto_clients():
+    """Fixture for mocked boto3 clients."""
+    with patch("boto3.client") as mock_boto3_client:
+        sagemaker_runtime = MagicMock()
+        sagemaker = MagicMock()
+        s3 = MagicMock()
+        
+        # Configure mock boto3.client to return different clients
+        def get_client(service_name, **kwargs):
+            if service_name == "sagemaker-runtime":
+                return sagemaker_runtime
+            elif service_name == "sagemaker":
+                return sagemaker
+            elif service_name == "s3":
+                return s3
+            else:
+                return MagicMock()
+        
+        mock_boto3_client.side_effect = get_client
+        
+        yield {
+            "sagemaker_runtime": sagemaker_runtime,
+            "sagemaker": sagemaker,
+            "s3": s3,
+            "mock_boto3_client": mock_boto3_client
+        }
+
+
+@pytest.fixture
+def aws_service(boto_clients, aws_config):
+    """Fixture for AWS XGBoost service."""
+    service = AWSXGBoostService()
+    service.initialize(aws_config)
+    return service
+
+
+@pytest.fixture
+def clinical_data():
+    """Fixture for clinical data."""
+    return {
+        "symptom_severity": 7,
+        "medication_adherence": 0.8,
+        "previous_episodes": 2,
+        "social_support": 5,
+        "stress_level": 6
+    }
+
+
+@pytest.fixture
+def treatment_details():
+    """Fixture for treatment details."""
+    return {
+        "medication": "Fluoxetine",
+        "dosage": "20mg",
+        "frequency": "daily",
+        "duration_weeks": 8
+    }
+
+
+@pytest.fixture
+def treatment_plan():
+    """Fixture for treatment plan."""
+    return {
+        "medications": [
+            {
+                "name": "Fluoxetine",
+                "dosage": "20mg",
+                "frequency": "daily",
+                "duration_weeks": 8
+            }
+        ],
+        "therapy": {
+            "type": "CBT",
+            "frequency": "weekly",
+            "duration_weeks": 12
+        },
+        "lifestyle_changes": [
+            "Regular exercise",
+            "Sleep hygiene",
+            "Stress management"
+        ]
+    }
+
+
 class TestAWSXGBoostService:
-    """Tests for the AWS XGBoost service implementation."""
+    """Test suite for the AWS XGBoost service implementation."""
     
-    def test_initialization(self, aws_service):
-        """Test that the service initializes correctly."""
-        assert aws_service.is_initialized() is True
+    def test_initialization(self, aws_config, boto_clients):
+        """Test initialization with configuration."""
+        service = AWSXGBoostService()
+        service.initialize(aws_config)
+        
+        assert service._initialized is True
+        assert service._region_name == aws_config["region_name"]
+        assert service._endpoint_prefix == aws_config["endpoint_prefix"]
+        assert service._bucket_name == aws_config["bucket_name"]
+        assert service._model_mappings == aws_config["model_mappings"]
+        assert service._privacy_level == PrivacyLevel.STANDARD
+        
+        # Check that boto3 clients were created
+        calls = [
+            call("sagemaker-runtime", region_name=aws_config["region_name"]),
+            call("sagemaker", region_name=aws_config["region_name"]),
+            call("s3", region_name=aws_config["region_name"])
+        ]
+        boto_clients["mock_boto3_client"].assert_has_calls(calls, any_order=True)
     
-    def test_initialization_with_invalid_config(self):
-        """Test initialization with invalid configuration."""
+    def test_initialization_missing_parameters(self):
+        """Test initialization with missing parameters."""
         service = AWSXGBoostService()
         
-        # Missing required field
-        with pytest.raises(ConfigurationError):
+        with pytest.raises(ConfigurationError) as exc_info:
             service.initialize({})
         
-        # Invalid log level
-        with pytest.raises(ConfigurationError):
-            service.initialize({
-                "region_name": "us-east-1",
-                "log_level": "INVALID"
-            })
-        
-        # Invalid privacy level
-        with pytest.raises(ConfigurationError):
-            service.initialize({
-                "region_name": "us-east-1",
-                "privacy_level": 10
-            })
+        assert "Missing required AWS parameter" in str(exc_info.value)
     
-    def test_observer_pattern(self, aws_service, observer):
-        """Test the Observer pattern implementation."""
-        # Register the observer
-        aws_service.register_observer(EventType.INITIALIZATION, observer)
+    def test_initialization_client_error(self, boto_clients):
+        """Test initialization with AWS client error."""
+        # Make boto3.client raise ClientError
+        error_response = {"Error": {"Code": "AuthFailure", "Message": "Auth failure"}}
         
-        # Re-initialize to trigger the event
-        aws_service.initialize({
-            "region_name": "us-east-1"
-        })
-        
-        # Check that the observer was notified
-        assert len(observer.events) == 1
-        assert observer.events[0][0] == EventType.INITIALIZATION
-        
-        # Unregister the observer
-        aws_service.unregister_observer(EventType.INITIALIZATION, observer)
-        
-        # Re-initialize to check that the observer is not notified
-        observer.clear()
-        aws_service.initialize({
-            "region_name": "us-east-1"
-        })
-        
-        # Check that the observer was not notified
-        assert len(observer.events) == 0
-        
-        # Test wildcard observer
-        aws_service.register_observer("*", observer)
-        
-        # Re-initialize to trigger the event
-        aws_service.initialize({
-            "region_name": "us-east-1"
-        })
-        
-        # Check that the observer was notified
-        assert len(observer.events) == 1
-    
-    def test_predict_risk(self, aws_service, mock_sagemaker_client):
-        """Test the predict_risk method."""
-        # Test successful prediction
-        result = aws_service.predict_risk(
-            patient_id="test-patient-id",
-            risk_type="relapse",
-            clinical_data={
-                "symptom_severity": 5,
-                "medication_adherence": 3
-            }
+        boto_clients["mock_boto3_client"].side_effect = ClientError(
+            error_response, "CreateClient"
         )
         
-        # Check that SageMaker was called with the correct parameters
-        sagemaker_client = mock_sagemaker_client.return_value
-        sagemaker_client.invoke_endpoint.assert_called_once()
+        service = AWSXGBoostService()
         
-        # Verify the result
-        assert result["prediction_id"] == "test-prediction-id"
-        assert result["risk_level"] == "moderate"
-        assert result["risk_score"] == 0.5
-        assert result["confidence"] == 0.8
-        assert "contributing_factors" in result
+        with pytest.raises(ServiceConnectionError) as exc_info:
+            service.initialize({
+                "region_name": "us-east-1",
+                "endpoint_prefix": "xgboost",
+                "bucket_name": "novamind-ml-models"
+            })
+        
+        assert "Failed to connect to AWS services" in str(exc_info.value)
+        assert exc_info.value.service == "AWS"
+        assert exc_info.value.error_type == "AuthFailure"
+    
+    def test_observer_registration(self, aws_service, test_observer):
+        """Test observer registration and notification."""
+        # Register observer
+        aws_service.register_observer(EventType.PREDICTION, test_observer)
+        
+        # Trigger event - we'll need to patch _invoke_endpoint for this
+        with patch.object(aws_service, "_invoke_endpoint") as mock_invoke:
+            mock_invoke.return_value = {
+                "prediction_score": 0.8,
+                "confidence": 0.9,
+                "prediction_id": "test-id"
+            }
+            
+            aws_service.predict_risk(
+                patient_id="P12345",
+                risk_type="relapse",
+                clinical_data={"symptom_severity": 7}
+            )
+        
+        # Verify observer was notified
+        assert len(test_observer.events) == 1
+        event_type, data = test_observer.events[0]
+        assert event_type == EventType.PREDICTION
+        assert data["prediction_type"] == "risk"
+        assert data["risk_type"] == "relapse"
+        assert data["patient_id"] == "P12345"
+        assert "timestamp" in data
+    
+    def test_observer_unregistration(self, aws_service, test_observer):
+        """Test observer unregistration."""
+        # Register then unregister observer
+        aws_service.register_observer(EventType.PREDICTION, test_observer)
+        aws_service.unregister_observer(EventType.PREDICTION, test_observer)
+        
+        # Trigger event
+        with patch.object(aws_service, "_invoke_endpoint") as mock_invoke:
+            mock_invoke.return_value = {
+                "prediction_score": 0.8,
+                "confidence": 0.9,
+                "prediction_id": "test-id"
+            }
+            
+            aws_service.predict_risk(
+                patient_id="P12345",
+                risk_type="relapse",
+                clinical_data={"symptom_severity": 7}
+            )
+        
+        # Verify observer was not notified
+        assert len(test_observer.events) == 0
+    
+    def test_predict_risk(self, aws_service, boto_clients, clinical_data):
+        """Test risk prediction."""
+        # Mock SageMaker endpoint response
+        response_body = {
+            "prediction_score": 0.7,
+            "confidence": 0.85,
+            "risk_level": "moderate",
+            "factors": ["symptom_severity", "previous_episodes"],
+            "prediction_id": "risk-123456-P12345"
+        }
+        
+        mock_response = {
+            "Body": MagicMock()
+        }
+        mock_response["Body"].read.return_value = json.dumps(response_body).encode("utf-8")
+        
+        boto_clients["sagemaker_runtime"].invoke_endpoint.return_value = mock_response
+        
+        # Call predict_risk
+        result = aws_service.predict_risk(
+            patient_id="P12345",
+            risk_type="relapse",
+            clinical_data=clinical_data,
+            time_frame_days=60
+        )
+        
+        # Check result
+        assert result == response_body
+        
+        # Verify SageMaker endpoint was called
+        boto_clients["sagemaker_runtime"].invoke_endpoint.assert_called_once()
+        
+        # Get the call args
+        call_args = boto_clients["sagemaker_runtime"].invoke_endpoint.call_args[1]
+        assert call_args["EndpointName"] == "xgboost-relapse-risk-model"
+        assert call_args["ContentType"] == "application/json"
+        
+        # Parse the request body
+        request_body = json.loads(call_args["Body"])
+        assert request_body["patient_id"] == "P12345"
+        assert request_body["clinical_data"] == clinical_data
+        assert request_body["time_frame_days"] == 60
     
     def test_predict_risk_validation_error(self, aws_service):
-        """Test that predict_risk handles validation errors correctly."""
-        # Invalid risk type
+        """Test risk prediction with validation error."""
         with pytest.raises(ValidationError):
             aws_service.predict_risk(
-                patient_id="test-patient-id",
-                risk_type="invalid-risk-type",
-                clinical_data={}
+                patient_id="",  # Empty patient ID
+                risk_type="relapse",
+                clinical_data={"symptom_severity": 7}
+            )
+        
+        with pytest.raises(ValidationError):
+            aws_service.predict_risk(
+                patient_id="P12345",
+                risk_type="",  # Empty risk type
+                clinical_data={"symptom_severity": 7}
+            )
+        
+        with pytest.raises(ValidationError):
+            aws_service.predict_risk(
+                patient_id="P12345",
+                risk_type="relapse",
+                clinical_data={}  # Empty clinical data
             )
     
     def test_predict_risk_phi_detection(self, aws_service):
-        """Test that predict_risk detects PHI in the data."""
-        # Data with PHI
+        """Test risk prediction with PHI detection."""
         with pytest.raises(DataPrivacyError):
             aws_service.predict_risk(
-                patient_id="test-patient-id",
+                patient_id="P12345",
                 risk_type="relapse",
                 clinical_data={
-                    "ssn": "123-45-6789",
-                    "symptom_severity": 5
+                    "symptom_severity": 7,
+                    "ssn": "123-45-6789"  # Contains PHI
                 }
             )
     
-    def test_predict_treatment_response(self, aws_service, mock_sagemaker_client):
-        """Test the predict_treatment_response method."""
-        # Mock different response for treatment prediction
-        sagemaker_client = mock_sagemaker_client.return_value
-        mock_response = {
-            "Body": MagicMock()
-        }
-        mock_response["Body"].read.return_value = json.dumps({
-            "prediction_id": "test-treatment-prediction-id",
-            "response_level": "good",
-            "response_score": 0.75,
-            "confidence": 0.85,
-            "time_to_response_days": 28,
-            "features": {
-                "symptom_severity": 0.7,
-                "previous_medication_response": 0.6
-            },
-            "suggested_adjustments": [
-                {
-                    "adjustment_type": "dosage",
-                    "suggestion": "Consider increasing dosage to 20mg",
-                    "reasoning": "Current dosage may be subtherapeutic"
-                }
-            ]
-        }).encode()
+    def test_predict_risk_model_not_found(self, aws_service):
+        """Test risk prediction with model not found."""
+        with pytest.raises(ModelNotFoundError):
+            aws_service.predict_risk(
+                patient_id="P12345",
+                risk_type="unknown_model",  # Not in model mappings
+                clinical_data={"symptom_severity": 7}
+            )
+    
+    def test_predict_risk_aws_error(self, aws_service, boto_clients):
+        """Test risk prediction with AWS error."""
+        # Make SageMaker endpoint raise ClientError
+        error_response = {"Error": {"Code": "ModelError", "Message": "Model error"}}
         
-        sagemaker_client.invoke_endpoint.return_value = mock_response
-        
-        # Test successful prediction
-        result = aws_service.predict_treatment_response(
-            patient_id="test-patient-id",
-            treatment_type="medication_ssri",
-            treatment_details={
-                "medication": "fluoxetine",
-                "dosage": "10mg",
-                "frequency": "daily"
-            },
-            clinical_data={
-                "symptom_severity": 5,
-                "previous_medication_response": True
-            }
+        boto_clients["sagemaker_runtime"].invoke_endpoint.side_effect = ClientError(
+            error_response, "InvokeEndpoint"
         )
         
-        # Check that SageMaker was called with the correct parameters
-        sagemaker_client.invoke_endpoint.assert_called()
+        with pytest.raises(PredictionError) as exc_info:
+            aws_service.predict_risk(
+                patient_id="P12345",
+                risk_type="relapse",
+                clinical_data={"symptom_severity": 7}
+            )
         
-        # Verify the result
-        assert result["prediction_id"] == "test-treatment-prediction-id"
-        assert result["response_level"] == "good"
-        assert result["response_score"] == 0.75
-        assert result["confidence"] == 0.85
-        assert result["time_to_response_days"] == 28
-        assert "suggested_adjustments" in result
+        assert "Model prediction failed" in str(exc_info.value)
+        assert exc_info.value.model_type == "risk-relapse"
     
-    def test_predict_treatment_response_validation_error(self, aws_service):
-        """Test that predict_treatment_response handles validation errors correctly."""
-        # Invalid treatment type
-        with pytest.raises(ValidationError):
-            aws_service.predict_treatment_response(
-                patient_id="test-patient-id",
-                treatment_type="invalid-treatment-type",
-                treatment_details={},
-                clinical_data={}
-            )
+    def test_predict_treatment_response(self, aws_service, boto_clients, clinical_data, treatment_details):
+        """Test treatment response prediction."""
+        # Mock SageMaker endpoint response
+        response_body = {
+            "response_probability": 0.65,
+            "confidence": 0.8,
+            "response_level": "moderate",
+            "time_to_response_weeks": 4,
+            "prediction_id": "treatment-123456-P12345"
+        }
         
-        # Missing medication for medication treatment
-        with pytest.raises(ValidationError):
-            aws_service.predict_treatment_response(
-                patient_id="test-patient-id",
-                treatment_type="medication_ssri",
-                treatment_details={},
-                clinical_data={}
-            )
-        
-        # Missing frequency for therapy treatment
-        with pytest.raises(ValidationError):
-            aws_service.predict_treatment_response(
-                patient_id="test-patient-id",
-                treatment_type="therapy_cbt",
-                treatment_details={},
-                clinical_data={}
-            )
-    
-    def test_predict_outcome(self, aws_service, mock_sagemaker_client):
-        """Test the predict_outcome method."""
-        # Mock response for outcome prediction
-        sagemaker_client = mock_sagemaker_client.return_value
         mock_response = {
             "Body": MagicMock()
         }
-        mock_response["Body"].read.return_value = json.dumps({
-            "prediction_id": "test-outcome-prediction-id",
-            "domains": [
-                {"name": "symptom_improvement", "score": 0.65},
-                {"name": "functional_improvement", "score": 0.58},
-                {"name": "quality_of_life_improvement", "score": 0.47}
-            ],
+        mock_response["Body"].read.return_value = json.dumps(response_body).encode("utf-8")
+        
+        boto_clients["sagemaker_runtime"].invoke_endpoint.return_value = mock_response
+        
+        # Call predict_treatment_response
+        result = aws_service.predict_treatment_response(
+            patient_id="P12345",
+            treatment_type="medication_ssri",
+            treatment_details=treatment_details,
+            clinical_data=clinical_data,
+            prediction_horizon="12_weeks"
+        )
+        
+        # Check result
+        assert result == response_body
+        
+        # Verify SageMaker endpoint was called
+        boto_clients["sagemaker_runtime"].invoke_endpoint.assert_called_once()
+        
+        # Get the call args
+        call_args = boto_clients["sagemaker_runtime"].invoke_endpoint.call_args[1]
+        assert call_args["EndpointName"] == "xgboost-ssri-response-model"
+        assert call_args["ContentType"] == "application/json"
+        
+        # Parse the request body
+        request_body = json.loads(call_args["Body"])
+        assert request_body["patient_id"] == "P12345"
+        assert request_body["clinical_data"] == clinical_data
+        assert request_body["treatment_details"] == treatment_details
+        assert request_body["prediction_horizon"] == "12_weeks"
+    
+    def test_predict_outcome(self, aws_service, boto_clients, clinical_data, treatment_plan):
+        """Test outcome prediction."""
+        # Mock SageMaker endpoint response
+        response_body = {
+            "outcome_score": 0.75,
             "confidence": 0.85,
-            "features": {
-                "baseline_severity": 0.7,
-                "treatment_intensity": 0.6
+            "outcome_category": "Remission",
+            "projected_changes": {
+                "symptom_reduction": 0.6,
+                "functioning_improvement": 0.5
             },
-            "influencing_factors": [
-                {
-                    "name": "treatment_adherence",
-                    "impact": 0.75,
-                    "description": "Treatment Adherence is significantly improving the outcome.",
-                    "category": "treatment"
-                }
-            ]
-        }).encode()
+            "prediction_id": "outcome-123456-P12345"
+        }
         
-        sagemaker_client.invoke_endpoint.return_value = mock_response
+        mock_response = {
+            "Body": MagicMock()
+        }
+        mock_response["Body"].read.return_value = json.dumps(response_body).encode("utf-8")
         
-        # Test successful prediction
+        boto_clients["sagemaker_runtime"].invoke_endpoint.return_value = mock_response
+        
+        # Call predict_outcome
         result = aws_service.predict_outcome(
-            patient_id="test-patient-id",
-            outcome_timeframe={"weeks": 12},
-            clinical_data={
-                "baseline_severity": 5,
-                "functional_status": 7
-            },
-            treatment_plan={
-                "interventions": ["medication", "psychotherapy"],
-                "intensity": "weekly"
-            },
+            patient_id="P12345",
+            outcome_timeframe={"weeks": 8, "days": 3},
+            clinical_data=clinical_data,
+            treatment_plan=treatment_plan,
             outcome_type="symptom"
         )
         
-        # Check that SageMaker was called with the correct parameters
-        sagemaker_client.invoke_endpoint.assert_called()
+        # Check result
+        assert result == response_body
         
-        # Verify the result
-        assert result["prediction_id"] == "test-outcome-prediction-id"
-        assert "outcome_metrics" in result
-        assert result["outcome_metrics"]["symptom_improvement"] == 0.65
-        assert result["confidence"] == 0.85
-        assert "influencing_factors" in result
-    
-    def test_predict_outcome_validation_error(self, aws_service):
-        """Test that predict_outcome handles validation errors correctly."""
-        # Invalid outcome timeframe
-        with pytest.raises(ValidationError):
-            aws_service.predict_outcome(
-                patient_id="test-patient-id",
-                outcome_timeframe={},
-                clinical_data={},
-                treatment_plan={}
-            )
-    
-    def test_get_feature_importance(self, aws_service, mock_dynamodb_resource):
-        """Test the get_feature_importance method."""
-        # Test successful feature importance retrieval
-        result = aws_service.get_feature_importance(
-            patient_id="test-patient-id",
-            model_type="relapse-risk",
-            prediction_id="test-prediction-id"
-        )
+        # Verify SageMaker endpoint was called
+        boto_clients["sagemaker_runtime"].invoke_endpoint.assert_called_once()
         
-        # Check that DynamoDB was queried with the correct parameters
-        dynamodb_resource = mock_dynamodb_resource.return_value
-        table = dynamodb_resource.Table.return_value
-        table.get_item.assert_called_with(
-            Key={"prediction_id": "test-prediction-id"}
-        )
+        # Get the call args
+        call_args = boto_clients["sagemaker_runtime"].invoke_endpoint.call_args[1]
+        assert call_args["EndpointName"].startswith("xgboost-outcome-")
+        assert call_args["ContentType"] == "application/json"
         
-        # Verify the result
-        assert "feature_importance" in result
-        assert "visualization" in result
+        # Parse the request body
+        request_body = json.loads(call_args["Body"])
+        assert request_body["patient_id"] == "P12345"
+        assert request_body["clinical_data"] == clinical_data
+        assert request_body["treatment_plan"] == treatment_plan
+        assert request_body["time_frame_days"] == 8 * 7 + 3
+        assert request_body["outcome_type"] == "symptom"
     
-    def test_get_feature_importance_not_found(self, aws_service, mock_dynamodb_resource):
-        """Test that get_feature_importance handles not found errors correctly."""
-        # Mock empty response from DynamoDB
-        dynamodb_resource = mock_dynamodb_resource.return_value
-        table = dynamodb_resource.Table.return_value
-        table.get_item.return_value = {}
-        
-        # Resource not found
-        with pytest.raises(ResourceNotFoundError):
-            aws_service.get_feature_importance(
-                patient_id="test-patient-id",
-                model_type="relapse-risk",
-                prediction_id="test-prediction-id"
-            )
-    
-    def test_get_feature_importance_patient_mismatch(self, aws_service, mock_dynamodb_resource):
-        """Test that get_feature_importance validates patient ID."""
-        # Mock response with different patient ID
-        dynamodb_resource = mock_dynamodb_resource.return_value
-        table = dynamodb_resource.Table.return_value
-        table.get_item.return_value = {
-            "Item": {
-                "prediction_id": "test-prediction-id",
-                "patient_id": "different-patient-id",
-                "model_type": "relapse-risk",
-                "timestamp": "2025-03-01T00:00:00Z",
-                "data": json.dumps({
-                    "prediction_id": "test-prediction-id",
-                    "patient_id": "different-patient-id",
-                    "risk_level": "moderate",
-                    "risk_score": 0.5
-                })
-            }
+    def test_get_feature_importance(self, aws_service, boto_clients):
+        """Test feature importance retrieval."""
+        # Mock SageMaker endpoint response
+        response_body = {
+            "features": [
+                {"name": "symptom_severity", "importance": 0.35},
+                {"name": "previous_episodes", "importance": 0.25},
+                {"name": "medication_adherence", "importance": 0.2},
+                {"name": "social_support", "importance": 0.15},
+                {"name": "stress_level", "importance": 0.05}
+            ],
+            "model_type": "relapse-risk",
+            "prediction_id": "risk-123456-P12345",
+            "timestamp": datetime.now().isoformat()
         }
         
-        # Patient ID mismatch
-        with pytest.raises(ValidationError):
-            aws_service.get_feature_importance(
-                patient_id="test-patient-id",
-                model_type="relapse-risk",
-                prediction_id="test-prediction-id"
-            )
-    
-    def test_integrate_with_digital_twin(self, aws_service, mock_lambda_client):
-        """Test the integrate_with_digital_twin method."""
-        # Test successful integration
-        result = aws_service.integrate_with_digital_twin(
-            patient_id="test-patient-id",
-            profile_id="test-profile-id",
-            prediction_id="test-prediction-id"
-        )
-        
-        # Check that Lambda was called with the correct parameters
-        lambda_client = mock_lambda_client.return_value
-        lambda_client.invoke.assert_called_once()
-        
-        # Verify the result
-        assert result["integration_id"] == "test-integration-id"
-        assert result["status"] == "success"
-        assert result["patient_id"] == "test-patient-id"
-        assert result["profile_id"] == "test-profile-id"
-        assert result["prediction_id"] == "test-prediction-id"
-    
-    def test_integrate_with_digital_twin_no_lambda(self):
-        """Test that integrate_with_digital_twin handles missing Lambda config."""
-        # Initialize the service without Lambda config
-        service = AWSXGBoostService()
-        service.initialize({
-            "region_name": "us-east-1"
-        })
-        
-        # No Lambda client configured
-        with pytest.raises(ConfigurationError):
-            service.integrate_with_digital_twin(
-                patient_id="test-patient-id",
-                profile_id="test-profile-id",
-                prediction_id="test-prediction-id"
-            )
-    
-    def test_get_model_info(self, aws_service):
-        """Test the get_model_info method."""
-        # Test successful model info retrieval
-        result = aws_service.get_model_info("relapse-risk")
-        
-        # Verify the result
-        assert result["model_type"] == "relapse-risk"
-        assert "description" in result
-        assert "features" in result
-        assert "performance_metrics" in result
-        assert "status" in result
-        assert result["status"] == "active"
-        assert result["endpoint"] == "relapse-risk-endpoint"
-    
-    def test_get_model_info_not_found(self, aws_service):
-        """Test that get_model_info handles not found errors correctly."""
-        # Invalid model type
-        with pytest.raises(ModelNotFoundError):
-            aws_service.get_model_info("invalid-model-type")
-    
-    def test_handle_aws_error(self):
-        """Test the _handle_aws_error method."""
-        service = AWSXGBoostService()
-        
-        # ResourceNotFoundException
-        error_response = {
-            "Error": {
-                "Code": "ResourceNotFoundException",
-                "Message": "Resource not found"
-            }
-        }
-        exception = ClientError(error_response, "test-operation")
-        result = service._handle_aws_error(exception, "test-operation")
-        assert isinstance(result, ResourceNotFoundError)
-        
-        # ValidationException
-        error_response = {
-            "Error": {
-                "Code": "ValidationException",
-                "Message": "Validation error"
-            }
-        }
-        exception = ClientError(error_response, "test-operation")
-        result = service._handle_aws_error(exception, "test-operation")
-        assert isinstance(result, ValidationError)
-        
-        # ModelError
-        error_response = {
-            "Error": {
-                "Code": "ModelError",
-                "Message": "Model error"
-            }
-        }
-        exception = ClientError(error_response, "test-operation")
-        result = service._handle_aws_error(exception, "test-operation")
-        assert isinstance(result, PredictionError)
-        
-        # Other AWS error
-        error_response = {
-            "Error": {
-                "Code": "InternalServerError",
-                "Message": "Internal server error"
-            }
-        }
-        exception = ClientError(error_response, "test-operation")
-        result = service._handle_aws_error(exception, "test-operation")
-        assert isinstance(result, ServiceConnectionError)
-        
-        # Non-AWS error
-        exception = ConnectionError("Connection error")
-        result = service._handle_aws_error(exception, "test-operation")
-        assert isinstance(result, ServiceConnectionError)
-    
-    def test_phi_detection(self, aws_service):
-        """Test the PHI detection functionality."""
-        # Test with privacy level STANDARD
-        service = AWSXGBoostService()
-        service.initialize({
-            "region_name": "us-east-1",
-            "privacy_level": PrivacyLevel.STANDARD
-        })
-        
-        # Test with PHI in data - SSN should be detected with STANDARD level
-        with pytest.raises(DataPrivacyError):
-            service._check_phi_in_data({
-                "ssn": "123-45-6789",
-                "symptom_severity": 5
-            })
-        
-        # Test with ENHANCED privacy level
-        service = AWSXGBoostService()
-        service.initialize({
-            "region_name": "us-east-1",
-            "privacy_level": PrivacyLevel.ENHANCED
-        })
-        
-        # Test with PHI in data - Email should be detected with ENHANCED level
-        with pytest.raises(DataPrivacyError):
-            service._check_phi_in_data({
-                "email": "patient@example.com",
-                "symptom_severity": 5
-            })
-        
-        # Test with MAXIMUM privacy level
-        service = AWSXGBoostService()
-        service.initialize({
-            "region_name": "us-east-1",
-            "privacy_level": PrivacyLevel.MAXIMUM
-        })
-        
-        # Test with PHI in key names - should be detected with MAXIMUM level
-        with pytest.raises(DataPrivacyError):
-            service._check_phi_in_data({
-                "patient_email": "patient@example.com",
-                "symptom_severity": 5
-            })
-    
-    def test_invoke_sagemaker_endpoint(self, aws_service, mock_sagemaker_client):
-        """Test the _invoke_sagemaker_endpoint method."""
-        # Test successful invocation
-        result = aws_service._invoke_sagemaker_endpoint(
-            model_type="relapse-risk",
-            request_data={"patient_id": "test-patient-id"}
-        )
-        
-        # Check that SageMaker was called with the correct parameters
-        sagemaker_client = mock_sagemaker_client.return_value
-        sagemaker_client.invoke_endpoint.assert_called_with(
-            EndpointName="relapse-risk-endpoint",
-            ContentType="application/json",
-            Body=json.dumps({"patient_id": "test-patient-id"}).encode()
-        )
-        
-        # Verify the result
-        assert result["prediction_id"] == "test-prediction-id"
-        
-        # Test with default endpoint
-        aws_service._invoke_sagemaker_endpoint(
-            model_type="unknown-model-type",
-            request_data={"patient_id": "test-patient-id"}
-        )
-        
-        # Check that SageMaker was called with the default endpoint
-        sagemaker_client.invoke_endpoint.assert_called_with(
-            EndpointName="default-endpoint",
-            ContentType="application/json",
-            Body=json.dumps({"patient_id": "test-patient-id"}).encode()
-        )
-    
-    def test_invoke_sagemaker_endpoint_errors(self, aws_service, mock_sagemaker_client):
-        """Test error handling in _invoke_sagemaker_endpoint method."""
-        sagemaker_client = mock_sagemaker_client.return_value
-        
-        # Test JSON decode error
         mock_response = {
             "Body": MagicMock()
         }
-        mock_response["Body"].read.return_value = "invalid-json".encode()
-        sagemaker_client.invoke_endpoint.return_value = mock_response
+        mock_response["Body"].read.return_value = json.dumps(response_body).encode("utf-8")
         
-        with pytest.raises(PredictionError):
-            aws_service._invoke_sagemaker_endpoint(
-                model_type="relapse-risk",
-                request_data={"patient_id": "test-patient-id"}
-            )
+        boto_clients["sagemaker_runtime"].invoke_endpoint.return_value = mock_response
         
-        # Test model error
-        error_response = {
-            "Error": {
-                "Code": "ModelError",
-                "Message": "Model error"
-            }
-        }
-        sagemaker_client.invoke_endpoint.side_effect = ClientError(
-            error_response, "invoke_endpoint"
+        # Call get_feature_importance
+        result = aws_service.get_feature_importance(
+            patient_id="P12345",
+            model_type="relapse-risk",
+            prediction_id="risk-123456-P12345"
         )
         
-        with pytest.raises(PredictionError):
-            aws_service._invoke_sagemaker_endpoint(
-                model_type="relapse-risk",
-                request_data={"patient_id": "test-patient-id"}
-            )
+        # Check result
+        assert result == response_body
         
-        # Test other AWS error
-        error_response = {
-            "Error": {
-                "Code": "InternalServerError",
-                "Message": "Internal server error"
+        # Verify SageMaker endpoint was called
+        boto_clients["sagemaker_runtime"].invoke_endpoint.assert_called_once()
+        
+        # Get the call args
+        call_args = boto_clients["sagemaker_runtime"].invoke_endpoint.call_args[1]
+        assert call_args["EndpointName"] == "xgboost-feature-importance-model"
+        assert call_args["ContentType"] == "application/json"
+        
+        # Parse the request body
+        request_body = json.loads(call_args["Body"])
+        assert request_body["patient_id"] == "P12345"
+        assert request_body["model_type"] == "relapse-risk"
+        assert request_body["prediction_id"] == "risk-123456-P12345"
+    
+    def test_integrate_with_digital_twin(self, aws_service, boto_clients):
+        """Test digital twin integration."""
+        # Mock SageMaker endpoint response
+        response_body = {
+            "integration_id": "integration-123456",
+            "status": "success",
+            "patient_id": "P12345",
+            "profile_id": "DP67890",
+            "prediction_id": "risk-123456-P12345",
+            "timestamp": datetime.now().isoformat(),
+            "details": {
+                "updated_regions": ["amygdala", "prefrontal_cortex"],
+                "confidence": 0.85
             }
         }
-        sagemaker_client.invoke_endpoint.side_effect = ClientError(
-            error_response, "invoke_endpoint"
+        
+        mock_response = {
+            "Body": MagicMock()
+        }
+        mock_response["Body"].read.return_value = json.dumps(response_body).encode("utf-8")
+        
+        boto_clients["sagemaker_runtime"].invoke_endpoint.return_value = mock_response
+        
+        # Call integrate_with_digital_twin
+        result = aws_service.integrate_with_digital_twin(
+            patient_id="P12345",
+            profile_id="DP67890",
+            prediction_id="risk-123456-P12345"
         )
         
-        with pytest.raises(ServiceConnectionError):
-            aws_service._invoke_sagemaker_endpoint(
-                model_type="relapse-risk",
-                request_data={"patient_id": "test-patient-id"}
+        # Check result
+        assert result == response_body
+        
+        # Verify SageMaker endpoint was called
+        boto_clients["sagemaker_runtime"].invoke_endpoint.assert_called_once()
+        
+        # Get the call args
+        call_args = boto_clients["sagemaker_runtime"].invoke_endpoint.call_args[1]
+        assert call_args["EndpointName"] == "xgboost-digital-twin-integration-model"
+        assert call_args["ContentType"] == "application/json"
+        
+        # Parse the request body
+        request_body = json.loads(call_args["Body"])
+        assert request_body["patient_id"] == "P12345"
+        assert request_body["profile_id"] == "DP67890"
+        assert request_body["prediction_id"] == "risk-123456-P12345"
+    
+    def test_get_model_info(self, aws_service, boto_clients):
+        """Test model info retrieval."""
+        # Mock SageMaker response
+        model_response = {
+            "ModelName": "relapse-risk-model",
+            "ModelVersion": "1.2.0",
+            "CreationTime": datetime.now(),
+            "ModelStatus": "InService",
+            "ModelDescription": "XGBoost model for relapse risk prediction"
+        }
+        
+        boto_clients["sagemaker"].describe_model.return_value = model_response
+        
+        # Call get_model_info
+        result = aws_service.get_model_info("risk-relapse")
+        
+        # Check result
+        assert result["model_type"] == "risk-relapse"
+        assert result["version"] == "1.2.0"
+        assert "last_updated" in result
+        assert result["description"] == "XGBoost model for relapse risk prediction"
+        assert result["status"] == "active"
+        assert "features" in result
+        assert "performance_metrics" in result
+        assert "hyperparameters" in result
+        
+        # Verify SageMaker was called
+        boto_clients["sagemaker"].describe_model.assert_called_once_with(
+            ModelName="relapse-risk-model"
+        )
+    
+    def test_get_model_info_not_found(self, aws_service):
+        """Test model info retrieval for non-existent model."""
+        with pytest.raises(ModelNotFoundError):
+            aws_service.get_model_info("non-existent-model")
+    
+    def test_calculate_timeframe_days(self, aws_service):
+        """Test calculation of timeframe days."""
+        # Test with all units
+        timeframe = {"days": 5, "weeks": 2, "months": 1}
+        result = aws_service._calculate_timeframe_days(timeframe)
+        assert result == 5 + 2 * 7 + 1 * 30
+        
+        # Test with only days
+        timeframe = {"days": 10}
+        result = aws_service._calculate_timeframe_days(timeframe)
+        assert result == 10
+        
+        # Test with only weeks
+        timeframe = {"weeks": 4}
+        result = aws_service._calculate_timeframe_days(timeframe)
+        assert result == 4 * 7
+        
+        # Test with only months
+        timeframe = {"months": 2}
+        result = aws_service._calculate_timeframe_days(timeframe)
+        assert result == 2 * 30
+    
+    def test_validate_outcome_params(self, aws_service, clinical_data, treatment_plan):
+        """Test validation of outcome parameters."""
+        # Valid parameters
+        aws_service._validate_outcome_params(
+            patient_id="P12345",
+            outcome_timeframe={"weeks": 8},
+            clinical_data=clinical_data,
+            treatment_plan=treatment_plan
+        )
+        
+        # Invalid patient ID
+        with pytest.raises(ValidationError):
+            aws_service._validate_outcome_params(
+                patient_id="",
+                outcome_timeframe={"weeks": 8},
+                clinical_data=clinical_data,
+                treatment_plan=treatment_plan
             )
         
-        # Test connection error
-        sagemaker_client.invoke_endpoint.side_effect = ConnectionError("Connection error")
+        # Invalid outcome timeframe (empty)
+        with pytest.raises(ValidationError):
+            aws_service._validate_outcome_params(
+                patient_id="P12345",
+                outcome_timeframe={},
+                clinical_data=clinical_data,
+                treatment_plan=treatment_plan
+            )
         
-        with pytest.raises(ServiceConnectionError):
-            aws_service._invoke_sagemaker_endpoint(
-                model_type="relapse-risk",
-                request_data={"patient_id": "test-patient-id"}
+        # Invalid outcome timeframe (invalid unit)
+        with pytest.raises(ValidationError):
+            aws_service._validate_outcome_params(
+                patient_id="P12345",
+                outcome_timeframe={"years": 1},
+                clinical_data=clinical_data,
+                treatment_plan=treatment_plan
+            )
+        
+        # Invalid outcome timeframe (invalid value)
+        with pytest.raises(ValidationError):
+            aws_service._validate_outcome_params(
+                patient_id="P12345",
+                outcome_timeframe={"weeks": -1},
+                clinical_data=clinical_data,
+                treatment_plan=treatment_plan
+            )
+        
+        # Invalid clinical data
+        with pytest.raises(ValidationError):
+            aws_service._validate_outcome_params(
+                patient_id="P12345",
+                outcome_timeframe={"weeks": 8},
+                clinical_data={},
+                treatment_plan=treatment_plan
+            )
+        
+        # Invalid treatment plan
+        with pytest.raises(ValidationError):
+            aws_service._validate_outcome_params(
+                patient_id="P12345",
+                outcome_timeframe={"weeks": 8},
+                clinical_data=clinical_data,
+                treatment_plan={}
             )

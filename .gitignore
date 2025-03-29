@@ -1,8 +1,12 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# C extensions
 *.so
+
+# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -16,19 +20,21 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
-# Virtual Environment
-venv/
-ENV/
-env/
-.env
-.venv
-env.bak/
-venv.bak/
+# PyInstaller
+# Usually these files are written by a CI script
+# and should be ignored
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
 
 # Unit test / coverage reports
 htmlcov/
@@ -45,81 +51,125 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# IDE related
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-.project
-.pydevproject
-.settings
+# IPython
+profile_default/
+ipython_config.py
 
-# Logs
-logs/
-*.log
+# pyenv
+.python-version
+
+# PEP 582; automatically loads dependencies from this folder
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# Sage Notebook worksheets
+*.sws
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# VS Code settings
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Ruff cache
+.ruff_cache
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak
+venv.bak
+
+# Node.js / React / Frontend
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
-
-# Local development settings
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# OS specific
+# package-lock.json # Usually committed, but ignore if causing issues
+yarn.lock
+build/
+dist/
+.next/
+out/
+coverage/
 .DS_Store
+*.local
+
+# Log files
+*.log
+logs/
+*.log.[0-9]*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-desktop.ini
 
-# ML specific
-*.h5
-*.pkl
-*.model
-*.joblib
-.weights
-
-# Security and secrets
+# Secrets - IMPORTANT: Ensure any actual secrets files are listed here!
+*.env
+secrets.*
 *.pem
 *.key
-*.cert
-*.crt
-
-# Database
-*.sqlite3
-*.db
-
-# NodeJS / Frontend (general patterns, more specific in frontend/.gitignore)
-node_modules/
-dist/
-dist-ssr/
-*.local
-.yarn/
-.pnp.*
-
-# Reports and generated content
-reports/
-.coverage-report/
-*.bak
-*.tmp
-temp/
-
-# Alembic migrations (keep the directory structure but ignore version-specific files)
-# alembic/versions/*.py
-
-# Security Reports
-security-reports/
-
-# Misc
-.DS_Store
-*.csv
-*.dat
-*.out
-*.pid
+credentials.*
+config.json # If it contains secrets

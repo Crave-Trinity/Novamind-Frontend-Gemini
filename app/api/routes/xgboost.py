@@ -1,21 +1,25 @@
 """
-FastAPI routes for the XGBoost service.
+FastAPI endpoints for the XGBoost service.
 
-This module provides API endpoints for the XGBoost machine learning service,
-including risk prediction, treatment response prediction, outcome prediction,
-and digital twin integration.
+This module provides API routes for risk prediction, treatment response prediction,
+outcome prediction, feature importance, and digital twin integration using the
+XGBoost service.
 """
 
 import logging
-from typing import Annotated, Dict, Any, List
+from typing import Dict, List, Any, Optional, Union, Annotated
+from datetime import datetime
+from functools import lru_cache
 
-from fastapi import APIRouter, Depends, HTTPException, Security, status, Query, Path
+from fastapi import APIRouter, Depends, Path, Query, Body, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from app.core.services.ml.xgboost import (
     XGBoostInterface,
+    get_xgboost_service,
+    ModelType,
     EventType,
-    Observer,
+    PrivacyLevel,
     XGBoostServiceError,
     ValidationError,
     DataPrivacyError,
@@ -23,652 +27,619 @@ from app.core.services.ml.xgboost import (
     ModelNotFoundError,
     PredictionError,
     ServiceConnectionError,
-    ConfigurationError,
-    create_xgboost_service_from_env,
+    ConfigurationError
 )
+
 from app.api.schemas.xgboost import (
-    # Base models
-    ErrorResponse,
-    # Risk prediction
     RiskPredictionRequest,
     RiskPredictionResponse,
-    # Treatment response
     TreatmentResponseRequest,
     TreatmentResponseResponse,
-    # Outcome prediction
     OutcomePredictionRequest,
     OutcomePredictionResponse,
-    # Feature importance
     FeatureImportanceRequest,
     FeatureImportanceResponse,
-    # Digital twin
     DigitalTwinIntegrationRequest,
     DigitalTwinIntegrationResponse,
-    # Model info
-    ModelInfoRequest,
     ModelInfoResponse,
+    ErrorResponse
 )
 
-# Configure logging
+from app.api.dependencies.auth import get_token_user, verify_psychiatrist
+
+
+# Configure logger
 logger = logging.getLogger(__name__)
 
-# Security scheme
-security = HTTPBearer()
-
-# Create router
+# Create API router
 router = APIRouter(
-    prefix="/api/xgboost",
-    tags=["XGBoost ML Service"],
+    prefix="/api/v1/xgboost",
+    tags=["xgboost"],
     responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
-        status.HTTP_403_FORBIDDEN: {"model": ErrorResponse},
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ErrorResponse},
-    },
+        status.HTTP_401_UNAUTHORIZED: {
+            "model": ErrorResponse,
+            "description": "Unauthorized access"
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "model": ErrorResponse,
+            "description": "Forbidden - insufficient permissions"
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorResponse,
+            "description": "Resource not found"
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "model": ErrorResponse,
+            "description": "Validation error"
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "model": ErrorResponse,
+            "description": "Internal server error"
+        }
+    }
 )
 
 
-# -------------------- Dependencies --------------------
-
-def get_xgboost_service() -> XGBoostInterface:
-    """
-    Get an initialized XGBoost service instance.
-    
-    This dependency creates and initializes an XGBoost service
-    based on environment variables.
-    
-    Returns:
-        Initialized XGBoost service instance
-    """
-    try:
-        service = create_xgboost_service_from_env()
-        return service
-    except ConfigurationError as e:
-        logger.error(f"Failed to create XGBoost service: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"XGBoost service configuration error: {str(e)}",
-        )
-
-
-def get_token_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Security(security)]
-) -> Dict[str, Any]:
-    """
-    Extract and validate user from token.
-    
-    This dependency extracts user information from the JWT token
-    and performs validation.
-    
-    Args:
-        credentials: HTTP Authorization credentials
-        
-    Returns:
-        Dictionary containing user information
-        
-    Raises:
-        HTTPException: If token is invalid or user is not authorized
-    """
-    # In a real implementation, this would validate the token with AWS Cognito 
-    # or another HIPAA-compliant auth provider
-    # For now, we'll just return a mock user
-    
-    # Extract token
-    token = credentials.credentials
-    
-    # Simple mock validation (replace with real token validation)
-    if not token or token == "invalid":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    # Mock user information (replace with real user extraction)
-    return {
-        "user_id": "user-123",
-        "roles": ["clinician"],
-        "permissions": ["xgboost:read", "xgboost:predict"]
-    }
-
-
-def verify_permission(
-    user: Annotated[Dict[str, Any], Depends(get_token_user)],
-    required_permission: str,
-) -> None:
-    """
-    Verify that the user has the required permission.
-    
-    Args:
-        user: User information
-        required_permission: Permission to check
-        
-    Raises:
-        HTTPException: If user doesn't have the required permission
-    """
-    if required_permission not in user.get("permissions", []):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"User does not have permission: {required_permission}",
-        )
-
-
-# -------------------- Helper Functions --------------------
-
-def handle_xgboost_error(e: XGBoostServiceError) -> HTTPException:
-    """
-    Handle XGBoost service errors and convert to HTTP exceptions.
-    
-    Args:
-        e: XGBoost service error
-        
-    Returns:
-        HTTPException with appropriate status code and details
-    """
-    # Map domain exceptions to HTTP status codes
-    if isinstance(e, ValidationError):
-        return HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorResponse(
-                error=str(e),
-                error_type="ValidationError",
-                field=getattr(e, "field", None),
-                value=getattr(e, "value", None),
-            ).model_dump(),
-        )
-    elif isinstance(e, DataPrivacyError):
-        return HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorResponse(
-                error=str(e),
-                error_type="DataPrivacyError",
-                details={"pattern_types": getattr(e, "pattern_types", [])},
-            ).model_dump(),
-        )
-    elif isinstance(e, ResourceNotFoundError):
-        return HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=ErrorResponse(
-                error=str(e),
-                error_type="ResourceNotFoundError",
-                details={
-                    "resource_type": getattr(e, "resource_type", None),
-                    "resource_id": getattr(e, "resource_id", None),
-                },
-            ).model_dump(),
-        )
-    elif isinstance(e, ModelNotFoundError):
-        return HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=ErrorResponse(
-                error=str(e),
-                error_type="ModelNotFoundError",
-                details={"model_type": getattr(e, "model_type", None)},
-            ).model_dump(),
-        )
-    elif isinstance(e, PredictionError):
-        return HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=ErrorResponse(
-                error=str(e),
-                error_type="PredictionError",
-                details={"model_type": getattr(e, "model_type", None)},
-            ).model_dump(),
-        )
-    elif isinstance(e, ServiceConnectionError):
-        return HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=ErrorResponse(
-                error=str(e),
-                error_type="ServiceConnectionError",
-                details={
-                    "service": getattr(e, "service", None),
-                    "error_type": getattr(e, "error_type", None),
-                },
-            ).model_dump(),
-        )
-    elif isinstance(e, ConfigurationError):
-        return HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=ErrorResponse(
-                error=str(e),
-                error_type="ConfigurationError",
-                field=getattr(e, "field", None),
-                value=getattr(e, "value", None),
-                details=getattr(e, "details", None),
-            ).model_dump(),
-        )
-    else:
-        # Generic error handling
-        return HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=ErrorResponse(
-                error=str(e),
-                error_type="XGBoostServiceError",
-            ).model_dump(),
-        )
-
-
-# -------------------- Risk Prediction Routes --------------------
+# ---- Risk Prediction ----
 
 @router.post(
-    "/predict/risk",
+    "/risk/{risk_type}",
     response_model=RiskPredictionResponse,
-    summary="Predict risk level",
-    description="Predict risk level for a patient using clinical data.",
+    status_code=status.HTTP_200_OK,
+    summary="Predict psychiatric risk",
+    description="Predict the risk level for a specific psychiatric risk type. "
+                "This endpoint requires psychiatrist authorization.",
     responses={
-        status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
-        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ErrorResponse},
-    },
+        status.HTTP_200_OK: {
+            "description": "Risk prediction result",
+            "model": RiskPredictionResponse
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Invalid request data",
+            "model": ErrorResponse
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Not authorized as a psychiatrist",
+            "model": ErrorResponse
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "description": "Data privacy violation detected",
+            "model": ErrorResponse
+        }
+    }
 )
 async def predict_risk(
-    request: RiskPredictionRequest,
-    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)],
-    user: Annotated[Dict[str, Any], Depends(get_token_user)],
+    risk_type: str = Path(..., description="Type of risk to predict"),
+    request: RiskPredictionRequest = Body(..., description="Risk prediction request data"),
+    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)] = Depends(get_xgboost_service),
+    user: Annotated[Dict[str, Any], Depends(get_token_user)] = Depends(get_token_user),
+    is_psychiatrist: bool = Depends(verify_psychiatrist)
 ) -> RiskPredictionResponse:
     """
-    Predict risk level for a patient using clinical data.
+    Predict psychiatric risk level for a patient.
     
     Args:
-        request: Risk prediction request
+        risk_type: Type of risk to predict (e.g., "relapse", "suicide")
+        request: Risk prediction request data
         xgboost_service: XGBoost service instance
-        user: Authenticated user information
+        user: Current authenticated user
+        is_psychiatrist: Whether the user is a psychiatrist
         
     Returns:
-        Risk prediction response
+        Risk prediction result
         
     Raises:
-        HTTPException: If the request is invalid or prediction fails
+        HTTPException: If an error occurs during prediction
     """
-    # Verify permission
-    verify_permission(user, "xgboost:predict")
-    
     try:
+        # Normalize risk type
+        normalized_risk_type = risk_type.lower().replace("_", "-")
+        
         # Make prediction
-        result = xgboost_service.predict_risk(
+        prediction_result = xgboost_service.predict_risk(
             patient_id=request.patient_id,
-            risk_type=request.risk_type,
+            risk_type=normalized_risk_type,
             clinical_data=request.clinical_data,
-            time_frame_days=request.time_frame_days,
+            time_frame_days=request.time_frame_days
         )
         
-        # Convert to response model
-        return RiskPredictionResponse(**result)
+        # Create response
+        response = RiskPredictionResponse(
+            patient_id=request.patient_id,
+            risk_type=normalized_risk_type,
+            prediction_id=prediction_result.get("prediction_id", f"risk-{int(datetime.now().timestamp())}"),
+            prediction_score=prediction_result.get("prediction_score", 0.0),
+            risk_level=prediction_result.get("risk_level", "unknown"),
+            confidence=prediction_result.get("confidence", 0.0),
+            factors=prediction_result.get("factors", []),
+            timestamp=prediction_result.get("timestamp", datetime.now().isoformat()),
+            time_frame_days=request.time_frame_days
+        )
+        
+        # Log prediction (no PHI)
+        logger.info(
+            f"Risk prediction completed: type={normalized_risk_type}, "
+            f"prediction_id={response.prediction_id}"
+        )
+        
+        return response
     
-    except XGBoostServiceError as e:
-        # Log error (without PHI)
-        logger.error(
-            f"Risk prediction failed: {e.__class__.__name__}: {str(e)}"
-        )
-        
-        # Convert to HTTP exception
-        raise handle_xgboost_error(e)
+    except (ValidationError, DataPrivacyError, ModelNotFoundError, PredictionError, ServiceConnectionError) as e:
+        # Map exception to appropriate HTTP status code and error model
+        _handle_xgboost_exception(e)
 
 
-# -------------------- Treatment Response Routes --------------------
+# ---- Treatment Response Prediction ----
 
 @router.post(
-    "/predict/treatment-response",
+    "/treatment/{treatment_type}",
     response_model=TreatmentResponseResponse,
+    status_code=status.HTTP_200_OK,
     summary="Predict treatment response",
-    description="Predict response to a psychiatric treatment.",
+    description="Predict how a patient will respond to a specific psychiatric treatment. "
+                "This endpoint requires psychiatrist authorization.",
     responses={
-        status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
-        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ErrorResponse},
-    },
+        status.HTTP_200_OK: {
+            "description": "Treatment response prediction result",
+            "model": TreatmentResponseResponse
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Invalid request data",
+            "model": ErrorResponse
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Not authorized as a psychiatrist",
+            "model": ErrorResponse
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "description": "Data privacy violation detected",
+            "model": ErrorResponse
+        }
+    }
 )
 async def predict_treatment_response(
-    request: TreatmentResponseRequest,
-    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)],
-    user: Annotated[Dict[str, Any], Depends(get_token_user)],
+    treatment_type: str = Path(..., description="Type of treatment"),
+    request: TreatmentResponseRequest = Body(..., description="Treatment response prediction request data"),
+    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)] = Depends(get_xgboost_service),
+    user: Annotated[Dict[str, Any], Depends(get_token_user)] = Depends(get_token_user),
+    is_psychiatrist: bool = Depends(verify_psychiatrist)
 ) -> TreatmentResponseResponse:
     """
-    Predict response to a psychiatric treatment.
+    Predict psychiatric treatment response for a patient.
     
     Args:
-        request: Treatment response prediction request
+        treatment_type: Type of treatment (e.g., "medication_ssri", "therapy_cbt")
+        request: Treatment response prediction request data
         xgboost_service: XGBoost service instance
-        user: Authenticated user information
+        user: Current authenticated user
+        is_psychiatrist: Whether the user is a psychiatrist
         
     Returns:
-        Treatment response prediction response
+        Treatment response prediction result
         
     Raises:
-        HTTPException: If the request is invalid or prediction fails
+        HTTPException: If an error occurs during prediction
     """
-    # Verify permission
-    verify_permission(user, "xgboost:predict")
-    
     try:
+        # Normalize treatment type
+        normalized_treatment_type = treatment_type.lower().replace("-", "_")
+        
         # Make prediction
-        result = xgboost_service.predict_treatment_response(
+        prediction_result = xgboost_service.predict_treatment_response(
             patient_id=request.patient_id,
-            treatment_type=request.treatment_type,
-            treatment_details=request.treatment_details.model_dump(),
+            treatment_type=normalized_treatment_type,
+            treatment_details=request.treatment_details,
             clinical_data=request.clinical_data,
-            prediction_horizon=request.prediction_horizon,
+            prediction_horizon=request.prediction_horizon
         )
         
-        # Convert to response model
-        return TreatmentResponseResponse(**result)
+        # Create response
+        response = TreatmentResponseResponse(
+            patient_id=request.patient_id,
+            treatment_type=normalized_treatment_type,
+            prediction_id=prediction_result.get("prediction_id", f"treatment-{int(datetime.now().timestamp())}"),
+            response_probability=prediction_result.get("response_probability", 0.0),
+            response_level=prediction_result.get("response_level", "unknown"),
+            confidence=prediction_result.get("confidence", 0.0),
+            time_to_response_weeks=prediction_result.get("time_to_response_weeks", 0),
+            factors=prediction_result.get("factors", []),
+            timestamp=prediction_result.get("timestamp", datetime.now().isoformat()),
+            prediction_horizon=request.prediction_horizon
+        )
+        
+        # Log prediction (no PHI)
+        logger.info(
+            f"Treatment response prediction completed: type={normalized_treatment_type}, "
+            f"prediction_id={response.prediction_id}"
+        )
+        
+        return response
     
-    except XGBoostServiceError as e:
-        # Log error (without PHI)
-        logger.error(
-            f"Treatment response prediction failed: {e.__class__.__name__}: {str(e)}"
-        )
-        
-        # Convert to HTTP exception
-        raise handle_xgboost_error(e)
+    except (ValidationError, DataPrivacyError, ModelNotFoundError, PredictionError, ServiceConnectionError) as e:
+        # Map exception to appropriate HTTP status code and error model
+        _handle_xgboost_exception(e)
 
 
-# -------------------- Outcome Prediction Routes --------------------
+# ---- Outcome Prediction ----
 
 @router.post(
-    "/predict/outcome",
+    "/outcome/{outcome_type}",
     response_model=OutcomePredictionResponse,
-    summary="Predict clinical outcomes",
-    description="Predict clinical outcomes based on treatment plan.",
+    status_code=status.HTTP_200_OK,
+    summary="Predict clinical outcome",
+    description="Predict clinical outcomes based on treatment plan. "
+                "This endpoint requires psychiatrist authorization.",
     responses={
-        status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
-        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ErrorResponse},
-    },
+        status.HTTP_200_OK: {
+            "description": "Outcome prediction result",
+            "model": OutcomePredictionResponse
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Invalid request data",
+            "model": ErrorResponse
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Not authorized as a psychiatrist",
+            "model": ErrorResponse
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "description": "Data privacy violation detected",
+            "model": ErrorResponse
+        }
+    }
 )
 async def predict_outcome(
-    request: OutcomePredictionRequest,
-    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)],
-    user: Annotated[Dict[str, Any], Depends(get_token_user)],
+    outcome_type: str = Path(..., description="Type of outcome"),
+    request: OutcomePredictionRequest = Body(..., description="Outcome prediction request data"),
+    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)] = Depends(get_xgboost_service),
+    user: Annotated[Dict[str, Any], Depends(get_token_user)] = Depends(get_token_user),
+    is_psychiatrist: bool = Depends(verify_psychiatrist)
 ) -> OutcomePredictionResponse:
     """
-    Predict clinical outcomes based on treatment plan.
+    Predict clinical outcomes for a patient based on treatment plan.
     
     Args:
-        request: Outcome prediction request
+        outcome_type: Type of outcome (e.g., "symptom", "functional", "quality_of_life")
+        request: Outcome prediction request data
         xgboost_service: XGBoost service instance
-        user: Authenticated user information
+        user: Current authenticated user
+        is_psychiatrist: Whether the user is a psychiatrist
         
     Returns:
-        Outcome prediction response
+        Outcome prediction result
         
     Raises:
-        HTTPException: If the request is invalid or prediction fails
+        HTTPException: If an error occurs during prediction
     """
-    # Verify permission
-    verify_permission(user, "xgboost:predict")
-    
     try:
+        # Normalize outcome type
+        normalized_outcome_type = outcome_type.lower().replace("-", "_")
+        
         # Make prediction
-        result = xgboost_service.predict_outcome(
+        prediction_result = xgboost_service.predict_outcome(
             patient_id=request.patient_id,
-            outcome_timeframe=request.outcome_timeframe.model_dump(),
+            outcome_timeframe=request.outcome_timeframe,
             clinical_data=request.clinical_data,
             treatment_plan=request.treatment_plan,
-            outcome_type=request.outcome_type,
+            outcome_type=normalized_outcome_type
         )
         
-        # Convert to response model
-        return OutcomePredictionResponse(**result)
+        # Create response
+        response = OutcomePredictionResponse(
+            patient_id=request.patient_id,
+            outcome_type=normalized_outcome_type,
+            prediction_id=prediction_result.get("prediction_id", f"outcome-{int(datetime.now().timestamp())}"),
+            outcome_score=prediction_result.get("outcome_score", 0.0),
+            outcome_category=prediction_result.get("outcome_category", "unknown"),
+            confidence=prediction_result.get("confidence", 0.0),
+            projected_changes=prediction_result.get("projected_changes", {}),
+            factors=prediction_result.get("factors", []),
+            timestamp=prediction_result.get("timestamp", datetime.now().isoformat()),
+            outcome_timeframe=request.outcome_timeframe
+        )
+        
+        # Log prediction (no PHI)
+        logger.info(
+            f"Outcome prediction completed: type={normalized_outcome_type}, "
+            f"prediction_id={response.prediction_id}"
+        )
+        
+        return response
     
-    except XGBoostServiceError as e:
-        # Log error (without PHI)
-        logger.error(
-            f"Outcome prediction failed: {e.__class__.__name__}: {str(e)}"
-        )
-        
-        # Convert to HTTP exception
-        raise handle_xgboost_error(e)
+    except (ValidationError, DataPrivacyError, ModelNotFoundError, PredictionError, ServiceConnectionError) as e:
+        # Map exception to appropriate HTTP status code and error model
+        _handle_xgboost_exception(e)
 
 
-# -------------------- Feature Importance Routes --------------------
+# ---- Feature Importance ----
 
 @router.post(
     "/feature-importance",
     response_model=FeatureImportanceResponse,
+    status_code=status.HTTP_200_OK,
     summary="Get feature importance",
-    description="Get feature importance for a prediction.",
+    description="Get feature importance for a prediction. "
+                "This endpoint requires psychiatrist authorization.",
     responses={
-        status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
-    },
+        status.HTTP_200_OK: {
+            "description": "Feature importance result",
+            "model": FeatureImportanceResponse
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Invalid request data",
+            "model": ErrorResponse
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Not authorized as a psychiatrist",
+            "model": ErrorResponse
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Prediction not found",
+            "model": ErrorResponse
+        }
+    }
 )
 async def get_feature_importance(
-    request: FeatureImportanceRequest,
-    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)],
-    user: Annotated[Dict[str, Any], Depends(get_token_user)],
+    request: FeatureImportanceRequest = Body(..., description="Feature importance request data"),
+    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)] = Depends(get_xgboost_service),
+    user: Annotated[Dict[str, Any], Depends(get_token_user)] = Depends(get_token_user),
+    is_psychiatrist: bool = Depends(verify_psychiatrist)
 ) -> FeatureImportanceResponse:
     """
     Get feature importance for a prediction.
     
     Args:
-        request: Feature importance request
+        request: Feature importance request data
         xgboost_service: XGBoost service instance
-        user: Authenticated user information
+        user: Current authenticated user
+        is_psychiatrist: Whether the user is a psychiatrist
         
     Returns:
-        Feature importance response
+        Feature importance result
         
     Raises:
-        HTTPException: If the request is invalid or feature importance fails
+        HTTPException: If an error occurs during feature importance calculation
     """
-    # Verify permission
-    verify_permission(user, "xgboost:read")
-    
     try:
         # Get feature importance
-        result = xgboost_service.get_feature_importance(
+        importance_result = xgboost_service.get_feature_importance(
+            patient_id=request.patient_id,
+            model_type=request.model_type,
+            prediction_id=request.prediction_id
+        )
+        
+        # Create response
+        response = FeatureImportanceResponse(
             patient_id=request.patient_id,
             model_type=request.model_type,
             prediction_id=request.prediction_id,
+            features=importance_result.get("features", []),
+            timestamp=importance_result.get("timestamp", datetime.now().isoformat())
         )
         
-        # Convert to response model
-        return FeatureImportanceResponse(**result)
+        # Log feature importance calculation (no PHI)
+        logger.info(
+            f"Feature importance calculation completed: model_type={request.model_type}, "
+            f"prediction_id={request.prediction_id}"
+        )
+        
+        return response
     
-    except XGBoostServiceError as e:
-        # Log error (without PHI)
-        logger.error(
-            f"Feature importance failed: {e.__class__.__name__}: {str(e)}"
-        )
-        
-        # Convert to HTTP exception
-        raise handle_xgboost_error(e)
+    except (ValidationError, ResourceNotFoundError, ServiceConnectionError) as e:
+        # Map exception to appropriate HTTP status code and error model
+        _handle_xgboost_exception(e)
 
 
-# -------------------- Digital Twin Integration Routes --------------------
+# ---- Digital Twin Integration ----
 
 @router.post(
-    "/integrate/digital-twin",
+    "/digital-twin/integrate",
     response_model=DigitalTwinIntegrationResponse,
+    status_code=status.HTTP_200_OK,
     summary="Integrate with digital twin",
-    description="Integrate prediction with digital twin profile.",
+    description="Integrate prediction with digital twin profile. "
+                "This endpoint requires psychiatrist authorization.",
     responses={
-        status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
-        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ErrorResponse},
-    },
+        status.HTTP_200_OK: {
+            "description": "Integration result",
+            "model": DigitalTwinIntegrationResponse
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Invalid request data",
+            "model": ErrorResponse
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Not authorized as a psychiatrist",
+            "model": ErrorResponse
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Prediction or profile not found",
+            "model": ErrorResponse
+        }
+    }
 )
 async def integrate_with_digital_twin(
-    request: DigitalTwinIntegrationRequest,
-    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)],
-    user: Annotated[Dict[str, Any], Depends(get_token_user)],
+    request: DigitalTwinIntegrationRequest = Body(..., description="Digital twin integration request data"),
+    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)] = Depends(get_xgboost_service),
+    user: Annotated[Dict[str, Any], Depends(get_token_user)] = Depends(get_token_user),
+    is_psychiatrist: bool = Depends(verify_psychiatrist)
 ) -> DigitalTwinIntegrationResponse:
     """
     Integrate prediction with digital twin profile.
     
     Args:
-        request: Digital twin integration request
+        request: Digital twin integration request data
         xgboost_service: XGBoost service instance
-        user: Authenticated user information
+        user: Current authenticated user
+        is_psychiatrist: Whether the user is a psychiatrist
         
     Returns:
-        Digital twin integration response
+        Integration result
         
     Raises:
-        HTTPException: If the request is invalid or integration fails
+        HTTPException: If an error occurs during integration
     """
-    # Verify permission
-    verify_permission(user, "xgboost:predict")
-    
     try:
         # Integrate with digital twin
-        result = xgboost_service.integrate_with_digital_twin(
+        integration_result = xgboost_service.integrate_with_digital_twin(
+            patient_id=request.patient_id,
+            profile_id=request.profile_id,
+            prediction_id=request.prediction_id
+        )
+        
+        # Create response
+        response = DigitalTwinIntegrationResponse(
             patient_id=request.patient_id,
             profile_id=request.profile_id,
             prediction_id=request.prediction_id,
+            integration_id=integration_result.get("integration_id", f"integration-{int(datetime.now().timestamp())}"),
+            status=integration_result.get("status", "unknown"),
+            details=integration_result.get("details", {}),
+            timestamp=integration_result.get("timestamp", datetime.now().isoformat())
         )
         
-        # Convert to response model
-        return DigitalTwinIntegrationResponse(**result)
+        # Log integration (no PHI)
+        logger.info(
+            f"Digital twin integration completed: profile_id={request.profile_id}, "
+            f"prediction_id={request.prediction_id}, status={response.status}"
+        )
+        
+        return response
     
-    except XGBoostServiceError as e:
-        # Log error (without PHI)
-        logger.error(
-            f"Digital twin integration failed: {e.__class__.__name__}: {str(e)}"
-        )
-        
-        # Convert to HTTP exception
-        raise handle_xgboost_error(e)
+    except (ValidationError, ResourceNotFoundError, ServiceConnectionError) as e:
+        # Map exception to appropriate HTTP status code and error model
+        _handle_xgboost_exception(e)
 
 
-# -------------------- Model Info Routes --------------------
+# ---- Model Information ----
 
 @router.get(
     "/models/{model_type}",
     response_model=ModelInfoResponse,
+    status_code=status.HTTP_200_OK,
     summary="Get model information",
-    description="Get information about a model.",
+    description="Get information about an XGBoost model. "
+                "This endpoint requires psychiatrist authorization.",
     responses={
-        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
-    },
+        status.HTTP_200_OK: {
+            "description": "Model information",
+            "model": ModelInfoResponse
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Not authorized as a psychiatrist",
+            "model": ErrorResponse
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Model not found",
+            "model": ErrorResponse
+        }
+    }
 )
 async def get_model_info(
     model_type: str = Path(..., description="Type of model"),
     xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)] = Depends(get_xgboost_service),
     user: Annotated[Dict[str, Any], Depends(get_token_user)] = Depends(get_token_user),
+    is_psychiatrist: bool = Depends(verify_psychiatrist)
 ) -> ModelInfoResponse:
     """
-    Get information about a model.
+    Get information about an XGBoost model.
     
     Args:
         model_type: Type of model
         xgboost_service: XGBoost service instance
-        user: Authenticated user information
+        user: Current authenticated user
+        is_psychiatrist: Whether the user is a psychiatrist
         
     Returns:
-        Model information response
+        Model information
         
     Raises:
-        HTTPException: If the model type is invalid or model information fails
+        HTTPException: If an error occurs during model info retrieval
     """
-    # Verify permission
-    verify_permission(user, "xgboost:read")
-    
     try:
-        # Get model information
-        result = xgboost_service.get_model_info(
-            model_type=model_type,
+        # Normalize model type
+        normalized_model_type = model_type.lower().replace("-", "_")
+        
+        # Get model info
+        model_info = xgboost_service.get_model_info(normalized_model_type)
+        
+        # Create response
+        response = ModelInfoResponse(
+            model_type=model_info.get("model_type", normalized_model_type),
+            version=model_info.get("version", "1.0.0"),
+            last_updated=model_info.get("last_updated", datetime.now().isoformat()),
+            description=model_info.get("description", ""),
+            features=model_info.get("features", []),
+            performance_metrics=model_info.get("performance_metrics", {}),
+            hyperparameters=model_info.get("hyperparameters", {}),
+            status=model_info.get("status", "unknown")
         )
         
-        # Convert to response model
-        return ModelInfoResponse(**result)
+        # Log model info retrieval (no PHI)
+        logger.info(
+            f"Model info retrieval completed: model_type={normalized_model_type}, "
+            f"version={response.version}"
+        )
+        
+        return response
     
-    except XGBoostServiceError as e:
-        # Log error (without PHI)
-        logger.error(
-            f"Model information failed: {e.__class__.__name__}: {str(e)}"
-        )
-        
-        # Convert to HTTP exception
-        raise handle_xgboost_error(e)
+    except (ModelNotFoundError, ServiceConnectionError) as e:
+        # Map exception to appropriate HTTP status code and error model
+        _handle_xgboost_exception(e)
 
 
-@router.get(
-    "/models",
-    response_model=List[str],
-    summary="List available models",
-    description="List all available model types.",
-)
-async def list_models(
-    user: Annotated[Dict[str, Any], Depends(get_token_user)],
-) -> List[str]:
+# ---- Error Handling ----
+
+def _handle_xgboost_exception(exception: XGBoostServiceError) -> None:
     """
-    List all available model types.
+    Handle XGBoost service exceptions and convert them to appropriate HTTP exceptions.
     
     Args:
-        user: Authenticated user information
+        exception: XGBoost service exception
         
-    Returns:
-        List of available model types
+    Raises:
+        HTTPException: Converted HTTP exception
     """
-    # Verify permission
-    verify_permission(user, "xgboost:read")
+    # Get exception details
+    detail = str(exception)
     
-    # In a real implementation, this would retrieve model types from a registry
-    # For now, we'll return a static list
-    return [
-        "relapse-risk",
-        "suicide-risk",
-        "hospitalization-risk",
-        "medication_ssri-response",
-        "medication_snri-response",
-        "therapy_cbt-response",
-        "therapy_dbt-response",
-        "symptom-outcome",
-        "functional-outcome",
-        "quality_of_life-outcome",
-    ]
-
-
-# -------------------- Notifications Observer --------------------
-
-class LoggingObserver(Observer):
-    """Observer that logs events to the application logger."""
+    # Map exception type to HTTP status code
+    if isinstance(exception, ValidationError):
+        status_code = status.HTTP_400_BAD_REQUEST
+        error_type = "ValidationError"
+    elif isinstance(exception, DataPrivacyError):
+        status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+        error_type = "DataPrivacyError"
+    elif isinstance(exception, ResourceNotFoundError):
+        status_code = status.HTTP_404_NOT_FOUND
+        error_type = "ResourceNotFoundError"
+    elif isinstance(exception, ModelNotFoundError):
+        status_code = status.HTTP_404_NOT_FOUND
+        error_type = "ModelNotFoundError"
+    elif isinstance(exception, PredictionError):
+        status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        error_type = "PredictionError"
+    elif isinstance(exception, ServiceConnectionError):
+        status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        error_type = "ServiceConnectionError"
+    elif isinstance(exception, ConfigurationError):
+        status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        error_type = "ConfigurationError"
+    else:
+        status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        error_type = "XGBoostServiceError"
     
-    def update(self, event_type: EventType, data: Dict[str, Any]) -> None:
-        """
-        Log an event from the XGBoost service.
-        
-        Args:
-            event_type: Type of event
-            data: Event data
-        """
-        # Sanitize data to remove PHI
-        sanitized_data = {}
-        if "patient_id" in data:
-            sanitized_data["patient_id"] = "[REDACTED]"
-        if "prediction_id" in data:
-            sanitized_data["prediction_id"] = data["prediction_id"]
-        if "model_type" in data:
-            sanitized_data["model_type"] = data["model_type"]
-        if "prediction_type" in data:
-            sanitized_data["prediction_type"] = data["prediction_type"]
-        if "status" in data:
-            sanitized_data["status"] = data["status"]
-        if "timestamp" in data:
-            sanitized_data["timestamp"] = data["timestamp"]
-        
-        # Log the event
-        logger.info(
-            f"XGBoost service event: {event_type} - {sanitized_data}"
-        )
-
-
-# Register observer with the XGBoost service
-def register_observers() -> None:
-    """Register observers with the XGBoost service."""
-    try:
-        # Create an observer
-        observer = LoggingObserver()
-        
-        # Get service instance
-        service = create_xgboost_service_from_env()
-        
-        # Register observer for all events
-        service.register_observer("*", observer)
-        
-        logger.info("Registered observers with XGBoost service")
+    # Log error (no PHI)
+    logger.error(f"XGBoost service error: {error_type} - {detail}")
     
-    except Exception as e:
-        logger.error(f"Failed to register observers: {e}")
+    # Raise HTTP exception
+    error_response = ErrorResponse(
+        error_type=error_type,
+        error_message=detail,
+        timestamp=datetime.now().isoformat()
+    )
+    
+    raise HTTPException(
+        status_code=status_code,
+        detail=error_response.dict()
+    )
