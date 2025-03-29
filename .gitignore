@@ -114,6 +114,9 @@ temp/
 # Alembic migrations (keep the directory structure but ignore version-specific files)
 # alembic/versions/*.py
 
+# Security Reports
+security-reports/
+
 # Misc
 .DS_Store
 *.csv

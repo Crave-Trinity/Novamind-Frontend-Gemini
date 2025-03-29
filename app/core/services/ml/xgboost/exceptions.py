@@ -1,437 +1,213 @@
 """
-Custom exceptions for the XGBoost service.
+Domain-specific exceptions for the XGBoost service.
 
-This module defines a hierarchy of domain-specific exceptions for the XGBoost
-service, providing clear error semantics for different failure modes.
+This module defines custom exceptions for the XGBoost service
+that provide richer error information and better error handling.
 """
 
-from typing import Optional, Dict, List, Any
+from typing import List, Optional, Any
 
 
-class XGBoostBaseError(Exception):
-    """
-    Base exception for XGBoost service errors.
+class XGBoostServiceError(Exception):
+    """Base class for all XGBoost service exceptions."""
     
-    All XGBoost service exceptions inherit from this class to provide
-    consistent error handling and serialization.
-    """
-    
-    def __init__(
-        self,
-        message: str,
-        **kwargs: Any
-    ) -> None:
+    def __init__(self, message: str, **kwargs):
         """
-        Initialize the base exception.
+        Initialize a new XGBoost service exception.
         
         Args:
-            message: Human-readable error message
-            **kwargs: Additional context for the error
+            message: Error message
+            **kwargs: Additional error context
         """
-        self.message = message
-        self.context = kwargs
         super().__init__(message)
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert the exception to a dictionary for serialization.
+        self.message = message
         
-        Returns:
-            Dictionary representation of the exception
-        """
-        result = {
-            "error_type": self.__class__.__name__,
-            "message": self.message
-        }
-        
-        # Add context if available
-        if self.context:
-            result["context"] = self.context
-            
-        return result
+        # Store additional context
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 
-class ConfigurationError(XGBoostBaseError):
+class ValidationError(XGBoostServiceError):
     """
-    Raised when service configuration is invalid or incomplete.
+    Raised when validation of parameters fails.
     
-    This error occurs during service initialization when required configuration
-    parameters are missing or have invalid values.
+    This exception is raised when a method parameter fails validation,
+    such as an invalid risk type or missing required field.
     """
     
-    def __init__(
-        self,
-        message: str,
-        missing_params: Optional[List[str]] = None,
-        invalid_params: Optional[Dict[str, str]] = None
-    ) -> None:
+    def __init__(self, message: str, field: Optional[str] = None, value: Any = None, **kwargs):
         """
-        Initialize a configuration error.
+        Initialize a new validation error.
         
         Args:
-            message: Human-readable error message
-            missing_params: List of missing configuration parameters
-            invalid_params: Dict of parameter names to error descriptions
-        """
-        context = {}
-        if missing_params:
-            context["missing_params"] = missing_params
-        if invalid_params:
-            context["invalid_params"] = invalid_params
-            
-        super().__init__(message, **context)
-
-
-class ValidationError(XGBoostBaseError):
-    """
-    Raised when input data fails validation.
-    
-    This error occurs when the service is called with invalid input data,
-    such as missing required fields or values that don't meet constraints.
-    """
-    
-    def __init__(
-        self,
-        message: str,
-        field: Optional[str] = None,
-        value: Optional[Any] = None,
-        reason: Optional[str] = None
-    ) -> None:
-        """
-        Initialize a validation error.
-        
-        Args:
-            message: Human-readable error message
+            message: Error message
             field: Name of the field that failed validation
-            value: Invalid value that was provided
-            reason: Detailed reason for validation failure
+            value: Value that failed validation
+            **kwargs: Additional error context
         """
-        context = {}
-        if field:
-            context["field"] = field
-        if value is not None:
-            # Convert value to string to avoid serialization issues
-            context["value"] = str(value)
-        if reason:
-            context["reason"] = reason
-            
-        super().__init__(message, **context)
+        super().__init__(message, field=field, value=value, **kwargs)
 
 
-class DataPrivacyError(XGBoostBaseError):
+class DataPrivacyError(XGBoostServiceError):
     """
-    Raised when potential PHI is detected in input data.
+    Raised when PHI is detected in input data.
     
-    This error occurs when the service detects patterns that might indicate
-    Personal Health Information (PHI) in the input data, protecting against
-    accidental PHI processing.
+    This exception is raised when protected health information (PHI)
+    is detected in input data, to prevent accidental PHI leakage.
     """
     
-    def __init__(
-        self,
-        message: str,
-        field: Optional[str] = None,
-        pattern_type: Optional[str] = None
-    ) -> None:
+    def __init__(self, message: str, pattern_types: Optional[List[str]] = None, **kwargs):
         """
-        Initialize a data privacy error.
+        Initialize a new data privacy error.
         
         Args:
-            message: Human-readable error message
-            field: Name of the field where PHI was detected
-            pattern_type: Type of PHI pattern that was detected
+            message: Error message
+            pattern_types: Types of PHI patterns detected
+            **kwargs: Additional error context
         """
-        context = {}
-        if field:
-            context["field"] = field
-        if pattern_type:
-            context["pattern_type"] = pattern_type
-            
-        super().__init__(message, **context)
+        super().__init__(message, pattern_types=pattern_types or [], **kwargs)
 
 
-class ResourceNotFoundError(XGBoostBaseError):
+class ResourceNotFoundError(XGBoostServiceError):
     """
     Raised when a requested resource is not found.
     
-    This error occurs when the service cannot find a requested resource,
-    such as a prediction record or digital twin profile.
+    This exception is raised when a resource such as a prediction
+    or profile is not found in the system.
     """
     
     def __init__(
         self,
         message: str,
         resource_type: Optional[str] = None,
-        resource_id: Optional[str] = None
-    ) -> None:
+        resource_id: Optional[str] = None,
+        **kwargs
+    ):
         """
-        Initialize a resource not found error.
+        Initialize a new resource not found error.
         
         Args:
-            message: Human-readable error message
-            resource_type: Type of resource that was not found
-            resource_id: Identifier of the resource that was not found
+            message: Error message
+            resource_type: Type of resource not found
+            resource_id: ID of resource not found
+            **kwargs: Additional error context
         """
-        context = {}
-        if resource_type:
-            context["resource_type"] = resource_type
-        if resource_id:
-            context["resource_id"] = resource_id
-            
-        super().__init__(message, **context)
+        super().__init__(
+            message,
+            resource_type=resource_type,
+            resource_id=resource_id,
+            **kwargs
+        )
 
 
-class ModelNotFoundError(XGBoostBaseError):
+class ModelNotFoundError(ResourceNotFoundError):
     """
     Raised when a requested model is not found.
     
-    This error occurs when the service cannot find a requested model,
-    either because it doesn't exist or because it's not configured.
+    This exception is raised when a model type is not supported
+    or not found in the system.
     """
     
-    def __init__(
-        self,
-        message: str,
-        model_type: Optional[str] = None
-    ) -> None:
+    def __init__(self, message: str, model_type: Optional[str] = None, **kwargs):
         """
-        Initialize a model not found error.
+        Initialize a new model not found error.
         
         Args:
-            message: Human-readable error message
-            model_type: Type of model that was not found
+            message: Error message
+            model_type: Type of model not found
+            **kwargs: Additional error context
         """
-        context = {}
-        if model_type:
-            context["model_type"] = model_type
-            
-        super().__init__(message, **context)
+        super().__init__(
+            message,
+            resource_type="model",
+            resource_id=model_type,
+            model_type=model_type,
+            **kwargs
+        )
 
 
-class PredictionError(XGBoostBaseError):
+class PredictionError(XGBoostServiceError):
     """
-    Raised when a prediction fails to process.
+    Raised when prediction fails.
     
-    This error occurs when the model fails to generate a prediction,
-    either due to internal errors or issues with the input data.
+    This exception is raised when a prediction fails due to model error,
+    input data error, or other prediction-related issues.
     """
     
-    def __init__(
-        self,
-        message: str,
-        model_type: Optional[str] = None,
-        cause: Optional[str] = None
-    ) -> None:
+    def __init__(self, message: str, model_type: Optional[str] = None, **kwargs):
         """
-        Initialize a prediction error.
+        Initialize a new prediction error.
         
         Args:
-            message: Human-readable error message
+            message: Error message
             model_type: Type of model that failed
-            cause: Underlying cause of the failure
+            **kwargs: Additional error context
         """
-        context = {}
-        if model_type:
-            context["model_type"] = model_type
-        if cause:
-            context["cause"] = cause
-            
-        super().__init__(message, **context)
+        super().__init__(message, model_type=model_type, **kwargs)
 
 
-class FeatureImportanceError(XGBoostBaseError):
+class ServiceConnectionError(XGBoostServiceError):
     """
-    Raised when feature importance calculation fails.
+    Raised when connection to a service fails.
     
-    This error occurs when the service fails to calculate feature
-    importance for a prediction, usually due to missing data.
+    This exception is raised when a connection to a required service
+    such as SageMaker, DynamoDB, or Lambda fails.
     """
     
     def __init__(
         self,
         message: str,
-        prediction_id: Optional[str] = None,
-        model_type: Optional[str] = None,
-        cause: Optional[str] = None
-    ) -> None:
+        service: Optional[str] = None,
+        error_type: Optional[str] = None,
+        **kwargs
+    ):
         """
-        Initialize a feature importance error.
+        Initialize a new service connection error.
         
         Args:
-            message: Human-readable error message
-            prediction_id: ID of the prediction
-            model_type: Type of model
-            cause: Underlying cause of the failure
+            message: Error message
+            service: Name of the service that failed
+            error_type: Type of connection error
+            **kwargs: Additional error context
         """
-        context = {}
-        if prediction_id:
-            context["prediction_id"] = prediction_id
-        if model_type:
-            context["model_type"] = model_type
-        if cause:
-            context["cause"] = cause
-            
-        super().__init__(message, **context)
+        super().__init__(
+            message,
+            service=service,
+            error_type=error_type,
+            **kwargs
+        )
 
 
-class DigitalTwinIntegrationError(XGBoostBaseError):
+class ConfigurationError(XGBoostServiceError):
     """
-    Raised when digital twin integration fails.
+    Raised when configuration is invalid.
     
-    This error occurs when the service fails to integrate a prediction
-    with a digital twin profile.
+    This exception is raised when configuration of the service
+    is missing required fields or contains invalid values.
     """
     
     def __init__(
         self,
         message: str,
-        patient_id: Optional[str] = None,
-        profile_id: Optional[str] = None,
-        prediction_id: Optional[str] = None,
-        cause: Optional[str] = None
-    ) -> None:
+        field: Optional[str] = None,
+        value: Any = None,
+        details: Optional[str] = None,
+        **kwargs
+    ):
         """
-        Initialize a digital twin integration error.
+        Initialize a new configuration error.
         
         Args:
-            message: Human-readable error message
-            patient_id: ID of the patient
-            profile_id: ID of the digital twin profile
-            prediction_id: ID of the prediction
-            cause: Underlying cause of the failure
+            message: Error message
+            field: Name of the field with invalid configuration
+            value: Invalid value
+            details: Additional error details
+            **kwargs: Additional error context
         """
-        context = {}
-        if patient_id:
-            context["patient_id"] = patient_id
-        if profile_id:
-            context["profile_id"] = profile_id
-        if prediction_id:
-            context["prediction_id"] = prediction_id
-        if cause:
-            context["cause"] = cause
-            
-        super().__init__(message, **context)
-
-
-class ServiceConnectionError(XGBoostBaseError):
-    """
-    Raised when an external service connection fails.
-    
-    This error occurs when the service fails to connect to an external
-    service, such as AWS SageMaker or DynamoDB.
-    """
-    
-    def __init__(
-        self,
-        message: str,
-        service_name: Optional[str] = None,
-        cause: Optional[str] = None
-    ) -> None:
-        """
-        Initialize a service connection error.
-        
-        Args:
-            message: Human-readable error message
-            service_name: Name of the service that failed
-            cause: Underlying cause of the failure
-        """
-        context = {}
-        if service_name:
-            context["service_name"] = service_name
-        if cause:
-            context["cause"] = cause
-            
-        super().__init__(message, **context)
-
-
-class PermissionError(XGBoostBaseError):
-    """
-    Raised when a permission check fails.
-    
-    This error occurs when the service doesn't have permission to
-    access a requested resource.
-    """
-    
-    def __init__(
-        self,
-        message: str,
-        resource_type: Optional[str] = None,
-        resource_id: Optional[str] = None
-    ) -> None:
-        """
-        Initialize a permission error.
-        
-        Args:
-            message: Human-readable error message
-            resource_type: Type of resource
-            resource_id: ID of the resource
-        """
-        context = {}
-        if resource_type:
-            context["resource_type"] = resource_type
-        if resource_id:
-            context["resource_id"] = resource_id
-            
-        super().__init__(message, **context)
-
-
-class AuthenticationError(XGBoostBaseError):
-    """
-    Raised when authentication fails.
-    
-    This error occurs when the service fails to authenticate with
-    an external service.
-    """
-    
-    def __init__(
-        self,
-        message: str,
-        service_name: Optional[str] = None,
-        cause: Optional[str] = None
-    ) -> None:
-        """
-        Initialize an authentication error.
-        
-        Args:
-            message: Human-readable error message
-            service_name: Name of the service that failed authentication
-            cause: Underlying cause of the failure
-        """
-        context = {}
-        if service_name:
-            context["service_name"] = service_name
-        if cause:
-            context["cause"] = cause
-            
-        super().__init__(message, **context)
-
-
-class RateLimitError(XGBoostBaseError):
-    """
-    Raised when a rate limit is exceeded.
-    
-    This error occurs when the service exceeds a rate limit for an
-    external service, such as AWS SageMaker or AWS Lambda.
-    """
-    
-    def __init__(
-        self,
-        message: str,
-        service_name: Optional[str] = None,
-        retry_after: Optional[int] = None
-    ) -> None:
-        """
-        Initialize a rate limit error.
-        
-        Args:
-            message: Human-readable error message
-            service_name: Name of the service that imposed the rate limit
-            retry_after: Seconds to wait before retrying
-        """
-        context = {}
-        if service_name:
-            context["service_name"] = service_name
-        if retry_after is not None:
-            context["retry_after"] = retry_after
-            
-        super().__init__(message, **context)
+        super().__init__(
+            message,
+            field=field,
+            value=value,
+            details=details,
+            **kwargs
+        )

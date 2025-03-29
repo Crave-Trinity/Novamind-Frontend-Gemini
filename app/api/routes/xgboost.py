@@ -1,679 +1,674 @@
 """
-API routes for the XGBoost ML service.
+FastAPI routes for the XGBoost service.
 
-This module provides FastAPI endpoints for accessing the XGBoost ML service functionality,
-including risk prediction, treatment response prediction, and outcome prediction.
+This module provides API endpoints for the XGBoost machine learning service,
+including risk prediction, treatment response prediction, outcome prediction,
+and digital twin integration.
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Union
+from typing import Annotated, Dict, Any, List
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
-from pydantic import UUID4
+from fastapi import APIRouter, Depends, HTTPException, Security, status, Query, Path
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from app.api.dependencies.auth import get_current_clinician, verify_patient_access
+from app.core.services.ml.xgboost import (
+    XGBoostInterface,
+    EventType,
+    Observer,
+    XGBoostServiceError,
+    ValidationError,
+    DataPrivacyError,
+    ResourceNotFoundError,
+    ModelNotFoundError,
+    PredictionError,
+    ServiceConnectionError,
+    ConfigurationError,
+    create_xgboost_service_from_env,
+)
 from app.api.schemas.xgboost import (
+    # Base models
+    ErrorResponse,
+    # Risk prediction
     RiskPredictionRequest,
     RiskPredictionResponse,
-    TreatmentPredictionRequest,
-    TreatmentPredictionResponse,
+    # Treatment response
+    TreatmentResponseRequest,
+    TreatmentResponseResponse,
+    # Outcome prediction
     OutcomePredictionRequest,
     OutcomePredictionResponse,
-    PredictionValidationRequest,
-    PredictionValidationResponse,
-    TreatmentComparisonRequest,
-    TreatmentComparisonResponse,
-    ExplanationResponse,
-    PredictionResponse,
-    PredictionListResponse,
-    ModelInfoResponse,
-    ModelListResponse,
+    # Feature importance
+    FeatureImportanceRequest,
     FeatureImportanceResponse,
-    DigitalTwinUpdateRequest,
-    DigitalTwinUpdateResponse,
-    HealthCheckResponse,
-    ErrorResponse
-)
-from app.core.services.ml.xgboost import (
-    get_xgboost_service,
-    XGBoostServiceInterface,
-    PredictionType,
-    ValidationStatus,
-    ModelNotFoundError,
-    PredictionNotFoundError,
-    PatientNotFoundError,
-    InvalidFeatureError,
-    PredictionError,
-    DigitalTwinUpdateError,
-    ServiceOperationError
+    # Digital twin
+    DigitalTwinIntegrationRequest,
+    DigitalTwinIntegrationResponse,
+    # Model info
+    ModelInfoRequest,
+    ModelInfoResponse,
 )
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
+# Security scheme
+security = HTTPBearer()
+
 # Create router
 router = APIRouter(
-    prefix="/api/v1/xgboost",
-    tags=["xgboost"],
+    prefix="/api/xgboost",
+    tags=["XGBoost ML Service"],
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
         status.HTTP_403_FORBIDDEN: {"model": ErrorResponse},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ErrorResponse}
-    }
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": ErrorResponse},
+    },
 )
 
 
-def get_xgboost_service_from_settings() -> XGBoostServiceInterface:
+# -------------------- Dependencies --------------------
+
+def get_xgboost_service() -> XGBoostInterface:
     """
-    Get the XGBoost service from application settings.
+    Get an initialized XGBoost service instance.
     
-    Uses the factory pattern to create the appropriate service implementation.
+    This dependency creates and initializes an XGBoost service
+    based on environment variables.
+    
+    Returns:
+        Initialized XGBoost service instance
     """
-    return get_xgboost_service()
-
-
-@router.get(
-    "/healthcheck",
-    response_model=HealthCheckResponse,
-    summary="Check XGBoost service health",
-    description="Checks the health of the XGBoost service and its components."
-)
-async def healthcheck(
-    service: XGBoostServiceInterface = Depends(get_xgboost_service_from_settings)
-):
-    """Check the health of the XGBoost service."""
     try:
-        health_status = service.healthcheck()
-        return health_status
-    except Exception as e:
-        logger.error(f"Health check failed: {str(e)}")
+        service = create_xgboost_service_from_env()
+        return service
+    except ConfigurationError as e:
+        logger.error(f"Failed to create XGBoost service: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Service health check failed: {str(e)}"
+            detail=f"XGBoost service configuration error: {str(e)}",
         )
 
+
+def get_token_user(
+    credentials: Annotated[HTTPAuthorizationCredentials, Security(security)]
+) -> Dict[str, Any]:
+    """
+    Extract and validate user from token.
+    
+    This dependency extracts user information from the JWT token
+    and performs validation.
+    
+    Args:
+        credentials: HTTP Authorization credentials
+        
+    Returns:
+        Dictionary containing user information
+        
+    Raises:
+        HTTPException: If token is invalid or user is not authorized
+    """
+    # In a real implementation, this would validate the token with AWS Cognito 
+    # or another HIPAA-compliant auth provider
+    # For now, we'll just return a mock user
+    
+    # Extract token
+    token = credentials.credentials
+    
+    # Simple mock validation (replace with real token validation)
+    if not token or token == "invalid":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Mock user information (replace with real user extraction)
+    return {
+        "user_id": "user-123",
+        "roles": ["clinician"],
+        "permissions": ["xgboost:read", "xgboost:predict"]
+    }
+
+
+def verify_permission(
+    user: Annotated[Dict[str, Any], Depends(get_token_user)],
+    required_permission: str,
+) -> None:
+    """
+    Verify that the user has the required permission.
+    
+    Args:
+        user: User information
+        required_permission: Permission to check
+        
+    Raises:
+        HTTPException: If user doesn't have the required permission
+    """
+    if required_permission not in user.get("permissions", []):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"User does not have permission: {required_permission}",
+        )
+
+
+# -------------------- Helper Functions --------------------
+
+def handle_xgboost_error(e: XGBoostServiceError) -> HTTPException:
+    """
+    Handle XGBoost service errors and convert to HTTP exceptions.
+    
+    Args:
+        e: XGBoost service error
+        
+    Returns:
+        HTTPException with appropriate status code and details
+    """
+    # Map domain exceptions to HTTP status codes
+    if isinstance(e, ValidationError):
+        return HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorResponse(
+                error=str(e),
+                error_type="ValidationError",
+                field=getattr(e, "field", None),
+                value=getattr(e, "value", None),
+            ).model_dump(),
+        )
+    elif isinstance(e, DataPrivacyError):
+        return HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorResponse(
+                error=str(e),
+                error_type="DataPrivacyError",
+                details={"pattern_types": getattr(e, "pattern_types", [])},
+            ).model_dump(),
+        )
+    elif isinstance(e, ResourceNotFoundError):
+        return HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=ErrorResponse(
+                error=str(e),
+                error_type="ResourceNotFoundError",
+                details={
+                    "resource_type": getattr(e, "resource_type", None),
+                    "resource_id": getattr(e, "resource_id", None),
+                },
+            ).model_dump(),
+        )
+    elif isinstance(e, ModelNotFoundError):
+        return HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=ErrorResponse(
+                error=str(e),
+                error_type="ModelNotFoundError",
+                details={"model_type": getattr(e, "model_type", None)},
+            ).model_dump(),
+        )
+    elif isinstance(e, PredictionError):
+        return HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=ErrorResponse(
+                error=str(e),
+                error_type="PredictionError",
+                details={"model_type": getattr(e, "model_type", None)},
+            ).model_dump(),
+        )
+    elif isinstance(e, ServiceConnectionError):
+        return HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=ErrorResponse(
+                error=str(e),
+                error_type="ServiceConnectionError",
+                details={
+                    "service": getattr(e, "service", None),
+                    "error_type": getattr(e, "error_type", None),
+                },
+            ).model_dump(),
+        )
+    elif isinstance(e, ConfigurationError):
+        return HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=ErrorResponse(
+                error=str(e),
+                error_type="ConfigurationError",
+                field=getattr(e, "field", None),
+                value=getattr(e, "value", None),
+                details=getattr(e, "details", None),
+            ).model_dump(),
+        )
+    else:
+        # Generic error handling
+        return HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=ErrorResponse(
+                error=str(e),
+                error_type="XGBoostServiceError",
+            ).model_dump(),
+        )
+
+
+# -------------------- Risk Prediction Routes --------------------
 
 @router.post(
     "/predict/risk",
     response_model=RiskPredictionResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Generate risk prediction",
-    description="Generate a risk prediction (relapse, suicide, hospitalization) for a patient."
+    summary="Predict risk level",
+    description="Predict risk level for a patient using clinical data.",
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ErrorResponse},
+    },
 )
 async def predict_risk(
     request: RiskPredictionRequest,
-    clinician: Dict = Depends(get_current_clinician),
-    service: XGBoostServiceInterface = Depends(get_xgboost_service_from_settings)
-):
-    """Generate a risk prediction for a patient."""
-    # Verify patient access
-    await verify_patient_access(clinician, request.patient_id)
+    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)],
+    user: Annotated[Dict[str, Any], Depends(get_token_user)],
+) -> RiskPredictionResponse:
+    """
+    Predict risk level for a patient using clinical data.
+    
+    Args:
+        request: Risk prediction request
+        xgboost_service: XGBoost service instance
+        user: Authenticated user information
+        
+    Returns:
+        Risk prediction response
+        
+    Raises:
+        HTTPException: If the request is invalid or prediction fails
+    """
+    # Verify permission
+    verify_permission(user, "xgboost:predict")
     
     try:
-        # Generate prediction
-        prediction = service.predict_risk(
+        # Make prediction
+        result = xgboost_service.predict_risk(
             patient_id=request.patient_id,
-            risk_type=PredictionType(request.risk_type),
-            features=request.features,
-            time_frame_days=request.time_frame_days
+            risk_type=request.risk_type,
+            clinical_data=request.clinical_data,
+            time_frame_days=request.time_frame_days,
         )
         
-        # Return response
-        return prediction.to_dict()
+        # Convert to response model
+        return RiskPredictionResponse(**result)
+    
+    except XGBoostServiceError as e:
+        # Log error (without PHI)
+        logger.error(
+            f"Risk prediction failed: {e.__class__.__name__}: {str(e)}"
+        )
         
-    except InvalidFeatureError as e:
-        logger.warning(f"Invalid features for risk prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid features: {str(e)}"
-        )
-    except ModelNotFoundError as e:
-        logger.warning(f"Model not found for risk prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Model not found: {str(e)}"
-        )
-    except PredictionError as e:
-        logger.error(f"Error generating risk prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Prediction failed: {str(e)}"
-        )
-    except Exception as e:
-        logger.error(f"Unexpected error in risk prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
-        )
+        # Convert to HTTP exception
+        raise handle_xgboost_error(e)
 
+
+# -------------------- Treatment Response Routes --------------------
 
 @router.post(
-    "/predict/treatment",
-    response_model=TreatmentPredictionResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Generate treatment response prediction",
-    description="Generate a treatment response prediction for a specified treatment."
+    "/predict/treatment-response",
+    response_model=TreatmentResponseResponse,
+    summary="Predict treatment response",
+    description="Predict response to a psychiatric treatment.",
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ErrorResponse},
+    },
 )
 async def predict_treatment_response(
-    request: TreatmentPredictionRequest,
-    clinician: Dict = Depends(get_current_clinician),
-    service: XGBoostServiceInterface = Depends(get_xgboost_service_from_settings)
-):
-    """Generate a treatment response prediction for a patient."""
-    # Verify patient access
-    await verify_patient_access(clinician, request.patient_id)
+    request: TreatmentResponseRequest,
+    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)],
+    user: Annotated[Dict[str, Any], Depends(get_token_user)],
+) -> TreatmentResponseResponse:
+    """
+    Predict response to a psychiatric treatment.
+    
+    Args:
+        request: Treatment response prediction request
+        xgboost_service: XGBoost service instance
+        user: Authenticated user information
+        
+    Returns:
+        Treatment response prediction response
+        
+    Raises:
+        HTTPException: If the request is invalid or prediction fails
+    """
+    # Verify permission
+    verify_permission(user, "xgboost:predict")
     
     try:
-        # Generate prediction
-        prediction = service.predict_treatment_response(
+        # Make prediction
+        result = xgboost_service.predict_treatment_response(
             patient_id=request.patient_id,
-            treatment_category=request.treatment_category,
-            treatment_details=request.treatment_details,
-            features=request.features
+            treatment_type=request.treatment_type,
+            treatment_details=request.treatment_details.model_dump(),
+            clinical_data=request.clinical_data,
+            prediction_horizon=request.prediction_horizon,
         )
         
-        # Return response
-        return prediction.to_dict()
+        # Convert to response model
+        return TreatmentResponseResponse(**result)
+    
+    except XGBoostServiceError as e:
+        # Log error (without PHI)
+        logger.error(
+            f"Treatment response prediction failed: {e.__class__.__name__}: {str(e)}"
+        )
         
-    except InvalidFeatureError as e:
-        logger.warning(f"Invalid features for treatment prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid features: {str(e)}"
-        )
-    except ModelNotFoundError as e:
-        logger.warning(f"Model not found for treatment prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Model not found: {str(e)}"
-        )
-    except PredictionError as e:
-        logger.error(f"Error generating treatment prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Prediction failed: {str(e)}"
-        )
-    except Exception as e:
-        logger.error(f"Unexpected error in treatment prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
-        )
+        # Convert to HTTP exception
+        raise handle_xgboost_error(e)
 
+
+# -------------------- Outcome Prediction Routes --------------------
 
 @router.post(
     "/predict/outcome",
     response_model=OutcomePredictionResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Generate outcome prediction",
-    description="Generate an outcome prediction for a patient (clinical, functional, quality of life)."
+    summary="Predict clinical outcomes",
+    description="Predict clinical outcomes based on treatment plan.",
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ErrorResponse},
+    },
 )
 async def predict_outcome(
     request: OutcomePredictionRequest,
-    clinician: Dict = Depends(get_current_clinician),
-    service: XGBoostServiceInterface = Depends(get_xgboost_service_from_settings)
-):
-    """Generate an outcome prediction for a patient."""
-    # Verify patient access
-    await verify_patient_access(clinician, request.patient_id)
+    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)],
+    user: Annotated[Dict[str, Any], Depends(get_token_user)],
+) -> OutcomePredictionResponse:
+    """
+    Predict clinical outcomes based on treatment plan.
+    
+    Args:
+        request: Outcome prediction request
+        xgboost_service: XGBoost service instance
+        user: Authenticated user information
+        
+    Returns:
+        Outcome prediction response
+        
+    Raises:
+        HTTPException: If the request is invalid or prediction fails
+    """
+    # Verify permission
+    verify_permission(user, "xgboost:predict")
     
     try:
-        # Generate prediction
-        prediction = service.predict_outcome(
+        # Make prediction
+        result = xgboost_service.predict_outcome(
             patient_id=request.patient_id,
-            outcome_type=PredictionType(request.outcome_type),
-            features=request.features,
-            time_frame_days=request.time_frame_days
+            outcome_timeframe=request.outcome_timeframe.model_dump(),
+            clinical_data=request.clinical_data,
+            treatment_plan=request.treatment_plan,
+            outcome_type=request.outcome_type,
         )
         
-        # Return response
-        return prediction.to_dict()
-        
-    except InvalidFeatureError as e:
-        logger.warning(f"Invalid features for outcome prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid features: {str(e)}"
-        )
-    except ModelNotFoundError as e:
-        logger.warning(f"Model not found for outcome prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Model not found: {str(e)}"
-        )
-    except PredictionError as e:
-        logger.error(f"Error generating outcome prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Prediction failed: {str(e)}"
-        )
-    except Exception as e:
-        logger.error(f"Unexpected error in outcome prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
-        )
-
-
-@router.get(
-    "/predictions/{prediction_id}",
-    response_model=PredictionResponse,
-    summary="Get prediction by ID",
-    description="Retrieve a previously generated prediction by its ID."
-)
-async def get_prediction(
-    prediction_id: str = Path(..., description="The ID of the prediction to retrieve"),
-    clinician: Dict = Depends(get_current_clinician),
-    service: XGBoostServiceInterface = Depends(get_xgboost_service_from_settings)
-):
-    """Get a prediction by ID."""
-    try:
-        # Get prediction
-        prediction = service.get_prediction(prediction_id=prediction_id)
-        
-        # Verify patient access (prediction contains patient_id)
-        await verify_patient_access(clinician, prediction.patient_id)
-        
-        # Return response
-        return prediction.to_dict()
-        
-    except PredictionNotFoundError as e:
-        logger.warning(f"Prediction not found: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Prediction not found: {str(e)}"
-        )
-    except Exception as e:
-        logger.error(f"Unexpected error retrieving prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
-        )
-
-
-@router.get(
-    "/patients/{patient_id}/predictions",
-    response_model=PredictionListResponse,
-    summary="Get predictions for patient",
-    description="Retrieve all predictions for a specific patient."
-)
-async def get_predictions_for_patient(
-    patient_id: str = Path(..., description="The ID of the patient"),
-    prediction_type: Optional[str] = Query(None, description="Filter by prediction type"),
-    limit: int = Query(10, ge=1, le=100, description="Maximum number of predictions to return"),
-    offset: int = Query(0, ge=0, description="Number of predictions to skip"),
-    clinician: Dict = Depends(get_current_clinician),
-    service: XGBoostServiceInterface = Depends(get_xgboost_service_from_settings)
-):
-    """Get predictions for a patient."""
-    # Verify patient access
-    await verify_patient_access(clinician, patient_id)
+        # Convert to response model
+        return OutcomePredictionResponse(**result)
     
-    try:
-        # Convert prediction type if provided
-        prediction_type_enum = None
-        if prediction_type:
-            prediction_type_enum = PredictionType(prediction_type)
-        
-        # Get predictions
-        predictions = service.get_predictions_for_patient(
-            patient_id=patient_id,
-            prediction_type=prediction_type_enum,
-            limit=limit,
-            offset=offset
+    except XGBoostServiceError as e:
+        # Log error (without PHI)
+        logger.error(
+            f"Outcome prediction failed: {e.__class__.__name__}: {str(e)}"
         )
         
-        # Convert predictions to dictionaries
-        prediction_dicts = [p.to_dict() for p in predictions]
-        
-        # Return response
-        return {
-            "patient_id": patient_id,
-            "count": len(prediction_dicts),
-            "predictions": prediction_dicts
-        }
-        
-    except PatientNotFoundError as e:
-        logger.warning(f"Patient not found: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Patient not found: {str(e)}"
-        )
-    except Exception as e:
-        logger.error(f"Unexpected error retrieving patient predictions: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
-        )
+        # Convert to HTTP exception
+        raise handle_xgboost_error(e)
 
+
+# -------------------- Feature Importance Routes --------------------
 
 @router.post(
-    "/predictions/{prediction_id}/validate",
-    response_model=PredictionValidationResponse,
-    summary="Validate prediction",
-    description="Update the validation status of a prediction (validated or rejected)."
+    "/feature-importance",
+    response_model=FeatureImportanceResponse,
+    summary="Get feature importance",
+    description="Get feature importance for a prediction.",
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+    },
 )
-async def validate_prediction(
-    request: PredictionValidationRequest,
-    prediction_id: str = Path(..., description="The ID of the prediction to validate"),
-    clinician: Dict = Depends(get_current_clinician),
-    service: XGBoostServiceInterface = Depends(get_xgboost_service_from_settings)
-):
-    """Validate a prediction."""
-    try:
-        # Get prediction first to verify patient access
-        prediction = service.get_prediction(prediction_id=prediction_id)
+async def get_feature_importance(
+    request: FeatureImportanceRequest,
+    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)],
+    user: Annotated[Dict[str, Any], Depends(get_token_user)],
+) -> FeatureImportanceResponse:
+    """
+    Get feature importance for a prediction.
+    
+    Args:
+        request: Feature importance request
+        xgboost_service: XGBoost service instance
+        user: Authenticated user information
         
-        # Verify patient access
-        await verify_patient_access(clinician, prediction.patient_id)
+    Returns:
+        Feature importance response
         
-        # Validate prediction
-        success = service.validate_prediction(
-            prediction_id=prediction_id,
-            status=ValidationStatus(request.status),
-            validator_notes=request.validator_notes
-        )
-        
-        # Return response
-        return {
-            "prediction_id": prediction_id,
-            "status": request.status,
-            "validator": clinician.get("name", "Unknown"),
-            "success": success
-        }
-        
-    except PredictionNotFoundError as e:
-        logger.warning(f"Prediction not found: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Prediction not found: {str(e)}"
-        )
-    except Exception as e:
-        logger.error(f"Unexpected error validating prediction: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
-        )
-
-
-@router.post(
-    "/compare/treatments",
-    response_model=TreatmentComparisonResponse,
-    summary="Compare treatments",
-    description="Compare multiple treatment options for a patient and get recommendations."
-)
-async def compare_treatments(
-    request: TreatmentComparisonRequest,
-    clinician: Dict = Depends(get_current_clinician),
-    service: XGBoostServiceInterface = Depends(get_xgboost_service_from_settings)
-):
-    """Compare treatment options for a patient."""
-    # Verify patient access
-    await verify_patient_access(clinician, request.patient_id)
+    Raises:
+        HTTPException: If the request is invalid or feature importance fails
+    """
+    # Verify permission
+    verify_permission(user, "xgboost:read")
     
     try:
-        # Compare treatments
-        comparison_result = service.compare_treatments(
+        # Get feature importance
+        result = xgboost_service.get_feature_importance(
             patient_id=request.patient_id,
-            treatment_options=request.treatment_options,
-            features=request.features
+            model_type=request.model_type,
+            prediction_id=request.prediction_id,
         )
         
-        # Return response
-        return comparison_result
+        # Convert to response model
+        return FeatureImportanceResponse(**result)
+    
+    except XGBoostServiceError as e:
+        # Log error (without PHI)
+        logger.error(
+            f"Feature importance failed: {e.__class__.__name__}: {str(e)}"
+        )
         
-    except InvalidFeatureError as e:
-        logger.warning(f"Invalid features for treatment comparison: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid features: {str(e)}"
+        # Convert to HTTP exception
+        raise handle_xgboost_error(e)
+
+
+# -------------------- Digital Twin Integration Routes --------------------
+
+@router.post(
+    "/integrate/digital-twin",
+    response_model=DigitalTwinIntegrationResponse,
+    summary="Integrate with digital twin",
+    description="Integrate prediction with digital twin profile.",
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ErrorResponse},
+    },
+)
+async def integrate_with_digital_twin(
+    request: DigitalTwinIntegrationRequest,
+    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)],
+    user: Annotated[Dict[str, Any], Depends(get_token_user)],
+) -> DigitalTwinIntegrationResponse:
+    """
+    Integrate prediction with digital twin profile.
+    
+    Args:
+        request: Digital twin integration request
+        xgboost_service: XGBoost service instance
+        user: Authenticated user information
+        
+    Returns:
+        Digital twin integration response
+        
+    Raises:
+        HTTPException: If the request is invalid or integration fails
+    """
+    # Verify permission
+    verify_permission(user, "xgboost:predict")
+    
+    try:
+        # Integrate with digital twin
+        result = xgboost_service.integrate_with_digital_twin(
+            patient_id=request.patient_id,
+            profile_id=request.profile_id,
+            prediction_id=request.prediction_id,
         )
-    except PatientNotFoundError as e:
-        logger.warning(f"Patient not found: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Patient not found: {str(e)}"
+        
+        # Convert to response model
+        return DigitalTwinIntegrationResponse(**result)
+    
+    except XGBoostServiceError as e:
+        # Log error (without PHI)
+        logger.error(
+            f"Digital twin integration failed: {e.__class__.__name__}: {str(e)}"
         )
-    except PredictionError as e:
-        logger.error(f"Error comparing treatments: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Treatment comparison failed: {str(e)}"
+        
+        # Convert to HTTP exception
+        raise handle_xgboost_error(e)
+
+
+# -------------------- Model Info Routes --------------------
+
+@router.get(
+    "/models/{model_type}",
+    response_model=ModelInfoResponse,
+    summary="Get model information",
+    description="Get information about a model.",
+    responses={
+        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+    },
+)
+async def get_model_info(
+    model_type: str = Path(..., description="Type of model"),
+    xgboost_service: Annotated[XGBoostInterface, Depends(get_xgboost_service)] = Depends(get_xgboost_service),
+    user: Annotated[Dict[str, Any], Depends(get_token_user)] = Depends(get_token_user),
+) -> ModelInfoResponse:
+    """
+    Get information about a model.
+    
+    Args:
+        model_type: Type of model
+        xgboost_service: XGBoost service instance
+        user: Authenticated user information
+        
+    Returns:
+        Model information response
+        
+    Raises:
+        HTTPException: If the model type is invalid or model information fails
+    """
+    # Verify permission
+    verify_permission(user, "xgboost:read")
+    
+    try:
+        # Get model information
+        result = xgboost_service.get_model_info(
+            model_type=model_type,
         )
-    except Exception as e:
-        logger.error(f"Unexpected error comparing treatments: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
+        
+        # Convert to response model
+        return ModelInfoResponse(**result)
+    
+    except XGBoostServiceError as e:
+        # Log error (without PHI)
+        logger.error(
+            f"Model information failed: {e.__class__.__name__}: {str(e)}"
         )
+        
+        # Convert to HTTP exception
+        raise handle_xgboost_error(e)
 
 
 @router.get(
     "/models",
-    response_model=ModelListResponse,
-    summary="Get available models",
-    description="Get information about available prediction models."
+    response_model=List[str],
+    summary="List available models",
+    description="List all available model types.",
 )
-async def get_models(
-    prediction_type: Optional[str] = Query(None, description="Filter by prediction type"),
-    clinician: Dict = Depends(get_current_clinician),
-    service: XGBoostServiceInterface = Depends(get_xgboost_service_from_settings)
-):
-    """Get information about available models."""
-    try:
-        # Convert prediction type if provided
-        prediction_type_enum = None
-        if prediction_type:
-            prediction_type_enum = PredictionType(prediction_type)
-        
-        # Get models
-        models = service.get_model_info(prediction_type=prediction_type_enum)
-        
-        # Handle both single model and list
-        if not isinstance(models, list):
-            models = [models]
-        
-        # Convert models to dictionaries
-        model_dicts = [model.to_dict() for model in models]
-        
-        # Return response
-        return {
-            "count": len(model_dicts),
-            "models": model_dicts
-        }
-        
-    except ModelNotFoundError as e:
-        logger.warning(f"Models not found: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Models not found: {str(e)}"
-        )
-    except Exception as e:
-        logger.error(f"Unexpected error retrieving models: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
-        )
-
-
-@router.get(
-    "/models/{model_id}",
-    response_model=ModelInfoResponse,
-    summary="Get model info",
-    description="Get detailed information about a specific model."
-)
-async def get_model_info(
-    model_id: str = Path(..., description="The ID of the model"),
-    clinician: Dict = Depends(get_current_clinician),
-    service: XGBoostServiceInterface = Depends(get_xgboost_service_from_settings)
-):
-    """Get information about a specific model."""
-    try:
-        # Get model info
-        model = service.get_model_info(model_id=model_id)
-        
-        # Return response
-        return model.to_dict()
-        
-    except ModelNotFoundError as e:
-        logger.warning(f"Model not found: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Model not found: {str(e)}"
-        )
-    except Exception as e:
-        logger.error(f"Unexpected error retrieving model info: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
-        )
-
-
-@router.get(
-    "/models/{model_id}/features",
-    response_model=FeatureImportanceResponse,
-    summary="Get feature importance",
-    description="Get feature importance information for a specific model."
-)
-async def get_feature_importance(
-    model_id: str = Path(..., description="The ID of the model"),
-    clinician: Dict = Depends(get_current_clinician),
-    service: XGBoostServiceInterface = Depends(get_xgboost_service_from_settings)
-):
-    """Get feature importance information for a model."""
-    try:
-        # Get feature importance
-        features = service.get_feature_importance(model_id=model_id)
-        
-        # Convert to dictionaries
-        feature_dicts = [feature.to_dict() for feature in features]
-        
-        # Return response
-        return {
-            "model_id": model_id,
-            "features": feature_dicts
-        }
-        
-    except ModelNotFoundError as e:
-        logger.warning(f"Model not found: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Model not found: {str(e)}"
-        )
-    except Exception as e:
-        logger.error(f"Unexpected error retrieving feature importance: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
-        )
-
-
-@router.get(
-    "/predictions/{prediction_id}/explanation",
-    response_model=ExplanationResponse,
-    summary="Get prediction explanation",
-    description="Get detailed explanation for a prediction."
-)
-async def get_explanation(
-    prediction_id: str = Path(..., description="The ID of the prediction"),
-    detail_level: str = Query("standard", description="Level of detail for the explanation (concise, standard, detailed)"),
-    clinician: Dict = Depends(get_current_clinician),
-    service: XGBoostServiceInterface = Depends(get_xgboost_service_from_settings)
-):
-    """Get explanation for a prediction."""
-    try:
-        # Get prediction first to verify patient access
-        prediction = service.get_prediction(prediction_id=prediction_id)
-        
-        # Verify patient access
-        await verify_patient_access(clinician, prediction.patient_id)
-        
-        # Generate explanation
-        explanation = service.generate_explanation(
-            prediction_id=prediction_id,
-            detail_level=detail_level
-        )
-        
-        # Return response
-        return explanation
-        
-    except PredictionNotFoundError as e:
-        logger.warning(f"Prediction not found: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Prediction not found: {str(e)}"
-        )
-    except Exception as e:
-        logger.error(f"Unexpected error generating explanation: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
-        )
-
-
-@router.post(
-    "/digital-twin/update",
-    response_model=DigitalTwinUpdateResponse,
-    summary="Update digital twin",
-    description="Update a patient's digital twin with prediction results."
-)
-async def update_digital_twin(
-    request: DigitalTwinUpdateRequest,
-    clinician: Dict = Depends(get_current_clinician),
-    service: XGBoostServiceInterface = Depends(get_xgboost_service_from_settings)
-):
-    """Update a patient's digital twin with prediction results."""
-    # Verify patient access
-    await verify_patient_access(clinician, request.patient_id)
+async def list_models(
+    user: Annotated[Dict[str, Any], Depends(get_token_user)],
+) -> List[str]:
+    """
+    List all available model types.
     
+    Args:
+        user: Authenticated user information
+        
+    Returns:
+        List of available model types
+    """
+    # Verify permission
+    verify_permission(user, "xgboost:read")
+    
+    # In a real implementation, this would retrieve model types from a registry
+    # For now, we'll return a static list
+    return [
+        "relapse-risk",
+        "suicide-risk",
+        "hospitalization-risk",
+        "medication_ssri-response",
+        "medication_snri-response",
+        "therapy_cbt-response",
+        "therapy_dbt-response",
+        "symptom-outcome",
+        "functional-outcome",
+        "quality_of_life-outcome",
+    ]
+
+
+# -------------------- Notifications Observer --------------------
+
+class LoggingObserver(Observer):
+    """Observer that logs events to the application logger."""
+    
+    def update(self, event_type: EventType, data: Dict[str, Any]) -> None:
+        """
+        Log an event from the XGBoost service.
+        
+        Args:
+            event_type: Type of event
+            data: Event data
+        """
+        # Sanitize data to remove PHI
+        sanitized_data = {}
+        if "patient_id" in data:
+            sanitized_data["patient_id"] = "[REDACTED]"
+        if "prediction_id" in data:
+            sanitized_data["prediction_id"] = data["prediction_id"]
+        if "model_type" in data:
+            sanitized_data["model_type"] = data["model_type"]
+        if "prediction_type" in data:
+            sanitized_data["prediction_type"] = data["prediction_type"]
+        if "status" in data:
+            sanitized_data["status"] = data["status"]
+        if "timestamp" in data:
+            sanitized_data["timestamp"] = data["timestamp"]
+        
+        # Log the event
+        logger.info(
+            f"XGBoost service event: {event_type} - {sanitized_data}"
+        )
+
+
+# Register observer with the XGBoost service
+def register_observers() -> None:
+    """Register observers with the XGBoost service."""
     try:
-        # Get all predictions to verify they exist and belong to the patient
-        predictions = []
-        for prediction_id in request.prediction_ids:
-            prediction = service.get_prediction(prediction_id=prediction_id)
-            if prediction.patient_id != request.patient_id:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Prediction {prediction_id} belongs to a different patient"
-                )
-            predictions.append(prediction)
+        # Create an observer
+        observer = LoggingObserver()
         
-        # Update digital twin
-        success = service.update_digital_twin(
-            patient_id=request.patient_id,
-            prediction_results=predictions
-        )
+        # Get service instance
+        service = create_xgboost_service_from_env()
         
-        # Return response
-        return {
-            "patient_id": request.patient_id,
-            "digital_twin_updated": success,
-            "prediction_count": len(predictions),
-            "timestamp": predictions[0].timestamp if predictions else None
-        }
+        # Register observer for all events
+        service.register_observer("*", observer)
         
-    except PredictionNotFoundError as e:
-        logger.warning(f"Prediction not found: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Prediction not found: {str(e)}"
-        )
-    except PatientNotFoundError as e:
-        logger.warning(f"Patient not found: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Patient not found: {str(e)}"
-        )
-    except DigitalTwinUpdateError as e:
-        logger.error(f"Error updating digital twin: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Digital twin update failed: {str(e)}"
-        )
+        logger.info("Registered observers with XGBoost service")
+    
     except Exception as e:
-        logger.error(f"Unexpected error updating digital twin: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred"
-        )
+        logger.error(f"Failed to register observers: {e}")

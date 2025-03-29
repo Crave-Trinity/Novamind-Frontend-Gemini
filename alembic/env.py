@@ -11,7 +11,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from dotenv import load_dotenv
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, pool, create_engine
 
 # Add the project root directory to the Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -34,26 +34,34 @@ from app.infrastructure.persistence.sqlalchemy.models import (
 # This is the Alembic Config object, which provides access to the values within the .ini file
 config = context.config
 
-# Override the SQLAlchemy URL with the one from environment variables
-db_url = os.getenv(
-    "DATABASE_URL", 
-    "postgresql://postgres:password@localhost/novamind"
-)
-# Ensure the URL is properly formatted for SQLAlchemy 2.0+
-if db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
-config.set_main_option("sqlalchemy.url", db_url)
-
 # Interpret the config file for Python logging
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Set target metadata
+# Import SQLAlchemy models to ensure they're registered with the metadata
+from app.infrastructure.database.base import Base  
 target_metadata = Base.metadata
 
-# Other values from the config, defined by the needs of env.py,
-# can be acquired:
-# ... etc.
+# Get database URL from environment variable or fallback to config
+# Ensure you set DATABASE_URL environment variable
+# Format: postgresql://user:password@host/database
+db_user = os.environ.get("DB_USER", "postgres")
+db_password = os.environ.get("DB_PASSWORD", "")  # Read password from environment
+db_host = os.environ.get("DB_HOST", "localhost")
+db_name = os.environ.get("DB_NAME", "novamind")
+    
+if not db_password:
+    print("WARNING: DB_PASSWORD environment variable not set. Alembic might fail.")
+    # Optionally, raise an error or use a default unsafe password for local dev ONLY
+    # raise ValueError("DB_PASSWORD environment variable must be set")
+    # db_password = "unsafe_default_dev_password" # Use with extreme caution
+
+sqlalchemy_url = f"postgresql://{db_user}:{db_password}@{db_host}/{db_name}"
+    
+# Override URL from config if environment variable is not set (less secure)
+# sqlalchemy_url = os.environ.get("DATABASE_URL", config.get_main_option("sqlalchemy.url"))
+
+config.set_main_option("sqlalchemy.url", sqlalchemy_url)
 
 
 def run_migrations_offline() -> None:
@@ -87,11 +95,14 @@ def run_migrations_online() -> None:
     
     In this scenario we need to create an Engine and associate a connection with the context.
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    # Connectable = engine_from_config(
+    #     config.get_section(config.config_ini_section, {}),
+    #     prefix="sqlalchemy.",
+    #     poolclass=pool.NullPool,
+    # )
+        
+    # Use the URL set in run_migrations_offline
+    connectable = create_engine(config.get_main_option("sqlalchemy.url"))
 
     with connectable.connect() as connection:
         context.configure(
