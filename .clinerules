@@ -1,25 +1,11 @@
 # Local Rules (Concierge Psychiatry Platform)
 IF YOU GET STUCK READ ALL THE DOCS IN HERE 
-C:\Users\JJ\Desktop\NOVAMIND-WEB\Novamind-Backend\docs
+\docs\
 ## Development Environment Setup
 
-- **WSL2-Windows Integration**: Create proper symbolic links between WSL2 and Windows paths to ensure seamless file visibility and editing:
-
-  ```bash
-  # From WSL2, create symlinks for all project directories
-  ln -s /mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend /home/username/novamind-backend
-  
-  # For specific directories that need Windows visibility
-  mkdir -p /mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend/app/core/utils
-  cp -r /home/username/novamind-backend/app/core/utils/* /mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend/app/core/utils/
-  ```
+- **WSL2-Windows Integration**: Create proper symbolic links between WSL2 and Windows paths to ensure seamless file visibility and editing (completed already)
 
 - **File Permissions**: Ensure all files created in WSL2 have proper permissions to be visible and editable in Windows:
-
-  ```bash
-  # Set appropriate permissions
-  chmod -R 755 /mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend
-  ```
 
 - **IDE Configuration**: Configure VSCode to properly recognize both Windows and WSL2 paths for the same project.
 

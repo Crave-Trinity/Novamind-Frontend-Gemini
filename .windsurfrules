@@ -1,72 +1,161 @@
-# Windsurf Local Rules (Concierge Psychiatry Platform)
-- IF YOU GET STUCK READ ALL THE DOCS IN HERE 
-- C:\Users\JJ\Desktop\NOVAMIND-WEB\Novamind-Backend\docs
-ALWAYS LOOK AT THE DOCUMENTS HERE AS DEFINITIVE CODING REFERENCE: C:\Users\JJ\Desktop\NOVAMIND-WEB\Novamind-Backend\docs
+React + Tailwind Advanced Guidelines for Novamind Digital Twin
+Component Architecture
+Use atomic design pattern: atoms → molecules → organisms → templates → pages
+Apply container/presentation pattern for all data-fetching components
+Every component should follow single responsibility principle
+Components consuming large data should implement windowing (react-window)
+Tailwind Best Practices
+Never use inline styles, always use Tailwind classes
+Avoid arbitrary values like w-[753px] - use standard classes (w-64) or create theme extensions
+For repeated class combinations, use @apply in CSS or extract to components
+Use group and group-hover for complex hover interactions
+For dark mode, use dark: variant consistently with your theme setup
+Use lg:, md:, and sm: breakpoints deliberately, mobile-first
+React Performance Optimizations
+Use React.memo() on expensive render components
+Apply useCallback() for event handlers passed to memoized child components
+Implement useMemo() for expensive calculations
+Add React.lazy() and Suspense for code-splitting heavy visualization components
+Set explicit key props (never use array index) for all lists
+Use useTransition() for non-blocking UI updates with large datasets
+State Management Guidelines
+Store UI state locally within components
+Use React Context only for theme, user auth, and global preferences
+Apply useReducer pattern for complex local state
+Keep state normalized (avoid deep nesting and duplication)
+For form state, use React Hook Form (reduces rerenders)
+Rendering Optimizations
+Prevent layout thrashing by batching DOM reads then writes
+Use CSS transforms instead of top/left for animations
+Implement will-change CSS property for elements that will animate
+Apply content-visibility: auto for off-screen content
+Debounce window resize event handlers
+Throttle scroll event handlers
+Data Visualization Gotchas
+Initialize D3 charts in useEffect with proper cleanup
+For Three.js, dispose of geometries, materials, textures in cleanup function
+When animating with Framer Motion, prefer layout over manual positioning
+With large datasets, implement progressive loading in chart components
+Use WebGL renderer for complex 3D brain models
+Precompute data transformations outside render cycles
+Common React Anti-patterns to Avoid
+Never use useEffect as an event handler
+Don't call hooks inside conditions (if statements)
+Avoid useEffect dependencies arrays with object references
+Never mutate state directly (useState setter or reducer only)
+Don't use Context for everything - it causes full tree re-renders
+Avoid nested ternary operators for conditional rendering
+Brain Visualization Implementation Tips
+Use Three.js instancing for rendering multiple neural nodes
+Implement WebGL shaders for glowing neuron effects
+For complex neural connections, use THREE.Line for better performance
+Apply post-processing effects (bloom) for the "sleek" theme only
+Limit animation frame rate for better performance
+Pre-bake complex geometries when possible
+Development Workflow
+Use Next.js App Router for route-based code splitting
+Set strict TypeScript checks for all components
+Apply ESLint with plugins for React hooks, a11y, and performance
+Configure Prettier with Tailwind plugin for class sorting
+Add Storybook for isolated component development
+Use React DevTools Profiler to identify render bottlenecks
+Reference
+// Example of optimized Brain visualization component
+import React, { useRef, useMemo, useEffect } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import { useTheme } from '../context/ThemeContext';
 
-## Development Environment Setup
-- **WSL2-Windows Integration**: Create proper symbolic links between WSL2 and Windows paths to ensure seamless file visibility and editing:
-  ```bash
-  # From WSL2, create symlinks for all project directories
-  ln -s /mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend /home/username/novamind-backend
-  # For specific directories that need Windows visibility
-  mkdir -p /mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend/app/core/utils
-  cp -r /home/username/novamind-backend/app/core/utils/* /mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend/app/core/utils/
-  ```
+const BrainVisualization = ({ brainData, activeRegions }) => {
+  const { theme } = useTheme();
+  
+  // Memoize expensive data transformations
+  const processedData = useMemo(() => {
+    return transformBrainData(brainData);
+  }, [brainData]);
+  
+  // Theme-specific settings
+  const settings = useMemo(() => ({
+    'sleek-dark': {
+      bgColor: '#121212',
+      glowIntensity: 0.8,
+      useBloom: true,
+    },
+    'retro': {
+      bgColor: '#0a1128',
+      glowIntensity: 0,
+      useBloom: false,
+    },
+    'wes': {
+      bgColor: '#F8E9D6',
+      glowIntensity: 0,
+      useBloom: false,
+    },
+    'clinical': {
+      bgColor: '#ffffff',
+      glowIntensity: 0,
+      useBloom: false,
+    }
+  }), []);
+  
+  return (
+    <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden">
+      <Canvas gl={{ antialias: true }} dpr={[1, 2]} camera={{ position: [0, 0, 15], fov: 50 }}>
+        <color attach="background" args={[settings[theme].bgColor]} />
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[10, 10, 5]} intensity={1} />
+        
+        <BrainModel 
+          processedData={processedData} 
+          activeRegions={activeRegions} 
+          settings={settings[theme]} 
+        />
+        
+        {settings[theme].useBloom && (
+          <EffectComposer>
+            <Bloom luminanceThreshold={0.2} intensity={1.5} />
+          </EffectComposer>
+        )}
+      </Canvas>
+      
+      {/* UI Overlay - can include region selection, filters, etc. */}
+      <div className="absolute bottom-4 left-4 right-4 flex justify-center">
+        <div className="bg-black/30 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-xs">
+          {activeRegions.map(region => (
+            <span key={region.id} className="inline-block px-2 py-1 m-1 rounded bg-white/10">
+              {region.name}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
-- **File Permissions**: Ensure all files created in WSL2 have proper permissions to be visible and editable in Windows:
-  ```bash
-  # Set appropriate permissions
-  chmod -R 755 /mnt/c/Users/JJ/Desktop/NOVAMIND-WEB/Novamind-Backend
-  ```
+// Extract complex Three.js logic to a separate component
+const BrainModel = React.memo(({ processedData, activeRegions, settings }) => {
+  const groupRef = useRef();
+  
+  // Handle animation
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y = state.clock.getElapsedTime() * 0.1;
+    }
+  });
+  
+  return (
+    <group ref={groupRef}>
+      {/* Brain mesh implementation */}
+      {processedData.map(region => (
+        <RegionMesh 
+          key={region.id}
+          region={region}
+          isActive={activeRegions.some(r => r.id === region.id)}
+          glowIntensity={settings.glowIntensity}
+        />
+      ))}
+    </group>
+  );
+});
 
-- **IDE Configuration**: Configure VSCode to properly recognize both Windows and WSL2 paths for the same project.
-## Domain Layer (Pure Clinical Logic)
-- Represents psychiatry-relevant concepts: Patients, Appointments, Billing, Outcomes, Notes, etc.
-- Zero references to FastAPI, AWS, or any external frameworks.
-- All logic regarding patient flow, scheduling rules, or therapy features belongs here, untainted by infrastructure.
-
-## Data Layer (Repositories & Persistence)
-- Use a Repository Pattern for patient data, appointments, forms, and more.
-- Implement an ORM (e.g., SQLAlchemy, with a separate model) but keep it out of the Domain layer.
-- All data access calls (database queries, external APIs, file storage) remain in this layer.
-
-## Presentation Layer (FastAPI Endpoints & Schemas)
-- FastAPI endpoints for patient onboarding, scheduling, secure messaging, and more.
-- **Pydantic v2** schemas for input/output validation (do not mix domain entities with Pydantic models).
-- Use **FastAPI's `Depends()`** for dependency injection (fetching repositories, services).
-
-## HIPAA & Security
-- All endpoints must enforce authentication & role-based access (patient vs. admin/psychiatrist).
-- Use AWS Cognito (or another HIPAA-eligible auth) for login, MFA, JWT issuance.
-- No session state stored server-side; all user context is provided via validated JWT tokens.
-- All logs stripped of PHI. Any error or usage logs must anonymize or exclude patient identifiers.
-
-## Event-Driven & GoF Patterns
-- **Observer Pattern** for triggering analytics or notifications when a patient record changes (e.g., appointment booked triggers an email or text reminder).
-- **Strategy Pattern** for optional AI-based modules (e.g., risk scoring, summarization) or any advanced logic that could have multiple interchangeable algorithms.
-- **Factory/Abstract Factory** for creating complex domain aggregates (e.g., building a patient record with multiple sub-objects, handling default settings).
-
-## Testing & QA
-- Provide unit tests that cover domain logic (pure, fast, no side effects).
-- Integration tests that mock out external dependencies but test layer interaction (e.g., ensuring repository calls persist the correct data).
-- Explicitly test the security boundaries—attempt unauthorized calls, expired tokens, role-based restrictions.
-
-## Error Handling & Custom Exceptions
-- Create domain exceptions (e.g., `AppointmentConflictError`, `UnauthorizedAccessError`).
-- In the API layer, catch these domain exceptions and translate them to appropriate HTTP status codes (e.g., `409 Conflict`, `401 Unauthorized`).
-- Document all custom exceptions inline.
-
-## Function Size & Responsibilities
-- Each function **≤15 lines**. For complex logic, break into smaller private helper methods.
-- No function or method should do more than one conceptual operation.
-- Aim for short, descriptive names and explicit docstrings for each method and class.
-
-## Configuration
-- Store HIPAA compliance settings (e.g., encryption, logging policies, BAA-related toggles) in a **.env** file or `settings.py`.
-- Document each variable (meaning, usage) in code or in a dedicated reference file.
-- No dynamic or runtime adjustments to global config.
-
-## Luxury Concierge Quality
-- The code, UX, and overall system must reflect a high-end "concierge psychiatry" experience—fast, reliable, impeccably designed.
-- Include thoughtful touches like automated text/email reminders (via HIPAA-compliant Twilio) or easy patient scheduling to justify premium fees.
-- Keep potential future expansion to a SaaS model in mind, but remain hyper-focused on immediate, impeccable performance for a single top-tier provider.
+// Further component details omitted for brevity

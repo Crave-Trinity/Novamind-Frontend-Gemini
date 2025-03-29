@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-50: 236 253 245;
+  --primary-100: 209 250 229;
+  --primary-200: 167 243 208;
+  --primary-300: 110 231 183;
+  --primary-400: 52 211 153;
+  --primary-500: 16 185 129;
+  --primary-600: 5 150 105;
+  --primary-700: 4 120 87;
+  --primary-800: 6 95 70;
+  --primary-900: 4 78 56;
+  --primary-950: 2 44 34;
+  
+  --background: 252 252 253;
+  --background-card: 255 255 255;
+  --foreground: 15 23 42;
+}
+
+.dark {
+  --primary-50: 2 44 34;
+  --primary-100: 4 78 56;
+  --primary-200: 6 95 70;
+  --primary-300: 4 120 87;
+  --primary-400: 5 150 105;
+  --primary-500: 16 185 129;
+  --primary-600: 52 211 153;
+  --primary-700: 110 231 183;
+  --primary-800: 167 243 208;
+  --primary-900: 209 250 229;
+  --primary-950: 236 253 245;
+  
+  --background: 10 12 16;
+  --background-card: 17 20 27;
+  --foreground: 255 255 255;
+}
+
+@layer base {
+  body {
+    @apply text-neutral-900 bg-neutral-50 dark:text-white dark:bg-background;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-neutral-300 dark:bg-neutral-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-neutral-400 dark:bg-neutral-600;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Transition utilities */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Remove Tailwind focus ring for non-keyboard focus */
+.focus\:outline-none:focus:not(:focus-visible) {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}

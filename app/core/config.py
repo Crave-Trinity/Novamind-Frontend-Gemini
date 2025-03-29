@@ -1,277 +1,261 @@
-# -*- coding: utf-8 -*-
 """
-Application Configuration.
+Application configuration settings.
 
-This module provides configuration settings for the application.
-All environment variables are loaded here and accessed through this module.
+This module provides configuration settings for the application, loaded from
+environment variables and/or a .env file.
 """
 
+import logging
 import os
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from pydantic import Field, field_validator
+from pydantic import AnyHttpUrl, BaseModel, Field, PostgresDsn, validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Set up logging with no PHI
+logger = logging.getLogger(__name__)
 
-class MentalLLaMASettings(BaseSettings):
-    """MentaLLaMA service settings."""
+
+class MLConfig(BaseModel):
+    """Machine learning service configuration settings."""
     
-    provider: str = Field(
-        "mock", 
-        description="Provider for MentaLLaMA service (aws_bedrock, mock)"
+    # MentaLLaMA configuration
+    mentalllama: Dict[str, Any] = Field(
+        default_factory=lambda: {
+            "service_type": os.getenv("ML_MENTALLLAMA_SERVICE_TYPE", "mock"),
+            "api_key": os.getenv("ML_MENTALLLAMA_API_KEY", ""),
+            "endpoint": os.getenv("ML_MENTALLLAMA_ENDPOINT", ""),
+            "model_id": os.getenv("ML_MENTALLLAMA_MODEL_ID", ""),
+            "mock_delay_ms": int(os.getenv("ML_MENTALLLAMA_MOCK_DELAY_MS", "200")),
+        },
+        description="MentaLLaMA service configuration"
     )
-    aws_region: Optional[str] = Field(
-        None, 
-        description="AWS region for Bedrock service"
+    
+    # PHI detection configuration
+    phi_detection: Dict[str, Any] = Field(
+        default_factory=lambda: {
+            "service_type": os.getenv("ML_PHI_DETECTION_SERVICE_TYPE", "mock"),
+            "aws_region": os.getenv("ML_PHI_DETECTION_AWS_REGION", "us-east-1"),
+            "aws_access_key_id": os.getenv("ML_PHI_DETECTION_AWS_ACCESS_KEY_ID", ""),
+            "aws_secret_access_key": os.getenv("ML_PHI_DETECTION_AWS_SECRET_ACCESS_KEY", ""),
+            "mock_delay_ms": int(os.getenv("ML_PHI_DETECTION_MOCK_DELAY_MS", "100")),
+        },
+        description="PHI detection service configuration"
     )
+    
+    # Digital twin configuration
+    digital_twin: Dict[str, Any] = Field(
+        default_factory=lambda: {
+            "service_type": os.getenv("ML_DIGITAL_TWIN_SERVICE_TYPE", "mock"),
+            "api_key": os.getenv("ML_DIGITAL_TWIN_API_KEY", ""),
+            "endpoint": os.getenv("ML_DIGITAL_TWIN_ENDPOINT", ""),
+            "model_id": os.getenv("ML_DIGITAL_TWIN_MODEL_ID", ""),
+            "mock_delay_ms": int(os.getenv("ML_DIGITAL_TWIN_MOCK_DELAY_MS", "300")),
+        },
+        description="Digital twin service configuration"
+    )
+
+
+class PATConfig(BaseModel):
+    """Physical Activity Tracker (PAT) service configuration settings."""
+    
+    # Service type (mock or bedrock)
+    service_type: str = Field(
+        default=os.getenv("PAT_SERVICE_TYPE", "mock"),
+        description="PAT service type (mock or bedrock)"
+    )
+    
+    # AWS configuration for Bedrock
+    aws_region: str = Field(
+        default=os.getenv("PAT_AWS_REGION", "us-east-1"),
+        description="AWS region for PAT service"
+    )
+    
     aws_access_key_id: Optional[str] = Field(
-        None, 
-        description="AWS access key ID (if not using instance role)"
+        default=os.getenv("PAT_AWS_ACCESS_KEY_ID", ""),
+        description="AWS access key ID for PAT service"
     )
+    
     aws_secret_access_key: Optional[str] = Field(
-        None, 
-        description="AWS secret access key (if not using instance role)"
-    )
-    default_model: str = Field(
-        "claude-v2", 
-        description="Default model to use for MentaLLaMA service"
-    )
-    depression_detection_model: Optional[str] = Field(
-        None, 
-        description="Model to use for depression detection"
-    )
-    risk_assessment_model: Optional[str] = Field(
-        None, 
-        description="Model to use for risk assessment"
-    )
-    sentiment_analysis_model: Optional[str] = Field(
-        None, 
-        description="Model to use for sentiment analysis"
-    )
-    wellness_dimensions_model: Optional[str] = Field(
-        None, 
-        description="Model to use for wellness dimensions analysis"
-    )
-    max_tokens: int = Field(
-        1024, 
-        description="Maximum tokens to generate"
-    )
-    temperature: float = Field(
-        0.7, 
-        description="Sampling temperature (0.0-1.0)"
-    )
-    timeout_seconds: int = Field(
-        30, 
-        description="Timeout in seconds for API calls"
-    )
-    request_retries: int = Field(
-        3, 
-        description="Number of retries for failed API calls"
-    )
-    encryption_key_id: Optional[str] = Field(
-        None, 
-        description="AWS KMS key ID for encryption (HIPAA)"
-    )
-    log_phi: bool = Field(
-        False, 
-        description="Whether to log PHI (should be False in production)"
-    )
-    cache_results: bool = Field(
-        True, 
-        description="Whether to cache results (improves performance)"
-    )
-    cache_ttl_seconds: int = Field(
-        3600, 
-        description="Time-to-live for cached results in seconds"
+        default=os.getenv("PAT_AWS_SECRET_ACCESS_KEY", ""),
+        description="AWS secret access key for PAT service"
     )
     
-    model_config = SettingsConfigDict(
-        env_prefix="MENTALLLAMA_",
-        extra="ignore"
+    # S3 configuration
+    pat_s3_bucket: str = Field(
+        default=os.getenv("PAT_S3_BUCKET", "novamind-pat-data"),
+        description="S3 bucket for PAT data storage"
     )
     
-    @field_validator("provider")
-    def validate_provider(cls, v: str) -> str:
-        """Validate provider."""
-        allowed_providers = ["aws_bedrock", "mock"]
-        if v not in allowed_providers:
-            raise ValueError(f"Provider must be one of {allowed_providers}")
-        return v
+    # DynamoDB configuration
+    pat_dynamodb_table: str = Field(
+        default=os.getenv("PAT_DYNAMODB_TABLE", "novamind-pat-analyses"),
+        description="DynamoDB table for PAT analyses"
+    )
+    
+    # Bedrock model configuration
+    pat_bedrock_model_id: str = Field(
+        default=os.getenv("PAT_BEDROCK_MODEL_ID", "amazon.titan-embed-text-v1"),
+        description="Bedrock model ID for PAT service"
+    )
+    
+    # KMS key ID for encryption
+    pat_kms_key_id: Optional[str] = Field(
+        default=os.getenv("PAT_KMS_KEY_ID", ""),
+        description="KMS key ID for PAT data encryption"
+    )
+    
+    # Mock service configuration
+    mock_delay_ms: int = Field(
+        default=int(os.getenv("PAT_MOCK_DELAY_MS", "200")),
+        description="Mock delay in milliseconds"
+    )
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert configuration to dictionary.
+        
+        Returns:
+            Dictionary of configuration values
+        """
+        return {
+            "service_type": self.service_type,
+            "aws_region": self.aws_region,
+            "aws_access_key_id": self.aws_access_key_id,
+            "aws_secret_access_key": self.aws_secret_access_key,
+            "pat_s3_bucket": self.pat_s3_bucket,
+            "pat_dynamodb_table": self.pat_dynamodb_table,
+            "pat_bedrock_model_id": self.pat_bedrock_model_id,
+            "pat_kms_key_id": self.pat_kms_key_id,
+            "mock_delay_ms": self.mock_delay_ms,
+        }
 
 
-class PHIDetectionSettings(BaseSettings):
-    """PHI detection service settings."""
+class SecurityConfig(BaseModel):
+    """Security-related configuration settings."""
     
-    enabled: bool = Field(
-        True, 
-        description="Whether PHI detection is enabled"
-    )
-    provider: str = Field(
-        "internal", 
-        description="Provider for PHI detection service (internal, aws)"
-    )
-    detection_level: str = Field(
-        "strict", 
-        description="Detection level (strict, moderate, relaxed)"
-    )
-    aws_region: Optional[str] = Field(
-        None, 
-        description="AWS region for Comprehend Medical"
-    )
-    aws_access_key_id: Optional[str] = Field(
-        None, 
-        description="AWS access key ID (if not using instance role)"
-    )
-    aws_secret_access_key: Optional[str] = Field(
-        None, 
-        description="AWS secret access key (if not using instance role)"
+    # JWT settings
+    secret_key: str = Field(
+        default=os.getenv("SECURITY_SECRET_KEY", "secret-key"),
+        description="Secret key for JWT token signing"
     )
     
-    model_config = SettingsConfigDict(
-        env_prefix="PHI_DETECTION_",
-        extra="ignore"
+    algorithm: str = Field(
+        default=os.getenv("SECURITY_ALGORITHM", "HS256"),
+        description="Algorithm for JWT token signing"
+    )
+    
+    access_token_expire_minutes: int = Field(
+        default=int(os.getenv("SECURITY_ACCESS_TOKEN_EXPIRE_MINUTES", "30")),
+        description="Access token expiration time in minutes"
+    )
+    
+    # CORS settings
+    cors_origins: List[str] = Field(
+        default_factory=lambda: os.getenv("SECURITY_CORS_ORIGINS", "*").split(","),
+        description="CORS allowed origins (comma-separated)"
+    )
+    
+    # AWS Cognito settings
+    use_cognito: bool = Field(
+        default=os.getenv("SECURITY_USE_COGNITO", "False").lower() == "true",
+        description="Whether to use AWS Cognito for authentication"
+    )
+    
+    cognito_region: Optional[str] = Field(
+        default=os.getenv("SECURITY_COGNITO_REGION", ""),
+        description="AWS Cognito region"
+    )
+    
+    cognito_user_pool_id: Optional[str] = Field(
+        default=os.getenv("SECURITY_COGNITO_USER_POOL_ID", ""),
+        description="AWS Cognito user pool ID"
+    )
+    
+    cognito_client_id: Optional[str] = Field(
+        default=os.getenv("SECURITY_COGNITO_CLIENT_ID", ""),
+        description="AWS Cognito client ID"
     )
 
 
-class DigitalTwinSettings(BaseSettings):
-    """Digital Twin service settings."""
+class DatabaseConfig(BaseModel):
+    """Database configuration settings."""
     
-    enabled: bool = Field(
-        False, 
-        description="Whether Digital Twin service is enabled"
-    )
-    provider: str = Field(
-        "internal", 
-        description="Provider for Digital Twin service (internal, external)"
-    )
-    model_path: Optional[str] = Field(
-        None, 
-        description="Path to Digital Twin model"
-    )
-    
-    model_config = SettingsConfigDict(
-        env_prefix="DIGITAL_TWIN_",
-        extra="ignore"
-    )
-
-
-class MLServiceSettings(BaseSettings):
-    """ML service settings."""
-    
-    mentalllama: MentalLLaMASettings = Field(
-        default_factory=MentalLLaMASettings,
-        description="MentaLLaMA service settings"
-    )
-    phi_detection: PHIDetectionSettings = Field(
-        default_factory=PHIDetectionSettings,
-        description="PHI detection service settings"
-    )
-    digital_twin: DigitalTwinSettings = Field(
-        default_factory=DigitalTwinSettings,
-        description="Digital Twin service settings"
+    # PostgreSQL settings
+    url: PostgresDsn = Field(
+        default=PostgresDsn.build(
+            scheme="postgresql",
+            username=os.getenv("DB_USER", "postgres"),
+            password=os.getenv("DB_PASSWORD", "postgres"),
+            host=os.getenv("DB_HOST", "localhost"),
+            port=int(os.getenv("DB_PORT", "5432")),
+            path=f"/{os.getenv('DB_NAME', 'novamind')}"
+        ),
+        description="PostgreSQL connection URL"
     )
     
-    model_config = SettingsConfigDict(
-        env_prefix="ML_",
-        extra="ignore"
+    pool_size: int = Field(
+        default=int(os.getenv("DB_POOL_SIZE", "5")),
+        description="Database connection pool size"
+    )
+    
+    max_overflow: int = Field(
+        default=int(os.getenv("DB_MAX_OVERFLOW", "10")),
+        description="Maximum number of connections beyond pool size"
+    )
+    
+    pool_timeout: int = Field(
+        default=int(os.getenv("DB_POOL_TIMEOUT", "30")),
+        description="Timeout for acquiring connection from pool"
+    )
+    
+    pool_recycle: int = Field(
+        default=int(os.getenv("DB_POOL_RECYCLE", "3600")),
+        description="Connection recycling time in seconds"
     )
 
 
 class Settings(BaseSettings):
     """Application settings."""
     
-    # Application settings
-    ENV: str = Field(
-        "development", 
-        description="Environment (development, staging, production)"
-    )
-    APP_NAME: str = Field(
-        "Concierge Psychiatry Platform", 
-        description="Application name"
-    )
-    APP_VERSION: str = Field(
-        "1.0.0", 
-        description="Application version"
-    )
-    DEBUG: bool = Field(
-        False, 
-        description="Debug mode"
-    )
-    API_PREFIX: str = Field(
-        "/api/v1", 
-        description="API prefix"
-    )
-    BACKEND_CORS_ORIGINS: List[str] = Field(
-        ["http://localhost:8000", "http://localhost:3000"], 
-        description="CORS origins"
-    )
-    
-    # Security settings
-    SECRET_KEY: str = Field(
-        "development_secret_key_change_in_production",
-        description="Secret key for JWT encoding"
-    )
-    JWT_ALGORITHM: str = Field(
-        "HS256", 
-        description="JWT algorithm"
-    )
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(
-        30, 
-        description="Access token expiration in minutes"
-    )
-    
-    # Database settings
-    DATABASE_URL: str = Field(
-        "sqlite:///./app.db", 
-        description="Database URL"
-    )
-    
-    # HIPAA Compliance settings
-    HIPAA_ENABLED: bool = Field(
-        True, 
-        description="Whether HIPAA compliance is enabled"
-    )
-    PHI_LOG_SANITIZER_ENABLED: bool = Field(
-        True, 
-        description="Whether PHI log sanitization is enabled"
-    )
-    PHI_LOG_SANITIZER_PATTERNS_FILE: str = Field(
-        "phi_patterns.yaml", 
-        description="Path to PHI patterns file"
-    )
-    
-    # ML services settings
-    ML_SERVICES: MLServiceSettings = Field(
-        default_factory=MLServiceSettings,
-        description="ML services settings"
-    )
-    
-    # Path settings
-    BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
-    
     model_config = SettingsConfigDict(
         env_file=".env",
-        extra="ignore"
+        env_file_encoding="utf-8",
+        case_sensitive=True,
     )
     
-    @field_validator("BACKEND_CORS_ORIGINS")
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
-        """Parse CORS origins from string or list."""
+    # Basic application settings
+    app_name: str = "NOVAMIND"
+    api_v1_prefix: str = "/api/v1"
+    debug: bool = os.getenv("DEBUG", "False").lower() == "true"
+    
+    # Service configurations
+    ml_config: MLConfig = Field(default_factory=MLConfig)
+    pat_config: PATConfig = Field(default_factory=PATConfig)
+    security: SecurityConfig = Field(default_factory=SecurityConfig)
+    database: DatabaseConfig = Field(default_factory=DatabaseConfig)
+    
+    # Backend settings
+    backend_cors_origins: List[AnyHttpUrl] = []
+    
+    @validator("backend_cors_origins", pre=True)
+    def assemble_cors_origins(cls, v: str | List[str]) -> List[str] | str:
+        """Process and validate CORS origins from settings.
+        
+        Args:
+            v: CORS origins as string or list
+            
+        Returns:
+            Processed CORS origins
+            
+        Raises:
+            ValueError: If invalid CORS origin values provided
+        """
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
+        if isinstance(v, list):
             return v
-        raise ValueError(v)
-    
-    @field_validator("ENV")
-    def validate_env(cls, v: str) -> str:
-        """Validate environment."""
-        allowed_envs = ["development", "staging", "production"]
-        if v not in allowed_envs:
-            raise ValueError(f"Environment must be one of {allowed_envs}")
-        return v
+        raise ValueError("CORS origins must be a list or a comma-separated string")
 
 
-# Create settings instance
+# Create global settings instance
 settings = Settings()
