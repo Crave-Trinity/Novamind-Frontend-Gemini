@@ -1,936 +1,490 @@
 """
-Visualization preprocessor module for preparing neurotransmitter data for visualization.
+Domain service for preprocessing neurotransmitter data for visualization.
 
-This module provides data transformation and formatting services for the
-frontend visualization components, ensuring efficient and optimized
-data structures for 3D brain visualizations.
+This module contains preprocessing logic to optimize neurotransmitter data
+for efficient visualization in the frontend.
 """
-from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Set, Optional, Any, Union
-import uuid
-from uuid import UUID
+from typing import Dict, List, Tuple, Optional, Any, Set
+import math
+from datetime import datetime
 
-from app.domain.entities.digital_twin_enums import (
-    BrainRegion, 
-    Neurotransmitter,
-    NeurotransmitterState,
-    BrainNetwork
-)
-from app.domain.entities.temporal_neurotransmitter_mapping import TemporalNeurotransmitterMapping
+from app.domain.entities.temporal_sequence import TemporalSequence
+from app.domain.entities.digital_twin_enums import BrainRegion, Neurotransmitter, ClinicalSignificance
+from app.domain.entities.neurotransmitter_effect import NeurotransmitterEffect
 
 
-class VisualizationPreprocessor:
+class NeurotransmitterVisualizationPreprocessor:
     """
-    Service that transforms neurotransmitter data for optimized visualization.
+    Handles preprocessing of neurotransmitter data for visualization.
     
-    This class converts raw neurotransmitter data from the TemporalNeurotransmitterMapping
-    into formats optimized for the frontend visualization components, including:
-    - 3D brain models
-    - Time series charts
-    - Heat maps
-    - Network connectivity diagrams
+    This class optimizes and transforms temporal sequences and neurotransmitter
+    data to formats more conducive to efficient visualization in the frontend.
+    It includes methods for downsampling, geometry generation, and statistical
+    preprocessing to ensure smooth rendering even with large datasets.
     """
     
     def __init__(self):
-        """Initialize a new visualization preprocessor."""
-        # Mapping of brain regions to 3D coordinates (x, y, z)
-        self.region_coordinates: Dict[BrainRegion, Tuple[float, float, float]] = {
-            BrainRegion.PREFRONTAL_CORTEX: (0.0, 0.8, 0.4),
-            BrainRegion.AMYGDALA: (0.3, 0.0, 0.0),
-            BrainRegion.HIPPOCAMPUS: (0.3, -0.1, 0.1),
-            BrainRegion.NUCLEUS_ACCUMBENS: (0.1, 0.3, -0.2),
-            BrainRegion.VENTRAL_TEGMENTAL_AREA: (0.0, -0.3, -0.1),
-            BrainRegion.RAPHE_NUCLEI: (0.0, -0.5, -0.2),
-            BrainRegion.LOCUS_COERULEUS: (-0.1, -0.6, -0.1),
-            BrainRegion.STRIATUM: (0.2, 0.2, 0.0),
-            BrainRegion.SUBSTANTIA_NIGRA: (0.0, -0.4, -0.2),
-            BrainRegion.HYPOTHALAMUS: (0.0, 0.0, -0.1),
-            BrainRegion.THALAMUS: (0.0, 0.1, 0.2),
-            BrainRegion.INSULA: (0.4, 0.2, 0.2),
-            BrainRegion.ANTERIOR_CINGULATE_CORTEX: (0.0, 0.4, 0.3),
-            BrainRegion.ORBITOFRONTAL_CORTEX: (0.0, 0.6, 0.0),
-            BrainRegion.PARIETAL_CORTEX: (-0.3, 0.4, 0.5),
-            BrainRegion.TEMPORAL_CORTEX: (0.5, 0.0, 0.0),
-            BrainRegion.OCCIPITAL_CORTEX: (-0.5, -0.2, 0.2),
-            BrainRegion.BASAL_GANGLIA: (0.2, 0.1, 0.1),
-            BrainRegion.CEREBELLUM: (-0.2, -0.7, 0.0),
-            BrainRegion.BRAIN_STEM: (0.0, -0.7, -0.3),
+        """Initialize the preprocessor with required brain region coordinates."""
+        # Define standardized 3D coordinates for each brain region
+        # These are normalized coordinates that can be used by visualization engines
+        self._brain_region_coordinates = {
+            BrainRegion.PREFRONTAL_CORTEX: (0.0, 0.8, 0.3),
+            BrainRegion.ORBITOFRONTAL_CORTEX: (0.0, 0.7, 0.1),
+            BrainRegion.ANTERIOR_CINGULATE_CORTEX: (0.0, 0.5, 0.4),
+            BrainRegion.AMYGDALA: (0.3, 0.1, 0.0),
+            BrainRegion.HIPPOCAMPUS: (0.4, 0.0, 0.2),
+            BrainRegion.INSULA: (0.5, 0.3, 0.1),
+            BrainRegion.NUCLEUS_ACCUMBENS: (0.2, 0.3, -0.1),
+            BrainRegion.VENTRAL_TEGMENTAL_AREA: (0.0, -0.3, 0.0),
+            BrainRegion.SUBSTANTIA_NIGRA: (0.1, -0.5, -0.1),
+            BrainRegion.LOCUS_COERULEUS: (-0.1, -0.7, 0.0),
+            BrainRegion.RAPHE_NUCLEI: (0.0, -0.6, 0.2),
+            BrainRegion.HYPOTHALAMUS: (0.0, 0.0, -0.2),
+            BrainRegion.THALAMUS: (0.0, 0.1, 0.0),
+            BrainRegion.STRIATUM: (0.3, 0.2, 0.0),
+            BrainRegion.PARIETAL_CORTEX: (0.4, 0.5, 0.6),
+            BrainRegion.TEMPORAL_CORTEX: (0.6, 0.3, 0.3),
+            BrainRegion.OCCIPITAL_CORTEX: (0.5, -0.3, 0.5),
+            BrainRegion.CEREBELLUM: (0.0, -0.8, 0.4),
+            BrainRegion.BRAIN_STEM: (0.0, -0.9, 0.0),
+            BrainRegion.BASAL_GANGLIA: (0.2, 0.1, 0.0),
+            BrainRegion.VENTRAL_STRIATUM: (0.25, 0.15, -0.05),
+            BrainRegion.DORSAL_STRIATUM: (0.3, 0.25, 0.05)
         }
         
-        # Connectivity between brain regions (strength from 0.0 to 1.0)
-        self.region_connectivity: Dict[BrainRegion, Dict[BrainRegion, float]] = self._initialize_connectivity()
-        
-        # Color mapping for neurotransmitters (hex colors)
-        self.neurotransmitter_colors: Dict[Neurotransmitter, str] = {
-            Neurotransmitter.SEROTONIN: "#FFA500",   # Orange
-            Neurotransmitter.DOPAMINE: "#FF2D55",    # Red
-            Neurotransmitter.NOREPINEPHRINE: "#007AFF",  # Blue
-            Neurotransmitter.GABA: "#5856D6",        # Purple
-            Neurotransmitter.GLUTAMATE: "#FF9500",   # Orange-yellow
-            Neurotransmitter.ACETYLCHOLINE: "#4CD964",  # Green
-            Neurotransmitter.ENDORPHINS: "#FF3B30",  # Bright red
-            Neurotransmitter.SUBSTANCE_P: "#FF2D55", # Pink-red
-            Neurotransmitter.OXYTOCIN: "#AF52DE",    # Purple
-            Neurotransmitter.HISTAMINE: "#FF9500",   # Orange
-            Neurotransmitter.GLYCINE: "#5AC8FA",     # Light blue
-            Neurotransmitter.ADENOSINE: "#34C759",   # Green
+        # Color mappings for neurotransmitters - used for visualization
+        self._neurotransmitter_colors = {
+            Neurotransmitter.SEROTONIN: (0.8, 0.2, 0.8),  # Purple
+            Neurotransmitter.DOPAMINE: (0.2, 0.8, 0.2),   # Green
+            Neurotransmitter.NOREPINEPHRINE: (0.2, 0.2, 0.8),  # Blue
+            Neurotransmitter.GABA: (0.8, 0.6, 0.2),       # Orange
+            Neurotransmitter.GLUTAMATE: (0.8, 0.2, 0.2),  # Red
+            Neurotransmitter.ACETYLCHOLINE: (0.6, 0.8, 0.8),  # Light Blue
+            Neurotransmitter.ENDORPHINS: (0.9, 0.7, 0.9),  # Light Purple
+            Neurotransmitter.SUBSTANCE_P: (0.7, 0.3, 0.1),  # Brown
+            Neurotransmitter.OXYTOCIN: (0.9, 0.4, 0.6),  # Pink
+            Neurotransmitter.HISTAMINE: (0.5, 0.5, 0.1),  # Olive
+            Neurotransmitter.GLYCINE: (0.4, 0.8, 0.4),  # Light Green
+            Neurotransmitter.ADENOSINE: (0.6, 0.6, 0.6)   # Gray
         }
-        
-        # Brain networks
-        self.brain_networks: Dict[BrainNetwork, List[BrainRegion]] = self._initialize_networks()
     
-    def _initialize_connectivity(self) -> Dict[BrainRegion, Dict[BrainRegion, float]]:
-        """
-        Initialize the connectivity map between brain regions.
-        
-        Returns:
-            Dictionary mapping source regions to target regions with connection strength
-        """
-        connectivity: Dict[BrainRegion, Dict[BrainRegion, float]] = {}
-        
-        # Initialize all regions with empty connectivity
-        for region in BrainRegion:
-            connectivity[region] = {}
-        
-        # Define key connections
-        # Prefrontal connections
-        connectivity[BrainRegion.PREFRONTAL_CORTEX][BrainRegion.ANTERIOR_CINGULATE_CORTEX] = 0.8
-        connectivity[BrainRegion.PREFRONTAL_CORTEX][BrainRegion.ORBITOFRONTAL_CORTEX] = 0.9
-        connectivity[BrainRegion.PREFRONTAL_CORTEX][BrainRegion.STRIATUM] = 0.7
-        connectivity[BrainRegion.PREFRONTAL_CORTEX][BrainRegion.THALAMUS] = 0.6
-        
-        # Limbic system
-        connectivity[BrainRegion.AMYGDALA][BrainRegion.HIPPOCAMPUS] = 0.7
-        connectivity[BrainRegion.AMYGDALA][BrainRegion.HYPOTHALAMUS] = 0.6
-        connectivity[BrainRegion.AMYGDALA][BrainRegion.PREFRONTAL_CORTEX] = 0.5
-        
-        # Reward pathway
-        connectivity[BrainRegion.VENTRAL_TEGMENTAL_AREA][BrainRegion.NUCLEUS_ACCUMBENS] = 0.9
-        connectivity[BrainRegion.VENTRAL_TEGMENTAL_AREA][BrainRegion.PREFRONTAL_CORTEX] = 0.6
-        connectivity[BrainRegion.NUCLEUS_ACCUMBENS][BrainRegion.PREFRONTAL_CORTEX] = 0.5
-        
-        # More connections would be defined here in a complete implementation
-        
-        return connectivity
-    
-    def _initialize_networks(self) -> Dict[BrainNetwork, List[BrainRegion]]:
-        """
-        Initialize brain networks with their constituent regions.
-        
-        Returns:
-            Dictionary mapping networks to lists of brain regions
-        """
-        networks: Dict[BrainNetwork, List[BrainRegion]] = {}
-        
-        # Default Mode Network
-        networks[BrainNetwork.DEFAULT_MODE] = [
-            BrainRegion.PREFRONTAL_CORTEX,
-            BrainRegion.ANTERIOR_CINGULATE_CORTEX,
-            BrainRegion.PARIETAL_CORTEX,
-            BrainRegion.TEMPORAL_CORTEX,
-            BrainRegion.HIPPOCAMPUS
-        ]
-        
-        # Salience Network
-        networks[BrainNetwork.SALIENCE] = [
-            BrainRegion.ANTERIOR_CINGULATE_CORTEX,
-            BrainRegion.INSULA,
-            BrainRegion.AMYGDALA
-        ]
-        
-        # Executive Control Network
-        networks[BrainNetwork.EXECUTIVE_CONTROL] = [
-            BrainRegion.PREFRONTAL_CORTEX,
-            BrainRegion.ANTERIOR_CINGULATE_CORTEX,
-            BrainRegion.PARIETAL_CORTEX
-        ]
-        
-        # Reward Network
-        networks[BrainNetwork.REWARD] = [
-            BrainRegion.NUCLEUS_ACCUMBENS,
-            BrainRegion.VENTRAL_TEGMENTAL_AREA,
-            BrainRegion.ORBITOFRONTAL_CORTEX,
-            BrainRegion.PREFRONTAL_CORTEX
-        ]
-        
-        # Fear Network
-        networks[BrainNetwork.FEAR] = [
-            BrainRegion.AMYGDALA,
-            BrainRegion.HYPOTHALAMUS,
-            BrainRegion.ANTERIOR_CINGULATE_CORTEX,
-            BrainRegion.LOCUS_COERULEUS
-        ]
-        
-        # Memory Network
-        networks[BrainNetwork.MEMORY] = [
-            BrainRegion.HIPPOCAMPUS,
-            BrainRegion.PREFRONTAL_CORTEX,
-            BrainRegion.TEMPORAL_CORTEX
-        ]
-        
-        return networks
-    
-    def prepare_brain_visualization_data(
+    def precompute_temporal_sequence_visualization(
         self,
-        mapping: TemporalNeurotransmitterMapping,
-        neurotransmitter: Optional[Neurotransmitter] = None,
-        reference_time: Optional[datetime] = None,
-        highlighted_regions: Optional[List[BrainRegion]] = None
+        sequence: TemporalSequence,
+        focus_features: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
-        Prepare data for 3D brain visualization.
+        Precompute visualization data for a temporal sequence.
         
         Args:
-            mapping: The temporal neurotransmitter mapping to visualize
-            neurotransmitter: Optional specific neurotransmitter to visualize
-            reference_time: Optional reference time for data (defaults to latest)
-            highlighted_regions: Optional list of regions to highlight
+            sequence: The temporal sequence to visualize
+            focus_features: Optional list of features to focus on
             
         Returns:
-            Dictionary with visualization data
+            Dictionary with preprocessed visualization data
         """
-        # Default to visualizing serotonin if not specified
-        nt = neurotransmitter or Neurotransmitter.SEROTONIN
+        # Determine which features to include
+        features = focus_features or sequence.feature_names
         
-        # Data for brain regions
-        regions_data = []
+        # Get time and value data
+        timestamps = sequence.timestamps
         
-        # Process each brain region
-        for region in BrainRegion:
-            # Skip if region doesn't have coordinates defined
-            if region not in self.region_coordinates:
-                continue
+        # Determine if downsampling is needed
+        downsample = len(timestamps) > 100
+        sample_rate = max(1, len(timestamps) // 100) if downsample else 1
+        
+        # Create downsampled data points
+        downsampled_times = []
+        downsampled_values = []
+        
+        for i in range(0, len(timestamps), sample_rate):
+            downsampled_times.append(timestamps[i])
             
-            # Get coordinates
-            coordinates = self.region_coordinates[region]
-            
-            # Get neurotransmitter level
-            level = mapping.get_current_level(nt, region, reference_time) or 0.5
-            
-            # Get state
-            state = mapping.get_neurotransmitter_state(nt, region, reference_time)
-            
-            # Calculate color based on neurotransmitter and level
-            base_color = self.neurotransmitter_colors.get(nt, "#FFFFFF")
-            
-            # Determine if region is highlighted
-            is_highlighted = highlighted_regions and region in highlighted_regions
-            
-            # Add region data
-            regions_data.append({
-                "id": region.value,
-                "name": region.value.replace("_", " ").title(),
-                "coordinates": coordinates,
-                "level": level,
-                "state": state.value,
-                "color": base_color,
-                "highlighted": is_highlighted,
-                "size": 0.3 + (level * 0.2)  # Size varies based on level
-            })
-        
-        # Generate connection data
-        connections_data = []
-        
-        # Only include strong connections
-        for source, targets in self.region_connectivity.items():
-            for target, strength in targets.items():
-                # Skip weak connections
-                if strength < 0.5:
-                    continue
-                
-                # Skip if either region is missing coordinates
-                if source not in self.region_coordinates or target not in self.region_coordinates:
-                    continue
-                
-                # Get source and target data
-                source_data = next((r for r in regions_data if r["id"] == source.value), None)
-                target_data = next((r for r in regions_data if r["id"] == target.value), None)
-                
-                if source_data and target_data:
-                    # Calculate connection properties based on neurotransmitter levels
-                    source_level = source_data["level"]
-                    target_level = target_data["level"]
-                    
-                    # Activity level affects connection visibility
-                    activity = (source_level + target_level) / 2 * strength
-                    
-                    # Only show active connections
-                    if activity < 0.3:
-                        continue
-                    
-                    connections_data.append({
-                        "source": source.value,
-                        "target": target.value,
-                        "strength": strength,
-                        "activity": activity,
-                        "coordinates": [source_data["coordinates"], target_data["coordinates"]]
-                    })
-        
-        # Prepare network data
-        networks_data = []
-        
-        for network, regions in self.brain_networks.items():
-            # Calculate average neurotransmitter level in this network
-            network_levels = []
-            for region in regions:
-                level = mapping.get_current_level(nt, region, reference_time)
-                if level is not None:
-                    network_levels.append(level)
-            
-            # Skip networks with no data
-            if not network_levels:
-                continue
-            
-            # Calculate average level
-            avg_level = sum(network_levels) / len(network_levels)
-            
-            networks_data.append({
-                "id": network.value,
-                "name": network.value.replace("_", " ").title(),
-                "regions": [r.value for r in regions],
-                "level": avg_level,
-                "dominant": avg_level > 0.7  # Networks with high activity are dominant
-            })
-        
-        # Return the prepared data
-        return {
-            "neurotransmitter": nt.value,
-            "color": self.neurotransmitter_colors.get(nt, "#FFFFFF"),
-            "timestamp": reference_time.isoformat() if reference_time else None,
-            "regions": regions_data,
-            "connections": connections_data,
-            "networks": networks_data
-        }
-    
-    def prepare_time_series_data(
-        self,
-        mapping: TemporalNeurotransmitterMapping,
-        neurotransmitter: Neurotransmitter,
-        brain_region: BrainRegion,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
-        include_baseline: bool = False
-    ) -> Dict[str, Any]:
-        """
-        Prepare time series data for charts.
-        
-        Args:
-            mapping: The temporal neurotransmitter mapping
-            neurotransmitter: Target neurotransmitter
-            brain_region: Target brain region
-            start_time: Optional start time (defaults to earliest data)
-            end_time: Optional end time (defaults to latest data)
-            include_baseline: Whether to include baseline for comparison
-            
-        Returns:
-            Dictionary with time series visualization data
-        """
-        # Get the sequence for this neurotransmitter and region
-        sequence = mapping.get_measurement_sequence(neurotransmitter, brain_region)
-        
-        if not sequence or not sequence.events:
-            return {
-                "neurotransmitter": neurotransmitter.value,
-                "brain_region": brain_region.value,
-                "color": self.neurotransmitter_colors.get(neurotransmitter, "#FFFFFF"),
-                "data_points": [],
-                "statistics": {},
-                "baseline": None
-            }
-        
-        # Determine time range
-        if not start_time:
-            start_time = sequence.events[0].timestamp
-        
-        if not end_time:
-            end_time = sequence.events[-1].timestamp
-        
-        # Get events in range
-        events_in_range = sequence.get_events_in_range(start_time, end_time)
-        
-        # Prepare data points
-        data_points = []
-        for event in events_in_range:
-            data_points.append({
-                "timestamp": event.timestamp.isoformat(),
-                "value": event.value,
-                "metadata": event.metadata
-            })
-        
-        # Get statistics
-        stats = sequence.get_statistics()
-        
-        # Add trend
-        trend = sequence.get_trend()
-        
-        # Get baseline data if requested
-        baseline = None
-        if include_baseline:
-            # Use first 20% of data as baseline
-            cutoff_idx = max(1, len(events_in_range) // 5)
-            
-            if cutoff_idx < len(events_in_range):
-                baseline_events = events_in_range[:cutoff_idx]
-                baseline_values = [e.value for e in baseline_events]
-                
-                if baseline_values:
-                    baseline = {
-                        "mean": sum(baseline_values) / len(baseline_values),
-                        "start": baseline_events[0].timestamp.isoformat(),
-                        "end": baseline_events[-1].timestamp.isoformat()
-                    }
-        
-        return {
-            "neurotransmitter": neurotransmitter.value,
-            "brain_region": brain_region.value,
-            "color": self.neurotransmitter_colors.get(neurotransmitter, "#FFFFFF"),
-            "data_points": data_points,
-            "statistics": stats,
-            "trend": trend,
-            "baseline": baseline
-        }
-    
-    def prepare_heatmap_data(
-        self,
-        mapping: TemporalNeurotransmitterMapping,
-        neurotransmitters: Optional[List[Neurotransmitter]] = None,
-        brain_regions: Optional[List[BrainRegion]] = None,
-        reference_time: Optional[datetime] = None
-    ) -> Dict[str, Any]:
-        """
-        Prepare heatmap data for visualizing neurotransmitter levels across brain regions.
-        
-        Args:
-            mapping: The temporal neurotransmitter mapping
-            neurotransmitters: List of neurotransmitters to include (defaults to all)
-            brain_regions: List of brain regions to include (defaults to all)
-            reference_time: Optional reference time (defaults to latest)
-            
-        Returns:
-            Dictionary with heatmap visualization data
-        """
-        # Default to all neurotransmitters if not specified
-        target_nts = neurotransmitters or list(Neurotransmitter)
-        
-        # Default to all brain regions if not specified
-        target_regions = brain_regions or list(BrainRegion)
-        
-        # Prepare the data rows
-        rows = []
-        
-        for nt in target_nts:
-            row_data = []
-            
-            for region in target_regions:
-                # Get level at reference time
-                level = mapping.get_current_level(nt, region, reference_time) or 0.0
-                
-                # Get state
-                state = mapping.get_neurotransmitter_state(nt, region, reference_time)
-                
-                row_data.append({
-                    "region": region.value,
-                    "level": level,
-                    "state": state.value
-                })
-            
-            rows.append({
-                "neurotransmitter": nt.value,
-                "color": self.neurotransmitter_colors.get(nt, "#FFFFFF"),
-                "data": row_data
-            })
-        
-        # Prepare the column headers
-        columns = [region.value.replace("_", " ").title() for region in target_regions]
-        
-        return {
-            "rows": rows,
-            "columns": columns,
-            "timestamp": reference_time.isoformat() if reference_time else None
-        }
-
-
-class NeurotransmitterVisualizationPreprocessor(VisualizationPreprocessor):
-    """
-    Specialized preprocessor for neurotransmitter visualization.
-    
-    This class extends the base visualization preprocessor with specialized
-    methods for processing neurotransmitter data for the frontend visualization
-    components, including additional optimizations and neurotransmitter-specific
-    transformations.
-    """
-    
-    def __init__(self, color_palette: Optional[Dict[Neurotransmitter, str]] = None):
-        """
-        Initialize a neurotransmitter visualization preprocessor.
-        
-        Args:
-            color_palette: Optional custom color palette for neurotransmitters
-        """
-        super().__init__()
-        
-        # Override default colors if provided
-        if color_palette:
-            self.neurotransmitter_colors.update(color_palette)
-        
-        # Scaling factors for different visualization types
-        self._visualization_scaling_factors = {
-            "3d_model": 1.0,
-            "heatmap": 1.2,
-            "network": 0.8,
-            "time_series": 1.0
-        }
-    
-    def prepare_neurotransmitter_network_data(
-        self,
-        mapping: TemporalNeurotransmitterMapping,
-        reference_time: Optional[datetime] = None,
-        receptor_threshold: float = 0.5
-    ) -> Dict[str, Any]:
-        """
-        Prepare data for visualizing the neurotransmitter signaling network.
-        
-        Args:
-            mapping: The temporal neurotransmitter mapping
-            reference_time: Optional reference time (defaults to latest)
-            receptor_threshold: Minimum receptor density to include
-            
-        Returns:
-            Dictionary with network visualization data
-        """
-        # Nodes represent neurotransmitters
-        nodes = []
-        
-        # Edges represent receptor relationships
-        edges = []
-        
-        # Process each neurotransmitter
-        for nt in Neurotransmitter:
-            # Basic node data
-            node = {
-                "id": nt.value,
-                "name": nt.value.replace("_", " ").title(),
-                "color": self.neurotransmitter_colors.get(nt, "#FFFFFF"),
-                "type": "neurotransmitter"
-            }
-            
-            # Calculate average level across brain regions
-            levels = []
-            for region in BrainRegion:
-                level = mapping.get_current_level(nt, region, reference_time)
-                if level is not None:
-                    levels.append(level)
-            
-            if levels:
-                avg_level = sum(levels) / len(levels)
-                node["level"] = avg_level
-                node["size"] = 10 + (avg_level * 15)  # Size based on level
-            else:
-                node["level"] = 0.0
-                node["size"] = 10
-            
-            nodes.append(node)
-            
-            # Create edges for receptor relationships
-            receptor_regions = []
-            for region in BrainRegion:
-                affinity = mapping.analyze_receptor_affinity(nt, region)
-                if affinity >= receptor_threshold:
-                    receptor_regions.append((region, affinity))
-            
-            # Add edges for each receptor region
-            for region, affinity in receptor_regions:
-                # Look for other neurotransmitters in this region
-                for other_nt in Neurotransmitter:
-                    if other_nt == nt:
-                        continue
-                    
-                    other_level = mapping.get_current_level(other_nt, region, reference_time)
-                    if other_level and other_level > 0.2:
-                        # This region has both neurotransmitters, create an edge
-                        edge = {
-                            "source": nt.value,
-                            "target": other_nt.value,
-                            "value": (affinity + other_level) / 2,
-                            "label": f"Via {region.value.replace('_', ' ').title()}"
-                        }
-                        
-                        # Check if this edge already exists
-                        duplicate = False
-                        for existing in edges:
-                            if (existing["source"] == edge["source"] and
-                                existing["target"] == edge["target"]):
-                                duplicate = True
-                                break
-                        
-                        if not duplicate:
-                            edges.append(edge)
-        
-        return {
-            "nodes": nodes,
-            "edges": edges,
-            "timestamp": reference_time.isoformat() if reference_time else None
-        }
-    
-    def optimize_for_visualization_type(
-        self,
-        data: Dict[str, Any],
-        visualization_type: str,
-        detail_level: str = "high"
-    ) -> Dict[str, Any]:
-        """
-        Optimize the data structure for a specific visualization type.
-        
-        Args:
-            data: The visualization data to optimize
-            visualization_type: Type of visualization (3d_model, heatmap, network, time_series)
-            detail_level: Level of detail (low, medium, high)
-            
-        Returns:
-            Optimized data structure
-        """
-        # Apply scaling based on visualization type
-        scaling = self._visualization_scaling_factors.get(visualization_type, 1.0)
-        
-        # Apply detail level filtering
-        if detail_level == "low":
-            # Remove detailed metadata
-            if "regions" in data:
-                for region in data["regions"]:
-                    if "metadata" in region:
-                        region.pop("metadata", None)
-            
-            # Simplify time series by sampling
-            if "data_points" in data and len(data["data_points"]) > 20:
-                sampling_rate = len(data["data_points"]) // 20
-                data["data_points"] = data["data_points"][::sampling_rate]
-        
-        elif detail_level == "medium":
-            # Apply moderate optimizations
-            pass
-        
-        # Apply type-specific optimizations
-        if visualization_type == "3d_model":
-            # Scale node sizes for 3D
-            if "regions" in data:
-                for region in data["regions"]:
-                    if "size" in region:
-                        region["size"] *= scaling
-        
-        elif visualization_type == "heatmap":
-            # Normalize values for heatmap
-            pass
-        
-        elif visualization_type == "network":
-            # Scale node sizes and edge thicknesses for network
-            if "nodes" in data:
-                for node in data["nodes"]:
-                    if "size" in node:
-                        node["size"] *= scaling
-        
-        return data
-    
-    def create_comparative_visualization(
-        self,
-        before_mapping: TemporalNeurotransmitterMapping,
-        after_mapping: TemporalNeurotransmitterMapping,
-        neurotransmitter: Neurotransmitter,
-        before_time: Optional[datetime] = None,
-        after_time: Optional[datetime] = None
-    ) -> Dict[str, Any]:
-        """
-        Create a visualization comparing before and after states.
-        
-        Args:
-            before_mapping: Mapping representing the before state
-            after_mapping: Mapping representing the after state
-            neurotransmitter: Target neurotransmitter
-            before_time: Optional reference time for before state
-            after_time: Optional reference time for after state
-            
-        Returns:
-            Comparative visualization data
-        """
-        # Prepare data for before state
-        before_data = self.prepare_brain_visualization_data(
-            before_mapping, neurotransmitter, before_time
-        )
-        
-        # Prepare data for after state
-        after_data = self.prepare_brain_visualization_data(
-            after_mapping, neurotransmitter, after_time
-        )
-        
-        # Create a differential view
-        diff_data = {
-            "neurotransmitter": neurotransmitter.value,
-            "color": self.neurotransmitter_colors.get(neurotransmitter, "#FFFFFF"),
-            "regions": []
-        }
-        
-        # Map regions by ID for easier lookup
-        before_regions = {r["id"]: r for r in before_data["regions"]}
-        after_regions = {r["id"]: r for r in after_data["regions"]}
-        
-        # Calculate differences for each region
-        for region_id in set(before_regions.keys()) | set(after_regions.keys()):
-            before_region = before_regions.get(region_id, {"level": 0.0})
-            after_region = after_regions.get(region_id, {"level": 0.0})
-            
-            # Calculate difference
-            level_diff = after_region.get("level", 0.0) - before_region.get("level", 0.0)
-            
-            # Only include regions with significant changes
-            if abs(level_diff) >= 0.1:
-                # Use data from after_region as base
-                diff_region = after_region.copy() if region_id in after_regions else before_region.copy()
-                
-                # Add differential data
-                diff_region["change"] = level_diff
-                diff_region["percent_change"] = (
-                    (level_diff / before_region["level"]) * 100
-                    if before_region["level"] > 0 else float('inf')
-                )
-                
-                # Determine change direction
-                if level_diff > 0:
-                    diff_region["direction"] = "increase"
-                elif level_diff < 0:
-                    diff_region["direction"] = "decrease"
+            # Get feature values for this timestamp
+            feature_values = {}
+            for feature in features:
+                if feature in sequence.feature_names:
+                    feature_idx = sequence.feature_names.index(feature)
+                    if i < len(sequence.values) and feature_idx < len(sequence.values[i]):
+                        feature_values[feature] = sequence.values[i][feature_idx]
+                    else:
+                        feature_values[feature] = 0.0  # Default if out of range
                 else:
-                    diff_region["direction"] = "unchanged"
-                
-                diff_data["regions"].append(diff_region)
+                    feature_values[feature] = 0.0  # Default if feature not in sequence
+                    
+            downsampled_values.append(feature_values)
         
+        # Calculate statistics for visualization aids
+        feature_stats = {}
+        for feature in features:
+            values = [point.get(feature, 0.0) for point in downsampled_values]
+            if values:
+                feature_stats[feature] = {
+                    "min": min(values),
+                    "max": max(values),
+                    "avg": sum(values) / len(values),
+                    "trend": self._calculate_trend(values)
+                }
+        
+        # Generate color and opacity mappings
+        colors = {}
+        for feature in features:
+            if feature in [nt.value for nt in Neurotransmitter]:
+                # Try to find matching neurotransmitter
+                for nt in Neurotransmitter:
+                    if nt.value == feature:
+                        colors[feature] = {
+                            "rgb": self._neurotransmitter_colors.get(nt, (0.5, 0.5, 0.5)),
+                            "hex": self._rgb_to_hex(self._neurotransmitter_colors.get(nt, (0.5, 0.5, 0.5)))
+                        }
+                        break
+            else:
+                # Generate color algorithmically
+                hue = hash(feature) % 360 / 360.0
+                colors[feature] = {
+                    "rgb": self._hsv_to_rgb(hue, 0.7, 0.8),
+                    "hex": self._rgb_to_hex(self._hsv_to_rgb(hue, 0.7, 0.8))
+                }
+        
+        # Return visualization-ready data
         return {
-            "before": before_data,
-            "after": after_data,
-            "difference": diff_data,
-            "before_time": before_time.isoformat() if before_time else None,
-            "after_time": after_time.isoformat() if after_time else None
+            "downsampled": downsample,
+            "sample_rate": sample_rate,
+            "times": [t.isoformat() for t in downsampled_times],
+            "values": downsampled_values,
+            "features": features,
+            "feature_stats": feature_stats,
+            "colors": colors,
+            "brain_region": sequence.brain_region.value if sequence.brain_region else None,
+            "neurotransmitter": sequence.neurotransmitter.value if sequence.neurotransmitter else None
         }
-
-
-class NeurotransmitterEffectVisualizer:
-    """
-    Specialized class for visualizing neurotransmitter effects.
     
-    This class provides methods for visualizing the effects of neurotransmitters,
-    including comparison of effects between different neurotransmitters and over time.
-    """
-    
-    def __init__(self):
-        """Initialize a new neurotransmitter effect visualizer."""
-        # Color mapping for different effect magnitudes
-        self.effect_magnitude_colors = {
-            "large": "#FF3B30",  # Red for large effects
-            "medium": "#FF9500", # Orange for medium effects
-            "small": "#4CD964",  # Green for small effects
-            "minimal": "#5AC8FA" # Blue for minimal effects
-        }
-        
-        # Default timeline steps for effect prediction
-        self.default_timeline_steps = 10
-    
-    def generate_effect_comparison(self, effects: List) -> Dict[str, Any]:
+    def precompute_cascade_geometry(
+        self,
+        cascade_data: Dict[BrainRegion, List[float]]
+    ) -> Dict[str, Any]:
         """
-        Generate a comparison of multiple neurotransmitter effects.
+        Generate geometry data for neurotransmitter cascade visualization.
         
         Args:
-            effects: List of NeurotransmitterEffect objects to compare
+            cascade_data: Dictionary mapping brain regions to activity values over time
             
         Returns:
-            Dictionary with comparison visualization data
+            Dictionary with preprocessed visualization data
         """
-        if not effects:
-            return {"effects": [], "comparison_metrics": {}}
+        # Extract time steps from data
+        time_steps = 0
+        for region, values in cascade_data.items():
+            time_steps = max(time_steps, len(values))
         
-        # Process each effect
-        effect_data = []
-        for effect in effects:
-            effect_data.append({
-                "neurotransmitter": effect.neurotransmitter.value,
-                "effect_size": effect.effect_size,
-                "confidence_interval": effect.confidence_interval,
-                "p_value": effect.p_value,
-                "is_significant": effect.is_statistically_significant,
-                "magnitude": effect.effect_magnitude,
-                "direction": effect.direction,
-                "clinical_significance": effect.clinical_significance.value
-            })
-        
-        # Sort effects by absolute effect size
-        effect_data.sort(key=lambda x: abs(x["effect_size"]), reverse=True)
-        
-        # Generate comparison metrics
-        comparison_metrics = {}
-        
-        # Find most significant effect
-        significant_effects = [e for e in effect_data if e["is_significant"]]
-        if significant_effects:
-            comparison_metrics["most_significant"] = significant_effects[0]["neurotransmitter"]
-        
-        # Find largest effect
-        if effect_data:
-            comparison_metrics["largest_effect"] = effect_data[0]["neurotransmitter"]
-        
-        # Generate magnitude ranking
-        comparison_metrics["magnitude_ranking"] = [e["neurotransmitter"] for e in effect_data]
-        
-        return {
-            "effects": effect_data,
-            "comparison_metrics": comparison_metrics
-        }
-    
-    def generate_effect_timeline(self, effect) -> Dict[str, Any]:
-        """
-        Generate a timeline of an effect, including prediction of future trajectory.
-        
-        Args:
-            effect: NeurotransmitterEffect object
-            
-        Returns:
-            Dictionary with timeline visualization data
-        """
-        # Start with current effect
-        timeline = []
-        
-        # Add current effect as starting point
-        current_point = {
-            "timestamp": datetime.now().isoformat(),
-            "effect_size": effect.effect_size,
-            "confidence_interval": effect.confidence_interval,
-            "is_prediction": False
-        }
-        timeline.append(current_point)
-        
-        # Generate future predictions
-        # This is a simplified model - in reality would use more sophisticated predictive analytics
-        for i in range(1, self.default_timeline_steps):
-            # Simplified decay model with some randomness
-            decay_factor = 0.95  # 5% reduction per step
-            randomness = 0.02  # Small random fluctuations
-            
-            previous = timeline[-1]["effect_size"]
-            predicted = previous * decay_factor
-            
-            # Add small random fluctuation
-            import random
-            fluctuation = (random.random() * 2 - 1) * randomness
-            predicted += fluctuation
-            
-            # Ensure effect size doesn't go negative
-            predicted = max(0, predicted)
-            
-            # Widen confidence interval for future predictions
-            ci_width = effect.confidence_interval[1] - effect.confidence_interval[0]
-            ci_width_increase = 0.02 * i  # Confidence interval widens by 2% per step
-            new_ci_width = ci_width * (1 + ci_width_increase)
-            
-            # Calculate new confidence interval
-            ci_center = predicted
-            ci_low = max(0, ci_center - new_ci_width / 2)
-            ci_high = ci_center + new_ci_width / 2
-            
-            # Add prediction point
-            prediction_point = {
-                "timestamp": (datetime.now() + timedelta(days=i)).isoformat(),
-                "effect_size": predicted,
-                "confidence_interval": (ci_low, ci_high),
-                "is_prediction": True
-            }
-            timeline.append(prediction_point)
-        
-        # Add metrics about the timeline
-        metrics = {
-            "initial_effect": effect.effect_size,
-            "half_life": self.default_timeline_steps // 2,  # Simplified half-life estimate
-            "trend": "decreasing" if timeline[-1]["effect_size"] < effect.effect_size else "stable"
-        }
-        
-        return {
-            "neurotransmitter": effect.neurotransmitter.value,
-            "timeline": timeline,
-            "metrics": metrics
-        }
-    
-    def precompute_cascade_geometry(self, cascade_data: Dict[BrainRegion, List[float]]) -> Dict[str, Any]:
-        """
-        Precompute geometry for cascade visualization.
-        
-        Args:
-            cascade_data: Dictionary mapping brain regions to lists of values over time
-            
-        Returns:
-            Dictionary with precomputed geometry data
-        """
-        # Create a map of brain regions to 3D coordinates
-        region_coordinates = {
-            BrainRegion.PREFRONTAL_CORTEX: (0.0, 0.8, 0.4),
-            BrainRegion.AMYGDALA: (0.3, 0.0, 0.0),
-            BrainRegion.HIPPOCAMPUS: (0.3, -0.1, 0.1),
-            BrainRegion.NUCLEUS_ACCUMBENS: (0.1, 0.3, -0.2),
-            BrainRegion.VENTRAL_TEGMENTAL_AREA: (0.0, -0.3, -0.1),
-            BrainRegion.RAPHE_NUCLEI: (0.0, -0.5, -0.2),
-            BrainRegion.LOCUS_COERULEUS: (-0.1, -0.6, -0.1),
-            BrainRegion.STRIATUM: (0.2, 0.2, 0.0),
-            # Additional regions would be defined here
-        }
-        
-        # Calculate the number of time steps
-        num_time_steps = max(len(values) for values in cascade_data.values())
-        
-        # Precompute vertices for each time step
+        # Generate vertices, colors, and connections for each time step
         vertices_by_time = []
         colors_by_time = []
         
-        for t in range(num_time_steps):
+        for t in range(time_steps):
             vertices = []
             colors = []
             
+            # Process each brain region
             for region, values in cascade_data.items():
-                # Skip regions without coordinates
-                if region not in region_coordinates:
-                    continue
-                
-                # Get value for this time step (or 0 if not available)
-                value = values[t] if t < len(values) else 0
-                
-                # Skip inactive regions
-                if value < 0.1:
-                    continue
-                
-                # Get coordinates
-                x, y, z = region_coordinates[region]
-                
-                # Add vertex
-                vertices.extend([x, y, z])
-                
-                # Calculate color based on activity level (grayscale for simplicity)
-                # In a real implementation, this would use proper color mapping
-                color_intensity = min(1.0, value)
-                colors.extend([color_intensity, color_intensity, color_intensity])
+                if t < len(values):
+                    # Get activity value for this region at this time
+                    activity = values[t]
+                    
+                    # Skip if activity is negligible
+                    if activity < 0.05:
+                        continue
+                    
+                    # Get coordinates for this region
+                    coords = self._brain_region_coordinates.get(region, (0, 0, 0))
+                    
+                    # Add coordinates to vertices
+                    vertices.extend([coords[0], coords[1], coords[2]])
+                    
+                    # Scale color intensity by activity
+                    color = (0.2 + 0.8 * activity, 0.2, 0.8 * activity)
+                    colors.extend(color)
             
+            # Add to time-based collections
             vertices_by_time.append(vertices)
             colors_by_time.append(colors)
         
-        # Calculate connections between brain regions
+        # Generate connections between active regions
         connections = []
-        for region1 in cascade_data.keys():
-            for region2 in cascade_data.keys():
-                if region1 != region2 and region1 in region_coordinates and region2 in region_coordinates:
-                    # Check if these regions should be connected (simplified)
-                    # In a real implementation, would use proper connectivity data
-                    connections.append({
-                        "source": region1.value,
-                        "target": region2.value,
-                        "source_coords": region_coordinates[region1],
-                        "target_coords": region_coordinates[region2]
-                    })
+        active_regions = set(cascade_data.keys())
         
+        for region1 in active_regions:
+            for region2 in active_regions:
+                if region1 != region2:
+                    # Calculate if there's a temporal connection
+                    region1_data = cascade_data.get(region1, [])
+                    region2_data = cascade_data.get(region2, [])
+                    
+                    # Find first time each region becomes active
+                    region1_active_at = next((i for i, v in enumerate(region1_data) if v > 0.1), -1)
+                    region2_active_at = next((i for i, v in enumerate(region2_data) if v > 0.1), -1)
+                    
+                    # Connection exists if region2 activates shortly after region1
+                    if 0 <= region1_active_at < region2_active_at <= region1_active_at + 3:
+                        # Get coordinates for both regions
+                        coords1 = self._brain_region_coordinates.get(region1, (0, 0, 0))
+                        coords2 = self._brain_region_coordinates.get(region2, (0, 0, 0))
+                        
+                        # Create connection
+                        connection = {
+                            "from": region1.value,
+                            "to": region2.value,
+                            "from_coords": coords1,
+                            "to_coords": coords2,
+                            "lag": region2_active_at - region1_active_at,
+                            "strength": 0.0
+                        }
+                        
+                        # Calculate connection strength
+                        for t in range(time_steps - 1):
+                            if t < len(region1_data) and t+1 < len(region2_data):
+                                if region1_data[t] > 0.1:
+                                    # Measure region2's response to region1
+                                    delta = region2_data[t+1] - region2_data[t]
+                                    if delta > 0:
+                                        connection["strength"] += delta * region1_data[t]
+                        
+                        # Only add meaningful connections
+                        if connection["strength"] > 0.05:
+                            connections.append(connection)
+        
+        # Return precomputed geometry data
         return {
             "vertices_by_time": vertices_by_time,
             "colors_by_time": colors_by_time,
             "connections": connections,
-            "time_steps": num_time_steps
+            "time_steps": time_steps,
+            "active_regions": [region.value for region in active_regions]
+        }
+    
+    def _calculate_trend(self, values: List[float]) -> str:
+        """
+        Calculate the trend direction of a series of values.
+        
+        Args:
+            values: List of numeric values
+            
+        Returns:
+            Trend description ("increasing", "decreasing", "stable", or "volatile")
+        """
+        if not values or len(values) < 2:
+            return "insufficient_data"
+        
+        # Calculate first and last values
+        start_value = values[0]
+        end_value = values[-1]
+        
+        # Calculate percent change
+        if start_value == 0:
+            percent_change = float('inf') if end_value > 0 else 0
+        else:
+            percent_change = (end_value - start_value) / start_value * 100
+        
+        # Calculate volatility (standard deviation of changes)
+        changes = []
+        for i in range(1, len(values)):
+            if values[i-1] != 0:
+                changes.append((values[i] - values[i-1]) / values[i-1])
+        
+        volatility = 0
+        if changes:
+            mean = sum(changes) / len(changes)
+            variance = sum((x - mean) ** 2 for x in changes) / len(changes)
+            volatility = math.sqrt(variance)
+        
+        # Determine trend
+        if volatility > 0.2:
+            return "volatile"
+        elif percent_change > 10:
+            return "increasing"
+        elif percent_change < -10:
+            return "decreasing"
+        else:
+            return "stable"
+    
+    def _rgb_to_hex(self, rgb_tuple: Tuple[float, float, float]) -> str:
+        """
+        Convert RGB tuple (0-1 range) to hex color string.
+        
+        Args:
+            rgb_tuple: Tuple of (r, g, b) values in 0-1 range
+            
+        Returns:
+            Hex color string (e.g., "#ff0000" for red)
+        """
+        r, g, b = rgb_tuple
+        return f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
+    
+    def _hsv_to_rgb(self, h: float, s: float, v: float) -> Tuple[float, float, float]:
+        """
+        Convert HSV colors to RGB.
+        
+        Args:
+            h: Hue (0-1 range)
+            s: Saturation (0-1 range)
+            v: Value (0-1 range)
+            
+        Returns:
+            Tuple of (r, g, b) values in 0-1 range
+        """
+        if s == 0.0:
+            return (v, v, v)
+        
+        i = int(h * 6)
+        f = (h * 6) - i
+        p = v * (1 - s)
+        q = v * (1 - s * f)
+        t = v * (1 - s * (1 - f))
+        
+        i %= 6
+        
+        if i == 0:
+            return (v, t, p)
+        if i == 1:
+            return (q, v, p)
+        if i == 2:
+            return (p, v, t)
+        if i == 3:
+            return (p, q, v)
+        if i == 4:
+            return (t, p, v)
+        return (v, p, q)  # i == 5
+
+
+class NeurotransmitterEffectVisualizer:
+    """
+    Specialized visualizer for neurotransmitter effects.
+    
+    This class transforms NeurotransmitterEffect objects into formats optimized
+    for visualization in the frontend, applying color mapping, intensity scaling,
+    and generating visualization-ready data.
+    """
+    
+    def __init__(self):
+        """Initialize the visualizer with default color mappings."""
+        # Define color mappings for different clinical significance levels
+        self._significance_colors = {
+            ClinicalSignificance.NONE: "#888888",      # Gray
+            ClinicalSignificance.MINIMAL: "#aaccee",   # Light blue
+            ClinicalSignificance.MILD: "#66aadd",      # Medium blue
+            ClinicalSignificance.MODERATE: "#ee8822",  # Orange
+            ClinicalSignificance.SIGNIFICANT: "#dd3311" # Red
+        }
+        
+        # Initialize preprocessor for coordinates and base colors
+        self.preprocessor = NeurotransmitterVisualizationPreprocessor()
+    
+    def generate_effect_visualization(
+        self,
+        effect: NeurotransmitterEffect
+    ) -> Dict[str, Any]:
+        """
+        Generate visualization data for a neurotransmitter effect.
+        
+        Args:
+            effect: The neurotransmitter effect to visualize
+            
+        Returns:
+            Dictionary with visualization-ready data
+        """
+        if not effect:
+            return {"error": "No effect data provided"}
+            
+        # Get base color for this neurotransmitter
+        base_color = "#888888"  # Default gray
+        for nt, color in self.preprocessor._neurotransmitter_colors.items():
+            if nt == effect.neurotransmitter:
+                base_color = self.preprocessor._rgb_to_hex(color)
+                break
+        
+        # Get significance color
+        significance_color = self._significance_colors.get(
+            effect.clinical_significance,
+            self._significance_colors[ClinicalSignificance.NONE]
+        )
+        
+        # Get brain region coordinates if available
+        coordinates = None
+        if effect.brain_region:
+            coordinates = self.preprocessor._brain_region_coordinates.get(effect.brain_region)
+        
+        # Generate time series data if available
+        time_series = None
+        if effect.time_series_data:
+            time_series = {
+                "times": [t.isoformat() for t, _ in effect.time_series_data],
+                "values": [value for _, value in effect.time_series_data],
+                "trend": effect.get_trend_direction()
+            }
+            
+        # Return visualization data
+        return {
+            "neurotransmitter": effect.neurotransmitter.value,
+            "brain_region": effect.brain_region.value if effect.brain_region else None,
+            "effect_size": effect.effect_size,
+            "is_significant": effect.is_statistically_significant,
+            "clinical_significance": effect.clinical_significance.value,
+            "confidence_interval": {
+                "lower": effect.confidence_interval[0],
+                "upper": effect.confidence_interval[1]
+            },
+            "visualization": {
+                "base_color": base_color,
+                "significance_color": significance_color,
+                "coordinates": coordinates,
+                "time_series": time_series,
+                "relative_change": effect.get_relative_change()
+            }
+        }
+        
+    def generate_comparative_visualization(
+        self,
+        effects: List[NeurotransmitterEffect]
+    ) -> Dict[str, Any]:
+        """
+        Generate visualization data for comparing multiple effects.
+        
+        Args:
+            effects: List of neurotransmitter effects to compare
+            
+        Returns:
+            Dictionary with comparative visualization data
+        """
+        if not effects:
+            return {"effects": [], "summary": "No effects data provided"}
+            
+        # Generate individual visualizations
+        effect_visualizations = []
+        for effect in effects:
+            effect_visualizations.append(self.generate_effect_visualization(effect))
+            
+        # Create summary data
+        brain_regions = set()
+        neurotransmitters = set()
+        max_effect_size = 0
+        significant_count = 0
+        
+        for effect in effects:
+            if effect.brain_region:
+                brain_regions.add(effect.brain_region)
+            neurotransmitters.add(effect.neurotransmitter)
+            max_effect_size = max(max_effect_size, effect.effect_size)
+            if effect.is_statistically_significant:
+                significant_count += 1
+                
+        # Return comparative data
+        return {
+            "effects": effect_visualizations,
+            "summary": {
+                "brain_regions": [br.value for br in brain_regions],
+                "neurotransmitters": [nt.value for nt in neurotransmitters],
+                "max_effect_size": max_effect_size,
+                "significant_count": significant_count,
+                "total_effects": len(effects)
+            }
         }

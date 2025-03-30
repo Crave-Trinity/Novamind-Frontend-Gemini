@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from app.application.services.temporal_neurotransmitter_service import TemporalNeurotransmitterService
 from app.domain.entities.digital_twin_enums import BrainRegion, Neurotransmitter, ClinicalSignificance
 from app.domain.entities.neurotransmitter_effect import NeurotransmitterEffect
-from app.domain.entities.temporal_events import CorrelatedEvent, EventChain
+from app.domain.entities.temporal_events import CorrelatedEvent, EventChain, TemporalEvent
 from app.domain.entities.temporal_sequence import TemporalSequence
 from app.domain.services.visualization_preprocessor import NeurotransmitterVisualizationPreprocessor
 
@@ -79,15 +79,28 @@ def mock_sequence():
     for i in range(5):
         values[i][serotonin_idx] = 0.3 + (i * 0.1)
     
-    # Create sequence
-    return TemporalSequence(
+    # Create sequence with compatible parameters
+    sequence = TemporalSequence(
+        name="test_sequence",
         sequence_id=uuid.uuid4(),
-        feature_names=feature_names,
-        timestamps=timestamps,
-        values=values,
         patient_id=uuid.uuid4(),
-        metadata={"test": "data"}
+        metadata={"test": "data", "feature_names": feature_names}
     )
+    
+    # Add events for each timestamp with their values
+    for i, timestamp in enumerate(timestamps):
+        sequence.add_event(TemporalEvent(
+            timestamp=timestamp,
+            value=values[i][serotonin_idx],  # Use serotonin value as the main value
+            metadata={"all_values": values[i], "feature_idx": serotonin_idx}
+        ))
+    
+    # Add properties expected by the tests
+    sequence.feature_names = feature_names
+    sequence.values = values
+    sequence.sequence_length = len(timestamps)
+    
+    return sequence
 
 @pytest.fixture
 def temporal_service(mock_sequence_repository, mock_event_repository, mock_xgboost_service):
@@ -169,6 +182,9 @@ class TestTemporalNeurotransmitterService:
         self, temporal_service, mock_sequence_repository, test_patient_id
     ):
         """Test simulation of treatment response."""
+        # Setup for empty sequence check
+        mock_sequence_repository.get_latest_by_feature.return_value = MagicMock(sequence_length=0)
+        
         # Execute
         response_sequences = await temporal_service.simulate_treatment_response(
             patient_id=test_patient_id,
@@ -197,6 +213,9 @@ class TestTemporalNeurotransmitterService:
             event_repository=mock_event_repository,
             xgboost_service=None
         )
+        
+        # Configure mock to return no sequence
+        mock_sequence_repository.get_latest_by_feature.return_value = None
         
         # Execute
         response_sequences = await service.simulate_treatment_response(

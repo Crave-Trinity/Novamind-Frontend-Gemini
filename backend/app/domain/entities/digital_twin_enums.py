@@ -40,6 +40,9 @@ class BrainRegion(Enum):
     BASAL_GANGLIA = "basal_ganglia"
     CEREBELLUM = "cerebellum"
     BRAIN_STEM = "brain_stem"
+    # Additional regions needed for tests
+    VENTRAL_STRIATUM = "ventral_striatum"
+    DORSAL_STRIATUM = "dorsal_striatum"
 
 
 class Neurotransmitter(Enum):
@@ -66,6 +69,8 @@ class ClinicalSignificance(Enum):
     MODERATE = "moderate"
     SIGNIFICANT = "significant"
     SEVERE = "severe"
+    # Additional level needed for tests
+    CRITICAL = "critical"
 
 
 class BrainNetwork(Enum):
@@ -121,3 +126,72 @@ class TemporalResolution(Enum):
     MONTHLY = "monthly"
     QUARTERLY = "quarterly"
     YEARLY = "yearly"
+
+
+# Additional enums referenced in digital_twin/__init__.py
+
+class ClinicalInsight(Enum):
+    """Clinical insights derived from digital twin analysis."""
+    TREATMENT_RESPONSE = "treatment_response"
+    RELAPSE_RISK = "relapse_risk"
+    SIDE_EFFECT_PROFILE = "side_effect_profile"
+    THERAPEUTIC_WINDOW = "therapeutic_window"
+    NEUROADAPTATION = "neuroadaptation"
+    NEUROTRANSMITTER_DYNAMICS = "neurotransmitter_dynamics"
+    COGNITIVE_PROFILE = "cognitive_profile"
+    EMOTIONAL_REGULATION = "emotional_regulation"
+    STRESS_RESPONSE = "stress_response"
+    SLEEP_PATTERN = "sleep_pattern"
+    CIRCADIAN_RHYTHM = "circadian_rhythm"
+    BIOMARKER_CORRELATION = "biomarker_correlation"
+
+
+class DigitalTwinState(Enum):
+    """Overall state of the digital twin model."""
+    INITIALIZING = "initializing"
+    CALIBRATING = "calibrating"
+    ACTIVE = "active"
+    LEARNING = "learning"
+    PREDICTING = "predicting"
+    ANALYZING = "analyzing"
+    UPDATING = "updating"
+    VALIDATING = "validating"
+    ERROR = "error"
+    INACTIVE = "inactive"
+
+
+class NeuralConnection(Enum):
+    """Types of neural connections in the digital twin model."""
+    PRIMARY = "primary"
+    SECONDARY = "secondary"
+    TERTIARY = "tertiary"
+    FEEDFORWARD = "feedforward"
+    FEEDBACK = "feedback"
+    LATERAL = "lateral"
+    RECIPROCAL = "reciprocal"
+    MODULATORY = "modulatory"
+
+
+class TemporalPattern(Enum):
+    """Temporal patterns in neurotransmitter activity."""
+    SUSTAINED = "sustained"
+    PHASIC = "phasic"
+    TONIC = "tonic"
+    RHYTHMIC = "rhythmic"
+    TRANSIENT = "transient"
+    CIRCADIAN = "circadian"
+    ULTRADIAN = "ultradian"
+    HOMEOSTATIC = "homeostatic"
+    REACTIVE = "reactive"
+
+
+class BrainRegionState(Enum):
+    """State of activity in brain regions."""
+    HYPOACTIVE = "hypoactive"
+    BELOW_BASELINE = "below_baseline"
+    BASELINE = "baseline"
+    ABOVE_BASELINE = "above_baseline"
+    HYPERACTIVE = "hyperactive"
+    DYSREGULATED = "dysregulated"
+    SYNCHRONIZED = "synchronized"
+    DESYNCHRONIZED = "desynchronized"

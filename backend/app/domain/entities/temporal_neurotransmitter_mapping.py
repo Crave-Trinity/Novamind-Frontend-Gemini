@@ -1,70 +1,57 @@
 """
-Temporal neurotransmitter mapping module for the Digital Twin model.
+Temporal neurotransmitter mapping module for the Temporal Neurotransmitter System.
 
-This module extends the base neurotransmitter mapping with temporal features,
-enabling the tracking and analysis of neurotransmitter dynamics over time.
+This module defines the core classes that map neurotransmitter activity across brain regions
+over time, including mechanisms for modeling cascading effects and treatment responses.
 """
-
-def extend_neurotransmitter_mapping(base_mapping):
-    """
-    Extend a base neurotransmitter mapping with temporal capabilities.
-    
-    This factory function creates a TemporalNeurotransmitterMapping
-    using an existing NeurotransmitterMapping as its foundation.
-    
-    Args:
-        base_mapping: Base NeurotransmitterMapping to extend
-        
-    Returns:
-        TemporalNeurotransmitterMapping with data from the base mapping
-    """
-    if not base_mapping:
-        return None
-        
-    # Create a new temporal mapping
-    temporal_mapping = TemporalNeurotransmitterMapping(
-        patient_id=getattr(base_mapping, 'patient_id', None)
-    )
-    
-    # Copy production map
-    if hasattr(base_mapping, 'production_map'):
-        temporal_mapping.production_map = base_mapping.production_map.copy()
-    
-    # Copy receptor profiles
-    if hasattr(base_mapping, 'receptor_profiles'):
-        temporal_mapping.receptor_profiles = base_mapping.receptor_profiles.copy()
-    
-    # Rebuild lookup maps
-    temporal_mapping._build_lookup_maps()
-    
-    return temporal_mapping
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Set, Optional, Any, Union
+from enum import Enum, auto
+from typing import Dict, List, Tuple, Optional, Set, Any, Union
 import uuid
 from uuid import UUID
-import statistics
-from copy import deepcopy
+import random
+import math
 
-from app.domain.entities.digital_twin_enums import (
-    BrainRegion, 
-    Neurotransmitter, 
-    ClinicalSignificance,
-    TemporalResolution,
-    NeurotransmitterState
-)
-from app.domain.entities.neurotransmitter_mapping import NeurotransmitterMapping
+from app.domain.entities.digital_twin_enums import BrainRegion, Neurotransmitter, ClinicalSignificance
 from app.domain.entities.neurotransmitter_effect import NeurotransmitterEffect
+from app.domain.entities.neurotransmitter_mapping import NeurotransmitterMapping, ReceptorProfile, ReceptorType, ReceptorSubtype
 from app.domain.entities.temporal_sequence import TemporalSequence
-from app.domain.entities.temporal_events import TemporalEvent, EventChain
+from app.domain.entities.temporal_events import TemporalEvent, CorrelatedEvent, EventChain, CorrelationType
+
+
+class EventType(Enum):
+    """Types of neurotransmitter events that can be tracked."""
+    LEVEL_INCREASE = auto()
+    LEVEL_DECREASE = auto()
+    THRESHOLD_CROSSED_UP = auto()
+    THRESHOLD_CROSSED_DOWN = auto()
+    OSCILLATION = auto()
+    TREATMENT_RESPONSE = auto()
+    ACTIVITY_CHANGE = auto()
+    CONNECTIVITY_CHANGE = auto()
+
+
+class TransmissionPattern(Enum):
+    """Patterns of neurotransmitter transmission across regions."""
+    SEQUENTIAL = auto()
+    PARALLEL = auto()
+    FEEDBACK = auto()
+    FEEDFORWARD = auto()
+    OSCILLATORY = auto()
+    CYCLICAL = auto()
+    CHAOTIC = auto()
+    INHIBITORY = auto()  # Added this pattern for inhibitory neurotransmitters like GABA
 
 
 class TemporalNeurotransmitterMapping(NeurotransmitterMapping):
     """
-    Extends NeurotransmitterMapping to include temporal dynamics.
+    Extended neurotransmitter mapping with temporal dynamics.
     
-    This class tracks how neurotransmitter levels change over time across
-    different brain regions, enabling temporal analysis, pattern detection,
-    and treatment simulation.
+    This class adds temporal aspects to the neurotransmitter mapping, allowing for:
+    - Tracking how neurotransmitter levels change over time
+    - Modeling cascading effects across brain regions
+    - Simulating treatment responses
+    - Analyzing temporal patterns and correlations
     """
     
     def __init__(self, patient_id: Optional[UUID] = None):
@@ -72,726 +59,435 @@ class TemporalNeurotransmitterMapping(NeurotransmitterMapping):
         Initialize a temporal neurotransmitter mapping.
         
         Args:
-            patient_id: Optional patient identifier for personalized mappings
+            patient_id: Optional UUID of the associated patient
         """
         super().__init__()
         
+        # Patient ID allows for patient-specific mappings
         self.patient_id = patient_id
         
-        # Map of neurotransmitters to temporal sequences by brain region
-        self.temporal_profiles: Dict[
-            Neurotransmitter, 
-            Dict[BrainRegion, TemporalSequence[float]]
-        ] = {}
+        # Track temporal sequences
+        self.temporal_sequences: Dict[Tuple[BrainRegion, Neurotransmitter], List[TemporalSequence]] = {}
         
-        # Map of treatment effects by neurotransmitter
-        self.treatment_effects: Dict[
-            str,  # Treatment identifier
-            Dict[Neurotransmitter, Dict[BrainRegion, float]]
-        ] = {}
+        # Track events
+        self.events: Dict[UUID, TemporalEvent] = {}
         
-        # Sequence IDs for lookups
-        self.sequence_lookup: Dict[UUID, Tuple[Neurotransmitter, BrainRegion]] = {}
+        # Track correlations between events
+        self.correlations: Dict[UUID, Dict[UUID, float]] = {}
         
-        # Initialize temporal profiles for all neurotransmitters and regions
-        self._initialize_temporal_profiles()
+        # Track cascading patterns
+        self.cascade_patterns: Dict[Neurotransmitter, Dict[BrainRegion, TransmissionPattern]] = {}
+        
+        # Initialize temporal profiles
+        self.temporal_profiles: Dict[Tuple[BrainRegion, Neurotransmitter], Dict[str, Any]] = {}
+        
+        # Initialize with default patterns
+        self._initialize_default_patterns()
+    
+    def _initialize_default_patterns(self) -> None:
+        """Initialize default transmission patterns for common neurotransmitters."""
+        # Serotonin - generally inhibitory, acts sequentially
+        serotonin_patterns = {
+            BrainRegion.RAPHE_NUCLEI: TransmissionPattern.SEQUENTIAL,
+            BrainRegion.PREFRONTAL_CORTEX: TransmissionPattern.FEEDBACK,
+            BrainRegion.AMYGDALA: TransmissionPattern.FEEDFORWARD,
+            BrainRegion.HIPPOCAMPUS: TransmissionPattern.OSCILLATORY
+        }
+        
+        # Dopamine - reward system, parallel activation
+        dopamine_patterns = {
+            BrainRegion.VENTRAL_TEGMENTAL_AREA: TransmissionPattern.PARALLEL,
+            BrainRegion.NUCLEUS_ACCUMBENS: TransmissionPattern.FEEDFORWARD,
+            BrainRegion.PREFRONTAL_CORTEX: TransmissionPattern.FEEDBACK,
+            BrainRegion.STRIATUM: TransmissionPattern.SEQUENTIAL
+        }
+        
+        # GABA - inhibitory, often feedback
+        gaba_patterns = {
+            BrainRegion.PREFRONTAL_CORTEX: TransmissionPattern.FEEDBACK,
+            BrainRegion.AMYGDALA: TransmissionPattern.INHIBITORY,
+            BrainRegion.STRIATUM: TransmissionPattern.OSCILLATORY
+        }
+        
+        # Glutamate - excitatory, often feedforward
+        glutamate_patterns = {
+            BrainRegion.PREFRONTAL_CORTEX: TransmissionPattern.FEEDFORWARD,
+            BrainRegion.AMYGDALA: TransmissionPattern.PARALLEL,
+            BrainRegion.HIPPOCAMPUS: TransmissionPattern.SEQUENTIAL
+        }
+        
+        # Store patterns
+        self.cascade_patterns[Neurotransmitter.SEROTONIN] = serotonin_patterns
+        self.cascade_patterns[Neurotransmitter.DOPAMINE] = dopamine_patterns
+        self.cascade_patterns[Neurotransmitter.GABA] = gaba_patterns
+        self.cascade_patterns[Neurotransmitter.GLUTAMATE] = glutamate_patterns
     
     def _initialize_temporal_profiles(self) -> None:
-        """Initialize empty temporal profiles for all neurotransmitters and regions."""
-        for nt in Neurotransmitter:
-            self.temporal_profiles[nt] = {}
-            
-            # Add profile for each brain region with receptors for this neurotransmitter
-            for region, density in self.get_receptor_regions(nt):
-                sequence_name = f"{nt.value}_{region.value}_levels"
-                sequence = TemporalSequence[float](
-                    name=sequence_name,
-                    patient_id=self.patient_id,
-                    brain_region=region,
-                    neurotransmitter=nt,
-                    metadata={
-                        "receptor_density": density,
-                        "is_producing_region": region in self.get_producing_regions(nt)
+        """
+        Initialize temporal profiles for common neurotransmitter-region combinations.
+        
+        This creates default temporal profiles that describe how neurotransmitter levels
+        typically change over time in different brain regions.
+        """
+        # Create default profiles for all region-neurotransmitter pairs
+        for region in BrainRegion:
+            for nt in Neurotransmitter:
+                # Skip combinations that don't make sense biologically
+                if not self._is_valid_region_nt_combination(region, nt):
+                    continue
+                
+                # Calculate baseline metrics
+                baseline_receptor_affinity = self.analyze_receptor_affinity(nt, region)
+                is_producing_region = region in self.get_producing_regions(nt)
+                
+                # Determine temporal characteristics based on neurotransmitter type
+                if nt == Neurotransmitter.SEROTONIN:
+                    # Serotonin tends to have slower, more stable dynamics
+                    temporal_profile = {
+                        "baseline_level": 0.5 + (0.2 * baseline_receptor_affinity),
+                        "variance": 0.05 + (0.05 * (1.0 - baseline_receptor_affinity)),
+                        "response_delay": 3.0,  # Days for significant level changes
+                        "oscillation_frequency": 0.2,  # Low frequency oscillations
+                        "treatment_sensitivity": 0.8 if region == BrainRegion.RAPHE_NUCLEI else 0.5,
+                        "is_producing_region": is_producing_region,
+                        "pattern": TransmissionPattern.SEQUENTIAL
                     }
-                )
                 
-                self.temporal_profiles[nt][region] = sequence
-                self.sequence_lookup[sequence.sequence_id] = (nt, region)
-    
-    def add_neurotransmitter_measurement(
-        self,
-        neurotransmitter: Neurotransmitter,
-        brain_region: BrainRegion,
-        timestamp: datetime,
-        level: float,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> UUID:
-        """
-        Add a neurotransmitter level measurement for a specific time.
-        
-        Args:
-            neurotransmitter: Target neurotransmitter
-            brain_region: Target brain region
-            timestamp: When the measurement was taken
-            level: Measured neurotransmitter level (normalized to 0.0-1.0)
-            metadata: Additional measurement information
-            
-        Returns:
-            UUID of the created temporal event
-        """
-        # Ensure profile exists
-        if neurotransmitter not in self.temporal_profiles:
-            self.temporal_profiles[neurotransmitter] = {}
-        
-        if brain_region not in self.temporal_profiles[neurotransmitter]:
-            sequence_name = f"{neurotransmitter.value}_{brain_region.value}_levels"
-            sequence = TemporalSequence[float](
-                name=sequence_name,
-                patient_id=self.patient_id,
-                brain_region=brain_region,
-                neurotransmitter=neurotransmitter,
-                metadata={
-                    "receptor_density": self.analyze_receptor_affinity(neurotransmitter, brain_region),
-                    "is_producing_region": brain_region in self.get_producing_regions(neurotransmitter)
-                }
-            )
-            self.temporal_profiles[neurotransmitter][brain_region] = sequence
-        
-        # Validate level
-        normalized_level = max(0.0, min(1.0, level))
-        
-        # Add event to sequence
-        event = TemporalEvent[float](
-            timestamp=timestamp,
-            value=normalized_level,
-            patient_id=self.patient_id,
-            metadata=metadata or {}
-        )
-        
-        self.temporal_profiles[neurotransmitter][brain_region].add_event(event)
-        
-        return event.event_id
-    
-    def get_measurement_sequence(
-        self,
-        neurotransmitter: Neurotransmitter,
-        brain_region: BrainRegion
-    ) -> Optional[TemporalSequence[float]]:
-        """
-        Get the temporal sequence for a neurotransmitter in a specific brain region.
-        
-        Args:
-            neurotransmitter: Target neurotransmitter
-            brain_region: Target brain region
-            
-        Returns:
-            TemporalSequence with measurements or None if not found
-        """
-        return self.temporal_profiles.get(neurotransmitter, {}).get(brain_region)
-    
-    def get_current_level(
-        self,
-        neurotransmitter: Neurotransmitter,
-        brain_region: BrainRegion,
-        reference_time: Optional[datetime] = None
-    ) -> Optional[float]:
-        """
-        Get the current neurotransmitter level in a brain region.
-        
-        Args:
-            neurotransmitter: Target neurotransmitter
-            brain_region: Target brain region
-            reference_time: Reference time (defaults to now)
-            
-        Returns:
-            Current level or None if not available
-        """
-        sequence = self.get_measurement_sequence(neurotransmitter, brain_region)
-        if not sequence or not sequence.events:
-            return None
-        
-        # If reference time is provided, get the value at that time
-        if reference_time:
-            return sequence.get_value_at(reference_time)
-        
-        # Otherwise, return the most recent value
-        return sequence.events[-1].value
-    
-    def get_neurotransmitter_state(
-        self,
-        neurotransmitter: Neurotransmitter,
-        brain_region: BrainRegion,
-        reference_time: Optional[datetime] = None
-    ) -> NeurotransmitterState:
-        """
-        Get the state of a neurotransmitter in a brain region.
-        
-        Args:
-            neurotransmitter: Target neurotransmitter
-            brain_region: Target brain region
-            reference_time: Reference time (defaults to now)
-            
-        Returns:
-            NeurotransmitterState enum value
-        """
-        level = self.get_current_level(neurotransmitter, brain_region, reference_time)
-        
-        if level is None:
-            return NeurotransmitterState.NORMAL
-        
-        if level < 0.2:
-            return NeurotransmitterState.DEFICIENT
-        elif level < 0.4:
-            return NeurotransmitterState.BELOW_NORMAL
-        elif level < 0.6:
-            return NeurotransmitterState.NORMAL
-        elif level < 0.8:
-            return NeurotransmitterState.ABOVE_NORMAL
-        else:
-            return NeurotransmitterState.EXCESSIVE
-    
-    def analyze_temporal_effect(
-        self,
-        neurotransmitter: Neurotransmitter,
-        brain_region: BrainRegion,
-        start_time: datetime,
-        end_time: datetime
-    ) -> NeurotransmitterEffect:
-        """
-        Analyze the temporal effect of a neurotransmitter in a brain region.
-        
-        Args:
-            neurotransmitter: Target neurotransmitter
-            brain_region: Target brain region
-            start_time: Start of analysis period
-            end_time: End of analysis period
-            
-        Returns:
-            NeurotransmitterEffect with temporal analysis
-        """
-        sequence = self.get_measurement_sequence(neurotransmitter, brain_region)
-        
-        if not sequence or not sequence.events:
-            # If no data, return baseline effect
-            return super().analyze_baseline_effect(neurotransmitter, brain_region, self.patient_id)
-        
-        # Get values in the time range
-        events_in_range = sequence.get_events_in_range(start_time, end_time)
-        values_in_range = [event.value for event in events_in_range]
-        time_series_data = [(event.timestamp, event.value) for event in events_in_range]
-        
-        if not values_in_range:
-            # If no values in range, return baseline effect
-            return super().analyze_baseline_effect(neurotransmitter, brain_region, self.patient_id)
-        
-        # Calculate effect statistics
-        mean_value = statistics.mean(values_in_range)
-        
-        # Calculate standard deviation if there are multiple values
-        std_dev = statistics.stdev(values_in_range) if len(values_in_range) > 1 else 0.0
-        
-        # Calculate p-value based on receptor density and consistency of values
-        # Lower p-value means more statistically significant effect
-        receptor_density = self.analyze_receptor_affinity(neurotransmitter, brain_region)
-        p_value = 0.05 if (receptor_density >= 0.5 and std_dev < 0.2) else 0.2
-        
-        # Effect size is the mean value
-        effect_size = mean_value
-        
-        # Confidence interval
-        ci_range = 0.1 + std_dev
-        confidence_interval = (max(0.0, effect_size - ci_range), min(1.0, effect_size + ci_range))
-        
-        # Statistical significance
-        is_statistically_significant = p_value < 0.05
-        
-        # Clinical significance based on effect size and receptor density
-        clinical_significance = ClinicalSignificance.NONE
-        if is_statistically_significant:
-            if effect_size >= 0.7 and receptor_density >= 0.7:
-                clinical_significance = ClinicalSignificance.SIGNIFICANT
-            elif effect_size >= 0.5 and receptor_density >= 0.5:
-                clinical_significance = ClinicalSignificance.MODERATE
-            elif effect_size >= 0.3 and receptor_density >= 0.3:
-                clinical_significance = ClinicalSignificance.MILD
-            else:
-                clinical_significance = ClinicalSignificance.MINIMAL
-        
-        # Create effect object
-        effect = NeurotransmitterEffect(
-            neurotransmitter=neurotransmitter,
-            effect_size=effect_size,
-            p_value=p_value,
-            confidence_interval=confidence_interval,
-            clinical_significance=clinical_significance,
-            is_statistically_significant=is_statistically_significant,
-            brain_region=brain_region,
-            time_series_data=time_series_data,
-            baseline_period=(start_time, end_time)
-        )
-        
-        return effect
-    
-    def register_treatment_effect(
-        self,
-        treatment_id: str,
-        primary_effect: Dict[Neurotransmitter, Dict[BrainRegion, float]],
-        secondary_effect: Optional[Dict[Neurotransmitter, Dict[BrainRegion, float]]] = None,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> None:
-        """
-        Register how a treatment affects neurotransmitter levels.
-        
-        Args:
-            treatment_id: Unique identifier for the treatment
-            primary_effect: Primary effects on neurotransmitters
-            secondary_effect: Secondary or indirect effects
-            metadata: Additional treatment information
-        """
-        # Initialize treatment if not exists
-        if treatment_id not in self.treatment_effects:
-            self.treatment_effects[treatment_id] = {}
-        
-        # Add primary effects
-        for nt, regions in primary_effect.items():
-            if nt not in self.treatment_effects[treatment_id]:
-                self.treatment_effects[treatment_id][nt] = {}
-            
-            self.treatment_effects[treatment_id][nt].update(regions)
-        
-        # Add secondary effects if provided
-        if secondary_effect:
-            for nt, regions in secondary_effect.items():
-                if nt not in self.treatment_effects[treatment_id]:
-                    self.treatment_effects[treatment_id][nt] = {}
-                
-                # Apply secondary effects with reduced magnitude
-                for region, effect in regions.items():
-                    # Secondary effects are half as strong as primary
-                    if region in self.treatment_effects[treatment_id][nt]:
-                        # If already has primary effect, add 25% of secondary
-                        self.treatment_effects[treatment_id][nt][region] += effect * 0.25
-                    else:
-                        # Otherwise add 50% of secondary
-                        self.treatment_effects[treatment_id][nt][region] = effect * 0.5
-    
-    def simulate_treatment_response(
-        self,
-        treatment_id: str,
-        start_time: datetime,
-        duration: timedelta,
-        interval: timedelta,
-        response_decay: float = 0.1
-    ) -> Dict[Neurotransmitter, Dict[BrainRegion, TemporalSequence[float]]]:
-        """
-        Simulate how neurotransmitter levels respond to a treatment over time.
-        
-        Args:
-            treatment_id: Identifier of the registered treatment
-            start_time: When treatment begins
-            duration: How long to simulate
-            interval: Time interval between simulated points
-            response_decay: Rate of decay for treatment response (0.0-1.0)
-            
-        Returns:
-            Dictionary mapping neurotransmitters to brain regions to temporal sequences
-        """
-        if treatment_id not in self.treatment_effects:
-            raise ValueError(f"Treatment {treatment_id} not registered")
-        
-        # Generate timestamps for simulation
-        timestamps = []
-        current_time = start_time
-        while current_time <= start_time + duration:
-            timestamps.append(current_time)
-            current_time += interval
-        
-        # Create result container
-        result: Dict[Neurotransmitter, Dict[BrainRegion, TemporalSequence[float]]] = {}
-        
-        # Iterate through neurotransmitters affected by treatment
-        for nt, regions in self.treatment_effects[treatment_id].items():
-            result[nt] = {}
-            
-            # Iterate through brain regions
-            for region, effect_magnitude in regions.items():
-                # Get current level to use as baseline
-                baseline = self.get_current_level(nt, region) or 0.5  # Default to 0.5 if no existing level
-                
-                # Create new temporal sequence for simulation
-                sequence_name = f"{treatment_id}_{nt.value}_{region.value}_simulation"
-                sequence = TemporalSequence[float](
-                    name=sequence_name,
-                    patient_id=self.patient_id,
-                    brain_region=region,
-                    neurotransmitter=nt,
-                    metadata={
-                        "simulation": True,
-                        "treatment_id": treatment_id,
-                        "baseline_level": baseline,
-                        "effect_magnitude": effect_magnitude
+                elif nt == Neurotransmitter.DOPAMINE:
+                    # Dopamine can change more quickly with higher variance
+                    temporal_profile = {
+                        "baseline_level": 0.4 + (0.3 * baseline_receptor_affinity),
+                        "variance": 0.1 + (0.1 * (1.0 - baseline_receptor_affinity)),
+                        "response_delay": 1.0,  # Quicker response to stimuli
+                        "oscillation_frequency": 0.5,  # Higher frequency
+                        "treatment_sensitivity": 0.9 if region in [BrainRegion.VENTRAL_TEGMENTAL_AREA, BrainRegion.NUCLEUS_ACCUMBENS] else 0.6,
+                        "is_producing_region": is_producing_region,
+                        "pattern": TransmissionPattern.PARALLEL if is_producing_region else TransmissionPattern.FEEDFORWARD
                     }
-                )
                 
-                # Generate the temporal response curve
-                for idx, timestamp in enumerate(timestamps):
-                    # Calculate time factor (0.0 to 1.0) representing progress through treatment
-                    time_factor = min(1.0, idx / (len(timestamps) - 1 if len(timestamps) > 1 else 1))
-                    
-                    # Calculate response curve
-                    # - Initially rises rapidly
-                    # - Then plateaus
-                    # - Gradually decays if response_decay > 0
-                    if time_factor < 0.2:
-                        # Initial rapid rise (first 20% of time)
-                        response_factor = time_factor * 5  # 0.0 to 1.0
-                    elif time_factor < 0.7:
-                        # Plateau (20% to 70% of time)
-                        response_factor = 1.0
-                    else:
-                        # Gradual decay (after 70% of time)
-                        decay_factor = (time_factor - 0.7) / 0.3  # 0.0 to 1.0
-                        response_factor = 1.0 - (decay_factor * response_decay)
-                    
-                    # Calculate new level
-                    # effect_magnitude can be positive (increase) or negative (decrease)
-                    effect = effect_magnitude * response_factor
-                    new_level = baseline + effect
-                    
-                    # Ensure level stays within valid range
-                    new_level = max(0.0, min(1.0, new_level))
-                    
-                    # Add to sequence
-                    sequence.add_value(
-                        timestamp=timestamp,
-                        value=new_level,
-                        metadata={
-                            "time_factor": time_factor,
-                            "response_factor": response_factor,
-                            "baseline": baseline,
-                            "effect": effect
-                        }
-                    )
+                elif nt == Neurotransmitter.GABA:
+                    # GABA as an inhibitory neurotransmitter
+                    temporal_profile = {
+                        "baseline_level": 0.6,  # Higher baseline for inhibitory balance
+                        "variance": 0.05,  # Low variance - more stable regulation
+                        "response_delay": 0.5,  # Fast response for inhibition
+                        "oscillation_frequency": 0.8,  # High frequency for quick regulation
+                        "treatment_sensitivity": 0.7,
+                        "is_producing_region": is_producing_region,
+                        "pattern": TransmissionPattern.INHIBITORY
+                    }
                 
-                # Add sequence to result
-                result[nt][region] = sequence
-        
-        return result
+                elif nt == Neurotransmitter.GLUTAMATE:
+                    # Glutamate as the main excitatory neurotransmitter
+                    temporal_profile = {
+                        "baseline_level": 0.5,
+                        "variance": 0.1,  # Moderate variance
+                        "response_delay": 0.3,  # Very fast response
+                        "oscillation_frequency": 0.9,  # High frequency
+                        "treatment_sensitivity": 0.6,
+                        "is_producing_region": is_producing_region,
+                        "pattern": TransmissionPattern.FEEDFORWARD
+                    }
+                
+                else:
+                    # Default profile for other neurotransmitters
+                    temporal_profile = {
+                        "baseline_level": 0.5,
+                        "variance": 0.1,
+                        "response_delay": 1.0,
+                        "oscillation_frequency": 0.5,
+                        "treatment_sensitivity": 0.5,
+                        "is_producing_region": is_producing_region,
+                        "pattern": TransmissionPattern.SEQUENTIAL
+                    }
+                
+                # Store the profile
+                self.temporal_profiles[(region, nt)] = temporal_profile
     
-    def analyze_temporal_response(
-        self,
-        patient_id: UUID,
-        brain_region: BrainRegion,
-        neurotransmitter: Neurotransmitter,
-        time_series_data: List[Tuple[datetime, float]],
-        baseline_period: Optional[Tuple[datetime, datetime]] = None
-    ) -> NeurotransmitterEffect:
+    def _is_valid_region_nt_combination(self, region: BrainRegion, nt: Neurotransmitter) -> bool:
         """
-        Analyze how a neurotransmitter's effect changes over time in a brain region.
+        Determine if a brain region and neurotransmitter combination is biologically valid.
         
         Args:
-            patient_id: UUID of the patient
-            brain_region: Target brain region
-            neurotransmitter: Target neurotransmitter
-            time_series_data: List of timestamp and value tuples
-            baseline_period: Optional period defining the baseline
+            region: Brain region to check
+            nt: Neurotransmitter to check
             
         Returns:
-            NeurotransmitterEffect object
+            True if the combination is valid, False otherwise
         """
-        # If no data provided, try to use existing data
-        if not time_series_data and self.patient_id == patient_id:
-            sequence = self.get_measurement_sequence(neurotransmitter, brain_region)
-            if sequence and sequence.events:
-                time_series_data = [(event.timestamp, event.value) for event in sequence.events]
+        # Primary producing regions should always be valid
+        if region in self.get_producing_regions(nt):
+            return True
         
-        # If still no data, return baseline effect
-        if not time_series_data:
-            return super().analyze_baseline_effect(neurotransmitter, brain_region, patient_id)
+        # For simplicity, most combinations are valid with some exceptions:
+        invalid_combinations = [
+            # These are just examples - a real implementation would have 
+            # more comprehensive biological constraints
+            (BrainRegion.RAPHE_NUCLEI, Neurotransmitter.GLUTAMATE),
+            (BrainRegion.VENTRAL_TEGMENTAL_AREA, Neurotransmitter.SEROTONIN)
+        ]
         
-        # Sort by timestamp
-        time_series_data.sort(key=lambda x: x[0])
+        return (region, nt) not in invalid_combinations
+    
+    def analyze_temporal_pattern(
+        self,
+        brain_region: BrainRegion,
+        neurotransmitter: Neurotransmitter,
+        time_range: timedelta = timedelta(days=30)
+    ) -> Dict[str, Any]:
+        """
+        Analyze the temporal pattern of a neurotransmitter in a region.
         
-        # Extract values
-        values = [value for _, value in time_series_data]
+        Args:
+            brain_region: Target brain region
+            neurotransmitter: Target neurotransmitter
+            time_range: Time period to analyze
+            
+        Returns:
+            Dictionary with analysis results
+        """
+        # Get sequences for this region and neurotransmitter
+        key = (brain_region, neurotransmitter)
+        sequences = self.temporal_sequences.get(key, [])
+        
+        if not sequences:
+            return {
+                "pattern": "unknown",
+                "confidence": 0.0,
+                "rhythmicity": 0.0,
+                "trend": "unknown",
+                "variance": 0.0,
+                "peak_count": 0,
+                "event_count": 0
+            }
+        
+        # Get most recent sequence
+        sequence = sequences[-1]
+        
+        # Get events within time range
+        cutoff = datetime.now() - time_range
+        events = [e for e in sequence.events if e.timestamp >= cutoff]
+        
+        if not events:
+            return {
+                "pattern": "insufficient_data",
+                "confidence": 0.0,
+                "rhythmicity": 0.0,
+                "trend": "unknown",
+                "variance": 0.0,
+                "peak_count": 0,
+                "event_count": 0
+            }
+        
+        # Get values
+        values = [e.value for e in events if isinstance(e.value, (int, float))]
+        
+        if not values:
+            return {
+                "pattern": "non_numeric_data",
+                "confidence": 0.0,
+                "rhythmicity": 0.0,
+                "trend": "unknown",
+                "variance": 0.0,
+                "peak_count": 0,
+                "event_count": len(events)
+            }
         
         # Calculate statistics
-        mean_value = statistics.mean(values)
-        std_dev = statistics.stdev(values) if len(values) > 1 else 0.0
+        mean_value = sum(values) / len(values)
+        variance = sum((v - mean_value) ** 2 for v in values) / len(values)
         
-        # Calculate p-value based on receptor density and consistency
-        receptor_density = self.analyze_receptor_affinity(neurotransmitter, brain_region)
-        consistency = 1.0 - min(1.0, std_dev * 5)  # Convert std_dev to a 0-1 consistency score
-        p_value = max(0.01, 0.05 * (1.0 - receptor_density * consistency))
+        # Count peaks (local maxima)
+        peaks = 0
+        for i in range(1, len(values) - 1):
+            if values[i] > values[i-1] and values[i] > values[i+1]:
+                peaks += 1
         
-        # Effect size is the mean value
-        effect_size = mean_value
+        # Determine trend
+        start_value = values[0]
+        end_value = values[-1]
         
-        # Confidence interval
-        ci_range = 0.1 + std_dev
-        confidence_interval = (max(0.0, effect_size - ci_range), min(1.0, effect_size + ci_range))
-        
-        # Statistical significance
-        is_statistically_significant = p_value < 0.05
-        
-        # Clinical significance
-        clinical_significance = ClinicalSignificance.NONE
-        if is_statistically_significant:
-            if effect_size >= 0.7 and receptor_density >= 0.7:
-                clinical_significance = ClinicalSignificance.SIGNIFICANT
-            elif effect_size >= 0.5 and receptor_density >= 0.5:
-                clinical_significance = ClinicalSignificance.MODERATE
-            elif effect_size >= 0.3 and receptor_density >= 0.3:
-                clinical_significance = ClinicalSignificance.MILD
-            else:
-                clinical_significance = ClinicalSignificance.MINIMAL
-        
-        # Define comparison period and baseline if needed
-        if not baseline_period and len(time_series_data) >= 2:
-            # Use first 20% as baseline
-            cutoff_idx = max(1, len(time_series_data) // 5)
-            baseline_period = (time_series_data[0][0], time_series_data[cutoff_idx-1][0])
-            comparison_period = (time_series_data[cutoff_idx][0], time_series_data[-1][0])
+        if abs(end_value - start_value) / max(abs(start_value), 0.1) < 0.1:
+            trend = "stable"
+        elif end_value > start_value:
+            trend = "increasing"
         else:
-            comparison_period = None
+            trend = "decreasing"
         
-        # Create effect object
-        effect = NeurotransmitterEffect(
-            neurotransmitter=neurotransmitter,
-            effect_size=effect_size,
-            p_value=p_value,
-            confidence_interval=confidence_interval,
-            clinical_significance=clinical_significance,
-            is_statistically_significant=is_statistically_significant,
-            brain_region=brain_region,
-            time_series_data=time_series_data,
-            baseline_period=baseline_period,
-            comparison_period=comparison_period
-        )
+        # Calculate rhythmicity (regularity of peaks)
+        rhythmicity = 0.0
+        if peaks >= 2:
+            peak_indices = []
+            for i in range(1, len(values) - 1):
+                if values[i] > values[i-1] and values[i] > values[i+1]:
+                    peak_indices.append(i)
+            
+            intervals = [peak_indices[i] - peak_indices[i-1] for i in range(1, len(peak_indices))]
+            if intervals:
+                mean_interval = sum(intervals) / len(intervals)
+                interval_variance = sum((i - mean_interval) ** 2 for i in intervals) / len(intervals)
+                
+                # Lower variance = higher rhythmicity
+                max_possible_variance = mean_interval ** 2
+                rhythmicity = 1.0 - min(1.0, interval_variance / max(max_possible_variance, 1.0))
         
-        return effect
+        # Determine pattern
+        pattern = "random"
+        confidence = 0.5
+        
+        if rhythmicity > 0.7:
+            pattern = "oscillatory"
+            confidence = rhythmicity
+        elif peaks == 0 and trend == "stable":
+            pattern = "flat"
+            confidence = 0.8
+        elif trend == "increasing" and variance < 0.05:
+            pattern = "linear_increase"
+            confidence = 0.7
+        elif trend == "decreasing" and variance < 0.05:
+            pattern = "linear_decrease"
+            confidence = 0.7
+        elif variance > 0.2:
+            pattern = "chaotic"
+            confidence = min(1.0, variance / 0.5)
+        
+        return {
+            "pattern": pattern,
+            "confidence": confidence,
+            "rhythmicity": rhythmicity,
+            "trend": trend,
+            "variance": variance,
+            "peak_count": peaks,
+            "event_count": len(events)
+        }
     
-    def find_correlated_regions(
+    def analyze_region_interactions(
         self,
         neurotransmitter: Neurotransmitter,
-        brain_region: BrainRegion,
-        threshold: float = 0.7,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None
-    ) -> List[Tuple[BrainRegion, float]]:
+        time_range: timedelta = timedelta(days=30),
+        correlation_threshold: float = 0.6
+    ) -> Dict[Tuple[BrainRegion, BrainRegion], float]:
         """
-        Find brain regions with correlated neurotransmitter levels.
+        Analyze interactions between brain regions for a neurotransmitter.
         
         Args:
             neurotransmitter: Target neurotransmitter
-            brain_region: Target brain region
-            threshold: Correlation threshold (0.0-1.0)
-            start_time: Optional start time for correlation window
-            end_time: Optional end time for correlation window
+            time_range: Time period to analyze
+            correlation_threshold: Minimum correlation coefficient to include
             
         Returns:
-            List of tuples with brain region and correlation score
+            Dictionary mapping region pairs to correlation strength
         """
-        if neurotransmitter not in self.temporal_profiles:
-            return []
+        # Get all regions with sequences for this neurotransmitter
+        regions_with_data = []
+        for key in self.temporal_sequences:
+            region, nt = key
+            if nt == neurotransmitter and self.temporal_sequences[key]:
+                regions_with_data.append(region)
         
-        # Get sequence for target region
-        target_sequence = self.temporal_profiles.get(neurotransmitter, {}).get(brain_region)
-        if not target_sequence or len(target_sequence.events) < 3:
-            return []
+        if len(regions_with_data) < 2:
+            return {}
         
-        # Filter events by time range if provided
-        if start_time and end_time:
-            target_events = target_sequence.get_events_in_range(start_time, end_time)
-        else:
-            target_events = target_sequence.events
-        
-        # Not enough data points
-        if len(target_events) < 3:
-            return []
-        
-        # Extract timestamps and values
-        target_timestamps = [event.timestamp for event in target_events]
-        target_values = [event.value for event in target_events]
-        
-        correlations = []
-        
-        # Check each brain region
-        for region, sequence in self.temporal_profiles[neurotransmitter].items():
-            # Skip the target region itself
-            if region == brain_region:
-                continue
-            
-            # Not enough data points
-            if len(sequence.events) < 3:
-                continue
-            
-            # Get values at matching timestamps
-            region_values = []
-            for ts in target_timestamps:
-                value = sequence.get_value_at(ts)
-                if value is not None:
-                    region_values.append(value)
-                else:
-                    # If no value at this timestamp, use 0.5 as default
-                    region_values.append(0.5)
-            
-            # Calculate correlation if we have enough matching points
-            if len(region_values) >= 3:
-                correlation = self._calculate_correlation(target_values, region_values)
+        # Analyze correlations between all pairs of regions
+        correlations = {}
+        for i, region1 in enumerate(regions_with_data):
+            for j in range(i + 1, len(regions_with_data)):
+                region2 = regions_with_data[j]
                 
-                # Add to results if above threshold
-                if abs(correlation) >= threshold:
-                    correlations.append((region, correlation))
-        
-        # Sort by absolute correlation (highest first)
-        correlations.sort(key=lambda x: abs(x[1]), reverse=True)
+                # Get sequences
+                seq1 = self.temporal_sequences.get((region1, neurotransmitter), [])
+                seq2 = self.temporal_sequences.get((region2, neurotransmitter), [])
+                
+                if not seq1 or not seq2:
+                    continue
+                
+                # Get most recent sequences
+                seq1 = seq1[-1]
+                seq2 = seq2[-1]
+                
+                # Get events within time range
+                cutoff = datetime.now() - time_range
+                events1 = [e for e in seq1.events if e.timestamp >= cutoff]
+                events2 = [e for e in seq2.events if e.timestamp >= cutoff]
+                
+                if not events1 or not events2:
+                    continue
+                
+                # Get values
+                values1 = [e.value for e in events1 if isinstance(e.value, (int, float))]
+                values2 = [e.value for e in events2 if isinstance(e.value, (int, float))]
+                
+                if not values1 or not values2:
+                    continue
+                
+                # For simplicity, compare the latest 10 values from each
+                values1 = values1[-10:]
+                values2 = values2[-10:]
+                
+                # Truncate to same length if needed
+                min_length = min(len(values1), len(values2))
+                values1 = values1[-min_length:]
+                values2 = values2[-min_length:]
+                
+                # Calculate correlation
+                if min_length < 3:
+                    continue
+                
+                # Simple correlation calculation
+                mean1 = sum(values1) / len(values1)
+                mean2 = sum(values2) / len(values2)
+                
+                # Calculate covariance and standard deviations
+                covariance = sum((values1[i] - mean1) * (values2[i] - mean2) for i in range(min_length))
+                std_dev1 = math.sqrt(sum((v - mean1) ** 2 for v in values1))
+                std_dev2 = math.sqrt(sum((v - mean2) ** 2 for v in values2))
+                
+                # Calculate correlation coefficient
+                if std_dev1 == 0 or std_dev2 == 0:
+                    correlation = 0
+                else:
+                    correlation = covariance / (std_dev1 * std_dev2)
+                
+                # Only include strong correlations
+                if abs(correlation) >= correlation_threshold:
+                    correlations[(region1, region2)] = correlation
         
         return correlations
     
-    def _calculate_correlation(self, values1: List[float], values2: List[float]) -> float:
-        """
-        Calculate Pearson correlation coefficient between two value lists.
-        
-        Args:
-            values1: First list of values
-            values2: Second list of values
-            
-        Returns:
-            Correlation coefficient (-1.0 to 1.0)
-        """
-        if len(values1) != len(values2) or len(values1) < 2:
-            return 0.0
-        
-        n = len(values1)
-        
-        # Calculate means
-        mean1 = sum(values1) / n
-        mean2 = sum(values2) / n
-        
-        # Calculate covariance and variances
-        covariance = sum((values1[i] - mean1) * (values2[i] - mean2) for i in range(n))
-        variance1 = sum((x - mean1) ** 2 for x in values1)
-        variance2 = sum((x - mean2) ** 2 for x in values2)
-        
-        # Calculate correlation
-        if variance1 == 0 or variance2 == 0:
-            return 0.0
-        
-        correlation = covariance / (variance1 ** 0.5 * variance2 ** 0.5)
-        
-        return max(-1.0, min(1.0, correlation))
-        
-    def _generate_response_simulation(
+    def get_recent_sequences(
         self,
-        treatment_id: str,
-        start_time: datetime,
-        duration: timedelta,
-        interval: timedelta,
-        response_decay: float = 0.1
-    ) -> Dict[Neurotransmitter, Dict[BrainRegion, TemporalSequence[float]]]:
+        days: int = 30
+    ) -> Dict[Tuple[BrainRegion, Neurotransmitter], TemporalSequence]:
         """
-        Private helper method to generate a treatment response simulation.
+        Get the most recent temporal sequences across all brain regions.
         
         Args:
-            treatment_id: Identifier of the registered treatment
-            start_time: When treatment begins
-            duration: How long to simulate
-            interval: Time interval between simulated points
-            response_decay: Rate of decay for treatment response (0.0-1.0)
+            days: Number of days to look back
             
         Returns:
-            Dictionary mapping neurotransmitters to brain regions to temporal sequences
+            Dictionary mapping (region, neurotransmitter) to most recent sequence
         """
-        if treatment_id not in self.treatment_effects:
-            raise ValueError(f"Treatment {treatment_id} not registered")
+        cutoff = datetime.now() - timedelta(days=days)
+        result = {}
         
-        # Generate timestamps for simulation
-        timestamps = []
-        current_time = start_time
-        while current_time <= start_time + duration:
-            timestamps.append(current_time)
-            current_time += interval
-        
-        # Create result container
-        result: Dict[Neurotransmitter, Dict[BrainRegion, TemporalSequence[float]]] = {}
-        
-        # Iterate through neurotransmitters affected by treatment
-        for nt, regions in self.treatment_effects[treatment_id].items():
-            result[nt] = {}
-            
-            # Iterate through brain regions
-            for region, effect_magnitude in regions.items():
-                # Get current level to use as baseline
-                baseline = self.get_current_level(nt, region) or 0.5  # Default to 0.5 if no existing level
-                
-                # Create new temporal sequence for simulation
-                sequence_name = f"{treatment_id}_{nt.value}_{region.value}_simulation"
-                sequence = TemporalSequence[float](
-                    name=sequence_name,
-                    patient_id=self.patient_id,
-                    brain_region=region,
-                    neurotransmitter=nt,
-                    metadata={
-                        "simulation": True,
-                        "treatment_id": treatment_id,
-                        "baseline_level": baseline,
-                        "effect_magnitude": effect_magnitude
-                    }
-                )
-                
-                # Generate the temporal response curve
-                for idx, timestamp in enumerate(timestamps):
-                    # Calculate time factor (0.0 to 1.0) representing progress through treatment
-                    time_factor = min(1.0, idx / (len(timestamps) - 1 if len(timestamps) > 1 else 1))
-                    
-                    # Calculate response curve
-                    # - Initially rises rapidly
-                    # - Then plateaus
-                    # - Gradually decays if response_decay > 0
-                    if time_factor < 0.2:
-                        # Initial rapid rise (first 20% of time)
-                        response_factor = time_factor * 5  # 0.0 to 1.0
-                    elif time_factor < 0.7:
-                        # Plateau (20% to 70% of time)
-                        response_factor = 1.0
-                    else:
-                        # Gradual decay (after 70% of time)
-                        decay_factor = (time_factor - 0.7) / 0.3  # 0.0 to 1.0
-                        response_factor = 1.0 - (decay_factor * response_decay)
-                    
-                    # Calculate new level
-                    # effect_magnitude can be positive (increase) or negative (decrease)
-                    effect = effect_magnitude * response_factor
-                    new_level = baseline + effect
-                    
-                    # Ensure level stays within valid range
-                    new_level = max(0.0, min(1.0, new_level))
-                    
-                    # Add to sequence
-                    sequence.add_value(
-                        timestamp=timestamp,
-                        value=new_level,
-                        metadata={
-                            "time_factor": time_factor,
-                            "response_factor": response_factor,
-                            "baseline": baseline,
-                            "effect": effect
-                        }
-                    )
-                
-                # Add sequence to result
-                result[nt][region] = sequence
+        # Get most recent sequence for each region/neurotransmitter pair
+        for key, sequences in self.temporal_sequences.items():
+            if sequences:
+                # Find most recent sequence updated after cutoff
+                recent_sequences = [s for s in sequences if s.updated_at >= cutoff]
+                if recent_sequences:
+                    result[key] = max(recent_sequences, key=lambda s: s.updated_at)
         
         return result
-        
+    
     def generate_temporal_sequence(
         self,
         brain_region: BrainRegion,
         neurotransmitter: Neurotransmitter,
         timestamps: List[datetime],
         baseline_level: float = 0.5,
-        random_seed: Optional[int] = None
+        random_seed: Optional[int] = None,
+        patient_id: Optional[UUID] = None
     ) -> TemporalSequence:
         """
         Generate a temporal sequence for a neurotransmitter in a specific brain region.
@@ -802,21 +498,23 @@ class TemporalNeurotransmitterMapping(NeurotransmitterMapping):
             timestamps: List of timestamps for the sequence
             baseline_level: Starting baseline level (0.0-1.0)
             random_seed: Optional random seed for reproducibility
+            patient_id: Optional patient ID to override the default
             
         Returns:
             TemporalSequence with generated values
         """
-        import random
-        
         # Set random seed if provided
         if random_seed is not None:
             random.seed(random_seed)
+        
+        # Use provided patient_id or fall back to self.patient_id
+        used_patient_id = patient_id if patient_id is not None else self.patient_id
         
         # Create a sequence
         sequence_name = f"{neurotransmitter.value}_{brain_region.value}_temporal"
         sequence = TemporalSequence[float](
             name=sequence_name,
-            patient_id=self.patient_id,
+            patient_id=used_patient_id,
             brain_region=brain_region,
             neurotransmitter=neurotransmitter,
             metadata={
@@ -906,7 +604,8 @@ class TemporalNeurotransmitterMapping(NeurotransmitterMapping):
         neurotransmitter: Neurotransmitter,
         initial_level: float,
         time_steps: int = 5,
-        step_duration: timedelta = timedelta(minutes=15)
+        step_duration: timedelta = timedelta(minutes=15),
+        patient_id: Optional[UUID] = None
     ) -> Dict[BrainRegion, List[float]]:
         """
         Predict how a neurotransmitter change cascades across brain regions.
@@ -917,6 +616,7 @@ class TemporalNeurotransmitterMapping(NeurotransmitterMapping):
             initial_level: Initial level in the starting region
             time_steps: Number of time steps to simulate
             step_duration: Duration of each time step
+            patient_id: Optional patient ID to override the default
             
         Returns:
             Dictionary mapping brain regions to lists of levels over time
@@ -1046,101 +746,241 @@ class TemporalNeurotransmitterMapping(NeurotransmitterMapping):
         brain_region: BrainRegion,
         target_neurotransmitter: Neurotransmitter,
         treatment_effect: float,
-        timestamps: List[datetime]
+        timestamps: List[datetime],
+        patient_id: Optional[UUID] = None
     ) -> Dict[Neurotransmitter, TemporalSequence]:
         """
-        Simulate how a treatment affects neurotransmitter levels over time.
+        Simulate the response to a treatment affecting a specific neurotransmitter.
         
         Args:
             brain_region: Target brain region
             target_neurotransmitter: Primary neurotransmitter affected by treatment
             treatment_effect: Magnitude and direction of effect (-1.0 to 1.0)
             timestamps: List of timestamps for the simulation
+            patient_id: Optional patient ID to override the default
             
         Returns:
-            Dictionary mapping neurotransmitters to temporal sequences
+            Dictionary mapping neurotransmitters to their temporal sequences
         """
-        # Create a treatment ID based on parameters
-        treatment_id = f"treatment_{target_neurotransmitter.value}_{brain_region.value}_{abs(treatment_effect):.1f}"
+        # Use provided patient_id or fall back to self.patient_id
+        used_patient_id = patient_id if patient_id is not None else self.patient_id
         
-        # Determine if treatment increases or decreases the target neurotransmitter
-        is_increasing = treatment_effect > 0
+        # Create result dictionary
+        result = {}
         
-        # Define primary effect on target neurotransmitter in the target region
-        primary_effect = {
-            target_neurotransmitter: {
-                brain_region: treatment_effect
-            }
-        }
-        
-        # Define secondary effects on other neurotransmitters
-        secondary_effect = {}
-        
-        # Add opposite effect on opposing neurotransmitters
-        # These are simplified neurobiological relationships
-        if target_neurotransmitter == Neurotransmitter.SEROTONIN:
-            # Serotonin increase can affect dopamine and GABA
-            secondary_effect[Neurotransmitter.DOPAMINE] = {
-                brain_region: -treatment_effect * 0.3  # Inverse relationship
-            }
-            secondary_effect[Neurotransmitter.GABA] = {
-                brain_region: treatment_effect * 0.4  # Similar direction
-            }
-        elif target_neurotransmitter == Neurotransmitter.DOPAMINE:
-            # Dopamine affects serotonin and glutamate
-            secondary_effect[Neurotransmitter.SEROTONIN] = {
-                brain_region: -treatment_effect * 0.2  # Inverse relationship
-            }
-            secondary_effect[Neurotransmitter.GLUTAMATE] = {
-                brain_region: treatment_effect * 0.5  # Similar direction
-            }
-        elif target_neurotransmitter == Neurotransmitter.GABA:
-            # GABA affects glutamate and serotonin
-            secondary_effect[Neurotransmitter.GLUTAMATE] = {
-                brain_region: -treatment_effect * 0.7  # Strong inverse relationship
-            }
-            secondary_effect[Neurotransmitter.SEROTONIN] = {
-                brain_region: treatment_effect * 0.3  # Similar direction
-            }
-        elif target_neurotransmitter == Neurotransmitter.GLUTAMATE:
-            # Glutamate affects GABA and dopamine
-            secondary_effect[Neurotransmitter.GABA] = {
-                brain_region: -treatment_effect * 0.6  # Inverse relationship
-            }
-            secondary_effect[Neurotransmitter.DOPAMINE] = {
-                brain_region: treatment_effect * 0.4  # Similar direction
-            }
-        
-        # Register the treatment effect
-        self.register_treatment_effect(
-            treatment_id=treatment_id,
-            primary_effect=primary_effect,
-            secondary_effect=secondary_effect,
-            metadata={
-                "treatment_type": "medication" if abs(treatment_effect) > 0.5 else "therapy",
-                "target_system": "serotonergic" if target_neurotransmitter == Neurotransmitter.SEROTONIN else
-                               "dopaminergic" if target_neurotransmitter == Neurotransmitter.DOPAMINE else
-                               "GABAergic" if target_neurotransmitter == Neurotransmitter.GABA else
-                               "glutamatergic"
-            }
+        # Get affected neurotransmitters (primary + secondary effects)
+        affected_neurotransmitters = self._get_treatment_affected_neurotransmitters(
+            target_neurotransmitter, treatment_effect
         )
         
-        # Calculate duration based on timestamps
-        if len(timestamps) >= 2:
-            duration = timestamps[-1] - timestamps[0]
-            interval = duration / (len(timestamps) - 1)
+        # Simulate effect on each neurotransmitter
+        for nt, effect_modifier in affected_neurotransmitters.items():
+            # Calculate modified treatment effect for this neurotransmitter
+            modified_effect = treatment_effect * effect_modifier
+            
+            # Get baseline level from receptor affinity
+            baseline = 0.5 + (0.2 * self.analyze_receptor_affinity(nt, brain_region))
+            
+            # Ensure baseline is valid
+            baseline = max(0.1, min(0.9, baseline))
+            
+            # Create sequence for this neurotransmitter
+            sequence = self.generate_temporal_sequence(
+                brain_region=brain_region,
+                neurotransmitter=nt,
+                timestamps=timestamps,
+                baseline_level=baseline,
+                patient_id=used_patient_id
+            )
+            
+            # Apply treatment effect to sequence
+            _apply_treatment_effect(sequence, modified_effect, timestamps)
+            
+            # Add to result
+            result[nt] = sequence
+        
+        return result
+    
+    def _get_treatment_affected_neurotransmitters(
+        self, primary_nt: Neurotransmitter, effect_strength: float
+    ) -> Dict[Neurotransmitter, float]:
+        """
+        Determine which neurotransmitters are affected by a treatment.
+        
+        Args:
+            primary_nt: Primary neurotransmitter targeted by treatment
+            effect_strength: Strength of treatment effect (-1.0 to 1.0)
+            
+        Returns:
+            Dictionary mapping affected neurotransmitters to effect modifiers
+        """
+        result = {primary_nt: 1.0}  # Primary effect at full strength
+        
+        # Add secondary effects based on primary neurotransmitter
+        if primary_nt == Neurotransmitter.SEROTONIN:
+            # SSRI-like effects: Secondary effects on other monoamines
+            result[Neurotransmitter.DOPAMINE] = 0.3
+            result[Neurotransmitter.NOREPINEPHRINE] = 0.2
+            
+            # Indirect effect on inhibitory/excitatory balance
+            if effect_strength > 0:  # Increasing serotonin
+                result[Neurotransmitter.GABA] = 0.1
+                result[Neurotransmitter.GLUTAMATE] = -0.1
+            else:  # Decreasing serotonin
+                result[Neurotransmitter.GABA] = -0.1
+                result[Neurotransmitter.GLUTAMATE] = 0.2
+        
+        elif primary_nt == Neurotransmitter.DOPAMINE:
+            # Dopaminergic effects: Secondary effects on related systems
+            result[Neurotransmitter.NOREPINEPHRINE] = 0.4
+            
+            # Indirect effects on serotonin depend on direction
+            if effect_strength > 0:  # Increasing dopamine
+                result[Neurotransmitter.SEROTONIN] = 0.1
+                result[Neurotransmitter.GLUTAMATE] = 0.2
+            else:  # Decreasing dopamine
+                result[Neurotransmitter.SEROTONIN] = -0.1
+                result[Neurotransmitter.GLUTAMATE] = -0.1
+        
+        elif primary_nt == Neurotransmitter.GABA:
+            # GABAergic effects: Inhibitory system changes
+            result[Neurotransmitter.GLUTAMATE] = -0.5  # Strong reciprocal relationship
+            
+            # Secondary effects on monoamines
+            if effect_strength > 0:  # Increasing GABA (more inhibition)
+                result[Neurotransmitter.DOPAMINE] = -0.2
+                result[Neurotransmitter.SEROTONIN] = 0.1
+            else:  # Decreasing GABA (less inhibition)
+                result[Neurotransmitter.DOPAMINE] = 0.3
+                result[Neurotransmitter.GLUTAMATE] = 0.4
+        
+        elif primary_nt == Neurotransmitter.GLUTAMATE:
+            # Glutamatergic effects: Excitatory system changes
+            result[Neurotransmitter.GABA] = -0.4  # Reciprocal relationship
+            
+            # Secondary effects on other systems
+            if effect_strength > 0:  # Increasing glutamate
+                result[Neurotransmitter.DOPAMINE] = 0.2
+                result[Neurotransmitter.SEROTONIN] = -0.1
+            else:  # Decreasing glutamate
+                result[Neurotransmitter.DOPAMINE] = -0.1
+                result[Neurotransmitter.SEROTONIN] = 0.1
+        
+        return result
+    
+    def __str__(self) -> str:
+        """String representation of the mapping."""
+        return f"TemporalNeurotransmitterMapping(patient_id={self.patient_id}, sequences={len(self.temporal_sequences)})"
+
+
+def _apply_treatment_effect(
+    sequence: TemporalSequence,
+    effect: float,
+    timestamps: List[datetime]
+) -> None:
+    """
+    Apply treatment effect to a temporal sequence.
+    
+    Args:
+        sequence: Sequence to modify
+        effect: Treatment effect (-1.0 to 1.0)
+        timestamps: Timestamps when treatment is applied
+    """
+    if not sequence or not timestamps:
+        return
+    
+    # Skip if effect is negligible
+    if abs(effect) < 0.05:
+        return
+    
+    # Get maximum effect (change in neurotransmitter level)
+    max_effect = effect * 0.4  # Scale to reasonable range
+    
+    # Apply gradual effect over time
+    treatment_start = timestamps[0]
+    treatment_duration = timestamps[-1] - treatment_start
+    total_days = treatment_duration.total_seconds() / (24 * 3600)
+    
+    # No effect if duration is too short
+    if total_days < 0.5:
+        return
+    
+    # Calculate onset delay based on effect size
+    # Larger effects may take longer to manifest
+    onset_days = 1.0 + (abs(effect) * 2.0)
+    onset_days = min(onset_days, total_days / 2)  # Can't be more than half the duration
+    
+    for event in sequence.events:
+        # Skip events outside treatment timeframe
+        if event.timestamp < treatment_start or event.timestamp > timestamps[-1]:
+            continue
+        
+        # Calculate days since treatment start
+        days_since_start = (event.timestamp - treatment_start).total_seconds() / (24 * 3600)
+        
+        # Calculate effect factor based on time (sigmoid curve)
+        if days_since_start < onset_days:
+            # Gradual onset phase
+            factor = days_since_start / onset_days
+            effect_factor = factor ** 2  # Quadratic ramp-up
         else:
-            # Default values
-            duration = timedelta(days=1)
-            interval = timedelta(hours=1)
+            # Full effect phase with slight random variation
+            effect_factor = 1.0 + (random.uniform(-0.1, 0.1) * (1.0 - (days_since_start / total_days)))
         
-        # Simulate the treatment response
-        response = self._generate_response_simulation(
-            treatment_id=treatment_id,
-            start_time=timestamps[0],
-            duration=duration,
-            interval=interval,
-            response_decay=0.2  # Moderate decay
-        )
+        # Apply effect to value
+        if isinstance(event.value, (int, float)):
+            # Calculate new value
+            current_value = event.value
+            effect_amount = max_effect * effect_factor
+            new_value = current_value + effect_amount
+            
+            # Ensure value stays within valid range
+            new_value = max(0.0, min(1.0, new_value))
+            
+            # Update metadata to track treatment effect
+            event_metadata = event.metadata or {}
+            event_metadata["treatment_effect"] = effect_amount
+            event_metadata["original_value"] = current_value
+            
+            # Update event value and metadata
+            event.value = new_value
+            event.metadata = event_metadata
+
+
+def extend_neurotransmitter_mapping(base_mapping: NeurotransmitterMapping, patient_id: Optional[UUID] = None) -> TemporalNeurotransmitterMapping:
+    """
+    Extends a base NeurotransmitterMapping with temporal capabilities.
+    
+    This function takes a base mapping and creates a new TemporalNeurotransmitterMapping
+    that inherits all the receptor profiles and mappings from the base, but adds
+    temporal analysis capabilities.
+    
+    Args:
+        base_mapping: The base NeurotransmitterMapping to extend
+        patient_id: Optional UUID of the associated patient
         
-        return response
+    Returns:
+        A TemporalNeurotransmitterMapping with data copied from the base mapping
+    """
+    # Create a new temporal mapping
+    temporal_mapping = TemporalNeurotransmitterMapping(patient_id=patient_id)
+    
+    # Copy receptor profiles
+    for profile in base_mapping.receptor_profiles:
+        temporal_mapping.add_receptor_profile(profile)
+    
+    # Copy receptor maps (if not updated by add_receptor_profile)
+    if hasattr(base_mapping, 'receptor_map') and hasattr(temporal_mapping, 'receptor_map'):
+        for region, nt_map in base_mapping.receptor_map.items():
+            if region not in temporal_mapping.receptor_map:
+                temporal_mapping.receptor_map[region] = {}
+            
+            for nt, value in nt_map.items():
+                temporal_mapping.receptor_map[region][nt] = value
+    
+    # Copy production maps
+    if hasattr(base_mapping, 'production_map') and hasattr(temporal_mapping, 'production_map'):
+        for key, value in base_mapping.production_map.items():
+            temporal_mapping.production_map[key] = value
+    
+    return temporal_mapping

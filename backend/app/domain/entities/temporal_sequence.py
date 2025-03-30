@@ -4,11 +4,12 @@ Temporal sequence models for the Temporal Neurotransmitter System.
 This module defines the core classes for representing time series data
 for neurotransmitter levels and other temporal measurements.
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Tuple, Optional, Any, Union, Iterator, Generic, TypeVar
 import uuid
 from uuid import UUID
 import statistics
+import math
 from enum import Enum, auto
 
 from app.domain.entities.digital_twin_enums import BrainRegion, Neurotransmitter, TemporalResolution
@@ -71,9 +72,98 @@ class TemporalSequence(Generic[T]):
         self.metadata = metadata or {}
         self.brain_region = brain_region
         self.neurotransmitter = neurotransmitter
-        self.created_at = created_at or datetime.utcnow()
-        self.updated_at = updated_at or datetime.utcnow()
+        self.created_at = created_at or datetime.now(UTC)
+        self.updated_at = updated_at or datetime.now(UTC)
         self.temporal_resolution = temporal_resolution
+        
+        # Initialize feature names and cached values
+        self._feature_names = []
+        self._values = None  # Explicitly set to None initially
+        self._sequence_length = None  # For tests that need to override the computed length
+        
+        # If feature_names are in metadata, initialize the internal property
+        if metadata and "feature_names" in metadata:
+            self._feature_names = metadata["feature_names"]
+        elif neurotransmitter:
+            self._feature_names = [neurotransmitter.value]
+    
+    @property
+    def timestamps(self) -> List[datetime]:
+        """Get all timestamps in the sequence, ordered chronologically."""
+        return [event.timestamp for event in self.events]
+    
+    @property
+    def values(self) -> List[T]:
+        """
+        Get all values in the sequence, ordered chronologically.
+        
+        If _values is explicitly set (for testing), returns that.
+        Otherwise, extracts values from events.
+        """
+        if self._values is not None:
+            return self._values
+        return [event.value for event in self.events]
+    
+    @values.setter
+    def values(self, new_values: List[T]) -> None:
+        """
+        Set the values for this sequence.
+        
+        Args:
+            new_values: List of values to set
+        """
+        self._values = new_values
+        
+        # Update metadata to indicate values were explicitly set
+        self.metadata["explicit_values"] = True
+    
+    @property
+    def feature_names(self) -> List[str]:
+        """Get the names of features in this sequence."""
+        if self._feature_names:
+            return self._feature_names
+        elif self.neurotransmitter:
+            return [self.neurotransmitter.value]
+        else:
+            return ["value"]
+    
+    @feature_names.setter
+    def feature_names(self, new_feature_names: List[str]) -> None:
+        """
+        Set the feature names for this sequence.
+        
+        Args:
+            new_feature_names: List of feature names
+        """
+        self._feature_names = new_feature_names
+        
+        # Update metadata for consistency
+        self.metadata["feature_names"] = new_feature_names
+    
+    @property
+    def sequence_length(self) -> int:
+        """
+        Get the number of events in the sequence.
+        
+        If _sequence_length is explicitly set (for testing), returns that.
+        Otherwise, computes from the events list.
+        """
+        if self._sequence_length is not None:
+            return self._sequence_length
+        return len(self.events)
+    
+    @sequence_length.setter
+    def sequence_length(self, length: int) -> None:
+        """
+        Set an explicit sequence length (used primarily in tests).
+        
+        Args:
+            length: The sequence length to set
+        """
+        self._sequence_length = length
+        
+        # Update metadata to indicate length was explicitly set
+        self.metadata["explicit_length"] = length
     
     def add_event(self, event: TemporalEvent[T]) -> None:
         """
@@ -84,7 +174,10 @@ class TemporalSequence(Generic[T]):
         """
         self.events.append(event)
         self.events.sort(key=lambda e: e.timestamp)
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(UTC)
+        
+        # Clear cached values when adding events
+        self._values = None
     
     def add_value(self, timestamp: datetime, value: T, metadata: Optional[Dict[str, Any]] = None) -> None:
         """
@@ -242,7 +335,7 @@ class TemporalSequence(Generic[T]):
         
         # If window size is provided, only analyze the most recent window
         if window_size:
-            cutoff = datetime.utcnow() - window_size
+            cutoff = datetime.now(UTC) - window_size
             events = [e for e in self.events if e.timestamp >= cutoff]
             if not events or len(events) < 2:
                 return "insufficient_data"
@@ -271,7 +364,11 @@ class TemporalSequence(Generic[T]):
             change = (events[i].value - events[i-1].value) / events[i-1].value
             changes.append(change)
         
-        volatility = statistics.stdev(changes) if len(changes) > 1 else 0
+        volatility = 0
+        if changes:
+            mean = sum(changes) / len(changes)
+            variance = sum((x - mean) ** 2 for x in changes) / len(changes)
+            volatility = math.sqrt(variance)
         
         # Determine trend based on percent change and volatility
         if volatility > 0.2:  # 20% standard deviation in changes
@@ -298,7 +395,8 @@ class TemporalSequence(Generic[T]):
             "event_count": len(self.events),
             "statistics": self.get_statistics(),
             "trend": self.get_trend(),
-            "metadata": self.metadata
+            "metadata": self.metadata,
+            "feature_names": self.feature_names
         }
         
         if self.patient_id:
