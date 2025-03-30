@@ -47,11 +47,13 @@
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
+    "@types/classnames": "^2.3.0",
     "@types/d3": "^7.4.3",
     "@types/lodash": "^4.14.200",
     "@types/node": "^20.8.9",
     "@types/react": "^18.2.33",
     "@types/react-dom": "^18.2.14",
+    "@types/react-query": "^1.2.8",
     "@types/three": "^0.158.2",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
     "@typescript-eslint/parser": "^6.9.1",

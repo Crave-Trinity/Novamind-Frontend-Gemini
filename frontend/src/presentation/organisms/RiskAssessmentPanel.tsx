@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 import { RiskAssessment } from "../../domain/models/PatientModel";
 import {
@@ -29,7 +29,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
 }) => {
   // Sort risk assessments by date (newest first)
   const sortedRiskAssessments = [...riskAssessments].sort(
-    (a, b) => new Date(b?.date || new Date()).getTime() - new Date(a?.date || new Date()).getTime(),
+    (a, b) => new Date(b.date || new Date().toISOString()).getTime() - new Date(a.date || new Date().toISOString()).getTime(),
   );
 
   // Active risk type selection
@@ -48,11 +48,12 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
   // Mutation for making risk predictions
   const {
     mutate: predictRisk,
-    isLoading: isPredicting,
+    isPending: isPredicting,
     error: predictionError,
     data: predictionResult,
     reset: resetPrediction,
-  } = useMutation(async () => {
+  } = useMutation({
+    mutationFn: async () => {
     const request: RiskPredictionRequest = {
       patient_id: patientId,
       risk_type: activeRiskType,
@@ -68,6 +69,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
     };
 
     return xgboostService.predictRisk(request);
+    }
   });
 
   // Handle risk type change
@@ -103,7 +105,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
     }
   };
 
-  // Get severity text color class
+  // Get severity text color class for both Severity and RiskLevel values
   const getSeverityTextClass = (severity: string) => {
     switch (severity) {
       case "none":
@@ -482,7 +484,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
             <div className="space-y-2">
               {predictionResult.factors
                 .slice(0, 5)
-                .map((factor: any, idx: number) => (
+                .map((factor: { name: string; contribution: number; direction: "positive" | "negative" }, idx: number) => (
                   <div key={idx} className="flex items-center justify-between">
                     <span className="text-sm text-neutral-700 dark:text-neutral-300">
                       {factor.name}
@@ -512,8 +514,8 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
               </h4>
               <ul className="list-inside list-disc space-y-1 pl-2 text-sm text-neutral-700 dark:text-neutral-300">
                 {predictionResult.recommendations.map(
-                  (rec: string, idx: number) => (
-                    <li key={idx}>{rec}</li>
+                  (recommendation: string, idx: number) => (
+                    <li key={idx}>{recommendation}</li>
                   ),
                 )}
               </ul>

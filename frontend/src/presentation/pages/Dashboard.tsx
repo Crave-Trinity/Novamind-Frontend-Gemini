@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useQuery } from "react-query";
+// Import with proper type definitions
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+
+// Dashboard-specific patient interface
+interface DashboardPatient {
+  id: string;
+  name: string;
+  primaryDiagnosis: string;
+  currentSeverity: string;
+  lastUpdated: string;
+}
 
 import { useTheme } from "../../application/contexts/ThemeContext";
 import Button from "../atoms/Button";
@@ -250,7 +260,7 @@ const fetchDigitalTwinProfile = async (patientId: string) => {
  * This component serves as the entry point to the Digital Twin frontend.
  */
 const Dashboard: React.FC = () => {
-  const { theme, isDarkMode, toggleDarkMode } = useTheme();
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const navigate = useNavigate();
 
   // Selected patient state
@@ -263,21 +273,22 @@ const Dashboard: React.FC = () => {
     data: patients,
     isLoading: isPatientsLoading,
     error: patientsError,
-  } = useQuery("patients", fetchPatients);
+  } = useQuery({
+    queryKey: ['patients'],
+    queryFn: fetchPatients
+  });
 
   // Fetch digital twin profile when patient is selected
   const {
     data: digitalTwinProfile,
     isLoading: isProfileLoading,
     error: profileError,
-  } = useQuery(
-    ["digitalTwinProfile", selectedPatientId],
-    () => fetchDigitalTwinProfile(selectedPatientId!),
-    {
-      enabled: !!selectedPatientId,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  );
+  } = useQuery({
+    queryKey: ['digitalTwinProfile', selectedPatientId],
+    queryFn: () => fetchDigitalTwinProfile(selectedPatientId!),
+    enabled: !!selectedPatientId,
+    staleTime: 5 * 60 * 1000 // 5 minutes
+  });
 
   // Select first patient by default when data loads
   useEffect(() => {
@@ -445,7 +456,7 @@ const Dashboard: React.FC = () => {
           </h2>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
-            {patients?.map((patient) => (
+            {patients?.map((patient: DashboardPatient) => (
               <button
                 key={patient.id}
                 className={`rounded-lg border p-4 ${

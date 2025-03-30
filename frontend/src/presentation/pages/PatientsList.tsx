@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useQuery } from "react-query";
+import React, { useState } from "react";
+// Import with proper type definitions
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
 import { Patient } from "../../domain/models/PatientModel";
-import { ApiClient } from "../../infrastructure/api/ApiClient";
+import { RiskLevel } from "../../domain/types/RiskLevel";
 import Button from "../atoms/Button";
 
 const PatientsList: React.FC = () => {
@@ -19,7 +20,9 @@ const PatientsList: React.FC = () => {
     isLoading,
     error,
     refetch,
-  } = useQuery("patients", async () => {
+  } = useQuery({
+    queryKey: ['patients'],
+    queryFn: async () => {
     // In a real app, this would call the API with proper filters
     // For now, we'll return mock data
     return await new Promise<Patient[]>((resolve) =>
@@ -113,6 +116,7 @@ const PatientsList: React.FC = () => {
         800,
       ),
     );
+    }
   });
 
   // Filter patients based on search and filter
@@ -132,13 +136,15 @@ const PatientsList: React.FC = () => {
             .toLowerCase()
             .includes(search) ||
           patient.mrn.toLowerCase().includes(search) ||
-          patient.diagnoses.some((d) => d.toLowerCase().includes(search)),
+          patient.diagnoses.some((d: string) => d.toLowerCase().includes(search)),
       );
     }
 
     // Apply category filter
     if (selectedFilter === "high-risk") {
-      filtered = filtered.filter((patient) => patient.riskLevel === "High");
+      filtered = filtered.filter((patient) =>
+        patient.riskLevel === "high" || patient.riskLevel === "High" || patient.riskLevel === "critical" || patient.riskLevel === "Critical"
+      );
     } else if (selectedFilter === "recent") {
       // Sort by most recent visit and take top 3
       filtered = [...filtered]
@@ -164,7 +170,7 @@ const PatientsList: React.FC = () => {
   };
 
   // Get risk level badge color
-  const getRiskLevelColor = (riskLevel: string) => {
+  const getRiskLevelColor = (riskLevel: import('../../domain/types/RiskLevel').RiskLevel) => {
     switch (riskLevel) {
       case "High":
         return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
@@ -351,7 +357,7 @@ const PatientsList: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredPatients.map((patient) => (
+            {filteredPatients.map((patient: Patient) => (
               <div
                 key={patient.id}
                 className="cursor-pointer overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-neutral-800 dark:bg-background-card"
@@ -442,8 +448,8 @@ const PatientsList: React.FC = () => {
                           Diagnoses
                         </p>
                         <ul className="text-sm text-neutral-900 dark:text-white">
-                          {patient.diagnoses.map((diagnosis, index) => (
-                            <li key={index} className="truncate">
+                          {patient.diagnoses.map((diagnosis: string, index: number) => (
+                            <li key={`${patient.id}-diagnosis-${index}`} className="truncate">
                               • {diagnosis}
                             </li>
                           ))}

@@ -4,10 +4,10 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { useQuery } from "react-query";
+// Import with proper type definitions
+import { useQuery } from "@tanstack/react-query";
 
 import {
-  BrainModel,
   BrainRegion,
   BrainViewState,
   NeuralPathway,
@@ -36,20 +36,18 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
 
   // Fetch brain model data
   const {
-    data: brainModel,
+    data: brainModel = { regions: [], pathways: [] },
     isLoading,
     error,
     refetch,
-  } = useQuery(
-    ["brainModel", mergedOptions.patientId],
-    async () => {
+  } = useQuery({
+    queryKey: ["brainModel", mergedOptions.patientId],
+    queryFn: async () => {
       return apiClient.getBrainModel(mergedOptions.patientId);
     },
-    {
-      enabled: !mergedOptions.disabled,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  );
+    enabled: !mergedOptions.disabled,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
   // View state for 3D visualization
   const [viewState, setViewState] = useState<BrainViewState>({
@@ -203,7 +201,7 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
 
   // Load specific brain model
   const loadBrainModel = useCallback(
-    (modelId: string) => {
+    (_modelId: string) => {
       // In a real app, this would update the query parameters
       refetch();
     },

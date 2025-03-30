@@ -4,7 +4,8 @@
  */
 
 import { useState, useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "react-query";
+// Import with proper type definitions
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
   xgboostService,
@@ -28,7 +29,7 @@ export function useTreatmentPrediction({
   // Store current treatment configuration
   const [treatmentConfig, setTreatmentConfig] = useState({
     treatmentType: initialTreatmentType,
-    details: {} as Record<string, any>,
+    details: {} as Record<string, unknown>,
   });
 
   // Query client for cache invalidation
@@ -42,24 +43,23 @@ export function useTreatmentPrediction({
   // Mutation for treatment response prediction
   const {
     mutate: predictTreatmentResponse,
-    isLoading: isPredicting,
+    isPending: isPredicting,
     error: predictionError,
     data: predictionResult,
     reset: resetPrediction,
-  } = useMutation<
-    TreatmentResponseResponse,
-    Error,
-    {
+  } = useMutation({
+    mutationFn: async ({
+      clinicalData,
+      geneticData
+    }: {
       clinicalData: {
         severity: string;
         diagnosis: string;
         assessment_scores?: Record<string, number>;
-        [key: string]: any;
+        [key: string]: unknown;
       };
       geneticData?: string[];
-    }
-  >(
-    async ({ clinicalData, geneticData }) => {
+    }) => {
       const request: TreatmentResponseRequest = {
         patient_id: patientId,
         treatment_type: treatmentConfig.treatmentType,
@@ -77,54 +77,54 @@ export function useTreatmentPrediction({
 
       return response;
     },
-    {
-      onSuccess: (data) => {
-        onPredictionSuccess?.(data);
+    onSuccess: (data: TreatmentResponseResponse) => {
+      onPredictionSuccess?.(data);
 
-        // Invalidate related queries that depend on this prediction
-        queryClient.invalidateQueries(["featureImportance", patientId]);
-      },
-      onError: (error) => {
-        onPredictionError?.(error);
-      },
+      // Invalidate related queries that depend on this prediction
+      queryClient.invalidateQueries({
+        queryKey: ["featureImportance", patientId]
+      });
     },
-  );
+    onError: (error: Error) => {
+      onPredictionError?.(error);
+    },
+  });
 
   // Fetch feature importance for current prediction
   const {
     data: featureImportance,
     isLoading: isLoadingFeatures,
     error: featureError,
-  } = useQuery(
-    ["featureImportance", patientId, activePredictionId],
-    () =>
+  } = useQuery({
+    queryKey: ["featureImportance", patientId, activePredictionId],
+    queryFn: () =>
       xgboostService.getFeatureImportance({
         patient_id: patientId,
         model_type: `treatment-${treatmentConfig.treatmentType}`,
         prediction_id: activePredictionId!,
       }),
-    {
-      enabled: !!activePredictionId, // Only run query if we have a prediction ID
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  );
+    enabled: !!activePredictionId, // Only run query if we have a prediction ID
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
   // Integrate prediction with digital twin profile
   const {
     mutate: integrateWithDigitalTwin,
-    isLoading: isIntegrating,
+    isPending: isIntegrating,
     error: integrationError,
     data: integrationResult,
-  } = useMutation(async (profileId: string) => {
-    if (!activePredictionId) {
-      throw new Error("No active prediction to integrate");
-    }
+  } = useMutation({
+    mutationFn: async (profileId: string) => {
+      if (!activePredictionId) {
+        throw new Error("No active prediction to integrate");
+      }
 
-    return xgboostService.integrateWithDigitalTwin({
-      patient_id: patientId,
-      profile_id: profileId,
-      prediction_id: activePredictionId,
-    });
+      return xgboostService.integrateWithDigitalTwin({
+        patient_id: patientId,
+        profile_id: profileId,
+        prediction_id: activePredictionId,
+      });
+    }
   });
 
   // Update treatment configuration

@@ -230,9 +230,9 @@ const PatientProfile: React.FC = () => {
                 {patient.gender}
               </p>
               <div className="mt-2 flex flex-wrap">
-                {patient.diagnoses.map((diagnosis, index) => (
+                {patient.diagnoses.map((diagnosis: string, index: number) => (
                   <span
-                    key={index}
+                    key={`diagnosis-${patient.id}-${index}`}
                     className="mb-1 mr-2 rounded-full bg-neutral-100 px-2 py-1 text-xs text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
                   >
                     {diagnosis}

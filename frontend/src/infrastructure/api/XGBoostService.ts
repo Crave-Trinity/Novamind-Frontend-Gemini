@@ -13,10 +13,10 @@ export interface RiskPredictionRequest {
     assessment_scores: Record<string, number>;
     severity: string;
     diagnosis: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
-  demographic_data?: Record<string, any>;
-  temporal_data?: Record<string, any>;
+  demographic_data?: Record<string, unknown>;
+  temporal_data?: Record<string, unknown>;
   confidence_threshold?: number;
 }
 
@@ -40,11 +40,11 @@ export interface RiskPredictionResponse {
 export interface TreatmentResponseRequest {
   patient_id: string;
   treatment_type: string;
-  treatment_details: Record<string, any>;
+  treatment_details: Record<string, unknown>;
   clinical_data: {
     severity: string;
     diagnosis: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   genetic_data?: string[];
 }
@@ -76,9 +76,9 @@ export interface OutcomePredictionRequest {
   outcome_timeframe: {
     weeks: number;
   };
-  clinical_data: Record<string, any>;
-  treatment_plan: Record<string, any>;
-  social_determinants?: Record<string, any>;
+  clinical_data: Record<string, unknown>;
+  treatment_plan: Record<string, unknown>;
+  social_determinants?: Record<string, unknown>;
   comorbidities?: string[];
 }
 
@@ -132,7 +132,7 @@ export interface DigitalTwinIntegrationResponse {
   profile_id: string;
   prediction_id: string;
   updated_metrics: string[];
-  impact_assessment: Record<string, any>;
+  impact_assessment: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -153,7 +153,7 @@ export interface ModelInfoResponse {
     auc: number;
   };
   last_updated: string;
-  training_data_summary: Record<string, any>;
+  training_data_summary: Record<string, unknown>;
 }
 
 /**
