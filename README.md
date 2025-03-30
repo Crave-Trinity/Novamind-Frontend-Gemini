@@ -1,113 +1,118 @@
-# Novamind Digital Twin: Concierge Psychiatry Platform
+# NOVAMIND Digital Twin: Concierge Psychiatry Platform
 
-## Overview
-
-Novamind Digital Twin is a groundbreaking HIPAA-compliant platform that combines clinical excellence with top-tier technology for concierge psychiatry practices. The system provides temporal neurotransmitter mapping, treatment simulation, and comprehensive neuropsychiatric analysis through a sophisticated digital twin model.
-
-## Architecture
-
-This project follows **Clean Architecture** principles with strict layer separation:
-
-- **Domain Layer**: Pure business logic with no external dependencies
-- **Application Layer**: Orchestration of domain operations and use cases
-- **Infrastructure Layer**: External service implementations and data access
-- **API Layer**: FastAPI endpoints with proper validation and error handling
-
-## Key Features
-
-- **Temporal Neurotransmitter Mapping**: Track neurotransmitter levels across brain regions over time
-- **Digital Twin Modeling**: Patient-specific neural network visualization and modeling
-- **XGBoost Integration**: AI-powered treatment response forecasting
-- **HIPAA-Compliant Security**: Enterprise-grade authentication and data protection
-- **Luxury UX**: Premium user experience with performance optimization
-
-## Project Status
-
-The core architecture for the temporal neurotransmitter mapping system has been successfully built. Current development focuses on completing the full implementation of neurotransmitter mapping functionality and integrating with XGBoost and MentalLLaMA services.
-
-See [TEMPORAL_NEUROTRANSMITTER_IMPLEMENTATION.md](docs/TEMPORAL_NEUROTRANSMITTER_IMPLEMENTATION.md) for detailed implementation status.
+A cutting-edge psychiatric platform with Digital Twin technology for personalized treatment planning and visualization.
 
 ## Project Structure
 
-The project follows a canonical organization pattern as documented in [PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md).
+This project follows a monorepo architecture with clear separation between frontend, backend, and shared resources:
+
+```
+novamind-digitaltwin/
+├── backend/             # All backend code and configuration
+│   ├── app/             # FastAPI application
+│   │   ├── api/         # API endpoints
+│   │   ├── application/ # Application services and use cases
+│   │   ├── core/        # Core utilities and configuration
+│   │   ├── domain/      # Domain models and business logic
+│   │   └── infrastructure/ # External services integration
+│   ├── alembic/         # Database migration scripts
+│   ├── main.py          # FastAPI application entry point
+│   └── requirements.txt # Python dependencies
+│
+├── frontend/            # All frontend code and configuration
+│   ├── src/             # React application source code
+│   │   ├── domain/      # Domain models and interfaces
+│   │   ├── application/ # Application services and state management
+│   │   ├── infrastructure/ # API clients and external services
+│   │   └── presentation/ # React components following atomic design
+│   ├── public/          # Static assets
+│   ├── package.json     # Node.js dependencies
+│   └── tsconfig.json    # TypeScript configuration
+│
+├── shared/              # Shared resources used by both frontend and backend
+│   ├── deployment/      # Deployment scripts and configurations
+│   ├── logs/            # Application logs
+│   ├── reports/         # Generated reports
+│   ├── security-reports/ # Security audit reports
+│   └── tools/           # Shared tools and utilities
+│
+├── docs/                # Documentation for the entire project
+└── README.md            # This file
+```
 
 ## Getting Started
 
 ### Prerequisites
 
 - Python 3.10+
-- PostgreSQL 14+
-- Node.js 18+ (for frontend)
+- Node.js 18+
+- npm 9+
 
-### Installation
+### Backend Setup
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/novamind-backend.git
-   cd novamind-backend
-   ```
+```bash
+# Navigate to backend directory
+cd backend
 
-2. Create and activate a virtual environment:
-   ```
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+# Create a virtual environment
+python -m venv venv
 
-3. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   pip install -r requirements-dev.txt  # For development
-   ```
+# Activate the virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
 
-4. Copy the environment variables file and configure it:
-   ```
-   cp config/env/.env.example config/env/.env
-   # Edit .env with your configuration
-   ```
+# Install dependencies
+pip install -r requirements.txt
 
-5. Run database migrations:
-   ```
-   alembic upgrade head
-   ```
-
-### Running the API
-
-Start the FastAPI server:
-
-```
-python main.py
-```
-
-Or use uvicorn directly:
-
-```
+# Run the FastAPI application
 uvicorn main:app --reload
 ```
 
-Visit http://localhost:8000/api/docs for the interactive API documentation.
+The backend API will be available at http://localhost:8000.
 
-### Running Tests
+### Frontend Setup
 
-To run tests with coverage report:
+```bash
+# Navigate to frontend directory
+cd frontend
 
+# Install dependencies
+npm install
+
+# Run the development server
+npm run dev
 ```
-pytest --cov=app tests/
-```
 
-## Deployment
+The frontend application will be available at http://localhost:3000.
 
-See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed deployment instructions.
 
-## Security & HIPAA Compliance
+## Development Guidelines
 
-This system is designed with HIPAA compliance as a primary concern:
+### Backend
 
-- All PHI data is encrypted at rest and in transit
-- JWT authentication with proper role-based access control
-- Comprehensive audit logging
-- No PHI in logs or URLs
-- Automatic session timeouts for inactivity
+- Follow clean architecture principles
+- Keep domain logic pure and framework-agnostic
+- Use type hints and docstrings
+- Write tests for all new features
+
+### Frontend
+
+- Follow atomic design pattern for components
+- Use TypeScript for all new code
+- Follow the React and Tailwind guidelines in `.windsurfrules`
+- Implement proper error handling and loading states
+
+## HIPAA Compliance
+
+This application handles sensitive patient data and must comply with HIPAA regulations:
+
+- No PHI in URLs or localStorage
+- Implement proper authentication and authorization
+- Log all data access
+- Encrypt all data in transit and at rest
 
 ## License
 
-This project is licensed under the terms of the license included in the [LICENSE](LICENSE) file.
+See the [LICENSE](LICENSE) file for details.
