@@ -1,135 +1,110 @@
 # -*- coding: utf-8 -*-
 """
-NOVAMIND Digital Twin main application entry point.
+NOVAMIND FastAPI Application
 
-This module sets up the FastAPI application, configures middleware,
-and includes all the API routes. It's the main entry point for the application.
+This is the main application entry point for the NOVAMIND backend API.
+It configures the FastAPI application, registers routes, middleware, and
+event handlers.
 """
 
 import logging
-from typing import Dict
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
-from app.api.routes import actigraphy, auth, patients, appointments, digital_twin, xgboost
-from app.core.config import settings
-from app.core.exceptions import (
-    InvalidConfigurationError,
-    InvalidRequestError,
-    ResourceNotFoundError,
-    ServiceUnavailableError,
-)
-from app.core.middleware.phi_audit_middleware import PHIAuditMiddleware
-from app.core.middleware.request_logging_middleware import RequestLoggingMiddleware
+from app.core.config import get_app_settings
+from app.infrastructure.database.init_db import init_db
+from app.infrastructure.persistence.repository_factory import init_repositories
+from app.presentation.api.routes import api_router
+from app.presentation.api.routes.analytics_endpoints import router as analytics_router
+from app.presentation.middleware.rate_limiting_middleware import setup_rate_limiting
 
 
 # Configure logging
 logging.basicConfig(
-    level=settings.log_level,
-    format=settings.log_format
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
-
 logger = logging.getLogger(__name__)
 
 
-# Create FastAPI application
-app = FastAPI(
-    title="NOVAMIND Digital Twin Platform",
-    description="A comprehensive digital twin platform for concierge psychiatry",
-    version="1.0.0",
-    docs_url="/api/docs" if settings.environment != "production" else None,
-    redoc_url="/api/redoc" if settings.environment != "production" else None,
-)
-
-
-# Add middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-app.add_middleware(RequestLoggingMiddleware)
-app.add_middleware(PHIAuditMiddleware)
-
-
-# Exception handlers
-@app.exception_handler(InvalidRequestError)
-async def invalid_request_exception_handler(request: Request, exc: InvalidRequestError) -> JSONResponse:
-    """Handle InvalidRequestError exceptions."""
-    return JSONResponse(
-        status_code=400,
-        content={"error": {"code": "INVALID_REQUEST", "message": str(exc)}},
-    )
-
-
-@app.exception_handler(ResourceNotFoundError)
-async def resource_not_found_exception_handler(request: Request, exc: ResourceNotFoundError) -> JSONResponse:
-    """Handle ResourceNotFoundError exceptions."""
-    return JSONResponse(
-        status_code=404,
-        content={"error": {"code": "RESOURCE_NOT_FOUND", "message": str(exc)}},
-    )
-
-
-@app.exception_handler(InvalidConfigurationError)
-async def invalid_configuration_exception_handler(request: Request, exc: InvalidConfigurationError) -> JSONResponse:
-    """Handle InvalidConfigurationError exceptions."""
-    logger.error(f"Configuration error: {str(exc)}")
-    return JSONResponse(
-        status_code=500,
-        content={"error": {"code": "CONFIGURATION_ERROR", "message": "Server configuration error"}},
-    )
-
-
-@app.exception_handler(ServiceUnavailableError)
-async def service_unavailable_exception_handler(request: Request, exc: ServiceUnavailableError) -> JSONResponse:
-    """Handle ServiceUnavailableError exceptions."""
-    logger.error(f"Service unavailable: {str(exc)}")
-    return JSONResponse(
-        status_code=503,
-        content={"error": {"code": "SERVICE_UNAVAILABLE", "message": str(exc)}},
-    )
-
-
-# Include routers
-app.include_router(auth.router, prefix="/api")
-app.include_router(patients.router, prefix="/api")
-app.include_router(appointments.router, prefix="/api")
-app.include_router(digital_twin.router, prefix="/api")
-app.include_router(actigraphy.router, prefix="/api")  # Add actigraphy routes
-app.include_router(xgboost.router)  # XGBoost ML service routes (prefix included in router)
-
-
-@app.get("/api/health", tags=["health"])
-async def health_check() -> Dict[str, str]:
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     """
-    Health check endpoint.
+    Lifespan context manager for FastAPI application.
     
-    This endpoint returns a simple status check to verify that the API is running.
-    It doesn't interact with any services or databases, making it suitable for
-    basic health monitoring.
+    This handles application startup and shutdown events, including database initialization
+    and connection cleanup.
+    
+    Args:
+        app: FastAPI application instance
+    """
+    # Startup events
+    logger.info("Starting NOVAMIND application")
+    
+    # Initialize database
+    await init_db()
+    
+    # Initialize repositories
+    init_repositories()
+    
+    logger.info("Application startup complete")
+    
+    yield
+    
+    # Shutdown events
+    logger.info("Shutting down NOVAMIND application")
+    
+    # Any cleanup code goes here
+    
+    logger.info("Application shutdown complete")
+
+
+def create_application() -> FastAPI:
+    """
+    Create and configure the FastAPI application.
     
     Returns:
-        Dictionary with status message
+        FastAPI: Configured FastAPI application
     """
-    return {"status": "healthy"}
+    settings = get_app_settings()
+    
+    app = FastAPI(
+        title=settings.PROJECT_NAME,
+        description=settings.APP_DESCRIPTION,
+        version=settings.APP_VERSION,
+        lifespan=lifespan,
+    )
+    
+    # Set up CORS middleware
+    if settings.BACKEND_CORS_ORIGINS:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    
+    # Set up rate limiting middleware
+    setup_rate_limiting(app)
+    
+    # Include API router
+    app.include_router(api_router, prefix=settings.API_PREFIX)
+    
+    # Include analytics router if analytics are enabled
+    # This condition depends on configuration, if not present in settings, default to False
+    if getattr(settings, "ENABLE_ANALYTICS", False):
+        app.include_router(analytics_router, prefix=settings.API_PREFIX)
+    
+    # Mount static files if STATIC_DIR is defined in settings
+    static_dir = getattr(settings, "STATIC_DIR", None)
+    if static_dir:
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    
+    return app
 
 
-@app.get("/api/version", tags=["version"])
-async def version() -> Dict[str, str]:
-    """
-    Version information endpoint.
-    
-    This endpoint returns the current version of the API.
-    
-    Returns:
-        Dictionary with version information
-    """
-    return {
-        "version": app.version,
-        "environment": settings.environment
-    }
+app = create_application()

@@ -3,10 +3,17 @@
  * Provides state management and data fetching for 3D brain visualization
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { useQuery } from 'react-query';
-import { BrainModel, BrainRegion, BrainViewState, NeuralPathway, RenderMode } from '../../domain/models/BrainModel';
-import { apiClient } from '../../infrastructure/api/ApiClient';
+import { useState, useEffect, useCallback } from "react";
+import { useQuery } from "react-query";
+
+import {
+  BrainModel,
+  BrainRegion,
+  BrainViewState,
+  NeuralPathway,
+  RenderMode,
+} from "../../domain/models/BrainModel";
+import { apiClient } from "../../infrastructure/api/ApiClient";
 
 interface UseBrainVisualizationOptions {
   patientId?: string;
@@ -18,25 +25,30 @@ interface UseBrainVisualizationOptions {
 
 export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
   const defaultOptions: UseBrainVisualizationOptions = {
-    patientId: 'default',
+    patientId: "default",
     autoRotate: false,
     highlightActiveRegions: true,
-    disabled: false
+    disabled: false,
   };
-  
+
   // Merge provided options with defaults
   const mergedOptions = { ...defaultOptions, ...options };
 
   // Fetch brain model data
-  const { data: brainModel, isLoading, error, refetch } = useQuery(
-    ['brainModel', mergedOptions.patientId],
+  const {
+    data: brainModel,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery(
+    ["brainModel", mergedOptions.patientId],
     async () => {
       return apiClient.getBrainModel(mergedOptions.patientId);
     },
     {
       enabled: !mergedOptions.disabled,
       staleTime: 5 * 60 * 1000, // 5 minutes
-    }
+    },
   );
 
   // View state for 3D visualization
@@ -47,7 +59,7 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
     zoom: 1,
     highlightedRegions: [],
     visiblePathways: true,
-    renderMode: 'anatomical' as RenderMode,
+    renderMode: "anatomical" as RenderMode,
     transparencyLevel: 0.8,
     focusPoint: null,
     ...mergedOptions.initialViewState,
@@ -62,28 +74,30 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
       const significantRegions = brainModel.regions
         .filter((region: BrainRegion) => region.significance > 0.6)
         .map((region: BrainRegion) => region.id);
-      
+
       setActiveRegions(significantRegions);
     }
   }, [brainModel, mergedOptions.highlightActiveRegions]);
 
   // Auto-rotation effect
   useEffect(() => {
-    if (!mergedOptions.autoRotate) return;
-    
+    if (!mergedOptions.autoRotate) {
+      return;
+    }
+
     const rotationInterval = setInterval(() => {
-      setViewState(prev => ({
+      setViewState((prev) => ({
         ...prev,
         rotationY: prev.rotationY + 0.01,
       }));
     }, 50);
-    
+
     return () => clearInterval(rotationInterval);
   }, [mergedOptions.autoRotate]);
 
   // Callback to highlight a specific region
   const highlightRegion = useCallback((regionId: string) => {
-    setViewState(prev => ({
+    setViewState((prev) => ({
       ...prev,
       highlightedRegions: [...prev.highlightedRegions, regionId],
     }));
@@ -91,26 +105,39 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
 
   // Callback to clear highlighted regions
   const clearHighlights = useCallback(() => {
-    setViewState(prev => ({
+    setViewState((prev) => ({
       ...prev,
       highlightedRegions: [],
     }));
   }, []);
 
   // Callback to focus on a specific region
-  const focusOnRegion = useCallback((regionId: string) => {
-    if (!brainModel) return;
-    
-    const region = brainModel.regions.find((r: BrainRegion) => r.id === regionId);
-    if (!region) return;
-    
-    setViewState(prev => ({
-      ...prev,
-      focusPoint: [region.coordinates.x, region.coordinates.y, region.coordinates.z],
-      zoom: 2,
-      highlightedRegions: [regionId],
-    }));
-  }, [brainModel]);
+  const focusOnRegion = useCallback(
+    (regionId: string) => {
+      if (!brainModel) {
+        return;
+      }
+
+      const region = brainModel.regions.find(
+        (r: BrainRegion) => r.id === regionId,
+      );
+      if (!region) {
+        return;
+      }
+
+      setViewState((prev) => ({
+        ...prev,
+        focusPoint: [
+          region.coordinates.x,
+          region.coordinates.y,
+          region.coordinates.z,
+        ],
+        zoom: 2,
+        highlightedRegions: [regionId],
+      }));
+    },
+    [brainModel],
+  );
 
   // Callback to reset view to default
   const resetView = useCallback(() => {
@@ -121,7 +148,7 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
       zoom: 1,
       highlightedRegions: [],
       visiblePathways: true,
-      renderMode: 'anatomical' as RenderMode,
+      renderMode: "anatomical" as RenderMode,
       transparencyLevel: 0.8,
       focusPoint: null,
     });
@@ -129,52 +156,66 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
 
   // Callback to change render mode
   const setRenderMode = useCallback((mode: RenderMode) => {
-    setViewState(prev => ({
+    setViewState((prev) => ({
       ...prev,
       renderMode: mode,
     }));
   }, []);
 
   // Find a region by ID
-  const findRegionById = useCallback((regionId: string) => {
-    if (!brainModel) return null;
-    return brainModel.regions.find((r: BrainRegion) => r.id === regionId) || null;
-  }, [brainModel]);
+  const findRegionById = useCallback(
+    (regionId: string) => {
+      if (!brainModel) {
+        return null;
+      }
+      return (
+        brainModel.regions.find((r: BrainRegion) => r.id === regionId) || null
+      );
+    },
+    [brainModel],
+  );
 
   // Filter regions based on view state
-  const visibleRegions = brainModel?.regions.filter((region: BrainRegion) => {
-    if (viewState.highlightedRegions.length > 0) {
-      return viewState.highlightedRegions.includes(region.id);
-    }
-    return true;
-  }) || [];
+  const visibleRegions =
+    brainModel?.regions.filter((region: BrainRegion) => {
+      if (viewState.highlightedRegions.length > 0) {
+        return viewState.highlightedRegions.includes(region.id);
+      }
+      return true;
+    }) || [];
 
   // Filter pathways based on view state
-  const visiblePathways = brainModel?.pathways.filter((pathway: NeuralPathway) => {
-    if (!viewState.visiblePathways) return false;
-    
-    if (viewState.highlightedRegions.length > 0) {
-      return (
-        viewState.highlightedRegions.includes(pathway.sourceId) ||
-        viewState.highlightedRegions.includes(pathway.targetId)
-      );
-    }
-    
-    return true;
-  }) || [];
+  const visiblePathways =
+    brainModel?.pathways.filter((pathway: NeuralPathway) => {
+      if (!viewState.visiblePathways) {
+        return false;
+      }
+
+      if (viewState.highlightedRegions.length > 0) {
+        return (
+          viewState.highlightedRegions.includes(pathway.sourceId) ||
+          viewState.highlightedRegions.includes(pathway.targetId)
+        );
+      }
+
+      return true;
+    }) || [];
 
   // Load specific brain model
-  const loadBrainModel = useCallback((modelId: string) => {
-    // In a real app, this would update the query parameters
-    refetch();
-  }, [refetch]);
+  const loadBrainModel = useCallback(
+    (modelId: string) => {
+      // In a real app, this would update the query parameters
+      refetch();
+    },
+    [refetch],
+  );
 
   // Reset entire visualization
   const resetVisualization = useCallback(() => {
     clearHighlights();
     resetView();
     setActiveRegions([]);
-    setViewState(prev => ({
+    setViewState((prev) => ({
       ...prev,
       visiblePathways: true,
     }));

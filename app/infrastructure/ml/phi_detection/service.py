@@ -2,253 +2,342 @@
 """
 PHI Detection Service.
 
-This module provides functionality for detecting and anonymizing
-Protected Health Information (PHI) in clinical text for HIPAA compliance.
+This module provides a service for detecting and redacting Protected Health Information
+(PHI) in text data, ensuring HIPAA compliance for all content stored and logged.
 """
 
-import datetime
-import logging
 import re
-import uuid
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
-
+import os
 import yaml
+import logging
+from typing import Dict, List, Set, Pattern, Optional, Tuple, Union
+from dataclasses import dataclass
 
+from app.core.utils.logging import get_logger
 from app.core.exceptions.ml_exceptions import PHIDetectionError
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass
-class PHIMatch:
-    """Represents a detected PHI entity in text."""
-    
-    entity_type: str
-    text: str
-    start: int
-    end: int
-    confidence: float
-    replacement: Optional[str] = None
-
-
-class PhiDetectionService:
+class PHIPattern:
     """
-    Service for detecting and anonymizing PHI in clinical text.
+    PHI pattern configuration.
     
-    This service loads rules from a YAML file and applies them to
-    detect various types of PHI (names, addresses, etc.) in text.
-    It provides methods for anonymizing or redacting detected PHI
-    to maintain HIPAA compliance.
+    This dataclass represents a pattern for detecting a specific type of PHI.
     """
     
-    def __init__(self, rules_path: str):
+    name: str
+    pattern: str
+    description: str
+    category: str
+    regex: Optional[Pattern] = None
+    
+    def __post_init__(self):
+        """Compile the regex pattern after initialization."""
+        try:
+            if self.pattern:
+                self.regex = re.compile(self.pattern, re.IGNORECASE)
+        except re.error as e:
+            logger.error(f"Invalid regex pattern for {self.name}: {e}")
+            # Fall back to a pattern that will never match
+            self.regex = re.compile(r"a^")
+
+
+class PHIDetectionService:
+    """
+    Service for detecting and redacting PHI in text.
+    
+    This service loads PHI detection patterns from configuration and provides
+    methods to detect and redact PHI in text data.
+    """
+    
+    def __init__(self, pattern_file: Optional[str] = None):
         """
-        Initialize PHI detection service with rules.
+        Initialize the PHI detection service.
         
         Args:
-            rules_path: Path to YAML file containing PHI detection rules
+            pattern_file: Path to pattern file, or None to use default
+        """
+        self.pattern_file = pattern_file or os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))),
+            "phi_patterns.yaml"
+        )
+        self.patterns: List[PHIPattern] = []
+        self._initialized = False
+        
+    def ensure_initialized(self) -> None:
+        """
+        Ensure the service is initialized.
+        
+        This method lazy-loads the patterns when needed.
         
         Raises:
-            PHIDetectionError: If rules cannot be loaded
+            PHIDetectionError: If patterns cannot be loaded
         """
-        self.rules_path = rules_path
-        self.rules = {}
-        self.load_rules()
-    
-    def load_rules(self) -> None:
+        if not self._initialized:
+            self._load_patterns()
+            self._initialized = True
+            
+    def _load_patterns(self) -> None:
         """
-        Load PHI detection rules from YAML file.
+        Load PHI detection patterns from file.
+        
+        This method reads the pattern configuration file and initializes
+        the PHI detection patterns.
         
         Raises:
-            PHIDetectionError: If rules cannot be loaded
+            PHIDetectionError: If patterns cannot be loaded
         """
         try:
-            path = Path(self.rules_path)
-            if not path.exists():
-                raise PHIDetectionError(f"Rules file not found: {self.rules_path}")
-            
-            with open(path, "r", encoding="utf-8") as f:
-                self.rules = yaml.safe_load(f)
-            
-            # Compile regex patterns for performance
-            self._compile_patterns()
-            
-            logger.info(f"Loaded PHI detection rules from {self.rules_path}")
-            
-        except (yaml.YAMLError, Exception) as e:
-            logger.error(f"Failed to load PHI rules: {str(e)}")
-            raise PHIDetectionError(f"Failed to load PHI rules: {str(e)}")
-    
-    def _compile_patterns(self) -> None:
-        """Compile regex patterns for each rule."""
-        for rule_name, rule_data in self.rules.items():
-            if "patterns" in rule_data:
-                compiled_patterns = []
-                for pattern in rule_data["patterns"]:
-                    try:
-                        compiled_patterns.append(re.compile(pattern, re.IGNORECASE))
-                    except re.error as e:
-                        logger.warning(f"Invalid regex in {rule_name}: {pattern}, error: {str(e)}")
+            with open(self.pattern_file, "r") as f:
+                config = yaml.safe_load(f)
                 
-                self.rules[rule_name]["compiled_patterns"] = compiled_patterns
-    
-    async def detect_phi(
-        self, 
-        text: str, 
-        anonymize_method: Optional[str] = None,
-        confidence_threshold: float = 0.7
-    ) -> Dict[str, Any]:
+            self.patterns = []
+            
+            for category, patterns in config.items():
+                for pattern_info in patterns:
+                    self.patterns.append(
+                        PHIPattern(
+                            name=pattern_info["name"],
+                            pattern=pattern_info["pattern"],
+                            description=pattern_info.get("description", ""),
+                            category=category
+                        )
+                    )
+                    
+            logger.info(f"Loaded {len(self.patterns)} PHI detection patterns")
+            
+        except (yaml.YAMLError, IOError) as e:
+            logger.error(f"Error loading PHI patterns: {e}")
+            # Load some basic default patterns
+            self.patterns = self._get_default_patterns()
+            
+    def _get_default_patterns(self) -> List[PHIPattern]:
         """
-        Detect PHI in text and optionally anonymize it.
+        Get default PHI patterns.
+        
+        This method provides a fallback set of patterns if the pattern file
+        cannot be loaded.
+        
+        Returns:
+            List of default PHI patterns
+        """
+        return [
+            PHIPattern(
+                name="US Phone Number",
+                pattern=r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}",
+                description="US phone number with or without formatting",
+                category="contact"
+            ),
+            PHIPattern(
+                name="Email Address",
+                pattern=r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
+                description="Email address",
+                category="contact"
+            ),
+            PHIPattern(
+                name="SSN",
+                pattern=r"\d{3}[-\s]?\d{2}[-\s]?\d{4}",
+                description="Social Security Number",
+                category="government_id"
+            ),
+            PHIPattern(
+                name="Full Name",
+                pattern=r"(?:[A-Z][a-z]+\s+){1,2}[A-Z][a-z]+",
+                description="Full name with 2-3 parts",
+                category="name"
+            ),
+            PHIPattern(
+                name="Address",
+                pattern=r"\d+\s+[A-Za-z\s]+,\s+[A-Za-z\s]+,\s+[A-Z]{2}\s+\d{5}",
+                description="US street address",
+                category="location"
+            ),
+            PHIPattern(
+                name="Date",
+                pattern=r"\d{1,2}[/-]\d{1,2}[/-]\d{2,4}",
+                description="Date in MM/DD/YYYY format",
+                category="date"
+            ),
+            PHIPattern(
+                name="Credit Card",
+                pattern=r"\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}",
+                description="Credit card number",
+                category="financial"
+            )
+        ]
+            
+    def contains_phi(self, text: str) -> bool:
+        """
+        Check if text contains PHI.
         
         Args:
-            text: Text to analyze for PHI
-            anonymize_method: Method for anonymizing PHI ('redact' or 'replace')
-            confidence_threshold: Minimum confidence score for PHI detection
+            text: Text to check
             
         Returns:
-            Dictionary with detection results and optionally anonymized text
+            True if PHI is detected, False otherwise
             
         Raises:
             PHIDetectionError: If PHI detection fails
         """
         try:
-            # Find all PHI matches in text
-            matches = self._find_phi_matches(text, confidence_threshold)
+            self.ensure_initialized()
             
-            # Create result structure
-            result = {
-                "detection_id": str(uuid.uuid4()),
-                "processed_at": datetime.datetime.now().isoformat(),
-                "entities": [],
-                "phi_count": len(matches)
-            }
+            for pattern in self.patterns:
+                if pattern.regex and pattern.regex.search(text):
+                    return True
+                    
+            return False
+        except Exception as e:
+            logger.error(f"Error detecting PHI: {e}")
+            raise PHIDetectionError(f"Failed to detect PHI: {str(e)}")
+        
+    def detect_phi(self, text: str) -> List[Tuple[str, str, int, int]]:
+        """
+        Detect PHI in text and return details of matches.
+        
+        Args:
+            text: Text to check
             
-            # Handle anonymization if requested
-            if anonymize_method and matches:
-                anonymized_text, matches = self._anonymize_text(
-                    text, matches, anonymize_method
-                )
-                result["anonymized_text"] = anonymized_text
+        Returns:
+            List of tuples (category, match_text, start_pos, end_pos)
             
-            # Add entity information
-            for match in matches:
-                entity = {
-                    "entity_type": match.entity_type,
-                    "position": {"start": match.start, "end": match.end},
-                    "confidence": match.confidence
-                }
+        Raises:
+            PHIDetectionError: If PHI detection fails
+        """
+        try:
+            self.ensure_initialized()
+            
+            results = []
+            
+            for pattern in self.patterns:
+                if not pattern.regex:
+                    continue
+                    
+                for match in pattern.regex.finditer(text):
+                    results.append((
+                        pattern.category,
+                        match.group(0),
+                        match.start(),
+                        match.end()
+                    ))
+                    
+            # Sort by position
+            results.sort(key=lambda x: x[2])
+            
+            return results
+        except Exception as e:
+            logger.error(f"Error detecting PHI: {e}")
+            raise PHIDetectionError(f"Failed to detect PHI details: {str(e)}")
+        
+    def redact_phi(self, text: str) -> str:
+        """
+        Redact PHI from text.
+        
+        Args:
+            text: Text to redact
+            
+        Returns:
+            Text with PHI replaced by [REDACTED]
+            
+        Raises:
+            PHIDetectionError: If PHI redaction fails
+        """
+        try:
+            self.ensure_initialized()
+            
+            # Get all PHI matches
+            matches = self.detect_phi(text)
+            
+            # No PHI found
+            if not matches:
+                return text
                 
-                # Only include original text if not anonymizing
-                if not anonymize_method:
-                    entity["text"] = match.text
-                else:
-                    entity["replacement"] = match.replacement
+            # Redact PHI
+            result = ""
+            last_end = 0
+            
+            for _, match_text, start, end in matches:
+                # Add text before match
+                result += text[last_end:start]
+                # Add redaction
+                result += f"[REDACTED:{len(match_text)}]"
+                # Update last end position
+                last_end = end
                 
-                result["entities"].append(entity)
+            # Add remaining text after last match
+            result += text[last_end:]
             
             return result
-            
         except Exception as e:
-            logger.error(f"PHI detection error: {str(e)}")
-            raise PHIDetectionError(f"PHI detection failed: {str(e)}")
-    
-    def _find_phi_matches(
-        self, 
-        text: str, 
-        confidence_threshold: float
-    ) -> List[PHIMatch]:
+            logger.error(f"Error redacting PHI: {e}")
+            raise PHIDetectionError(f"Failed to redact PHI: {str(e)}")
+        
+    def anonymize_phi(self, text: str) -> str:
         """
-        Find all PHI matches in text.
+        Anonymize PHI in text by replacing it with synthetic data.
         
         Args:
-            text: Text to analyze
-            confidence_threshold: Minimum confidence score
+            text: Text to anonymize
             
         Returns:
-            List of PHI matches
+            Text with PHI replaced by synthetic data
+            
+        Raises:
+            PHIDetectionError: If PHI anonymization fails
         """
-        matches = []
-        
-        for rule_name, rule_data in self.rules.items():
-            if "compiled_patterns" not in rule_data:
-                continue
+        try:
+            self.ensure_initialized()
+            
+            # Get all PHI matches
+            matches = self.detect_phi(text)
+            
+            # No PHI found
+            if not matches:
+                return text
                 
-            confidence = rule_data.get("confidence", 0.5)
-            if confidence < confidence_threshold:
-                continue
+            # Anonymize PHI
+            result = list(text)
+            
+            for category, match_text, start, end in matches:
+                replacement = self._get_synthetic_replacement(category, match_text)
                 
-            for pattern in rule_data["compiled_patterns"]:
-                for match in pattern.finditer(text):
-                    matches.append(PHIMatch(
-                        entity_type=rule_name,
-                        text=match.group(0),
-                        start=match.start(),
-                        end=match.end(),
-                        confidence=confidence,
-                        replacement=rule_data.get("replacement", f"[{rule_name}]")
-                    ))
+                # Replace in result
+                for i in range(start, min(end, len(result))):
+                    if i == start:
+                        # Add replacement at start position
+                        result[i] = replacement
+                    else:
+                        # Clear other positions
+                        result[i] = ""
+                        
+            return "".join(result)
+        except Exception as e:
+            logger.error(f"Error anonymizing PHI: {e}")
+            raise PHIDetectionError(f"Failed to anonymize PHI: {str(e)}")
         
-        # Sort matches by position for proper anonymization
-        return sorted(matches, key=lambda m: m.start)
-    
-    def _anonymize_text(
-        self, 
-        text: str, 
-        matches: List[PHIMatch],
-        method: str
-    ) -> Tuple[str, List[PHIMatch]]:
+    def _get_synthetic_replacement(self, category: str, original: str) -> str:
         """
-        Anonymize PHI in text.
+        Get synthetic replacement for PHI.
         
         Args:
-            text: Original text
-            matches: PHI matches to anonymize
-            method: Anonymization method ('redact' or 'replace')
+            category: PHI category
+            original: Original PHI text
             
         Returns:
-            Tuple of (anonymized text, updated matches)
+            Synthetic replacement text
         """
-        if not matches:
-            return text, matches
-            
-        # Make a copy of the original text
-        anonymized = text
+        # Simple replacements
+        replacements = {
+            "name": "JOHN DOE",
+            "contact": "CONTACT-INFO",
+            "location": "ADDRESS",
+            "government_id": "ID-NUMBER",
+            "date": "DATE-VALUE",
+            "financial": "FINANCIAL-INFO",
+            "medical": "MEDICAL-INFO"
+        }
         
-        # When replacing text, we need to adjust offsets for subsequent matches
-        offset = 0
-        updated_matches = []
-        
-        for match in matches:
-            original_text = match.text
-            start_idx = match.start + offset
-            end_idx = match.end + offset
-            
-            if method == "redact":
-                # Replace with [REDACTED]
-                replacement = "[REDACTED]"
-            else:
-                # Use the rule's replacement or a generic placeholder
-                replacement = match.replacement
-            
-            # Update the text
-            anonymized = anonymized[:start_idx] + replacement + anonymized[end_idx:]
-            
-            # Update the match with new position info
-            new_match = PHIMatch(
-                entity_type=match.entity_type,
-                text=original_text,
-                start=start_idx,
-                end=start_idx + len(replacement),
-                confidence=match.confidence,
-                replacement=replacement
-            )
-            updated_matches.append(new_match)
-            
-            # Update offset for subsequent replacements
-            offset += len(replacement) - len(original_text)
-        
-        return anonymized, updated_matches
+        return replacements.get(category, "REDACTED")

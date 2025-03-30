@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-MentaLLaMA Package.
+MentaLLaMA Integration Module.
 
-This package provides services for interacting with the MentaLLaMA model.
+This package provides integration with MentaLLaMA for clinical text analysis
+and decision support.
 """
 
-from app.infrastructure.ml.mentallama.service import (
-    MentaLLaMAService,
-    MentaLLaMAResult
-)
+from app.infrastructure.ml.mentallama.models import MentaLLaMAResult
+from app.infrastructure.ml.mentallama.mock_service import MentaLLaMAService
 
 __all__ = ["MentaLLaMAService", "MentaLLaMAResult"]

@@ -1,111 +1,121 @@
 # -*- coding: utf-8 -*-
 """
-ML Exceptions Module.
+Machine Learning Service Exceptions.
 
-This module defines custom exceptions for machine learning services,
-including MentaLLaMA, PHI detection, and Digital Twin.
+This module defines exceptions raised by machine learning services.
 """
 
-from typing import Dict, Any, Optional
+from app.core.exceptions.base_exceptions import ApplicationError
 
 
-class MLException(Exception):
-    """Base exception for all ML-related exceptions."""
+class MLServiceError(ApplicationError):
+    """Base exception for ML service errors."""
     
-    def __init__(
-        self, 
-        message: str, 
-        details: Optional[Dict[str, Any]] = None
-    ):
+    def __init__(self, message: str = "ML service error", *args, **kwargs):
         """
-        Initialize ML exception.
+        Initialize ML service error.
         
         Args:
             message: Error message
-            details: Additional error details
         """
-        self.message = message
-        self.details = details or {}
-        super().__init__(message)
+        super().__init__(message, *args, **kwargs)
 
 
-# ============================================================================
-# MentaLLaMA Exceptions
-# ============================================================================
-
-class MentaLLaMAException(MLException):
-    """Base exception for MentaLLaMA-related errors."""
-    pass
-
-
-class MentaLLaMAConnectionError(MentaLLaMAException):
-    """Exception raised when connection to MentaLLaMA API fails."""
-    pass
-
-
-class MentaLLaMATimeoutError(MentaLLaMAException):
-    """Exception raised when MentaLLaMA request times out."""
-    pass
+class PHIDetectionError(MLServiceError):
+    """Exception raised for errors in PHI detection."""
+    
+    def __init__(self, message: str = "Error in PHI detection", *args, **kwargs):
+        """
+        Initialize PHI detection error.
+        
+        Args:
+            message: Error message
+        """
+        super().__init__(message, *args, **kwargs)
 
 
-class MentaLLaMAInvalidInputError(MentaLLaMAException):
-    """Exception raised when input to MentaLLaMA is invalid."""
-    pass
+class MentaLLaMAServiceError(MLServiceError):
+    """Exception raised for errors in MentaLLaMA service."""
+    
+    def __init__(self, message: str = "Error in MentaLLaMA service", *args, **kwargs):
+        """
+        Initialize MentaLLaMA service error.
+        
+        Args:
+            message: Error message
+        """
+        super().__init__(message, *args, **kwargs)
 
 
-class MentaLLaMAAuthenticationError(MentaLLaMAException):
-    """Exception raised when authentication to MentaLLaMA API fails."""
-    pass
+class XGBoostServiceError(MLServiceError):
+    """Exception raised for errors in XGBoost service."""
+    
+    def __init__(self, message: str = "Error in XGBoost service", *args, **kwargs):
+        """
+        Initialize XGBoost service error.
+        
+        Args:
+            message: Error message
+        """
+        super().__init__(message, *args, **kwargs)
 
 
-class MentaLLaMAQuotaExceededError(MentaLLaMAException):
-    """Exception raised when MentaLLaMA API quota is exceeded."""
-    pass
+class InvalidRequestError(MLServiceError):
+    """Exception raised for invalid request parameters or inputs."""
+    
+    def __init__(self, message: str = "Invalid request parameters", parameter: str = None, *args, **kwargs):
+        """
+        Initialize invalid request error.
+        
+        Args:
+            message: Error message
+            parameter: The specific parameter that is invalid
+            args: Additional positional arguments
+            kwargs: Additional keyword arguments
+        """
+        self.parameter = parameter
+        if parameter:
+            message = f"{message}: {parameter}"
+        super().__init__(message, *args, **kwargs)
 
 
-# ============================================================================
-# PHI Detection Exceptions
-# ============================================================================
-
-class PHIDetectionException(MLException):
-    """Base exception for PHI detection-related errors."""
-    pass
-
-
-class PHIConfigurationError(PHIDetectionException):
-    """Exception raised when PHI detection configuration is invalid."""
-    pass
-
-
-class PHIPatternError(PHIDetectionException):
-    """Exception raised when a PHI pattern is invalid."""
-    pass
-
-
-# ============================================================================
-# Digital Twin Exceptions
-# ============================================================================
-
-class DigitalTwinException(MLException):
-    """Base exception for Digital Twin-related errors."""
-    pass
+class ModelNotFoundError(MLServiceError):
+    """Exception raised when a requested ML model cannot be found."""
+    
+    def __init__(self, model_id: str = None, *args, **kwargs):
+        """
+        Initialize model not found error.
+        
+        Args:
+            model_id: ID of the model that was not found
+            args: Additional positional arguments
+            kwargs: Additional keyword arguments
+        """
+        message = "ML model not found"
+        if model_id:
+            message = f"{message}: {model_id}"
+        self.model_id = model_id
+        super().__init__(message, *args, **kwargs)
 
 
-class DigitalTwinStorageError(DigitalTwinException):
-    """Exception raised when Digital Twin storage fails."""
-    pass
-
-
-class DigitalTwinQueryError(DigitalTwinException):
-    """Exception raised when Digital Twin query fails."""
-    pass
-
-
-class DigitalTwinInsightError(DigitalTwinException):
-    """Exception raised when Digital Twin insight generation fails."""
-    pass
-
-
-class DigitalTwinConfigurationError(DigitalTwinException):
-    """Exception raised when Digital Twin configuration is invalid."""
-    pass
+class ServiceUnavailableError(MLServiceError):
+    """Exception raised when an ML service is unavailable or uninitialized."""
+    
+    def __init__(self, service_name: str = None, reason: str = None, *args, **kwargs):
+        """
+        Initialize service unavailable error.
+        
+        Args:
+            service_name: Name of the service that is unavailable
+            reason: Reason for service unavailability
+            args: Additional positional arguments
+            kwargs: Additional keyword arguments
+        """
+        message = "ML service unavailable"
+        if service_name:
+            message = f"{service_name} service unavailable"
+        if reason:
+            message = f"{message}: {reason}"
+        self.service_name = service_name
+        self.reason = reason
+        super().__init__(message, *args, **kwargs)

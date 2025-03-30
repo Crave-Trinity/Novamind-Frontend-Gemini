@@ -13,220 +13,156 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID, uuid4
 
-from app.infrastructure.ml.symptom_forecasting.xgboost_model import XGBoostTimeSeriesModel
+from app.infrastructure.ml.symptom_forecasting.xgboost_model import XGBoostSymptomModel
 
 
-class TestXGBoostTimeSeriesModel:
-    """Tests for the XGBoostTimeSeriesModel."""
+class TestXGBoostSymptomModel:
+    """Tests for the XGBoostSymptomModel."""
 
     @pytest.fixture
     def model(self):
-        """Create an XGBoostTimeSeriesModel with mocked internals."""
+        """Create an XGBoostSymptomModel with mocked internals."""
         with patch('app.infrastructure.ml.symptom_forecasting.xgboost_model.xgb', autospec=True):
-            model = XGBoostTimeSeriesModel(
+            model = XGBoostSymptomModel(
                 model_path="test_model_path",
-                feature_importance_method="gain"
+                feature_names=["symptom_history_1", "symptom_history_2", "medication_adherence", "sleep_quality"],
+                target_names=["depression_score"]
             )
-            # Mock the internal XGBoost model
-            model._model = MagicMock()
-            model._model.predict = MagicMock(return_value=np.array([4.3, 4.1, 3.9, 3.6]))
-            model._model.feature_importances_ = np.array([0.5, 0.3, 0.2])
-            model._feature_names = ["feature1", "feature2", "feature3"]
-            model.is_initialized = True
+            # Mock the internal models
+            model.models = {"depression_score": MagicMock()}
             return model
 
-    @pytest.fixture
-    def sample_input_data(self):
-        """Create sample input data for testing."""
-        # Create a DataFrame with symptom severity data
-        dates = pd.date_range(start=datetime.now() - timedelta(days=10), periods=10, freq='D')
-        data = {
-            'date': dates,
-            'symptom_type': ['anxiety'] * 10,
-            'severity': [5, 6, 7, 6, 5, 4, 5, 6, 5, 4]
-        }
-        return pd.DataFrame(data)
-
-    async def test_initialize_loads_model(self):
-        """Test that initialize loads the model correctly."""
-        # Setup
-        with patch('app.infrastructure.ml.symptom_forecasting.xgboost_model.xgb', autospec=True) as mock_xgb, \
-             patch('app.infrastructure.ml.symptom_forecasting.xgboost_model.joblib', autospec=True) as mock_joblib, \
+    def test_load_model(self, tmp_path):
+        """Test that the model loads correctly from a file."""
+        with patch('app.infrastructure.ml.symptom_forecasting.xgboost_model.joblib', autospec=True) as mock_joblib, \
              patch('app.infrastructure.ml.symptom_forecasting.xgboost_model.os.path.exists', return_value=True):
-            
-            # Create model instance
-            model = XGBoostTimeSeriesModel(model_path="test_model_path")
-            
-            # Mock joblib.load to return a mock model
-            mock_model = MagicMock()
+            # Setup
             mock_joblib.load.return_value = {
-                'model': mock_model,
-                'feature_names': ['feature1', 'feature2', 'feature3'],
-                'metadata': {'version': '1.0'}
+                "models": {"depression_score": MagicMock()},
+                "feature_names": ["f1", "f2", "f3"],
+                "target_names": ["t1"],
+                "params": {"n_estimators": 100}
             }
             
             # Execute
-            await model.initialize()
+            model = XGBoostSymptomModel(model_path="test/model/path.json")
             
             # Verify
-            mock_joblib.load.assert_called_once()
-            assert model.is_initialized
-            assert model._model is not None
-            assert model._feature_names == ['feature1', 'feature2', 'feature3']
-            assert model._metadata == {'version': '1.0'}
+            mock_joblib.load.assert_called_once_with("test/model/path.json")
+            assert "depression_score" in model.models
+            assert model.feature_names == ["f1", "f2", "f3"]
+            assert model.target_names == ["t1"]
+            assert model.params["n_estimators"] == 100
 
-    async def test_initialize_handles_missing_model(self):
-        """Test that initialize handles missing model files gracefully."""
-        # Setup
-        with patch('app.infrastructure.ml.symptom_forecasting.xgboost_model.xgb', autospec=True) as mock_xgb, \
-             patch('app.infrastructure.ml.symptom_forecasting.xgboost_model.os.path.exists', return_value=False):
+    def test_save_model(self, model, tmp_path):
+        """Test that the model is saved correctly."""
+        with patch('app.infrastructure.ml.symptom_forecasting.xgboost_model.joblib', autospec=True) as mock_joblib:
+            # Execute
+            model.save_model(f"{tmp_path}/model.json")
             
-            # Create model instance
-            model = XGBoostTimeSeriesModel(model_path="nonexistent_path")
+            # Verify
+            mock_joblib.dump.assert_called_once()
+            # Check that the model data was passed to dump
+            args, _ = mock_joblib.dump.call_args
+            assert "models" in args[0]
+            assert "feature_names" in args[0]
+            assert "target_names" in args[0]
+            assert "params" in args[0]
+            assert "timestamp" in args[0]
+
+    @pytest.mark.asyncio
+    async def test_predict(self, model):
+        """Test that the model predicts correctly."""
+        # Setup
+        X = np.array([
+            [3.0, 4.0, 0.8, 0.6],
+            [2.0, 3.0, 0.9, 0.5],
+            [4.0, 5.0, 0.7, 0.8]
+        ])
+        horizon = 3
+        
+        # Mock the internal dmatrix and predict function
+        with patch('app.infrastructure.ml.symptom_forecasting.xgboost_model.xgb.DMatrix', autospec=True) as mock_dmatrix:
+            # Setup the mock prediction
+            model.models["depression_score"].predict.return_value = np.array([4.2, 3.8, 4.5])
             
             # Execute
-            await model.initialize()
+            result = await model.predict(X, horizon)
             
             # Verify
-            mock_xgb.XGBRegressor.assert_called_once()
-            assert model.is_initialized
-            assert model._model is not None
+            assert "values" in result
+            assert "feature_importance" in result
+            assert "model_type" in result
+            assert result["model_type"] == "xgboost"
+            # The result shape should be (n_samples, horizon, n_targets)
+            assert result["values"].shape == (3, 3, 1)
 
-    async def test_predict_returns_forecast(self, model, sample_input_data):
-        """Test that predict returns a forecast with the expected structure."""
+    def test_get_feature_importance(self, model):
+        """Test that feature importance is correctly calculated."""
+        # Setup
+        mock_model = model.models["depression_score"]
+        mock_model.get_score.return_value = {
+            "symptom_history_1": 15.5,
+            "symptom_history_2": 12.3,
+            "medication_adherence": 25.7,
+            "sleep_quality": 18.2
+        }
+        
         # Execute
-        result = await model.predict(sample_input_data, horizon=4)
+        result = model.get_feature_importance()
         
         # Verify
-        assert "predictions" in result
-        assert "feature_importance" in result
-        assert "model_metrics" in result
-        
-        # Check predictions shape
-        assert len(result["predictions"]) == 4
-        
-        # Check feature importance
-        assert "feature1" in result["feature_importance"]
-        assert "feature2" in result["feature_importance"]
-        assert "feature3" in result["feature_importance"]
-        
-        # Check metrics
-        assert "mae" in result["model_metrics"]
-        assert "rmse" in result["model_metrics"]
+        assert "depression_score" in result
+        assert result["depression_score"]["medication_adherence"] == 25.7
+        mock_model.get_score.assert_called_once_with(importance_type="gain")
 
-    async def test_predict_handles_empty_data(self, model):
-        """Test that predict handles empty input data gracefully."""
-        # Setup
-        empty_df = pd.DataFrame()
+    def test_get_model_info(self, model):
+        """Test that model info is correctly reported."""
+        # Execute
+        info = model.get_model_info()
         
-        # Execute and verify exception is raised
-        with pytest.raises(ValueError) as excinfo:
-            await model.predict(empty_df, horizon=4)
-        
-        assert "Empty input data" in str(excinfo.value)
+        # Verify
+        assert "model_type" in info
+        assert "feature_names" in info
+        assert "target_names" in info
+        assert "params" in info
+        assert "num_models" in info
+        assert "timestamp" in info
+        assert info["feature_names"] == ["symptom_history_1", "symptom_history_2", "medication_adherence", "sleep_quality"]
+        assert info["target_names"] == ["depression_score"]
 
-    async def test_predict_handles_missing_columns(self, model):
-        """Test that predict handles input data with missing required columns."""
+    def test_train(self, model):
+        """Test that the model trains correctly."""
         # Setup
-        incomplete_df = pd.DataFrame({
-            'date': pd.date_range(start=datetime.now() - timedelta(days=5), periods=5, freq='D'),
-            # Missing 'severity' column
-            'symptom_type': ['anxiety'] * 5
-        })
+        X_train = np.array([
+            [3.0, 4.0, 0.8, 0.6],
+            [2.0, 3.0, 0.9, 0.5],
+            [4.0, 5.0, 0.7, 0.8]
+        ])
+        y_train = np.array([4.2, 3.8, 4.5])
         
-        # Execute and verify exception is raised
-        with pytest.raises(ValueError) as excinfo:
-            await model.predict(incomplete_df, horizon=4)
-        
-        assert "Missing required column" in str(excinfo.value)
-
-    async def test_extract_features(self, model, sample_input_data):
-        """Test that _extract_features correctly transforms the input data."""
-        # Setup
-        with patch.object(model, '_extract_features', wraps=model._extract_features) as mock_extract:
+        # Mock the internal training
+        with patch('app.infrastructure.ml.symptom_forecasting.xgboost_model.xgb', autospec=True) as mock_xgb:
+            mock_xgb.DMatrix.return_value = MagicMock()
+            mock_xgb.train.return_value = MagicMock()
+            
+            # Set up the model to return feature importance
+            mock_model = mock_xgb.train.return_value
+            mock_model.get_score.return_value = {
+                "symptom_history_1": 15.5,
+                "symptom_history_2": 12.3,
+                "medication_adherence": 25.7,
+                "sleep_quality": 18.2
+            }
             
             # Execute
-            await model.predict(sample_input_data, horizon=4)
+            result = model.train(X_train, y_train, optimize=False)
             
             # Verify
-            mock_extract.assert_called_once_with(sample_input_data)
-            
-            # Get the extracted features
-            features = mock_extract.return_value
-            
-            # Verify the features have the expected structure
-            assert isinstance(features, np.ndarray)
-            assert features.ndim == 2  # 2D array: [samples, features]
-
-    async def test_get_feature_importance(self, model, sample_input_data):
-        """Test that _get_feature_importance returns the correct feature importance."""
-        # Setup
-        with patch.object(model, '_get_feature_importance', wraps=model._get_feature_importance) as mock_importance:
-            
-            # Execute
-            await model.predict(sample_input_data, horizon=4)
-            
-            # Verify
-            mock_importance.assert_called_once()
-            
-            # Call directly to test
-            importance = model._get_feature_importance()
-            
-            # Verify the importance has the expected structure
-            assert isinstance(importance, dict)
-            assert "feature1" in importance
-            assert "feature2" in importance
-            assert "feature3" in importance
-            assert importance["feature1"] == 0.5
-            assert importance["feature2"] == 0.3
-            assert importance["feature3"] == 0.2
-
-    async def test_different_feature_importance_methods(self):
-        """Test that different feature importance methods work correctly."""
-        # Setup
-        with patch('app.infrastructure.ml.symptom_forecasting.xgboost_model.xgb', autospec=True):
-            # Create models with different feature importance methods
-            gain_model = XGBoostTimeSeriesModel(
-                model_path="test_model_path",
-                feature_importance_method="gain"
-            )
-            weight_model = XGBoostTimeSeriesModel(
-                model_path="test_model_path",
-                feature_importance_method="weight"
-            )
-            cover_model = XGBoostTimeSeriesModel(
-                model_path="test_model_path",
-                feature_importance_method="cover"
-            )
-            
-            # Mock the internal XGBoost models
-            for model in [gain_model, weight_model, cover_model]:
-                model._model = MagicMock()
-                model._model.get_booster = MagicMock()
-                model._model.get_booster().get_score = MagicMock(return_value={
-                    'feature1': 0.5,
-                    'feature2': 0.3,
-                    'feature3': 0.2
-                })
-                model._feature_names = ["feature1", "feature2", "feature3"]
-                model.is_initialized = True
-            
-            # Execute
-            gain_importance = gain_model._get_feature_importance()
-            weight_importance = weight_model._get_feature_importance()
-            cover_importance = cover_model._get_feature_importance()
-            
-            # Verify
-            for importance in [gain_importance, weight_importance, cover_importance]:
-                assert isinstance(importance, dict)
-                assert "feature1" in importance
-                assert "feature2" in importance
-                assert "feature3" in importance
-                assert importance["feature1"] == 0.5
-                assert importance["feature2"] == 0.3
-                assert importance["feature3"] == 0.2
-            
-            # Verify each model called get_score with the correct importance_type
-            gain_model._model.get_booster().get_score.assert_called_with(importance_type="gain")
-            weight_model._model.get_booster().get_score.assert_called_with(importance_type="weight")
-            cover_model._model.get_booster().get_score.assert_called_with(importance_type="cover")
+            assert "training_results" in result
+            assert "feature_names" in result
+            assert "target_names" in result
+            assert "params" in result
+            assert "depression_score" in result["training_results"]
+            assert "feature_importance" in result["training_results"]["depression_score"]
+            assert "params" in result["training_results"]["depression_score"]

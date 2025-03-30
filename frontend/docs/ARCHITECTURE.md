@@ -1,15 +1,18 @@
 # Novamind Digital Twin Frontend Architecture
 
 ## Overview
+
 The Novamind Digital Twin frontend delivers a premium, HIPAA-compliant interface for concierge psychiatry, visualizing sophisticated mental health models with clinical precision.
 
 ## Design Philosophy
-- **Premium Experience**: Sleek dark theme for a luxury experience 
+
+- **Premium Experience**: Sleek dark theme for a luxury experience
 - **Clinical Precision**: Medical-grade visualizations with high fidelity
 - **Performance**: Optimized for complex 3D brain visualization rendering
 - **HIPAA Compliance**: Zero PHI exposure in UI or logs
 
 ## Tech Stack
+
 - **Framework**: React 18 with TypeScript
 - **Styling**: Tailwind CSS with custom theme
 - **State Management**: React Context + hooks for local state, React Query for server state
@@ -19,6 +22,7 @@ The Novamind Digital Twin frontend delivers a premium, HIPAA-compliant interface
 - **Build Tool**: Vite for fast development and optimized builds
 
 ## Architecture Patterns
+
 1. **Clean Architecture**
    - Clear separation between domain, application, and infrastructure layers
    - Domain layer contains pure business logic
@@ -37,6 +41,7 @@ The Novamind Digital Twin frontend delivers a premium, HIPAA-compliant interface
    - API wrapper for backend communication
 
 ## Core Components
+
 1. **Digital Twin Core**
    - Central visualization engine
    - Manages temporal dynamics and state transitions
@@ -63,6 +68,7 @@ The Novamind Digital Twin frontend delivers a premium, HIPAA-compliant interface
    - Multi-scale temporal patterns
 
 ## Performance Strategies
+
 1. **Rendering Optimization**
    - WebGL for complex visualizations
    - GPU acceleration where available
@@ -82,6 +88,7 @@ The Novamind Digital Twin frontend delivers a premium, HIPAA-compliant interface
    - Memoization of complex calculations
 
 ## Security Implementation
+
 1. **Authentication**
    - AWS Cognito integration
    - Role-based access control
@@ -95,7 +102,8 @@ The Novamind Digital Twin frontend delivers a premium, HIPAA-compliant interface
    - State encryption for sensitive data
 
 ## Folder Structure
-```
+
+```text
 frontend/
 ├── public/          # Static assets
 ├── src/
@@ -123,16 +131,3 @@ frontend/
 │   ├── integration/
 │   └── e2e/
 └── vite.config.ts   # Vite configuration
-```
-
-## API Integration
-- RESTful API integration with backend services
-- GraphQL for complex data requirements
-- WebSockets for real-time updates
-- Comprehensive error handling with user-friendly messages
-
-## Responsive Design
-- Mobile-first approach with tailored UX for each device type
-- Custom breakpoints for clinical workstations
-- Adaptive visualizations that scale appropriately
-- Touch-optimized controls for tablet use in clinical settings

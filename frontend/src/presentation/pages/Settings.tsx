@@ -1,85 +1,95 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from "react"; // Removed unused useEffect
+
 // Import components from index files for better organization following clean architecture
-import { DocumentTitle, Card, Button } from '../atoms';
-import { Header } from '../molecules';
-import MainLayout from '../templates/MainLayout';
-import { useTheme, ThemeType } from '../../application/contexts/ThemeContext';
+import { useTheme } from "../../application/hooks/useTheme"; // Correct hook path
+import { ThemeOption } from "../../types/theme"; // Import correct type
+import { DocumentTitle, Card, Button } from "../atoms";
+import { Header } from "../molecules";
+import MainLayout from "../templates/MainLayout";
 
 /**
  * Settings page component
- * 
+ *
  * This page allows users to configure application settings, preferences, and account details
  */
 const Settings: React.FC = () => {
+  // Removed unused isDarkMode, toggleDarkMode
   const { theme, setTheme } = useTheme();
+  // Removed unused selectedTheme state
   const [notificationSettings, setNotificationSettings] = useState({
     emailAlerts: true,
     smsAlerts: false,
     riskAlerts: true,
     treatmentAlerts: true,
-    outcomeAlerts: true
+    outcomeAlerts: true,
   });
   const [dataPrivacySettings, setDataPrivacySettings] = useState({
     anonymizeData: true,
     shareForResearch: false,
-    dataRetentionPeriod: '1-year'
+    dataRetentionPeriod: "1-year",
   });
   const [visualizationSettings, setVisualizationSettings] = useState({
     showConfidenceIntervals: true,
-    defaultModelView: '3d',
-    colorMode: 'clinical'
+    defaultModelView: "3d",
+    colorMode: "clinical",
   });
 
   // Theme toggle handler
   const handleThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const themeValue = e.target.value as ThemeType;
+    const themeValue = e.target.value as ThemeOption; // Use ThemeOption
     setTheme(themeValue);
   };
 
   // Notification settings handler
   const handleNotificationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setNotificationSettings(prev => ({
+    setNotificationSettings((prev) => ({
       ...prev,
-      [name]: checked
+      [name]: checked,
     }));
   };
 
   // Data privacy settings handler
-  const handleDataPrivacyChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleDataPrivacyChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value, type } = e.target;
-    const newValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
-    
-    setDataPrivacySettings(prev => ({
+    const newValue =
+      type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
+
+    setDataPrivacySettings((prev) => ({
       ...prev,
-      [name]: newValue
+      [name]: newValue,
     }));
   };
 
   // Visualization settings handler
-  const handleVisualizationChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleVisualizationChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value, type } = e.target;
-    const newValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
-    
-    setVisualizationSettings(prev => ({
+    const newValue =
+      type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
+
+    setVisualizationSettings((prev) => ({
       ...prev,
-      [name]: newValue
+      [name]: newValue,
     }));
   };
 
   // Save all settings
   const handleSaveSettings = () => {
     // In a real app, we would call the API to save user settings
-    console.log('Saving settings...');
+    console.log("Saving settings...");
     console.log({
       theme,
       notificationSettings,
       dataPrivacySettings,
-      visualizationSettings
+      visualizationSettings,
     });
-    
+
     // Show success message
-    alert('Settings saved successfully!');
+    alert("Settings saved successfully!");
   };
 
   return (
@@ -87,13 +97,15 @@ const Settings: React.FC = () => {
       <DocumentTitle title="Settings | Novamind Digital Twin" />
       <MainLayout>
         <Header title="Settings" subtitle="Configure your experience" />
-        
-        <div className="grid grid-cols-1 gap-6 mb-6">
+
+        <div className="mb-6 grid grid-cols-1 gap-6">
           <Card title="Theme Settings">
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Interface Theme</label>
+              <label className="mb-2 block text-sm font-medium text-gray-300">
+                Interface Theme
+              </label>
               <select
-                className="bg-gray-800 text-white border border-gray-700 rounded-md p-2 w-full"
+                className="w-full rounded-md border border-gray-700 bg-gray-800 p-2 text-white"
                 value={theme}
                 onChange={handleThemeChange}
               >
@@ -104,7 +116,7 @@ const Settings: React.FC = () => {
               </select>
             </div>
           </Card>
-          
+
           <Card title="Notification Preferences">
             <div className="space-y-4">
               <div className="flex items-center">
@@ -114,13 +126,16 @@ const Settings: React.FC = () => {
                   name="emailAlerts"
                   checked={notificationSettings.emailAlerts}
                   onChange={handleNotificationChange}
-                  className="h-4 w-4 text-blue-600 rounded"
+                  className="h-4 w-4 rounded text-blue-600"
                 />
-                <label htmlFor="emailAlerts" className="ml-2 block text-sm text-gray-300">
+                <label
+                  htmlFor="emailAlerts"
+                  className="ml-2 block text-sm text-gray-300"
+                >
                   Email Alerts
                 </label>
               </div>
-              
+
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -128,13 +143,16 @@ const Settings: React.FC = () => {
                   name="smsAlerts"
                   checked={notificationSettings.smsAlerts}
                   onChange={handleNotificationChange}
-                  className="h-4 w-4 text-blue-600 rounded"
+                  className="h-4 w-4 rounded text-blue-600"
                 />
-                <label htmlFor="smsAlerts" className="ml-2 block text-sm text-gray-300">
+                <label
+                  htmlFor="smsAlerts"
+                  className="ml-2 block text-sm text-gray-300"
+                >
                   SMS Alerts
                 </label>
               </div>
-              
+
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -142,13 +160,16 @@ const Settings: React.FC = () => {
                   name="riskAlerts"
                   checked={notificationSettings.riskAlerts}
                   onChange={handleNotificationChange}
-                  className="h-4 w-4 text-blue-600 rounded"
+                  className="h-4 w-4 rounded text-blue-600"
                 />
-                <label htmlFor="riskAlerts" className="ml-2 block text-sm text-gray-300">
+                <label
+                  htmlFor="riskAlerts"
+                  className="ml-2 block text-sm text-gray-300"
+                >
                   Risk Assessment Alerts
                 </label>
               </div>
-              
+
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -156,13 +177,16 @@ const Settings: React.FC = () => {
                   name="treatmentAlerts"
                   checked={notificationSettings.treatmentAlerts}
                   onChange={handleNotificationChange}
-                  className="h-4 w-4 text-blue-600 rounded"
+                  className="h-4 w-4 rounded text-blue-600"
                 />
-                <label htmlFor="treatmentAlerts" className="ml-2 block text-sm text-gray-300">
+                <label
+                  htmlFor="treatmentAlerts"
+                  className="ml-2 block text-sm text-gray-300"
+                >
                   Treatment Response Alerts
                 </label>
               </div>
-              
+
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -170,15 +194,18 @@ const Settings: React.FC = () => {
                   name="outcomeAlerts"
                   checked={notificationSettings.outcomeAlerts}
                   onChange={handleNotificationChange}
-                  className="h-4 w-4 text-blue-600 rounded"
+                  className="h-4 w-4 rounded text-blue-600"
                 />
-                <label htmlFor="outcomeAlerts" className="ml-2 block text-sm text-gray-300">
+                <label
+                  htmlFor="outcomeAlerts"
+                  className="ml-2 block text-sm text-gray-300"
+                >
                   Outcome Prediction Alerts
                 </label>
               </div>
             </div>
           </Card>
-          
+
           <Card title="Data Privacy">
             <div className="space-y-4">
               <div className="flex items-center">
@@ -188,13 +215,16 @@ const Settings: React.FC = () => {
                   name="anonymizeData"
                   checked={dataPrivacySettings.anonymizeData}
                   onChange={handleDataPrivacyChange}
-                  className="h-4 w-4 text-blue-600 rounded"
+                  className="h-4 w-4 rounded text-blue-600"
                 />
-                <label htmlFor="anonymizeData" className="ml-2 block text-sm text-gray-300">
+                <label
+                  htmlFor="anonymizeData"
+                  className="ml-2 block text-sm text-gray-300"
+                >
                   Anonymize Data for Research
                 </label>
               </div>
-              
+
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -202,17 +232,22 @@ const Settings: React.FC = () => {
                   name="shareForResearch"
                   checked={dataPrivacySettings.shareForResearch}
                   onChange={handleDataPrivacyChange}
-                  className="h-4 w-4 text-blue-600 rounded"
+                  className="h-4 w-4 rounded text-blue-600"
                 />
-                <label htmlFor="shareForResearch" className="ml-2 block text-sm text-gray-300">
+                <label
+                  htmlFor="shareForResearch"
+                  className="ml-2 block text-sm text-gray-300"
+                >
                   Allow Anonymized Data Sharing
                 </label>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Data Retention Period</label>
-                <select 
-                  className="bg-gray-800 text-white border border-gray-700 rounded-md p-2 w-full"
+                <label className="mb-2 block text-sm font-medium text-gray-300">
+                  Data Retention Period
+                </label>
+                <select
+                  className="w-full rounded-md border border-gray-700 bg-gray-800 p-2 text-white"
                   name="dataRetentionPeriod"
                   value={dataPrivacySettings.dataRetentionPeriod}
                   onChange={handleDataPrivacyChange}
@@ -226,7 +261,7 @@ const Settings: React.FC = () => {
               </div>
             </div>
           </Card>
-          
+
           <Card title="Visualization Preferences">
             <div className="space-y-4">
               <div className="flex items-center">
@@ -236,17 +271,22 @@ const Settings: React.FC = () => {
                   name="showConfidenceIntervals"
                   checked={visualizationSettings.showConfidenceIntervals}
                   onChange={handleVisualizationChange}
-                  className="h-4 w-4 text-blue-600 rounded"
+                  className="h-4 w-4 rounded text-blue-600"
                 />
-                <label htmlFor="showConfidenceIntervals" className="ml-2 block text-sm text-gray-300">
+                <label
+                  htmlFor="showConfidenceIntervals"
+                  className="ml-2 block text-sm text-gray-300"
+                >
                   Show Confidence Intervals
                 </label>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Default Model View</label>
-                <select 
-                  className="bg-gray-800 text-white border border-gray-700 rounded-md p-2 w-full"
+                <label className="mb-2 block text-sm font-medium text-gray-300">
+                  Default Model View
+                </label>
+                <select
+                  className="w-full rounded-md border border-gray-700 bg-gray-800 p-2 text-white"
                   name="defaultModelView"
                   value={visualizationSettings.defaultModelView}
                   onChange={handleVisualizationChange}
@@ -256,11 +296,13 @@ const Settings: React.FC = () => {
                   <option value="network">Network Graph</option>
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Color Mode</label>
-                <select 
-                  className="bg-gray-800 text-white border border-gray-700 rounded-md p-2 w-full"
+                <label className="mb-2 block text-sm font-medium text-gray-300">
+                  Color Mode
+                </label>
+                <select
+                  className="w-full rounded-md border border-gray-700 bg-gray-800 p-2 text-white"
                   name="colorMode"
                   value={visualizationSettings.colorMode}
                   onChange={handleVisualizationChange}
@@ -273,7 +315,7 @@ const Settings: React.FC = () => {
               </div>
             </div>
           </Card>
-          
+
           <div className="flex justify-end">
             <Button onClick={handleSaveSettings} variant="primary">
               Save Settings

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-PHI Detection Module.
+PHI Detection Package.
 
-This module provides functionality for detecting and anonymizing
-Protected Health Information (PHI) in clinical text for HIPAA compliance.
+This package provides functionality for detecting and redacting
+Protected Health Information (PHI) from text content.
 """
 
-from app.infrastructure.ml.phi_detection.service import PhiDetectionService
+from app.infrastructure.ml.phi_detection.service import PHIDetectionService
 
-__all__ = ["PhiDetectionService"]
+__all__ = ["PHIDetectionService"]

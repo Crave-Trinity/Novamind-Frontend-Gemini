@@ -51,6 +51,18 @@ class ValidationError(DomainException):
         super().__init__(message)
 
 
+class ValidationException(ValidationError):
+    """
+    Alternative name for ValidationError that is used for backward compatibility.
+    
+    This exception serves the same purpose as ValidationError and is provided to
+    maintain compatibility with existing code that expects a ValidationException class.
+    """
+    
+    def __init__(self, message: str = "Validation error occurred"):
+        super().__init__(message)
+
+
 class BiometricIntegrationError(DomainException):
     """
     Raised when there's an error processing biometric data.

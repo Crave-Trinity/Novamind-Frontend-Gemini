@@ -1,0 +1,64 @@
+name: Build and Deploy Novamind Frontend
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'API Mode'
+        required: true
+        default: 'mock'
+        type: choice
+        options:
+          - mock
+          - real
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        run: cd frontend && npm ci
+        
+      - name: Set environment for mock mode
+        if: github.event.inputs.mode == 'mock' || github.event.inputs.mode == ''
+        run: |
+          cd frontend
+          echo "VITE_API_MODE=mock" > .env.production
+          echo "VITE_USE_MOCK_API=true" >> .env.production
+          echo "VITE_BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> .env.production
+      
+      - name: Set environment for real mode
+        if: github.event.inputs.mode == 'real'
+        run: |
+          cd frontend
+          echo "VITE_API_MODE=real" > .env.production
+          echo "VITE_USE_MOCK_API=false" >> .env.production
+          echo "VITE_BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> .env.production
+      
+      - name: Build the app
+        run: cd frontend && npm run build -- --config vite.config.prod.ts
+        
+      - name: Create version info
+        run: |
+          cd frontend
+          VERSION=$(node -e "console.log(require('./package.json').version)")
+          echo "{\"version\":\"$VERSION\",\"environment\":\"${github.event.inputs.mode || 'mock'}\",\"buildTime\":\"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"}" > dist/version.json
+      
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@4.1.5
+        with:
+          branch: gh-pages
+          folder: frontend/dist

@@ -3,9 +3,23 @@
  * HIPAA compliant - no PHI exposed
  */
 
-export type Severity = 'none' | 'mild' | 'moderate' | 'severe';
-export type TreatmentType = 'medication' | 'therapy' | 'tms' | 'ect' | 'combined';
-export type DiagnosisType = 'depression' | 'anxiety' | 'bipolar' | 'schizophrenia' | 'ptsd' | 'ocd' | 'eating_disorder' | 'addiction' | 'other';
+export type Severity = "none" | "mild" | "moderate" | "severe";
+export type TreatmentType =
+  | "medication"
+  | "therapy"
+  | "tms"
+  | "ect"
+  | "combined";
+export type DiagnosisType =
+  | "depression"
+  | "anxiety"
+  | "bipolar"
+  | "schizophrenia"
+  | "ptsd"
+  | "ocd"
+  | "eating_disorder"
+  | "addiction"
+  | "other";
 
 /**
  * Clinical assessment score tracking
@@ -64,7 +78,7 @@ export interface Biomarker {
     max: number;
   };
   isAbnormal: boolean;
-  trend: 'increasing' | 'decreasing' | 'stable';
+  trend: "increasing" | "decreasing" | "stable";
   clinicalSignificance: number; // 0-100%
 }
 
@@ -116,7 +130,7 @@ export interface RiskAssessment {
   riskFactors: {
     category: string;
     severity: Severity;
-    trend: 'increasing' | 'decreasing' | 'stable';
+    trend: "increasing" | "decreasing" | "stable";
   }[];
   overallRisk: Severity;
   recommendedInterventions: string[];

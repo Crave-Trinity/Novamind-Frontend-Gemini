@@ -1,224 +1,217 @@
 # -*- coding: utf-8 -*-
 """
-HIPAA-compliant logging utilities.
+Logging Utility Module.
 
-This module provides enhanced logging capabilities with HIPAA-compliant PHI sanitization
-to ensure protected health information is never exposed in logs.
+This module provides logging configuration and utilities for the application,
+with special care for HIPAA compliance and PHI protection.
 """
 
-import asyncio
 import logging
-import json
+import os
+import sys
+import traceback
 from datetime import datetime
-from typing import Any, Dict, Optional, Union, List
 from functools import wraps
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, cast
 
-from app.core.config import Settings
-from app.core.utils.phi_sanitizer import PHISanitizer, sanitize_log_message
+from app.core.constants import LogLevel
 
-settings = Settings()
 
-class HIPAACompliantLogger:
+# Type variables for function signatures
+F = TypeVar('F', bound=Callable[..., Any])
+
+
+def get_logger(name: str) -> logging.Logger:
     """
-    HIPAA-compliant logger that ensures sensitive information is properly masked.
+    Get a configured logger instance for the specified name.
     
-    Features:
-    - PHI masking
-    - Audit trail
-    - Configurable outputs (file/console)
-    - Structured logging
-    """
-    
-    def __init__(self, name: str) -> None:
-        """Initialize logger with name."""
-        self.logger = logging.getLogger(name)
-        self.logger.setLevel(logging.DEBUG if settings.DEBUG else logging.INFO)
-        
-        # Configure handlers based on settings
-        if settings.logging.LOG_TO_CONSOLE:
-            console_handler = logging.StreamHandler()
-            console_handler.setFormatter(self._get_formatter())
-            self.logger.addHandler(console_handler)
-        
-        if settings.logging.LOG_TO_FILE:
-            file_handler = logging.FileHandler(settings.logging.LOG_FILE_PATH)
-            file_handler.setFormatter(self._get_formatter())
-            self.logger.addHandler(file_handler)
-    
-    def _get_formatter(self) -> logging.Formatter:
-        """Get HIPAA-compliant log formatter."""
-        return logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
-    
-    def _mask_phi(self, message: str) -> str:
-        """
-        Mask PHI in log messages using the comprehensive PHI sanitizer.
-        
-        This method ensures that all Protected Health Information (PHI)
-        is properly sanitized before being logged, in accordance with
-        HIPAA requirements.
-        
-        Args:
-            message: The message to sanitize
-            
-        Returns:
-            A sanitized version of the message with PHI removed
-        """
-        if not isinstance(message, str):
-            return str(message)
-            
-        return PHISanitizer.sanitize_text(message)
-    
-    def _create_audit_log(
-        self,
-        level: int,
-        message: str,
-        extra: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """
-        Create an audit log entry with comprehensive PHI sanitization.
-        
-        Ensures that all PHI is sanitized not only in the main message
-        but also in any structured data or extra fields.
-        
-        Args:
-            level: Log level (DEBUG, INFO, etc.)
-            message: The log message to be sanitized
-            extra: Additional structured data for the log entry
-            
-        Returns:
-            PHI-sanitized structured audit log entry
-        """
-        audit_log = {
-            "timestamp": datetime.utcnow().isoformat(),
-            "level": logging.getLevelName(level),
-            "message": self._mask_phi(message),
-            "source": self.logger.name
-        }
-        
-        if extra:
-            # Use PHISanitizer for complex structured data
-            audit_log["extra"] = PHISanitizer.sanitize_structured_data(extra)
-        
-        return audit_log
-    
-    def _log(
-        self,
-        level: int,
-        message: str,
-        extra: Optional[Dict[str, Any]] = None,
-        *args: Any,
-        **kwargs: Any
-    ) -> None:
-        """Base logging method with PHI masking and audit trail."""
-        # Create audit log
-        audit_log = self._create_audit_log(level, message, extra)
-        
-        # Log the message
-        self.logger.log(
-            level,
-            json.dumps(audit_log),
-            *args,
-            **kwargs
-        )
-        
-        # Store audit log if enabled
-        if settings.logging.ENABLE_AUDIT_LOGGING:
-            self._store_audit_log(audit_log)
-    
-    def _store_audit_log(self, audit_log: Dict[str, Any]) -> None:
-        """Store audit log entry."""
-        import os
-        import json
-        from datetime import datetime
-        
-        # Ensure audit log directory exists
-        audit_log_dir = os.path.join(
-            os.path.dirname(settings.logging.LOG_FILE_PATH),
-            'audit_logs'
-        )
-        os.makedirs(audit_log_dir, exist_ok=True)
-        
-        # Create filename with timestamp for better organization
-        timestamp = datetime.now().strftime('%Y%m%d')
-        audit_filename = f'audit_{timestamp}.jsonl'
-        audit_path = os.path.join(audit_log_dir, audit_filename)
-        
-        # Append audit log to file
-        with open(audit_path, 'a') as f:
-            f.write(json.dumps(audit_log) + '\n')
-    
-    def debug(self, message: str, extra: Optional[Dict[str, Any]] = None, *args: Any, **kwargs: Any) -> None:
-        """Log debug message."""
-        self._log(logging.DEBUG, message, extra, *args, **kwargs)
-    
-    def info(self, message: str, extra: Optional[Dict[str, Any]] = None, *args: Any, **kwargs: Any) -> None:
-        """Log info message."""
-        self._log(logging.INFO, message, extra, *args, **kwargs)
-    
-    def warning(self, message: str, extra: Optional[Dict[str, Any]] = None, *args: Any, **kwargs: Any) -> None:
-        """Log warning message."""
-        self._log(logging.WARNING, message, extra, *args, **kwargs)
-    
-    def error(self, message: str, extra: Optional[Dict[str, Any]] = None, *args: Any, **kwargs: Any) -> None:
-        """Log error message."""
-        self._log(logging.ERROR, message, extra, *args, **kwargs)
-    
-    def critical(self, message: str, extra: Optional[Dict[str, Any]] = None, *args: Any, **kwargs: Any) -> None:
-        """Log critical message."""
-        self._log(logging.CRITICAL, message, extra, *args, **kwargs)
-
-def audit_log(event_type: str) -> Any:
-    """
-    Decorator to create audit log entries for function calls.
+    This function creates and returns a logger with the specified name,
+    configured according to the application's logging settings.
+    HIPAA-compliant sanitization is automatically applied.
     
     Args:
-        event_type: Type of event being audited
-    """
-    def decorator(func: Any) -> Any:
-        @wraps(func)
-        async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
-            logger = HIPAACompliantLogger(func.__module__)
-            try:
-                result = await func(*args, **kwargs)
-                logger.info(
-                    f"{event_type} completed successfully",
-                    {"function": func.__name__}
-                )
-                return result
-            except Exception as e:
-                logger.error(
-                    f"{event_type} failed",
-                    {
-                        "function": func.__name__,
-                        "error": str(e)
-                    }
-                )
-                raise
+        name: Logger name, typically __name__ of the calling module
         
+    Returns:
+        Configured logger instance
+    """
+    logger = logging.getLogger(name)
+    
+    # Only configure if it hasn't been done yet
+    if not logger.handlers:
+        # Get log level from environment or default to INFO
+        log_level_str = os.getenv("LOG_LEVEL", "INFO").upper()
+        log_level = getattr(logging, log_level_str, logging.INFO)
+        
+        # Set level
+        logger.setLevel(log_level)
+        
+        # Create console handler
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(log_level)
+        
+        # Create formatter
+        formatter = logging.Formatter(
+            '[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        console_handler.setFormatter(formatter)
+        
+        # Add handler to logger
+        logger.addHandler(console_handler)
+        
+        # Don't propagate to root logger
+        logger.propagate = False
+        
+    return logger
+
+
+def log_execution_time(
+    logger: Optional[logging.Logger] = None, 
+    level: LogLevel = LogLevel.DEBUG
+) -> Callable[[F], F]:
+    """
+    Decorator to log the execution time of a function.
+    
+    Args:
+        logger: Logger to use, if None a new logger is created using function's module name
+        level: Log level to use
+        
+    Returns:
+        Decorator function
+    """
+    def decorator(func: F) -> F:
         @wraps(func)
-        def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
-            logger = HIPAACompliantLogger(func.__module__)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            # Get or create logger
+            nonlocal logger
+            if logger is None:
+                logger = get_logger(func.__module__)
+            
+            # Record start time
+            start_time = datetime.now()
+            
+            # Call the decorated function
             try:
                 result = func(*args, **kwargs)
-                logger.info(
-                    f"{event_type} completed successfully",
-                    {"function": func.__name__}
+                # Record end time and calculate duration
+                end_time = datetime.now()
+                duration_ms = (end_time - start_time).total_seconds() * 1000
+                
+                # Log execution time
+                logger.log(
+                    level.value,
+                    f"Function '{func.__name__}' executed in {duration_ms:.2f} ms"
                 )
+                
                 return result
             except Exception as e:
-                logger.error(
-                    f"{event_type} failed",
-                    {
-                        "function": func.__name__,
-                        "error": str(e)
-                    }
+                # Log exception with sanitized PHI
+                end_time = datetime.now()
+                duration_ms = (end_time - start_time).total_seconds() * 1000
+                
+                logger.exception(
+                    f"Exception in '{func.__name__}' after {duration_ms:.2f} ms: {str(e)}"
                 )
-                raise
-        
-        if asyncio.iscoroutinefunction(func):
-            return async_wrapper
-        return sync_wrapper
+                raise  # Re-raise the exception
+                
+        return cast(F, wrapper)
     
     return decorator
+
+
+def log_method_calls(
+    logger: Optional[logging.Logger] = None,
+    level: LogLevel = LogLevel.DEBUG,
+    log_args: bool = True,
+    log_results: bool = True
+) -> Callable[[Type], Type]:
+    """
+    Class decorator to log method calls.
+    
+    Args:
+        logger: Logger to use, if None a logger is created for each method
+        level: Log level to use
+        log_args: Whether to log method arguments
+        log_results: Whether to log method return values
+        
+    Returns:
+        Decorator function
+    """
+    def decorator(cls: Type) -> Type:
+        # Get class methods (excluding magic methods)
+        for name, method in cls.__dict__.items():
+            if callable(method) and not name.startswith('__'):
+                setattr(cls, name, _create_logged_method(
+                    method, logger, level, log_args, log_results
+                ))
+        return cls
+    
+    return decorator
+
+
+def _create_logged_method(
+    method: Callable,
+    logger: Optional[logging.Logger],
+    level: LogLevel,
+    log_args: bool,
+    log_results: bool
+) -> Callable:
+    """
+    Create a logged version of a method.
+    
+    Args:
+        method: Method to wrap with logging
+        logger: Logger to use
+        level: Log level to use
+        log_args: Whether to log method arguments
+        log_results: Whether to log method return values
+        
+    Returns:
+        Wrapped method with logging
+    """
+    @wraps(method)
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+        # Get or create logger
+        method_logger = logger
+        if method_logger is None:
+            method_logger = get_logger(f"{self.__class__.__module__}.{self.__class__.__name__}")
+        
+        # Build method call representation
+        method_call = f"{self.__class__.__name__}.{method.__name__}"
+        if log_args and (args or kwargs):
+            args_str = ", ".join([str(arg) for arg in args])
+            kwargs_str = ", ".join([f"{k}={v}" for k, v in kwargs.items()])
+            args_kwargs = [s for s in [args_str, kwargs_str] if s]
+            method_call += f"({', '.join(args_kwargs)})"
+        
+        # Log method entry
+        method_logger.log(level.value, f"Calling {method_call}")
+        
+        # Execute method
+        try:
+            result = method(self, *args, **kwargs)
+            
+            # Log successful completion
+            if log_results:
+                method_logger.log(
+                    level.value,
+                    f"{method_call} returned: {str(result)}"
+                )
+            else:
+                method_logger.log(
+                    level.value,
+                    f"{method_call} completed successfully"
+                )
+                
+            return result
+            
+        except Exception as e:
+            # Log exception
+            tb = traceback.format_exc()
+            method_logger.error(
+                f"Exception in {method_call}: {str(e)}\n{tb}"
+            )
+            raise  # Re-raise the exception
+            
+    return wrapper

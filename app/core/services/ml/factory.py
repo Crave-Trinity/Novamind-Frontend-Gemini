@@ -190,3 +190,107 @@ class MLServiceFactory:
         self._phi_detection_instances.clear()
         
         logger.info("ML service factory shut down")
+
+
+class MLServiceCache:
+    """
+    Cache for ML service instances.
+    
+    Provides a unified caching mechanism for ML services to improve
+    performance and manage resources efficiently. This class uses
+    the Singleton pattern to ensure a single cache is shared across
+    the application.
+    """
+    
+    # Singleton instance
+    _instance = None
+    
+    @classmethod
+    def get_instance(cls) -> 'MLServiceCache':
+        """
+        Get the singleton cache instance.
+        
+        Returns:
+            The singleton MLServiceCache instance
+        """
+        if cls._instance is None:
+            cls._instance = MLServiceCache()
+        return cls._instance
+    
+    def __init__(self) -> None:
+        """Initialize the ML service cache."""
+        self._factory: Optional[MLServiceFactory] = None
+    
+    def initialize(self, config: Dict[str, Any]) -> None:
+        """
+        Initialize the cache with configuration.
+        
+        This method initializes the internal factory with the provided
+        configuration.
+        
+        Args:
+            config: Configuration dictionary containing service configs
+            
+        Raises:
+            InvalidConfigurationError: If configuration is invalid
+        """
+        # Create factory if it doesn't exist
+        if not self._factory:
+            self._factory = MLServiceFactory()
+            
+        # Initialize factory
+        self._factory.initialize(config)
+        
+        logger.info("ML service cache initialized")
+    
+    def get_mentalllama_service(
+        self, 
+        service_type: Literal["aws", "mock"] = "aws",
+        with_phi_detection: bool = True
+    ) -> MentaLLaMAInterface:
+        """
+        Get a MentaLLaMA service instance from the cache.
+        
+        Args:
+            service_type: Type of service to get (aws or mock)
+            with_phi_detection: Whether to include PHI detection service
+            
+        Returns:
+            MentaLLaMA service instance
+            
+        Raises:
+            ServiceUnavailableError: If cache is not initialized
+        """
+        if not self._factory:
+            raise InvalidConfigurationError("ML service cache not initialized")
+            
+        return self._factory.get_mentalllama_service(service_type, with_phi_detection)
+    
+    def get_phi_detection_service(
+        self, 
+        service_type: Literal["aws", "mock"] = "aws"
+    ) -> PHIDetectionInterface:
+        """
+        Get a PHI detection service instance from the cache.
+        
+        Args:
+            service_type: Type of service to get (aws or mock)
+            
+        Returns:
+            PHI detection service instance
+            
+        Raises:
+            ServiceUnavailableError: If cache is not initialized
+        """
+        if not self._factory:
+            raise InvalidConfigurationError("ML service cache not initialized")
+            
+        return self._factory.get_phi_detection_service(service_type)
+    
+    def shutdown(self) -> None:
+        """Shutdown all cached service instances and release resources."""
+        if self._factory:
+            self._factory.shutdown()
+            self._factory = None
+            
+        logger.info("ML service cache shut down")

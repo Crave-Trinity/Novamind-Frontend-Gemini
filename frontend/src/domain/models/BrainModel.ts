@@ -1,166 +1,106 @@
 /**
- * Core domain models for brain visualization and digital twin functionality.
- * These models align with the HIPAA-compliant Digital Twin architecture.
+ * Brain Model Domain Types
+ * Defines data structures for brain visualization
  */
 
 /**
- * Vector3D represents a position in 3D space
+ * Render modes for the brain visualization
  */
-export interface Vector3D {
-  x: number;
-  y: number;
-  z: number;
+export enum RenderMode {
+  ANATOMICAL = "anatomical",
+  FUNCTIONAL = "functional",
+  ACTIVITY = "activity",
+  SIGNIFICANCE = "significance",
+  CONNECTIVITY = "connectivity",
+  ANOMALY = "anomaly",
+  TREATMENT_RESPONSE = "treatment_response",
 }
 
 /**
- * Connection represents a neural connection between brain regions
+ * Source of model data
  */
-export interface Connection {
-  id: string;
-  sourceRegionId: string;
-  targetRegionId: string;
-  strength: number; // 0.0 to 1.0
-  type: ConnectionType;
-  isActive?: boolean;
+export enum ModelSource {
+  MRI = "mri",
+  FMRI = "fmri",
+  DTI = "dti",
+  EEG = "eeg",
+  SIMULATION = "simulation",
+  AGGREGATE = "aggregate",
 }
 
 /**
- * Brain region model representing different areas of the brain
- * for visualization and interaction in the Digital Twin.
+ * Brain region representing a distinct anatomical area
  */
 export interface BrainRegion {
   id: string;
   name: string;
   description: string;
-  coordinates: [number, number, number]; // [x, y, z]
+  coordinates: [number, number, number]; // 3D position
+  position: [number, number, number]; // Might be redundant with coordinates
   size: number;
+  scale: number;
   color: string;
-  volume?: number; // Volume of the region for scaling visualization
-  significance: number; // Clinical significance (0-1)
-  connections: string[]; // Array of region IDs this region connects to
-  functions: string[];
-  data?: {
-    activity?: number;
-    anomalies?: string[];
-    volumes?: {
+  volume: number;
+  significance: number; // Clinical significance score
+  connections: string[]; // IDs of connected regions
+  functions: string[]; // Primary functions (e.g., "memory", "emotion")
+  data: {
+    activity: number;
+    anomalies: string[];
+    volumes: {
       current: number;
       expected: number;
       percentile: number;
     };
   };
-  position?: [number, number, number]; // Alternative position format
-  scale?: number;  // Added for visualization scaling
 }
 
 /**
- * Render properties for visualization
+ * Neural pathway connecting regions
  */
-export interface RenderProperties {
-  color: string;
-  opacity: number;
-  visible: boolean;
-  highlightColor: string;
+export interface NeuralPathway {
+  id: string;
+  sourceId: string;
+  targetId: string;
+  strength: number;
+  type: "excitatory" | "inhibitory";
+  significance: number;
+  isActive: boolean;
 }
 
 /**
- * Complete brain model for visualization
+ * Brain model metadata
+ */
+export interface BrainModelMetadata {
+  modelVersion: string;
+  confidenceScore: number;
+  dataQuality: number;
+  source: ModelSource;
+}
+
+/**
+ * Complete brain model
  */
 export interface BrainModel {
   id: string;
   patientId: string;
   regions: BrainRegion[];
   pathways: NeuralPathway[];
-  timestamp: string;
-  metadata: {
-    modelVersion: string;
-    confidenceScore: number;
-    dataQuality: number;
-    source?: ModelSource;
-  };
+  timestamp: string; // ISO date
+  metadata: BrainModelMetadata;
 }
 
 /**
- * Neural pathway representing connections between brain regions
- */
-export interface NeuralPathway {
-  id: string;
-  sourceId: string; // Source brain region
-  targetId: string; // Target brain region
-  strength: number; // Connection strength (0-1)
-  type: 'excitatory' | 'inhibitory';
-  significance: number; // Clinical significance level
-  isActive: boolean;
-}
-
-/**
- * Brain activity data for temporal visualization
- */
-export interface BrainActivity {
-  regionId: string;
-  timestamps: string[];
-  values: number[]; // Activity levels
-  baseline: number;
-  anomalyThreshold: number;
-  clinicalSignificance: number;
-}
-
-/**
- * View state for brain visualization component
+ * View state for 3D visualization
  */
 export interface BrainViewState {
   rotationX: number;
   rotationY: number;
   rotationZ: number;
   zoom: number;
-  highlightedRegions: string[];
+  highlightedRegions: string[]; // IDs of highlighted regions
   visiblePathways: boolean;
   renderMode: RenderMode;
   transparencyLevel: number;
   focusPoint: [number, number, number] | null;
-}
-
-/**
- * Rendering modes for brain visualization
- */
-export enum RenderMode {
-  NORMAL = 'normal',
-  ANATOMICAL = 'anatomical',
-  FUNCTIONAL = 'functional',
-  CONNECTIVITY = 'connectivity',
-  ACTIVITY = 'activity',
-  ANOMALY = 'anomaly',
-  TREATMENT_RESPONSE = 'treatment_response'
-}
-
-/**
- * Connection types between brain regions
- */
-export enum ConnectionType {
-  STRUCTURAL = 'structural',
-  FUNCTIONAL = 'functional',
-  EFFECTIVE = 'effective'
-}
-
-/**
- * Brain function types
- */
-export enum BrainFunction {
-  EMOTION_REGULATION = 'emotion_regulation',
-  EXECUTIVE_FUNCTION = 'executive_function',
-  MEMORY = 'memory',
-  ATTENTION = 'attention',
-  REWARD_PROCESSING = 'reward_processing',
-  LANGUAGE = 'language',
-  MOTOR = 'motor',
-  SENSORY = 'sensory'
-}
-
-/**
- * Sources of brain model data
- */
-export enum ModelSource {
-  NEUROIMAGING = 'neuroimaging',
-  SIMULATION = 'simulation',
-  POPULATION_AVERAGE = 'population_average',
-  MACHINE_LEARNING = 'machine_learning'
 }

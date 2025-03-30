@@ -3,12 +3,12 @@
  * Handles all interactions with the XGBoost prediction backend
  */
 
-import { apiClient } from './ApiClient';
+import { apiClient } from "./ApiClient";
 
 // Types for XGBoost requests and responses
 export interface RiskPredictionRequest {
   patient_id: string;
-  risk_type: 'relapse' | 'suicide';
+  risk_type: "relapse" | "suicide";
   clinical_data: {
     assessment_scores: Record<string, number>;
     severity: string;
@@ -24,14 +24,14 @@ export interface RiskPredictionResponse {
   prediction_id: string;
   patient_id: string;
   risk_type: string;
-  risk_level: 'low' | 'moderate' | 'high' | 'severe';
+  risk_level: "low" | "moderate" | "high" | "severe";
   risk_score: number;
   confidence: number;
   meets_threshold: boolean;
   factors: Array<{
     name: string;
     contribution: number;
-    direction: 'positive' | 'negative';
+    direction: "positive" | "negative";
   }>;
   timestamp: string;
   recommendations: string[];
@@ -54,7 +54,7 @@ export interface TreatmentResponseResponse {
   patient_id: string;
   treatment_type: string;
   response_probability: number;
-  response_level: 'poor' | 'partial' | 'good' | 'excellent';
+  response_level: "poor" | "partial" | "good" | "excellent";
   confidence: number;
   time_to_response: {
     weeks: number;
@@ -110,7 +110,7 @@ export interface FeatureImportanceResponse {
   features: Array<{
     name: string;
     importance: number;
-    direction: 'positive' | 'negative';
+    direction: "positive" | "negative";
     category: string;
   }>;
   interaction_effects: Array<{
@@ -118,7 +118,7 @@ export interface FeatureImportanceResponse {
     importance: number;
   }>;
   methodology: string;
-  interpretation: string[]; 
+  interpretation: string[];
 }
 
 export interface DigitalTwinIntegrationRequest {
@@ -163,43 +163,68 @@ class XGBoostService {
   /**
    * Predict psychiatric risk
    */
-  async predictRisk(request: RiskPredictionRequest): Promise<RiskPredictionResponse> {
-    return apiClient.post<RiskPredictionResponse>('/xgboost/predict-risk', request);
+  async predictRisk(
+    request: RiskPredictionRequest,
+  ): Promise<RiskPredictionResponse> {
+    return apiClient.post<RiskPredictionResponse>(
+      "/xgboost/predict-risk",
+      request,
+    );
   }
 
   /**
    * Predict treatment response
    */
-  async predictTreatmentResponse(request: TreatmentResponseRequest): Promise<TreatmentResponseResponse> {
-    return apiClient.post<TreatmentResponseResponse>('/xgboost/predict-treatment-response', request);
+  async predictTreatmentResponse(
+    request: TreatmentResponseRequest,
+  ): Promise<TreatmentResponseResponse> {
+    return apiClient.post<TreatmentResponseResponse>(
+      "/xgboost/predict-treatment-response",
+      request,
+    );
   }
 
   /**
    * Predict psychiatric outcome
    */
-  async predictOutcome(request: OutcomePredictionRequest): Promise<OutcomePredictionResponse> {
-    return apiClient.post<OutcomePredictionResponse>('/xgboost/predict-outcome', request);
+  async predictOutcome(
+    request: OutcomePredictionRequest,
+  ): Promise<OutcomePredictionResponse> {
+    return apiClient.post<OutcomePredictionResponse>(
+      "/xgboost/predict-outcome",
+      request,
+    );
   }
 
   /**
    * Get feature importance for a prediction
    */
-  async getFeatureImportance(request: FeatureImportanceRequest): Promise<FeatureImportanceResponse> {
-    return apiClient.post<FeatureImportanceResponse>('/xgboost/feature-importance', request);
+  async getFeatureImportance(
+    request: FeatureImportanceRequest,
+  ): Promise<FeatureImportanceResponse> {
+    return apiClient.post<FeatureImportanceResponse>(
+      "/xgboost/feature-importance",
+      request,
+    );
   }
 
   /**
    * Integrate prediction with digital twin profile
    */
-  async integrateWithDigitalTwin(request: DigitalTwinIntegrationRequest): Promise<DigitalTwinIntegrationResponse> {
-    return apiClient.post<DigitalTwinIntegrationResponse>('/xgboost/integrate-with-digital-twin', request);
+  async integrateWithDigitalTwin(
+    request: DigitalTwinIntegrationRequest,
+  ): Promise<DigitalTwinIntegrationResponse> {
+    return apiClient.post<DigitalTwinIntegrationResponse>(
+      "/xgboost/integrate-with-digital-twin",
+      request,
+    );
   }
 
   /**
    * Get model information
    */
   async getModelInfo(request: ModelInfoRequest): Promise<ModelInfoResponse> {
-    return apiClient.post<ModelInfoResponse>('/xgboost/model-info', request);
+    return apiClient.post<ModelInfoResponse>("/xgboost/model-info", request);
   }
 }
 

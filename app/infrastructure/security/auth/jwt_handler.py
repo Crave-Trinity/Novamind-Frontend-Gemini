@@ -33,7 +33,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import ValidationError
 
-from app.core.config import get_settings
+from app.core.config import get_app_settings
 from app.domain.exceptions import (
     AuthenticationError,
     InvalidTokenError,
@@ -61,7 +61,7 @@ def create_access_token(
         str: JWT token as string
     """
     # Get settings
-    settings = get_settings()
+    settings = get_app_settings()
 
     # Create a copy of the data
     payload = data.copy()
@@ -71,7 +71,7 @@ def create_access_token(
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(
-            minutes=settings.jwt_access_token_expire_minutes
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
     # Add standard JWT claims
@@ -87,7 +87,7 @@ def create_access_token(
 
     # Encode the token
     encoded_jwt = jwt.encode(
-        payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
+        payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
     )
 
     return encoded_jwt
@@ -104,10 +104,11 @@ def create_refresh_token(data: Dict[str, Any]) -> str:
         str: JWT refresh token as string
     """
     # Get settings
-    settings = get_settings()
+    settings = get_app_settings()
 
-    # Create refresh token with longer expiration
-    refresh_expire = timedelta(days=settings.jwt_refresh_token_expire_days)
+    # Create refresh token with longer expiration (default to 7 days if not specified)
+    refresh_expire_days = getattr(settings, "JWT_REFRESH_TOKEN_EXPIRE_DAYS", 7)
+    refresh_expire = timedelta(days=refresh_expire_days)
 
     # Create minimal payload for refresh token
     minimal_payload = {"user_id": data.get("user_id"), "role": data.get("role")}
@@ -132,12 +133,12 @@ def verify_token(token: str) -> Dict[str, Any]:
         TokenExpiredError: If the token has expired
     """
     # Get settings
-    settings = get_settings()
+    settings = get_app_settings()
 
     try:
         # Decode and verify the token
         payload = jwt.decode(
-            token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
+            token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
 
         return payload

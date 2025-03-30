@@ -1,60 +1,70 @@
-# PHI detection patterns for HIPAA compliance
-patterns:
-  - name: "Patient ID"
-    pattern: "PT\\d{6,8}"
-    type: "regex"
-    priority: 10
-    partial_redaction_length: 4
-    examples: ["PT12345678", "PT987654"]
-    
-  - name: "Social Security Number"
-    pattern: "\\b\\d{3}-\\d{2}-\\d{4}\\b"
-    type: "regex" 
-    priority: 10
-    partial_redaction_length: 4
-    examples: ["123-45-6789"]
-    
+# PHI Detection Patterns
+# These patterns are used by the PHI detection service to identify and redact
+# Protected Health Information (PHI) from text content.
+
+contact:
+  - name: "US Phone Number"
+    pattern: "\\(?(\\d{3})\\)?[-. ]?(\\d{3})[-. ]?(\\d{4})"
+    description: "US phone number with or without formatting"
+  
   - name: "Email Address"
     pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"
-    type: "regex"
-    priority: 8
-    partial_format: "xxxx@{domain}"
-    examples: ["patient@example.com", "doctor.name@hospital.org"]
-    
-  - name: "Phone Number"
-    pattern: "\\(\\d{3}\\)\\s*\\d{3}-\\d{4}|\\d{3}-\\d{3}-\\d{4}"
-    type: "regex"
-    priority: 7
-    partial_redaction_length: 4
-    examples: ["(555) 123-4567", "555-123-4567"]
+    description: "Email address"
 
-  - name: "Medical Record Number"
-    pattern: "MRN\\d{6,10}"
-    type: "regex"
-    priority: 9
-    examples: ["MRN123456", "MRN9876543210"]
+name:
+  - name: "Full Name"
+    pattern: "(?:[A-Z][a-z]+\\s+){1,2}[A-Z][a-z]+"
+    description: "Full name with 2-3 parts"
+  
+  - name: "Dr. Name Pattern"
+    pattern: "Dr\\.?\\s+[A-Z][a-z]+"
+    description: "Doctor name with title"
 
-sensitive_keys:
+government_id:
   - name: "SSN"
-    keys: ["ssn", "social_security", "social_security_number"]
-    priority: 10
-    
-  - name: "DOB"
-    keys: ["dob", "date_of_birth", "birth_date"]
-    priority: 9
-    
+    pattern: "\\d{3}[-\\s]?\\d{2}[-\\s]?\\d{4}"
+    description: "Social Security Number"
+  
+  - name: "Medical Record Number"
+    pattern: "MRN:?\\s*\\d{5,10}"
+    description: "Medical Record Number"
+
+location:
+  - name: "US Address"
+    pattern: "\\d+\\s+[A-Za-z\\s]+,\\s+[A-Za-z\\s]+,\\s+[A-Z]{2}\\s+\\d{5}"
+    description: "US street address"
+  
+  - name: "Zip Code"
+    pattern: "\\b\\d{5}(?:-\\d{4})?\\b"
+    description: "US ZIP code with optional +4"
+
+date:
+  - name: "Date (MM/DD/YYYY)"
+    pattern: "\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4}"
+    description: "Date in MM/DD/YYYY format"
+  
+  - name: "Date (Month DD, YYYY)"
+    pattern: "(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\s+\\d{1,2},?\\s+\\d{4}"
+    description: "Date in Month DD, YYYY format"
+
+financial:
   - name: "Credit Card"
-    keys: ["credit_card", "cc_number", "card_number"]
-    priority: 10
-    
-  - name: "Patient ID"
-    keys: ["patient_id", "id", "identifier", "mrn", "medical_record_number"]
-    priority: 8
-    
-  - name: "Name"
-    keys: ["name", "full_name", "first_name", "last_name", "patient_name"]
-    priority: 7
-    
-  - name: "Contact"
-    keys: ["email", "phone", "address", "contact"]
-    priority: 6
+    pattern: "\\d{4}[- ]?\\d{4}[- ]?\\d{4}[- ]?\\d{4}"
+    description: "Credit card number"
+  
+  - name: "Bank Account"
+    pattern: "Acct\\.?\\s*#?\\s*\\d{8,17}"
+    description: "Bank account number"
+
+medical:
+  - name: "ICD-10 Code"
+    pattern: "[A-Z]\\d{2}(?:\\.\\d{1,2})?"
+    description: "ICD-10 diagnostic code"
+  
+  - name: "Healthcare Provider"
+    pattern: "(?:Doctor|Dr|Physician|Psychiatrist|Psychologist|Therapist|Counselor)\\s+[A-Z][a-z]+"
+    description: "Healthcare provider reference"
+  
+  - name: "Medication"
+    pattern: "(?:prescribe|take|using|on)\\s+\\d+\\s*mg\\s+of\\s+[A-Za-z]+"
+    description: "Medication reference with dosage"
