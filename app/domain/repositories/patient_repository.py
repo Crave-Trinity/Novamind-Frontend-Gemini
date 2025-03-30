@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
 """
-Patient Repository Interface
-
-This module defines the interface for patient repositories.
+Repository interface for Patient operations.
+Pure domain interface with no infrastructure dependencies.
 """
-
 from abc import ABC, abstractmethod
-from typing import List, Optional, Union, Dict, Any
+from typing import List, Optional
 from uuid import UUID
 
 from app.domain.entities.patient import Patient
@@ -14,114 +11,31 @@ from app.domain.entities.patient import Patient
 
 class PatientRepository(ABC):
     """
-    Interface for patient repositories.
-    
-    This abstract class defines the contract that all patient repositories
-    must implement, ensuring consistent access to patient data regardless
-    of the underlying storage mechanism.
+    Abstract repository interface for Patient operations.
+    Concrete implementations will be provided in the infrastructure layer.
     """
     
     @abstractmethod
-    def get_by_id(self, patient_id: Union[UUID, str]) -> Optional[Patient]:
+    async def get_by_id(self, patient_id: UUID) -> Optional[Patient]:
         """
-        Get a patient by ID.
+        Retrieve a patient by ID.
         
         Args:
-            patient_id: ID of the patient
+            patient_id: The ID of the patient
             
         Returns:
-            Patient if found, None otherwise
+            The patient if found, None otherwise
         """
         pass
     
     @abstractmethod
-    def get_by_email(self, email: str) -> Optional[Patient]:
+    async def get_all(self, limit: int = 100, offset: int = 0) -> List[Patient]:
         """
-        Get a patient by email.
+        Retrieve all patients with pagination.
         
         Args:
-            email: Email of the patient
-            
-        Returns:
-            Patient if found, None otherwise
-        """
-        pass
-    
-    @abstractmethod
-    def get_by_phone(self, phone: str) -> Optional[Patient]:
-        """
-        Get a patient by phone number.
-        
-        Args:
-            phone: Phone number of the patient
-            
-        Returns:
-            Patient if found, None otherwise
-        """
-        pass
-    
-    @abstractmethod
-    def save(self, patient: Patient) -> Patient:
-        """
-        Save a patient.
-        
-        Args:
-            patient: Patient to save
-            
-        Returns:
-            Saved patient
-        """
-        pass
-    
-    @abstractmethod
-    def delete(self, patient_id: Union[UUID, str]) -> bool:
-        """
-        Delete a patient.
-        
-        Args:
-            patient_id: ID of the patient to delete
-            
-        Returns:
-            True if deleted, False otherwise
-        """
-        pass
-    
-    @abstractmethod
-    def search(
-        self,
-        query: str,
-        limit: int = 10,
-        offset: int = 0
-    ) -> List[Patient]:
-        """
-        Search for patients.
-        
-        Args:
-            query: Search query
-            limit: Maximum number of results
-            offset: Offset for pagination
-            
-        Returns:
-            List of matching patients
-        """
-        pass
-    
-    @abstractmethod
-    def get_all(
-        self,
-        limit: int = 100,
-        offset: int = 0,
-        sort_by: str = "last_name",
-        sort_order: str = "asc"
-    ) -> List[Patient]:
-        """
-        Get all patients with pagination.
-        
-        Args:
-            limit: Maximum number of results
-            offset: Offset for pagination
-            sort_by: Field to sort by
-            sort_order: Sort order (asc or desc)
+            limit: Maximum number of patients to retrieve
+            offset: Number of patients to skip
             
         Returns:
             List of patients
@@ -129,66 +43,66 @@ class PatientRepository(ABC):
         pass
     
     @abstractmethod
-    def count(self) -> int:
+    async def save(self, patient: Patient) -> Patient:
         """
-        Count all patients.
+        Save a patient (create or update).
         
+        Args:
+            patient: The patient to save
+            
         Returns:
-            Number of patients
+            The saved patient with any updates (e.g., generated IDs)
         """
         pass
     
     @abstractmethod
-    def exists(self, patient_id: Union[UUID, str]) -> bool:
+    async def delete(self, patient_id: UUID) -> bool:
         """
-        Check if a patient exists.
+        Delete a patient by ID.
         
         Args:
-            patient_id: ID of the patient
+            patient_id: The ID of the patient to delete
             
         Returns:
-            True if exists, False otherwise
+            True if successful, False otherwise
         """
         pass
     
     @abstractmethod
-    def exists_by_email(self, email: str) -> bool:
+    async def find_by_name(self, name: str) -> List[Patient]:
         """
-        Check if a patient exists by email.
+        Find patients by name (partial match).
         
         Args:
-            email: Email of the patient
+            name: The name to search for
             
         Returns:
-            True if exists, False otherwise
+            List of matching patients
         """
         pass
     
     @abstractmethod
-    def exists_by_phone(self, phone: str) -> bool:
+    async def find_by_diagnosis(self, diagnosis_code: str) -> List[Patient]:
         """
-        Check if a patient exists by phone number.
+        Find patients by diagnosis code.
         
         Args:
-            phone: Phone number of the patient
+            diagnosis_code: The diagnosis code to search for
             
         Returns:
-            True if exists, False otherwise
+            List of patients with the specified diagnosis
         """
         pass
     
     @abstractmethod
-    def get_patients_with_upcoming_appointments(
-        self,
-        days: int = 7
-    ) -> List[Patient]:
+    async def find_by_medication(self, medication_name: str) -> List[Patient]:
         """
-        Get patients with upcoming appointments.
+        Find patients by medication name.
         
         Args:
-            days: Number of days to look ahead
+            medication_name: The medication name to search for
             
         Returns:
-            List of patients with upcoming appointments
+            List of patients with the specified medication
         """
         pass

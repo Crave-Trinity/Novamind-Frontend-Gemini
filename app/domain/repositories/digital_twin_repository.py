@@ -1,79 +1,100 @@
-# -*- coding: utf-8 -*-
-# app/domain/repositories/digital_twin_repository.py
+"""
+Repository interface for Digital Twin operations.
+Pure domain interface with no infrastructure dependencies.
+"""
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from datetime import datetime
+from typing import List, Optional, Tuple
 from uuid import UUID
 
-from app.domain.entities.digital_twin.digital_twin import DigitalTwin
+from app.domain.entities.digital_twin import DigitalTwinState
 
 
 class DigitalTwinRepository(ABC):
     """
-    Abstract repository interface for DigitalTwin entity.
-    Following the Repository pattern from DDD.
+    Abstract repository interface for Digital Twin state operations.
+    Concrete implementations will be provided in the infrastructure layer.
     """
-
+    
     @abstractmethod
-    async def create(self, digital_twin: DigitalTwin) -> DigitalTwin:
+    async def get_by_id(self, digital_twin_id: UUID) -> Optional[DigitalTwinState]:
         """
-        Create a new digital twin
-
+        Retrieve a Digital Twin state by its ID.
+        
         Args:
-            digital_twin: DigitalTwin entity to create
-
+            digital_twin_id: The ID of the Digital Twin state
+            
         Returns:
-            Created digital twin with ID
+            The Digital Twin state if found, None otherwise
         """
         pass
-
+    
     @abstractmethod
-    async def get_by_id(self, digital_twin_id: UUID) -> Optional[DigitalTwin]:
+    async def get_latest_for_patient(self, patient_id: UUID) -> Optional[DigitalTwinState]:
         """
-        Get digital twin by ID
-
+        Retrieve the latest Digital Twin state for a patient.
+        
         Args:
-            digital_twin_id: DigitalTwin UUID
-
+            patient_id: The ID of the patient
+            
         Returns:
-            DigitalTwin if found, None otherwise
+            The latest Digital Twin state if found, None otherwise
         """
         pass
-
+    
     @abstractmethod
-    async def get_by_patient_id(self, patient_id: UUID) -> Optional[DigitalTwin]:
+    async def get_history_for_patient(
+        self, 
+        patient_id: UUID, 
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        limit: int = 100
+    ) -> List[DigitalTwinState]:
         """
-        Get digital twin by patient ID
-
+        Retrieve historical Digital Twin states for a patient.
+        
         Args:
-            patient_id: Patient UUID
-
+            patient_id: The ID of the patient
+            start_date: Optional start date for filtering
+            end_date: Optional end date for filtering
+            limit: Maximum number of records to return
+            
         Returns:
-            DigitalTwin if found, None otherwise
+            List of Digital Twin states ordered by timestamp (newest first)
         """
         pass
-
+    
     @abstractmethod
-    async def update(self, digital_twin: DigitalTwin) -> DigitalTwin:
+    async def save(self, digital_twin_state: DigitalTwinState) -> DigitalTwinState:
         """
-        Update an existing digital twin
-
+        Save a Digital Twin state.
+        
         Args:
-            digital_twin: DigitalTwin entity with updated values
-
+            digital_twin_state: The Digital Twin state to save
+            
         Returns:
-            Updated digital twin
+            The saved Digital Twin state with any updates (e.g., generated IDs)
         """
         pass
-
+    
     @abstractmethod
-    async def list_versions(self, digital_twin_id: UUID) -> List[DigitalTwin]:
+    async def find_by_clinical_significance(
+        self,
+        significance_level: str,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        limit: int = 100
+    ) -> List[Tuple[UUID, DigitalTwinState]]:
         """
-        List all versions of a digital twin
-
+        Find Digital Twin states with specified clinical significance.
+        
         Args:
-            digital_twin_id: DigitalTwin UUID
-
+            significance_level: The clinical significance level to search for
+            start_date: Optional start date for filtering
+            end_date: Optional end date for filtering
+            limit: Maximum number of records to return
+            
         Returns:
-            List of digital twin versions
+            List of tuples containing patient ID and Digital Twin state
         """
         pass

@@ -23,9 +23,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.core.config import settings
+from app.core.config.settings import settings
 from app.core.utils.logging import HIPAACompliantLogger
-from app.presentation.api.v1.endpoints import patients, appointments, digital_twins, auth, biometric_alerts, biometric_alert_system
+# Updated imports to match new structure
+from app.api.routes import patients, appointments, digital_twins, auth, biometric_alerts, biometric_alert_system, temporal_neurotransmitter
 from app.infrastructure.di.container import get_container
 from app.domain.exceptions import (
     NovaBaseException, 
@@ -250,6 +251,7 @@ api_router.include_router(appointments.router, prefix="/appointments", tags=["Ap
 api_router.include_router(digital_twins.router, prefix="/digital-twins", tags=["Digital Twins"])
 api_router.include_router(biometric_alerts.router, prefix="/biometric-alerts", tags=["Biometric Alerts"])
 api_router.include_router(biometric_alert_system.router, prefix="/biometric-alert-system", tags=["Biometric Alert System"])
+api_router.include_router(temporal_neurotransmitter.router, prefix="/temporal-neurotransmitter", tags=["Temporal Neurotransmitter"])
 
 app.include_router(api_router)
 

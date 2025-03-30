@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from app.domain.entities.digital_twin.clinical_insight import ClinicalInsight
+from app.domain.entities.digital_twin_enums import ClinicalInsight
 from app.domain.entities.digital_twin.twin_model import DigitalTwinModel
 
 

@@ -1,31 +1,27 @@
 """
-API routes initialization.
+API routes package for the Novamind Digital Twin Backend.
 
-This module initializes and configures all API routes for the application.
+This package contains all FastAPI routes organized by feature areas,
+ensuring clean separation of concerns and maintaining the API structure.
 """
-
 from fastapi import APIRouter
 
-from app.api.routes import (
-    actigraphy,
-    auth,
-    health,
-    patients,
-    practitioners,
-    scheduling,
-    messaging,
-    ml,
-)
+from app.api.routes import temporal_neurotransmitter
 
-# Create main router
+# Create main API router
 api_router = APIRouter()
 
-# Include all route modules
-api_router.include_router(health.router)
-api_router.include_router(auth.router)
-api_router.include_router(patients.router)
-api_router.include_router(practitioners.router)
-api_router.include_router(scheduling.router)
-api_router.include_router(messaging.router)
-api_router.include_router(ml.router)
-api_router.include_router(actigraphy.router)
+# Include routers from individual modules
+api_router.include_router(
+    temporal_neurotransmitter.router,
+    prefix="/temporal",
+    tags=["Temporal Neurotransmitter System"]
+)
+
+# Additional routers would be included here
+# Example:
+# api_router.include_router(
+#     patient.router,
+#     prefix="/patients",
+#     tags=["Patient Management"]
+# )

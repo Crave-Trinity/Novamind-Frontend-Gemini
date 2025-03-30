@@ -1,94 +1,52 @@
 """
-FastAPI dependency functions for service injection.
+Dependency injection for application services.
 
-This module provides dependencies for injecting services into API routes,
-following the dependency injection pattern for clean, testable code.
+This module provides FastAPI dependency functions to inject services
+into route handlers, ensuring proper initialization and cleanup.
 """
+from typing import AsyncGenerator
 
-import logging
-import os
-from functools import lru_cache
-from typing import Dict, Any
+from fastapi import Depends
 
-from fastapi import Depends, Request
-from app.core.services.ml.xgboost import (
-    XGBoostServiceInterface, 
-    get_service,
-    ConfigurationError
-)
-
-# Configure logging
-logger = logging.getLogger(__name__)
-
-# Default environment values
-DEFAULT_XGBOOST_SERVICE_TYPE = "mock"  # Use mock by default for safety
+from app.api.dependencies.database import get_db
+from app.application.services.temporal_neurotransmitter_service import TemporalNeurotransmitterService
+from app.domain.services.enhanced_xgboost_service import EnhancedXGBoostService
+from app.infrastructure.repositories.temporal_event_repository import SqlAlchemyEventRepository
+from app.infrastructure.repositories.temporal_sequence_repository import SqlAlchemyTemporalSequenceRepository
 
 
-@lru_cache(maxsize=1)
-def get_xgboost_config() -> Dict[str, Any]:
+async def get_sequence_repository(db=Depends(get_db)) -> AsyncGenerator:
+    """Get a sequence repository instance."""
+    repository = SqlAlchemyTemporalSequenceRepository(session=db)
+    yield repository
+
+
+async def get_event_repository(db=Depends(get_db)) -> AsyncGenerator:
+    """Get an event repository instance."""
+    repository = SqlAlchemyEventRepository(session=db)
+    yield repository
+
+
+async def get_xgboost_service() -> AsyncGenerator:
+    """Get an XGBoost service instance."""
+    # In production, model_path would be loaded from configuration
+    service = EnhancedXGBoostService()
+    yield service
+
+
+async def get_temporal_neurotransmitter_service(
+    sequence_repository=Depends(get_sequence_repository),
+    event_repository=Depends(get_event_repository),
+    xgboost_service=Depends(get_xgboost_service)
+) -> AsyncGenerator:
     """
-    Get configuration for XGBoost service from environment variables.
+    Get a temporal neurotransmitter service instance with all dependencies.
     
-    Uses LRU cache to avoid reloading config on every request.
-    
-    Returns:
-        Dictionary with service configuration
+    This dependency automatically injects repositories and the XGBoost service.
     """
-    # Load configuration from environment
-    service_type = os.environ.get("XGBOOST_SERVICE_TYPE", DEFAULT_XGBOOST_SERVICE_TYPE)
-    
-    # AWS-specific configuration (if needed)
-    aws_config = {}
-    if service_type == "aws":
-        aws_config = {
-            "aws_region": os.environ.get("AWS_REGION", "us-east-1"),
-            # Credentials should be provided via environment or instance profile
-            # for production deployments
-            "aws_access_key_id": os.environ.get("AWS_ACCESS_KEY_ID"),
-            "aws_secret_access_key": os.environ.get("AWS_SECRET_ACCESS_KEY"),
-            
-            # SageMaker endpoint configurations
-            "sagemaker_endpoints": {
-                # These can be customized as needed
-                # Format: "model_type": "endpoint_name"
-            }
-        }
-    
-    # Combine all config
-    config = {
-        "service_type": service_type,
-        **aws_config
-    }
-    
-    return config
-
-
-def get_xgboost_service() -> XGBoostServiceInterface:
-    """
-    FastAPI dependency for XGBoost service.
-    
-    This dependency will be injected into route functions that need
-    access to the XGBoost prediction service.
-    
-    Returns:
-        Initialized XGBoostServiceInterface implementation
-        
-    Raises:
-        ConfigurationError: If service initialization fails
-    """
-    try:
-        # Get configuration
-        config = get_xgboost_config()
-        service_type = config.pop("service_type")
-        
-        # Create and initialize service
-        service = get_service(service_type, config)
-        
-        return service
-        
-    except Exception as e:
-        logger.error(f"Failed to initialize XGBoost service: {str(e)}")
-        raise ConfigurationError(f"Failed to initialize XGBoost service: {str(e)}")
-
-
-# Additional service dependencies can be added here
+    service = TemporalNeurotransmitterService(
+        sequence_repository=sequence_repository,
+        event_repository=event_repository,
+        xgboost_service=xgboost_service
+    )
+    yield service

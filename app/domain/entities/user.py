@@ -1,77 +1,94 @@
-# -*- coding: utf-8 -*-
-# app/domain/entities/user.py
+"""
+User entity for authentication and authorization.
+
+This module defines the User domain entity which is used for authentication,
+authorization, and tracking user actions in the system.
+"""
 from datetime import datetime
-from enum import Enum
 from typing import List, Optional
-from uuid import UUID, uuid4
-
-
-class UserRole(Enum):
-    """User roles for role-based access control"""
-
-    ADMIN = "admin"
-    PROVIDER = "provider"
-    ASSISTANT = "assistant"
-    PATIENT = "patient"
+from uuid import UUID
 
 
 class User:
     """
-    User entity representing a system user with role-based permissions.
-    Core domain entity with no external dependencies.
+    User domain entity.
+    
+    This class represents a user in the system, which could be a clinician,
+    administrator, or patient. It contains the essential user data required
+    for authentication and authorization.
     """
-
+    
     def __init__(
         self,
-        username: str,
+        id: UUID,
         email: str,
-        roles: List[UserRole],
-        id: Optional[UUID] = None,
-        first_name: Optional[str] = None,
-        last_name: Optional[str] = None,
+        first_name: str,
+        last_name: str,
+        hashed_password: str,
         is_active: bool = True,
+        roles: List[str] = None,
         created_at: Optional[datetime] = None,
-        last_login: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None
     ):
-        self.id = id or uuid4()
-        self.username = username
+        """
+        Initialize a User entity.
+        
+        Args:
+            id: Unique identifier for the user
+            email: User's email address
+            first_name: User's first name
+            last_name: User's last name
+            hashed_password: Securely hashed password
+            is_active: Whether the user account is active
+            roles: List of roles assigned to the user
+            created_at: When the user was created
+            updated_at: When the user was last updated
+        """
+        self.id = id
         self.email = email
-        self.roles = roles
         self.first_name = first_name
         self.last_name = last_name
+        self.hashed_password = hashed_password
         self.is_active = is_active
-        self.created_at = created_at or datetime.now()
-        self.last_login = last_login
-
+        self.roles = roles or []
+        self.created_at = created_at or datetime.utcnow()
+        self.updated_at = updated_at or datetime.utcnow()
+    
     @property
     def full_name(self) -> str:
-        """Get user's full name if available, otherwise username"""
-        if self.first_name and self.last_name:
-            return f"{self.first_name} {self.last_name}"
-        return self.username
-
-    def has_role(self, role: UserRole) -> bool:
-        """Check if user has a specific role"""
+        """Get the user's full name."""
+        return f"{self.first_name} {self.last_name}"
+    
+    def has_role(self, role: str) -> bool:
+        """
+        Check if the user has a specific role.
+        
+        Args:
+            role: Role to check
+            
+        Returns:
+            True if the user has the specified role
+        """
         return role in self.roles
-
-    def add_role(self, role: UserRole) -> None:
-        """Add a role to user if not already present"""
+    
+    def add_role(self, role: str) -> None:
+        """
+        Add a role to the user.
+        
+        Args:
+            role: Role to add
+        """
         if role not in self.roles:
             self.roles.append(role)
-
-    def remove_role(self, role: UserRole) -> None:
-        """Remove a role from user"""
+            self.updated_at = datetime.utcnow()
+    
+    def remove_role(self, role: str) -> None:
+        """
+        Remove a role from the user.
+        
+        Args:
+            role: Role to remove
+        """
         if role in self.roles:
             self.roles.remove(role)
-
-    def deactivate(self) -> None:
-        """Deactivate user account"""
-        self.is_active = False
-
-    def activate(self) -> None:
-        """Activate user account"""
-        self.is_active = True
-
-    def update_last_login(self) -> None:
-        """Update last login timestamp"""
-        self.last_login = datetime.now()
+            self.updated_at = datetime.utcnow()
