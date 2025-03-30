@@ -1,7 +1,5 @@
 # Novamind Digital Twin: Concierge Psychiatry Platform
 
-IF YOU GET STUCK READ ALL THE DOCS IN `/docs/` and `/frontend/docs/`
-
 ## Full-Stack Architecture (Backend + Frontend)
 
 ### Clean Architecture Across the Stack
