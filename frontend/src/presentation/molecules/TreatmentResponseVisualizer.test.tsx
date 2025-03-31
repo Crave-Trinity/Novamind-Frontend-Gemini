@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * TreatmentResponseVisualizer testing with quantum precision
  */
@@ -364,4 +364,4 @@ describe('TreatmentResponseVisualizer', () => {
     
     expect(hasCustomColor).toBeTruthy();
   });
-});
+}); } from "";

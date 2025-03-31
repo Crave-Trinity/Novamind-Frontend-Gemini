@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * RegionSelectionPanel testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('RegionSelectionPanel', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

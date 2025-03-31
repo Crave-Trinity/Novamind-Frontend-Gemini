@@ -13,7 +13,7 @@ For dark mode, use dark: variant consistently with your theme setup
 Use lg:, md:, and sm: breakpoints deliberately, mobile-first
 React Performance Optimizations
 Use React.memo() on expensive render components
-Apply useCallback() for event handlers passed to memoized child components
+Apply useCallback() for  handlers passed to memoized child components
 Implement useMemo() for expensive calculations
 Add React.lazy() and Suspense for code-splitting heavy visualization components
 Set explicit key props (never use array index) for all lists
@@ -59,103 +59,4 @@ Apply ESLint with plugins for React hooks, a11y, and performance
 Configure Prettier with Tailwind plugin for class sorting
 Add Storybook for isolated component development
 Use React DevTools Profiler to identify render bottlenecks
-Reference
-// Example of optimized Brain visualization component
-import React, { useRef, useMemo, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
-import { useTheme } from '../context/ThemeContext';
-
-const BrainVisualization = ({ brainData, activeRegions }) => {
-  const { theme } = useTheme();
-  
-  // Memoize expensive data transformations
-  const processedData = useMemo(() => {
-    return transformBrainData(brainData);
-  }, [brainData]);
-  
-  // Theme-specific settings
-  const settings = useMemo(() => ({
-    'sleek-dark': {
-      bgColor: '#121212',
-      glowIntensity: 0.8,
-      useBloom: true,
-    },
-    'retro': {
-      bgColor: '#0a1128',
-      glowIntensity: 0,
-      useBloom: false,
-    },
-    'wes': {
-      bgColor: '#F8E9D6',
-      glowIntensity: 0,
-      useBloom: false,
-    },
-    'clinical': {
-      bgColor: '#ffffff',
-      glowIntensity: 0,
-      useBloom: false,
-    }
-  }), []);
-  
-  return (
-    <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden">
-      <Canvas gl={{ antialias: true }} dpr={[1, 2]} camera={{ position: [0, 0, 15], fov: 50 }}>
-        <color attach="background" args={[settings[theme].bgColor]} />
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1} />
-        
-        <BrainModel 
-          processedData={processedData} 
-          activeRegions={activeRegions} 
-          settings={settings[theme]} 
-        />
-        
-        {settings[theme].useBloom && (
-          <EffectComposer>
-            <Bloom luminanceThreshold={0.2} intensity={1.5} />
-          </EffectComposer>
-        )}
-      </Canvas>
-      
-      {/* UI Overlay - can include region selection, filters, etc. */}
-      <div className="absolute bottom-4 left-4 right-4 flex justify-center">
-        <div className="bg-black/30 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-xs">
-          {activeRegions.map(region => (
-            <span key={region.id} className="inline-block px-2 py-1 m-1 rounded bg-white/10">
-              {region.name}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Extract complex Three.js logic to a separate component
-const BrainModel = React.memo(({ processedData, activeRegions, settings }) => {
-  const groupRef = useRef();
-  
-  // Handle animation
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.getElapsedTime() * 0.1;
-    }
-  });
-  
-  return (
-    <group ref={groupRef}>
-      {/* Brain mesh implementation */}
-      {processedData.map(region => (
-        <RegionMesh 
-          key={region.id}
-          region={region}
-          isActive={activeRegions.some(r => r.id === region.id)}
-          glowIntensity={settings.glowIntensity}
-        />
-      ))}
-    </group>
-  );
-});
-
-// Further component details omitted for brevity
+# NOVAMIND TESTING REQUIREMENTS: /FRONTEND/TESTING-REQUIREMENTS.MD

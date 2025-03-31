@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * PerformanceMonitor testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('PerformanceMonitor', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

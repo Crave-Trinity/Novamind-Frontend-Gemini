@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * Login testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('Login', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * LoadingIndicator testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('LoadingIndicator', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

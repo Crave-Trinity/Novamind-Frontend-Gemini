@@ -14,7 +14,7 @@
   --primary-800: 6 95 70;
   --primary-900: 4 78 56;
   --primary-950: 2 44 34;
-  
+
   --background: 252 252 253;
   --background-card: 255 255 255;
   --foreground: 15 23 42;
@@ -32,7 +32,7 @@
   --primary-800: 167 243 208;
   --primary-900: 209 250 229;
   --primary-950: 236 253 245;
-  
+
   --background: 10 12 16;
   --background-card: 17 20 27;
   --foreground: 255 255 255;
@@ -41,7 +41,9 @@
 @layer base {
   body {
     @apply text-neutral-900 bg-neutral-50 dark:text-white dark:bg-background;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 }
 
@@ -65,7 +67,8 @@
 
 /* Animations */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -85,7 +88,8 @@
 }
 
 .transition-colors {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }

@@ -11,13 +11,13 @@ export interface IApiClient {
   clearAuthToken(): void;
   isAuthenticated(): boolean;
   login(email: string, password: string): Promise<any>;
-  
+
   // HTTP methods
   get<T>(url: string, config?: any): Promise<T>;
   post<T>(url: string, data?: any, config?: any): Promise<T>;
   put<T>(url: string, data?: any, config?: any): Promise<T>;
   delete<T>(url: string, config?: any): Promise<T>;
-  
+
   // Domain-specific methods
   getPatients(): Promise<any[]>;
   getPatientById(patientId: string): Promise<any>;

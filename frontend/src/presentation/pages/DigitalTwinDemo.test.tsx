@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * DigitalTwinDemo testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('DigitalTwinDemo', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

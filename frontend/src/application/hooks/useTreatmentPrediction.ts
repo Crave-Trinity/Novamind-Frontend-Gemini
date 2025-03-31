@@ -50,7 +50,7 @@ export function useTreatmentPrediction({
   } = useMutation({
     mutationFn: async ({
       clinicalData,
-      geneticData
+      geneticData,
     }: {
       clinicalData: {
         severity: string;
@@ -82,7 +82,7 @@ export function useTreatmentPrediction({
 
       // Invalidate related queries that depend on this prediction
       queryClient.invalidateQueries({
-        queryKey: ["featureImportance", patientId]
+        queryKey: ["featureImportance", patientId],
       });
     },
     onError: (error: Error) => {
@@ -124,7 +124,7 @@ export function useTreatmentPrediction({
         profile_id: profileId,
         prediction_id: activePredictionId,
       });
-    }
+    },
   });
 
   // Update treatment configuration

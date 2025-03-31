@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * Card testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('Card', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

@@ -4,13 +4,13 @@
  * with neuropsychiatric precision and mathematical elegance
  */
 
-import React, { useRef, useMemo, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Vector3, Color, ShaderMaterial, Mesh, DoubleSide } from 'three';
-import { useSpring, animated } from '@react-spring/three';
+import React, { useRef, useMemo, useEffect } from "react";
+import { useFrame } from "@react-three/fiber";
+import { Vector3, Color, ShaderMaterial, Mesh, DoubleSide } from "three";
+import { useSpring, animated } from "@react-spring/three";
 
 // Import types
-import { ActivationLevel } from '@domain/types/brain/activity';
+import { ActivationLevel } from "@domain/types/brain/activity";
 
 // Neural activity shader with advanced clinical precision effects
 const activityShader = {
@@ -73,7 +73,7 @@ const activityShader = {
       // Output final color with clinical precision
       gl_FragColor = vec4(finalColor, finalOpacity);
     }
-  `
+  `,
 };
 
 // Component Props with neural-safe typing
@@ -83,7 +83,7 @@ interface ActivityIndicatorProps {
   baseColor?: string;
   activeColor?: string;
   activationLevel: ActivationLevel;
-  rawActivity: number;  // 0.0-1.0 raw value
+  rawActivity: number; // 0.0-1.0 raw value
   opacity?: number;
   pulsePeriod?: number;
   waveSpeed?: number;
@@ -100,7 +100,7 @@ const activationLevelMap: Record<ActivationLevel, number> = {
   [ActivationLevel.LOW]: 0.25,
   [ActivationLevel.MEDIUM]: 0.5,
   [ActivationLevel.HIGH]: 0.75,
-  [ActivationLevel.EXTREME]: 1.0
+  [ActivationLevel.EXTREME]: 1.0,
 };
 
 /**
@@ -110,8 +110,8 @@ const activationLevelMap: Record<ActivationLevel, number> = {
 export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
   position,
   scale,
-  baseColor = '#94a3b8', // Default slate color
-  activeColor = '#ef4444', // Default red for active state
+  baseColor = "#94a3b8", // Default slate color
+  activeColor = "#ef4444", // Default red for active state
   activationLevel,
   rawActivity,
   opacity = 0.8,
@@ -119,24 +119,24 @@ export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
   waveSpeed = 2.0,
   waveAmplitude = 0.05,
   glowIntensity = 0.6,
-  animationDuration = 800
+  animationDuration = 800,
 }) => {
   // Create refs for animation
   const meshRef = useRef<Mesh>(null);
   const materialRef = useRef<ShaderMaterial>(null);
-  
+
   // Calculate derived scale
   const derivedScale = useMemo(() => {
-    if (typeof scale === 'number') {
+    if (typeof scale === "number") {
       return new Vector3(scale, scale, scale);
     }
     return scale;
   }, [scale]);
-  
+
   // Create color objects for shaders
   const baseColorObj = useMemo(() => new Color(baseColor), [baseColor]);
   const activeColorObj = useMemo(() => new Color(activeColor), [activeColor]);
-  
+
   // Apply specialized neural activity level
   // Using both discrete activation level and raw value for precise visualization
   const activityValue = useMemo(() => {
@@ -144,17 +144,17 @@ export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
     // Blend between raw value and level value for a more precise representation
     return levelValue * 0.7 + rawActivity * 0.3;
   }, [activationLevel, rawActivity]);
-  
+
   // Create spring animation for smooth neural activation transitions
   const { springActivity } = useSpring({
     springActivity: activityValue,
     config: {
       tension: 120,
       friction: 20,
-      duration: animationDuration
-    }
+      duration: animationDuration,
+    },
   });
-  
+
   // Create unified shader material with precise clinical parameters
   const shaderMaterial = useMemo(() => {
     return new ShaderMaterial({
@@ -167,29 +167,37 @@ export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
         pulsePeriod: { value: pulsePeriod },
         waveSpeed: { value: waveSpeed },
         waveAmplitude: { value: waveAmplitude },
-        glowIntensity: { value: glowIntensity }
+        glowIntensity: { value: glowIntensity },
       },
       vertexShader: activityShader.vertexShader,
       fragmentShader: activityShader.fragmentShader,
       transparent: true,
       side: DoubleSide, // Visible from both sides
-      depthWrite: false // Prevent Z-fighting with brain region
+      depthWrite: false, // Prevent Z-fighting with brain region
     });
-  }, [baseColorObj, activeColorObj, opacity, pulsePeriod, waveSpeed, waveAmplitude, glowIntensity]);
-  
+  }, [
+    baseColorObj,
+    activeColorObj,
+    opacity,
+    pulsePeriod,
+    waveSpeed,
+    waveAmplitude,
+    glowIntensity,
+  ]);
+
   // Update material when activity level changes
   useEffect(() => {
     if (materialRef.current) {
       // Material update will be handled by the spring animation
     }
   }, [activityValue]);
-  
+
   // Animate neural activity indicator with clinical precision
   useFrame((state) => {
     if (materialRef.current) {
       // Update time uniform for shader animations
       materialRef.current.uniforms.time.value = state.clock.getElapsedTime();
-      
+
       // Update activity level from spring physics for smooth transitions
       materialRef.current.uniforms.activityLevel.value = springActivity.get();
     }
@@ -197,7 +205,7 @@ export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
 
   // Only render if activity is above threshold
   if (activityValue < 0.05) return null;
-  
+
   return (
     <animated.mesh
       ref={meshRef}
@@ -205,7 +213,11 @@ export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
       scale={derivedScale.clone().multiplyScalar(1.1)} // Slightly larger than the region
     >
       <sphereGeometry args={[1, 32, 32]} />
-      <shaderMaterial ref={materialRef} args={[shaderMaterial]} attach="material" />
+      <shaderMaterial
+        ref={materialRef}
+        args={[shaderMaterial]}
+        attach="material"
+      />
     </animated.mesh>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
 import { RiskAssessment } from "../../domain/models/PatientModel";
@@ -29,7 +29,9 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
 }) => {
   // Sort risk assessments by date (newest first)
   const sortedRiskAssessments = [...riskAssessments].sort(
-    (a, b) => new Date(b.date || new Date().toISOString()).getTime() - new Date(a.date || new Date().toISOString()).getTime(),
+    (a, b) =>
+      new Date(b.date || new Date().toISOString()).getTime() -
+      new Date(a.date || new Date().toISOString()).getTime(),
   );
 
   // Active risk type selection
@@ -54,22 +56,22 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
     reset: resetPrediction,
   } = useMutation({
     mutationFn: async () => {
-    const request: RiskPredictionRequest = {
-      patient_id: patientId,
-      risk_type: activeRiskType,
-      clinical_data: {
-        assessment_scores: {
-          phq9: clinicalData.phq9_score,
-          gad7: clinicalData.gad7_score,
+      const request: RiskPredictionRequest = {
+        patient_id: patientId,
+        risk_type: activeRiskType,
+        clinical_data: {
+          assessment_scores: {
+            phq9: clinicalData.phq9_score,
+            gad7: clinicalData.gad7_score,
+          },
+          severity: clinicalData.severity,
+          diagnosis: clinicalData.diagnosis,
         },
-        severity: clinicalData.severity,
-        diagnosis: clinicalData.diagnosis,
-      },
-      confidence_threshold: 0.7,
-    };
+        confidence_threshold: 0.7,
+      };
 
-    return xgboostService.predictRisk(request);
-    }
+      return xgboostService.predictRisk(request);
+    },
   });
 
   // Handle risk type change
@@ -238,7 +240,9 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
 
           <div className="text-xs text-neutral-500">
             Next Assessment:{" "}
-            {new Date(latest?.nextAssessmentDate || new Date()).toLocaleDateString()}
+            {new Date(
+              latest?.nextAssessmentDate || new Date(),
+            ).toLocaleDateString()}
           </div>
         </div>
       </div>
@@ -484,24 +488,36 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
             <div className="space-y-2">
               {predictionResult.factors
                 .slice(0, 5)
-                .map((factor: { name: string; contribution: number; direction: "positive" | "negative" }, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between">
-                    <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                      {factor.name}
-                    </span>
-                    <div className="h-2 w-1/2 rounded-full bg-neutral-200 dark:bg-neutral-700">
-                      <div
-                        className={`h-2 rounded-full ${factor.direction === "positive" ? "bg-red-500" : "bg-blue-500"}`}
-                        style={{
-                          width: `${Math.abs(factor.contribution) * 100}%`,
-                        }}
-                      ></div>
+                .map(
+                  (
+                    factor: {
+                      name: string;
+                      contribution: number;
+                      direction: "positive" | "negative";
+                    },
+                    idx: number,
+                  ) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between"
+                    >
+                      <span className="text-sm text-neutral-700 dark:text-neutral-300">
+                        {factor.name}
+                      </span>
+                      <div className="h-2 w-1/2 rounded-full bg-neutral-200 dark:bg-neutral-700">
+                        <div
+                          className={`h-2 rounded-full ${factor.direction === "positive" ? "bg-red-500" : "bg-blue-500"}`}
+                          style={{
+                            width: `${Math.abs(factor.contribution) * 100}%`,
+                          }}
+                        ></div>
+                      </div>
+                      <span className="w-12 text-right text-xs text-neutral-500">
+                        {(factor.contribution * 100).toFixed(1)}%
+                      </span>
                     </div>
-                    <span className="w-12 text-right text-xs text-neutral-500">
-                      {(factor.contribution * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                ))}
+                  ),
+                )}
             </div>
           </div>
         )}
@@ -559,7 +575,9 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
               {sortedRiskAssessments.slice(1).map((assessment, idx) => (
                 <tr key={idx}>
                   <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-neutral-800 dark:text-neutral-200">
-                    {new Date(assessment?.date || new Date()).toLocaleDateString()}
+                    {new Date(
+                      assessment?.date || new Date(),
+                    ).toLocaleDateString()}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">
                     <span
@@ -595,7 +613,8 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
                         ))}
                       {assessment?.recommendedInterventions.length > 2 && (
                         <span className="inline-block rounded bg-neutral-100 px-2 py-1 text-xs text-neutral-800 dark:bg-neutral-900 dark:text-neutral-200">
-                          +{assessment?.recommendedInterventions.length - 2} more
+                          +{assessment?.recommendedInterventions.length - 2}{" "}
+                          more
                         </span>
                       )}
                     </div>

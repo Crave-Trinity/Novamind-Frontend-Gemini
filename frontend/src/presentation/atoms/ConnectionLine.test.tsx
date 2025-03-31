@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * ConnectionLine testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('ConnectionLine', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

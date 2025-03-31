@@ -274,8 +274,8 @@ const Dashboard: React.FC = () => {
     isLoading: isPatientsLoading,
     error: patientsError,
   } = useQuery({
-    queryKey: ['patients'],
-    queryFn: fetchPatients
+    queryKey: ["patients"],
+    queryFn: fetchPatients,
   });
 
   // Fetch digital twin profile when patient is selected
@@ -284,10 +284,10 @@ const Dashboard: React.FC = () => {
     isLoading: isProfileLoading,
     error: profileError,
   } = useQuery({
-    queryKey: ['digitalTwinProfile', selectedPatientId],
+    queryKey: ["digitalTwinProfile", selectedPatientId],
     queryFn: () => fetchDigitalTwinProfile(selectedPatientId!),
     enabled: !!selectedPatientId,
-    staleTime: 5 * 60 * 1000 // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Select first patient by default when data loads

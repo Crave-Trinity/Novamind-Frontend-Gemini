@@ -1,13 +1,13 @@
-import { ApiClient } from './ApiClient';
-import { EnhancedMockApiClient } from './EnhancedMockApiClient';
-import { IApiClient } from './IApiClient';
+import { ApiClient } from "./ApiClient";
+import { EnhancedMockApiClient } from "./EnhancedMockApiClient";
+import { IApiClient } from "./IApiClient";
 
 /**
  * ApiGateway - Implementation of the clean hexagonal architecture pattern
- * 
+ *
  * This gateway allows the frontend application to operate without a backend
  * using the following clean architecture principles:
- * 
+ *
  * 1. Dependency Inversion - high level modules depend on abstractions
  * 2. Interface Segregation - clients only depend on methods they use
  * 3. Single Responsibility - each implementation handles one aspect
@@ -22,21 +22,23 @@ export class ApiGateway implements IApiClient {
   public static getInstance(): IApiClient {
     if (!this.instance) {
       // For production, we'll check env vars to determine mode
-      const useMockApi = 
-        process.env.NODE_ENV === 'development' || 
+      const useMockApi =
+        process.env.NODE_ENV === "development" ||
         this.mockMode ||
         // Detect if we're in a GitHub Codespace and allow override
-        (window.location.hostname.includes('githubpreview.dev') && 
-        !localStorage.getItem('use_real_api'));
-      
-      console.info(`🧠 Novamind API Gateway: Using ${useMockApi ? 'MOCK' : 'REAL'} API client`);
-      
+        (window.location.hostname.includes("githubpreview.dev") &&
+          !localStorage.getItem("use_real_api"));
+
+      console.info(
+        `🧠 Novamind API Gateway: Using ${useMockApi ? "MOCK" : "REAL"} API client`,
+      );
+
       // If we detect API connection errors, we can auto-fallback to mock mode
-      this.instance = useMockApi 
+      this.instance = useMockApi
         ? new EnhancedMockApiClient()
         : new ApiClient();
     }
-    
+
     return this.instance;
   }
 
@@ -46,8 +48,8 @@ export class ApiGateway implements IApiClient {
   public static enableMockMode(): void {
     this.mockMode = true;
     this.instance = null as unknown as IApiClient; // Force recreation
-    localStorage.setItem('use_mock_api', 'true');
-    console.info('🧠 Novamind API Gateway: Mock mode ENABLED');
+    localStorage.setItem("use_mock_api", "true");
+    console.info("🧠 Novamind API Gateway: Mock mode ENABLED");
   }
 
   /**
@@ -56,8 +58,10 @@ export class ApiGateway implements IApiClient {
   public static disableMockMode(): void {
     this.mockMode = false;
     this.instance = null as unknown as IApiClient; // Force recreation
-    localStorage.setItem('use_mock_api', 'false');
-    console.info('🧠 Novamind API Gateway: Mock mode DISABLED - attempting to use real API');
+    localStorage.setItem("use_mock_api", "false");
+    console.info(
+      "🧠 Novamind API Gateway: Mock mode DISABLED - attempting to use real API",
+    );
   }
 
   // Forward all methods to the instance - clean implementation of the Proxy pattern
@@ -105,8 +109,14 @@ export class ApiGateway implements IApiClient {
     return ApiGateway.getInstance().getBrainModel(modelId);
   }
 
-  predictTreatmentResponse(patientId: string, treatmentData: any): Promise<any> {
-    return ApiGateway.getInstance().predictTreatmentResponse(patientId, treatmentData);
+  predictTreatmentResponse(
+    patientId: string,
+    treatmentData: any,
+  ): Promise<any> {
+    return ApiGateway.getInstance().predictTreatmentResponse(
+      patientId,
+      treatmentData,
+    );
   }
 
   getRiskAssessment(patientId: string): Promise<any> {

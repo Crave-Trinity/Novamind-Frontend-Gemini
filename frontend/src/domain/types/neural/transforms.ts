@@ -4,7 +4,10 @@
  * with mathematically precise type definitions
  */
 
-import { NeuralFrequencyBand, NeuralTransitionType } from '@domain/types/brain/activity';
+import {
+  NeuralFrequencyBand,
+  NeuralTransitionType,
+} from "@domain/types/brain/activity";
 
 /**
  * Neural-safe transform definition with clinical precision
@@ -15,55 +18,60 @@ export interface NeuralTransform {
    * Unique identifier for the transform
    */
   id?: string;
-  
+
   /**
    * Target brain region identifier
    */
   regionId: string;
-  
+
   /**
    * Change in activation level (-1.0 to 1.0)
    * Negative values suppress activity, positive values enhance
    */
   activationChange: number;
-  
+
   /**
    * Type of transition to apply
    */
   transitionType: NeuralTransitionType;
-  
+
   /**
    * Optional frequency band to affect
    */
   frequencyBand?: NeuralFrequencyBand;
-  
+
   /**
    * Source trigger for this neural transform
    */
-  sourceTrigger: 'symptom' | 'medication' | 'stimulation' | 'baseline' | 'manual';
-  
+  sourceTrigger:
+    | "symptom"
+    | "medication"
+    | "stimulation"
+    | "baseline"
+    | "manual";
+
   /**
    * Clinical correlation identifier
    * Links this transform to a clinical entity (symptom, medication, etc.)
    */
   clinicalCorrelationId?: string;
-  
+
   /**
    * Timestamp of transform application
    */
   timestamp?: Date;
-  
+
   /**
    * Duration of the transform effect in milliseconds
    * If undefined, effect is persistent until reset
    */
   duration?: number;
-  
+
   /**
    * Confidence level in the transform's accuracy (0.0 to 1.0)
    */
   confidence?: number;
-  
+
   /**
    * Clinical notes providing context for this transform
    */
@@ -78,28 +86,28 @@ export interface NeuralTransformBatch {
    * Unique identifier for the batch
    */
   id: string;
-  
+
   /**
    * Transforms to apply as a synchronized unit
    */
   transforms: NeuralTransform[];
-  
+
   /**
    * Whether transforms should be applied atomically
    * If true, all transforms succeed or all fail
    */
   atomic: boolean;
-  
+
   /**
    * Clinical context for this transform batch
    */
   clinicalContext?: string;
-  
+
   /**
    * Source of the transform batch
    */
-  source: 'clinical' | 'algorithmic' | 'manual' | 'simulation';
-  
+  source: "clinical" | "algorithmic" | "manual" | "simulation";
+
   /**
    * Application timestamp
    */
@@ -114,12 +122,12 @@ export interface NeuralTransformSequence {
    * Unique identifier for the sequence
    */
   id: string;
-  
+
   /**
    * Name of the sequence
    */
   name: string;
-  
+
   /**
    * Ordered transform batches to apply in sequence
    */
@@ -128,35 +136,35 @@ export interface NeuralTransformSequence {
      * Transform batch to apply
      */
     batch: NeuralTransformBatch;
-    
+
     /**
      * Delay in milliseconds before applying this batch
      * Relative to the previous batch or sequence start
      */
     delayMs: number;
   }[];
-  
+
   /**
    * Whether the sequence should loop
    */
   loop: boolean;
-  
+
   /**
    * Number of times to repeat the sequence
    * Undefined means infinite (if loop is true)
    */
   repetitions?: number;
-  
+
   /**
    * Delay between repetitions in milliseconds
    */
   interRepetitionDelayMs?: number;
-  
+
   /**
    * Description of the sequence's clinical purpose
    */
   description?: string;
-  
+
   /**
    * Tags for categorization
    */
@@ -171,22 +179,22 @@ export interface NeuralTransformResult {
    * Reference to original transform or batch
    */
   transformId: string;
-  
+
   /**
    * Success status
    */
   success: boolean;
-  
+
   /**
    * Error message if unsuccessful
    */
   error?: string;
-  
+
   /**
    * Affected region IDs
    */
   affectedRegions: string[];
-  
+
   /**
    * Clinical metrics affected by this transform
    */
@@ -196,12 +204,12 @@ export interface NeuralTransformResult {
     newValue: number;
     percentChange: number;
   }[];
-  
+
   /**
    * Application timestamp
    */
   timestamp: Date;
-  
+
   /**
    * Performance metrics
    */
@@ -210,10 +218,10 @@ export interface NeuralTransformResult {
      * Processing time in milliseconds
      */
     processingTimeMs: number;
-    
+
     /**
      * Computation intensity
      */
-    computationalIntensity: 'low' | 'medium' | 'high';
+    computationalIntensity: "low" | "medium" | "high";
   };
 }

@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 
 import ThemeContext, {
   ThemeContextType, // Import the context type
-  ThemeOption,      // Import the correct theme option type
-  themeSettings,    // Import the actual settings object
+  ThemeOption, // Import the correct theme option type
+  themeSettings, // Import the actual settings object
 } from "./ThemeContext";
 // Removed incorrect ThemeType import from ../types/brain
 import { isValidTheme } from "../types/theme"; // Import the correct type guard
@@ -25,7 +25,8 @@ const ThemeProviderComponent: React.FC<ThemeProviderProps> = ({
   initialTheme = "clinical",
 }) => {
   // Get saved theme from localStorage or use default
-  const getSavedTheme = (): ThemeOption => { // Return ThemeOption
+  const getSavedTheme = (): ThemeOption => {
+    // Return ThemeOption
     try {
       const savedTheme = localStorage.getItem("novamind-theme");
       // Use the imported isValidTheme type guard
@@ -45,13 +46,15 @@ const ThemeProviderComponent: React.FC<ThemeProviderProps> = ({
   const [theme, setThemeState] = useState<ThemeOption>(getSavedTheme); // Use ThemeOption
 
   // Computed state for dark mode - Include all dark themes
-  const isDarkMode = theme === "dark" || theme === "sleek-dark" || theme === "retro";
+  const isDarkMode =
+    theme === "dark" || theme === "sleek-dark" || theme === "retro";
 
   // Get theme settings based on current theme - Use themeSettings directly
   const settings = useMemo(() => themeSettings[theme], [theme]);
 
   // Set theme and save to localStorage
-  const setTheme = useCallback((newTheme: ThemeOption) => { // Use ThemeOption
+  const setTheme = useCallback((newTheme: ThemeOption) => {
+    // Use ThemeOption
     try {
       localStorage.setItem("novamind-theme", newTheme);
     } catch (e) {

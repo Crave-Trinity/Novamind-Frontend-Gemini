@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * ClinicalDataOverlay testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('ClinicalDataOverlay', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

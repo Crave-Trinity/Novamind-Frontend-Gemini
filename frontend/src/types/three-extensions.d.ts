@@ -1,6 +1,6 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
-declare module 'three' {
+declare module "three" {
   export interface ShaderMaterial {
     uniforms: {
       [key: string]: {
@@ -8,7 +8,7 @@ declare module 'three' {
       };
     };
   }
-  
+
   // Removed conflicting Mesh interface declaration
   // export interface Mesh {
   //   material: THREE.Material | THREE.Material[];

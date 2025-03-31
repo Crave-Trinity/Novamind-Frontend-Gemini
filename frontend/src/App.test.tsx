@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * App testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('App', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

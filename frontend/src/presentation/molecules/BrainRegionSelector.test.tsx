@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * BrainRegionSelector test with clinical precision
  */
@@ -13,3 +13,4 @@ describe('BrainRegionSelector', () => {
     expect(screen.getByTestId('brainregionselector')).toBeInTheDocument();
   });
 });
+ } from "";

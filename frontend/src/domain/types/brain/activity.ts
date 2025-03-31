@@ -4,19 +4,19 @@
  * with clinical precision and mathematical integrity
  */
 
-import { Vector3 } from 'three';
-import { Result } from '../common';
+import { Vector3 } from "three";
+import { Result } from "../common";
 
 /**
  * Neural activation level classifications
  * Provides precise categorization of neural activity
  */
 export enum ActivationLevel {
-  NONE = 'none',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  EXTREME = 'extreme'
+  NONE = "none",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  EXTREME = "extreme",
 }
 
 /**
@@ -26,14 +26,14 @@ export enum ActivationLevel {
 export interface NeuralActivityState {
   // Core properties
   entityId: string;
-  entityType: 'region' | 'connection';
+  entityType: "region" | "connection";
   timestamp: number;
-  
+
   // Activity metrics
   rawActivity: number; // Normalized 0.0-1.0
   activationLevel: ActivationLevel;
   activationDuration: number; // Duration in milliseconds
-  
+
   // Clinical metadata
   relatedSymptoms?: string[]; // IDs of related symptoms
   relatedDiagnoses?: string[]; // IDs of related diagnoses
@@ -61,7 +61,7 @@ export interface NeuralActivationPattern {
   }>;
   // Clinical context
   clinicalSignificance: number; // 0.0-1.0
-  evidenceLevel: 'established' | 'emerging' | 'theoretical';
+  evidenceLevel: "established" | "emerging" | "theoretical";
   references?: string[]; // Scientific references
 }
 
@@ -72,11 +72,11 @@ export interface NeuralActivationPattern {
 export interface NeuralStateTransition {
   id: string;
   entityId: string;
-  entityType: 'region' | 'connection';
+  entityType: "region" | "connection";
   startState: NeuralActivityState;
   endState: NeuralActivityState;
   transitionDuration: number; // Duration in milliseconds
-  transitionType: 'gradual' | 'abrupt' | 'oscillating';
+  transitionType: "gradual" | "abrupt" | "oscillating";
   // Clinical significance
   clinicallySignificant: boolean;
   associatedEvent?: string; // e.g., "medication administration", "stress trigger"
@@ -98,7 +98,7 @@ export interface TemporalActivationSequence {
   // Clinical metadata
   associatedCondition?: string;
   clinicalSignificance: number; // 0.0-1.0
-  evidenceLevel: 'established' | 'emerging' | 'theoretical';
+  evidenceLevel: "established" | "emerging" | "theoretical";
 }
 
 /**
@@ -125,21 +125,21 @@ export interface ActivityVisualizationSettings {
   // Display thresholds
   minDisplayThreshold: number; // Minimum activity level to display (0.0-1.0)
   highActivityThreshold: number; // Threshold for high activity (0.0-1.0)
-  
+
   // Color mapping
-  colorMapName: 'clinical' | 'heatmap' | 'spectral' | 'custom';
+  colorMapName: "clinical" | "heatmap" | "spectral" | "custom";
   customColorMap?: Record<number, string>; // Custom color mapping
-  
+
   // Visual effects
   usePulsation: boolean; // Pulsate regions based on activity
   pulsationSpeed: number; // Speed of pulsation
   useGlow: boolean; // Add glow effect to active regions
   glowIntensity: number; // Intensity of glow effect (0.0-1.0)
-  
+
   // Temporal settings
   temporalSmoothingFactor: number; // Smoothing factor for temporal changes (0.0-1.0)
   temporalScale: number; // Scale factor for temporal visualization
-  
+
   // Clinical settings
   showConfidenceIntervals: boolean; // Show confidence intervals for activity
   highlightClinicallySignificant: boolean; // Highlight clinically significant activity
@@ -165,41 +165,55 @@ export function calculateActivationLevel(rawActivity: number): ActivationLevel {
  */
 export function calculateClinicalSignificance(
   activationPattern: NeuralActivationPattern,
-  patientRiskFactors: string[] = []
+  patientRiskFactors: string[] = [],
 ): Result<number> {
   // This would be a complex algorithm in practice
   // Simplified implementation for demonstration
-  
+
   let baseSignificance = 0;
-  
+
   // Calculate base significance from primary effect regions
-  const primaryRegions = activationPattern.regionActivations.filter(r => r.primaryEffect);
+  const primaryRegions = activationPattern.regionActivations.filter(
+    (r) => r.primaryEffect,
+  );
   if (primaryRegions.length > 0) {
-    const avgPrimaryActivity = primaryRegions.reduce((sum, r) => sum + r.activityLevel, 0) / primaryRegions.length;
+    const avgPrimaryActivity =
+      primaryRegions.reduce((sum, r) => sum + r.activityLevel, 0) /
+      primaryRegions.length;
     baseSignificance = avgPrimaryActivity * 0.7; // Primary regions contribute 70% of base score
   }
-  
+
   // Add contribution from secondary regions
-  const secondaryRegions = activationPattern.regionActivations.filter(r => !r.primaryEffect);
+  const secondaryRegions = activationPattern.regionActivations.filter(
+    (r) => !r.primaryEffect,
+  );
   if (secondaryRegions.length > 0) {
-    const avgSecondaryActivity = secondaryRegions.reduce((sum, r) => sum + r.activityLevel, 0) / secondaryRegions.length;
+    const avgSecondaryActivity =
+      secondaryRegions.reduce((sum, r) => sum + r.activityLevel, 0) /
+      secondaryRegions.length;
     baseSignificance += avgSecondaryActivity * 0.3; // Secondary regions contribute 30%
   }
-  
+
   // Apply evidence level modifier
-  const evidenceModifier = 
-    activationPattern.evidenceLevel === 'established' ? 1.0 :
-    activationPattern.evidenceLevel === 'emerging' ? 0.8 : 0.5;
-  
+  const evidenceModifier =
+    activationPattern.evidenceLevel === "established"
+      ? 1.0
+      : activationPattern.evidenceLevel === "emerging"
+        ? 0.8
+        : 0.5;
+
   // Apply risk factor modifier
   const riskFactorCount = patientRiskFactors.length;
-  const riskModifier = Math.min(1.0 + (riskFactorCount * 0.05), 1.5); // Max 50% increase
-  
+  const riskModifier = Math.min(1.0 + riskFactorCount * 0.05, 1.5); // Max 50% increase
+
   // Calculate final significance score
-  const clinicalSignificance = Math.min(baseSignificance * evidenceModifier * riskModifier, 1.0);
-  
+  const clinicalSignificance = Math.min(
+    baseSignificance * evidenceModifier * riskModifier,
+    1.0,
+  );
+
   return {
     success: true,
-    data: clinicalSignificance
+    data: clinicalSignificance,
   };
 }

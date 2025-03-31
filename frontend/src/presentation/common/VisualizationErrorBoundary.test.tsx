@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * VisualizationErrorBoundary testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('VisualizationErrorBoundary', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

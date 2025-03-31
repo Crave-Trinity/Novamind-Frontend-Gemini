@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * Dashboard testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('Dashboard', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

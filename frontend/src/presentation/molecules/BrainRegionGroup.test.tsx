@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * BrainRegionGroup testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('BrainRegionGroup', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

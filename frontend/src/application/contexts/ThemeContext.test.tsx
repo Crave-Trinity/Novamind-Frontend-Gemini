@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * themeSettings testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('themeSettings', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

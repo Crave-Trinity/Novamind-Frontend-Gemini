@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * SessionWarningModal testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('SessionWarningModal', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

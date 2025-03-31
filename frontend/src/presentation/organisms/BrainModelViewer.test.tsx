@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * BrainModelViewer testing with quantum precision
  */
@@ -228,4 +228,4 @@ describe('BrainModelViewer', () => {
     expect(screen.getByTestId('bloom-effect')).toBeInTheDocument();
     expect(screen.getByTestId('depth-of-field')).toBeInTheDocument();
   });
-});
+}); } from "";

@@ -23,16 +23,21 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
   });
 
   // Calculate whether we're in dark mode
-  const isDarkMode = theme === "dark" || theme === "sleek-dark" || theme === "retro";
+  const isDarkMode =
+    theme === "dark" || theme === "sleek-dark" || theme === "retro";
 
   // Set theme with validation and persistence
   const setTheme = useCallback((newTheme: ThemeOption) => {
     if (isValidTheme(newTheme)) {
       setThemeState(newTheme);
       localStorage.setItem("novamind-theme", newTheme);
-      
+
       // Apply dark mode class to document
-      if (newTheme === "dark" || newTheme === "sleek-dark" || newTheme === "retro") {
+      if (
+        newTheme === "dark" ||
+        newTheme === "sleek-dark" ||
+        newTheme === "retro"
+      ) {
         document.documentElement.classList.add("dark");
       } else {
         document.documentElement.classList.remove("dark");

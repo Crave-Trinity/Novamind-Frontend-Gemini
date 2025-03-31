@@ -3,7 +3,7 @@
  * Core domain entities for brain visualization with quantum-level type safety
  */
 
-import { Vector3, SafeArray } from '../common';
+import { Vector3, SafeArray } from "../common";
 
 // Brain region with clinical-precision typing
 export interface BrainRegion {
@@ -17,8 +17,8 @@ export interface BrainRegion {
   isActive: boolean;
   riskFactor?: number;
   clinicalSignificance?: string;
-  hemisphereLocation: 'left' | 'right' | 'central';
-  tissueType?: 'gray' | 'white';
+  hemisphereLocation: "left" | "right" | "central";
+  tissueType?: "gray" | "white";
   dataConfidence: number; // 0-1 representing confidence level of data
 }
 
@@ -28,8 +28,8 @@ export interface NeuralConnection {
   sourceId: string;
   targetId: string;
   strength: number; // 0-1 connection strength
-  type: 'structural' | 'functional' | 'effective';
-  directionality: 'unidirectional' | 'bidirectional';
+  type: "structural" | "functional" | "effective";
+  directionality: "unidirectional" | "bidirectional";
   activityLevel: number;
   pathwayLength?: number; // mm
   dataConfidence: number; // 0-1 representing confidence level of data
@@ -40,7 +40,7 @@ export interface BrainScan {
   id: string;
   patientId: string;
   scanDate: string;
-  scanType: 'fMRI' | 'PET' | 'MRI' | 'DTI' | 'EEG' | 'MEG';
+  scanType: "fMRI" | "PET" | "MRI" | "DTI" | "EEG" | "MEG";
   resolution?: string;
   scannerModel?: string;
   contrastAgent?: boolean;
@@ -60,7 +60,7 @@ export interface BrainModel {
   timestamp: string;
   version: string;
   algorithmVersion?: string;
-  processingLevel: 'raw' | 'filtered' | 'normalized' | 'analyzed';
+  processingLevel: "raw" | "filtered" | "normalized" | "analyzed";
   lastUpdated: string;
 }
 
@@ -70,14 +70,14 @@ export interface NeuralActivity {
   timestamp: string;
   value: number;
   relativeChange?: number; // percent change from baseline
-  dataSource: 'measured' | 'interpolated' | 'predicted';
+  dataSource: "measured" | "interpolated" | "predicted";
   confidence: number; // 0-1 confidence score
 }
 
 // Neural activity time series with type safety
 export interface ActivityTimeSeries {
   regionId: string;
-  timeUnit: 'ms' | 's' | 'min' | 'hour' | 'day';
+  timeUnit: "ms" | "s" | "min" | "hour" | "day";
   startTime: string;
   endTime: string;
   timestamps: number[];
@@ -101,34 +101,34 @@ export interface RegionClinicalData {
 // Type guard for brain regions
 export function isBrainRegion(obj: unknown): obj is BrainRegion {
   return (
-    typeof obj === 'object' &&
+    typeof obj === "object" &&
     obj !== null &&
-    'id' in obj &&
-    'name' in obj &&
-    'position' in obj &&
-    'activityLevel' in obj
+    "id" in obj &&
+    "name" in obj &&
+    "position" in obj &&
+    "activityLevel" in obj
   );
 }
 
 // Type guard for neural connections
 export function isNeuralConnection(obj: unknown): obj is NeuralConnection {
   return (
-    typeof obj === 'object' &&
+    typeof obj === "object" &&
     obj !== null &&
-    'sourceId' in obj &&
-    'targetId' in obj &&
-    'strength' in obj
+    "sourceId" in obj &&
+    "targetId" in obj &&
+    "strength" in obj
   );
 }
 
 // Type guard for brain model
 export function isBrainModel(obj: unknown): obj is BrainModel {
   return (
-    typeof obj === 'object' &&
+    typeof obj === "object" &&
     obj !== null &&
-    'regions' in obj &&
-    'connections' in obj &&
-    'patientId' in obj &&
+    "regions" in obj &&
+    "connections" in obj &&
+    "patientId" in obj &&
     Array.isArray((obj as BrainModel).regions) &&
     Array.isArray((obj as BrainModel).connections)
   );
@@ -138,39 +138,50 @@ export function isBrainModel(obj: unknown): obj is BrainModel {
 export const BrainModelOps = {
   // Get region by ID with null safety
   getRegion: (model: BrainModel, regionId: string): BrainRegion | undefined => {
-    return new SafeArray(model.regions).find(region => region.id === regionId);
+    return new SafeArray(model.regions).find(
+      (region) => region.id === regionId,
+    );
   },
-  
+
   // Get connection by source and target with null safety
-  getConnection: (model: BrainModel, sourceId: string, targetId: string): NeuralConnection | undefined => {
-    return new SafeArray(model.connections)
-      .find(conn => conn.sourceId === sourceId && conn.targetId === targetId);
+  getConnection: (
+    model: BrainModel,
+    sourceId: string,
+    targetId: string,
+  ): NeuralConnection | undefined => {
+    return new SafeArray(model.connections).find(
+      (conn) => conn.sourceId === sourceId && conn.targetId === targetId,
+    );
   },
-  
+
   // Get connected regions for a specific region with null safety
   getConnectedRegions: (model: BrainModel, regionId: string): BrainRegion[] => {
     const connectedIds = new SafeArray(model.connections)
-      .filter(conn => conn.sourceId === regionId || conn.targetId === regionId)
-      .map(conn => conn.sourceId === regionId ? conn.targetId : conn.sourceId);
-    
+      .filter(
+        (conn) => conn.sourceId === regionId || conn.targetId === regionId,
+      )
+      .map((conn) =>
+        conn.sourceId === regionId ? conn.targetId : conn.sourceId,
+      );
+
     return new SafeArray(model.regions)
-      .filter(region => connectedIds.get().includes(region.id))
+      .filter((region) => connectedIds.get().includes(region.id))
       .get();
   },
-  
+
   // Calculate average activity level with mathematical precision
   calculateAverageActivity: (model: BrainModel): number => {
     const regions = new SafeArray(model.regions);
     if (regions.isEmpty()) return 0;
-    
-    const sum = regions.map(r => r.activityLevel).reduce((a, b) => a + b, 0);
+
+    const sum = regions.map((r) => r.activityLevel).reduce((a, b) => a + b, 0);
     return sum / regions.size();
   },
-  
+
   // Get regions by activity threshold with type safety
   getActiveRegions: (model: BrainModel, threshold: number): BrainRegion[] => {
     return new SafeArray(model.regions)
-      .filter(region => region.activityLevel >= threshold)
+      .filter((region) => region.activityLevel >= threshold)
       .get();
-  }
+  },
 };

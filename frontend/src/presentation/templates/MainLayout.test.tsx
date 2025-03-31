@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * MainLayout testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('MainLayout', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

@@ -58,7 +58,11 @@ export const Chart: React.FC<ChartProps> = ({
 
   // Safely get the primary dataset and data values
   const primaryDataset = data?.datasets?.[0];
-  if (!primaryDataset || !primaryDataset.data || primaryDataset.data.length === 0) {
+  if (
+    !primaryDataset ||
+    !primaryDataset.data ||
+    primaryDataset.data.length === 0
+  ) {
     return renderEmptyState();
   }
 
@@ -70,20 +74,23 @@ export const Chart: React.FC<ChartProps> = ({
   const getBackgroundColor = (dataset: ChartDataset, index: number): string => {
     // Default color if backgroundColor is not defined
     if (!dataset.backgroundColor) return "#4F46E5";
-    
+
     // If it's a string, return it directly
     if (typeof dataset.backgroundColor === "string") {
       return dataset.backgroundColor;
     }
-    
+
     // If it's an array, make sure it has elements before accessing
-    if (Array.isArray(dataset.backgroundColor) && dataset.backgroundColor.length > 0) {
+    if (
+      Array.isArray(dataset.backgroundColor) &&
+      dataset.backgroundColor.length > 0
+    ) {
       const colorIndex = index % dataset.backgroundColor.length;
       // Extra type check to satisfy TypeScript
       const color = dataset.backgroundColor[colorIndex];
       return color || "#4F46E5";
     }
-    
+
     // Default fallback
     return "#4F46E5";
   };
@@ -91,8 +98,8 @@ export const Chart: React.FC<ChartProps> = ({
   // Function to safely get border color
   const getBorderColor = (dataset: ChartDataset): string => {
     if (!dataset.borderColor) return "#4F46E5"; // Default color
-    return typeof dataset.borderColor === "string" 
-      ? dataset.borderColor 
+    return typeof dataset.borderColor === "string"
+      ? dataset.borderColor
       : "#4F46E5";
   };
 

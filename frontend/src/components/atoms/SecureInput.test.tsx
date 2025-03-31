@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * SecureInput testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('SecureInput', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

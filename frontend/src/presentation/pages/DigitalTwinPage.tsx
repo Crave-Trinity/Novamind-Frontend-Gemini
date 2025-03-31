@@ -4,39 +4,49 @@
  * with clinical precision and HIPAA-compliant data handling
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useCallback, useMemo, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
 // Neural visualization coordinator provider
-import { VisualizationCoordinatorProvider } from '@application/coordinators/NeuralVisualizationCoordinator';
+import { VisualizationCoordinatorProvider } from "@application/coordinators/NeuralVisualizationCoordinator";
 
 // Page components
-import BrainModelContainer from '@presentation/templates/BrainModelContainer';
-import PatientHeader from '@presentation/molecules/PatientHeader';
-import ClinicalTimelinePanel from '@presentation/organisms/ClinicalTimelinePanel';
-import NeuralRegionSelector from '@presentation/organisms/NeuralRegionSelector';
-import DataIntegrationPanel from '@presentation/organisms/DataIntegrationPanel';
-import DigitalTwinSettings from '@presentation/organisms/DigitalTwinSettings';
+import BrainModelContainer from "@presentation/templates/BrainModelContainer";
+import PatientHeader from "@presentation/molecules/PatientHeader";
+import ClinicalTimelinePanel from "@presentation/organisms/ClinicalTimelinePanel";
+import NeuralRegionSelector from "@presentation/organisms/NeuralRegionSelector";
+import DataIntegrationPanel from "@presentation/organisms/DataIntegrationPanel";
+import DigitalTwinSettings from "@presentation/organisms/DigitalTwinSettings";
 
 // UI components
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@presentation/atoms/Tabs';
-import { Button } from '@presentation/atoms/Button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@presentation/atoms/Tooltip';
-import { Badge } from '@presentation/atoms/Badge';
-import { Card } from '@presentation/atoms/Card';
-import { Separator } from '@presentation/atoms/Separator';
-import { ScrollArea } from '@presentation/atoms/ScrollArea';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@presentation/atoms/Tabs";
+import { Button } from "@presentation/atoms/Button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@presentation/atoms/Tooltip";
+import { Badge } from "@presentation/atoms/Badge";
+import { Card } from "@presentation/atoms/Card";
+import { Separator } from "@presentation/atoms/Separator";
+import { ScrollArea } from "@presentation/atoms/ScrollArea";
 
 // Layout components
-import DashboardLayout from '@presentation/layouts/DashboardLayout';
-import { PageHeader } from '@presentation/molecules/PageHeader';
+import DashboardLayout from "@presentation/layouts/DashboardLayout";
+import { PageHeader } from "@presentation/molecules/PageHeader";
 
 // Icons
-import { 
-  Brain, 
-  Settings, 
-  History, 
-  List, 
+import {
+  Brain,
+  Settings,
+  History,
+  List,
   Database,
   DownloadCloud,
   Share2,
@@ -44,14 +54,14 @@ import {
   Layers,
   Maximize,
   PanelLeft,
-  PanelRight
-} from 'lucide-react';
+  PanelRight,
+} from "lucide-react";
 
 // Services
-import { patientService } from '@application/services/patientService';
+import { patientService } from "@application/services/patientService";
 
 // Domain types
-import { Patient } from '@domain/types/patient/patient';
+import { Patient } from "@domain/types/patient/patient";
 
 /**
  * Digital Twin Page component - primary integration point for all neural visualization
@@ -61,65 +71,65 @@ export const DigitalTwinPage: React.FC = () => {
   // Router params and navigation
   const { patientId } = useParams<{ patientId: string }>();
   const navigate = useNavigate();
-  
+
   // Tab state
-  const [activeTab, setActiveTab] = useState<string>('visualization');
-  
+  const [activeTab, setActiveTab] = useState<string>("visualization");
+
   // UI state
   const [leftPanelOpen, setLeftPanelOpen] = useState<boolean>(true);
   const [rightPanelOpen, setRightPanelOpen] = useState<boolean>(true);
   const [fullscreen, setFullscreen] = useState<boolean>(false);
-  
+
   // Patient data
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Safely access patient ID
-  const safePatientId = useMemo(() => patientId || '', [patientId]);
-  
+  const safePatientId = useMemo(() => patientId || "", [patientId]);
+
   // Load patient data
   useEffect(() => {
     const loadPatient = async () => {
       try {
         setLoading(true);
         const result = await patientService.getPatientById(safePatientId);
-        
+
         if (result.success && result.data) {
           setPatient(result.data);
         } else {
-          setError(result.error || 'Failed to load patient data');
+          setError(result.error || "Failed to load patient data");
         }
       } catch (err) {
-        setError('An unexpected error occurred');
+        setError("An unexpected error occurred");
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-    
+
     if (safePatientId) {
       loadPatient();
     } else {
-      setError('No patient ID provided');
+      setError("No patient ID provided");
       setLoading(false);
     }
   }, [safePatientId]);
-  
+
   // Toggle left panel
   const toggleLeftPanel = useCallback(() => {
-    setLeftPanelOpen(prev => !prev);
+    setLeftPanelOpen((prev) => !prev);
   }, []);
-  
+
   // Toggle right panel
   const toggleRightPanel = useCallback(() => {
-    setRightPanelOpen(prev => !prev);
+    setRightPanelOpen((prev) => !prev);
   }, []);
-  
+
   // Toggle fullscreen
   const toggleFullscreen = useCallback(() => {
-    setFullscreen(prev => !prev);
-    
+    setFullscreen((prev) => !prev);
+
     if (!fullscreen) {
       setLeftPanelOpen(false);
       setRightPanelOpen(false);
@@ -128,25 +138,25 @@ export const DigitalTwinPage: React.FC = () => {
       setRightPanelOpen(true);
     }
   }, [fullscreen]);
-  
+
   // Handle visualization export
   const handleExport = useCallback(() => {
     // Implementation handled by the VisualizationCoordinator
     // This is just a handler for the UI button
   }, []);
-  
+
   // Handle region selection
   const handleRegionSelect = useCallback((regionId: string) => {
     // Handled by visualization coordinator
-    console.log('Region selected:', regionId);
+    console.log("Region selected:", regionId);
   }, []);
-  
+
   // Handle visualization error
   const handleVisualizationError = useCallback((error: Error) => {
-    console.error('Visualization error:', error);
+    console.error("Visualization error:", error);
     setError(`Visualization error: ${error.message}`);
   }, []);
-  
+
   // If loading
   if (loading) {
     return (
@@ -154,13 +164,15 @@ export const DigitalTwinPage: React.FC = () => {
         <div className="flex items-center justify-center w-full h-[80vh]">
           <div className="flex flex-col items-center">
             <div className="animate-spin h-16 w-16 rounded-full border-4 border-indigo-600 border-t-transparent mb-4"></div>
-            <div className="text-slate-600 text-lg">Loading Digital Twin...</div>
+            <div className="text-slate-600 text-lg">
+              Loading Digital Twin...
+            </div>
           </div>
         </div>
       </DashboardLayout>
     );
   }
-  
+
   // If error
   if (error) {
     return (
@@ -169,12 +181,11 @@ export const DigitalTwinPage: React.FC = () => {
           <Card className="max-w-md p-6 bg-red-50 border-red-200">
             <div className="flex flex-col items-center text-center">
               <Brain className="h-16 w-16 text-red-500 mb-4" />
-              <h2 className="text-xl font-semibold text-red-700 mb-2">Error Loading Digital Twin</h2>
+              <h2 className="text-xl font-semibold text-red-700 mb-2">
+                Error Loading Digital Twin
+              </h2>
               <p className="text-red-600 mb-4">{error}</p>
-              <Button 
-                variant="default" 
-                onClick={() => navigate('/patients')}
-              >
+              <Button variant="default" onClick={() => navigate("/patients")}>
                 Return to Patient List
               </Button>
             </div>
@@ -183,7 +194,7 @@ export const DigitalTwinPage: React.FC = () => {
       </DashboardLayout>
     );
   }
-  
+
   // If no patient
   if (!patient) {
     return (
@@ -192,12 +203,13 @@ export const DigitalTwinPage: React.FC = () => {
           <Card className="max-w-md p-6">
             <div className="flex flex-col items-center text-center">
               <Brain className="h-16 w-16 text-slate-400 mb-4" />
-              <h2 className="text-xl font-semibold text-slate-700 mb-2">Patient Not Found</h2>
-              <p className="text-slate-600 mb-4">The requested patient could not be found.</p>
-              <Button 
-                variant="default" 
-                onClick={() => navigate('/patients')}
-              >
+              <h2 className="text-xl font-semibold text-slate-700 mb-2">
+                Patient Not Found
+              </h2>
+              <p className="text-slate-600 mb-4">
+                The requested patient could not be found.
+              </p>
+              <Button variant="default" onClick={() => navigate("/patients")}>
                 Return to Patient List
               </Button>
             </div>
@@ -206,7 +218,7 @@ export const DigitalTwinPage: React.FC = () => {
       </DashboardLayout>
     );
   }
-  
+
   // Render digital twin view
   return (
     <VisualizationCoordinatorProvider patientId={safePatientId}>
@@ -218,24 +230,23 @@ export const DigitalTwinPage: React.FC = () => {
               <div className="flex items-center gap-4">
                 <Brain className="h-8 w-8 text-indigo-600" />
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-800">Digital Twin</h1>
+                  <h1 className="text-2xl font-bold text-slate-800">
+                    Digital Twin
+                  </h1>
                   <p className="text-sm text-slate-500">
                     Neural visualization and clinical analysis
                   </p>
                 </div>
               </div>
-              
-              <PatientHeader 
-                patient={patient}
-                compact={true}
-              />
-              
+
+              <PatientHeader patient={patient} compact={true} />
+
               <div className="flex items-center gap-2">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="icon"
                         onClick={handleExport}
                       >
@@ -247,12 +258,12 @@ export const DigitalTwinPage: React.FC = () => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                
+
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="icon"
                         onClick={toggleFullscreen}
                       >
@@ -264,12 +275,12 @@ export const DigitalTwinPage: React.FC = () => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                
+
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="icon"
                         onClick={toggleLeftPanel}
                       >
@@ -281,12 +292,12 @@ export const DigitalTwinPage: React.FC = () => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                
+
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="icon"
                         onClick={toggleRightPanel}
                       >
@@ -300,9 +311,9 @@ export const DigitalTwinPage: React.FC = () => {
                 </TooltipProvider>
               </div>
             </div>
-            
-            <Tabs 
-              value={activeTab} 
+
+            <Tabs
+              value={activeTab}
               onValueChange={setActiveTab}
               className="mt-4"
             >
@@ -330,34 +341,34 @@ export const DigitalTwinPage: React.FC = () => {
               </TabsList>
             </Tabs>
           </div>
-          
+
           {/* Main Content */}
           <div className="flex-1 flex overflow-hidden">
             {/* Left Panel */}
-            {leftPanelOpen && activeTab !== 'visualization' && (
+            {leftPanelOpen && activeTab !== "visualization" && (
               <div className="w-80 border-r border-slate-200 bg-white overflow-auto">
                 <ScrollArea className="h-full">
                   <div className="p-4">
-                    {activeTab === 'timeline' && (
+                    {activeTab === "timeline" && (
                       <ClinicalTimelinePanel patientId={safePatientId} />
                     )}
-                    
-                    {activeTab === 'regions' && (
+
+                    {activeTab === "regions" && (
                       <NeuralRegionSelector patientId={safePatientId} />
                     )}
-                    
-                    {activeTab === 'data' && (
+
+                    {activeTab === "data" && (
                       <DataIntegrationPanel patientId={safePatientId} />
                     )}
-                    
-                    {activeTab === 'settings' && (
+
+                    {activeTab === "settings" && (
                       <DigitalTwinSettings patientId={safePatientId} />
                     )}
                   </div>
                 </ScrollArea>
               </div>
             )}
-            
+
             {/* Main Visualization Area */}
             <div className="flex-1 bg-slate-100">
               <TabsContent value="visualization" className="h-full">
@@ -375,7 +386,7 @@ export const DigitalTwinPage: React.FC = () => {
                   onError={handleVisualizationError}
                 />
               </TabsContent>
-              
+
               <TabsContent value="timeline" className="h-full p-4">
                 <div className="bg-white rounded-lg shadow-sm h-full overflow-hidden">
                   <BrainModelContainer
@@ -393,7 +404,7 @@ export const DigitalTwinPage: React.FC = () => {
                   />
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="regions" className="h-full p-4">
                 <div className="bg-white rounded-lg shadow-sm h-full overflow-hidden">
                   <BrainModelContainer
@@ -411,7 +422,7 @@ export const DigitalTwinPage: React.FC = () => {
                   />
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="data" className="h-full p-4">
                 <div className="bg-white rounded-lg shadow-sm h-full overflow-hidden">
                   <BrainModelContainer
@@ -429,7 +440,7 @@ export const DigitalTwinPage: React.FC = () => {
                   />
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="settings" className="h-full p-4">
                 <div className="bg-white rounded-lg shadow-sm h-full overflow-hidden">
                   <BrainModelContainer
@@ -448,48 +459,58 @@ export const DigitalTwinPage: React.FC = () => {
                 </div>
               </TabsContent>
             </div>
-            
+
             {/* Right Panel */}
-            {rightPanelOpen && activeTab !== 'visualization' && (
+            {rightPanelOpen && activeTab !== "visualization" && (
               <div className="w-80 border-l border-slate-200 bg-white overflow-auto">
                 <ScrollArea className="h-full">
                   <div className="p-4">
-                    {activeTab === 'timeline' && (
+                    {activeTab === "timeline" && (
                       <div className="space-y-4">
-                        <h3 className="text-lg font-medium text-slate-800">Timeline Details</h3>
+                        <h3 className="text-lg font-medium text-slate-800">
+                          Timeline Details
+                        </h3>
                         <p className="text-sm text-slate-600">
-                          Select events on the timeline to view detailed information about clinical events
-                          and their correlation with neural activity patterns.
+                          Select events on the timeline to view detailed
+                          information about clinical events and their
+                          correlation with neural activity patterns.
                         </p>
                       </div>
                     )}
-                    
-                    {activeTab === 'regions' && (
+
+                    {activeTab === "regions" && (
                       <div className="space-y-4">
-                        <h3 className="text-lg font-medium text-slate-800">Region Details</h3>
+                        <h3 className="text-lg font-medium text-slate-800">
+                          Region Details
+                        </h3>
                         <p className="text-sm text-slate-600">
-                          Select a neural region to view detailed information about its connectivity,
-                          activity patterns, and clinical correlations.
+                          Select a neural region to view detailed information
+                          about its connectivity, activity patterns, and
+                          clinical correlations.
                         </p>
                       </div>
                     )}
-                    
-                    {activeTab === 'data' && (
+
+                    {activeTab === "data" && (
                       <div className="space-y-4">
-                        <h3 className="text-lg font-medium text-slate-800">Data Source Details</h3>
+                        <h3 className="text-lg font-medium text-slate-800">
+                          Data Source Details
+                        </h3>
                         <p className="text-sm text-slate-600">
-                          View detailed information about integrated data sources, data quality,
-                          and synchronization status.
+                          View detailed information about integrated data
+                          sources, data quality, and synchronization status.
                         </p>
                       </div>
                     )}
-                    
-                    {activeTab === 'settings' && (
+
+                    {activeTab === "settings" && (
                       <div className="space-y-4">
-                        <h3 className="text-lg font-medium text-slate-800">Setting Details</h3>
+                        <h3 className="text-lg font-medium text-slate-800">
+                          Setting Details
+                        </h3>
                         <p className="text-sm text-slate-600">
-                          Configure detailed visualization settings, performance options,
-                          and clinical precision parameters.
+                          Configure detailed visualization settings, performance
+                          options, and clinical precision parameters.
                         </p>
                       </div>
                     )}

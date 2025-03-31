@@ -1,10 +1,13 @@
 import { Canvas, useFrame, RootState } from "@react-three/fiber"; // Import RootState
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
-import React, { useRef, useEffect, useMemo } from 'react'; // Removed unused useCallback
+import React, { useRef, useEffect, useMemo } from "react"; // Removed unused useCallback
 import * as THREE from "three";
 
 import { useTheme } from "@/application/hooks/useTheme";
-import { MeshWithShaderMaterial, Object3DWithMaterial } from "../../types/three-extensions";
+import {
+  MeshWithShaderMaterial,
+  Object3DWithMaterial,
+} from "../../types/three-extensions";
 import { isValidTheme } from "../../types/theme";
 import {
   createNeuralGlowUniforms,
@@ -64,7 +67,7 @@ const BrainVisualizationContainer: React.FC<
         useBloom: false,
       },
       "sleek-dark": {
-        bgColor: "#0a1128", 
+        bgColor: "#0a1128",
         glowIntensity: 1.0,
         useBloom: true,
       },
@@ -77,13 +80,17 @@ const BrainVisualizationContainer: React.FC<
         bgColor: "#F8E9D6",
         glowIntensity: 0.3,
         useBloom: false,
-      }
+      },
     }),
     [],
   );
 
   // Get current theme settings (default to light if theme is invalid)
-  const currentTheme = isValidTheme(theme) ? theme : isDarkMode ? "dark" : "light";
+  const currentTheme = isValidTheme(theme)
+    ? theme
+    : isDarkMode
+      ? "dark"
+      : "light";
   const settings = themeSettings[currentTheme];
 
   // Memoize brain data processing to avoid unnecessary recalculations
@@ -193,7 +200,8 @@ const BrainModel = React.memo(
     const groupRef = useRef<THREE.Group>(null);
 
     // Animate brain rotation
-    useFrame((state: RootState) => { // Re-add RootState type
+    useFrame((state: RootState) => {
+      // Re-add RootState type
       if (groupRef.current) {
         // Gentle rotation for visual appeal
         groupRef.current.rotation.y = state.clock.getElapsedTime() * 0.1;
@@ -203,7 +211,7 @@ const BrainModel = React.memo(
           const mesh = groupRef.current?.getObjectByName(
             `region-${region.id}`,
           ) as Object3DWithMaterial | undefined;
-          
+
           if (mesh?.material?.uniforms) {
             updateTimeUniform(
               mesh.material.uniforms,
@@ -398,23 +406,18 @@ const ConnectionLine = React.memo(
         new THREE.Vector3(...start),
         new THREE.Vector3(...end),
       ]);
-      
+
       const material = new THREE.LineBasicMaterial({
         color: "#80a0ff",
         transparent: true,
         opacity: 0.4,
         linewidth: 1,
       });
-      
+
       return new THREE.Line(geometry, material);
     }, [start, end]);
 
-    return (
-      <primitive
-        object={line}
-        ref={lineRef}
-      />
-    );
+    return <primitive object={line} ref={lineRef} />;
   },
 );
 

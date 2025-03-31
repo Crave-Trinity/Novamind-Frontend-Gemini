@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * NeuralConnection testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('NeuralConnection', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

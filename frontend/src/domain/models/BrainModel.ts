@@ -113,16 +113,16 @@ export const BrainModel = (data: any = {}): BrainModelData => {
   // Generate a default processed model with clinical precision
   const defaultModel: BrainModelData = {
     id: data.id || `model-${Date.now()}`,
-    patientId: data.patientId || 'unknown',
+    patientId: data.patientId || "unknown",
     regions: data.regions || [],
     pathways: data.pathways || [],
     timestamp: data.timestamp || new Date().toISOString(),
     metadata: {
-      modelVersion: data.metadata?.modelVersion || '1.0.0',
+      modelVersion: data.metadata?.modelVersion || "1.0.0",
       confidenceScore: data.metadata?.confidenceScore || 0.95,
       dataQuality: data.metadata?.dataQuality || 0.9,
-      source: data.metadata?.source || ModelSource.AGGREGATE
-    }
+      source: data.metadata?.source || ModelSource.AGGREGATE,
+    },
   };
 
   // Deep merge input data with default model
@@ -131,35 +131,37 @@ export const BrainModel = (data: any = {}): BrainModelData => {
     ...data,
     metadata: {
       ...defaultModel.metadata,
-      ...(data.metadata || {})
-    }
+      ...(data.metadata || {}),
+    },
   };
 
   // Process any available data with neural-safe verification
   if (Array.isArray(model.regions)) {
     // Ensure all regions have required fields
-    model.regions = model.regions.map(region => ({
+    model.regions = model.regions.map((region) => ({
       id: region.id || `region-${Math.random().toString(36).substr(2, 9)}`,
-      name: region.name || 'Unnamed Region',
-      description: region.description || '',
+      name: region.name || "Unnamed Region",
+      description: region.description || "",
       coordinates: region.coordinates || [0, 0, 0],
       position: region.position || region.coordinates || [0, 0, 0],
       size: region.size || 1,
       scale: region.scale || 1,
-      color: region.color || '#CCCCCC',
+      color: region.color || "#CCCCCC",
       volume: region.volume || 0,
       significance: region.significance || 0,
       connections: Array.isArray(region.connections) ? region.connections : [],
       functions: Array.isArray(region.functions) ? region.functions : [],
       data: {
         activity: region.data?.activity || 0,
-        anomalies: Array.isArray(region.data?.anomalies) ? region.data.anomalies : [],
+        anomalies: Array.isArray(region.data?.anomalies)
+          ? region.data.anomalies
+          : [],
         volumes: {
           current: region.data?.volumes?.current || 0,
           expected: region.data?.volumes?.expected || 0,
-          percentile: region.data?.volumes?.percentile || 50
-        }
-      }
+          percentile: region.data?.volumes?.percentile || 50,
+        },
+      },
     }));
   }
 

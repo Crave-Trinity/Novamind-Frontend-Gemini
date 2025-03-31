@@ -5,8 +5,8 @@ import path from 'path';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 /**
- * NOVAMIND Neural Testing Framework
- * Quantum-precise test configuration with clinical-grade reliability
+ * NOVAMIND Testing Framework
+ * Pure TypeScript-only test configuration with ESM modules
  */
 export default defineConfig({
   plugins: [
@@ -37,20 +37,27 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    environment: 'jsdom',  // MUST BE JSDOM
+    setupFiles: [
+      './src/test/textencoder-fix.ts',  // MUST BE FIRST
+      './src/test/url-fix.ts',          // URL fix second
+      './src/test/setup.ts'             // Regular setup last
+    ],
+    include: ['src/**/*.{test,spec,type-test}.{ts,tsx}'],
     exclude: ['node_modules', '.git', 'dist'],
     testTimeout: 20000,
-    pool: 'forks', // Use forks for better isolation between tests
-    isolate: true, // Ensure tests don't affect each other
-    mockReset: true, // Reset mocks between tests
-    restoreMocks: true, // Restore original behavior after mocking
-    clearMocks: true, // Clear all mocks between tests
-    testTransformMode: {
-      web: ['.[jt]sx?$'],
+    
+    // Critical: Prevent transformation of node_modules
+    deps: {
+      inline: []
     },
-    // Thread configuration is managed by the pool setting
+    
+    // Ensure proper isolation and cleanup
+    isolate: true,
+    mockReset: true,
+    restoreMocks: true,
+    clearMocks: true,
+    
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

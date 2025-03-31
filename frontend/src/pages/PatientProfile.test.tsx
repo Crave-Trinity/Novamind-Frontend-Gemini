@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * PatientProfile testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('PatientProfile', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

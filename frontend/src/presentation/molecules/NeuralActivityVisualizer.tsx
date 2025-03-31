@@ -4,33 +4,43 @@
  * with clinical precision and temporal dynamics
  */
 
-import React, { useRef, useMemo, useEffect, useState } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
-import { Sphere, Line, Text, useTexture, shaderMaterial } from '@react-three/drei';
-import { Vector3, Color, ShaderMaterial, Mesh, IUniform, Group, Event } from 'three';
-import { useSpring, animated } from '@react-spring/three';
-import { extend } from '@react-three/fiber';
+import React, { useRef, useMemo, useEffect, useState } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import {
+  Sphere,
+  Line,
+  Text,
+  useTexture,
+  shaderMaterial,
+} from "@react-three/drei";
+import {
+  Vector3,
+  Color,
+  ShaderMaterial,
+  Mesh,
+  IUniform,
+  Group,
+  Event,
+} from "three";
+import { useSpring, animated } from "@react-spring/three";
+import { extend } from "@react-three/fiber";
 
 // Domain types
-import { 
-  NeuralActivityState, 
+import {
+  NeuralActivityState,
   ActivationLevel,
   TemporalActivationSequence,
-  NeuralActivationPattern
-} from '@domain/types/brain/activity';
-import { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
-import { Vector3 as DomainVector3 } from '@domain/types/common';
+  NeuralActivationPattern,
+} from "@domain/types/brain/activity";
+import { BrainRegion, NeuralConnection } from "@domain/types/brain/models";
+import { Vector3 as DomainVector3 } from "@domain/types/common";
 
 /**
  * Neural-safe adapter to convert domain Vector3 to Three.js Vector3
  * with quantum precision
  */
 const adaptVector3 = (domainVector: DomainVector3): Vector3 => {
-  return new Vector3(
-    domainVector.x,
-    domainVector.y,
-    domainVector.z
-  );
+  return new Vector3(domainVector.x, domainVector.y, domainVector.z);
 };
 
 // Neural activity shader
@@ -38,11 +48,11 @@ const NeuralActivityShaderMaterial = shaderMaterial(
   {
     time: 0,
     activityLevel: 0,
-    activityColor: new Color('#ef4444'),
-    baseColor: new Color('#1e293b'),
+    activityColor: new Color("#ef4444"),
+    baseColor: new Color("#1e293b"),
     pulsePeriod: 1.5,
     noiseIntensity: 0.1,
-    glowIntensity: 0.5
+    glowIntensity: 0.5,
   },
   // Vertex shader
   `
@@ -101,7 +111,7 @@ const NeuralActivityShaderMaterial = shaderMaterial(
       // Output final color
       gl_FragColor = vec4(color, 1.0);
     }
-  `
+  `,
 );
 
 // Register the shader material with react-three-fiber
@@ -129,42 +139,46 @@ interface ActivityNodeProps {
   activeColor?: string;
   label?: string | undefined;
   showLabel?: boolean;
-  onClick?: (event: Event, entityId: string, entityType: 'region' | 'connection') => void;
+  onClick?: (
+    event: Event,
+    entityId: string,
+    entityType: "region" | "connection",
+  ) => void;
 }
 
 /**
  * ActivityNode - Internal component for visualizing a single neural activity node
  */
-const ActivityNode: React.FC<ActivityNodeProps> = ({ 
-  position, 
-  scale, 
+const ActivityNode: React.FC<ActivityNodeProps> = ({
+  position,
+  scale,
   activityLevel,
   activationLevel,
   pulseSpeed = 1.5,
-  baseColor = '#1e293b',
-  activeColor = '#ef4444',
+  baseColor = "#1e293b",
+  activeColor = "#ef4444",
   label,
   showLabel = false,
-  onClick
+  onClick,
 }) => {
   // References
   const meshRef = useRef<Mesh>(null);
   const materialRef = useRef<ShaderMaterial>(null);
-  
+
   // Create color objects
   const baseColorObj = useMemo(() => new Color(baseColor), [baseColor]);
   const activeColorObj = useMemo(() => new Color(activeColor), [activeColor]);
-  
+
   // Spring animation for smooth activity transitions
   const { springActivity } = useSpring({
     springActivity: activityLevel,
     config: {
       tension: 120,
       friction: 14,
-      duration: 500
-    }
+      duration: 500,
+    },
   });
-  
+
   // Animation for pulsing effect
   useFrame((state) => {
     if (materialRef.current) {
@@ -172,7 +186,7 @@ const ActivityNode: React.FC<ActivityNodeProps> = ({
       materialRef.current.uniforms.time.value = state.clock.getElapsedTime();
       materialRef.current.uniforms.activityLevel.value = springActivity.get();
       materialRef.current.uniforms.pulsePeriod.value = pulseSpeed;
-      
+
       // Scale node based on activity level for better visibility
       if (meshRef.current) {
         const baseScale = scale;
@@ -181,13 +195,18 @@ const ActivityNode: React.FC<ActivityNodeProps> = ({
       }
     }
   });
-  
+
   // Only render if there's activity
   if (activityLevel < 0.05) return null;
-  
+
   return (
     <group position={position}>
-      <mesh ref={meshRef} data-testid="neural-node" data-color={activeColor} onClick={(event) => onClick && onClick(event, '', 'region')}>
+      <mesh
+        ref={meshRef}
+        data-testid="neural-node"
+        data-color={activeColor}
+        onClick={(event) => onClick && onClick(event, "", "region")}
+      >
         <sphereGeometry args={[1, 32, 32]} />
         <neuralActivityShaderMaterial
           ref={materialRef}
@@ -200,7 +219,7 @@ const ActivityNode: React.FC<ActivityNodeProps> = ({
           transparent
         />
       </mesh>
-      
+
       {showLabel && label && (
         <Text
           position={[0, scale * 1.5, 0]}
@@ -240,39 +259,40 @@ const ActivityFlow: React.FC<ActivityFlowProps> = ({
   activityLevel,
   flowSpeed = 1,
   width = 0.1,
-  color = '#3b82f6',
+  color = "#3b82f6",
   dashPattern = [0.1, 0.1],
-  bidirectional = false
+  bidirectional = false,
 }) => {
   // Animation progress
   const progress = useRef(0);
-  
+
   // Spring animation for smooth activity transitions
   const { springActivity } = useSpring({
     springActivity: activityLevel,
     config: {
       tension: 80,
       friction: 10,
-      duration: 300
-    }
+      duration: 300,
+    },
   });
-  
+
   // Animation for flow effect
   useFrame((state, delta) => {
     // Update progress for flow animation
-    progress.current = (progress.current + delta * flowSpeed * springActivity.get()) % 1;
+    progress.current =
+      (progress.current + delta * flowSpeed * springActivity.get()) % 1;
   });
-  
+
   // Only render if there's activity
   if (activityLevel < 0.05) return null;
-  
+
   // Calculate line width based on activity level
   const lineWidth = width * (0.5 + activityLevel * 0.5);
-  
+
   // Animation settings
   const dashArray = dashPattern;
   const dashOffset = progress.current;
-  
+
   return (
     <group>
       <Line
@@ -288,7 +308,7 @@ const ActivityFlow: React.FC<ActivityFlowProps> = ({
         data-testid="neural-line"
         data-color={color}
       />
-      
+
       {bidirectional && (
         <Line
           points={[...points].reverse()}
@@ -329,7 +349,11 @@ interface NeuralActivityVisualizerProps {
   flowColor?: string;
   maxVisibleActivities?: number;
   enableTemporalSmoothing?: boolean;
-  onActivityNodeClick?: (event: Event, entityId: string, entityType: 'region' | 'connection') => void;
+  onActivityNodeClick?: (
+    event: Event,
+    entityId: string,
+    entityType: "region" | "connection",
+  ) => void;
 }
 
 /**
@@ -344,39 +368,44 @@ interface ActivityDisplayProperties {
 /**
  * Activity level display mapping
  */
-const defaultActivityDisplay: Record<ActivationLevel, ActivityDisplayProperties> = {
+const defaultActivityDisplay: Record<
+  ActivationLevel,
+  ActivityDisplayProperties
+> = {
   [ActivationLevel.NONE]: {
-    color: '#94a3b8',
+    color: "#94a3b8",
     pulseSpeed: 0.5,
-    scale: 0.2
+    scale: 0.2,
   },
   [ActivationLevel.LOW]: {
-    color: '#60a5fa',
+    color: "#60a5fa",
     pulseSpeed: 0.8,
-    scale: 0.3
+    scale: 0.3,
   },
   [ActivationLevel.MEDIUM]: {
-    color: '#fbbf24',
+    color: "#fbbf24",
     pulseSpeed: 1.2,
-    scale: 0.4
+    scale: 0.4,
   },
   [ActivationLevel.HIGH]: {
-    color: '#f87171',
+    color: "#f87171",
     pulseSpeed: 1.6,
-    scale: 0.5
+    scale: 0.5,
   },
   [ActivationLevel.EXTREME]: {
-    color: '#ef4444',
+    color: "#ef4444",
     pulseSpeed: 2.0,
-    scale: 0.6
-  }
+    scale: 0.6,
+  },
 };
 
 /**
  * NeuralActivityVisualizer - Molecular component for neural activity visualization
  * Implements clinical precision neural activity with temporal dynamics
  */
-export const NeuralActivityVisualizer: React.FC<NeuralActivityVisualizerProps> = ({
+export const NeuralActivityVisualizer: React.FC<
+  NeuralActivityVisualizerProps
+> = ({
   regions,
   connections,
   activityStates = [],
@@ -385,111 +414,121 @@ export const NeuralActivityVisualizer: React.FC<NeuralActivityVisualizerProps> =
   playbackSpeed = 1.0,
   showLabels = false,
   colorMap = {
-    none: '#94a3b8',
-    low: '#60a5fa',
-    medium: '#fbbf24',
-    high: '#f87171',
-    extreme: '#ef4444'
+    none: "#94a3b8",
+    low: "#60a5fa",
+    medium: "#fbbf24",
+    high: "#f87171",
+    extreme: "#ef4444",
   },
-  flowColor = '#3b82f6',
+  flowColor = "#3b82f6",
   maxVisibleActivities = 100,
   enableTemporalSmoothing = true,
-  onActivityNodeClick
+  onActivityNodeClick,
 }) => {
   // Refs
   const groupRef = useRef<Group>(null);
-  
+
   // Create custom activity display properties using provided color map
   const activityDisplay = useMemo(() => {
     return {
       [ActivationLevel.NONE]: {
         ...defaultActivityDisplay[ActivationLevel.NONE],
-        color: colorMap.none
+        color: colorMap.none,
       },
       [ActivationLevel.LOW]: {
         ...defaultActivityDisplay[ActivationLevel.LOW],
-        color: colorMap.low
+        color: colorMap.low,
       },
       [ActivationLevel.MEDIUM]: {
         ...defaultActivityDisplay[ActivationLevel.MEDIUM],
-        color: colorMap.medium
+        color: colorMap.medium,
       },
       [ActivationLevel.HIGH]: {
         ...defaultActivityDisplay[ActivationLevel.HIGH],
-        color: colorMap.high
+        color: colorMap.high,
       },
       [ActivationLevel.EXTREME]: {
         ...defaultActivityDisplay[ActivationLevel.EXTREME],
-        color: colorMap.extreme
-      }
+        color: colorMap.extreme,
+      },
     };
   }, [colorMap]);
-  
+
   // Maps for efficient lookup
   const regionMap = useMemo(() => {
     const map = new Map<string, BrainRegion>();
-    regions.forEach(region => map.set(region.id, region));
+    regions.forEach((region) => map.set(region.id, region));
     return map;
   }, [regions]);
-  
+
   const connectionMap = useMemo(() => {
     const map = new Map<string, NeuralConnection>();
-    connections.forEach(connection => map.set(connection.id, connection));
+    connections.forEach((connection) => map.set(connection.id, connection));
     return map;
   }, [connections]);
-  
+
   // Process activity states
   const processedActivities = useMemo(() => {
     // If we have a temporal sequence, we'll handle it separately
     if (temporalSequence) return [];
-    
+
     // If we have an activation pattern, convert it to activity states
     let activities = [...activityStates];
-    
+
     if (activationPattern) {
       // Convert activation pattern to activity states
       const patternActivities: NeuralActivityState[] = [];
-      
+
       // Add region activations
-      activationPattern.regionActivations.forEach(activation => {
+      activationPattern.regionActivations.forEach((activation) => {
         patternActivities.push({
           entityId: activation.regionId,
-          entityType: 'region',
+          entityType: "region",
           timestamp: Date.now(),
           rawActivity: activation.activityLevel,
-          activationLevel: activation.activityLevel < 0.1 ? ActivationLevel.NONE :
-                          activation.activityLevel < 0.3 ? ActivationLevel.LOW :
-                          activation.activityLevel < 0.6 ? ActivationLevel.MEDIUM :
-                          activation.activityLevel < 0.9 ? ActivationLevel.HIGH :
-                          ActivationLevel.EXTREME,
+          activationLevel:
+            activation.activityLevel < 0.1
+              ? ActivationLevel.NONE
+              : activation.activityLevel < 0.3
+                ? ActivationLevel.LOW
+                : activation.activityLevel < 0.6
+                  ? ActivationLevel.MEDIUM
+                  : activation.activityLevel < 0.9
+                    ? ActivationLevel.HIGH
+                    : ActivationLevel.EXTREME,
           activationDuration: 0,
-          clinicalSignificance: activation.primaryEffect ? 0.8 : 0.5
+          clinicalSignificance: activation.primaryEffect ? 0.8 : 0.5,
         });
       });
-      
+
       // If there are connection activations, add those too
       if (activationPattern.connectionActivations) {
-        activationPattern.connectionActivations.forEach(activation => {
+        activationPattern.connectionActivations.forEach((activation) => {
           patternActivities.push({
             entityId: activation.connectionId,
-            entityType: 'connection',
+            entityType: "connection",
             timestamp: Date.now(),
             rawActivity: activation.activityLevel,
-            activationLevel: activation.activityLevel < 0.1 ? ActivationLevel.NONE :
-                            activation.activityLevel < 0.3 ? ActivationLevel.LOW :
-                            activation.activityLevel < 0.6 ? ActivationLevel.MEDIUM :
-                            activation.activityLevel < 0.9 ? ActivationLevel.HIGH :
-                            ActivationLevel.EXTREME,
+            activationLevel:
+              activation.activityLevel < 0.1
+                ? ActivationLevel.NONE
+                : activation.activityLevel < 0.3
+                  ? ActivationLevel.LOW
+                  : activation.activityLevel < 0.6
+                    ? ActivationLevel.MEDIUM
+                    : activation.activityLevel < 0.9
+                      ? ActivationLevel.HIGH
+                      : ActivationLevel.EXTREME,
             activationDuration: 0,
-            clinicalSignificance: activation.primaryEffect ? 0.8 : 0.5
+            clinicalSignificance: activation.primaryEffect ? 0.8 : 0.5,
           });
         });
       }
-      
+
       // Combine with existing activities, prioritizing the pattern
       activities = [...patternActivities, ...activities];
     }
-    
+
     // Filter to most relevant activities
     if (activities.length > maxVisibleActivities) {
       // Sort by activity level and clinical significance
@@ -499,41 +538,48 @@ export const NeuralActivityVisualizer: React.FC<NeuralActivityVisualizerProps> =
           const sigDiff = b.clinicalSignificance - a.clinicalSignificance;
           if (Math.abs(sigDiff) > 0.1) return sigDiff;
         }
-        
+
         // Then by raw activity
         return b.rawActivity - a.rawActivity;
       });
-      
+
       // Limit to max visible
       activities = activities.slice(0, maxVisibleActivities);
     }
-    
+
     return activities;
-  }, [activityStates, activationPattern, temporalSequence, maxVisibleActivities]);
-  
+  }, [
+    activityStates,
+    activationPattern,
+    temporalSequence,
+    maxVisibleActivities,
+  ]);
+
   // Track temporal sequence playback
   const [sequenceTimeIndex, setSequenceTimeIndex] = useState(0);
   const sequenceStartTime = useRef(Date.now());
-  
+
   // Determine current temporal sequence activities
   const sequenceActivities = useMemo(() => {
     if (!temporalSequence) return [];
-    
+
     // Find the current time step
-    const currentTimeStep = temporalSequence.timeSteps[sequenceTimeIndex] || temporalSequence.timeSteps[0];
+    const currentTimeStep =
+      temporalSequence.timeSteps[sequenceTimeIndex] ||
+      temporalSequence.timeSteps[0];
     return currentTimeStep?.activationStates || [];
   }, [temporalSequence, sequenceTimeIndex]);
-  
+
   // Advance temporal sequence playback
   useFrame(() => {
     if (temporalSequence && temporalSequence.timeSteps.length > 1) {
       const now = Date.now();
       const elapsedMs = (now - sequenceStartTime.current) * playbackSpeed;
-      
+
       // Find the appropriate time index
       let newIndex = 0;
       let foundIndex = false;
-      
+
       for (let i = 0; i < temporalSequence.timeSteps.length; i++) {
         if (elapsedMs < temporalSequence.timeSteps[i].timeOffset) {
           newIndex = Math.max(0, i - 1);
@@ -541,31 +587,31 @@ export const NeuralActivityVisualizer: React.FC<NeuralActivityVisualizerProps> =
           break;
         }
       }
-      
+
       // If we've gone past the end, reset
       if (!foundIndex) {
         sequenceStartTime.current = now;
         newIndex = 0;
       }
-      
+
       // Update if changed
       if (newIndex !== sequenceTimeIndex) {
         setSequenceTimeIndex(newIndex);
       }
     }
   });
-  
+
   // Render activity nodes
   const renderActivityNodes = (activities: NeuralActivityState[]) => {
-    return activities.map(activity => {
-      if (activity.entityType === 'region') {
+    return activities.map((activity) => {
+      if (activity.entityType === "region") {
         // Get region data
         const region = regionMap.get(activity.entityId);
         if (!region) return null;
-        
+
         // Get display properties
         const display = activityDisplay[activity.activationLevel];
-        
+
         return (
           <ActivityNode
             key={`region-activity-${activity.entityId}`}
@@ -577,25 +623,33 @@ export const NeuralActivityVisualizer: React.FC<NeuralActivityVisualizerProps> =
             activeColor={display.color}
             label={showLabels ? region.name : undefined}
             showLabel={showLabels}
-            onClick={(event) => onActivityNodeClick && onActivityNodeClick(event, activity.entityId, activity.entityType)}
+            onClick={(event) =>
+              onActivityNodeClick &&
+              onActivityNodeClick(event, activity.entityId, activity.entityType)
+            }
           />
         );
-      } else if (activity.entityType === 'connection') {
+      } else if (activity.entityType === "connection") {
         // Get connection data
         const connection = connectionMap.get(activity.entityId);
         if (!connection) return null;
-        
+
         // Get source and target regions
         const sourceRegion = regionMap.get(connection.sourceId);
         const targetRegion = regionMap.get(connection.targetId);
         if (!sourceRegion || !targetRegion) return null;
-        
+
         // Create flow path
-        const points = [adaptVector3(sourceRegion.position), adaptVector3(targetRegion.position)];
-        
+        const points = [
+          adaptVector3(sourceRegion.position),
+          adaptVector3(targetRegion.position),
+        ];
+
         // Determine if bidirectional
-        const isBidirectional = connection.type === 'structural' && connection.directionality === 'bidirectional';
-        
+        const isBidirectional =
+          connection.type === "structural" &&
+          connection.directionality === "bidirectional";
+
         return (
           <ActivityFlow
             key={`connection-activity-${activity.entityId}`}
@@ -608,11 +662,11 @@ export const NeuralActivityVisualizer: React.FC<NeuralActivityVisualizerProps> =
           />
         );
       }
-      
+
       return null;
     });
   };
-  
+
   return (
     <group ref={groupRef} data-testid="neural-canvas">
       {/* Render activation pattern title if present */}
@@ -630,9 +684,11 @@ export const NeuralActivityVisualizer: React.FC<NeuralActivityVisualizerProps> =
           {activationPattern.name}
         </Text>
       )}
-      
+
       {/* Render activities from combined sources */}
-      {renderActivityNodes(temporalSequence ? sequenceActivities : processedActivities)}
+      {renderActivityNodes(
+        temporalSequence ? sequenceActivities : processedActivities,
+      )}
     </group>
   );
 };

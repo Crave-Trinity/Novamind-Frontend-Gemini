@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
-import ThemeContext, { 
-  ThemeContextType, 
-  ThemeOption, 
-  themeSettings 
+import ThemeContext, {
+  ThemeContextType,
+  ThemeOption,
+  themeSettings,
 } from "../contexts/ThemeContext";
 
 /**
@@ -27,7 +27,9 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
   const getSavedTheme = (): ThemeOption => {
     try {
       const savedTheme = localStorage.getItem("novamind-theme");
-      return savedTheme && isValidTheme(savedTheme) ? savedTheme as ThemeOption : initialTheme;
+      return savedTheme && isValidTheme(savedTheme)
+        ? (savedTheme as ThemeOption)
+        : initialTheme;
     } catch (e) {
       console.error("Error accessing localStorage", e);
       return initialTheme;
@@ -103,7 +105,7 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
     isDarkMode,
     settings: themeSettings[theme],
     setTheme,
-    toggleDarkMode
+    toggleDarkMode,
   };
 
   return (

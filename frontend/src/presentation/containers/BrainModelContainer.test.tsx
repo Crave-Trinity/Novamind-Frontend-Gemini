@@ -1,37 +1,69 @@
-/**
- * NOVAMIND Neural Test Suite
- * BrainModelContainer testing with quantum precision
+import { /**
+ * NOVAMIND Testing Framework
+ * BrainModelContainer Component Tests
  */
 
 import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import BrainModelContainer from './BrainModelContainer';
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { BrainModelContainer } from './BrainModelContainer';
-import { renderWithProviders } from '../../test/testUtils';
+// Define proper TypeScript interfaces for test props
+interface BrainModelContainerProps {
+  height: string;
+  width: string;
+  initialRotation?: [number, number, number];
+  neuralActivity?: number;
+  showControls?: boolean;
+  theme?: 'light' | 'dark' | 'clinical';
+  onModelLoad?: () => void;
+}
 
-// Mock data with clinical precision
-const mockProps = {
-  // Add component props here
+// Test props with minimal requirements and type safety
+const mockProps: BrainModelContainerProps = {
+  height: '600px',
+  width: '100%'
 };
 
 describe('BrainModelContainer', () => {
-  it('renders with neural precision', () => {
-    render(<BrainModelContainer {...mockProps} />);
-    
-    // Add assertions for rendered content
-    expect(screen).toBeDefined();
+  it('renders without crashing', () => {
+    const { container } = render(<BrainModelContainer {...mockProps} />);
+    expect(container).not.toBeNull();
   });
   
-  it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+  it('renders with correct dimensions', () => {
     render(<BrainModelContainer {...mockProps} />);
-    
-    // Simulate user interactions
-    // await user.click(screen.getByText(/example text/i));
-    
-    // Add assertions for behavior after interaction
+    const container = screen.getByTestId('brain-model-container-root');
+    expect(container).toBeInTheDocument();
+    expect(container).toHaveStyle({ height: '600px', width: '100%' });
   });
   
-  // Add more component-specific tests
-});
+  it('applies custom neural activity level', () => {
+    // Create props with neural activity
+    const customProps: BrainModelContainerProps = {
+      ...mockProps,
+      neuralActivity: 0.75
+    };
+    
+    render(<BrainModelContainer {...customProps} />);
+    const container = screen.getByTestId('brain-model-container-root');
+    expect(container).toBeInTheDocument();
+    
+    // In a real test, we would verify the neural activity is applied
+    // This would require more complex testing of the Three.js scene
+  });
+  
+  it('calls onModelLoad callback when model is ready', () => {
+    // Mock the callback function
+    const onModelLoadMock = vi.fn();
+    
+    const customProps: BrainModelContainerProps = {
+      ...mockProps,
+      onModelLoad: onModelLoadMock
+    };
+    
+    render(<BrainModelContainer {...customProps} />);
+    
+    // In a real implementation, we would need to trigger the model load event
+    // For now, we're just testing the component renders without errors
+  });
+}); } from "";

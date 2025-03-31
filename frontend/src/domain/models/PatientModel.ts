@@ -174,7 +174,7 @@ export interface Patient {
   gender: string;
   mrn: string;
   status: string;
-  riskLevel: import('../types/RiskLevel').RiskLevel;
+  riskLevel: import("../types/RiskLevel").RiskLevel;
   lastVisit: string;
   diagnoses: string[];
   currentMedications: {

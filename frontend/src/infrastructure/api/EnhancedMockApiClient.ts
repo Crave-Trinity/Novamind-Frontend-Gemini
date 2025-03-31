@@ -4,7 +4,7 @@ import { mockApi } from "./mockApi";
 
 /**
  * Enhanced Mock API Client - A fully-functional API client with no backend dependency
- * 
+ *
  * This implementation follows the hexagonal architecture pattern by:
  * 1. Implementing the IApiClient interface fully
  * 2. Providing realistic mock data for all endpoints
@@ -18,7 +18,7 @@ export class EnhancedMockApiClient implements IApiClient {
   constructor() {
     // Initialize from localStorage if available
     this.authToken = localStorage.getItem("auth_token");
-    
+
     console.info("🧠 Enhanced Mock API Client initialized");
     console.info("📡 HIPAA-compliant Novamind API simulation running");
   }
@@ -29,7 +29,7 @@ export class EnhancedMockApiClient implements IApiClient {
   public setAuthToken(token: string): void {
     this.authToken = token;
     localStorage.setItem("auth_token", token);
-    
+
     // Log token set (simulating audit logging)
     if (this.auditLogsEnabled) {
       this.logActivity("auth_token_set", { tokenLength: token.length });
@@ -42,7 +42,7 @@ export class EnhancedMockApiClient implements IApiClient {
   public clearAuthToken(): void {
     this.authToken = null;
     localStorage.removeItem("auth_token");
-    
+
     // Log token cleared (simulating audit logging)
     if (this.auditLogsEnabled) {
       this.logActivity("auth_token_cleared", {});
@@ -61,7 +61,7 @@ export class EnhancedMockApiClient implements IApiClient {
    */
   private async simulateNetworkDelay(min = 200, max = 800): Promise<void> {
     const delay = Math.floor(Math.random() * (max - min + 1)) + min;
-    await new Promise(resolve => setTimeout(resolve, delay));
+    await new Promise((resolve) => setTimeout(resolve, delay));
   }
 
   /**
@@ -70,15 +70,17 @@ export class EnhancedMockApiClient implements IApiClient {
   private logActivity(action: string, details: any): void {
     // Try to send to audit log endpoint, but expect it to fail gracefully
     // This simulates the behavior we'd want in production
-    axios.post("/api/audit-logs", {
-      action,
-      timestamp: new Date().toISOString(),
-      details,
-      userId: "mock-user-123",
-    }).catch(() => {
-      // We expect this to fail in mock mode - it's by design
-      // The error is already logged in the console by the API proxy
-    });
+    axios
+      .post("/api/audit-logs", {
+        action,
+        timestamp: new Date().toISOString(),
+        details,
+        userId: "mock-user-123",
+      })
+      .catch(() => {
+        // We expect this to fail in mock mode - it's by design
+        // The error is already logged in the console by the API proxy
+      });
   }
 
   /**
@@ -98,27 +100,23 @@ export class EnhancedMockApiClient implements IApiClient {
 
     // Return appropriate mock data based on the URL
     let result: any;
-    
-    if (url.includes('/patients') && url.length > 10) {
+
+    if (url.includes("/patients") && url.length > 10) {
       // Get single patient (URL format: /patients/123)
       const patientId = url.split("/")[2] || "default";
       result = mockApi.getPatientById(patientId);
-    } 
-    else if (url === '/patients') {
+    } else if (url === "/patients") {
       // Get all patients
       result = mockApi.getPatients();
-    }
-    else if (url.includes('/brain-models')) {
+    } else if (url.includes("/brain-models")) {
       // Get brain model
       const modelId = url.split("/")[2] || "default";
       result = mockApi.getBrainModel(modelId);
-    }
-    else if (url.includes('/risk-assessment')) {
+    } else if (url.includes("/risk-assessment")) {
       // Get risk assessment
       const patientId = url.split("/")[2] || "default";
       result = mockApi.getRiskAssessment(patientId);
-    }
-    else {
+    } else {
       // Unknown endpoint
       console.error(`Mock API: Unknown GET endpoint ${url}`);
       throw new Error(`No mock data available for GET ${url}`);
@@ -133,11 +131,15 @@ export class EnhancedMockApiClient implements IApiClient {
   public async post<T>(
     url: string,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ): Promise<T> {
     // Log the request attempt
     if (this.auditLogsEnabled) {
-      this.logActivity("api_request", { method: "POST", url, dataKeys: Object.keys(data || {}) });
+      this.logActivity("api_request", {
+        method: "POST",
+        url,
+        dataKeys: Object.keys(data || {}),
+      });
     }
 
     // Simulate network delay
@@ -145,26 +147,24 @@ export class EnhancedMockApiClient implements IApiClient {
 
     // Handle specific endpoints
     let result: any;
-    
-    if (url === '/auth/login') {
-      result = { 
-        success: true, 
+
+    if (url === "/auth/login") {
+      result = {
+        success: true,
         token: "mock_jwt_token_" + Date.now(),
         user: {
           id: "user-123",
           name: "Dr. Jane Smith",
           role: "Neuropsychiatrist",
-          email: data.email
-        }
+          email: data.email,
+        },
       };
       // Set the token automatically
       this.setAuthToken(result.token);
-    }
-    else if (url.includes('/predict-treatment')) {
+    } else if (url.includes("/predict-treatment")) {
       const patientId = url.split("/")[2] || "default";
       result = mockApi.predictTreatmentResponse(patientId, data.treatment);
-    }
-    else {
+    } else {
       // Default fallback
       console.error(`Mock API: Unknown POST endpoint ${url}`);
       result = { success: true, message: `Mock POST to ${url} successful` };
@@ -179,21 +179,25 @@ export class EnhancedMockApiClient implements IApiClient {
   public async put<T>(
     url: string,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ): Promise<T> {
     // Log the request attempt
     if (this.auditLogsEnabled) {
-      this.logActivity("api_request", { method: "PUT", url, dataKeys: Object.keys(data || {}) });
+      this.logActivity("api_request", {
+        method: "PUT",
+        url,
+        dataKeys: Object.keys(data || {}),
+      });
     }
 
     // Simulate network delay
     await this.simulateNetworkDelay();
 
     // Simple simulation for now
-    const result = { 
-      success: true, 
+    const result = {
+      success: true,
       message: `Mock PUT to ${url} successful`,
-      updatedData: { ...data, id: url.split("/").pop(), updated: true }
+      updatedData: { ...data, id: url.split("/").pop(), updated: true },
     };
 
     return result as T;
@@ -212,10 +216,10 @@ export class EnhancedMockApiClient implements IApiClient {
     await this.simulateNetworkDelay();
 
     // Simple simulation for now
-    const result = { 
-      success: true, 
+    const result = {
+      success: true,
       message: `Mock DELETE to ${url} successful`,
-      id: url.split("/").pop()
+      id: url.split("/").pop(),
     };
 
     return result as T;
@@ -246,8 +250,8 @@ export class EnhancedMockApiClient implements IApiClient {
         id: "user-123",
         name: "Dr. Jane Smith",
         role: "Neuropsychiatrist",
-        email
-      }
+        email,
+      },
     };
 
     // Set the auth token
@@ -296,19 +300,19 @@ export class EnhancedMockApiClient implements IApiClient {
    */
   public async predictTreatmentResponse(
     patientId: string,
-    treatmentData: any
+    treatmentData: any,
   ): Promise<any> {
     // Log the request
     if (this.auditLogsEnabled) {
-      this.logActivity("predict_treatment", { 
-        patientId, 
-        treatmentType: treatmentData?.treatment 
+      this.logActivity("predict_treatment", {
+        patientId,
+        treatmentType: treatmentData?.treatment,
       });
     }
 
     return this.post<any>(
       `/patients/${patientId}/predict-treatment`,
-      treatmentData
+      treatmentData,
     );
   }
 

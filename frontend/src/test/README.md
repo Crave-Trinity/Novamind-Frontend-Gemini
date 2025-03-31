@@ -12,13 +12,15 @@ This directory contains the unified testing infrastructure for the NOVAMIND Digi
 ## Usage Guidelines
 
 1. Always import the unified Three.js mock using the path alias:
+
    ```typescript
-   import '@test/unified-three.mock';
+   import "@test/unified-three.mock";
    ```
 
 2. Import the neural setup in your tests:
+
    ```typescript
-   import '@test/neural-setup';
+   import "@test/neural-setup";
    ```
 
 3. Use the vitest.unified.js configuration for all tests:
@@ -47,4 +49,3 @@ All imports should use the standardized path aliases defined in tsconfig.json:
 3. Test visualization components with quantum-level accuracy
 4. Implement clean setup and teardown for each test
 5. Use type-safe assertions for all validations
-

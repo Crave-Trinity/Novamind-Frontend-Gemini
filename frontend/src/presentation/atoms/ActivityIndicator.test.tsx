@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * ActivityIndicator testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('ActivityIndicator', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

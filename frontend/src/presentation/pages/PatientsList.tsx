@@ -21,102 +21,106 @@ const PatientsList: React.FC = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['patients'],
+    queryKey: ["patients"],
     queryFn: async () => {
-    // In a real app, this would call the API with proper filters
-    // For now, we'll return mock data
-    return await new Promise<Patient[]>((resolve) =>
-      setTimeout(
-        () =>
-          resolve([
-            {
-              id: "1",
-              firstName: "Emma",
-              lastName: "Thompson",
-              dateOfBirth: "1985-05-12",
-              gender: "Female",
-              mrn: "MRN12345",
-              status: "Active",
-              riskLevel: "Medium",
-              lastVisit: "2025-03-15",
-              diagnoses: [
-                "Major Depressive Disorder",
-                "Generalized Anxiety Disorder",
-              ],
-              currentMedications: [
-                { name: "Sertraline", dosage: "100mg", frequency: "Daily" },
-                { name: "Clonazepam", dosage: "0.5mg", frequency: "As needed" },
-              ],
-            },
-            {
-              id: "2",
-              firstName: "Michael",
-              lastName: "Rodriguez",
-              dateOfBirth: "1992-11-03",
-              gender: "Male",
-              mrn: "MRN67890",
-              status: "Active",
-              riskLevel: "High",
-              lastVisit: "2025-03-20",
-              diagnoses: ["Bipolar I Disorder", "Substance Use Disorder"],
-              currentMedications: [
-                { name: "Lithium", dosage: "900mg", frequency: "Daily" },
-                { name: "Quetiapine", dosage: "300mg", frequency: "Nightly" },
-              ],
-            },
-            {
-              id: "3",
-              firstName: "Sarah",
-              lastName: "Chen",
-              dateOfBirth: "1979-03-24",
-              gender: "Female",
-              mrn: "MRN54321",
-              status: "Active",
-              riskLevel: "Low",
-              lastVisit: "2025-03-10",
-              diagnoses: ["Post-Traumatic Stress Disorder"],
-              currentMedications: [
-                { name: "Prazosin", dosage: "1mg", frequency: "Nightly" },
-                { name: "Bupropion", dosage: "150mg", frequency: "Daily" },
-              ],
-            },
-            {
-              id: "4",
-              firstName: "David",
-              lastName: "Wilson",
-              dateOfBirth: "1988-07-16",
-              gender: "Male",
-              mrn: "MRN13579",
-              status: "Active",
-              riskLevel: "High",
-              lastVisit: "2025-03-22",
-              diagnoses: ["Schizophrenia", "Obsessive-Compulsive Disorder"],
-              currentMedications: [
-                { name: "Risperidone", dosage: "4mg", frequency: "Daily" },
-                { name: "Fluoxetine", dosage: "40mg", frequency: "Daily" },
-              ],
-            },
-            {
-              id: "5",
-              firstName: "Olivia",
-              lastName: "Johnson",
-              dateOfBirth: "1995-12-05",
-              gender: "Female",
-              mrn: "MRN24680",
-              status: "Active",
-              riskLevel: "Medium",
-              lastVisit: "2025-03-18",
-              diagnoses: ["Major Depressive Disorder", "Eating Disorder NOS"],
-              currentMedications: [
-                { name: "Escitalopram", dosage: "20mg", frequency: "Daily" },
-                { name: "Olanzapine", dosage: "5mg", frequency: "Nightly" },
-              ],
-            },
-          ]),
-        800,
-      ),
-    );
-    }
+      // In a real app, this would call the API with proper filters
+      // For now, we'll return mock data
+      return await new Promise<Patient[]>((resolve) =>
+        setTimeout(
+          () =>
+            resolve([
+              {
+                id: "1",
+                firstName: "Emma",
+                lastName: "Thompson",
+                dateOfBirth: "1985-05-12",
+                gender: "Female",
+                mrn: "MRN12345",
+                status: "Active",
+                riskLevel: "Medium",
+                lastVisit: "2025-03-15",
+                diagnoses: [
+                  "Major Depressive Disorder",
+                  "Generalized Anxiety Disorder",
+                ],
+                currentMedications: [
+                  { name: "Sertraline", dosage: "100mg", frequency: "Daily" },
+                  {
+                    name: "Clonazepam",
+                    dosage: "0.5mg",
+                    frequency: "As needed",
+                  },
+                ],
+              },
+              {
+                id: "2",
+                firstName: "Michael",
+                lastName: "Rodriguez",
+                dateOfBirth: "1992-11-03",
+                gender: "Male",
+                mrn: "MRN67890",
+                status: "Active",
+                riskLevel: "High",
+                lastVisit: "2025-03-20",
+                diagnoses: ["Bipolar I Disorder", "Substance Use Disorder"],
+                currentMedications: [
+                  { name: "Lithium", dosage: "900mg", frequency: "Daily" },
+                  { name: "Quetiapine", dosage: "300mg", frequency: "Nightly" },
+                ],
+              },
+              {
+                id: "3",
+                firstName: "Sarah",
+                lastName: "Chen",
+                dateOfBirth: "1979-03-24",
+                gender: "Female",
+                mrn: "MRN54321",
+                status: "Active",
+                riskLevel: "Low",
+                lastVisit: "2025-03-10",
+                diagnoses: ["Post-Traumatic Stress Disorder"],
+                currentMedications: [
+                  { name: "Prazosin", dosage: "1mg", frequency: "Nightly" },
+                  { name: "Bupropion", dosage: "150mg", frequency: "Daily" },
+                ],
+              },
+              {
+                id: "4",
+                firstName: "David",
+                lastName: "Wilson",
+                dateOfBirth: "1988-07-16",
+                gender: "Male",
+                mrn: "MRN13579",
+                status: "Active",
+                riskLevel: "High",
+                lastVisit: "2025-03-22",
+                diagnoses: ["Schizophrenia", "Obsessive-Compulsive Disorder"],
+                currentMedications: [
+                  { name: "Risperidone", dosage: "4mg", frequency: "Daily" },
+                  { name: "Fluoxetine", dosage: "40mg", frequency: "Daily" },
+                ],
+              },
+              {
+                id: "5",
+                firstName: "Olivia",
+                lastName: "Johnson",
+                dateOfBirth: "1995-12-05",
+                gender: "Female",
+                mrn: "MRN24680",
+                status: "Active",
+                riskLevel: "Medium",
+                lastVisit: "2025-03-18",
+                diagnoses: ["Major Depressive Disorder", "Eating Disorder NOS"],
+                currentMedications: [
+                  { name: "Escitalopram", dosage: "20mg", frequency: "Daily" },
+                  { name: "Olanzapine", dosage: "5mg", frequency: "Nightly" },
+                ],
+              },
+            ]),
+          800,
+        ),
+      );
+    },
   });
 
   // Filter patients based on search and filter
@@ -136,14 +140,20 @@ const PatientsList: React.FC = () => {
             .toLowerCase()
             .includes(search) ||
           patient.mrn.toLowerCase().includes(search) ||
-          patient.diagnoses.some((d: string) => d.toLowerCase().includes(search)),
+          patient.diagnoses.some((d: string) =>
+            d.toLowerCase().includes(search),
+          ),
       );
     }
 
     // Apply category filter
     if (selectedFilter === "high-risk") {
-      filtered = filtered.filter((patient) =>
-        patient.riskLevel === "high" || patient.riskLevel === "High" || patient.riskLevel === "critical" || patient.riskLevel === "Critical"
+      filtered = filtered.filter(
+        (patient) =>
+          patient.riskLevel === "high" ||
+          patient.riskLevel === "High" ||
+          patient.riskLevel === "critical" ||
+          patient.riskLevel === "Critical",
       );
     } else if (selectedFilter === "recent") {
       // Sort by most recent visit and take top 3
@@ -170,7 +180,9 @@ const PatientsList: React.FC = () => {
   };
 
   // Get risk level badge color
-  const getRiskLevelColor = (riskLevel: import('../../domain/types/RiskLevel').RiskLevel) => {
+  const getRiskLevelColor = (
+    riskLevel: import("../../domain/types/RiskLevel").RiskLevel,
+  ) => {
     switch (riskLevel) {
       case "High":
         return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
@@ -448,11 +460,16 @@ const PatientsList: React.FC = () => {
                           Diagnoses
                         </p>
                         <ul className="text-sm text-neutral-900 dark:text-white">
-                          {patient.diagnoses.map((diagnosis: string, index: number) => (
-                            <li key={`${patient.id}-diagnosis-${index}`} className="truncate">
-                              • {diagnosis}
-                            </li>
-                          ))}
+                          {patient.diagnoses.map(
+                            (diagnosis: string, index: number) => (
+                              <li
+                                key={`${patient.id}-diagnosis-${index}`}
+                                className="truncate"
+                              >
+                                • {diagnosis}
+                              </li>
+                            ),
+                          )}
                         </ul>
                       </div>
                     </div>

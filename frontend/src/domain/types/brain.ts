@@ -27,18 +27,18 @@ export interface Vector3 {
 export interface BrainScan {
   patientId: string;
   scanDate: string;
-  scanType: 'fMRI' | 'PET' | 'MRI' | 'DTI';
+  scanType: "fMRI" | "PET" | "MRI" | "DTI";
   notes?: string;
   technician?: string;
 }
 
 // Digital Twin visualization modes
 export enum RenderMode {
-  NORMAL = 'normal',
-  ACTIVITY = 'activity',
-  CONNECTIVITY = 'connectivity',
-  RISK = 'risk',
-  TREATMENT_RESPONSE = 'treatment_response'
+  NORMAL = "normal",
+  ACTIVITY = "activity",
+  CONNECTIVITY = "connectivity",
+  RISK = "risk",
+  TREATMENT_RESPONSE = "treatment_response",
 }
 
 // Neural-safe visualization settings
@@ -66,10 +66,10 @@ export interface BrainModelData {
 export interface PatientMetadata {
   id: string;
   age: number;
-  biologicalSex: 'male' | 'female' | 'other';
+  biologicalSex: "male" | "female" | "other";
   diagnosis?: string[];
   medications?: Medication[];
-  riskLevel?: 'low' | 'moderate' | 'high' | 'severe';
+  riskLevel?: "low" | "moderate" | "high" | "severe";
 }
 
 // Medication with clinical precision typing
@@ -104,30 +104,27 @@ export interface ActivityTimeSeries {
 export interface NeuralVisualizationErrorInterface {
   code: string;
   message: string;
-  severity: 'warning' | 'error' | 'fatal';
+  severity: "warning" | "error" | "fatal";
   component?: string;
   timestamp: number;
 }
 
 // Type guard for brain regions
 export function isBrainRegion(obj: unknown): obj is BrainRegion {
-  if (!obj || typeof obj !== 'object') return false;
+  if (!obj || typeof obj !== "object") return false;
   const region = obj as Partial<BrainRegion>;
   return (
-    typeof region.id === 'string' &&
-    typeof region.name === 'string' &&
-    typeof region.activityLevel === 'number'
+    typeof region.id === "string" &&
+    typeof region.name === "string" &&
+    typeof region.activityLevel === "number"
   );
 }
 
 // Type guard for brain model
 export function isBrainModel(obj: unknown): obj is BrainModelData {
-  if (!obj || typeof obj !== 'object') return false;
+  if (!obj || typeof obj !== "object") return false;
   const model = obj as Partial<BrainModelData>;
-  return (
-    Array.isArray(model.regions) &&
-    model.regions.every(isBrainRegion)
-  );
+  return Array.isArray(model.regions) && model.regions.every(isBrainRegion);
 }
 
 // Neural-safe array wrapper to prevent null reference errors
@@ -193,22 +190,28 @@ export class SafeArray<T> {
 }
 
 // Custom implementation of NeuralVisualizationError class
-export class NeuralVisualizationError extends Error implements NeuralVisualizationErrorInterface {
+export class NeuralVisualizationError
+  extends Error
+  implements NeuralVisualizationErrorInterface
+{
   code: string;
-  severity: 'warning' | 'error' | 'fatal';
+  severity: "warning" | "error" | "fatal";
   component?: string;
   timestamp: number;
 
-  constructor(message: string, options: {
-    code: string;
-    severity?: 'warning' | 'error' | 'fatal';
-    component?: string;
-  } = { code: 'VISUALIZATION_ERROR' }) {
+  constructor(
+    message: string,
+    options: {
+      code: string;
+      severity?: "warning" | "error" | "fatal";
+      component?: string;
+    } = { code: "VISUALIZATION_ERROR" },
+  ) {
     super(message);
-    this.name = 'NeuralVisualizationError';
+    this.name = "NeuralVisualizationError";
     this.message = message;
     this.code = options.code;
-    this.severity = options.severity || 'error';
+    this.severity = options.severity || "error";
     this.component = options.component;
     this.timestamp = Date.now();
   }
@@ -224,20 +227,20 @@ export const BrainRegion = {
     // Neural-safe properties with strict null handling
     const region: BrainRegion = {
       id: data.id || `region-${Math.random().toString(36).substring(2, 9)}`,
-      name: data.name || 'Unnamed Region',
+      name: data.name || "Unnamed Region",
       position: data.position || { x: 0, y: 0, z: 0 },
-      color: data.color || '#CCCCCC',
+      color: data.color || "#CCCCCC",
       connections: data.connections || [],
       activityLevel: data.activityLevel ?? 0,
       isActive: data.isActive ?? false,
     };
-    
+
     // Handle optional properties with type safety
     if (data.volumeMl !== undefined) region.volumeMl = data.volumeMl;
     if (data.riskFactor !== undefined) region.riskFactor = data.riskFactor;
-    
+
     return region;
-  }
+  },
 };
 
 /**
@@ -249,7 +252,7 @@ export const Vector3Factory = {
   },
   zero(): Vector3 {
     return { x: 0, y: 0, z: 0 };
-  }
+  },
 };
 
 /**
@@ -259,17 +262,17 @@ export const BrainScan = {
   create(data: Partial<BrainScan> = {}): BrainScan {
     // Neural-safe properties with strict null handling
     const scan: BrainScan = {
-      patientId: data.patientId || 'unknown',
+      patientId: data.patientId || "unknown",
       scanDate: data.scanDate || new Date().toISOString(),
-      scanType: data.scanType || 'MRI',
+      scanType: data.scanType || "MRI",
     };
-    
+
     // Handle optional properties with type safety
     if (data.notes !== undefined) scan.notes = data.notes;
     if (data.technician !== undefined) scan.technician = data.technician;
-    
+
     return scan;
-  }
+  },
 };
 
 /**
@@ -280,15 +283,15 @@ export const VisualizationSettings = {
     return {
       showLabels: data.showLabels ?? true,
       rotationSpeed: data.rotationSpeed ?? 0.5,
-      highlightColor: data.highlightColor || '#FF5733',
-      backgroundColor: data.backgroundColor || '#121212',
+      highlightColor: data.highlightColor || "#FF5733",
+      backgroundColor: data.backgroundColor || "#121212",
       connectionOpacity: data.connectionOpacity ?? 0.7,
       nodeSize: data.nodeSize ?? 1,
       renderMode: data.renderMode ?? RenderMode.NORMAL,
       enableBloom: data.enableBloom ?? true,
-      synapticPulse: data.synapticPulse ?? true
+      synapticPulse: data.synapticPulse ?? true,
     };
-  }
+  },
 };
 
 /**
@@ -300,16 +303,16 @@ export const PatientMetadata = {
     const metadata: PatientMetadata = {
       id: data.id || `patient-${Math.random().toString(36).substring(2, 9)}`,
       age: data.age ?? 35,
-      biologicalSex: data.biologicalSex || 'other',
+      biologicalSex: data.biologicalSex || "other",
     };
-    
+
     // Handle optional properties with type safety
     if (data.diagnosis !== undefined) metadata.diagnosis = data.diagnosis;
     if (data.medications !== undefined) metadata.medications = data.medications;
     if (data.riskLevel !== undefined) metadata.riskLevel = data.riskLevel;
-    
+
     return metadata;
-  }
+  },
 };
 
 /**
@@ -319,18 +322,18 @@ export const Medication = {
   create(data: Partial<Medication> = {}): Medication {
     // Neural-safe properties with strict null handling
     const medication: Medication = {
-      name: data.name || 'Unknown Medication',
-      dosage: data.dosage || '0mg',
-      frequency: data.frequency || 'daily',
+      name: data.name || "Unknown Medication",
+      dosage: data.dosage || "0mg",
+      frequency: data.frequency || "daily",
       startDate: data.startDate || new Date().toISOString(),
     };
-    
+
     // Handle optional properties with type safety
     if (data.endDate !== undefined) medication.endDate = data.endDate;
     if (data.adherence !== undefined) medication.adherence = data.adherence;
-    
+
     return medication;
-  }
+  },
 };
 
 /**
@@ -340,21 +343,23 @@ export const TreatmentResponse = {
   create(data: Partial<TreatmentResponse> = {}): TreatmentResponse {
     // Neural-safe properties with strict null handling
     const response: TreatmentResponse = {
-      treatmentId: data.treatmentId || `treatment-${Math.random().toString(36).substring(2, 9)}`,
-      treatmentName: data.treatmentName || 'Unknown Treatment',
+      treatmentId:
+        data.treatmentId ||
+        `treatment-${Math.random().toString(36).substring(2, 9)}`,
+      treatmentName: data.treatmentName || "Unknown Treatment",
       responseProbability: data.responseProbability ?? 0.75,
       timeToEffect: data.timeToEffect ?? 14,
       sideEffectRisk: data.sideEffectRisk ?? 0.15,
       confidenceInterval: data.confidenceInterval || [0.65, 0.85],
     };
-    
+
     // Handle optional properties with type safety
     if (data.neuroplasticityImpact !== undefined) {
       response.neuroplasticityImpact = data.neuroplasticityImpact;
     }
-    
+
     return response;
-  }
+  },
 };
 
 /**
@@ -363,11 +368,11 @@ export const TreatmentResponse = {
 export const ActivityTimeSeries = {
   create(data: Partial<ActivityTimeSeries> = {}): ActivityTimeSeries {
     return {
-      regionId: data.regionId || 'unknown',
+      regionId: data.regionId || "unknown",
       timestamps: data.timestamps || [Date.now()],
-      values: data.values || [0]
+      values: data.values || [0],
     };
-  }
+  },
 };
 
 /**
@@ -380,18 +385,18 @@ export const BrainModel = (data: any = {}): BrainModelData => {
     settings: {
       showLabels: true,
       rotationSpeed: 0.5,
-      highlightColor: '#FF5733',
-      backgroundColor: '#121212',
+      highlightColor: "#FF5733",
+      backgroundColor: "#121212",
       connectionOpacity: 0.7,
       nodeSize: 1,
       renderMode: RenderMode.NORMAL,
       enableBloom: true,
-      synapticPulse: true
-    }
+      synapticPulse: true,
+    },
   };
 
   // Process regions if provided
-  const processedRegions = Array.isArray(data.regions) 
+  const processedRegions = Array.isArray(data.regions)
     ? data.regions.map((r: any) => BrainRegion.create(r))
     : [];
 
@@ -401,7 +406,7 @@ export const BrainModel = (data: any = {}): BrainModelData => {
     regions: processedRegions,
     settings: {
       ...defaultModel.settings,
-      ...(data.settings || {})
-    }
+      ...(data.settings || {}),
+    },
   };
 };

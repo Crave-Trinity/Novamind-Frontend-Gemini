@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * Header testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('Header', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

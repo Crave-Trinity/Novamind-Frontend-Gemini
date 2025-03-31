@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * Chart testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('Chart', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

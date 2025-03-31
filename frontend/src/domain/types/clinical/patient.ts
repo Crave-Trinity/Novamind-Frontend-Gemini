@@ -18,13 +18,13 @@ export interface Patient {
 // Demographic data with clinical precision
 export interface PatientDemographics {
   age: number;
-  biologicalSex: 'male' | 'female' | 'other';
+  biologicalSex: "male" | "female" | "other";
   ethnicity?: string;
   occupationalStatus?: string;
   educationLevel?: string;
-  handedness?: 'right' | 'left' | 'ambidextrous';
+  handedness?: "right" | "left" | "ambidextrous";
   primaryLanguage?: string;
-  anonymizationLevel: 'full' | 'partial' | 'research' | 'clinical';
+  anonymizationLevel: "full" | "partial" | "research" | "clinical";
 }
 
 // Clinical data with psychiatric precision
@@ -45,13 +45,13 @@ export interface ClinicalData {
 export interface Diagnosis {
   id: string;
   code: string;
-  codingSystem: 'ICD-10' | 'ICD-11' | 'DSM-5' | 'DSM-5-TR';
+  codingSystem: "ICD-10" | "ICD-11" | "DSM-5" | "DSM-5-TR";
   name: string;
-  severity: 'mild' | 'moderate' | 'severe' | 'in remission' | 'unspecified';
+  severity: "mild" | "moderate" | "severe" | "in remission" | "unspecified";
   onsetDate?: string;
   diagnosisDate: string;
   diagnosingClinician?: string;
-  status: 'active' | 'resolved' | 'in remission' | 'recurrent';
+  status: "active" | "resolved" | "in remission" | "recurrent";
   notes?: string;
   confidenceLevel?: number; // 0-1 representing diagnostic confidence
   associatedBrainRegions?: string[]; // IDs of associated brain regions
@@ -61,16 +61,22 @@ export interface Diagnosis {
 export interface Symptom {
   id: string;
   name: string;
-  category: 'cognitive' | 'affective' | 'behavioral' | 'somatic' | 'perceptual';
+  category: "cognitive" | "affective" | "behavioral" | "somatic" | "perceptual";
   severity: number; // 0-10 scale
-  frequency: 'constant' | 'daily' | 'weekly' | 'monthly' | 'episodic' | 'situational';
+  frequency:
+    | "constant"
+    | "daily"
+    | "weekly"
+    | "monthly"
+    | "episodic"
+    | "situational";
   onsetDate?: string;
   lastOccurrence?: string;
   duration?: string;
   triggers?: string[];
   alleviatingFactors?: string[];
-  impact: 'none' | 'mild' | 'moderate' | 'severe';
-  progression: 'improving' | 'stable' | 'worsening' | 'fluctuating';
+  impact: "none" | "mild" | "moderate" | "severe";
+  progression: "improving" | "stable" | "worsening" | "fluctuating";
   associatedDiagnoses?: string[]; // IDs of associated diagnoses
   associatedBrainRegions?: string[]; // IDs of associated brain regions
   notes?: string;
@@ -84,7 +90,16 @@ export interface Medication {
   classification: string;
   dosage: string;
   frequency: string;
-  route: 'oral' | 'sublingual' | 'topical' | 'intramuscular' | 'intravenous' | 'subcutaneous' | 'inhaled' | 'rectal' | 'other';
+  route:
+    | "oral"
+    | "sublingual"
+    | "topical"
+    | "intramuscular"
+    | "intravenous"
+    | "subcutaneous"
+    | "inhaled"
+    | "rectal"
+    | "other";
   startDate: string;
   endDate?: string;
   prescribingClinician?: string;
@@ -95,7 +110,7 @@ export interface Medication {
   interactionAlerts?: string[];
   associatedBrainEffects?: {
     regionId: string;
-    effect: 'increase' | 'decrease' | 'modulate';
+    effect: "increase" | "decrease" | "modulate";
     confidenceLevel: number; // 0-1
   }[];
 }
@@ -103,9 +118,9 @@ export interface Medication {
 // Medication side effect
 export interface MedicationSideEffect {
   name: string;
-  severity: 'mild' | 'moderate' | 'severe';
+  severity: "mild" | "moderate" | "severe";
   onset: string;
-  status: 'active' | 'resolved' | 'improving' | 'worsening';
+  status: "active" | "resolved" | "improving" | "worsening";
   actionTaken?: string;
 }
 
@@ -130,7 +145,7 @@ export interface PsychometricAssessment {
     isValid: boolean;
     concerns?: string;
   };
-  comparativeTrend?: 'improved' | 'declined' | 'stable' | 'fluctuating';
+  comparativeTrend?: "improved" | "declined" | "stable" | "fluctuating";
   notes?: string;
 }
 
@@ -138,13 +153,21 @@ export interface PsychometricAssessment {
 export interface MedicalHistoryItem {
   id: string;
   condition: string;
-  type: 'neurological' | 'psychiatric' | 'cardiovascular' | 'endocrine' | 'gastrointestinal' | 'musculoskeletal' | 'respiratory' | 'other';
+  type:
+    | "neurological"
+    | "psychiatric"
+    | "cardiovascular"
+    | "endocrine"
+    | "gastrointestinal"
+    | "musculoskeletal"
+    | "respiratory"
+    | "other";
   onsetDate?: string;
   endDate?: string;
-  status: 'active' | 'resolved' | 'chronic' | 'episodic' | 'in remission';
+  status: "active" | "resolved" | "chronic" | "episodic" | "in remission";
   treatments?: string[];
-  impact: 'none' | 'minimal' | 'moderate' | 'significant';
-  relevanceToNeuralHealth: 'low' | 'moderate' | 'high';
+  impact: "none" | "minimal" | "moderate" | "significant";
+  relevanceToNeuralHealth: "low" | "moderate" | "high";
   notes?: string;
 }
 
@@ -162,7 +185,7 @@ export interface FamilyHistory {
     onsetAge?: number;
     status?: string;
   }[];
-  relevanceLevel: 'low' | 'moderate' | 'high';
+  relevanceLevel: "low" | "moderate" | "high";
   geneticTestingPerformed?: boolean;
   geneticRiskFactors?: string[];
 }
@@ -171,17 +194,17 @@ export interface FamilyHistory {
 export interface SubstanceUseHistory {
   substances: {
     name: string;
-    pattern: 'never' | 'past' | 'current' | 'experimental';
-    frequency?: 'daily' | 'weekly' | 'monthly' | 'rarely';
+    pattern: "never" | "past" | "current" | "experimental";
+    frequency?: "daily" | "weekly" | "monthly" | "rarely";
     quantity?: string;
     durationOfUse?: string;
     lastUse?: string;
     route?: string;
-    impact: 'none' | 'minimal' | 'moderate' | 'severe';
+    impact: "none" | "minimal" | "moderate" | "severe";
   }[];
   treatmentHistory?: string[];
   abstinencePeriods?: string[];
-  relevanceToNeuralHealth: 'low' | 'moderate' | 'high';
+  relevanceToNeuralHealth: "low" | "moderate" | "high";
 }
 
 // Sleep data
@@ -194,7 +217,7 @@ export interface SleepData {
   deepSleepPercentage?: number;
   remSleepPercentage?: number;
   sleepArchitecture?: {
-    stage: 'N1' | 'N2' | 'N3' | 'REM';
+    stage: "N1" | "N2" | "N3" | "REM";
     durationMinutes: number;
     percentage: number;
   }[];
@@ -219,7 +242,7 @@ export interface NutritionalData {
     frequency: string;
     purpose: string;
   }[];
-  relevanceToNeuralHealth: 'low' | 'moderate' | 'high';
+  relevanceToNeuralHealth: "low" | "moderate" | "high";
   dietaryRestrictions?: string[];
   recentChanges?: string;
 }
@@ -227,7 +250,7 @@ export interface NutritionalData {
 // Allergy information
 export interface Allergy {
   allergen: string;
-  severity: 'mild' | 'moderate' | 'severe';
+  severity: "mild" | "moderate" | "severe";
   reactions: string[];
   diagnosed: boolean;
   onsetDate?: string;
@@ -251,13 +274,19 @@ export interface TreatmentData {
 // Treatment details
 export interface Treatment {
   id: string;
-  type: 'pharmacological' | 'psychotherapy' | 'neuromodulation' | 'lifestyle' | 'complementary' | 'other';
+  type:
+    | "pharmacological"
+    | "psychotherapy"
+    | "neuromodulation"
+    | "lifestyle"
+    | "complementary"
+    | "other";
   name: string;
   description: string;
   startDate: string;
   endDate?: string;
   provider?: string;
-  status: 'active' | 'completed' | 'discontinued' | 'planned';
+  status: "active" | "completed" | "discontinued" | "planned";
   discontinuationReason?: string;
   frequency?: string;
   dose?: string;
@@ -273,7 +302,12 @@ export interface Treatment {
 export interface TreatmentResponse {
   treatmentId: string;
   assessmentDate: string;
-  clinicalResponse: 'remission' | 'response' | 'partial response' | 'no response' | 'worsening';
+  clinicalResponse:
+    | "remission"
+    | "response"
+    | "partial response"
+    | "no response"
+    | "worsening";
   symptomChanges: {
     symptomId: string;
     changePercentage: number; // negative values indicate worsening
@@ -286,7 +320,7 @@ export interface TreatmentResponse {
   }[];
   sideEffects: {
     description: string;
-    severity: 'mild' | 'moderate' | 'severe';
+    severity: "mild" | "moderate" | "severe";
     managementStrategy?: string;
   }[];
   functionalImprovements?: string[];
@@ -303,12 +337,12 @@ export interface TreatmentPlan {
   shortTermGoals: {
     description: string;
     targetDate?: string;
-    status: 'not started' | 'in progress' | 'achieved' | 'modified';
+    status: "not started" | "in progress" | "achieved" | "modified";
   }[];
   longTermGoals: {
     description: string;
     targetDate?: string;
-    status: 'not started' | 'in progress' | 'achieved' | 'modified';
+    status: "not started" | "in progress" | "achieved" | "modified";
   }[];
   treatmentComponents: {
     componentType: string;
@@ -337,7 +371,7 @@ export interface NeuralData {
     relevantGenes: string[];
     polymorphisms?: string[];
     pharmacogenomicFactors?: string[];
-    confidentiality: 'standard' | 'heightened' | 'restricted';
+    confidentiality: "standard" | "heightened" | "restricted";
   };
   connectomics?: {
     globalEfficiency?: number;
@@ -350,10 +384,10 @@ export interface NeuralData {
 
 // Data permissions with HIPAA compliance
 export interface DataPermissions {
-  accessLevel: 'full' | 'treatment' | 'research' | 'limited';
+  accessLevel: "full" | "treatment" | "research" | "limited";
   authorizedUsers: string[];
   restrictedElements?: string[];
-  consentStatus: 'full' | 'partial' | 'research-only' | 'none';
+  consentStatus: "full" | "partial" | "research-only" | "none";
   dataRetentionPolicy: string;
   lastReviewDate: string;
 }
@@ -361,21 +395,21 @@ export interface DataPermissions {
 // Type guard for patient
 export function isPatient(obj: unknown): obj is Patient {
   return (
-    typeof obj === 'object' &&
+    typeof obj === "object" &&
     obj !== null &&
-    'id' in obj &&
-    'demographicData' in obj &&
-    'clinicalData' in obj
+    "id" in obj &&
+    "demographicData" in obj &&
+    "clinicalData" in obj
   );
 }
 
 // Type guard for diagnosis
 export function isDiagnosis(obj: unknown): obj is Diagnosis {
   return (
-    typeof obj === 'object' &&
+    typeof obj === "object" &&
     obj !== null &&
-    'id' in obj &&
-    'code' in obj &&
-    'name' in obj
+    "id" in obj &&
+    "code" in obj &&
+    "name" in obj
   );
 }

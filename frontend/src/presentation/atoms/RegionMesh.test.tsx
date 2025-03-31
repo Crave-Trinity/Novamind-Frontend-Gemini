@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * RegionMesh testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('RegionMesh', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

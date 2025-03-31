@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * BrainModelViewer testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('BrainModelViewer', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

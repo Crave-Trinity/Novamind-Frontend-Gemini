@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * BrainRegionLabels testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('BrainRegionLabels', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";

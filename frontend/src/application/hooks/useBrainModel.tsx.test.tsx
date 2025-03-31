@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * useBrainModel testing with quantum precision
  */
@@ -188,3 +188,4 @@ describe('useBrainModel', () => {
     expect(result.current.isError).toBe(false);
   });
 });
+ } from "";

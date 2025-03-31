@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * TemporalDynamicsVisualizer testing with quantum precision
  */
@@ -329,4 +329,4 @@ describe('TemporalDynamicsVisualizer', () => {
     // Time range change should be detected
     expect(onTimeRangeChange).toHaveBeenCalledTimes(1);
   });
-});
+}); } from "";

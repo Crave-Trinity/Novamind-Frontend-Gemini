@@ -1,12 +1,12 @@
 /**
  * NOVAMIND Neural Architecture
  * Neural-Safe Test Registry with Quantum Precision
- * 
+ *
  * This centralized test registry provides a synchronous state coordination
  * mechanism for quantum-precise testing with clinical accuracy.
  */
 
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
 // Neural-safe test state registry with quantum precision
 interface NeuralTestState {
@@ -16,7 +16,7 @@ interface NeuralTestState {
     errorMessage: string | null;
     isLoading: boolean;
   };
-  
+
   // Mock registry configuration
   mockConfig: {
     interceptModules: boolean;
@@ -29,12 +29,12 @@ const neuralTestState: NeuralTestState = {
   visualizationState: {
     isErrorState: false,
     errorMessage: null,
-    isLoading: false
+    isLoading: false,
   },
   mockConfig: {
     interceptModules: true,
-    bypassCache: false
-  }
+    bypassCache: false,
+  },
 };
 
 // Neural-safe visualization error state mock creator with mathematical elegance
@@ -50,7 +50,7 @@ export const createVisualizationErrorMock = (errorMsg: string) => ({
   selectRegion: vi.fn(),
   setVisualizationMode: vi.fn(),
   setTimeScale: vi.fn(),
-  setDetailLevel: vi.fn()
+  setDetailLevel: vi.fn(),
 });
 
 /**
@@ -69,7 +69,7 @@ export const setVisualizationErrorState = (errorMessage: string): void => {
 export const clearVisualizationErrorState = (): void => {
   neuralTestState.visualizationState.isErrorState = false;
   neuralTestState.visualizationState.errorMessage = null;
-  
+
   // Reset module mocks with clinical precision
   vi.resetAllMocks();
 };
@@ -90,9 +90,11 @@ export const getVisualizationErrorState = (): {
 } => {
   return {
     isErrorState: neuralTestState.visualizationState.isErrorState,
-    errorMessage: neuralTestState.visualizationState.errorMessage
+    errorMessage: neuralTestState.visualizationState.errorMessage,
   };
 };
 
 // Initialize neural-safe test registry
-console.log('🧠 NOVAMIND Neural Test Registry: Initialized with quantum precision');
+console.log(
+  "🧠 NOVAMIND Neural Test Registry: Initialized with quantum precision",
+);

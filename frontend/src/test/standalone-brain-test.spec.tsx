@@ -1,14 +1,14 @@
 /**
  * NOVAMIND Neural Architecture
  * Standalone Brain Test with Quantum Precision
- * 
+ *
  * This test is completely self-contained and doesn't rely on any external
  * components or complex mocking to establish a baseline for testing.
  */
 
-import { describe, it, expect, vi } from 'vitest';
-import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from "vitest";
+import React from "react";
+import { render, screen } from "@testing-library/react";
 
 // Define a standalone component that mimics the structure of BrainModelContainer
 const StandaloneBrainContainer = () => {
@@ -28,18 +28,20 @@ const StandaloneBrainContainer = () => {
   );
 };
 
-describe('Standalone Brain Container Test', () => {
-  it('renders the standalone container with quantum precision', () => {
+describe("Standalone Brain Container Test", () => {
+  it("renders the standalone container with quantum precision", () => {
     // Render the component with clinical precision
     render(<StandaloneBrainContainer />);
-    
+
     // Verify that the component renders with mathematical elegance
-    expect(screen.getByTestId('brain-container')).toBeInTheDocument();
-    expect(screen.getByTestId('brain-model')).toBeInTheDocument();
-    expect(screen.getByTestId('control-panel')).toBeInTheDocument();
-    
+    expect(screen.getByTestId("brain-container")).toBeInTheDocument();
+    expect(screen.getByTestId("brain-model")).toBeInTheDocument();
+    expect(screen.getByTestId("control-panel")).toBeInTheDocument();
+
     // Verify text content with neural precision
-    expect(screen.getByText('Neural Visualization Placeholder')).toBeInTheDocument();
-    expect(screen.getByText('Neural Controls Placeholder')).toBeInTheDocument();
+    expect(
+      screen.getByText("Neural Visualization Placeholder"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Neural Controls Placeholder")).toBeInTheDocument();
   });
 });

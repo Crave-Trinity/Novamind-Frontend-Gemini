@@ -87,7 +87,8 @@ const RegionMesh: React.FC<{
   }, [isActive, isHighlighted, renderMode, region]);
 
   // Animation for pulsing effect on active regions
-  useFrame((state: RootState) => { // Re-add RootState type
+  useFrame((state: RootState) => {
+    // Re-add RootState type
     if (meshRef.current && materialRef.current && (isActive || isHighlighted)) {
       // Pulse effect for active or highlighted regions
       const pulse = Math.sin(state.clock.getElapsedTime() * 2) * 0.1 + 0.9;
@@ -326,7 +327,7 @@ const BrainVisualization: React.FC<BrainVisualizationProps> = ({
   // Handler for region click
   const handleRegionClick = (regionId: string) => {
     if (!interactive) return;
-    
+
     // Toggle in active regions
     setActiveRegions((prevRegions) => {
       if (prevRegions.includes(regionId)) {
@@ -342,50 +343,51 @@ const BrainVisualization: React.FC<BrainVisualizationProps> = ({
 
   // Theme-specific settings
   const visualSettings = useMemo(
-    () => ({
-      light: {
-        bgColor: "#f8f9fa",
-        ambientLight: 0.8,
-        directionalLight: 0.7,
-        glowIntensity: 0.2,
-        useBloom: false,
-      },
-      dark: {
-        bgColor: "#1a1a2e",
-        ambientLight: 0.4,
-        directionalLight: 0.6,
-        glowIntensity: 0.5,
-        useBloom: true,
-      },
-      clinical: {
-        bgColor: "#ffffff",
-        ambientLight: 1.0,
-        directionalLight: 0.8,
-        glowIntensity: 0.1,
-        useBloom: false,
-      },
-      "sleek-dark": {
-        bgColor: "#121212",
-        ambientLight: 0.3,
-        directionalLight: 0.5,
-        glowIntensity: 0.8,
-        useBloom: true,
-      },
-      "retro": {
-        bgColor: "#0a1128",
-        ambientLight: 0.5,
-        directionalLight: 0.6,
-        glowIntensity: 0.4,
-        useBloom: false,
-      },
-      "wes": {
-        bgColor: "#F8E9D6",
-        ambientLight: 0.7,
-        directionalLight: 0.6,
-        glowIntensity: 0.3,
-        useBloom: false,
-      },
-    } as const),
+    () =>
+      ({
+        light: {
+          bgColor: "#f8f9fa",
+          ambientLight: 0.8,
+          directionalLight: 0.7,
+          glowIntensity: 0.2,
+          useBloom: false,
+        },
+        dark: {
+          bgColor: "#1a1a2e",
+          ambientLight: 0.4,
+          directionalLight: 0.6,
+          glowIntensity: 0.5,
+          useBloom: true,
+        },
+        clinical: {
+          bgColor: "#ffffff",
+          ambientLight: 1.0,
+          directionalLight: 0.8,
+          glowIntensity: 0.1,
+          useBloom: false,
+        },
+        "sleek-dark": {
+          bgColor: "#121212",
+          ambientLight: 0.3,
+          directionalLight: 0.5,
+          glowIntensity: 0.8,
+          useBloom: true,
+        },
+        retro: {
+          bgColor: "#0a1128",
+          ambientLight: 0.5,
+          directionalLight: 0.6,
+          glowIntensity: 0.4,
+          useBloom: false,
+        },
+        wes: {
+          bgColor: "#F8E9D6",
+          ambientLight: 0.7,
+          directionalLight: 0.6,
+          glowIntensity: 0.3,
+          useBloom: false,
+        },
+      }) as const,
     [],
   );
 

@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * BrainVisualizationControls testing with quantum precision
  */
@@ -82,4 +82,4 @@ describe('BrainVisualizationControls', () => {
     // Verify the callback wasn't called
     expect(mockProps.onResetView).not.toHaveBeenCalled();
   });
-});
+}); } from "";

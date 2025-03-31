@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * NeuralActivityVisualizer testing with quantum precision
  */
@@ -344,4 +344,4 @@ describe('NeuralActivityVisualizer', () => {
     // Should respect the max visible limit (may be fewer due to filtering for distinct elements)
     expect(neuralNodes.length).toBeLessThanOrEqual(5);
   });
-});
+}); } from "";

@@ -1,12 +1,12 @@
 import React, { ButtonHTMLAttributes, forwardRef } from "react";
 import cn from "classnames";
 
-export type ButtonVariant = 
-  | "primary" 
-  | "secondary" 
-  | "outline" 
-  | "danger" 
-  | "success" 
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "danger"
+  | "success"
   | "warning"
   | "ghost";
 
@@ -17,27 +17,27 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
    * Visual variant of the button
    */
   variant?: ButtonVariant;
-  
+
   /**
    * Size of the button
    */
   size?: ButtonSize;
-  
+
   /**
    * Full width button
    */
   fullWidth?: boolean;
-  
+
   /**
    * Shows a loading spinner
    */
   isLoading?: boolean;
-  
+
   /**
    * Icon element to display before button text
    */
   icon?: React.ReactNode;
-  
+
   /**
    * Additional class names
    */
@@ -46,7 +46,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 /**
  * Button component
- * 
+ *
  * @example
  * ```tsx
  * <Button variant="primary" size="md" onClick={handleClick}>
@@ -67,17 +67,24 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       disabled,
       ...props
     },
-    ref
+    ref,
   ) => {
     // Generate variant classes
     const variantClasses = {
-      primary: "bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 dark:bg-primary-700 dark:hover:bg-primary-600",
-      secondary: "bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus:ring-neutral-500 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600",
-      outline: "border border-neutral-300 bg-transparent text-neutral-800 hover:bg-neutral-100 focus:ring-neutral-500 dark:border-neutral-600 dark:text-white dark:hover:bg-neutral-800",
-      danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 dark:bg-red-700 dark:hover:bg-red-600",
-      success: "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 dark:bg-green-700 dark:hover:bg-green-600",
-      warning: "bg-yellow-500 text-white hover:bg-yellow-600 focus:ring-yellow-400 dark:bg-yellow-600 dark:hover:bg-yellow-500",
-      ghost: "bg-transparent text-neutral-700 hover:bg-neutral-100 focus:ring-neutral-500 dark:text-neutral-300 dark:hover:bg-neutral-800",
+      primary:
+        "bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 dark:bg-primary-700 dark:hover:bg-primary-600",
+      secondary:
+        "bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus:ring-neutral-500 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600",
+      outline:
+        "border border-neutral-300 bg-transparent text-neutral-800 hover:bg-neutral-100 focus:ring-neutral-500 dark:border-neutral-600 dark:text-white dark:hover:bg-neutral-800",
+      danger:
+        "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 dark:bg-red-700 dark:hover:bg-red-600",
+      success:
+        "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 dark:bg-green-700 dark:hover:bg-green-600",
+      warning:
+        "bg-yellow-500 text-white hover:bg-yellow-600 focus:ring-yellow-400 dark:bg-yellow-600 dark:hover:bg-yellow-500",
+      ghost:
+        "bg-transparent text-neutral-700 hover:bg-neutral-100 focus:ring-neutral-500 dark:text-neutral-300 dark:hover:bg-neutral-800",
     };
 
     // Generate size classes
@@ -93,21 +100,21 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const buttonClasses = cn(
       // Base styles
       "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-neutral-900",
-      
+
       // Variant
       variantClasses[variant],
-      
+
       // Size
       sizeClasses[size],
-      
+
       // Full width
       fullWidth && "w-full",
-      
+
       // Disabled state
       (disabled || isLoading) && "opacity-60 cursor-not-allowed",
-      
+
       // Custom classes
-      className
+      className,
     );
 
     return (
@@ -139,13 +146,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             ></path>
           </svg>
         )}
-        
+
         {icon && !isLoading && <span className="mr-2">{icon}</span>}
-        
+
         {children}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

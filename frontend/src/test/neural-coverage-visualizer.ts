@@ -1,13 +1,13 @@
 /**
  * NOVAMIND Neural Architecture
  * Neural-Safe Coverage Visualizer with Quantum Precision
- * 
+ *
  * This utility generates HTML visualizations of test coverage metrics
  * for neural visualization components with clinical precision.
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 // Neural-safe coverage rendering with quantum precision
 interface NeuralCoverageMetrics {
@@ -21,7 +21,15 @@ interface NeuralCoverageMetrics {
 interface ComponentCoverage {
   name: string;
   path: string;
-  type: 'atom' | 'molecule' | 'organism' | 'template' | 'page' | 'service' | 'coordinator' | 'model';
+  type:
+    | "atom"
+    | "molecule"
+    | "organism"
+    | "template"
+    | "page"
+    | "service"
+    | "coordinator"
+    | "model";
   metrics: NeuralCoverageMetrics;
 }
 
@@ -29,53 +37,53 @@ interface ComponentCoverage {
  * Generate neural-safe coverage HTML report with quantum precision
  */
 export function generateCoverageVisualization(
-  coverageData: Record<string, any>, 
-  outputPath: string
+  coverageData: Record<string, any>,
+  outputPath: string,
 ): void {
   // Extract component metrics with clinical precision
   const components: ComponentCoverage[] = [];
-  
+
   // Process each file in coverage data with mathematical elegance
   Object.entries(coverageData).forEach(([filePath, metrics]) => {
     // Skip non-source files and total metrics
-    if (filePath === 'total' || !filePath.startsWith('src/')) {
+    if (filePath === "total" || !filePath.startsWith("src/")) {
       return;
     }
-    
+
     // Skip test and utility files
-    if (filePath.includes('.test.') || filePath.includes('/test/')) {
+    if (filePath.includes(".test.") || filePath.includes("/test/")) {
       return;
     }
-    
+
     // Determine component type with neural precision
-    let type: ComponentCoverage['type'] = 'service';
-    
-    if (filePath.includes('/presentation/atoms/')) {
-      type = 'atom';
-    } else if (filePath.includes('/presentation/molecules/')) {
-      type = 'molecule';
-    } else if (filePath.includes('/presentation/organisms/')) {
-      type = 'organism';
-    } else if (filePath.includes('/presentation/templates/')) {
-      type = 'template';
-    } else if (filePath.includes('/presentation/pages/')) {
-      type = 'page';
-    } else if (filePath.includes('/application/coordinators/')) {
-      type = 'coordinator';
-    } else if (filePath.includes('/application/services/')) {
-      type = 'service';
-    } else if (filePath.includes('/domain/models/')) {
-      type = 'model';
+    let type: ComponentCoverage["type"] = "service";
+
+    if (filePath.includes("/presentation/atoms/")) {
+      type = "atom";
+    } else if (filePath.includes("/presentation/molecules/")) {
+      type = "molecule";
+    } else if (filePath.includes("/presentation/organisms/")) {
+      type = "organism";
+    } else if (filePath.includes("/presentation/templates/")) {
+      type = "template";
+    } else if (filePath.includes("/presentation/pages/")) {
+      type = "page";
+    } else if (filePath.includes("/application/coordinators/")) {
+      type = "coordinator";
+    } else if (filePath.includes("/application/services/")) {
+      type = "service";
+    } else if (filePath.includes("/domain/models/")) {
+      type = "model";
     }
-    
+
     // Extract component name with quantum precision
-    const pathParts = filePath.split('/');
+    const pathParts = filePath.split("/");
     const fileName = pathParts[pathParts.length - 1];
-    const componentName = fileName.replace(/\.(ts|tsx)$/, '');
-    
+    const componentName = fileName.replace(/\.(ts|tsx)$/, "");
+
     // Calculate component metrics with clinical precision
     const fileMetrics = metrics as any;
-    
+
     components.push({
       name: componentName,
       path: filePath,
@@ -85,16 +93,16 @@ export function generateCoverageVisualization(
         branches: fileMetrics.branches.pct,
         functions: fileMetrics.functions.pct,
         lines: fileMetrics.lines.pct,
-        averageCoverage: (
-          fileMetrics.statements.pct + 
-          fileMetrics.branches.pct + 
-          fileMetrics.functions.pct + 
-          fileMetrics.lines.pct
-        ) / 4
-      }
+        averageCoverage:
+          (fileMetrics.statements.pct +
+            fileMetrics.branches.pct +
+            fileMetrics.functions.pct +
+            fileMetrics.lines.pct) /
+          4,
+      },
     });
   });
-  
+
   // Sort components by type and name with mathematical elegance
   components.sort((a, b) => {
     if (a.type !== b.type) {
@@ -106,21 +114,21 @@ export function generateCoverageVisualization(
         page: 5,
         coordinator: 6,
         service: 7,
-        model: 8
+        model: 8,
       };
-      
+
       return typeOrder[a.type] - typeOrder[b.type];
     }
-    
+
     return a.name.localeCompare(b.name);
   });
-  
+
   // Generate HTML report with clinical precision
   const html = generateHtmlReport(components, coverageData.total);
-  
+
   // Write HTML report with quantum precision
   fs.writeFileSync(outputPath, html);
-  
+
   console.log(`🧠 Neural Coverage Visualization: Generated at ${outputPath}`);
 }
 
@@ -128,8 +136,8 @@ export function generateCoverageVisualization(
  * Generate HTML report with quantum precision
  */
 function generateHtmlReport(
-  components: ComponentCoverage[], 
-  totalMetrics: any
+  components: ComponentCoverage[],
+  totalMetrics: any,
 ): string {
   // Calculate total coverage with clinical precision
   const totalCoverage: NeuralCoverageMetrics = {
@@ -137,17 +145,17 @@ function generateHtmlReport(
     branches: totalMetrics.branches.pct,
     functions: totalMetrics.functions.pct,
     lines: totalMetrics.lines.pct,
-    averageCoverage: (
-      totalMetrics.statements.pct +
-      totalMetrics.branches.pct +
-      totalMetrics.functions.pct +
-      totalMetrics.lines.pct
-    ) / 4
+    averageCoverage:
+      (totalMetrics.statements.pct +
+        totalMetrics.branches.pct +
+        totalMetrics.functions.pct +
+        totalMetrics.lines.pct) /
+      4,
   };
-  
+
   // Generate coverage statistics by component type with quantum precision
   const typeStats = generateTypeStats(components);
-  
+
   // Generate HTML with mathematical elegance
   return `
 <!DOCTYPE html>
@@ -417,12 +425,16 @@ function generateHtmlReport(
     <div class="chart-container">
       <h2 class="chart-title">Coverage by Component Type</h2>
       <div class="chart">
-        ${typeStats.map(typeStat => `
+        ${typeStats
+          .map(
+            (typeStat) => `
           <div class="chart-bar" style="height: ${typeStat.metrics.averageCoverage * 3}px;">
             <div class="chart-bar-label">${typeStat.type}</div>
             <div class="chart-bar-value">${typeStat.metrics.averageCoverage.toFixed(1)}%</div>
           </div>
-        `).join('')}
+        `,
+          )
+          .join("")}
       </div>
     </div>
   </div>
@@ -475,15 +487,15 @@ function generateHtmlReport(
 function generateComponentTypeHtml(components: ComponentCoverage[]): string {
   // Group components by type with clinical precision
   const typeMap: Record<string, ComponentCoverage[]> = {};
-  
-  components.forEach(component => {
+
+  components.forEach((component) => {
     if (!typeMap[component.type]) {
       typeMap[component.type] = [];
     }
-    
+
     typeMap[component.type].push(component);
   });
-  
+
   // Generate HTML for each component type with mathematical elegance
   return Object.entries(typeMap)
     .map(([type, typeComponents]) => {
@@ -493,24 +505,24 @@ function generateComponentTypeHtml(components: ComponentCoverage[]): string {
         branches: 0,
         functions: 0,
         lines: 0,
-        averageCoverage: 0
+        averageCoverage: 0,
       };
-      
-      typeComponents.forEach(component => {
+
+      typeComponents.forEach((component) => {
         typeMetrics.statements += component.metrics.statements;
         typeMetrics.branches += component.metrics.branches;
         typeMetrics.functions += component.metrics.functions;
         typeMetrics.lines += component.metrics.lines;
         typeMetrics.averageCoverage += component.metrics.averageCoverage;
       });
-      
+
       const count = typeComponents.length;
       typeMetrics.statements /= count;
       typeMetrics.branches /= count;
       typeMetrics.functions /= count;
       typeMetrics.lines /= count;
       typeMetrics.averageCoverage /= count;
-      
+
       // Generate HTML with quantum precision
       return `
         <div class="component-type">
@@ -520,7 +532,9 @@ function generateComponentTypeHtml(components: ComponentCoverage[]): string {
           </div>
           
           <div class="component-list">
-            ${typeComponents.map(component => `
+            ${typeComponents
+              .map(
+                (component) => `
               <div class="component-card">
                 <div class="component-header">
                   <div class="component-name">${component.name}</div>
@@ -537,12 +551,14 @@ function generateComponentTypeHtml(components: ComponentCoverage[]): string {
                   <div>Lines: ${component.metrics.lines.toFixed(1)}%</div>
                 </div>
               </div>
-            `).join('')}
+            `,
+              )
+              .join("")}
           </div>
         </div>
       `;
     })
-    .join('');
+    .join("");
 }
 
 /**
@@ -555,15 +571,15 @@ function generateTypeStats(components: ComponentCoverage[]): Array<{
 }> {
   // Group components by type with mathematical elegance
   const typeMap: Record<string, ComponentCoverage[]> = {};
-  
-  components.forEach(component => {
+
+  components.forEach((component) => {
     if (!typeMap[component.type]) {
       typeMap[component.type] = [];
     }
-    
+
     typeMap[component.type].push(component);
   });
-  
+
   // Calculate metrics by type with quantum precision
   return Object.entries(typeMap).map(([type, components]) => {
     const metrics: NeuralCoverageMetrics = {
@@ -571,24 +587,24 @@ function generateTypeStats(components: ComponentCoverage[]): Array<{
       branches: 0,
       functions: 0,
       lines: 0,
-      averageCoverage: 0
+      averageCoverage: 0,
     };
-    
-    components.forEach(component => {
+
+    components.forEach((component) => {
       metrics.statements += component.metrics.statements;
       metrics.branches += component.metrics.branches;
       metrics.functions += component.metrics.functions;
       metrics.lines += component.metrics.lines;
       metrics.averageCoverage += component.metrics.averageCoverage;
     });
-    
+
     const count = components.length;
     metrics.statements /= count;
     metrics.branches /= count;
     metrics.functions /= count;
     metrics.lines /= count;
     metrics.averageCoverage /= count;
-    
+
     return { type, count, metrics };
   });
 }
@@ -596,46 +612,54 @@ function generateTypeStats(components: ComponentCoverage[]): Array<{
 /**
  * Neural-safe command-line execution with quantum precision
  */
-if (import.meta.url === import.meta.resolve('./neural-coverage-visualizer.ts')) {
+if (
+  import.meta.url === import.meta.resolve("./neural-coverage-visualizer.ts")
+) {
   // Process command-line arguments with quantum precision
   const args = process.argv.slice(2);
-  let coverageFile = '';
-  let outputFile = '';
-  
+  let coverageFile = "";
+  let outputFile = "";
+
   // Parse arguments with clinical precision
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--coverage' && i + 1 < args.length) {
+    if (args[i] === "--coverage" && i + 1 < args.length) {
       coverageFile = args[i + 1];
       i++;
-    } else if (args[i] === '--output' && i + 1 < args.length) {
+    } else if (args[i] === "--output" && i + 1 < args.length) {
       outputFile = args[i + 1];
       i++;
     }
   }
-  
+
   // Ensure paths are provided with quantum precision
   if (!coverageFile) {
-    console.error('🧠 Neural Error: Coverage file path must be specified using --coverage');
+    console.error(
+      "🧠 Neural Error: Coverage file path must be specified using --coverage",
+    );
     process.exit(1);
   }
-  
+
   if (!outputFile) {
-    console.error('🧠 Neural Error: Output file path must be specified using --output');
+    console.error(
+      "🧠 Neural Error: Output file path must be specified using --output",
+    );
     process.exit(1);
   }
-  
+
   // Ensure cross-platform path resolution with mathematical elegance
   coverageFile = path.resolve(process.cwd(), coverageFile);
   outputFile = path.resolve(process.cwd(), outputFile);
-  
+
   try {
     // Read coverage data with clinical precision
-    const coverageData = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
-    
+    const coverageData = JSON.parse(fs.readFileSync(coverageFile, "utf8"));
+
     // Generate visualization with quantum precision
     generateCoverageVisualization(coverageData, outputFile);
-    
-    console.log(`🧠 Neural Coverage Visualization: Successfully generated at ${outputFile}`);
+
+    console.log(
+      `🧠 Neural Coverage Visualization: Successfully generated at ${outputFile}`,
+    );
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error(`🧠 Neural Error: ${errorMessage}`);

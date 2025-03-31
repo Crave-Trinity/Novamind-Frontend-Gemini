@@ -1,4 +1,4 @@
-/**
+import { /**
  * NOVAMIND Neural Test Suite
  * BrainVisualization testing with quantum precision
  */
@@ -34,4 +34,4 @@ describe('BrainVisualization', () => {
   });
   
   // Add more component-specific tests
-});
+}); } from "";
