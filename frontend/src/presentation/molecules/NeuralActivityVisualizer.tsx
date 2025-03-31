@@ -7,7 +7,7 @@
 import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Sphere, Line, Text, useTexture, shaderMaterial } from '@react-three/drei';
-import { Vector3, Color, ShaderMaterial, Mesh, IUniform, Group } from 'three';
+import { Vector3, Color, ShaderMaterial, Mesh, IUniform, Group, Event } from 'three';
 import { useSpring, animated } from '@react-spring/three';
 import { extend } from '@react-three/fiber';
 
@@ -19,6 +19,19 @@ import {
   NeuralActivationPattern
 } from '@domain/types/brain/activity';
 import { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+import { Vector3 as DomainVector3 } from '@domain/types/common';
+
+/**
+ * Neural-safe adapter to convert domain Vector3 to Three.js Vector3
+ * with quantum precision
+ */
+const adaptVector3 = (domainVector: DomainVector3): Vector3 => {
+  return new Vector3(
+    domainVector.x,
+    domainVector.y,
+    domainVector.z
+  );
+};
 
 // Neural activity shader
 const NeuralActivityShaderMaterial = shaderMaterial(
@@ -114,8 +127,9 @@ interface ActivityNodeProps {
   pulseSpeed?: number;
   baseColor?: string;
   activeColor?: string;
-  label?: string;
+  label?: string | undefined;
   showLabel?: boolean;
+  onClick?: (event: Event, entityId: string, entityType: 'region' | 'connection') => void;
 }
 
 /**
@@ -130,7 +144,8 @@ const ActivityNode: React.FC<ActivityNodeProps> = ({
   baseColor = '#1e293b',
   activeColor = '#ef4444',
   label,
-  showLabel = false
+  showLabel = false,
+  onClick
 }) => {
   // References
   const meshRef = useRef<Mesh>(null);
@@ -172,7 +187,7 @@ const ActivityNode: React.FC<ActivityNodeProps> = ({
   
   return (
     <group position={position}>
-      <mesh ref={meshRef}>
+      <mesh ref={meshRef} data-testid="neural-node" data-color={activeColor} onClick={(event) => onClick && onClick(event, '', 'region')}>
         <sphereGeometry args={[1, 32, 32]} />
         <neuralActivityShaderMaterial
           ref={materialRef}
@@ -265,10 +280,13 @@ const ActivityFlow: React.FC<ActivityFlowProps> = ({
         color={color}
         lineWidth={lineWidth}
         dashed
-        dashArray={dashArray}
+        dashScale={dashArray[0] + dashArray[1]}
+        dashSize={dashArray[0]}
         dashOffset={dashOffset}
         opacity={0.3 + activityLevel * 0.7}
         transparent
+        data-testid="neural-line"
+        data-color={color}
       />
       
       {bidirectional && (
@@ -277,10 +295,13 @@ const ActivityFlow: React.FC<ActivityFlowProps> = ({
           color={color}
           lineWidth={lineWidth * 0.7}
           dashed
-          dashArray={dashArray}
+          dashScale={dashArray[0] + dashArray[1]}
+          dashSize={dashArray[0]}
           dashOffset={-dashOffset}
           opacity={0.3 + activityLevel * 0.5}
           transparent
+          data-testid="neural-line"
+          data-color={color}
         />
       )}
     </group>
@@ -308,7 +329,7 @@ interface NeuralActivityVisualizerProps {
   flowColor?: string;
   maxVisibleActivities?: number;
   enableTemporalSmoothing?: boolean;
-  onActivityNodeClick?: (entityId: string, entityType: 'region' | 'connection') => void;
+  onActivityNodeClick?: (event: Event, entityId: string, entityType: 'region' | 'connection') => void;
 }
 
 /**
@@ -548,7 +569,7 @@ export const NeuralActivityVisualizer: React.FC<NeuralActivityVisualizerProps> =
         return (
           <ActivityNode
             key={`region-activity-${activity.entityId}`}
-            position={region.position}
+            position={adaptVector3(region.position)}
             scale={display.scale}
             activityLevel={activity.rawActivity}
             activationLevel={activity.activationLevel}
@@ -556,6 +577,7 @@ export const NeuralActivityVisualizer: React.FC<NeuralActivityVisualizerProps> =
             activeColor={display.color}
             label={showLabels ? region.name : undefined}
             showLabel={showLabels}
+            onClick={(event) => onActivityNodeClick && onActivityNodeClick(event, activity.entityId, activity.entityType)}
           />
         );
       } else if (activity.entityType === 'connection') {
@@ -569,10 +591,10 @@ export const NeuralActivityVisualizer: React.FC<NeuralActivityVisualizerProps> =
         if (!sourceRegion || !targetRegion) return null;
         
         // Create flow path
-        const points = [sourceRegion.position, targetRegion.position];
+        const points = [adaptVector3(sourceRegion.position), adaptVector3(targetRegion.position)];
         
         // Determine if bidirectional
-        const isBidirectional = connection.type === 'bidirectional';
+        const isBidirectional = connection.type === 'structural' && connection.directionality === 'bidirectional';
         
         return (
           <ActivityFlow
@@ -592,7 +614,23 @@ export const NeuralActivityVisualizer: React.FC<NeuralActivityVisualizerProps> =
   };
   
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} data-testid="neural-canvas">
+      {/* Render activation pattern title if present */}
+      {activationPattern && (
+        <Text
+          position={[0, 3, 0]}
+          fontSize={1}
+          color="white"
+          anchorX="center"
+          anchorY="middle"
+          depthOffset={1}
+          outlineWidth={0.05}
+          outlineColor="#ef4444"
+        >
+          {activationPattern.name}
+        </Text>
+      )}
+      
       {/* Render activities from combined sources */}
       {renderActivityNodes(temporalSequence ? sequenceActivities : processedActivities)}
     </group>

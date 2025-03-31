@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-03-31T19:48:48.176Z",
+  "testSuite": "NOVAMIND Neural Visualization Test Suite",
+  "coverage": {
+    "statements": 0,
+    "branches": 0,
+    "functions": 0,
+    "lines": 0,
+    "averageCoverage": 0
+  },
+  "visualizationDomains": [
+    "BrainVisualization",
+    "NeuralConnections",
+    "RegionSelection",
+    "BiometricAlerts",
+    "TreatmentResponse",
+    "ClinicalMetrics"
+  ],
+  "testRegistry": {
+    "isEnabled": true,
+    "version": "1.0.0",
+    "state": "neural-safe"
+  }
+}

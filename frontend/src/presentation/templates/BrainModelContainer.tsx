@@ -352,6 +352,7 @@ export const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
         width: typeof width === 'number' ? `${width}px` : width,
         height: typeof height === 'number' ? `${height}px` : height
       }}
+      data-testid="brain-model-container"
     >
       {/* Visualization Canvas */}
       <VisualizationErrorBoundary onError={handleError}>

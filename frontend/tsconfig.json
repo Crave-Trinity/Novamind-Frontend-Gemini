@@ -81,7 +81,8 @@
       "@config/*": ["src/infrastructure/config/*"],
       "@constants/*": ["src/domain/constants/*"],
       "@validation/*": ["src/domain/validation/*"],
-      "@visualizations/*": ["src/presentation/visualizations/*"]
+      "@visualizations/*": ["src/presentation/visualizations/*"],
+      "@test/*": ["src/test/*"]
     }
   },
   "include": ["src"],

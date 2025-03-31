@@ -45,10 +45,10 @@ const BrainVisualizationControls: React.FC<BrainVisualizationControlsProps> = ({
 
   // Reset view callback
   const handleResetView = useCallback(() => {
-    if (onResetView) {
+    if (onResetView && !disabled) {
       onResetView();
     }
-  }, [onResetView]);
+  }, [onResetView, disabled]);
 
   return (
     <div
