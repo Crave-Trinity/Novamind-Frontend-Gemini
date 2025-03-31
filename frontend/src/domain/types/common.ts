@@ -97,7 +97,7 @@ export class NeuralError extends Error {
     code: string;
     severity?: 'warning' | 'error' | 'fatal';
     component?: string;
-  }) {
+  } = { code: 'UNKNOWN_ERROR' }) {
     super(message);
     this.name = 'NeuralError';
     this.code = options.code;
