@@ -1,7 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import { mockApi } from "./mockApi";
-
+import { validateApiResponse } from "./ApiClient.runtime"; // Import the validator
+import { Result, Ok, Err } from "ts-results"; // Import Result types if needed for error handling
 // Flag to toggle between mock and real API
 const USE_MOCK_API = true;
 
@@ -181,12 +182,35 @@ export class ApiClient {
   /**
    * Generic request method
    */
-  private async request<T>(config: AxiosRequestConfig): Promise<T> {
+  // Updated request method to include runtime validation
+  private async request<T>(
+      config: AxiosRequestConfig,
+      // Optional: Pass the type guard for the expected response type T
+      responseGuard?: (data: unknown) => data is T
+  ): Promise<T> {
     try {
-      const response: AxiosResponse<T> = await this.instance.request(config);
-      return response.data;
+      const response: AxiosResponse<unknown> = await this.instance.request(config); // Get raw response first
+
+      // Validate the response data if a guard is provided
+      if (responseGuard) {
+          const validationResult = validateApiResponse(response.data, responseGuard, `API Response [${config.method} ${config.url}]`);
+          if (validationResult.ok) {
+              return validationResult.val; // Return validated data
+          } else {
+              // Throw the validation error to be caught below
+              console.error(`API Response Validation Failed: ${validationResult.val.message}`);
+              throw validationResult.val;
+          }
+      }
+
+      // If no guard provided, return raw data (consider adding a warning or stricter policy)
+      console.warn(`[ApiClient] No response validation guard provided for ${config.method} ${config.url}. Returning raw data.`);
+      return response.data as T;
+
     } catch (error) {
-      console.error("API request failed:", error);
+      // Log original Axios error or validation error
+      console.error(`API request failed [${config.method} ${config.url}]:`, error instanceof Error ? error.message : error);
+      // Re-throw the original error or a custom API error
       throw error;
     }
   }

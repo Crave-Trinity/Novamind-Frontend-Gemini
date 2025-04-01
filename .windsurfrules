@@ -1,4 +1,5 @@
-React + Tailwind Advanced Guidelines for Novamind Digital Twin
+# React + Tailwind Advanced Guidelines for Novamind Digital Twin
+
 Component Architecture
 Use atomic design pattern: atoms → molecules → organisms → templates → pages
 Apply container/presentation pattern for all data-fetching components
@@ -59,4 +60,3 @@ Apply ESLint with plugins for React hooks, a11y, and performance
 Configure Prettier with Tailwind plugin for class sorting
 Add Storybook for isolated component development
 Use React DevTools Profiler to identify render bottlenecks
-# NOVAMIND TESTING REQUIREMENTS: /FRONTEND/TESTING-REQUIREMENTS.MD

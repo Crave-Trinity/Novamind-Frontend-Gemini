@@ -3,8 +3,9 @@
  * Handles all interactions with the XGBoost prediction backend
  */
 
-import { apiClient } from "./ApiClient";
-
+import { apiClient } from "./apiClient"; // Corrected casing
+import { validateData, isRiskPredictionRequest, isRiskPredictionResponse, isTreatmentResponseRequest, isTreatmentResponseResponse, /* import other guards */ } from "./XGBoostService.runtime";
+import { Result, Ok, Err } from 'ts-results'; // Import Result for error handling
 // Types for XGBoost requests and responses
 export interface RiskPredictionRequest {
   patient_id: string;
@@ -165,11 +166,29 @@ class XGBoostService {
    */
   async predictRisk(
     request: RiskPredictionRequest,
-  ): Promise<RiskPredictionResponse> {
-    return apiClient.post<RiskPredictionResponse>(
-      "/xgboost/predict-risk",
-      request,
-    );
+  ): Promise<Result<RiskPredictionResponse, Error>> { // Return Result
+    // Validate request before sending
+    const requestValidation = validateData(request, isRiskPredictionRequest, 'RiskPredictionRequest');
+    if (requestValidation.err) {
+        console.error("Invalid RiskPredictionRequest:", requestValidation.val.message);
+        return Err(requestValidation.val);
+    }
+
+    try {
+        const responseData = await apiClient.post<RiskPredictionResponse>(
+            "/xgboost/predict-risk",
+            requestValidation.val, // Send validated data
+        );
+        // Validate response
+        const responseValidation = validateData(responseData, isRiskPredictionResponse, 'RiskPredictionResponse');
+        if (responseValidation.err) {
+             console.error("Invalid RiskPredictionResponse:", responseValidation.val.message);
+             return Err(responseValidation.val);
+        }
+        return Ok(responseValidation.val);
+    } catch (error) {
+         return Err(error instanceof Error ? error : new Error('API call failed in predictRisk'));
+    }
   }
 
   /**
@@ -177,11 +196,29 @@ class XGBoostService {
    */
   async predictTreatmentResponse(
     request: TreatmentResponseRequest,
-  ): Promise<TreatmentResponseResponse> {
-    return apiClient.post<TreatmentResponseResponse>(
-      "/xgboost/predict-treatment-response",
-      request,
-    );
+  ): Promise<Result<TreatmentResponseResponse, Error>> { // Return Result
+     // Validate request before sending
+    const requestValidation = validateData(request, isTreatmentResponseRequest, 'TreatmentResponseRequest');
+     if (requestValidation.err) {
+        console.error("Invalid TreatmentResponseRequest:", requestValidation.val.message);
+        return Err(requestValidation.val);
+    }
+
+     try {
+        const responseData = await apiClient.post<TreatmentResponseResponse>(
+            "/xgboost/predict-treatment-response",
+            requestValidation.val, // Send validated data
+        );
+         // Validate response
+        const responseValidation = validateData(responseData, isTreatmentResponseResponse, 'TreatmentResponseResponse');
+         if (responseValidation.err) {
+             console.error("Invalid TreatmentResponseResponse:", responseValidation.val.message);
+             return Err(responseValidation.val);
+        }
+        return Ok(responseValidation.val);
+    } catch (error) {
+         return Err(error instanceof Error ? error : new Error('API call failed in predictTreatmentResponse'));
+    }
   }
 
   /**
@@ -189,11 +226,21 @@ class XGBoostService {
    */
   async predictOutcome(
     request: OutcomePredictionRequest,
-  ): Promise<OutcomePredictionResponse> {
-    return apiClient.post<OutcomePredictionResponse>(
-      "/xgboost/predict-outcome",
-      request,
-    );
+  ): Promise<Result<OutcomePredictionResponse, Error>> { // Return Result
+    // TODO: Add request validation (isOutcomePredictionRequest)
+    try {
+        const responseData = await apiClient.post<OutcomePredictionResponse>(
+            "/xgboost/predict-outcome",
+            request,
+        );
+         // TODO: Add response validation (isOutcomePredictionResponse)
+        // const responseValidation = validateData(responseData, isOutcomePredictionResponse, 'OutcomePredictionResponse');
+        // if (responseValidation.err) return Err(responseValidation.val);
+        // return Ok(responseValidation.val);
+        return Ok(responseData); // Placeholder return
+    } catch (error) {
+         return Err(error instanceof Error ? error : new Error('API call failed in predictOutcome'));
+    }
   }
 
   /**
@@ -201,11 +248,21 @@ class XGBoostService {
    */
   async getFeatureImportance(
     request: FeatureImportanceRequest,
-  ): Promise<FeatureImportanceResponse> {
-    return apiClient.post<FeatureImportanceResponse>(
-      "/xgboost/feature-importance",
-      request,
-    );
+  ): Promise<Result<FeatureImportanceResponse, Error>> { // Return Result
+     // TODO: Add request validation (isFeatureImportanceRequest)
+     try {
+        const responseData = await apiClient.post<FeatureImportanceResponse>(
+            "/xgboost/feature-importance",
+            request,
+        );
+         // TODO: Add response validation (isFeatureImportanceResponse)
+        // const responseValidation = validateData(responseData, isFeatureImportanceResponse, 'FeatureImportanceResponse');
+        // if (responseValidation.err) return Err(responseValidation.val);
+        // return Ok(responseValidation.val);
+         return Ok(responseData); // Placeholder return
+    } catch (error) {
+         return Err(error instanceof Error ? error : new Error('API call failed in getFeatureImportance'));
+    }
   }
 
   /**
@@ -213,18 +270,38 @@ class XGBoostService {
    */
   async integrateWithDigitalTwin(
     request: DigitalTwinIntegrationRequest,
-  ): Promise<DigitalTwinIntegrationResponse> {
-    return apiClient.post<DigitalTwinIntegrationResponse>(
-      "/xgboost/integrate-with-digital-twin",
-      request,
-    );
+  ): Promise<Result<DigitalTwinIntegrationResponse, Error>> { // Return Result
+     // TODO: Add request validation (isDigitalTwinIntegrationRequest)
+     try {
+        const responseData = await apiClient.post<DigitalTwinIntegrationResponse>(
+            "/xgboost/integrate-with-digital-twin",
+            request,
+        );
+         // TODO: Add response validation (isDigitalTwinIntegrationResponse)
+        // const responseValidation = validateData(responseData, isDigitalTwinIntegrationResponse, 'DigitalTwinIntegrationResponse');
+        // if (responseValidation.err) return Err(responseValidation.val);
+        // return Ok(responseValidation.val);
+         return Ok(responseData); // Placeholder return
+    } catch (error) {
+         return Err(error instanceof Error ? error : new Error('API call failed in integrateWithDigitalTwin'));
+    }
   }
 
   /**
    * Get model information
    */
-  async getModelInfo(request: ModelInfoRequest): Promise<ModelInfoResponse> {
-    return apiClient.post<ModelInfoResponse>("/xgboost/model-info", request);
+  async getModelInfo(request: ModelInfoRequest): Promise<Result<ModelInfoResponse, Error>> { // Return Result
+     // TODO: Add request validation (isModelInfoRequest)
+     try {
+        const responseData = await apiClient.post<ModelInfoResponse>("/xgboost/model-info", request);
+         // TODO: Add response validation (isModelInfoResponse)
+        // const responseValidation = validateData(responseData, isModelInfoResponse, 'ModelInfoResponse');
+        // if (responseValidation.err) return Err(responseValidation.val);
+        // return Ok(responseValidation.val);
+         return Ok(responseData); // Placeholder return
+    } catch (error) {
+         return Err(error instanceof Error ? error : new Error('API call failed in getModelInfo'));
+    }
   }
 }
 

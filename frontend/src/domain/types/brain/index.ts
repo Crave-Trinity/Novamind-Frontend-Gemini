@@ -16,4 +16,4 @@ export {
   failure,
   NeuralError,
   VisualizationState,
-} from "../common";
+} from "@domain/types/shared/common"; // Corrected import path

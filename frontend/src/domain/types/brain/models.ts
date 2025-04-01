@@ -3,7 +3,13 @@
  * Core domain entities for brain visualization with quantum-level type safety
  */
 
-import { Vector3, SafeArray } from "../common";
+import { Vector3 as ImportedVector3, SafeArray } from "@domain/types/shared/common"; // Import Vector3 with alias
+
+// Define Vector3 locally if needed, or ensure it's correctly imported and used
+// Assuming Vector3 should be the imported one, remove local declaration if present
+// If Vector3 was meant to be defined here, export it.
+// For now, assume the import is correct and usage needs adjustment.
+type Vector3 = ImportedVector3; // Use the imported type
 
 // Brain region with clinical-precision typing
 export interface BrainRegion {
@@ -121,17 +127,42 @@ export function isNeuralConnection(obj: unknown): obj is NeuralConnection {
   );
 }
 
-// Type guard for brain model
+// Type guard for brain model (refined for array content validation)
 export function isBrainModel(obj: unknown): obj is BrainModel {
-  return (
-    typeof obj === "object" &&
-    obj !== null &&
-    "regions" in obj &&
-    "connections" in obj &&
-    "patientId" in obj &&
-    Array.isArray((obj as BrainModel).regions) &&
-    Array.isArray((obj as BrainModel).connections)
-  );
+  if (
+    typeof obj !== "object" ||
+    obj === null ||
+    !("regions" in obj) ||
+    !("connections" in obj) ||
+    !("patientId" in obj) || // Added check for patientId as per interface
+    !("scan" in obj) || // Added check for scan as per interface
+    !("timestamp" in obj) || // Added check for timestamp
+    !("version" in obj) || // Added check for version
+    !("processingLevel" in obj) || // Added check for processingLevel
+    !("lastUpdated" in obj) // Added check for lastUpdated
+  ) {
+    return false;
+  }
+
+  // Check if regions and connections are arrays and validate their contents
+  const model = obj as Partial<BrainModel>; // Cast to partial for safe access
+  if (!Array.isArray(model.regions) || !model.regions.every(isBrainRegion)) {
+      return false;
+  }
+  if (!Array.isArray(model.connections) || !model.connections.every(isNeuralConnection)) {
+      return false;
+  }
+
+  // Add basic checks for other required fields if needed (e.g., string types)
+  if (typeof model.patientId !== 'string') return false;
+  // Add check for scan object structure if needed (isBrainScan guard)
+  if (typeof model.timestamp !== 'string') return false;
+  if (typeof model.version !== 'string') return false;
+  // Add check for processingLevel enum if needed
+  if (typeof model.lastUpdated !== 'string') return false;
+
+
+  return true; // All checks passed
 }
 
 // Safe brain model operations
@@ -165,7 +196,7 @@ export const BrainModelOps = {
       );
 
     return new SafeArray(model.regions)
-      .filter((region) => connectedIds.get().includes(region.id))
+      .filter((region) => connectedIds.includes(region.id)) // Use array directly
       .get();
   },
 

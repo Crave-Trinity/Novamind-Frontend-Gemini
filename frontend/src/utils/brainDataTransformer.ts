@@ -1,242 +1,296 @@
+// Corrected import paths based on domain structure
 import {
-  BrainData,
   BrainRegion,
   NeuralConnection,
-  ThemeSettings,
-} from "../types/brain";
+  BrainModel,
+  BrainScan,
+  isBrainRegion,
+  isNeuralConnection,
+  isBrainModel
+} from "@domain/types/brain/models";
+import { Vector3 } from "@domain/types/shared/common"; // Correct: Import Vector3 from common.ts
+import { ThemeSettings, RenderMode, isValidRenderMode } from "@domain/types/brain/visualization";
+import {
+    validateBrainModelData,
+    validateBrainRegionArray,
+    validateRenderMode,
+    validateThemeSettings
+} from "./brainDataTransformer.runtime"; // Import validators
+import { Result, Ok, Err } from 'ts-results';
+
+// Use BrainModel directly
+type BrainData = BrainModel;
 
 /**
  * Transforms raw brain data for optimal visualization rendering
- * This follows the precomputation pattern to avoid expensive calculations during render
  */
-export function transformBrainData(data: BrainData): BrainData {
-  // Create a deep copy to avoid mutating the original data
+export function transformBrainData(data: unknown): Result<BrainData, Error> {
+  const validationResult = validateBrainModelData(data);
+  if (validationResult.err) {
+      console.error("Invalid data passed to transformBrainData:", validationResult.val.message);
+      return validationResult;
+  }
+  const validatedData = validationResult.val;
+
   const processed: BrainData = {
-    regions: [...data.regions],
-    connections: [...data.connections],
-    metadata: data.metadata ? { ...data.metadata } : undefined,
+    ...validatedData,
+    regions: [...validatedData.regions],
+    connections: [...validatedData.connections],
   };
 
-  // Process regions if needed (e.g., normalize positions, scales)
   processed.regions = processed.regions.map((region) => {
-    // Ensure region has all required properties
+    if (!isBrainRegion(region)) {
+        console.warn("Skipping invalid region structure during transformation map:", region);
+        return region;
+    }
     return {
       ...region,
-      // Apply any necessary transformations to position or scale
       position: normalizePosition(region.position),
-      // Ensure region has metrics
-      metrics: region.metrics || {
-        activity: 0,
-        connectivity: 0,
-        volume: 0,
-      },
+      activityLevel: region.activityLevel ?? 0,
+      isActive: region.isActive ?? false,
     };
   });
 
-  // Process connections (e.g., calculate curved paths, strength indicators)
   processed.connections = processed.connections.map((connection) => {
+     if (!isNeuralConnection(connection)) {
+         console.warn("Skipping invalid connection structure during transformation map:", connection);
+         return connection;
+     }
     return {
       ...connection,
-      // Additional computed properties could be added here
     };
   });
 
-  return processed;
+  return Ok(processed);
 }
 
 /**
- * Normalize a position to fit within visualization bounds
+ * Normalize a position Vector3 to fit within visualization bounds
  */
-function normalizePosition(
-  position: [number, number, number],
-): [number, number, number] {
-  // Example normalization logic - adjust based on actual requirements
+function normalizePosition(position: Vector3): Vector3 {
   const MAX_BOUND = 10;
-  return position.map((coord) =>
-    Math.max(-MAX_BOUND, Math.min(MAX_BOUND, coord)),
-  ) as [number, number, number];
+  if (typeof position !== 'object' || position === null || typeof position.x !== 'number' || typeof position.y !== 'number' || typeof position.z !== 'number') {
+       console.warn("Invalid position format for normalization:", position);
+       return { x: 0, y: 0, z: 0 };
+  }
+  return {
+      x: Math.max(-MAX_BOUND, Math.min(MAX_BOUND, position.x)),
+      y: Math.max(-MAX_BOUND, Math.min(MAX_BOUND, position.y)),
+      z: Math.max(-MAX_BOUND, Math.min(MAX_BOUND, position.z)),
+  };
 }
 
 /**
  * Filter active regions
  */
 export function getActiveRegions(
-  data: BrainData,
-  activeIds?: string[],
-): BrainRegion[] {
-  if (!activeIds || activeIds.length === 0) {
-    return data.regions.filter((region) => region.isActive);
+  data: unknown,
+  activeIds?: unknown,
+): Result<BrainRegion[], Error> {
+   const dataValidationResult = validateBrainModelData(data);
+   if (dataValidationResult.err) {
+       console.error("Invalid data passed to getActiveRegions:", dataValidationResult.val.message);
+       return Err(dataValidationResult.val);
+   }
+   const validatedData = dataValidationResult.val;
+
+   if (activeIds !== undefined && (!Array.isArray(activeIds) || !activeIds.every(id => typeof id === 'string'))) {
+       return Err(new Error("Invalid activeIds: Must be an array of strings or undefined."));
+   }
+   const validatedActiveIds = activeIds as string[] | undefined;
+
+  if (!validatedActiveIds || validatedActiveIds.length === 0) {
+    const filtered = validatedData.regions.filter((region) => region.isActive === true);
+    return Ok(filtered);
   }
-  return data.regions.filter((region) => activeIds.includes(region.id));
+  const filteredByIds = validatedData.regions.filter((region) => validatedActiveIds.includes(region.id));
+  return Ok(filteredByIds);
 }
 
 /**
  * Get connections between active regions
  */
 export function getActiveConnections(
-  data: BrainData,
-  activeRegionIds: string[],
-): NeuralConnection[] {
-  return data.connections.filter(
+  data: unknown,
+  activeRegionIds: unknown,
+): Result<NeuralConnection[], Error> {
+    const dataValidationResult = validateBrainModelData(data);
+   if (dataValidationResult.err) {
+       console.error("Invalid data passed to getActiveConnections:", dataValidationResult.val.message);
+       return Err(dataValidationResult.val);
+   }
+   const validatedData = dataValidationResult.val;
+
+   if (!Array.isArray(activeRegionIds) || !activeRegionIds.every(id => typeof id === 'string')) {
+       return Err(new Error("Invalid activeRegionIds: Must be an array of strings."));
+   }
+   const validatedActiveRegionIds = activeRegionIds as string[];
+
+  const filtered = validatedData.connections.filter(
     (conn) =>
-      activeRegionIds.includes(conn.sourceId) &&
-      activeRegionIds.includes(conn.targetId),
+      validatedActiveRegionIds.includes(conn.sourceId) &&
+      validatedActiveRegionIds.includes(conn.targetId),
   );
+  return Ok(filtered);
 }
 
 /**
  * Generate position mapping for connections
  */
 export function generateConnectionPositionMap(
-  data: BrainData,
-): Record<string, [number, number, number]> {
-  const positionMap: Record<string, [number, number, number]> = {};
+  data: unknown,
+): Result<Record<string, Vector3>, Error> {
+   const validationResult = validateBrainModelData(data);
+   if (validationResult.err) {
+       console.error("Invalid data passed to generateConnectionPositionMap:", validationResult.val.message);
+       return Err(validationResult.val);
+   }
+   const validatedData = validationResult.val;
 
-  data.regions.forEach((region) => {
-    positionMap[region.id] = region.position;
+  const positionMap: Record<string, Vector3> = {};
+  validatedData.regions.forEach((region) => {
+    if (region.position && typeof region.position === 'object' && 'x' in region.position && 'y' in region.position && 'z' in region.position) {
+        positionMap[region.id] = region.position;
+    }
   });
 
-  return positionMap;
+  return Ok(positionMap);
 }
 
 /**
  * Apply visual settings based on mode
  */
 export function applyVisualizationMode(
-  regions: BrainRegion[],
-  mode: "anatomical" | "functional" | "activity",
-  themeSettings: ThemeSettings,
-): BrainRegion[] {
-  return regions.map((region) => {
+  regions: unknown,
+  mode: unknown,
+  themeSettings: unknown,
+): Result<BrainRegion[], Error> {
+    const regionsValidation = validateBrainRegionArray(regions);
+    if (regionsValidation.err) return Err(regionsValidation.val);
+
+    const modeValidation = validateRenderMode(mode);
+    if (modeValidation.err) return Err(modeValidation.val);
+
+    const themeValidation = validateThemeSettings(themeSettings);
+    if (themeValidation.err) return Err(themeValidation.val);
+
+    const validatedRegions = regionsValidation.val;
+    const validatedMode = modeValidation.val;
+    const validatedTheme = themeValidation.val;
+
+  const processedRegions = validatedRegions.map((region) => {
     let color: string;
 
     if (region.isActive) {
-      switch (mode) {
-        case "anatomical":
-          color = region.type === "cortical" ? "#ff6b6b" : "#4dabf7";
+      switch (validatedMode) {
+        case RenderMode.ANATOMICAL:
+          color = region.tissueType === "gray" ? "#ff6b6b" : "#4dabf7";
           break;
-        case "functional":
-          color = themeSettings.activeRegionColor;
+        case RenderMode.FUNCTIONAL:
+          color = validatedTheme.activeRegionColor;
           break;
-        case "activity":
-          // Gradient color based on activity level
-          const activityLevel = region.metrics?.activity || 0;
-          if (activityLevel > 0.7) {
-            color = "#fa5252"; // High activity
-          } else if (activityLevel > 0.4) {
-            color = "#ff922b"; // Medium activity
-          } else {
-            color = "#74b816"; // Low activity
-          }
-          break;
+        case RenderMode.CONNECTIVITY:
+             color = (region.connections?.length ?? 0) > 5 ? validatedTheme.accentColor : validatedTheme.activeRegionColor;
+             break;
+        case RenderMode.RISK:
+             color = validatedTheme.activeRegionColor; // Placeholder
+             break;
+         case RenderMode.TREATMENT_RESPONSE:
+             color = validatedTheme.activeRegionColor; // Placeholder
+             break;
+         case RenderMode.NEUROTRANSMITTER:
+             color = validatedTheme.activeRegionColor; // Placeholder
+             break;
+         case RenderMode.TEMPORAL_DYNAMICS:
+             color = validatedTheme.activeRegionColor; // Placeholder
+             break;
+         case RenderMode.NETWORK_ANALYSIS:
+             color = validatedTheme.activeRegionColor; // Placeholder
+             break;
         default:
-          color = themeSettings.activeRegionColor;
+          color = validatedTheme.activeRegionColor;
       }
     } else {
-      color = themeSettings.inactiveRegionColor;
+      color = validatedTheme.regionBaseColor;
     }
 
-    return {
-      ...region,
-      color,
+    const updatedRegion: Omit<BrainRegion, 'color'> & { color: string } = {
+         ...region,
+         color: color,
     };
+    return updatedRegion as BrainRegion;
   });
+  return Ok(processedRegions);
 }
 
 /**
  * Generate mock brain data for testing/development
  */
-export function generateMockBrainData(): BrainData {
+export function generateMockBrainData(): BrainModel {
   const regions: BrainRegion[] = [
     {
-      id: "pfc",
-      name: "Prefrontal Cortex",
-      position: [0, 5, 0],
-      scale: 2.5,
-      isActive: true,
-      type: "cortical",
-      metrics: { activity: 0.8, connectivity: 0.7, volume: 1.0 },
+      id: "pfc", name: "Prefrontal Cortex", position: {x: 0, y: 5, z: 0}, color: "#4dabf7",
+      connections: ["pfc-hipp", "pfc-amyg"], activityLevel: 0.8, isActive: true,
+      hemisphereLocation: "central", tissueType: "gray", dataConfidence: 0.9
     },
     {
-      id: "amyg",
-      name: "Amygdala",
-      position: [-3, 0, 1],
-      scale: 1.2,
-      isActive: false,
-      type: "subcortical",
-      metrics: { activity: 0.6, connectivity: 0.9, volume: 0.7 },
+      id: "amyg", name: "Amygdala", position: {x: -3, y: 0, z: 1}, color: "#95A5A6",
+      connections: ["pfc-amyg", "amyg-hipp"], activityLevel: 0.6, isActive: false,
+      hemisphereLocation: "left", tissueType: "gray", dataConfidence: 0.85
     },
     {
-      id: "hipp",
-      name: "Hippocampus",
-      position: [-2, -2, 2],
-      scale: 1.5,
-      isActive: true,
-      type: "subcortical",
-      metrics: { activity: 0.5, connectivity: 0.8, volume: 0.8 },
+      id: "hipp", name: "Hippocampus", position: {x: -2, y: -2, z: 2}, color: "#E74C3C",
+      connections: ["pfc-hipp", "amyg-hipp"], activityLevel: 0.5, isActive: true,
+      hemisphereLocation: "left", tissueType: "gray", dataConfidence: 0.88
     },
     {
-      id: "thal",
-      name: "Thalamus",
-      position: [0, 1, -1],
-      scale: 1.8,
-      isActive: false,
-      type: "subcortical",
-      metrics: { activity: 0.7, connectivity: 0.6, volume: 0.9 },
+      id: "thal", name: "Thalamus", position: {x: 0, y: 1, z: -1}, color: "#95A5A6",
+      connections: ["thal-cere"], activityLevel: 0.7, isActive: false,
+      hemisphereLocation: "central", tissueType: "white", dataConfidence: 0.92
     },
     {
-      id: "cere",
-      name: "Cerebellum",
-      position: [0, -6, 0],
-      scale: 2.2,
-      isActive: true,
-      type: "cerebellum",
-      metrics: { activity: 0.6, connectivity: 0.5, volume: 1.0 },
+      id: "cere", name: "Cerebellum", position: {x: 0, y: -6, z: 0}, color: "#74b816",
+      connections: ["thal-cere"], activityLevel: 0.6, isActive: true,
+      hemisphereLocation: "central", tissueType: "gray", dataConfidence: 0.95
     },
   ];
 
   const connections: NeuralConnection[] = [
     {
-      id: "pfc-hipp",
-      sourceId: "pfc",
-      targetId: "hipp",
-      strength: 0.8,
-      type: "excitatory",
-      active: true,
+      id: "pfc-hipp", sourceId: "pfc", targetId: "hipp", strength: 0.8,
+      type: "functional", directionality: "bidirectional", activityLevel: 0.7, dataConfidence: 0.8
     },
     {
-      id: "pfc-amyg",
-      sourceId: "pfc",
-      targetId: "amyg",
-      strength: 0.6,
-      type: "inhibitory",
-      active: false,
+      id: "pfc-amyg", sourceId: "pfc", targetId: "amyg", strength: 0.6,
+      type: "structural", directionality: "unidirectional", activityLevel: 0.3, dataConfidence: 0.9
     },
     {
-      id: "amyg-hipp",
-      sourceId: "amyg",
-      targetId: "hipp",
-      strength: 0.9,
-      type: "excitatory",
-      active: true,
+      id: "amyg-hipp", sourceId: "amyg", targetId: "hipp", strength: 0.9,
+      type: "functional", directionality: "bidirectional", activityLevel: 0.8, dataConfidence: 0.85
     },
     {
-      id: "thal-cere",
-      sourceId: "thal",
-      targetId: "cere",
-      strength: 0.7,
-      type: "excitatory",
-      active: false,
+      id: "thal-cere", sourceId: "thal", targetId: "cere", strength: 0.7,
+      type: "structural", directionality: "unidirectional", activityLevel: 0.5, dataConfidence: 0.9
     },
   ];
 
+  const scan: BrainScan = {
+      id: "scan-001",
+      patientId: "DEMO-123",
+      scanDate: "2025-03-29T10:00:00Z",
+      scanType: "fMRI",
+      dataQualityScore: 0.95
+  };
+
   return {
+    id: "model-demo-001",
+    patientId: "DEMO-123",
     regions,
     connections,
-    metadata: {
-      patientId: "DEMO-123",
-      scanDate: "2025-03-29",
-      scanType: "fMRI",
-    },
+    scan,
+    timestamp: new Date().toISOString(),
+    version: "1.0",
+    processingLevel: "analyzed",
+    lastUpdated: new Date().toISOString(),
   };
 }

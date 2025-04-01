@@ -9,8 +9,9 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
-
+import { validateSessionOptions } from "./SessionService.runtime"; // Import validator
 import { auditLogService, AuditEventType } from "./AuditLogService";
+import { Result, Ok, Err } from 'ts-results'; // Import Result for consistency (though not used in return types here)
 
 /**
  * Configuration options for session management
@@ -74,13 +75,22 @@ let isWarningActive = false;
 /**
  * Initialize the session service with options
  */
-export function initializeSessionService(options: SessionOptions = {}): void {
+export function initializeSessionService(options: SessionOptions = {}): boolean { // Return boolean for success/failure
+  // Validate options
+  const validationResult = validateSessionOptions(options);
+  if (validationResult.err) {
+      console.error("[SessionService] Invalid options provided:", validationResult.val.message, options);
+      // Optionally throw or handle the error based on desired strictness
+      return false; // Indicate initialization failure
+  }
+  const validatedOptions = validationResult.val; // Use validated options
+
   // Set configuration options with defaults
-  sessionTimeout = options.timeout || 15 * 60 * 1000; // 15 minutes
-  warningTime = options.warningTime || 60 * 1000; // 1 minute
-  timeoutCallback = options.onTimeout || null;
-  warningCallback = options.onWarning || null;
-  isEnabled = options.enabled !== undefined ? options.enabled : true;
+  sessionTimeout = validatedOptions.timeout ?? 15 * 60 * 1000;
+  warningTime = validatedOptions.warningTime ?? 60 * 1000;
+  timeoutCallback = validatedOptions.onTimeout ?? null;
+  warningCallback = validatedOptions.onWarning ?? null;
+  isEnabled = validatedOptions.enabled ?? true;
 
   // Clear any existing timers
   if (sessionTimerId) {
@@ -104,11 +114,13 @@ export function initializeSessionService(options: SessionOptions = {}): void {
     startSessionTimer();
 
     // Log initialization
-    auditLogService.log(AuditEventType.SYSTEM_ERROR, {
+    auditLogService.log(AuditEventType.SYSTEM_ERROR, { // Consider a more specific type like SYSTEM_INIT or CONFIGURATION_CHANGE
       action: "session_service_initialized",
       details: `Session timeout set to ${sessionTimeout}ms, warning at ${warningTime}ms`,
+      result: "success", // Assuming initialization is always success if validation passes
     });
   }
+  return true; // Indicate successful initialization
 }
 
 /**
@@ -256,9 +268,9 @@ export function useSessionTimeout(options: SessionOptions = {}): {
   logout: () => void;
   isWarning: boolean;
 } {
-  // Configure local options or use defaults
-  const timeout = options.timeout || sessionTimeout;
-  const warning = options.warningTime || warningTime;
+  // Configure local options or use defaults from global state
+  const timeout = options.timeout ?? sessionTimeout;
+  const warning = options.warningTime ?? warningTime;
 
   // State for countdown and warning
   const [timeRemaining, setTimeRemaining] = useState(timeout);
@@ -269,76 +281,78 @@ export function useSessionTimeout(options: SessionOptions = {}): {
 
   // Callbacks
   const resetCallback = useCallback(() => {
-    resetSession();
+    resetSession(); // Use global reset function
     setIsWarning(false);
     setTimeRemaining(timeout);
-  }, [timeout]);
+  }, [timeout]); // Depend on local timeout for resetting display
 
   const logoutCallback = useCallback(() => {
-    logoutSession();
+    logoutSession(); // Use global logout function
   }, []);
 
   // Effect for activity tracking and warning display
   useEffect(() => {
-    if (!options.enabled) {
+    // Use the 'enabled' option passed to the hook, defaulting to true if not provided
+    const hookEnabled = options.enabled ?? true;
+    if (!hookEnabled) {
+      // If hook is disabled, ensure global timers are cleared if they were set by this hook instance
+      // This logic might need refinement depending on how global vs hook-specific enabling is intended
+      // For now, we assume the hook controls its own timers based on its enabled prop.
+       if (intervalRef.current) clearInterval(intervalRef.current);
+      // We don't destroy the global service here, just the hook's interaction
       return;
     }
 
-    // Custom warning handler
+    // Custom warning handler specific to this hook instance
     const handleWarning = () => {
       setIsWarning(true);
-
-      // Call provided warning handler
       if (options.onWarning) {
         options.onWarning();
       }
 
-      // Start countdown
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-
+      // Start countdown interval only when warning triggers
+      if (intervalRef.current) clearInterval(intervalRef.current);
       intervalRef.current = setInterval(() => {
-        const elapsed = Date.now() - lastActivityTime;
-        const remaining = Math.max(0, timeout - elapsed);
+        const elapsedSinceLastActivity = Date.now() - lastActivityTime;
+        const remaining = Math.max(0, timeout - elapsedSinceLastActivity);
         setTimeRemaining(remaining);
-
-        // If time is up, clear interval
         if (remaining <= 0) {
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-          }
+          if (intervalRef.current) clearInterval(intervalRef.current);
         }
       }, 1000);
     };
 
-    // Custom timeout handler
+    // Custom timeout handler specific to this hook instance
     const handleTimeout = () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-
-      // Call provided timeout handler
+      if (intervalRef.current) clearInterval(intervalRef.current);
       if (options.onTimeout) {
         options.onTimeout();
       }
+      // Potentially trigger global logout or rely on onTimeout to do it
     };
 
-    // Initialize the session service
-    initializeSessionService({
-      timeout,
-      warningTime: warning,
-      onWarning: handleWarning,
-      onTimeout: handleTimeout,
-      enabled: true,
-    });
+    // Initialize the global session service with hook-specific callbacks
+    // This might re-initialize repeatedly if the hook re-renders often with changing options.
+    // Consider moving initialization outside the hook or using a context provider.
+    const initOptions: SessionOptions = {
+        timeout,
+        warningTime: warning,
+        onWarning: handleWarning,
+        onTimeout: handleTimeout,
+        enabled: true, // Hook always enables the global timer if it's used and enabled
+    };
+     initializeSessionService(initOptions); // Re-initialize global service with potentially new callbacks
 
-    // Cleanup on unmount
+
+    // Cleanup on unmount: Clear interval and potentially global timers/listeners
+    // if this is the last active hook instance (more complex state needed for that).
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
+      // Simple cleanup: doesn't destroy global listeners if other hooks are active
     };
+    // Re-run effect if hook options change
   }, [options.enabled, options.onTimeout, options.onWarning, timeout, warning]);
 
   // Return the hook interface
