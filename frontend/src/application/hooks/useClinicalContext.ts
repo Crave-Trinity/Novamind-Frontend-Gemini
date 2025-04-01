@@ -75,22 +75,20 @@ export function useClinicalContext(
     isError: isSymptomMappingsError,
     error: symptomMappingsError,
     refetch: refetchSymptomMappings,
-  } = useQuery<SymptomNeuralMapping[], Error>(
-    [symptomMappingsKey],
-    async () => {
+  } = useQuery<SymptomNeuralMapping[], Error>({
+    queryKey: [symptomMappingsKey],
+    queryFn: async () => {
       const result = await clinicalService.fetchSymptomMappings();
-
       if (result.success) {
         return result.data;
       } else {
         throw result.error || new Error("Failed to fetch symptom mappings");
       }
     },
-    {
-      staleTime: 24 * 60 * 60 * 1000, // 24 hours - these change infrequently
-      refetchOnWindowFocus: false,
-    },
-  );
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours - these change infrequently
+    refetchOnWindowFocus: false,
+    initialData: [], // Explicitly set initial data
+  });
 
   // Fetch diagnosis mappings query
   const {
@@ -99,22 +97,20 @@ export function useClinicalContext(
     isError: isDiagnosisMappingsError,
     error: diagnosisMappingsError,
     refetch: refetchDiagnosisMappings,
-  } = useQuery<DiagnosisNeuralMapping[], Error>(
-    [diagnosisMappingsKey],
-    async () => {
+  } = useQuery<DiagnosisNeuralMapping[], Error>({
+    queryKey: [diagnosisMappingsKey],
+    queryFn: async () => {
       const result = await clinicalService.fetchDiagnosisMappings();
-
       if (result.success) {
         return result.data;
       } else {
         throw result.error || new Error("Failed to fetch diagnosis mappings");
       }
     },
-    {
-      staleTime: 24 * 60 * 60 * 1000, // 24 hours - these change infrequently
-      refetchOnWindowFocus: false,
-    },
-  );
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours - these change infrequently
+    refetchOnWindowFocus: false,
+    initialData: [], // Explicitly set initial data
+  });
 
   // Fetch treatment mappings query
   const {
@@ -123,22 +119,20 @@ export function useClinicalContext(
     isError: isTreatmentMappingsError,
     error: treatmentMappingsError,
     refetch: refetchTreatmentMappings,
-  } = useQuery<TreatmentNeuralMapping[], Error>(
-    [treatmentMappingsKey],
-    async () => {
+  } = useQuery<TreatmentNeuralMapping[], Error>({
+    queryKey: [treatmentMappingsKey],
+    queryFn: async () => {
       const result = await clinicalService.fetchTreatmentMappings();
-
       if (result.success) {
         return result.data;
       } else {
         throw result.error || new Error("Failed to fetch treatment mappings");
       }
     },
-    {
-      staleTime: 24 * 60 * 60 * 1000, // 24 hours - these change infrequently
-      refetchOnWindowFocus: false,
-    },
-  );
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours - these change infrequently
+    refetchOnWindowFocus: false,
+    initialData: [], // Explicitly set initial data
+  });
 
   // Fetch risk assessment query
   const {
@@ -147,27 +141,28 @@ export function useClinicalContext(
     isError: isRiskAssessmentError,
     error: riskAssessmentError,
     refetch: refetchRiskAssessment,
-  } = useQuery<RiskAssessment, Error>(
-    [riskAssessmentKey, patientId],
-    async () => {
+  } = useQuery<RiskAssessment, Error>({
+    queryKey: [riskAssessmentKey, patientId],
+    queryFn: async () => {
       if (!patientId) {
+        // Returning null or undefined might be better than throwing here
+        // depending on how loading/error states are handled downstream.
+        // Throwing will put the query in an error state.
         throw new Error("No patient ID provided for risk assessment");
       }
-
       const result = await clinicalService.fetchRiskAssessment(patientId);
-
       if (result.success) {
         return result.data;
       } else {
         throw result.error || new Error("Failed to fetch risk assessment");
       }
     },
-    {
-      enabled: !!patientId,
-      staleTime: 30 * 60 * 1000, // 30 minutes
-      refetchOnWindowFocus: false,
-    },
-  );
+    enabled: !!patientId, // Only run query if patientId exists
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: false,
+    // initialData for non-array types might need careful consideration
+    // initialData: undefined, // Or a default RiskAssessment structure if appropriate
+  });
 
   // Fetch treatment predictions query
   const {
@@ -176,29 +171,27 @@ export function useClinicalContext(
     isError: isTreatmentPredictionsError,
     error: treatmentPredictionsError,
     refetch: refetchTreatmentPredictions,
-  } = useQuery<TreatmentResponsePrediction[], Error>(
-    [treatmentPredictionsKey, patientId],
-    async () => {
-      if (!patientId) {
-        throw new Error("No patient ID provided for treatment predictions");
-      }
-
-      const result = await clinicalService.fetchTreatmentPredictions(patientId);
-
-      if (result.success) {
-        return result.data;
-      } else {
-        throw (
-          result.error || new Error("Failed to fetch treatment predictions")
-        );
-      }
+  } = useQuery<TreatmentResponsePrediction[], Error>({
+    queryKey: [treatmentPredictionsKey, patientId],
+    queryFn: async () => {
+       if (!patientId) {
+         // As above, consider return vs throw based on desired state handling
+         throw new Error("No patient ID provided for treatment predictions");
+       }
+       const result = await clinicalService.fetchTreatmentPredictions(patientId);
+       if (result.success) {
+         return result.data;
+       } else {
+         throw (
+           result.error || new Error("Failed to fetch treatment predictions")
+         );
+       }
     },
-    {
-      enabled: !!patientId,
-      staleTime: 30 * 60 * 1000, // 30 minutes
-      refetchOnWindowFocus: false,
-    },
-  );
+    enabled: !!patientId, // Only run query if patientId exists
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: false,
+    initialData: [], // Explicitly set initial data for array types
+  });
 
   // Refresh all clinical data for a patient
   const refreshClinicalData = useCallback(

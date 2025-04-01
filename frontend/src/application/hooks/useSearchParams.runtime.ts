@@ -6,40 +6,34 @@
 import { Result, Ok, Err } from 'ts-results';
 // TODO: Import specific domain types if search params represent domain entities
 // import { FilterCriteria } from '../../domain/types/search'; // Example type
-// import { ValidationError } from '../../domain/errors/validation'; // Assuming a custom error type
+// import { ValidationError } from '@domain/errors/validation'; // Assuming a custom error type
 
-// Placeholder for actual types used by the hook
-// Often, search params are simple key-value pairs (string | string[] | undefined)
-type SearchParamsData = Record<string, string | string[] | undefined>; // Example type
+// Type for the object passed to setParams
+type ParamsObject = Record<string, string | number | null>;
 
 /**
- * Validates the structure and types of SearchParamsData.
- * @param data - The data to validate (typically URLSearchParams or a parsed object).
- * @returns Result<SearchParamsData, ValidationError>
+ * Validates the structure and types of the params object used in setParams.
+ * Ensures keys are strings and values are string, number, or null.
+ * @param data - The params object to validate.
+ * @returns Result<ParamsObject, Error>
  */
-export function validateSearchParamsData(data: unknown): Result<SearchParamsData, Error> {
-  // TODO: Implement detailed validation logic based on expected search parameters
-  // - Check if data is an object (if parsed) or URLSearchParams instance
-  // - Check for expected parameter keys (e.g., 'patientId', 'dateRange', 'status')
-  // - Validate types of parameter values (e.g., 'status' must be one of ['active', 'inactive'])
-  // - Validate formats (e.g., date strings)
-
-  if (typeof data !== 'object' || data === null) {
-    // Add check for URLSearchParams instance if applicable
-    // if (!(data instanceof URLSearchParams)) { ... }
-    return Err(new Error('Invalid SearchParamsData: Input must be an object or URLSearchParams.'));
-    // Replace Error with specific ValidationError if defined
+export function validateParamsObject(data: unknown): Result<ParamsObject, Error> {
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+    return Err(new Error('Invalid ParamsObject: Input must be a plain object.'));
   }
 
-  // Add more checks here...
-  // Example: Check if 'patientId' exists and is a non-empty string
-  // const params = data as SearchParamsData; // Assuming object format
-  // if (!params.patientId || typeof params.patientId !== 'string' || params.patientId.length === 0) {
-  //   return Err(new Error('Invalid SearchParamsData: Missing or invalid "patientId".'));
-  // }
+  for (const key in data) {
+    // Ensure the key is directly on the object (optional, but good practice)
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
+      const value = (data as ParamsObject)[key];
+      if (typeof value !== 'string' && typeof value !== 'number' && value !== null) {
+        return Err(new Error(`Invalid ParamsObject: Value for key "${key}" must be a string, number, or null. Received type ${typeof value}.`));
+      }
+    }
+  }
 
-  // If validation passes:
-  return Ok(data as SearchParamsData); // Cast to the specific type after validation
+  // If all values are valid:
+  return Ok(data as ParamsObject);
 }
 
-// TODO: Add specific type guards if needed for complex parameter structures
+// No specific type guards needed here for this basic validation.

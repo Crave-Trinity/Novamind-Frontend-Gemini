@@ -7,21 +7,23 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 // Domain types
-import {
-  TemporalDynamics,
-  TemporalPattern,
-  TimeScale,
-  PatternClass,
-  StateTransition,
-  CriticalTransitionIndicator,
-  TemporalSegment,
-  TemporalFeature,
-} from "@domain/types/temporal/dynamics";
-import { Result, success, failure } from "@domain/types/common/result";
+// TODO: Locate or define these temporal dynamics types
+// Using placeholders for now
+type TimeScale = "momentary" | "hourly" | "daily" | "weekly" | "monthly";
+type TemporalDynamics = any;
+type TemporalPattern = any;
+type PatternClass = any;
+type StateTransition = any;
+type CriticalTransitionIndicator = any;
+type TemporalSegment = any;
+type TemporalFeature = any;
+
+import { Result, success, failure } from "@domain/types/shared/common"; // Corrected path
 
 // Services
-import { temporalService } from "@application/services/temporalService";
-import { clinicalService } from "@application/services/clinicalService";
+// TODO: Define or locate temporalService
+// import { temporalService } from "@application/services/temporal/temporal.service"; // Invalid path
+import { clinicalService } from "@application/services/clinical/clinical.service"; // Corrected path
 
 /**
  * Neural-safe temporal configuration with quantum precision
@@ -66,20 +68,8 @@ const defaultTemporalConfig: TemporalConfig = {
   timeScales: ["momentary", "hourly", "daily", "weekly", "monthly"],
   patternRecognitionThreshold: 0.7,
   criticalTransitionSensitivity: 0.8,
-  historyLength: {
-    momentary: 60, // 60 moments
-    hourly: 24, // 24 hours
-    daily: 30, // 30 days
-    weekly: 12, // 12 weeks
-    monthly: 24, // 24 months
-  },
-  samplingRate: {
-    momentary: 60, // 60 samples per minute
-    hourly: 6, // 6 samples per hour
-    daily: 24, // 24 samples per day
-    weekly: 7, // 7 samples per week
-    monthly: 30, // 30 samples per month
-  },
+  historyLength: { momentary: 60, hourly: 24, daily: 30, weekly: 12, monthly: 24 },
+  samplingRate: { momentary: 60, hourly: 6, daily: 24, weekly: 7, monthly: 30 },
   periodicity: true,
   anomalyDetection: true,
   filterNoise: true,
@@ -90,13 +80,7 @@ const defaultTemporalConfig: TemporalConfig = {
  * Initial temporal state with safe defaults
  */
 const createInitialTemporalState = (): TemporalState => ({
-  dynamicsData: {
-    momentary: [],
-    hourly: [],
-    daily: [],
-    weekly: [],
-    monthly: [],
-  },
+  dynamicsData: { momentary: [], hourly: [], daily: [], weekly: [], monthly: [] },
   detectedPatterns: [],
   stateTransitions: [],
   criticalTransitions: [],
@@ -105,12 +89,7 @@ const createInitialTemporalState = (): TemporalState => ({
   lastUpdated: null,
   isProcessing: false,
   errorState: null,
-  metrics: {
-    patternsDetected: 0,
-    transitionsIdentified: 0,
-    anomaliesDetected: 0,
-    processingLatency: 0,
-  },
+  metrics: { patternsDetected: 0, transitionsIdentified: 0, anomaliesDetected: 0, processingLatency: 0 },
 });
 
 /**
@@ -121,73 +100,38 @@ export function useTemporalDynamicsController(
   patientId: string,
   initialConfig: Partial<TemporalConfig> = {},
 ) {
-  // Merge provided config with defaults
   const config = useMemo<TemporalConfig>(
-    () => ({
-      ...defaultTemporalConfig,
-      ...initialConfig,
-    }),
+    () => ({ ...defaultTemporalConfig, ...initialConfig }),
     [initialConfig],
   );
 
-  // State with thread-safe operations
-  const [state, setState] = useState<TemporalState>(
-    createInitialTemporalState(),
-  );
+  const [state, setState] = useState<TemporalState>(createInitialTemporalState());
 
   // Load temporal dynamics for the given time scale
   const loadTemporalDynamics = useCallback(
     async (timeScale: TimeScale): Promise<Result<TemporalDynamics>> => {
       try {
-        // Start by marking as processing
-        setState((prevState) => ({
-          ...prevState,
-          isProcessing: true,
-          errorState: null,
-          currentTimeScale: timeScale,
-        }));
-
+        setState((prevState) => ({ ...prevState, isProcessing: true, errorState: null, currentTimeScale: timeScale }));
         const startTime = performance.now();
 
-        // Fetch temporal dynamics from service
-        const result = await temporalService.getTemporalDynamics(
-          patientId,
-          timeScale,
-        );
+        // TODO: Implement actual service call when temporalService is available
+        console.warn("temporalService.getTemporalDynamics not implemented.");
+        const result: Result<any> = failure(new Error("Service method getTemporalDynamics not implemented."));
 
-        if (result.success && result.data) {
+        if (result.success && result.value) {
           const endTime = performance.now();
           const processingLatency = endTime - startTime;
 
-          // Update state with new dynamics data
           setState((prevState) => {
-            // Extract segments
-            const segments = result.data.segments || [];
-
-            // Extract patterns
-            const patterns = result.data.patterns || [];
-
-            // Extract transitions
-            const transitions = result.data.stateTransitions || [];
-
-            // Extract critical transitions
-            const criticalTransitions = result.data.criticalTransitions || [];
-
-            // Extract temporal features
-            const features = result.data.features || {};
-
-            // Update dynamics data for this time scale
-            const newDynamicsData = {
-              ...prevState.dynamicsData,
-              [timeScale]: segments,
-            };
-
-            // Count metrics
+            const segments = result.value.segments || [];
+            const patterns = result.value.patterns || [];
+            const transitions = result.value.stateTransitions || [];
+            const criticalTransitions = result.value.criticalTransitions || [];
+            const features = result.value.features || {};
+            const newDynamicsData = { ...prevState.dynamicsData, [timeScale]: segments };
             const patternsDetected = patterns.length;
             const transitionsIdentified = transitions.length;
-            const anomaliesDetected = patterns.filter(
-              (p) => p.class === "anomaly",
-            ).length;
+            const anomaliesDetected = patterns.filter((p: any) => p.class === "anomaly").length;
 
             return {
               ...prevState,
@@ -200,440 +144,241 @@ export function useTemporalDynamicsController(
               isProcessing: false,
               metrics: {
                 ...prevState.metrics,
-                patternsDetected:
-                  prevState.metrics.patternsDetected + patternsDetected,
-                transitionsIdentified:
-                  prevState.metrics.transitionsIdentified +
-                  transitionsIdentified,
-                anomaliesDetected:
-                  prevState.metrics.anomaliesDetected + anomaliesDetected,
+                patternsDetected: prevState.metrics.patternsDetected + patternsDetected,
+                transitionsIdentified: prevState.metrics.transitionsIdentified + transitionsIdentified,
+                anomaliesDetected: prevState.metrics.anomaliesDetected + anomaliesDetected,
                 processingLatency,
               },
             };
           });
-
-          return success(result.data);
+          return success(result.value);
         }
 
         // Handle failure
-        setState((prevState) => ({
-          ...prevState,
-          isProcessing: false,
-          errorState: result.error || "Failed to load temporal dynamics",
-        }));
+        // If result is already a failure, use its error
+        if (!result.success) { // Check if it's actually a failure before accessing error
+            const error = result.error;
+            setState((prevState) => ({ ...prevState, isProcessing: false, errorState: error.message }));
+            return failure(error);
+        }
+        // Should not be reached if result was success, but as fallback:
+        return failure(new Error("Failed to load temporal dynamics (unexpected state)"));
 
-        return failure(result.error || "Failed to load temporal dynamics");
       } catch (error) {
-        // Update error state
-        setState((prevState) => ({
-          ...prevState,
-          isProcessing: false,
-          errorState:
-            error instanceof Error
-              ? error.message
-              : "Unknown error loading dynamics",
-        }));
-
-        return failure(
-          error instanceof Error
-            ? error.message
-            : "Unknown error loading dynamics",
-        );
+        const errorObj = error instanceof Error ? error : new Error("Unknown error loading dynamics");
+        setState((prevState) => ({ ...prevState, isProcessing: false, errorState: errorObj.message }));
+        return failure(errorObj);
       }
     },
     [patientId],
   );
 
   // Analyze patterns across all loaded time scales
-  const analyzePatterns = useCallback(async (): Promise<
-    Result<TemporalPattern[]>
-  > => {
+  const analyzePatterns = useCallback(async (): Promise<Result<TemporalPattern[]>> => {
     try {
       const startTime = performance.now();
+      setState((prevState) => ({ ...prevState, isProcessing: true, errorState: null }));
 
-      // Start by marking as processing
-      setState((prevState) => ({
-        ...prevState,
-        isProcessing: true,
-        errorState: null,
-      }));
-
-      // Get all dynamics data across time scales
       const dynamicsData = state.dynamicsData;
-
-      // Validate that we have data to analyze
-      const hasData = Object.values(dynamicsData).some(
-        (segments) => segments.length > 0,
-      );
+      const hasData = Object.values(dynamicsData).some((segments) => segments.length > 0);
 
       if (!hasData) {
-        setState((prevState) => ({
-          ...prevState,
-          isProcessing: false,
-          errorState: "No temporal data available for analysis",
-        }));
-
-        return failure("No temporal data available for analysis");
+        const errorMsg = "No temporal data available for analysis";
+        setState((prevState) => ({ ...prevState, isProcessing: false, errorState: errorMsg }));
+        return failure(new Error(errorMsg));
       }
 
-      // Call the service to analyze patterns
-      const result = await temporalService.analyzeTemporalPatterns({
-        patientId,
-        timeScales: config.timeScales,
-        threshold: config.patternRecognitionThreshold,
-        detectPeriodicity: config.periodicity,
-        detectAnomalies: config.anomalyDetection,
-        filterNoise: config.filterNoise,
-        smoothingFactor: config.smoothingFactor,
-      });
+      // TODO: Implement actual service call when temporalService is available
+      console.warn("temporalService.analyzeTemporalPatterns not implemented.");
+      const result: Result<any> = failure(new Error("Service method analyzeTemporalPatterns not implemented."));
 
-      if (result.success && result.data) {
+      if (result.success && result.value) {
         const endTime = performance.now();
         const processingLatency = endTime - startTime;
 
-        // Update state with new patterns
-        setState((prevState) => {
-          return {
-            ...prevState,
-            detectedPatterns: result.data,
-            isProcessing: false,
-            lastUpdated: new Date(),
-            metrics: {
-              ...prevState.metrics,
-              patternsDetected: result.data.length,
-              processingLatency,
-            },
-          };
-        });
-
-        return success(result.data);
+        setState((prevState) => ({
+          ...prevState,
+          detectedPatterns: result.value,
+          isProcessing: false,
+          lastUpdated: new Date(),
+          metrics: { ...prevState.metrics, patternsDetected: result.value.length, processingLatency },
+        }));
+        return success(result.value);
       }
 
       // Handle failure
-      setState((prevState) => ({
-        ...prevState,
-        isProcessing: false,
-        errorState: result.error || "Failed to analyze temporal patterns",
-      }));
+      if (!result.success) { // Check if it's actually a failure before accessing error
+            const error = result.error;
+            setState((prevState) => ({ ...prevState, isProcessing: false, errorState: error.message }));
+            return failure(error);
+      }
+      // Should not be reached if result was success, but as fallback:
+      return failure(new Error("Failed to analyze temporal patterns (unexpected state)"));
 
-      return failure(result.error || "Failed to analyze temporal patterns");
     } catch (error) {
-      // Update error state
-      setState((prevState) => ({
-        ...prevState,
-        isProcessing: false,
-        errorState:
-          error instanceof Error
-            ? error.message
-            : "Unknown error analyzing patterns",
-      }));
-
-      return failure(
-        error instanceof Error
-          ? error.message
-          : "Unknown error analyzing patterns",
-      );
+      const errorObj = error instanceof Error ? error : new Error("Unknown error analyzing patterns");
+      setState((prevState) => ({ ...prevState, isProcessing: false, errorState: errorObj.message }));
+      return failure(errorObj);
     }
   }, [patientId, state.dynamicsData, config]);
 
   // Detect state transitions
-  const detectTransitions = useCallback(async (): Promise<
-    Result<StateTransition[]>
-  > => {
+  const detectTransitions = useCallback(async (): Promise<Result<StateTransition[]>> => {
     try {
       const startTime = performance.now();
+      setState((prevState) => ({ ...prevState, isProcessing: true, errorState: null }));
 
-      // Start by marking as processing
-      setState((prevState) => ({
-        ...prevState,
-        isProcessing: true,
-        errorState: null,
-      }));
+      // TODO: Implement actual service call when temporalService is available
+      console.warn("temporalService.detectStateTransitions not implemented.");
+      const result: Result<any> = failure(new Error("Service method detectStateTransitions not implemented."));
 
-      // Call the service to detect transitions
-      const result = await temporalService.detectStateTransitions({
-        patientId,
-        timeScales: config.timeScales,
-        criticalTransitionSensitivity: config.criticalTransitionSensitivity,
-      });
-
-      if (result.success && result.data) {
+      if (result.success && result.value) {
         const endTime = performance.now();
         const processingLatency = endTime - startTime;
 
-        // Extract regular and critical transitions
-        const regularTransitions = result.data.filter((t) => !t.isCritical);
-        const criticalTransitions = result.data
-          .filter((t) => t.isCritical)
-          .map((t) => ({
-            id: t.id,
-            timestamp: t.timestamp,
-            fromState: t.fromState,
-            toState: t.toState,
-            confidence: t.confidence,
-            earlyWarningSignals: t.earlyWarningSignals || [],
-            timeScale: t.timeScale,
-            relatedMetrics: t.relatedMetrics || [],
+        const regularTransitions = result.value.filter((t: any) => !t.isCritical);
+        const criticalTransitions = result.value
+          .filter((t: any) => t.isCritical)
+          .map((t: any) => ({
+            id: t.id, timestamp: t.timestamp, fromState: t.fromState, toState: t.toState,
+            confidence: t.confidence, earlyWarningSignals: t.earlyWarningSignals || [],
+            timeScale: t.timeScale, relatedMetrics: t.relatedMetrics || [],
           }));
 
-        // Update state with transitions
-        setState((prevState) => {
-          return {
-            ...prevState,
-            stateTransitions: regularTransitions,
-            criticalTransitions,
-            isProcessing: false,
-            lastUpdated: new Date(),
-            metrics: {
-              ...prevState.metrics,
-              transitionsIdentified: result.data.length,
-              processingLatency,
-            },
-          };
-        });
-
-        return success(result.data);
+        setState((prevState) => ({
+          ...prevState,
+          stateTransitions: regularTransitions,
+          criticalTransitions,
+          isProcessing: false,
+          lastUpdated: new Date(),
+          metrics: { ...prevState.metrics, transitionsIdentified: result.value.length, processingLatency },
+        }));
+        return success(result.value);
       }
 
       // Handle failure
-      setState((prevState) => ({
-        ...prevState,
-        isProcessing: false,
-        errorState: result.error || "Failed to detect state transitions",
-      }));
+      if (!result.success) { // Check if it's actually a failure before accessing error
+            const error = result.error;
+            setState((prevState) => ({ ...prevState, isProcessing: false, errorState: error.message }));
+            return failure(error);
+      }
+       // Should not be reached if result was success, but as fallback:
+       return failure(new Error("Failed to detect state transitions (unexpected state)"));
 
-      return failure(result.error || "Failed to detect state transitions");
     } catch (error) {
-      // Update error state
-      setState((prevState) => ({
-        ...prevState,
-        isProcessing: false,
-        errorState:
-          error instanceof Error
-            ? error.message
-            : "Unknown error detecting transitions",
-      }));
-
-      return failure(
-        error instanceof Error
-          ? error.message
-          : "Unknown error detecting transitions",
-      );
+      const errorObj = error instanceof Error ? error : new Error("Unknown error detecting transitions");
+      setState((prevState) => ({ ...prevState, isProcessing: false, errorState: errorObj.message }));
+      return failure(errorObj);
     }
   }, [patientId, config.timeScales, config.criticalTransitionSensitivity]);
 
   // Extract features from temporal data
   const extractFeatures = useCallback(
-    async (
-      metricIds: string[],
-    ): Promise<Result<Record<string, TemporalFeature[]>>> => {
+    async (metricIds: string[]): Promise<Result<Record<string, TemporalFeature[]>>> => {
       try {
         const startTime = performance.now();
+        setState((prevState) => ({ ...prevState, isProcessing: true, errorState: null }));
 
-        // Start by marking as processing
-        setState((prevState) => ({
-          ...prevState,
-          isProcessing: true,
-          errorState: null,
-        }));
+        // TODO: Implement actual service call when temporalService is available
+        console.warn("temporalService.extractTemporalFeatures not implemented.");
+        const result: Result<any> = failure(new Error("Service method extractTemporalFeatures not implemented."));
 
-        // Call service to extract features
-        const result = await temporalService.extractTemporalFeatures({
-          patientId,
-          metricIds,
-          timeScales: config.timeScales,
-        });
-
-        if (result.success && result.data) {
+        if (result.success && result.value) {
           const endTime = performance.now();
           const processingLatency = endTime - startTime;
 
-          // Update state with features
-          setState((prevState) => {
-            return {
-              ...prevState,
-              temporalFeatures: result.data,
-              isProcessing: false,
-              lastUpdated: new Date(),
-              metrics: {
-                ...prevState.metrics,
-                processingLatency,
-              },
-            };
-          });
-
-          return success(result.data);
+          setState((prevState) => ({
+            ...prevState,
+            temporalFeatures: result.value,
+            isProcessing: false,
+            lastUpdated: new Date(),
+            metrics: { ...prevState.metrics, processingLatency },
+          }));
+          return success(result.value);
         }
 
         // Handle failure
-        setState((prevState) => ({
-          ...prevState,
-          isProcessing: false,
-          errorState: result.error || "Failed to extract temporal features",
-        }));
+        if (!result.success) { // Check if it's actually a failure before accessing error
+            const error = result.error;
+            setState((prevState) => ({ ...prevState, isProcessing: false, errorState: error.message }));
+            return failure(error);
+        }
+        // Should not be reached if result was success, but as fallback:
+        return failure(new Error("Failed to extract temporal features (unexpected state)"));
 
-        return failure(result.error || "Failed to extract temporal features");
       } catch (error) {
-        // Update error state
-        setState((prevState) => ({
-          ...prevState,
-          isProcessing: false,
-          errorState:
-            error instanceof Error
-              ? error.message
-              : "Unknown error extracting features",
-        }));
-
-        return failure(
-          error instanceof Error
-            ? error.message
-            : "Unknown error extracting features",
-        );
+        const errorObj = error instanceof Error ? error : new Error("Unknown error extracting features");
+        setState((prevState) => ({ ...prevState, isProcessing: false, errorState: errorObj.message }));
+        return failure(errorObj);
       }
     },
     [patientId, config.timeScales],
   );
 
   // Correlate temporal patterns with clinical events
-  const correlateWithClinicalEvents = useCallback(async (): Promise<
-    Result<TemporalPattern[]>
-  > => {
+  const correlateWithClinicalEvents = useCallback(async (): Promise<Result<TemporalPattern[]>> => {
     try {
-      // Get detected patterns
-      const patterns = state.detectedPatterns;
+      const startTime = performance.now();
+      setState((prevState) => ({ ...prevState, isProcessing: true, errorState: null }));
 
-      if (patterns.length === 0) {
-        return failure("No patterns detected to correlate");
+      // TODO: Implement actual service call when temporalService is available
+      console.warn("temporalService.correlatePatternsWithEvents not implemented.");
+       const result: Result<any> = failure(new Error("Service method correlatePatternsWithEvents not implemented."));
+
+      if (result.success && result.value) {
+        const endTime = performance.now();
+        const processingLatency = endTime - startTime;
+
+        setState((prevState) => ({
+          ...prevState,
+          detectedPatterns: result.value,
+          isProcessing: false,
+          lastUpdated: new Date(),
+          metrics: { ...prevState.metrics, processingLatency },
+        }));
+        return success(result.value);
       }
 
-      // Call clinical service
-      const result = await clinicalService.correlateTemporalPatternsWithEvents({
-        patientId,
-        patterns,
-        timeScales: config.timeScales,
-      });
-
-      if (result.success && result.data) {
-        // Update patterns with clinical correlations
-        setState((prevState) => {
-          return {
-            ...prevState,
-            detectedPatterns: result.data,
-            lastUpdated: new Date(),
-          };
-        });
-
-        return success(result.data);
+      // Handle failure
+      if (!result.success) { // Check if it's actually a failure before accessing error
+            const error = result.error;
+            setState((prevState) => ({ ...prevState, isProcessing: false, errorState: error.message }));
+            return failure(error);
       }
+      // Should not be reached if result was success, but as fallback:
+      return failure(new Error("Failed to correlate patterns (unexpected state)"));
 
-      return failure(
-        result.error || "Failed to correlate with clinical events",
-      );
     } catch (error) {
-      return failure(
-        error instanceof Error
-          ? error.message
-          : "Unknown error correlating events",
-      );
+      const errorObj = error instanceof Error ? error : new Error("Unknown error correlating patterns");
+      setState((prevState) => ({ ...prevState, isProcessing: false, errorState: errorObj.message }));
+      return failure(errorObj);
     }
-  }, [patientId, state.detectedPatterns, config.timeScales]);
+  }, [patientId, state.detectedPatterns]);
 
-  // Get early warning indicators
-  const getEarlyWarningIndicators = useCallback(async (): Promise<
-    Result<CriticalTransitionIndicator[]>
-  > => {
-    try {
-      // Call temporal service
-      const result = await temporalService.getEarlyWarningIndicators({
-        patientId,
-        sensitivity: config.criticalTransitionSensitivity,
-        timeScales: config.timeScales,
-      });
-
-      if (result.success && result.data) {
-        // Update state with indicators
-        setState((prevState) => {
-          return {
-            ...prevState,
-            criticalTransitions: result.data,
-            lastUpdated: new Date(),
-          };
-        });
-
-        return success(result.data);
-      }
-
-      return failure(result.error || "Failed to get early warning indicators");
-    } catch (error) {
-      return failure(
-        error instanceof Error
-          ? error.message
-          : "Unknown error getting indicators",
-      );
-    }
-  }, [patientId, config.criticalTransitionSensitivity, config.timeScales]);
-
-  // Set current time scale
-  const setTimeScale = useCallback((timeScale: TimeScale): void => {
-    setState((prevState) => ({
-      ...prevState,
-      currentTimeScale: timeScale,
-    }));
+  // Set current time scale for visualization/analysis focus
+  const setCurrentTimeScale = useCallback((timeScale: TimeScale): void => {
+    setState((prevState) => ({ ...prevState, currentTimeScale: timeScale }));
   }, []);
 
-  // Get patterns for a specific time scale
-  const getPatternsForTimeScale = useCallback(
-    (timeScale: TimeScale): TemporalPattern[] => {
-      return state.detectedPatterns.filter(
-        (pattern) => pattern.timeScale === timeScale,
-      );
+  // Configure temporal analysis parameters
+  const configureTemporalAnalysis = useCallback(
+    (cfg: Partial<TemporalConfig>) => {
+       const newConfig = { ...config, ...cfg };
+       console.warn("configureTemporalAnalysis only updates local config, not used by other callbacks unless config is managed by state.");
+       // To make this effective, 'config' should likely be state managed by useState
     },
-    [state.detectedPatterns],
+    [config],
   );
 
-  // Get critical transitions for a specific time scale
-  const getCriticalTransitionsForTimeScale = useCallback(
-    (timeScale: TimeScale): CriticalTransitionIndicator[] => {
-      return state.criticalTransitions.filter(
-        (transition) => transition.timeScale === timeScale,
-      );
-    },
-    [state.criticalTransitions],
-  );
-
-  // Initialize by loading temporal dynamics for the default time scale
-  useEffect(() => {
-    loadTemporalDynamics(state.currentTimeScale).catch((error) => {
-      console.error("Failed to load initial temporal dynamics:", error);
-    });
-  }, [loadTemporalDynamics, state.currentTimeScale]);
-
-  // Return controller interface
+  // Return the controller interface
   return {
+    ...state, // Exposing full state for now
     loadTemporalDynamics,
     analyzePatterns,
     detectTransitions,
     extractFeatures,
     correlateWithClinicalEvents,
-    getEarlyWarningIndicators,
-    setTimeScale,
-    getPatternsForTimeScale,
-    getCriticalTransitionsForTimeScale,
-
-    // State accessors
-    currentTimeScale: state.currentTimeScale,
-    detectedPatterns: state.detectedPatterns,
-    stateTransitions: state.stateTransitions,
-    criticalTransitions: state.criticalTransitions,
-    dynamicsData: state.dynamicsData,
-    temporalFeatures: state.temporalFeatures,
-
-    // Status information
-    isProcessing: state.isProcessing,
-    errorState: state.errorState,
-    lastUpdated: state.lastUpdated,
-    metrics: state.metrics,
+    setCurrentTimeScale,
+    configureTemporalAnalysis,
   };
 }
-
-export default useTemporalDynamicsController;

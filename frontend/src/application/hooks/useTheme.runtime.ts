@@ -4,56 +4,94 @@
  */
 
 import { Result, Ok, Err } from 'ts-results';
-// TODO: Import specific domain types used by useTheme (e.g., ThemeSettings, ColorPalette)
-// import { ThemeSettings, ColorPalette } from '../../domain/types/ui'; // Example type
-// import { ValidationError } from '../../domain/errors/validation'; // Assuming a custom error type
+// Import actual domain types and type guard
+import {
+  ThemeSettings,
+  ThemeOption,
+  isValidTheme,
+  visualizationThemes, // Import themes for validation if needed
+} from '@domain/types/brain/visualization';
+// import { ValidationError } from '@domain/errors/validation';
 
-// Placeholder for actual types used by the hook
-type ThemeData = unknown; // Replace with actual type (e.g., ThemeSettings)
-type ThemeMode = 'light' | 'dark' | 'system'; // Example
-
-/**
- * Validates the structure and types of ThemeData.
- * @param data - The data to validate.
- * @returns Result<ThemeData, ValidationError>
- */
-export function validateThemeData(data: unknown): Result<ThemeData, Error> {
-  // TODO: Implement detailed validation logic
-  // - Check if data is an object
-  // - Check for required fields (e.g., mode, primaryColor, fontFamily)
-  // - Validate types of fields (e.g., mode is 'light', 'dark', or 'system')
-  // - Use specific type guards (e.g., isColorPalette)
-
-  if (typeof data !== 'object' || data === null) {
-    return Err(new Error('Invalid ThemeData: Input must be an object.'));
-    // Replace Error with specific ValidationError if defined
-  }
-
-  // Add more checks here...
-  // Example: Check 'mode' field
-  // if (!('mode' in data) || !['light', 'dark', 'system'].includes(data.mode as ThemeMode)) {
-  //   return Err(new Error('Invalid ThemeData: Missing or invalid "mode".'));
-  // }
-
-  // If validation passes:
-  return Ok(data as ThemeData); // Cast to the specific type after validation
-}
+// Type alias for clarity
+type ThemeSettingsData = ThemeSettings;
+type ThemeOptionData = ThemeOption;
 
 /**
- * Validates if the provided value is a valid ThemeMode.
- * @param mode - The value to validate.
- * @returns Result<ThemeMode, Error>
+ * Validates the structure and basic types of a ThemeSettings object.
+ * @param data - The theme settings object to validate.
+ * @returns Result<ThemeSettingsData, Error>
  */
-export function validateThemeMode(mode: unknown): Result<ThemeMode, Error> {
-  if (typeof mode !== 'string' || !['light', 'dark', 'system'].includes(mode)) {
-     return Err(new Error(`Invalid ThemeMode: Expected 'light', 'dark', or 'system', received ${mode}`));
+export function validateThemeSettings(data: unknown): Result<ThemeSettingsData, Error> {
+   if (typeof data !== 'object' || data === null) {
+    return Err(new Error('Invalid ThemeSettings: Input must be an object.'));
   }
-  return Ok(mode as ThemeMode);
+  const settings = data as Partial<ThemeSettingsData>; // Cast for checking
+
+  // Basic checks for required fields and types
+  if (typeof settings.name !== 'string' || !isValidTheme(settings.name)) {
+     return Err(new Error('Invalid ThemeSettings: Missing or invalid "name".'));
+  }
+   if (typeof settings.backgroundColor !== 'string') {
+     return Err(new Error('Invalid ThemeSettings: Missing or invalid "backgroundColor".'));
+   }
+   if (typeof settings.primaryColor !== 'string') {
+      return Err(new Error('Invalid ThemeSettings: Missing or invalid "primaryColor".'));
+   }
+   // Add checks for other required string fields as needed based on ThemeSettings definition
+   if (typeof settings.secondaryColor !== 'string') {
+      return Err(new Error('Invalid ThemeSettings: Missing or invalid "secondaryColor".'));
+   }
+    if (typeof settings.accentColor !== 'string') {
+      return Err(new Error('Invalid ThemeSettings: Missing or invalid "accentColor".'));
+   }
+    if (typeof settings.textColor !== 'string') {
+      return Err(new Error('Invalid ThemeSettings: Missing or invalid "textColor".'));
+   }
+     if (typeof settings.regionBaseColor !== 'string') {
+      return Err(new Error('Invalid ThemeSettings: Missing or invalid "regionBaseColor".'));
+   }
+      if (typeof settings.activeRegionColor !== 'string') {
+      return Err(new Error('Invalid ThemeSettings: Missing or invalid "activeRegionColor".'));
+   }
+       if (typeof settings.connectionBaseColor !== 'string') {
+      return Err(new Error('Invalid ThemeSettings: Missing or invalid "connectionBaseColor".'));
+   }
+        if (typeof settings.activeConnectionColor !== 'string') {
+      return Err(new Error('Invalid ThemeSettings: Missing or invalid "activeConnectionColor".'));
+   }
+         if (typeof settings.uiBackgroundColor !== 'string') {
+      return Err(new Error('Invalid ThemeSettings: Missing or invalid "uiBackgroundColor".'));
+   }
+          if (typeof settings.uiTextColor !== 'string') {
+      return Err(new Error('Invalid ThemeSettings: Missing or invalid "uiTextColor".'));
+   }
+   if (typeof settings.fontFamily !== 'string') {
+      return Err(new Error('Invalid ThemeSettings: Missing or invalid "fontFamily".'));
+   }
+   if (typeof settings.glowIntensity !== 'number') {
+      return Err(new Error('Invalid ThemeSettings: Missing or invalid "glowIntensity".'));
+   }
+    if (typeof settings.useBloom !== 'boolean') {
+      return Err(new Error('Invalid ThemeSettings: Missing or invalid "useBloom".'));
+   }
+
+  // If basic checks pass:
+  return Ok(data as ThemeSettingsData); // Cast confirmed structure
 }
 
-// TODO: Add specific type guards if needed (e.g., isColorPalette)
-/*
-export function isColorPalette(obj: unknown): obj is ColorPalette {
-  // Implementation...
+/**
+ * Validates if the provided value is a valid ThemeOption using the domain type guard.
+ * @param option - The value to validate.
+ * @returns Result<ThemeOptionData, Error>
+ */
+export function validateThemeOption(option: unknown): Result<ThemeOptionData, Error> {
+  if (isValidTheme(option)) {
+    return Ok(option);
+  } else {
+    return Err(new Error(`Invalid ThemeOption: Received "${option}".`));
+  }
 }
-*/
+
+// isValidTheme serves as the type guard for ThemeOption.
+// No additional guards needed here.

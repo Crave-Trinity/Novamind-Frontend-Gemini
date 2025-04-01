@@ -34,7 +34,7 @@
     "ci": "npm run ts-fix && npm run build:prod && npm run test",
     "error-watch": "node scripts/continuous-error-check.js",
     "test:critical": "vitest run -t \"(NeuralActivityVisualizer|BiometricAlertVisualizer|BrainModelViewer)\" --config vitest.config.ts",
-    "test:runtime": "vitest run \"src/**/*.runtime.test.ts\" --config vitest.config.ts",
+    "test:runtime": "vitest run src/**/*.runtime.test.ts --config vitest.config.ts",
     "test:minimal": "vitest run src/**/*.minimal.test.{ts,tsx} --config vitest.config.ts",
     "test:node": "node --loader ts-node/esm src/test/minimal-ts.test.ts",
     "test:fixed": "node scripts/run-fixed-tests.js",

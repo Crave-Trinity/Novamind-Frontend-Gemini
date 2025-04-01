@@ -144,18 +144,15 @@ const DEFAULT_THEME_SETTINGS: Record<string, ThemeSettings> = {
 };
 
 // Default visualization settings
-const DEFAULT_VISUALIZATION_SETTINGS: VisualizationSettings = {
-  activityThreshold: 0.2,
-  showInactiveRegions: true,
-  enableBloom: true,
-  enableDepthOfField: false,
-  showLabels: true,
-  showRegionCount: true,
-  showLegend: true,
-  backgroundColor: "#000000",
-  performanceMode: "balanced",
-  themeSettings: DEFAULT_THEME_SETTINGS.clinical,
-};
+// Use the actual default defined in the domain types
+import { defaultVisualizationSettings } from "@domain/types/brain/visualization";
+
+const DEFAULT_VISUALIZATION_SETTINGS: VisualizationSettings = defaultVisualizationSettings;
+// Remove properties not present in the domain type:
+// activityThreshold, showInactiveRegions, enableDepthOfField, showRegionCount, performanceMode, themeSettings
+// These should be added to the domain type if they are truly part of the core settings.
+// For now, assuming the domain type is the source of truth.
+// We will apply theme colors dynamically based on the selected theme.
 
 /**
  * Hook return type with neural-safe typing
@@ -243,11 +240,7 @@ export function useVisualSettings(): UseVisualSettingsReturn {
       setLocalSettings((prev) => {
         const updatedSettings = { ...prev, ...settings };
 
-        // Apply current theme settings if not specified
-        if (!updatedSettings.themeSettings && theme) {
-          updatedSettings.themeSettings = getThemeSettings(theme);
-        }
-
+        // Removed logic related to nested themeSettings as it's not part of VisualizationSettings type
         // Save to localStorage
         try {
           localStorage.setItem(
@@ -318,11 +311,18 @@ export function useVisualSettings(): UseVisualSettingsReturn {
     [],
   );
 
-  // When theme changes, update theme settings in visualization settings
+  // When theme changes, update relevant visualization settings based on the theme
   useEffect(() => {
     if (theme) {
+      const currentThemeSettings = getThemeSettings(theme);
+      // Update specific visualization settings derived from the theme
       updateVisualizationSettings({
-        themeSettings: getThemeSettings(theme),
+        backgroundColor: currentThemeSettings.backgroundColor,
+        highlightColor: currentThemeSettings.activeRegionColor, // Example mapping
+        // Add other relevant mappings from ThemeSettings to VisualizationSettings
+        // e.g., connectionOpacity, bloomIntensity based on theme?
+        // This depends on which VisualizationSettings properties should be theme-dependent.
+        // For now, only updating background and highlight color as examples.
       });
     }
   }, [theme, getThemeSettings, updateVisualizationSettings]);

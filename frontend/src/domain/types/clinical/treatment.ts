@@ -4,7 +4,7 @@
  */
 
 import { RiskLevel } from "./risk";
-import { SafeArray, Result } from "../common";
+import { SafeArray, Result } from "../shared/common"; // Corrected path
 
 // Treatment prediction types with clinical precision
 export type TreatmentType =

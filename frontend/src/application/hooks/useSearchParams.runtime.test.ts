@@ -3,85 +3,90 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { validateSearchParamsData } from './useSearchParams.runtime';
-// TODO: Import specific domain types if needed
-// import { SearchParamsData } from '../../domain/types/search'; // Example type
+import { validateParamsObject } from './useSearchParams.runtime';
+
+// Define the type alias locally for test clarity
+type ParamsObject = Record<string, string | number | null>;
 
 describe('useSearchParams Runtime Validation', () => {
-  describe('validateSearchParamsData', () => {
-    it('should return Ok for valid SearchParamsData (object format)', () => {
-      // TODO: Replace with actual valid mock data conforming to SearchParamsData structure
-      const validData = {
+  describe('validateParamsObject', () => {
+    it('should return Ok for a valid ParamsObject', () => {
+      const validData: ParamsObject = {
         patientId: 'p123',
-        dateRange: '2024-01-01_2024-03-31',
-        status: ['active', 'pending'],
-        limit: '50',
+        limit: 50,
+        status: 'active',
+        offset: 0,
+        filter: null, // Null is allowed
       };
-      const result = validateSearchParamsData(validData);
+      const result = validateParamsObject(validData);
       expect(result.ok).toBe(true);
-      // Optionally check the value: expect(result.val).toEqual(validData);
+      expect(result.val).toEqual(validData);
     });
 
-    it('should return Ok for valid SearchParamsData (URLSearchParams format)', () => {
-      // TODO: Replace with actual valid mock data conforming to SearchParamsData structure
-      const validData = new URLSearchParams();
-      validData.set('patientId', 'p456');
-      validData.append('status', 'completed');
-      // const result = validateSearchParamsData(validData); // Uncomment when validation handles URLSearchParams
-      // expect(result.ok).toBe(true);
-      // Placeholder until validation logic is implemented for URLSearchParams
-      expect(true).toBe(true);
+     it('should return Ok for an empty object', () => {
+      const validData: ParamsObject = {};
+      const result = validateParamsObject(validData);
+      expect(result.ok).toBe(true);
+      expect(result.val).toEqual(validData);
     });
 
-
-    it('should return Err for non-object/non-URLSearchParams input', () => {
-      const invalidData = 500;
-      const result = validateSearchParamsData(invalidData);
+    it('should return Err for non-object input', () => {
+      const invalidData = 'key=value';
+      const result = validateParamsObject(invalidData);
       expect(result.err).toBe(true);
       expect(result.val).toBeInstanceOf(Error);
-      // TODO: Check for specific ValidationError type if defined
+      expect((result.val as Error).message).toContain('Input must be a plain object.');
+    });
+
+     it('should return Err for array input', () => {
+      const invalidData = ['key=value'];
+      const result = validateParamsObject(invalidData);
+      expect(result.err).toBe(true);
+      expect(result.val).toBeInstanceOf(Error);
+      expect((result.val as Error).message).toContain('Input must be a plain object.');
     });
 
     it('should return Err for null input', () => {
       const invalidData = null;
-      const result = validateSearchParamsData(invalidData);
+      const result = validateParamsObject(invalidData);
       expect(result.err).toBe(true);
       expect(result.val).toBeInstanceOf(Error);
-      // TODO: Check for specific ValidationError type if defined
+      expect((result.val as Error).message).toContain('Input must be a plain object.');
     });
 
-    it('should return Err for data with unexpected parameter keys', () => {
-      // TODO: Replace with mock data having unexpected keys if validation enforces strict keys
-      const invalidData = { patientId: 'p789', unexpectedParam: 'value' };
-      // const result = validateSearchParamsData(invalidData); // Uncomment when validation logic checks keys
-      // expect(result.err).toBe(true);
-      // expect(result.val).toBeInstanceOf(Error);
-      // expect((result.val as ValidationError).message).toContain('Unexpected parameter: unexpectedParam');
-      expect(true).toBe(true); // Placeholder
+    it('should return Err for object with invalid value type (boolean)', () => {
+      const invalidData = { patientId: 'p123', isActive: true };
+      const result = validateParamsObject(invalidData);
+      expect(result.err).toBe(true);
+      expect(result.val).toBeInstanceOf(Error);
+      expect((result.val as Error).message).toContain('Value for key "isActive" must be a string, number, or null.');
     });
 
-    it('should return Err for data with incorrect parameter value types', () => {
-      // TODO: Replace with mock data having incorrect type (e.g., 'limit' is not a string/number)
-      const invalidData = { patientId: 'p101', limit: true };
-      // const result = validateSearchParamsData(invalidData); // Uncomment when validation logic checks types
-      // expect(result.err).toBe(true);
-      // expect(result.val).toBeInstanceOf(Error);
-      // expect((result.val as ValidationError).message).toContain('Parameter "limit" must be a string or number');
-       expect(true).toBe(true); // Placeholder
+     it('should return Err for object with invalid value type (undefined)', () => {
+      const invalidData = { patientId: 'p123', filter: undefined };
+      const result = validateParamsObject(invalidData);
+      expect(result.err).toBe(true);
+      expect(result.val).toBeInstanceOf(Error);
+      expect((result.val as Error).message).toContain('Value for key "filter" must be a string, number, or null.');
     });
 
-    it('should return Err for data with invalid parameter value formats', () => {
-      // TODO: Replace with mock data having invalid format (e.g., 'dateRange' format)
-      const invalidData = { patientId: 'p112', dateRange: '01-01-2024/31-03-2024' }; // Incorrect format
-      // const result = validateSearchParamsData(invalidData); // Uncomment when validation logic checks formats
-      // expect(result.err).toBe(true);
-      // expect(result.val).toBeInstanceOf(Error);
-      // expect((result.val as ValidationError).message).toContain('Invalid format for parameter "dateRange"');
-       expect(true).toBe(true); // Placeholder
+     it('should return Err for object with invalid value type (object)', () => {
+      const invalidData = { patientId: 'p123', settings: { theme: 'dark' } };
+      const result = validateParamsObject(invalidData);
+      expect(result.err).toBe(true);
+      expect(result.val).toBeInstanceOf(Error);
+      expect((result.val as Error).message).toContain('Value for key "settings" must be a string, number, or null.');
     });
 
-    // TODO: Add more tests for edge cases and specific validation rules for search parameters
+     it('should return Err for object with invalid value type (array)', () => {
+      // Note: The hook's serialize/deserialize handles comma-separated strings for arrays,
+      // but the direct input to setParams expects string, number, or null.
+      const invalidData = { patientId: 'p123', ids: ['id1', 'id2'] };
+      const result = validateParamsObject(invalidData);
+      expect(result.err).toBe(true);
+      expect(result.val).toBeInstanceOf(Error);
+      expect((result.val as Error).message).toContain('Value for key "ids" must be a string, number, or null.');
+    });
+
   });
-
-  // TODO: Add tests for other validation functions and type guards if defined in useSearchParams.runtime.ts
 });

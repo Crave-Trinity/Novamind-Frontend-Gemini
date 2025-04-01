@@ -42,7 +42,7 @@
 
     // Verify the fix works
     try {
-      const testUrl = new URL("test");
+      const testUrl = new URL("file:///test-path"); // Use a valid file scheme URL
       console.log("URL fix applied successfully!");
     } catch (error) {
       console.error("URL fix failed:", error);
@@ -259,7 +259,7 @@ vi.mock("@react-three/fiber", () => {
     Canvas: vi.fn().mockImplementation(({ children, ...props }) => {
       return document.createElement("div");
     }),
-    useThree: vi.fn().mockReturnValue<ThreeContext>({
+    useThree: vi.fn().mockReturnValue({ // Removed incorrect generic type argument
       camera: { position: { set: vi.fn() }, lookAt: vi.fn() },
       gl: { render: vi.fn() },
       scene: {},
@@ -313,7 +313,7 @@ beforeAll(() => {
   });
 
   // Mock canvas methods
-  HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
+  HTMLCanvasElement.prototype.getContext = vi.fn(() => ({ // Cast mock to any to bypass strict signature check
     fillRect: vi.fn(),
     clearRect: vi.fn(),
     getImageData: vi.fn(() => ({
@@ -366,7 +366,7 @@ beforeAll(() => {
     fillText: vi.fn(),
     strokeText: vi.fn(),
     createImageData: vi.fn(() => []),
-  }));
+  })) as any; // Added 'as any' cast here
 });
 
 // Filter console noise

@@ -3,66 +3,140 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { validateVisualSettingsData } from './useVisualSettings.runtime';
-// TODO: Import mock data generators or fixtures if available
-// import { createMockVisualSettings } from '../../test/fixtures/visualization';
-// TODO: Import specific domain types for more precise testing
-// import { VisualSettingsData, VisualSettings } from '../../domain/types/visualization'; // Replace with actual types
+// Import the specific validation functions and relevant types/enums
+import {
+  validatePartialVisualizationSettings,
+  validateFullThemeSettings,
+} from './useVisualSettings.runtime';
+import {
+  VisualizationSettings,
+  ThemeSettings,
+  RenderMode,
+  ThemeOption,
+  visualizationThemes, // Import predefined themes for testing
+  defaultVisualizationSettings, // Import defaults for base valid object
+} from '@domain/types/brain/visualization';
+
+// Type alias for clarity
+type PartialVisSettings = Partial<VisualizationSettings>;
+type FullThemeSettings = ThemeSettings;
+
+// Helper to create a valid partial settings object
+const createValidPartialSettings = (): PartialVisSettings => ({
+  showLabels: false,
+  rotationSpeed: 0.8,
+  renderMode: RenderMode.CONNECTIVITY,
+  levelOfDetail: 'medium',
+  // Add other valid partial fields based on VisualizationSettings interface
+});
+
+// Helper to create a valid full theme settings object
+const createValidFullTheme = (): FullThemeSettings => ({
+  ...visualizationThemes.dark, // Use a predefined theme as a base
+  name: 'dark', // Ensure name matches ThemeOption
+});
+
 
 describe('useVisualSettings Runtime Validation', () => {
-  describe('validateVisualSettingsData', () => {
-    it('should return Ok for valid VisualSettingsData', () => {
-      // TODO: Replace with actual valid mock data conforming to VisualSettingsData structure
-      const validData = {
-        nodeSize: 1.5,
-        edgeStyle: 'solid', // Example: Assuming EdgeStyle is a string enum/literal
-        showLabels: true,
-        backgroundColor: '#000000',
-        // Add other required fields based on the actual VisualSettingsData type
-      };
-      const result = validateVisualSettingsData(validData);
+  // Tests for validatePartialVisualizationSettings
+  describe('validatePartialVisualizationSettings', () => {
+    it('should return Ok for a valid Partial<VisualizationSettings> object', () => {
+      const validData = createValidPartialSettings();
+      const result = validatePartialVisualizationSettings(validData);
       expect(result.ok).toBe(true);
-      // Optionally check the value: expect(result.val).toEqual(validData);
+      expect(result.val).toEqual(validData);
+    });
+
+     it('should return Ok for an empty object (all fields optional)', () => {
+      const validData = {};
+      const result = validatePartialVisualizationSettings(validData);
+      expect(result.ok).toBe(true);
+      expect(result.val).toEqual({});
     });
 
     it('should return Err for non-object input', () => {
-      const invalidData = true; // Boolean is not an object
-      const result = validateVisualSettingsData(invalidData);
+      const invalidData = true;
+      const result = validatePartialVisualizationSettings(invalidData);
       expect(result.err).toBe(true);
-      expect(result.val).toBeInstanceOf(Error);
-      // TODO: Check for specific ValidationError type if defined
+      expect((result.val as Error).message).toContain('Input must be an object.');
     });
 
     it('should return Err for null input', () => {
       const invalidData = null;
-      const result = validateVisualSettingsData(invalidData);
+      const result = validatePartialVisualizationSettings(invalidData);
       expect(result.err).toBe(true);
-      expect(result.val).toBeInstanceOf(Error);
-      // TODO: Check for specific ValidationError type if defined
+      expect((result.val as Error).message).toContain('Input must be an object.');
     });
 
-    it('should return Err for data missing required fields', () => {
-      // TODO: Replace with mock data missing a required field (e.g., 'nodeSize')
-      const invalidData = { showLabels: false };
-      // const result = validateVisualSettingsData(invalidData); // Uncomment when validation logic checks fields
-      // expect(result.err).toBe(true);
-      // expect(result.val).toBeInstanceOf(Error);
-      // expect((result.val as ValidationError).message).toContain('Missing required field: nodeSize');
-       expect(true).toBe(true); // Placeholder
+    it('should return Err for data with incorrect field type (e.g., showLabels)', () => {
+      const invalidData = { showLabels: 'yes' };
+      const result = validatePartialVisualizationSettings(invalidData);
+      expect(result.err).toBe(true);
+      expect((result.val as Error).message).toContain('showLabels must be a boolean.');
     });
 
-    it('should return Err for data with incorrect field types', () => {
-      // TODO: Replace with mock data having incorrect type (e.g., 'showLabels' is not boolean)
-      const invalidData = { nodeSize: 1, showLabels: 'yes' };
-      // const result = validateVisualSettingsData(invalidData); // Uncomment when validation logic checks types
-      // expect(result.err).toBe(true);
-      // expect(result.val).toBeInstanceOf(Error);
-      // expect((result.val as ValidationError).message).toContain('Field "showLabels" must be a boolean');
-       expect(true).toBe(true); // Placeholder
+     it('should return Err for data with invalid enum value (e.g., renderMode)', () => {
+      const invalidData = { renderMode: 'fancy' };
+      const result = validatePartialVisualizationSettings(invalidData);
+      expect(result.err).toBe(true);
+      expect((result.val as Error).message).toContain('Invalid renderMode value "fancy".');
     });
 
-    // TODO: Add more tests for edge cases and specific validation rules within VisualSettingsData
+     it('should return Err for data with invalid enum value (e.g., levelOfDetail)', () => {
+      const invalidData = { levelOfDetail: 'super_high' };
+      const result = validatePartialVisualizationSettings(invalidData);
+      expect(result.err).toBe(true);
+      expect((result.val as Error).message).toContain('Invalid levelOfDetail value.');
+    });
+
+     it('should return Err for invalid cameraPosition', () => {
+      const invalidData = { cameraPosition: [0, '1'] };
+      const result = validatePartialVisualizationSettings(invalidData);
+      expect(result.err).toBe(true);
+      expect((result.val as Error).message).toContain('cameraPosition must be an array of three numbers.');
+    });
+
+     // Note: The check for nested themeSettings was removed from validatePartialVisualizationSettings
+     // as themeSettings is not part of the VisualizationSettings domain type.
+
   });
 
-  // TODO: Add tests for other validation functions and type guards if defined in useVisualSettings.runtime.ts
+  // Tests for validateFullThemeSettings
+  describe('validateFullThemeSettings', () => {
+     it('should return Ok for a valid ThemeSettings object', () => {
+      const validData = createValidFullTheme();
+      const result = validateFullThemeSettings(validData);
+      expect(result.ok).toBe(true);
+      expect(result.val).toEqual(validData);
+    });
+
+    it('should return Err for non-object input', () => {
+      const invalidData = 'dark';
+      const result = validateFullThemeSettings(invalidData);
+      expect(result.err).toBe(true);
+      expect((result.val as Error).message).toContain('Input must be an object.');
+    });
+
+     it('should return Err for an empty object (missing required fields)', () => {
+      const invalidData = {};
+      const result = validateFullThemeSettings(invalidData);
+      expect(result.err).toBe(true);
+      expect((result.val as Error).message).toContain('Missing or invalid "name".');
+    });
+
+    it('should return Err for data missing a required field (e.g., name)', () => {
+      const invalidData = { ...createValidFullTheme(), name: undefined } as any;
+      const result = validateFullThemeSettings(invalidData);
+      expect(result.err).toBe(true);
+      expect((result.val as Error).message).toContain('Missing or invalid "name".');
+    });
+
+     it('should return Err for data with incorrect field type (e.g., glowIntensity)', () => {
+      const invalidData = { ...createValidFullTheme(), glowIntensity: 'low' };
+      const result = validateFullThemeSettings(invalidData);
+      expect(result.err).toBe(true);
+      expect((result.val as Error).message).toContain('Missing or invalid "glowIntensity".');
+    });
+  });
+
 });

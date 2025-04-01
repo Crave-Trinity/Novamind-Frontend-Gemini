@@ -43,7 +43,7 @@ export default defineConfig({
       './src/test/url-fix.ts',          // URL fix second
       './src/test/setup.ts'             // Regular setup last
     ],
-    include: ['src/**/*.{test,spec,type-test}.{ts,tsx}'],
+    include: ['src/**/*.{test,spec,type-test,runtime.test}.{ts,tsx}'], // Added runtime.test
     exclude: ['node_modules', '.git', 'dist'],
     testTimeout: 20000,
     
