@@ -1,6 +1,6 @@
-import { ApiClient } from "./ApiClient";
-import { EnhancedMockApiClient } from "./EnhancedMockApiClient";
-import { IApiClient } from "./IApiClient";
+import { ApiClient } from "@api/ApiClient";
+import { EnhancedMockApiClient } from "@api/EnhancedMockApiClient";
+import { IApiClient } from "@api/IApiClient";
 
 /**
  * ApiGateway - Implementation of the clean hexagonal architecture pattern

@@ -10,7 +10,7 @@ import {
   BrainRegionValidator,
   ConnectionValidator,
   BrainModelValidator,
-} from "./core-models.runtime";
+} from "@types/brain/core-models.runtime";
 
 describe("Brain Core Models runtime validators", () => {
   describe("Vector3Validator", () => {

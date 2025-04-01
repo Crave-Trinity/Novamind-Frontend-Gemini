@@ -7,7 +7,7 @@ import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ThemeProviderComponent } from "./ThemeProviderComponent";
+import { ThemeProviderComponent } from "@/contexts/ThemeProviderComponent";
 import { renderWithProviders } from "../../test/testUtils";
 
 // Mock data with clinical precision

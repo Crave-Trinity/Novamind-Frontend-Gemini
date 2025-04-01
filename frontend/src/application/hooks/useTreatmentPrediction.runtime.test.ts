@@ -9,7 +9,7 @@ import {
   validateGeneticPredictionData,
   validateTreatmentResponseRequest, // Validates the Request DTO
   validateTreatmentResponseResponse, // Validates the Response DTO
-} from "./useTreatmentPrediction.runtime";
+} from "@hooks/useTreatmentPrediction.runtime";
 import {
   ClinicalPredictionData, // Domain type
   GeneticPredictionData,

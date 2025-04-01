@@ -12,7 +12,7 @@ import {
   // validateAnalysisParameters,
   // Import local types/enums if needed for mock data clarity
   // TimeScale, PartialTemporalConfig
-} from "./TemporalDynamicsController.runtime";
+} from "@application/controllers/TemporalDynamicsController.runtime";
 
 // --- Mock Data ---
 

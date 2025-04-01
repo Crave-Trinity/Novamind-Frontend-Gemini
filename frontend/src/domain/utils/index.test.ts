@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import * as utils from "./index";
+import * as utils from "@domain/utils/index";
 
 describe("Domain utilities exports", () => {
   it("exports shared type verification utilities", () => {

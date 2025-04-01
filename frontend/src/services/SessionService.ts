@@ -9,8 +9,8 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { validateSessionOptions } from "./SessionService.runtime"; // Import validator
-import { auditLogService, AuditEventType } from "./AuditLogService";
+import { validateSessionOptions } from "@/services/SessionService.runtime"; // Import validator
+import { auditLogService, AuditEventType } from "@/services/AuditLogService";
 import { Result, Ok, Err } from "ts-results"; // Import Result for consistency (though not used in return types here)
 
 /**

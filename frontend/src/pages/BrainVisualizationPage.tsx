@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
 
-import LoadingIndicator from "../components/atoms/LoadingIndicator";
-import BrainVisualizationContainer from "../components/organisms/BrainVisualizationContainer";
-import { auditLogService, AuditEventType } from "../services/AuditLogService";
+import LoadingIndicator from "@/components/atoms/LoadingIndicator";
+import BrainVisualizationContainer from "@/components/organisms/BrainVisualizationContainer";
+import { auditLogService, AuditEventType } from "@/services/AuditLogService";
 
 /**
  * Props for region data

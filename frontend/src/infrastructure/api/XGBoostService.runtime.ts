@@ -17,7 +17,7 @@ import {
   DigitalTwinIntegrationResponse,
   ModelInfoRequest,
   ModelInfoResponse,
-} from "./XGBoostService"; // Import interfaces from the service file
+} from "@api/XGBoostService"; // Import interfaces from the service file
 
 // --- Type Guards for Request Interfaces ---
 

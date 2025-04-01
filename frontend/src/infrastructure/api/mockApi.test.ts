@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { mockApi } from "./mockApi";
+import { mockApi } from "@api/mockApi";
 
 describe("mockApi", () => {
   it("processes data with mathematical precision", () => {

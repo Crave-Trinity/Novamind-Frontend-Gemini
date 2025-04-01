@@ -7,7 +7,7 @@ import { describe, it, expect } from "vitest";
 import {
   validatePartialVisualizationSettings,
   validateFullThemeSettings,
-} from "./useVisualSettings.runtime";
+} from "@hooks/useVisualSettings.runtime";
 import {
   VisualizationSettings,
   ThemeSettings,

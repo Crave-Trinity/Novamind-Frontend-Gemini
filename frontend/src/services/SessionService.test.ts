@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { initializeSessionService } from "./SessionService";
+import { initializeSessionService } from "@/services/SessionService";
 
 describe("initializeSessionService", () => {
   it("processes data with mathematical precision", () => {

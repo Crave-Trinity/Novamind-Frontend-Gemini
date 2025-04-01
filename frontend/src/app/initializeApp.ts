@@ -5,8 +5,8 @@
  * for the Novamind Digital Twin application
  */
 
-import { auditLogService, AuditEventType } from "../services/AuditLogService";
-import { initializeSessionService } from "../services/SessionService";
+import { auditLogService, AuditEventType } from "@/services/AuditLogService";
+import { initializeSessionService } from "@/services/SessionService";
 
 /**
  * Initialize application

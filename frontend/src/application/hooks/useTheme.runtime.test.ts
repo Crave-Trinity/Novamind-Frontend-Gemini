@@ -3,7 +3,10 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { validateThemeSettings, validateThemeOption } from "./useTheme.runtime";
+import {
+  validateThemeSettings,
+  validateThemeOption,
+} from "@hooks/useTheme.runtime";
 // Import actual domain types and the theme definitions
 import {
   ThemeSettings,

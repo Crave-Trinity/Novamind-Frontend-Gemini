@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { useClinicalContext } from "./useClinicalContext";
+import { useClinicalContext } from "@hooks/useClinicalContext";
 
 describe("useClinicalContext", () => {
   it("processes data with mathematical precision", () => {

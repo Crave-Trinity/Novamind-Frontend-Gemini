@@ -6,7 +6,7 @@
 import { describe, it, expect, vi } from "vitest";
 
 import { renderHook, act } from "@testing-library/react-hooks";
-import { useTheme } from "./ThemeProviderComponent";
+import { useTheme } from "@contexts/ThemeProviderComponent";
 
 describe("useTheme", () => {
   it("initializes with correct default state", () => {

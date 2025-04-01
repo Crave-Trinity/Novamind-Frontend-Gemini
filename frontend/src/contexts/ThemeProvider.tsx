@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import ThemeContext, { themeSettings } from "./ThemeContext";
-import { isValidTheme } from "../types/theme";
-import type { ThemeOption } from "../types/theme";
+import ThemeContext, { themeSettings } from "@/contexts/ThemeContext";
+import { isValidTheme } from "@/types/theme";
+import type { ThemeOption } from "@/types/theme";
 
 interface ThemeProviderProps {
   children: React.ReactNode;

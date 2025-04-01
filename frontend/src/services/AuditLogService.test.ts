@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { useAuditLogPHIView } from "./AuditLogService";
+import { useAuditLogPHIView } from "@/services/AuditLogService";
 
 describe("useAuditLogPHIView", () => {
   it("processes data with mathematical precision", () => {

@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { initializeApp } from "./initializeApp";
+import { initializeApp } from "@/app/initializeApp";
 
 describe("initializeApp", () => {
   it("processes data with mathematical precision", () => {

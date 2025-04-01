@@ -6,7 +6,7 @@ import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import LoadingIndicator from "./LoadingIndicator"; // Corrected to default import
+import LoadingIndicator from "@/components/atoms/LoadingIndicator"; // Corrected to default import
 import { renderWithProviders } from "@test/testUtils.tsx";
 
 // Mock data with clinical precision

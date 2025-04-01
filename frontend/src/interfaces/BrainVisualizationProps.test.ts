@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { BrainVisualizationProps } from "./BrainVisualizationProps";
+import { BrainVisualizationProps } from "@/interfaces/BrainVisualizationProps";
 
 describe("BrainVisualizationProps", () => {
   it("processes data with mathematical precision", () => {

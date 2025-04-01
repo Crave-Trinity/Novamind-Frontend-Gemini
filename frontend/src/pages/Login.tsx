@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
-import SecureInput from "../components/atoms/SecureInput";
-import { auditLogService, AuditEventType } from "../services/AuditLogService";
+import SecureInput from "@/components/atoms/SecureInput";
+import { auditLogService, AuditEventType } from "@/services/AuditLogService";
 
 /**
  * Login page component

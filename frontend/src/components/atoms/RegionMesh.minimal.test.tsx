@@ -9,8 +9,8 @@ import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render } from "@testing-library/react";
 import { Canvas } from "@react-three/fiber";
-import RegionMesh from "./RegionMesh";
-import { BrainRegion } from "../../types/brain";
+import RegionMesh from "@/components/atoms/RegionMesh";
+import { BrainRegion } from "@/types/brain";
 
 // Mock Three.js objects since we can't test them directly in JSDOM
 vi.mock("@react-three/fiber", () => ({

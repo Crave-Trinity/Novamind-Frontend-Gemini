@@ -249,7 +249,7 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
     const farDistance = 50;
 
     // Normalize distance between 0 and 1
-    let distanceFactor =
+    const distanceFactor =
       1.0 -
       Math.min(
         1.0,

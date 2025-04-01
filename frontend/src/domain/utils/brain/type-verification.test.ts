@@ -4,9 +4,12 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { brainTypeVerifier, BrainTypeVerifier } from "./type-verification";
-import { RenderMode } from "../../types/brain/visualization";
-import { TypeVerificationError } from "../shared/type-verification";
+import {
+  brainTypeVerifier,
+  BrainTypeVerifier,
+} from "@domain/utils/brain/type-verification";
+import { RenderMode } from "@types/brain/visualization";
+import { TypeVerificationError } from "@domain/utils/shared/type-verification";
 
 describe("Brain type verification", () => {
   describe("verifyVector3", () => {

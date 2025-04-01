@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { createNeuralGlowUniforms } from "./neuralGlow";
+import { createNeuralGlowUniforms } from "@/utils/shaders/neuralGlow";
 
 describe("createNeuralGlowUniforms", () => {
   it("processes data with mathematical precision", () => {

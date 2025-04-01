@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { brain } from "./brain";
+import { brain } from "@/types/brain";
 
 describe("brain", () => {
   it("processes data with mathematical precision", () => {

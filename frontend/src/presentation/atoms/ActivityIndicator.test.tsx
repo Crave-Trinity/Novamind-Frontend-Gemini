@@ -9,8 +9,8 @@ import { ActivationLevel } from "@domain/types/brain/activity"; // Import Activa
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ActivityIndicator from "./ActivityIndicator"; // Assuming default export
-import { renderWithProviders } from "../../test/testUtils.tsx"; // Reverted to relative path with extension
+import ActivityIndicator from "@presentation/atoms/ActivityIndicator"; // Assuming default export
+import { renderWithProviders } from "@test/testUtils"; // Reverted to relative path with extension
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for ActivityIndicator

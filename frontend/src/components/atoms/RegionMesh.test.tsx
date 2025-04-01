@@ -6,7 +6,7 @@ import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import RegionMesh from "./RegionMesh"; // Corrected to default import
+import RegionMesh from "@/components/atoms/RegionMesh"; // Corrected to default import
 import { renderWithProviders } from "@test/testUtils.tsx";
 
 // Mock data with clinical precision
@@ -18,7 +18,7 @@ const mockProps = {
     position: [0, 0, 0] as [number, number, number],
     scale: 1,
     isActive: true,
-    type: "cortical" as "cortical",
+    type: "cortical" as const,
     metrics: { activity: 0.5, connectivity: 0.5, volume: 1000 },
   },
   glowIntensity: 0.5,

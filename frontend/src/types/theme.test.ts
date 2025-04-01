@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { isValidTheme } from "./theme";
+import { isValidTheme } from "@/types/theme";
 
 describe("isValidTheme", () => {
   it("processes data with mathematical precision", () => {

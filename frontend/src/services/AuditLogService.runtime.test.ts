@@ -9,8 +9,8 @@ import {
   isAuditEventType,
   isAuditLogEvent,
   isPartialAuditLogEventData,
-} from "./AuditLogService.runtime";
-import { AuditEventType, AuditLogEvent } from "./AuditLogService"; // Import from service file
+} from "@/services/AuditLogService.runtime";
+import { AuditEventType, AuditLogEvent } from "@/services/AuditLogService"; // Import from service file
 
 // --- Mock Data ---
 

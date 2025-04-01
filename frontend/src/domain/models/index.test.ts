@@ -4,14 +4,14 @@
  */
 
 import { describe, it, expect } from "vitest";
-import * as modelExports from "./index";
+import * as modelExports from "@models/index";
 // Import brain mapping functions for direct testing
 import {
   calculateNeuralActivation,
   mapSymptomsToRegions,
   mapDiagnosesToRegions,
   calculateTreatmentImpact,
-} from "./brain/mapping/brain-mapping";
+} from "@models/brain/mapping/brain-mapping";
 
 describe("Domain models index exports", () => {
   it("exports brain model functions", () => {

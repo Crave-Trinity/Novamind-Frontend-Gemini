@@ -4,18 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { visualizationThemes } from "./visualization";
-import { defaultVisualizationSettings } from "./visualization";
-import { RenderMode } from "./visualization";
-import { VisualizationSettings } from "./visualization";
-import { ThemeOption } from "./visualization";
-import { ThemeSettings } from "./visualization";
-import { BrainVisualizationProps } from "./visualization";
-import { BrainVisualizationState } from "./visualization";
-import { ProcessedBrainData } from "./visualization";
-import { ProcessedBrainRegion } from "./visualization";
-import { ProcessedNeuralConnection } from "./visualization";
-import { undefined } from "./visualization";
+import { visualizationThemes , defaultVisualizationSettings , RenderMode , VisualizationSettings , ThemeOption , ThemeSettings , BrainVisualizationProps , BrainVisualizationState , ProcessedBrainData , ProcessedBrainRegion , ProcessedNeuralConnection , undefined } from "@types/brain/visualization";
 
 describe("visualization type definitions", () => {
   it("exports visualizationThemes with correct structure", () => {

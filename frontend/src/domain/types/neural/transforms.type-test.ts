@@ -11,7 +11,7 @@ import {
   NeuralTransformBatch,
   NeuralTransformSequence,
   NeuralTransformResult,
-} from "./transforms";
+} from "@types/neural/transforms";
 
 describe("Neural Transforms type definitions", () => {
   it("NeuralTransform has correct structure", () => {

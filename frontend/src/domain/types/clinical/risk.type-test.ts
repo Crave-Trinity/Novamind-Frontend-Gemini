@@ -19,7 +19,7 @@ import {
   RiskAssessmentState,
   RiskTimelineState,
   ProcessedRiskTimeline,
-} from "./risk";
+} from "@types/clinical/risk";
 
 describe("Risk type definitions", () => {
   it("RiskLevel enum has correct structure", () => {

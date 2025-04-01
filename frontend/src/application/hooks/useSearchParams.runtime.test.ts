@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { validateParamsObject } from "./useSearchParams.runtime";
+import { validateParamsObject } from "@hooks/useSearchParams.runtime";
 
 // Define the type alias locally for test clarity
 type ParamsObject = Record<string, string | number | null>;

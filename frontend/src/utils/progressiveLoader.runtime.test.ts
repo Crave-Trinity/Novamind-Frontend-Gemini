@@ -11,13 +11,13 @@ import {
   isBrainRegionArray, // Import guards for direct testing
   isNeuralConnectionArray,
   isProgressCallback,
-} from "./progressiveLoader.runtime";
+} from "@/utils/progressiveLoader.runtime";
 import {
   BrainModel,
   BrainRegion,
   NeuralConnection,
 } from "@domain/types/brain/models";
-import { generateMockBrainData } from "./brainDataTransformer"; // Use the corrected mock data generator
+import { generateMockBrainData } from "@/utils/brainDataTransformer"; // Use the corrected mock data generator
 
 // --- Mock Data ---
 

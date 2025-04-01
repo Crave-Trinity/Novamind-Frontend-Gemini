@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { index } from "./index";
+import { index } from "@presentation/atoms/index";
 
 describe("index", () => {
   it("processes data with mathematical precision", () => {

@@ -18,7 +18,7 @@ import {
   asNumber,
   asBoolean,
   asDate,
-} from "./type-verification";
+} from "@models/shared/type-verification";
 
 /**
  * Validates a potentially undefined value is defined

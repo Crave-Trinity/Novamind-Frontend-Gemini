@@ -7,16 +7,13 @@ import {
   BrainModel,
   BrainRegion,
   NeuralConnection,
-} from "../../types/brain/core-models";
-import {
-  RenderMode,
-  VisualizationSettings,
-} from "../../types/brain/visualization";
-import { Vector3, Result } from "../../types/shared/common";
+} from "@types/brain/core-models";
+import { RenderMode, VisualizationSettings } from "@types/brain/visualization";
+import { Vector3, Result } from "@types/shared/common";
 import {
   typeVerifier,
   TypeVerificationError,
-} from "../shared/type-verification";
+} from "@domain/utils/shared/type-verification";
 
 /**
  * Brain model type verification utilities

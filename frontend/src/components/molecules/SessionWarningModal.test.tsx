@@ -6,7 +6,7 @@ import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import SessionWarningModal from "./SessionWarningModal"; // Assuming default export
+import SessionWarningModal from "@/components/molecules/SessionWarningModal"; // Assuming default export
 import { renderWithProviders } from "@test/testUtils.tsx";
 
 // Mock data with clinical precision

@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { useTemporalDynamicsController } from "./TemporalDynamicsController";
+import { useTemporalDynamicsController } from "@application/controllers/TemporalDynamicsController";
 
 describe("useTemporalDynamicsController", () => {
   it("processes data with mathematical precision", () => {

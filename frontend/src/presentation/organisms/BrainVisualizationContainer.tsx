@@ -153,7 +153,7 @@ export const BrainVisualizationContainer: React.FC<
   const loadingProgress = useMemo(() => {
     // Calculate loading progress based on various data sources
     let progress = 0;
-    let total = 3; // Model, patient, clinical
+    const total = 3; // Model, patient, clinical
 
     if (!isModelLoading) progress++;
     if (!isPatientLoading) progress++;

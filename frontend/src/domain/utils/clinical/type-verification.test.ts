@@ -4,9 +4,9 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { clinicalTypeVerifier } from "./type-verification";
-import { RiskLevel } from "../../types/clinical/risk-level";
-import { TypeVerificationError } from "../shared/type-verification";
+import { clinicalTypeVerifier } from "@domain/utils/clinical/type-verification";
+import { RiskLevel } from "@types/clinical/risk-level";
+import { TypeVerificationError } from "@domain/utils/shared/type-verification";
 
 describe("Clinical type verification", () => {
   describe("verifyRiskLevel", () => {

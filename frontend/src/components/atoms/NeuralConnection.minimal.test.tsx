@@ -9,8 +9,8 @@ import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
 import { Canvas } from "@react-three/fiber";
-import NeuralConnection from "./NeuralConnection";
-import { NeuralConnection as NeuralConnectionType } from "../../types/brain";
+import NeuralConnection from "@/components/atoms/NeuralConnection";
+import { NeuralConnection as NeuralConnectionType } from "@/types/brain";
 
 // Mock Three.js objects since we can't test them directly in JSDOM
 vi.mock("@react-three/fiber", () => ({
@@ -76,7 +76,7 @@ describe("NeuralConnection", () => {
       ...defaultProps,
       connection: {
         ...mockConnection,
-        type: "inhibitory" as "inhibitory", // Correct type assertion
+        type: "inhibitory" as const, // Correct type assertion
       },
     };
 

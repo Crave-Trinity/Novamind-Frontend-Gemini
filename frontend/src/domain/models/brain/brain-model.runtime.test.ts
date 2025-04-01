@@ -8,7 +8,7 @@ import {
   BrainRegionValidator,
   NeuralConnectionValidator,
   BrainModelValidator,
-} from "./brain-model.runtime";
+} from "@models/brain/brain-model.runtime";
 
 describe("Brain Model Runtime Validators", () => {
   describe("BrainRegionValidator", () => {

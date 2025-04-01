@@ -4,13 +4,13 @@ import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import React, { useRef, useEffect, useMemo } from "react"; // Removed useState
 import * as THREE from "three";
 
-import { useTheme } from "../../application/hooks/useTheme";
-import { useBrainVisualization } from "../../application/hooks/useBrainVisualization";
+import { useTheme } from "@hooks/useTheme";
+import { useBrainVisualization } from "@hooks/useBrainVisualization";
 import {
   RenderMode,
   BrainRegion,
   type NeuralPathway,
-} from "../../domain/models/BrainModel";
+} from "@models/BrainModel";
 
 interface BrainVisualizationProps {
   /** Patient ID for data fetching */

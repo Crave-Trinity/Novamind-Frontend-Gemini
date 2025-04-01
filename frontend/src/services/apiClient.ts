@@ -6,7 +6,7 @@
 
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 
-import { auditLogService, AuditEventType } from "./AuditLogService";
+import { auditLogService, AuditEventType } from "@/services/AuditLogService";
 
 /**
  * API error with enhanced information

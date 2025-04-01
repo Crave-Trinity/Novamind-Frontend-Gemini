@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { loadRegionsProgressively } from "./progressiveLoader";
+import { loadRegionsProgressively } from "@/utils/progressiveLoader";
 
 describe("loadRegionsProgressively", () => {
   it("processes data with mathematical precision", () => {

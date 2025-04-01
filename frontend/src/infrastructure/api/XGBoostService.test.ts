@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { XGBoostService } from "./XGBoostService";
+import { XGBoostService } from "@api/XGBoostService";
 
 describe("XGBoostService", () => {
   it("processes data with mathematical precision", () => {

@@ -1,12 +1,9 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
-import { RiskAssessment } from "../../domain/models/PatientModel";
-import {
-  xgboostService,
-  RiskPredictionRequest,
-} from "../../infrastructure/api/XGBoostService";
-import Button from "../atoms/Button";
+import { RiskAssessment } from "@domain/types/clinical/risk";
+import { xgboostService, RiskPredictionRequest } from "@api/XGBoostService";
+import Button from "@presentation/atoms/Button";
 
 interface RiskAssessmentPanelProps {
   patientId: string;
@@ -30,8 +27,8 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
   // Sort risk assessments by date (newest first)
   const sortedRiskAssessments = [...riskAssessments].sort(
     (a, b) =>
-      new Date(b.date || new Date().toISOString()).getTime() -
-      new Date(a.date || new Date().toISOString()).getTime(),
+      new Date(b.timestamp || new Date().toISOString()).getTime() - // Use timestamp
+      new Date(a.timestamp || new Date().toISOString()).getTime(), // Use timestamp
   );
 
   // Active risk type selection
@@ -136,95 +133,54 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
         <div className="mb-4 flex items-start justify-between">
           <h3 className="text-lg font-medium">Latest Risk Assessment</h3>
           <div className="text-xs text-neutral-500">
-            {new Date(latest?.date || new Date()).toLocaleDateString()}
+            {new Date(latest?.timestamp || new Date()).toLocaleDateString()}{" "}
+            {/* Use timestamp */}
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {latest?.riskFactors.map((factor, idx) => (
-            <div
-              key={idx}
-              className="rounded-lg bg-background p-3 dark:bg-background-card"
-            >
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-medium capitalize">
-                  {factor.category}
-                </span>
-                <span
-                  className={`rounded-full px-2 py-1 text-xs ${getSeverityTextClass(factor.severity)}`}
-                >
-                  {factor.severity}
-                </span>
-              </div>
-
-              <div className="flex items-center">
-                <div className="mr-2 h-2 w-full rounded-full bg-neutral-200 dark:bg-neutral-700">
-                  <div
-                    className={`h-2 rounded-full ${getSeverityColorClass(factor.severity)}`}
-                    style={{
-                      width: `${
-                        factor.severity === "none"
-                          ? 0
-                          : factor.severity === "mild"
-                            ? 33
-                            : factor.severity === "moderate"
-                              ? 66
-                              : 100
-                      }%`,
-                    }}
-                  ></div>
+          {latest?.contributingFactors.map((factor, idx) => {
+            // Map impactWeight (0-1) to a pseudo-severity for styling
+            const pseudoSeverity =
+              factor.impactWeight < 0.3
+                ? "low"
+                : factor.impactWeight < 0.7
+                  ? "moderate"
+                  : "high";
+            return (
+              <div
+                key={idx}
+                className="rounded-lg bg-background p-3 dark:bg-background-card"
+              >
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-medium capitalize">
+                    {factor.category}
+                  </span>
+                  <span
+                    // Use pseudoSeverity for styling, display impactWeight
+                    className={`rounded-full px-2 py-1 text-xs ${getSeverityTextClass(pseudoSeverity)}`}
+                  >
+                    Impact: {Math.round(factor.impactWeight * 100)}%
+                  </span>
                 </div>
 
-                <div className="flex items-center text-xs">
-                  {factor.trend === "increasing" && (
-                    <svg
-                      className="h-3 w-3 text-red-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 10l7-7m0 0l7 7m-7-7v18"
-                      />
-                    </svg>
-                  )}
-                  {factor.trend === "decreasing" && (
-                    <svg
-                      className="h-3 w-3 text-green-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                      />
-                    </svg>
-                  )}
-                  {factor.trend === "stable" && (
-                    <svg
-                      className="h-3 w-3 text-neutral-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 12h14"
-                      />
-                    </svg>
-                  )}
+                <div className="flex items-center">
+                  <div className="mr-2 h-2 w-full rounded-full bg-neutral-200 dark:bg-neutral-700">
+                    <div
+                      // Use pseudoSeverity for styling, width based on impactWeight
+                      className={`h-2 rounded-full ${getSeverityColorClass(pseudoSeverity)}`}
+                      style={{ width: `${factor.impactWeight * 100}%` }}
+                    ></div>
+                  </div>
+
+                  {/* Display temporalRelevance instead of trend icons */}
+                  <div className="flex items-center text-xs text-neutral-500">
+                    <span>{factor.temporalRelevance}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-4 flex items-center justify-between">
@@ -241,7 +197,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
           <div className="text-xs text-neutral-500">
             Next Assessment:{" "}
             {new Date(
-              latest?.nextAssessmentDate || new Date(),
+              latest?.nextAssessmentDue || new Date(), // Use nextAssessmentDue
             ).toLocaleDateString()}
           </div>
         </div>
@@ -438,7 +394,16 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
 
   // Render the prediction results
   const renderPredictionResults = () => {
-    if (!predictionResult) {
+    // Check if the prediction was successful and data exists
+    if (!predictionResult || !predictionResult.ok) {
+      // Optionally render an error state if predictionResult.err exists
+      if (predictionResult && predictionResult.err) {
+        return (
+          <div className="mt-4 text-red-600">
+            Error: {predictionResult.val.message}
+          </div>
+        );
+      }
       return null;
     }
 
@@ -448,10 +413,10 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
           <h3 className="text-lg font-medium">Risk Prediction Results</h3>
 
           <span
-            className={`rounded-full px-2 py-1 text-xs font-medium ${getSeverityTextClass(predictionResult.risk_level)}`}
+            className={`rounded-full px-2 py-1 text-xs font-medium ${getSeverityTextClass(predictionResult.val.risk_level)}`}
           >
-            {predictionResult.risk_level.charAt(0).toUpperCase() +
-              predictionResult.risk_level.slice(1)}{" "}
+            {predictionResult.val.risk_level.charAt(0).toUpperCase() +
+              predictionResult.val.risk_level.slice(1)}{" "}
             Risk
           </span>
         </div>
@@ -462,31 +427,31 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
               Risk Score
             </span>
             <span className="text-sm font-bold text-primary-600 dark:text-primary-400">
-              {Math.round(predictionResult.risk_score * 100)}%
+              {Math.round(predictionResult.val.risk_score * 100)}%
             </span>
           </div>
           <div className="h-3 w-full rounded-full bg-neutral-200 dark:bg-neutral-700">
             <div
-              className={`h-3 rounded-full ${getSeverityColorClass(predictionResult.risk_level)}`}
-              style={{ width: `${predictionResult.risk_score * 100}%` }}
+              className={`h-3 rounded-full ${getSeverityColorClass(predictionResult.val.risk_level)}`}
+              style={{ width: `${predictionResult.val.risk_score * 100}%` }}
             ></div>
           </div>
           <div className="mt-1 flex justify-between text-xs text-neutral-500">
             <span>Low Risk</span>
             <span>
-              Confidence: {Math.round(predictionResult.confidence * 100)}%
+              Confidence: {Math.round(predictionResult.val.confidence * 100)}%
             </span>
             <span>High Risk</span>
           </div>
         </div>
 
-        {predictionResult.factors.length > 0 && (
+        {predictionResult.val.factors.length > 0 && (
           <div className="mb-6">
             <h4 className="mb-2 text-sm font-medium text-neutral-700 dark:text-neutral-300">
               Key Risk Factors
             </h4>
             <div className="space-y-2">
-              {predictionResult.factors.slice(0, 5).map(
+              {predictionResult.val.factors.slice(0, 5).map(
                 (
                   factor: {
                     name: string;
@@ -517,14 +482,14 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
           </div>
         )}
 
-        {predictionResult.recommendations &&
-          predictionResult.recommendations.length > 0 && (
+        {predictionResult.val.recommendations &&
+          predictionResult.val.recommendations.length > 0 && (
             <div>
               <h4 className="mb-2 text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 Recommendations
               </h4>
               <ul className="list-inside list-disc space-y-1 pl-2 text-sm text-neutral-700 dark:text-neutral-300">
-                {predictionResult.recommendations.map(
+                {predictionResult.val.recommendations.map(
                   (recommendation: string, idx: number) => (
                     <li key={idx}>{recommendation}</li>
                   ),
@@ -571,7 +536,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
                 <tr key={idx}>
                   <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-neutral-800 dark:text-neutral-200">
                     {new Date(
-                      assessment?.date || new Date(),
+                      assessment?.timestamp || new Date(), // Use timestamp
                     ).toLocaleDateString()}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">
@@ -584,34 +549,52 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
                   </td>
                   <td className="px-4 py-3 text-sm text-neutral-700 dark:text-neutral-300">
                     <div className="flex flex-wrap gap-1">
-                      {assessment?.riskFactors.map((factor, fidx) => (
-                        <span
-                          key={fidx}
-                          className={`inline-block rounded px-2 py-1 text-xs ${getSeverityTextClass(factor.severity)}`}
-                        >
-                          {factor.category}
-                        </span>
-                      ))}
+                      {assessment?.contributingFactors?.map((factor, fidx) => {
+                        // Added optional chaining
+                        // Map impactWeight (0-1) to a pseudo-severity for styling
+                        const pseudoSeverity =
+                          factor.impactWeight < 0.3
+                            ? "low"
+                            : factor.impactWeight < 0.7
+                              ? "moderate"
+                              : "high";
+                        return (
+                          <span
+                            key={fidx}
+                            // Use pseudoSeverity for styling, display category and impact
+                            className={`inline-block rounded px-2 py-1 text-xs ${getSeverityTextClass(pseudoSeverity)}`}
+                          >
+                            {factor.category} (
+                            {(factor.impactWeight * 100).toFixed(0)}%)
+                          </span>
+                        );
+                      })}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-sm text-neutral-700 dark:text-neutral-300">
                     <div className="flex flex-wrap gap-1">
-                      {assessment?.recommendedInterventions
-                        .slice(0, 2)
-                        .map((intervention, iidx) => (
-                          <span
-                            key={iidx}
-                            className="inline-block rounded bg-blue-100 px-2 py-1 text-xs text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                          >
-                            {intervention}
+                      {
+                        assessment?.recommendations &&
+                        Array.isArray(assessment.recommendations) // Ensure it's an array
+                          ? assessment.recommendations
+                              .slice(0, 2)
+                              .map((intervention, iidx) => (
+                                <span
+                                  key={iidx}
+                                  className="inline-block rounded bg-blue-100 px-2 py-1 text-xs text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                                >
+                                  {intervention}
+                                </span>
+                              ))
+                          : null /* Or render placeholder */
+                      }
+                      {assessment?.recommendations &&
+                        Array.isArray(assessment.recommendations) &&
+                        assessment.recommendations.length > 2 && ( // Ensure it's an array before checking length
+                          <span className="inline-block rounded bg-neutral-100 px-2 py-1 text-xs text-neutral-800 dark:bg-neutral-900 dark:text-neutral-200">
+                            +{assessment.recommendations.length - 2} more
                           </span>
-                        ))}
-                      {assessment?.recommendedInterventions.length > 2 && (
-                        <span className="inline-block rounded bg-neutral-100 px-2 py-1 text-xs text-neutral-800 dark:bg-neutral-900 dark:text-neutral-200">
-                          +{assessment?.recommendedInterventions.length - 2}{" "}
-                          more
-                        </span>
-                      )}
+                        )}
                     </div>
                   </td>
                 </tr>

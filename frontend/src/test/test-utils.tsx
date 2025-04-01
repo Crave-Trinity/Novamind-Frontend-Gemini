@@ -1,9 +1,8 @@
 import React, { PropsWithChildren, ReactElement } from "react";
 import { render, RenderOptions } from "@testing-library/react";
-import ThemeContext from "../contexts/ThemeContext";
+import ThemeContext, { ThemeProvider } from "@/contexts/ThemeContext";
 // Fixed imports for Theme components
-import ThemeContext from "../contexts/ThemeContext";
-import { ThemeProvider } from "../contexts/ThemeContext";
+import ThemeContext from "@/contexts/ThemeContext";
 
 /**
  * Custom renderer that wraps components with necessary providers

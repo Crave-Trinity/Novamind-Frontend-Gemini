@@ -5,24 +5,15 @@
  */
 
 import axios from "axios";
-import {
-  Result,
-  success,
-  failure,
-  SafeArray,
-} from "../../../domain/types/shared/common";
+import { Result, success, failure, SafeArray } from "@types/shared/common";
 import {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
-} from "../../../domain/models/brain/mapping/brain-mapping";
-import { RiskAssessment, RiskLevel } from "../../../domain/types/clinical/risk";
-import { TreatmentResponsePrediction } from "../../../domain/types/clinical/treatment";
-import {
-  Symptom,
-  Diagnosis,
-  Treatment,
-} from "../../../domain/types/clinical/patient";
+} from "@models/brain/mapping/brain-mapping";
+import { RiskAssessment, RiskLevel } from "@types/clinical/risk";
+import { TreatmentResponsePrediction } from "@types/clinical/treatment";
+import { Symptom, Diagnosis, Treatment } from "@types/clinical/patient";
 
 // API endpoints
 const API_BASE_URL =

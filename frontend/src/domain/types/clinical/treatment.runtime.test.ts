@@ -13,7 +13,7 @@ import {
   BiomarkerDataValidator,
   TreatmentResponsePredictionValidator,
   TreatmentComparisonResultValidator,
-} from "./treatment.runtime";
+} from "@types/clinical/treatment.runtime";
 
 describe("Treatment runtime validators", () => {
   it("TreatmentTypeValidator validates correct treatment types", () => {

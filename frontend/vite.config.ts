@@ -48,41 +48,7 @@ export default defineConfig(({ command, mode }) => {
     ],
     
     // Path aliases - aligned with clean architecture in tsconfig.json
-    resolve: {
-      alias: {
-        // Core Clean Architecture Layers
-        '@': resolve(__dirname, 'src'),
-        '@domain': resolve(__dirname, 'src/domain'),
-        '@application': resolve(__dirname, 'src/application'),
-        '@infrastructure': resolve(__dirname, 'src/infrastructure'),
-        '@presentation': resolve(__dirname, 'src/presentation'),
-        
-        // Atomic Design Components
-        '@components': resolve(__dirname, 'src/presentation/components'),
-        '@atoms': resolve(__dirname, 'src/presentation/components/atoms'),
-        '@molecules': resolve(__dirname, 'src/presentation/components/molecules'),
-        '@organisms': resolve(__dirname, 'src/presentation/components/organisms'),
-        '@templates': resolve(__dirname, 'src/presentation/components/templates'),
-        '@pages': resolve(__dirname, 'src/presentation/pages'),
-        
-        // Domain-Driven Architecture Shortcuts
-        '@services': resolve(__dirname, 'src/infrastructure/services'),
-        '@hooks': resolve(__dirname, 'src/application/hooks'),
-        '@utils': resolve(__dirname, 'src/application/utils'),
-        '@contexts': resolve(__dirname, 'src/application/contexts'),
-        '@types': resolve(__dirname, 'src/domain/types'),
-        '@models': resolve(__dirname, 'src/domain/models'),
-        '@assets': resolve(__dirname, 'src/presentation/assets'),
-        '@shaders': resolve(__dirname, 'src/presentation/shaders'),
-        '@store': resolve(__dirname, 'src/application/store'),
-        '@styles': resolve(__dirname, 'src/presentation/styles'),
-        '@api': resolve(__dirname, 'src/infrastructure/api'),
-        '@config': resolve(__dirname, 'src/infrastructure/config'),
-        '@constants': resolve(__dirname, 'src/domain/constants'),
-        '@validation': resolve(__dirname, 'src/domain/validation'),
-        '@visualizations': resolve(__dirname, 'src/presentation/visualizations'),
-      },
-    },
+    // `resolve.alias` is handled by `vite-tsconfig-paths` plugin based on tsconfig.json
     
     // Neural network build optimization
     build: {

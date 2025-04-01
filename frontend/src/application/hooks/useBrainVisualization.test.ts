@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { useBrainVisualization } from "./useBrainVisualization";
+import { useBrainVisualization } from "@hooks/useBrainVisualization";
 
 describe("useBrainVisualization", () => {
   it("processes data with mathematical precision", () => {

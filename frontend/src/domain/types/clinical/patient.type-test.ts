@@ -12,7 +12,7 @@ import {
   Diagnosis,
   Symptom,
   Medication,
-} from "./patient";
+} from "@types/clinical/patient";
 
 describe("Patient type definitions", () => {
   it("Patient has correct structure", () => {

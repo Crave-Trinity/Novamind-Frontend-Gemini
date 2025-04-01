@@ -3,7 +3,7 @@
  */
 
 import { Result, Ok, Err } from "ts-results";
-import { SessionOptions } from "./SessionService"; // Import interface from service file
+import { SessionOptions } from "@/services/SessionService"; // Import interface from service file
 
 // --- Type Guards ---
 

@@ -3,7 +3,11 @@
  * Brain Model Domain Runtime Validation
  */
 
-import type { BrainRegion, NeuralConnection, BrainModel } from "./brain-model";
+import type {
+  BrainRegion,
+  NeuralConnection,
+  BrainModel,
+} from "@models/brain/brain-model";
 
 /**
  * Runtime validation for BrainRegion objects

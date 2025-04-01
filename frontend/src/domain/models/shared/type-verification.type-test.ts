@@ -21,7 +21,7 @@ import {
   asNumber,
   asBoolean,
   asDate,
-} from "./type-verification";
+} from "@models/shared/type-verification";
 
 // Test that TypeScript properly infers the assertion types
 // This file doesn't export any actual tests - it's a compile-time

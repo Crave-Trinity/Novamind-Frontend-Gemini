@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import Button from "../atoms/Button";
+import Button from "@presentation/atoms/Button";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");

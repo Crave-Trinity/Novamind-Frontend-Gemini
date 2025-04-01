@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from "vitest";
 // Import the specific validation function and relevant types
-import { validatePatientData } from "./usePatientData.runtime";
+import { validatePatientData } from "@hooks/usePatientData.runtime";
 import {
   Patient,
   PatientDemographics,

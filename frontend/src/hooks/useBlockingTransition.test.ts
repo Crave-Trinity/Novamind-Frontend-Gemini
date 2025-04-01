@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { useBlockingTransition } from "./useBlockingTransition";
+import { useBlockingTransition } from "@/hooks/useBlockingTransition";
 
 describe("useBlockingTransition", () => {
   it("processes data with mathematical precision", () => {

@@ -4,7 +4,7 @@ import {
   ThemeSettings,
   isValidTheme,
   visualSettings,
-} from "../types/theme";
+} from "@/types/theme";
 
 /**
  * Theme context interface

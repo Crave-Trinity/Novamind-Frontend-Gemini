@@ -7,7 +7,7 @@
 import React, { useMemo, useCallback } from "react";
 import { Instance, Instances } from "@react-three/drei";
 import * as THREE from "three";
-import RegionMesh from "../atoms/RegionMesh";
+import RegionMesh from "@presentation/atoms/RegionMesh";
 import { BrainRegion } from "@domain/types/brain/models";
 import { ThemeSettings, RenderMode } from "@domain/types/brain/visualization";
 import { SafeArray } from "@domain/types/common";

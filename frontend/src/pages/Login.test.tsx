@@ -6,7 +6,7 @@ import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import Login from "./Login"; // Assuming default export
+import Login from "@/pages/Login"; // Assuming default export
 import { renderWithProviders } from "@test/testUtils.tsx";
 
 // Mock data with clinical precision

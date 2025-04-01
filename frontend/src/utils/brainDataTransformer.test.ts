@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { transformBrainData } from "./brainDataTransformer";
+import { transformBrainData } from "@/utils/brainDataTransformer";
 
 describe("transformBrainData", () => {
   it("processes data with mathematical precision", () => {

@@ -3,14 +3,14 @@
  * Handles all interactions with the XGBoost prediction backend
  */
 
-import { apiClient } from "./apiClient"; // Corrected casing
+import { apiClient } from "@api/ApiClient"; // Match filename casing
 import {
   validateData,
   isRiskPredictionRequest,
   isRiskPredictionResponse,
   isTreatmentResponseRequest,
   isTreatmentResponseResponse /* import other guards */,
-} from "./XGBoostService.runtime";
+} from "@api/XGBoostService.runtime";
 import { Result, Ok, Err } from "ts-results"; // Import Result for error handling
 // Types for XGBoost requests and responses
 export interface RiskPredictionRequest {

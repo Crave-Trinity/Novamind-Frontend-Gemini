@@ -1,69 +1,64 @@
-import { /**
+/**
  * NOVAMIND Testing Framework
  * BrainModelContainer Component Tests
  */
+import { describe, it, expect, vi } from "vitest";
+import React from "react"; // Added missing React import
+import { render, screen } from "@testing-library/react";
+import BrainModelContainer from "@presentation/containers/BrainModelContainer"; // Assuming default export
+import { renderWithProviders } from "@test/testUtils"; // Added renderWithProviders
 
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import BrainModelContainer from './BrainModelContainer';
-
-// Define proper TypeScript interfaces for test props
-interface BrainModelContainerProps {
-  height: string;
-  width: string;
-  initialRotation?: [number, number, number];
-  neuralActivity?: number;
-  showControls?: boolean;
-  theme?: 'light' | 'dark' | 'clinical';
-  onModelLoad?: () => void;
-}
+// Removed local prop definition; will rely on imported component props
 
 // Test props with minimal requirements and type safety
-const mockProps: BrainModelContainerProps = {
-  height: '600px',
-  width: '100%'
+// Define minimal props based on assumed component props
+const mockProps = {
+  patientId: "test-patient-123", // Example prop
+  // Add other required props based on actual component definition
 };
 
-describe('BrainModelContainer', () => {
-  it('renders without crashing', () => {
-    const { container } = render(<BrainModelContainer {...mockProps} />);
+describe("BrainModelContainer", () => {
+  it("renders without crashing", () => {
+    const { container } = renderWithProviders(
+      <BrainModelContainer {...mockProps} />,
+    ); // Use renderWithProviders
     expect(container).not.toBeNull();
   });
-  
-  it('renders with correct dimensions', () => {
-    render(<BrainModelContainer {...mockProps} />);
-    const container = screen.getByTestId('brain-model-container-root');
+
+  it("renders with correct dimensions", () => {
+    renderWithProviders(<BrainModelContainer {...mockProps} />); // Use renderWithProviders
+    const container = screen.getByTestId("brain-model-container-root");
     expect(container).toBeInTheDocument();
-    expect(container).toHaveStyle({ height: '600px', width: '100%' });
+    expect(container).toHaveStyle({ height: "600px", width: "100%" });
   });
-  
-  it('applies custom neural activity level', () => {
-    // Create props with neural activity
-    const customProps: BrainModelContainerProps = {
+
+  it("applies custom neural activity level", () => {
+    // Create props with neural activity based on assumed component props
+    const customProps = {
       ...mockProps,
-      neuralActivity: 0.75
+      neuralActivity: 0.75, // Assuming this prop exists
     };
-    
-    render(<BrainModelContainer {...customProps} />);
-    const container = screen.getByTestId('brain-model-container-root');
+
+    renderWithProviders(<BrainModelContainer {...customProps} />); // Use renderWithProviders
+    const container = screen.getByTestId("brain-model-container-root");
     expect(container).toBeInTheDocument();
-    
+
     // In a real test, we would verify the neural activity is applied
     // This would require more complex testing of the Three.js scene
   });
-  
-  it('calls onModelLoad callback when model is ready', () => {
+
+  it("calls onModelLoad callback when model is ready", () => {
     // Mock the callback function
     const onModelLoadMock = vi.fn();
-    
-    const customProps: BrainModelContainerProps = {
+
+    const customProps = {
       ...mockProps,
-      onModelLoad: onModelLoadMock
+      onModelLoad: onModelLoadMock, // Assuming this prop exists
     };
-    
-    render(<BrainModelContainer {...customProps} />);
-    
+
+    renderWithProviders(<BrainModelContainer {...customProps} />); // Use renderWithProviders
+
     // In a real implementation, we would need to trigger the model load event
     // For now, we're just testing the component renders without errors
   });
-}); } from "";
+});

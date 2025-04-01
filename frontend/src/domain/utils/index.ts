@@ -19,9 +19,9 @@ export {
 } from "./clinical/type-verification";
 
 // Re-export type verifier singletons with descriptive names for easy access
-import { typeVerifier } from "./shared/type-verification";
-import { brainTypeVerifier } from "./brain/type-verification";
-import { clinicalTypeVerifier } from "./clinical/type-verification";
+import { typeVerifier } from "@domain/utils/shared/type-verification";
+import { brainTypeVerifier } from "@domain/utils/brain/type-verification";
+import { clinicalTypeVerifier } from "@domain/utils/clinical/type-verification";
 
 // Export verifiers as a unified object for easy consumption
 export const verifiers = {

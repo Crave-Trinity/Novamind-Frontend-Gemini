@@ -11,7 +11,7 @@ import {
   xgboostService,
   TreatmentResponseRequest,
   TreatmentResponseResponse,
-} from "../../infrastructure/api/XGBoostService";
+} from "@api/XGBoostService";
 
 interface UseTreatmentPredictionOptions {
   patientId: string;

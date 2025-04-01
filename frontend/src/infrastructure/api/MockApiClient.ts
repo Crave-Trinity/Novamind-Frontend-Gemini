@@ -3,7 +3,7 @@ import {
   RenderMode,
   ModelSource,
   NeuralPathway,
-} from "../../domain/models/BrainModel";
+} from "@models/BrainModel";
 
 /**
  * Mock API Client for development & testing

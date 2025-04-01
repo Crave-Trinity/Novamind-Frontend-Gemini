@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 
-import { useTheme } from "../../application/contexts/ThemeContext";
+import { useTheme } from "@contexts/ThemeContext";
 
 interface MainLayoutProps {
   children?: React.ReactNode;

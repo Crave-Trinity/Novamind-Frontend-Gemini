@@ -5,8 +5,8 @@
 
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { TimelineEvent } from "./TimelineEvent";
-import { renderWithProviders } from "../../test/testUtils";
+import { TimelineEvent } from "@presentation/molecules/TimelineEvent";
+import { renderWithProviders } from "@test/testUtils";
 
 // Domain mock data with clinical precision
 const mockSymptomEvent = {

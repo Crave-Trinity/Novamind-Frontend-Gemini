@@ -13,7 +13,7 @@ import {
   validateRiskAssessmentData, // Basic validation
   // Import locally defined types/enums if needed for mock data clarity
   // AggregationMethod, SymptomPredictionParams, ...
-} from "./ClinicalPredictionController.runtime";
+} from "@application/controllers/ClinicalPredictionController.runtime";
 import { RiskAssessment, RiskLevel } from "@domain/types/clinical/risk"; // Import the actual type and Enum
 
 // --- Mock Data (Based on inferred types) ---

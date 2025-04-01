@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 
-import { RenderMode } from "../../domain/models/BrainModel";
-import Button from "../atoms/Button";
+import { RenderMode } from "@models/BrainModel";
+import Button from "@presentation/atoms/Button";
 
 interface BrainVisualizationControlsProps {
   activeRegions: string[];

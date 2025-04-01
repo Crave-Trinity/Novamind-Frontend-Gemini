@@ -3,8 +3,8 @@
  * Treatment response prediction with quantum-level type safety
  */
 
-import { RiskLevel } from "./risk";
-import { SafeArray, Result } from "../shared/common"; // Corrected path
+import { RiskLevel } from "@types/clinical/risk";
+import { SafeArray, Result } from "@types/shared/common"; // Corrected path
 
 // Treatment prediction types with clinical precision
 export type TreatmentType =

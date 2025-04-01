@@ -4,14 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { ActivationLevel } from "./activity";
-import { NeuralActivityState } from "./activity";
-import { NeuralActivationPattern } from "./activity";
-import { NeuralStateTransition } from "./activity";
-import { TemporalActivationSequence } from "./activity";
-import { NeuralActivityHeatmap } from "./activity";
-import { ActivityVisualizationSettings } from "./activity";
-import { undefined } from "./activity";
+import { ActivationLevel , NeuralActivityState , NeuralActivationPattern , NeuralStateTransition , TemporalActivationSequence , NeuralActivityHeatmap , ActivityVisualizationSettings , undefined } from "@types/brain/activity";
 
 describe("activity type definitions", () => {
   it("exports ActivationLevel with correct structure", () => {

@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { apiClient } from "./apiClient";
+import { apiClient } from "@/services/apiClient";
 
 describe("apiClient", () => {
   it("processes data with mathematical precision", () => {

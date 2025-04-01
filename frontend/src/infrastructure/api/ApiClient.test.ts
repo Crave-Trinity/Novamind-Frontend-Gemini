@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { AxiosRequestConfig } from "axios";
 
-import { apiClient } from "./ApiClient";
+import { apiClient } from "@api/ApiClient";
 
 // Extract and modify USE_MOCK_API to ensure mock tests
 vi.mock("./ApiClient", async (importOriginal) => {

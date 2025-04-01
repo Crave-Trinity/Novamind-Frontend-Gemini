@@ -6,7 +6,7 @@ import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { VisualizationCoordinatorProvider } from "./NeuralVisualizationCoordinator";
+import { VisualizationCoordinatorProvider } from "@application/controllers/coordinators/NeuralVisualizationCoordinator";
 import { renderWithProviders } from "@test/testUtils.tsx";
 
 // Mock data with clinical precision

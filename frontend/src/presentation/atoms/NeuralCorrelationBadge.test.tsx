@@ -5,7 +5,7 @@
 
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { NeuralCorrelationBadge } from "./NeuralCorrelationBadge";
+import { NeuralCorrelationBadge } from "@presentation/atoms/NeuralCorrelationBadge";
 
 describe("NeuralCorrelationBadge", () => {
   // Neural correlation test data with clinical precision

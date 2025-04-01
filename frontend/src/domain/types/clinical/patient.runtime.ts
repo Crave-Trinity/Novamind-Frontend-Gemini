@@ -12,7 +12,7 @@ import type {
   Diagnosis,
   Symptom,
   Medication,
-} from "./patient";
+} from "@types/clinical/patient";
 
 /**
  * Runtime validation for Patient objects

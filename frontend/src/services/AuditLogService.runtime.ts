@@ -3,7 +3,7 @@
  */
 
 import { Result, Ok, Err } from "ts-results";
-import { AuditEventType, AuditLogEvent } from "./AuditLogService"; // Import from service file
+import { AuditEventType, AuditLogEvent } from "@/services/AuditLogService"; // Import from service file
 
 // --- Type Guards ---
 

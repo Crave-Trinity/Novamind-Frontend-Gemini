@@ -4,10 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { NeuralTransform } from "./transforms";
-import { NeuralTransformBatch } from "./transforms";
-import { NeuralTransformSequence } from "./transforms";
-import { NeuralTransformResult } from "./transforms";
+import { NeuralTransform , NeuralTransformBatch , NeuralTransformSequence , NeuralTransformResult } from "@types/neural/transforms";
 
 describe("transforms type definitions", () => {
   it("exports NeuralTransform with correct structure", () => {

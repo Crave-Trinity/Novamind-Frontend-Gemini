@@ -8,7 +8,7 @@ import {
   isApiPatient, // Example guard
   isApiPatientArray, // Example guard
   // Import other guards as they are defined
-} from "./ApiClient.runtime";
+} from "@api/ApiClient.runtime";
 // Import mock data generators or fixtures if available
 // import { createMockPatient } from '../../test/fixtures/patient';
 

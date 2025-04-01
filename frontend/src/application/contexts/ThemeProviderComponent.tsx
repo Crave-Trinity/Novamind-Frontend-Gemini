@@ -6,7 +6,7 @@ import React, {
   ReactNode,
 } from "react";
 
-import { ThemeType, ThemeSettings } from "../../types/brain";
+import { ThemeType, ThemeSettings } from "@/types/brain";
 
 // Define default theme settings for each theme
 const defaultThemeSettings: Record<ThemeType, ThemeSettings> = {

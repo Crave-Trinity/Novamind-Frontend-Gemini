@@ -6,7 +6,7 @@ import { describe, it, expect } from "vitest";
 import {
   validateCoordinatorState,
   validateCoordinatorEvent,
-} from "./NeuralVisualizationCoordinator.runtime";
+} from "@application/controllers/coordinators/NeuralVisualizationCoordinator.runtime";
 // TODO: Import mock data generators or fixtures if available
 // import { createMockCoordinatorState, createMockCoordinatorEvent } from '../../../test/fixtures/coordinators';
 // TODO: Import specific domain types for more precise testing

@@ -1,6 +1,6 @@
-import { BrainModel } from "../../domain/models/BrainModel";
+import { BrainModel } from "@models/BrainModel";
 
-import { mockApiClient } from "./MockApiClient";
+import { mockApiClient } from "@api/MockApiClient";
 
 // Define treatment response type for type safety
 interface TreatmentResponse {

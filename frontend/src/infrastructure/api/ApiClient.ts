@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
-import { mockApi } from "./mockApi";
-import { validateApiResponse } from "./ApiClient.runtime"; // Import the validator
+import { mockApi } from "@api/mockApi";
+import { validateApiResponse } from "@api/ApiClient.runtime"; // Import the validator
 import { Result, Ok, Err } from "ts-results"; // Import Result types if needed for error handling
 // Flag to toggle between mock and real API
 const USE_MOCK_API = true;

@@ -12,9 +12,9 @@ interface DashboardPatient {
   lastUpdated: string;
 }
 
-import { useTheme } from "../../application/contexts/ThemeContext";
-import Button from "../atoms/Button";
-import DigitalTwinDashboard from "../organisms/DigitalTwinDashboard";
+import { useTheme } from "@contexts/ThemeContext";
+import Button from "@presentation/atoms/Button";
+import DigitalTwinDashboard from "@presentation/organisms/DigitalTwinDashboard";
 
 // Mock API client (would be replaced with actual API calls)
 const fetchPatients = async () => {

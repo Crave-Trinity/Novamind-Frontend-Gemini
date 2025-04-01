@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { useClinicalPredictionController } from "./ClinicalPredictionController";
+import { useClinicalPredictionController } from "@application/controllers/ClinicalPredictionController";
 
 describe("useClinicalPredictionController", () => {
   it("processes data with mathematical precision", () => {

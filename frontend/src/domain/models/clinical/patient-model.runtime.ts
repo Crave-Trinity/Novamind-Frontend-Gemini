@@ -10,7 +10,7 @@ import type {
   Symptom,
   TreatmentResponse,
   PatientModel,
-} from "./patient-model";
+} from "@models/clinical/patient-model";
 
 /**
  * Runtime validation for PatientDemographics objects

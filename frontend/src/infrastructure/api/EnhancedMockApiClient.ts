@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig } from "axios";
-import { IApiClient } from "./IApiClient";
-import { mockApi } from "./mockApi";
+import { IApiClient } from "@api/IApiClient";
+import { mockApi } from "@api/mockApi";
 
 /**
  * Enhanced Mock API Client - A fully-functional API client with no backend dependency

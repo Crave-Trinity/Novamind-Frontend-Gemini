@@ -7,13 +7,13 @@ import { useTheme } from "@/application/hooks/useTheme";
 import {
   MeshWithShaderMaterial,
   Object3DWithMaterial,
-} from "../../types/three-extensions";
-import { isValidTheme } from "../../types/theme";
+} from "@/types/three-extensions";
+import { isValidTheme } from "@/types/theme";
 import {
   createNeuralGlowUniforms,
   updateTimeUniform,
   setActiveState,
-} from "../../utils/shaders/neuralGlow";
+} from "@/utils/shaders/neuralGlow";
 
 /**
  * Brain region data interface

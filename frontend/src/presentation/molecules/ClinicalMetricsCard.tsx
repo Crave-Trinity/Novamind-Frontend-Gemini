@@ -1,6 +1,6 @@
 import React from "react";
 
-import { AssessmentScore } from "../../domain/models/PatientModel";
+import { AssessmentScore } from "@models/PatientModel";
 
 interface ClinicalMetricProps {
   title: string;

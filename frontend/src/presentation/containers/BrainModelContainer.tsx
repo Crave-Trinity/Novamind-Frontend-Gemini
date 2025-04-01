@@ -515,7 +515,7 @@ function applyClinicialDataToBrainModel(
         if (!regionImpact) return region;
 
         // Modify region based on impact type
-        let updatedRegion = { ...region };
+        const updatedRegion = { ...region };
 
         if (regionImpact.impact === "increase") {
           updatedRegion.activityLevel = Math.min(
@@ -544,7 +544,7 @@ function applyClinicialDataToBrainModel(
         if (!connectionImpact) return conn;
 
         // Modify connection based on impact type
-        let updatedConn = { ...conn };
+        const updatedConn = { ...conn };
 
         if (connectionImpact.impact === "increase") {
           updatedConn.strength = Math.min(

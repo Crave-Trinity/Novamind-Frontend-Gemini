@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { useSearchParams } from "./useSearchParams";
+import { useSearchParams } from "@hooks/useSearchParams";
 
 describe("useSearchParams", () => {
   it("processes data with mathematical precision", () => {

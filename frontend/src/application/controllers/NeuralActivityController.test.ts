@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react-hooks";
-import { useNeuralActivityController } from "./NeuralActivityController";
+import { useNeuralActivityController } from "@application/controllers/NeuralActivityController";
 
 // Mock the domain types to prevent import errors
 vi.mock("@domain/types/brain/activity", () => ({

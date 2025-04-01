@@ -6,7 +6,7 @@ import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import NeuralConnection from "./NeuralConnection"; // Corrected to default import
+import NeuralConnection from "@/components/atoms/NeuralConnection"; // Corrected to default import
 import { renderWithProviders } from "@test/testUtils.tsx";
 
 // Mock data with clinical precision
@@ -17,7 +17,7 @@ const mockProps = {
     sourceId: "r1",
     targetId: "r2",
     strength: 0.7,
-    type: "excitatory" as "excitatory",
+    type: "excitatory" as const,
     active: true,
   }, // Added type assertion
   sourcePosition: [0, 0, 0] as [number, number, number],

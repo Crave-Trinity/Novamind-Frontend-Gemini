@@ -14,12 +14,12 @@ import {
   ProcessedBrainDataValidator,
   ProcessedBrainRegionValidator,
   ProcessedNeuralConnectionValidator,
-} from "./visualization.runtime";
+} from "@types/brain/visualization.runtime";
 import {
   RenderMode,
   defaultVisualizationSettings,
   visualizationThemes,
-} from "./visualization";
+} from "@types/brain/visualization";
 
 describe("Brain Visualization runtime validators", () => {
   it("RenderModeValidator validates correct render modes", () => {

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 
-import { DocumentTitle, Card } from "../atoms";
-import { Header, Chart } from "../molecules";
-import MainLayout from "../templates/MainLayout";
+import { DocumentTitle, Card } from "@presentation/atoms";
+import { Header, Chart } from "@presentation/molecules";
+import MainLayout from "@presentation/templates/MainLayout";
 
 /**
  * PredictionAnalytics page component

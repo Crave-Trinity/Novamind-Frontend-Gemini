@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ClinicalMetricsPanel } from "./ClinicalMetricsPanel";
+import { ClinicalMetricsPanel } from "@presentation/organisms/ClinicalMetricsPanel";
 
 // Mock the dependencies that might be causing import errors
 vi.mock("@presentation/atoms/Tabs", () => ({

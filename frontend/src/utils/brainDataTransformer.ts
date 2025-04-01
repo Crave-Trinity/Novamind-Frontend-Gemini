@@ -19,7 +19,7 @@ import {
   validateBrainRegionArray,
   validateRenderMode,
   validateThemeSettings,
-} from "./brainDataTransformer.runtime"; // Import validators
+} from "@/utils/brainDataTransformer.runtime"; // Import validators
 import { Result, Ok, Err } from "ts-results";
 
 // Use BrainModel directly

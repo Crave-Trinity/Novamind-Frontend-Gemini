@@ -7,7 +7,7 @@
 import React, { useMemo, useCallback } from "react";
 import { Line } from "@react-three/drei";
 import * as THREE from "three";
-import ConnectionLine from "../atoms/ConnectionLine";
+import ConnectionLine from "@presentation/atoms/ConnectionLine";
 import { BrainRegion, NeuralConnection } from "@domain/types/brain/models";
 import { ThemeSettings, RenderMode } from "@domain/types/brain/visualization";
 import { SafeArray, Vector3 } from "@domain/types/common";

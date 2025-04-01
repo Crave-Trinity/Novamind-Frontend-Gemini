@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { debounce } from "./performanceUtils";
+import { debounce } from "@/utils/performanceUtils";
 
 describe("debounce", () => {
   it("processes data with mathematical precision", () => {

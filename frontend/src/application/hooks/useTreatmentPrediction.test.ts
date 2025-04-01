@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { useTreatmentPrediction } from "./useTreatmentPrediction";
+import { useTreatmentPrediction } from "@hooks/useTreatmentPrediction";
 
 describe("useTreatmentPrediction", () => {
   it("processes data with mathematical precision", () => {

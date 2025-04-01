@@ -16,7 +16,7 @@ import {
   ProcessedBrainData,
   ProcessedBrainRegion,
   ProcessedNeuralConnection,
-} from "./visualization";
+} from "@types/brain/visualization";
 
 describe("Brain Visualization type definitions", () => {
   it("RenderMode has correct enum values", () => {

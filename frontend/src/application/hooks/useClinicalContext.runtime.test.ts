@@ -10,7 +10,7 @@ import {
   validateSymptomMappingArray,
   validateDiagnosisMappingArray,
   validateTreatmentMappingArray,
-} from "./useClinicalContext.runtime";
+} from "@hooks/useClinicalContext.runtime";
 import { RiskAssessment, RiskLevel } from "@domain/types/clinical/risk";
 import {
   TreatmentResponsePrediction,

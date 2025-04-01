@@ -9,13 +9,13 @@ import {
   Symptom,
   Treatment,
   TreatmentResponse,
-} from "../../types/clinical/patient";
-import { RiskLevel, RiskAssessment } from "../../types/clinical/risk-level";
-import { Result } from "../../types/shared/common";
+} from "@types/clinical/patient";
+import { RiskLevel, RiskAssessment } from "@types/clinical/risk-level";
+import { Result } from "@types/shared/common";
 import {
   typeVerifier,
   TypeVerificationError,
-} from "../shared/type-verification";
+} from "@domain/utils/shared/type-verification";
 
 /**
  * Clinical model type verification utilities

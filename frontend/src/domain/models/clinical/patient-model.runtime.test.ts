@@ -11,7 +11,7 @@ import {
   SymptomValidator,
   TreatmentResponseValidator,
   PatientModelValidator,
-} from "./patient-model.runtime";
+} from "@models/clinical/patient-model.runtime";
 
 describe("Patient Model Runtime Validators", () => {
   describe("PatientDemographicsValidator", () => {

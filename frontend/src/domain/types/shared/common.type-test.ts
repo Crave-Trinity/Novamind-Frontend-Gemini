@@ -18,7 +18,7 @@ import {
   ColorRGB,
   ColorRGBA,
   Dimensions,
-} from "./common";
+} from "@types/shared/common";
 
 describe("Common shared type definitions", () => {
   it("ID is a string type", () => {

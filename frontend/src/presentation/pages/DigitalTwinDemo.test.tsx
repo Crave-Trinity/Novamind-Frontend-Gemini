@@ -1,37 +1,36 @@
-import { /**
+/**
  * NOVAMIND Neural Test Suite
  * DigitalTwinDemo testing with quantum precision
  */
+import { describe, it, expect, vi } from "vitest";
 
-import { describe, it, expect, vi } from 'vitest';
-
-import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { DigitalTwinDemo } from './DigitalTwinDemo';
-import { renderWithProviders } from '../../test/testUtils';
+import { render, screen, fireEvent } from "@testing-library/react";
+import React from "react"; // Added missing React import
+import userEvent from "@testing-library/user-event";
+import DigitalTwinDemo from "@pages/DigitalTwinDemo"; // Assuming default export
+import { renderWithProviders } from "@test/testUtils.tsx";
 
 // Mock data with clinical precision
-const mockProps = {
-  // Add component props here
-};
+// Mock data with clinical precision - DigitalTwinDemo likely doesn't need props
+const mockProps = {};
 
-describe('DigitalTwinDemo', () => {
-  it('renders with neural precision', () => {
-    render(<DigitalTwinDemo {...mockProps} />);
-    
+describe("DigitalTwinDemo", () => {
+  it("renders with neural precision", () => {
+    renderWithProviders(<DigitalTwinDemo {...mockProps} />); // Use renderWithProviders
+
     // Add assertions for rendered content
     expect(screen).toBeDefined();
   });
-  
-  it('responds to user interaction with quantum precision', async () => {
+
+  it("responds to user interaction with quantum precision", async () => {
     const user = userEvent.setup();
-    render(<DigitalTwinDemo {...mockProps} />);
-    
+    renderWithProviders(<DigitalTwinDemo {...mockProps} />); // Use renderWithProviders
+
     // Simulate user interactions
     // await user.click(screen.getByText(/example text/i));
-    
+
     // Add assertions for behavior after interaction
   });
-  
+
   // Add more component-specific tests
-}); } from "";
+});

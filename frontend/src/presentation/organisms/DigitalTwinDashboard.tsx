@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 
-import { DigitalTwinProfile } from "../../domain/models/PatientModel";
-import Button from "../atoms/Button";
-import ClinicalMetricsGroup from "../molecules/ClinicalMetricsCard";
+import { DigitalTwinProfile } from "@domain/models/clinical/digital-twin-profile";
+import Button from "@presentation/atoms/Button";
+import ClinicalMetricsGroup from "@presentation/molecules/ClinicalMetricsCard";
 
-import BrainVisualization from "./BrainVisualization";
-import RiskAssessmentPanel from "./RiskAssessmentPanel";
-import TreatmentResponsePredictor from "./TreatmentResponsePredictor";
+import BrainVisualization from "@presentation/organisms/BrainVisualization";
+import RiskAssessmentPanel from "@presentation/organisms/RiskAssessmentPanel";
+import TreatmentResponsePredictor from "@presentation/organisms/TreatmentResponsePredictor";
 
 interface DigitalTwinDashboardProps {
   patientId: string;

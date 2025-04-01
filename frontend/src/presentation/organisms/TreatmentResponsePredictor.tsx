@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 
-import { useTreatmentPrediction } from "../../application/hooks/useTreatmentPrediction";
-import { DigitalTwinProfile } from "../../domain/models/PatientModel";
-import Button from "../atoms/Button";
+import { useTreatmentPrediction } from "@hooks/useTreatmentPrediction";
+import { DigitalTwinProfile } from "@domain/models/clinical/digital-twin-profile";
+import Button from "@presentation/atoms/Button";
 
 interface TreatmentResponsePredictorProps {
   patientId: string;
@@ -88,7 +88,20 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
 
   // Handle predict button click
   const handlePredict = () => {
-    predictTreatmentResponse({ clinicalData, geneticData });
+    // Ensure severity is a string and include assessment_scores
+    const requestClinicalData = {
+      ...clinicalData,
+      severity: String(clinicalData.severity), // Convert to string if number
+      assessment_scores: {
+        // Add missing assessment_scores
+        phq9: clinicalData.phq9_score,
+        gad7: clinicalData.gad7_score,
+      },
+    };
+    predictTreatmentResponse({
+      clinicalData: requestClinicalData,
+      geneticData,
+    });
   };
 
   // Response level colors
@@ -425,22 +438,36 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
               </h4>
 
               <div className="space-y-2">
-                {featureImportance.features.map((feature: any, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between">
-                    <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                      {feature.name}
-                    </span>
-                    <div className="h-2 w-1/2 rounded-full bg-neutral-200 dark:bg-neutral-700">
+                {featureImportance.ok &&
+                  featureImportance.val.features.map(
+                    (
+                      feature: {
+                        name: string;
+                        importance: number;
+                        direction: "positive" | "negative";
+                        category: string;
+                      },
+                      idx: number, // Check ok and use val, add specific type
+                    ) => (
                       <div
-                        className={`h-2 rounded-full ${feature.direction === "positive" ? "bg-green-500" : "bg-red-500"}`}
-                        style={{ width: `${feature.importance * 100}%` }}
-                      ></div>
-                    </div>
-                    <span className="w-12 text-right text-xs text-neutral-500">
-                      {(feature.importance * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                ))}
+                        key={idx}
+                        className="flex items-center justify-between"
+                      >
+                        <span className="text-sm text-neutral-700 dark:text-neutral-300">
+                          {feature.name}
+                        </span>
+                        <div className="h-2 w-1/2 rounded-full bg-neutral-200 dark:bg-neutral-700">
+                          <div
+                            className={`h-2 rounded-full ${feature.direction === "positive" ? "bg-green-500" : "bg-red-500"}`}
+                            style={{ width: `${feature.importance * 100}%` }}
+                          ></div>
+                        </div>
+                        <span className="w-12 text-right text-xs text-neutral-500">
+                          {(feature.importance * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                    ),
+                  )}
               </div>
             </div>
 
@@ -452,8 +479,9 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
 
               <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-700 dark:bg-background-card">
                 <ul className="list-inside list-disc space-y-2 text-sm text-neutral-700 dark:text-neutral-300">
-                  {featureImportance.interpretation &&
-                    featureImportance.interpretation.map(
+                  {featureImportance.ok &&
+                    featureImportance.val.interpretation && // Check ok and use val
+                    featureImportance.val.interpretation.map(
                       (item: string, idx: number) => <li key={idx}>{item}</li>,
                     )}
                 </ul>

@@ -4,9 +4,9 @@ import ThemeContext, {
   ThemeContextType, // Import the context type
   ThemeOption, // Import the correct theme option type
   themeSettings, // Import the actual settings object
-} from "./ThemeContext";
+} from "@/contexts/ThemeContext";
 // Removed incorrect ThemeType import from ../types/brain
-import { isValidTheme } from "../types/theme"; // Import the correct type guard
+import { isValidTheme } from "@/types/theme"; // Import the correct type guard
 
 /**
  * Theme provider props

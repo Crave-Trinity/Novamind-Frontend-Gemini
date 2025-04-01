@@ -6,8 +6,8 @@ import { describe, it, expect, vi } from "vitest";
 import {
   validateSessionOptions,
   isSessionOptions,
-} from "./SessionService.runtime";
-import { SessionOptions } from "./SessionService";
+} from "@/services/SessionService.runtime";
+import { SessionOptions } from "@/services/SessionService";
 
 // --- Mock Data ---
 

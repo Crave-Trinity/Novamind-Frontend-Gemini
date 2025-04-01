@@ -16,7 +16,7 @@ import {
   ColorRGBValidator,
   ColorRGBAValidator,
   DimensionsValidator,
-} from "./common.runtime";
+} from "@types/shared/common.runtime";
 
 describe("Common Shared Types runtime validators", () => {
   describe("IDValidator", () => {

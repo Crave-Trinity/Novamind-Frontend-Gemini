@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { calculateNeuralActivation } from "./brainMapping";
+import { calculateNeuralActivation } from "@models/brain/mapping/brainMapping";
 
 describe("calculateNeuralActivation", () => {
   it("processes data with mathematical precision", () => {

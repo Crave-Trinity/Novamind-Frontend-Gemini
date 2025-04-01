@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import React, { useRef, useEffect, useState, useMemo } from "react";
 import * as THREE from "three";
 
-import { BrainRegion } from "../../types/brain";
+import { BrainRegion } from "@/types/brain";
 
 interface RegionMeshProps {
   region: BrainRegion;

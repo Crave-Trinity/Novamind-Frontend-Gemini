@@ -10,14 +10,14 @@ import {
   isTreatmentResponseRequest,
   isTreatmentResponseResponse,
   // Import other guards as they are defined
-} from "./XGBoostService.runtime";
+} from "@api/XGBoostService.runtime";
 import {
   RiskPredictionRequest,
   RiskPredictionResponse,
   TreatmentResponseRequest,
   TreatmentResponseResponse,
   // Import other interfaces as needed
-} from "./XGBoostService";
+} from "@api/XGBoostService";
 
 // --- Mock Data ---
 

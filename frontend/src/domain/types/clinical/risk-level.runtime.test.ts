@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { RiskLevelValidator } from "./risk-level.runtime";
+import { RiskLevelValidator } from "@types/clinical/risk-level.runtime";
 
 describe("Risk Level runtime validators", () => {
   it("RiskLevelValidator validates correct risk levels", () => {

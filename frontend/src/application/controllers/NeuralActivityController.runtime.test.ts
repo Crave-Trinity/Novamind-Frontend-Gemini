@@ -11,7 +11,7 @@ import {
   // validateActivityFilters,
   // Import local types/enums if needed for mock data clarity
   // NeuralTransform, ComputationalIntensity, NeuralTransitionType, NeuralFrequencyBand
-} from "./NeuralActivityController.runtime";
+} from "@application/controllers/NeuralActivityController.runtime";
 
 // --- Mock Data ---
 

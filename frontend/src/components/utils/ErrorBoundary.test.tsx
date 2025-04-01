@@ -6,7 +6,7 @@ import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ErrorBoundary from "./ErrorBoundary"; // Assuming default export
+import ErrorBoundary from "@/components/utils/ErrorBoundary"; // Assuming default export
 import { renderWithProviders } from "@test/testUtils.tsx";
 
 // Mock data with clinical precision

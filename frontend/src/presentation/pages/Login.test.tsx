@@ -7,8 +7,8 @@ import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Login } from "./Login";
-import { renderWithProviders } from "../../test/testUtils";
+import { Login } from "@pages/Login";
+import { renderWithProviders } from "@test/testUtils";
 
 // Mock data with clinical precision
 const mockProps = {

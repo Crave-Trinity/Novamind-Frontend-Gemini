@@ -3,7 +3,7 @@
  * Common type verification utilities with quantum-level precision
  */
 
-import { Result, NeuralError } from "../../types/shared/common";
+import { Result, NeuralError } from "@types/shared/common";
 
 /**
  * Type Verification Error with clinical precision

@@ -4,13 +4,9 @@
  * with clinical precision and mathematical integrity
  */
 
-import {
-  BrainModel,
-  BrainRegion,
-  NeuralConnection,
-} from "../../../domain/types/brain/models";
-import { Result, success, failure } from "../../../domain/types/shared/common";
-import { TypeVerificationError } from "../../../domain/utils/shared/type-verification.runtime";
+import { BrainModel, BrainRegion, NeuralConnection } from "@types/brain/models";
+import { Result, success, failure } from "@types/shared/common";
+import { TypeVerificationError } from "@domain/utils/shared/type-verification.runtime";
 
 /**
  * Runtime validation for BrainModel objects

@@ -4,7 +4,10 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { typeVerifier, TypeVerificationError } from "./type-verification";
+import {
+  typeVerifier,
+  TypeVerificationError,
+} from "@domain/utils/shared/type-verification";
 
 describe("Shared type verification", () => {
   describe("TypeVerificationError", () => {

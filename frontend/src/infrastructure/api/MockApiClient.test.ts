@@ -5,8 +5,8 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-import { mockApiClient } from "./MockApiClient";
-import { BrainModel, ModelSource } from "../../domain/models/BrainModel";
+import { mockApiClient } from "@api/MockApiClient";
+import { BrainModel, ModelSource } from "@models/BrainModel";
 
 // Mock setTimeout to speed up tests
 vi.spyOn(global, "setTimeout").mockImplementation((fn) => {

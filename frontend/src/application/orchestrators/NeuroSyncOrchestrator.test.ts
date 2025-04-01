@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { useNeuroSyncOrchestrator } from "./NeuroSyncOrchestrator";
+import { useNeuroSyncOrchestrator } from "@application/orchestrators/NeuroSyncOrchestrator";
 
 describe("useNeuroSyncOrchestrator", () => {
   it("processes data with mathematical precision", () => {

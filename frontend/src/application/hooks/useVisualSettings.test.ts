@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { useVisualSettings } from "./useVisualSettings";
+import { useVisualSettings } from "@hooks/useVisualSettings";
 
 describe("useVisualSettings", () => {
   it("processes data with mathematical precision", () => {

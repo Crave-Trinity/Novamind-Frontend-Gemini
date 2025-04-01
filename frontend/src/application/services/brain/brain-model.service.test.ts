@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import axios from "axios";
-import { brainModelService } from "./brain-model.service";
+import { brainModelService } from "@application/services/brain/brain-model.service";
 import {
   BrainModel,
   BrainRegion,

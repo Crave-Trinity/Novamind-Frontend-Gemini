@@ -14,19 +14,20 @@ import {
   BiometricSource,
   BiometricType,
   AlertPriority,
-  AlertSource,
+  AlertSource, // Keep AlertSource if used, otherwise remove
   BiometricThreshold,
-} from "@domain/types/biometric/streams";
-import { Result, success, failure } from "@domain/types/common/result";
+} from "@domain/types/biometric/streams"; // Use alias
+import { Result, success, failure } from "@domain/types/shared/common"; // Use alias
 
 // Services
-import { biometricService } from "@application/services/biometricService";
-import { clinicalService } from "@application/services/clinicalService";
+import { biometricService } from "@application/services/biometricService"; // Revert to alias
+import { clinicalService } from "@application/services/clinicalService"; // Revert to alias
 
 /**
  * Neural-safe stream configuration with quantum precision
  */
-interface StreamConfig {
+export interface StreamConfig {
+  // Added export keyword
   sampleRate: number; // Samples per minute
   bufferSize: number; // Maximum data points to keep in memory
   alertThresholds: Map<BiometricType, BiometricThreshold[]>;
@@ -308,7 +309,7 @@ export function useBiometricStreamController(
         const targetStreamIds = streamIds || config.streamIds;
 
         if (targetStreamIds.length === 0) {
-          return failure("No stream IDs provided for connection");
+          return failure(new Error("No stream IDs provided for connection"));
         }
 
         // Start by marking as processing
@@ -332,7 +333,9 @@ export function useBiometricStreamController(
           }));
 
           return failure(
-            streamsResult.error || "Failed to load stream metadata",
+            new Error(
+              streamsResult.error?.message || "Failed to load stream metadata",
+            ),
           );
         }
 
@@ -413,9 +416,12 @@ export function useBiometricStreamController(
         }));
 
         return failure(
-          error instanceof Error
-            ? error.message
-            : "Unknown error connecting to streams",
+          // Ensure wrapped in Error
+          new Error(
+            error instanceof Error
+              ? error.message
+              : "Unknown error connecting to streams",
+          ),
         );
       }
     },
@@ -440,9 +446,12 @@ export function useBiometricStreamController(
       return success(undefined);
     } catch (error) {
       return failure(
-        error instanceof Error
-          ? error.message
-          : "Unknown error disconnecting streams",
+        // Ensure wrapped in Error
+        new Error(
+          error instanceof Error
+            ? error.message
+            : "Unknown error disconnecting streams",
+        ),
       );
     }
   }, []);
@@ -568,11 +577,13 @@ export function useBiometricStreamController(
               // Create alert
               const alert: BiometricAlert = {
                 id: `alert-${streamId}-${Date.now()}`,
+                patientId: patientId, // Added missing patientId
                 timestamp: new Date(),
                 streamId,
                 dataPointId: dataPoint.id,
+                type: dataPoint.type, // Added missing type
                 biometricType: dataPoint.type,
-                value: dataPoint.value,
+                triggeringValue: dataPoint.value,
                 threshold: threshold,
                 message: `${threshold.label}: ${dataPoint.value.toFixed(1)} ${stream.unit || ""}`,
                 priority: threshold.priority,
@@ -646,9 +657,12 @@ export function useBiometricStreamController(
       return success(undefined);
     } catch (error) {
       return failure(
-        error instanceof Error
-          ? error.message
-          : "Unknown error acknowledging alert",
+        // Ensure wrapped in Error
+        new Error(
+          error instanceof Error
+            ? error.message
+            : "Unknown error acknowledging alert",
+        ),
       );
     }
   }, []);
@@ -763,9 +777,12 @@ export function useBiometricStreamController(
       return success(correlations);
     } catch (error) {
       return failure(
-        error instanceof Error
-          ? error.message
-          : "Unknown error calculating correlations",
+        // Ensure wrapped in Error
+        new Error(
+          error instanceof Error
+            ? error.message
+            : "Unknown error calculating correlations",
+        ),
       );
     }
   }, [state.activeStreams, state.streamData]);

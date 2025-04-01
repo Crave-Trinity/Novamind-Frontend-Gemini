@@ -12,8 +12,8 @@ import {
   BrainViewState,
   NeuralPathway,
   RenderMode,
-} from "../../domain/models/BrainModel";
-import { apiClient } from "../../infrastructure/api/ApiClient";
+} from "@models/BrainModel";
+import { apiClient } from "@api/ApiClient";
 
 interface UseBrainVisualizationOptions {
   patientId?: string;

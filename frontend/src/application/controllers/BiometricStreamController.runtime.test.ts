@@ -7,8 +7,9 @@ import {
   validateBiometricData,
   validatePartialStreamConfig, // Updated function name
   // Import locally defined types/enums if needed for mock data clarity
-  // BiometricType, AlertPriority, BiometricThreshold, BiometricDataPoint, BiometricSource, StreamConfig, PartialStreamConfig
-} from "./BiometricStreamController.runtime";
+  // BiometricType, AlertPriority, BiometricThreshold, BiometricDataPoint, BiometricSource, PartialStreamConfig
+} from "@application/controllers/BiometricStreamController.runtime";
+import { StreamConfig } from "@application/controllers/BiometricStreamController"; // Import from the correct controller file
 
 // --- Mock Data (Based on inferred types) ---
 
@@ -42,8 +43,8 @@ const mockInvalidBiometricDataPoint_WrongType = {
   quality: "high",
 };
 
-const mockValidPartialStreamConfig: any = {
-  // Use 'any' for partial mock flexibility
+const mockValidPartialStreamConfig: Partial<StreamConfig> = {
+  // Use Partial<StreamConfig> for type-safe partial mock
   sampleRate: 120,
   filterOutliers: false,
   alertThresholds: new Map([

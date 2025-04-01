@@ -3,7 +3,7 @@ import ThemeContext, {
   ThemeContextType,
   ThemeOption,
   themeSettings,
-} from "../contexts/ThemeContext";
+} from "@contexts/ThemeContext";
 
 /**
  * Theme provider props

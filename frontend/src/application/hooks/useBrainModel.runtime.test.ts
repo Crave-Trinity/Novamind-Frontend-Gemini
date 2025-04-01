@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { validateBrainModelData } from "./useBrainModel.runtime";
+import { validateBrainModelData } from "@hooks/useBrainModel.runtime";
 // Import actual domain types and factory for precise testing
 import {
   BrainModel,

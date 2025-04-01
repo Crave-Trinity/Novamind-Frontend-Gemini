@@ -4,15 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { BrainModelOps } from "./models";
-import { BrainRegion } from "./models";
-import { NeuralConnection } from "./models";
-import { BrainScan } from "./models";
-import { BrainModel } from "./models";
-import { NeuralActivity } from "./models";
-import { ActivityTimeSeries } from "./models";
-import { RegionClinicalData } from "./models";
-import { undefined } from "./models";
+import { BrainModelOps , BrainRegion , NeuralConnection , BrainScan , BrainModel , NeuralActivity , ActivityTimeSeries , RegionClinicalData , undefined } from "@types/brain/models";
 
 describe("models type definitions", () => {
   it("exports BrainModelOps with correct structure", () => {

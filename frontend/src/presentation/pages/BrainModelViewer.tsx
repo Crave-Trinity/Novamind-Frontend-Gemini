@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 
-import { useTheme } from "../../application/contexts/ThemeContext";
-import { useBrainVisualization } from "../../application/hooks/useBrainVisualization";
-import { BrainRegion, RenderMode } from "../../domain/models/BrainModel";
-import Button from "../atoms/Button";
+import { useTheme } from "@contexts/ThemeContext";
+import { useBrainVisualization } from "@hooks/useBrainVisualization";
+import { BrainRegion } from "@domain/models/brain/brain-model";
+import { RenderMode } from "@domain/types/brain/visualization";
+import Button from "@presentation/atoms/Button";
 
 interface BrainModelViewerProps {
   patientId?: string;
@@ -452,13 +453,16 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                     <div
                       className="h-2 rounded-full bg-green-500"
                       style={{
-                        width: `${(selectedRegion.connections.length / 10) * 100}%`,
+                        width: `${((selectedRegion.connections?.length || 0) / 10) * 100}%`, // Add null check
                       }}
                     ></div>
                   </div>
                   <div className="mt-1 flex justify-between text-xs">
                     <span>Low</span>
-                    <span>{selectedRegion.connections.length} connections</span>
+                    <span>
+                      {selectedRegion.connections?.length || 0} connections
+                    </span>{" "}
+                    {/* Add null check */}
                     <span>High</span>
                   </div>
                 </div>
@@ -472,7 +476,11 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                       </h3>
                       <div className="space-y-1">
                         {selectedRegion.data.anomalies.map(
-                          (condition: string, index: number) => (
+                          // Type is now string[]
+                          (
+                            condition: string,
+                            index: number, // Type annotation is correct
+                          ) => (
                             <div
                               key={index}
                               className="rounded bg-red-50 px-2 py-1 text-xs text-red-800 dark:bg-red-900/20 dark:text-red-300"

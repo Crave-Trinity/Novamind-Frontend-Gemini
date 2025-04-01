@@ -19,7 +19,7 @@ import {
   asNumber,
   asBoolean,
   asDate,
-} from "./type-verification";
+} from "@models/shared/type-verification";
 
 import {
   validateDefined,
@@ -35,7 +35,7 @@ import {
   validateProperty,
   validateOneOf,
   createObjectValidator,
-} from "./type-verification.runtime";
+} from "@models/shared/type-verification.runtime";
 
 describe("TypeVerificationError", () => {
   it("formats error message with property path", () => {

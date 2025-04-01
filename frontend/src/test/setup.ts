@@ -115,7 +115,7 @@ if (typeof globalThis.TextEncoder === "undefined") {
 }
 
 // Import polyfills after TextEncoder fix
-import "./node-polyfills";
+import "@test/node-polyfills"; // Correct syntax for side-effect imports
 
 // Import required testing libraries
 import "@testing-library/jest-dom";
@@ -126,23 +126,35 @@ interface Vector3 {
   x: number;
   y: number;
   z: number;
-  set: () => Vector3;
+  set: (x: number, y: number, z: number) => Vector3;
   clone: () => Vector3;
+  normalize: () => Vector3;
+  multiplyScalar: (scalar: number) => Vector3;
+  length: () => number;
+  add: (v: Vector3) => Vector3; // Added add method signature
+  subVectors: (a: Vector3, b: Vector3) => Vector3; // Added subVectors
+  applyMatrix4: (m: any) => Vector3; // Added applyMatrix4
+  project: (camera: any) => Vector3; // Added project
 }
 
 interface Color {
   r: number;
   g: number;
   b: number;
-  set: () => Color;
+  set: (color: any) => Color;
+  clone: () => Color;
 }
 
 interface Object3D {
-  position: { x: number; y: number; z: number };
-  rotation: { x: number; y: number; z: number };
-  scale: { x: number; y: number; z: number };
+  position: Vector3;
+  rotation: Vector3; // Assuming rotation uses Vector3-like structure for simplicity
+  scale: Vector3;
   add: (object: Object3D) => void;
   remove: (object: Object3D) => void;
+  clone: () => Object3D;
+  traverse: (callback: (obj: Object3D) => void) => void;
+  updateMatrixWorld: (force?: boolean) => void;
+  matrixWorld: { decompose: (pos: Vector3, quat: any, scale: Vector3) => void };
 }
 
 interface Group extends Object3D {
@@ -159,57 +171,117 @@ interface WebGLRenderer {
   setPixelRatio: (ratio: number) => void;
   render: (scene: Scene, camera: any) => void;
   setClearColor: (color: Color, alpha?: number) => void;
+  dispose: () => void;
 }
 
+interface Material {
+    clone: () => Material;
+    dispose: () => void;
+    needsUpdate: boolean;
+    color: Color;
+    opacity: number;
+    transparent: boolean;
+}
+
+interface BufferGeometry {
+    setAttribute: (name: string, attribute: any) => void;
+    setIndex: (index: any) => void;
+    computeVertexNormals: () => void;
+    dispose: () => void;
+    setFromPoints: (points: Vector3[]) => void;
+}
+
+
 interface Mesh extends Object3D {
-  material?: any;
-  geometry?: any;
+  material?: Material | Material[];
+  geometry?: BufferGeometry;
+}
+
+// --- Mock Implementations ---
+
+class MockVector3 implements Vector3 {
+    x = 0;
+    y = 0;
+    z = 0;
+    constructor(x = 0, y = 0, z = 0) {
+      this.x = x;
+      this.y = y;
+      this.z = z;
+    }
+    set(x: number, y: number, z: number) { this.x = x; this.y = y; this.z = z; return this; }
+    clone() { return new MockVector3(this.x, this.y, this.z); }
+    normalize() { return this; }
+    multiplyScalar(scalar: number) {
+        this.x *= scalar;
+        this.y *= scalar;
+        this.z *= scalar;
+        return this;
+    }
+    length() { return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z); }
+    add(v: Vector3) {
+        this.x += v.x;
+        this.y += v.y;
+        this.z += v.z;
+        return this;
+    }
+    subVectors(a: Vector3, b: Vector3) {
+        this.x = a.x - b.x;
+        this.y = a.y - b.y;
+        this.z = a.z - b.z;
+        return this;
+    }
+    applyMatrix4(m: any) { return this; } // No-op mock
+    project(camera: any) { return this; } // No-op mock
+}
+
+class MockColor implements Color {
+    r = 1; g = 1; b = 1;
+    constructor() {}
+    set() { return this; } // Basic mock for set, returns this
+    clone() { return new MockColor(); } // Return a new instance
+}
+
+class MockObject3D implements Object3D {
+  position: Vector3 = new MockVector3(); // Use MockVector3 and type annotation
+  rotation: Vector3 = new MockVector3(); // Use MockVector3 and type annotation
+  scale: Vector3 = new MockVector3(1, 1, 1); // Use MockVector3 and type annotation
+  add = vi.fn();
+  remove = vi.fn();
+  clone = vi.fn(() => new MockObject3D()); // Return new instance for clone
+  traverse = vi.fn();
+  updateMatrixWorld = vi.fn();
+  matrixWorld = { decompose: vi.fn() };
+}
+
+class MockMaterial implements Material {
+    clone = vi.fn(() => new MockMaterial()); // Return new instance
+    dispose = vi.fn();
+    needsUpdate = false;
+    color = new MockColor(); // Use MockColor
+    opacity = 1;
+    transparent = false;
+}
+
+class MockBufferGeometry implements BufferGeometry {
+    setAttribute = vi.fn();
+    setIndex = vi.fn();
+    computeVertexNormals = vi.fn();
+    dispose = vi.fn();
+    setFromPoints = vi.fn(); // Add setFromPoints mock
 }
 
 // Create minimal Three.js mocks that won't conflict
 vi.mock("three", () => {
   return {
-    // Essential classes with simple implementations
-    Vector3: class Vector3 implements Vector3 {
-      x = 0;
-      y = 0;
-      z = 0;
-      constructor(x = 0, y = 0, z = 0) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-      }
-      set() {
-        return this;
-      }
-      clone() {
-        return new Vector3(this.x, this.y, this.z);
-      }
+    Vector3: MockVector3,
+    Color: MockColor,
+    Group: class Group extends MockObject3D {
+      children: any[] = [];
+      constructor() { super(); }
     },
-    Color: class Color implements Color {
-      r = 1;
-      g = 1;
-      b = 1;
-      constructor() {}
-      set() {
-        return this;
-      }
-    },
-    Group: class Group implements Group {
-      position = { x: 0, y: 0, z: 0 };
-      rotation = { x: 0, y: 0, z: 0 };
-      scale = { x: 1, y: 1, z: 1 };
-      children = [];
-      add = vi.fn();
-      remove = vi.fn();
-    },
-    Scene: class Scene implements Scene {
-      position = { x: 0, y: 0, z: 0 };
-      rotation = { x: 0, y: 0, z: 0 };
-      scale = { x: 1, y: 1, z: 1 };
+    Scene: class Scene extends MockObject3D {
       background = { set: vi.fn() };
-      add = vi.fn();
-      remove = vi.fn();
+      constructor() { super(); }
     },
     WebGLRenderer: class WebGLRenderer implements WebGLRenderer {
       domElement = document.createElement("canvas");
@@ -217,21 +289,32 @@ vi.mock("three", () => {
       setPixelRatio = vi.fn();
       render = vi.fn();
       setClearColor = vi.fn();
+      dispose = vi.fn();
     },
-    Mesh: class Mesh implements Mesh {
-      position = { x: 0, y: 0, z: 0 };
-      scale = { x: 1, y: 1, z: 1 };
-      rotation = { x: 0, y: 0, z: 0 };
-      add = vi.fn();
-      remove = vi.fn();
+    Mesh: class Mesh extends MockObject3D {
+        material = new MockMaterial();
+        geometry = new MockBufferGeometry();
+        constructor() { super(); }
     },
-    Object3D: class Object3D implements Object3D {
-      position = { x: 0, y: 0, z: 0 };
-      rotation = { x: 0, y: 0, z: 0 };
-      scale = { x: 1, y: 1, z: 1 };
-      add = vi.fn();
-      remove = vi.fn();
+    Object3D: MockObject3D,
+    SphereGeometry: class SphereGeometry {}, // Mock SphereGeometry if used directly
+    ShaderMaterial: class ShaderMaterial extends MockMaterial { constructor() { super(); } },
+    BufferGeometry: MockBufferGeometry,
+    QuadraticBezierCurve3: class QuadraticBezierCurve3 { // Add mock
+        v0: Vector3; v1: Vector3; v2: Vector3;
+        constructor(v0 = new MockVector3(), v1 = new MockVector3(), v2 = new MockVector3()) {
+            this.v0 = v0; this.v1 = v1; this.v2 = v2;
+        }
+        getPoints = vi.fn(() => [this.v0, this.v1, this.v2]); // Simple points mock
     },
+    MathUtils: {
+      mapLinear: vi.fn((value) => value), // Simple pass-through mock
+      randFloatSpread: vi.fn((range) => (Math.random() - 0.5) * range),
+      // Add other MathUtils functions if needed by tests
+    },
+    // Constants
+    DoubleSide: 2, // Mock constant value
+    // Add other constants like FrontSide, BackSide, AdditiveBlending etc. if needed
   };
 });
 
@@ -257,13 +340,14 @@ interface ThreeContext {
 vi.mock("@react-three/fiber", () => {
   return {
     Canvas: vi.fn().mockImplementation(({ children, ...props }) => {
+      // Return a simple div, or enhance if needed for specific tests
       return document.createElement("div");
     }),
     useThree: vi.fn().mockReturnValue({
-      // Removed incorrect generic type argument
+      // Provide mock implementations for expected properties/methods
       camera: { position: { set: vi.fn() }, lookAt: vi.fn() },
       gl: { render: vi.fn() },
-      scene: {},
+      scene: {}, // Provide a basic scene object
       size: { width: 800, height: 600 },
     }),
     useFrame: vi.fn(),
@@ -278,8 +362,11 @@ vi.mock("@react-three/drei", () => {
     useGLTF: vi.fn().mockReturnValue({
       nodes: {},
       materials: {},
-      scene: { clone: vi.fn().mockReturnValue({}) },
+      scene: { clone: vi.fn().mockReturnValue({}) }, // Ensure scene.clone is mocked
     }),
+    Sphere: vi.fn().mockImplementation(() => null), // Keep Sphere mock
+    MeshDistortMaterial: vi.fn().mockImplementation(() => null), // Keep MeshDistortMaterial mock
+    // Add other Drei components used in tests here
   };
 });
 
@@ -375,7 +462,9 @@ beforeAll(() => {
 vi.spyOn(console, "error").mockImplementation((...args) => {
   const message = args[0]?.toString() || "";
   if (message.includes("THREE.") || message.includes("React.createFactory")) {
+    // Suppress specific noisy warnings from mocks
     return;
   }
+  // Log other errors
   console.log("Test Error:", ...args);
 });

@@ -28,7 +28,7 @@ vi.mock("../presentation/molecules/ControlPanel", () => ({
 }));
 
 // Import the component under test after mocking its dependencies
-import BrainModelContainer from "../presentation/templates/BrainModelContainer";
+import BrainModelContainer from "@presentation/templates/BrainModelContainer";
 
 describe("BrainModelContainer Minimal Test", () => {
   beforeEach(() => {

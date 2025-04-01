@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { themeSettings } from "./ThemeContext";
+import { themeSettings } from "@/contexts/ThemeContext";
 
 describe("themeSettings", () => {
   it("processes data with mathematical precision", () => {

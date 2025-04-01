@@ -3,9 +3,12 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
-import { Patient } from "../../domain/models/PatientModel";
-import { RiskLevel } from "../../domain/types/RiskLevel";
-import Button from "../atoms/Button";
+import {
+  PatientModel,
+  createPatientModel,
+} from "@domain/models/clinical/patient-model"; // Ensure factory is imported
+import { RiskLevel } from "@domain/types/clinical/risk-level"; // Correct path
+import Button from "@presentation/atoms/Button";
 
 const PatientsList: React.FC = () => {
   const navigate = useNavigate();
@@ -25,97 +28,160 @@ const PatientsList: React.FC = () => {
     queryFn: async () => {
       // In a real app, this would call the API with proper filters
       // For now, we'll return mock data
-      return await new Promise<Patient[]>((resolve) =>
+      // Use PatientModel[] and conform mock data
+      return await new Promise<PatientModel[]>((resolve) =>
         setTimeout(
           () =>
             resolve([
-              {
+              createPatientModel({
                 id: "1",
                 firstName: "Emma",
                 lastName: "Thompson",
-                dateOfBirth: "1985-05-12",
-                gender: "Female",
-                mrn: "MRN12345",
-                status: "Active",
-                riskLevel: "Medium",
-                lastVisit: "2025-03-15",
-                diagnoses: [
-                  "Major Depressive Disorder",
-                  "Generalized Anxiety Disorder",
-                ],
-                currentMedications: [
-                  { name: "Sertraline", dosage: "100mg", frequency: "Daily" },
+                dateOfBirth: new Date("1985-05-12"),
+                demographics: { age: 39, biologicalSex: "female" },
+                clinicalHistory: {
+                  primaryDiagnosis: "Major Depressive Disorder",
+                  secondaryDiagnoses: ["Generalized Anxiety Disorder"],
+                },
+                medications: [
                   {
+                    id: "med1",
+                    name: "Sertraline",
+                    dosage: "100mg",
+                    frequency: "Daily",
+                    startDate: new Date("2024-01-15"),
+                  },
+                  {
+                    id: "med2",
                     name: "Clonazepam",
                     dosage: "0.5mg",
                     frequency: "As needed",
+                    startDate: new Date("2024-01-15"),
                   },
                 ],
-              },
-              {
+                symptoms: [],
+                treatmentResponses: [],
+                lastUpdated: new Date("2025-03-15"),
+              }),
+              createPatientModel({
                 id: "2",
                 firstName: "Michael",
                 lastName: "Rodriguez",
-                dateOfBirth: "1992-11-03",
-                gender: "Male",
-                mrn: "MRN67890",
-                status: "Active",
-                riskLevel: "High",
-                lastVisit: "2025-03-20",
-                diagnoses: ["Bipolar I Disorder", "Substance Use Disorder"],
-                currentMedications: [
-                  { name: "Lithium", dosage: "900mg", frequency: "Daily" },
-                  { name: "Quetiapine", dosage: "300mg", frequency: "Nightly" },
+                dateOfBirth: new Date("1992-11-03"),
+                demographics: { age: 32, biologicalSex: "male" },
+                clinicalHistory: {
+                  primaryDiagnosis: "Bipolar I Disorder",
+                  secondaryDiagnoses: ["Substance Use Disorder"],
+                },
+                medications: [
+                  {
+                    id: "med3",
+                    name: "Lithium",
+                    dosage: "900mg",
+                    frequency: "Daily",
+                    startDate: new Date("2023-12-01"),
+                  },
+                  {
+                    id: "med4",
+                    name: "Quetiapine",
+                    dosage: "300mg",
+                    frequency: "Nightly",
+                    startDate: new Date("2023-12-01"),
+                  },
                 ],
-              },
-              {
+                symptoms: [],
+                treatmentResponses: [],
+                lastUpdated: new Date("2025-03-20"),
+              }),
+              createPatientModel({
                 id: "3",
                 firstName: "Sarah",
                 lastName: "Chen",
-                dateOfBirth: "1979-03-24",
-                gender: "Female",
-                mrn: "MRN54321",
-                status: "Active",
-                riskLevel: "Low",
-                lastVisit: "2025-03-10",
-                diagnoses: ["Post-Traumatic Stress Disorder"],
-                currentMedications: [
-                  { name: "Prazosin", dosage: "1mg", frequency: "Nightly" },
-                  { name: "Bupropion", dosage: "150mg", frequency: "Daily" },
+                dateOfBirth: new Date("1979-03-24"),
+                demographics: { age: 46, biologicalSex: "female" },
+                clinicalHistory: {
+                  primaryDiagnosis: "Post-Traumatic Stress Disorder",
+                },
+                medications: [
+                  {
+                    id: "med5",
+                    name: "Prazosin",
+                    dosage: "1mg",
+                    frequency: "Nightly",
+                    startDate: new Date("2024-02-10"),
+                  },
+                  {
+                    id: "med6",
+                    name: "Bupropion",
+                    dosage: "150mg",
+                    frequency: "Daily",
+                    startDate: new Date("2024-03-01"),
+                  },
                 ],
-              },
-              {
+                symptoms: [],
+                treatmentResponses: [],
+                lastUpdated: new Date("2025-03-10"),
+              }),
+              createPatientModel({
                 id: "4",
                 firstName: "David",
                 lastName: "Wilson",
-                dateOfBirth: "1988-07-16",
-                gender: "Male",
-                mrn: "MRN13579",
-                status: "Active",
-                riskLevel: "High",
-                lastVisit: "2025-03-22",
-                diagnoses: ["Schizophrenia", "Obsessive-Compulsive Disorder"],
-                currentMedications: [
-                  { name: "Risperidone", dosage: "4mg", frequency: "Daily" },
-                  { name: "Fluoxetine", dosage: "40mg", frequency: "Daily" },
+                dateOfBirth: new Date("1988-07-16"),
+                demographics: { age: 36, biologicalSex: "male" },
+                clinicalHistory: {
+                  primaryDiagnosis: "Schizophrenia",
+                  secondaryDiagnoses: ["Obsessive-Compulsive Disorder"],
+                },
+                medications: [
+                  {
+                    id: "med7",
+                    name: "Risperidone",
+                    dosage: "4mg",
+                    frequency: "Daily",
+                    startDate: new Date("2022-05-20"),
+                  },
+                  {
+                    id: "med8",
+                    name: "Fluoxetine",
+                    dosage: "40mg",
+                    frequency: "Daily",
+                    startDate: new Date("2023-01-10"),
+                  },
                 ],
-              },
-              {
+                symptoms: [],
+                treatmentResponses: [],
+                lastUpdated: new Date("2025-03-22"),
+              }),
+              createPatientModel({
                 id: "5",
                 firstName: "Olivia",
                 lastName: "Johnson",
-                dateOfBirth: "1995-12-05",
-                gender: "Female",
-                mrn: "MRN24680",
-                status: "Active",
-                riskLevel: "Medium",
-                lastVisit: "2025-03-18",
-                diagnoses: ["Major Depressive Disorder", "Eating Disorder NOS"],
-                currentMedications: [
-                  { name: "Escitalopram", dosage: "20mg", frequency: "Daily" },
-                  { name: "Olanzapine", dosage: "5mg", frequency: "Nightly" },
+                dateOfBirth: new Date("1995-12-05"),
+                demographics: { age: 29, biologicalSex: "female" },
+                clinicalHistory: {
+                  primaryDiagnosis: "Major Depressive Disorder",
+                  secondaryDiagnoses: ["Eating Disorder NOS"],
+                },
+                medications: [
+                  {
+                    id: "med9",
+                    name: "Escitalopram",
+                    dosage: "20mg",
+                    frequency: "Daily",
+                    startDate: new Date("2024-04-01"),
+                  },
+                  {
+                    id: "med10",
+                    name: "Olanzapine",
+                    dosage: "5mg",
+                    frequency: "Nightly",
+                    startDate: new Date("2024-04-01"),
+                  },
                 ],
-              },
+                symptoms: [],
+                treatmentResponses: [],
+                lastUpdated: new Date("2025-03-18"),
+              }),
             ]),
           800,
         ),
@@ -139,8 +205,12 @@ const PatientsList: React.FC = () => {
           `${patient.firstName} ${patient.lastName}`
             .toLowerCase()
             .includes(search) ||
-          patient.mrn.toLowerCase().includes(search) ||
-          patient.diagnoses.some((d: string) =>
+          // MRN not in model
+          // Check primary and secondary diagnoses
+          patient.clinicalHistory.primaryDiagnosis
+            .toLowerCase()
+            .includes(search) ||
+          (patient.clinicalHistory.secondaryDiagnoses || []).some((d: string) =>
             d.toLowerCase().includes(search),
           ),
       );
@@ -148,19 +218,23 @@ const PatientsList: React.FC = () => {
 
     // Apply category filter
     if (selectedFilter === "high-risk") {
-      filtered = filtered.filter(
-        (patient) =>
-          patient.riskLevel === "high" ||
-          patient.riskLevel === "High" ||
-          patient.riskLevel === "critical" ||
-          patient.riskLevel === "Critical",
-      );
+      // Risk level filtering needs adjustment as it's not directly on PatientModel
+      // This logic needs to be updated based on how risk is determined/stored
+      // Example: Fetch risk assessments separately and filter based on that
+      // filtered = filtered.filter((patient) => {
+      //    const latestAssessment = getLatestRiskAssessment(patient.id); // Fictional function
+      //    return latestAssessment?.overallRisk === RiskLevel.HIGH || latestAssessment?.overallRisk === RiskLevel.SEVERE;
+      // });
+      // Temporarily removing risk filter logic
     } else if (selectedFilter === "recent") {
       // Sort by most recent visit and take top 3
+      // Sort by lastUpdated date
+      // Sort by lastUpdated date
       filtered = [...filtered]
         .sort(
           (a, b) =>
-            new Date(b.lastVisit).getTime() - new Date(a.lastVisit).getTime(),
+            new Date(b.lastUpdated).getTime() -
+            new Date(a.lastUpdated).getTime(),
         )
         .slice(0, 3);
     }
@@ -179,18 +253,32 @@ const PatientsList: React.FC = () => {
     navigate(`/brain-model/${patientId}`);
   };
 
-  // Get risk level badge color
+  // Get risk level badge color - Updated to accept RiskLevel enum or string
   const getRiskLevelColor = (
-    riskLevel: import("../../domain/types/RiskLevel").RiskLevel,
+    riskLevel: RiskLevel | string | undefined, // Accept string for potential mock data issues
   ) => {
-    switch (riskLevel) {
-      case "High":
+    // Handle potential string values from mock data if necessary, prioritize enum
+    const level =
+      typeof riskLevel === "string"
+        ? (riskLevel.toLowerCase() as RiskLevel)
+        : riskLevel;
+
+    // Compare with enum string values
+    // Compare with enum string values
+    // Compare with enum string values
+    // Compare with enum string values
+    // Compare with enum string values
+    switch (level) {
+      case RiskLevel.HIGH:
+      case RiskLevel.SEVERE: // Group severe with high for color
         return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
-      case "Medium":
+      case RiskLevel.MODERATE:
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
-      case "Low":
+      case RiskLevel.LOW:
         return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
-      default:
+      case RiskLevel.NONE:
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"; // Added color for None
+      default: // Handles UNKNOWN or undefined
         return "bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-400";
     }
   };
@@ -369,115 +457,86 @@ const PatientsList: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredPatients.map((patient: Patient) => (
-              <div
-                key={patient.id}
-                className="cursor-pointer overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-neutral-800 dark:bg-background-card"
-                onClick={() => handlePatientSelect(patient.id)}
-              >
-                <div className="p-6">
-                  <div className="mb-4 flex items-start justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold text-neutral-900 dark:text-white">
-                        {patient.firstName} {patient.lastName}
-                      </h3>
-                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                        MRN: {patient.mrn}
-                      </p>
+            {filteredPatients.map(
+              (
+                patient: PatientModel, // Use PatientModel type
+              ) => (
+                <div
+                  key={patient.id}
+                  className="mb-4 cursor-pointer rounded-lg border border-neutral-200 bg-white p-4 shadow-sm transition-shadow duration-200 hover:shadow-md dark:border-neutral-700 dark:bg-background-card dark:hover:bg-neutral-800"
+                  onClick={() => handlePatientSelect(patient.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="mr-4 h-10 w-10 rounded-full bg-gradient-to-br from-primary-400 to-secondary-500"></div>
+                      <div>
+                        <h2 className="text-lg font-semibold text-neutral-800 dark:text-white">
+                          {patient.firstName} {patient.lastName}
+                        </h2>
+                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                          {/* MRN not in model */} DOB:{" "}
+                          {patient.dateOfBirth.toLocaleDateString()} | Gender:{" "}
+                          {patient.demographics.biologicalSex}{" "}
+                          {/* Access via demographics */}
+                        </p>
+                      </div>
                     </div>
-                    <span
-                      className={`rounded-full px-2 py-1 text-xs font-medium ${getRiskLevelColor(patient.riskLevel)}`}
-                    >
+                    <div className="flex items-center">
+                      {/* Risk Level needs to be fetched/derived separately */}
+                      {/* <span className={`mr-4 rounded-full px-3 py-1 text-xs font-medium ${getRiskLevelColor(patient.riskLevel)}`}>
                       {patient.riskLevel} Risk
-                    </span>
-                  </div>
-
-                  <div className="mb-4 space-y-3">
-                    <div className="flex items-start">
-                      <svg
-                        className="mr-2 mt-0.5 h-4 w-4 flex-shrink-0 text-neutral-500 dark:text-neutral-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <div>
-                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                          Date of Birth
-                        </p>
-                        <p className="text-sm text-neutral-900 dark:text-white">
-                          {patient.dateOfBirth}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start">
-                      <svg
-                        className="mr-2 mt-0.5 h-4 w-4 flex-shrink-0 text-neutral-500 dark:text-neutral-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
-                      <div>
-                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                          Gender
-                        </p>
-                        <p className="text-sm text-neutral-900 dark:text-white">
-                          {patient.gender}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start">
-                      <svg
-                        className="mr-2 mt-0.5 h-4 w-4 flex-shrink-0 text-neutral-500 dark:text-neutral-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                      <div>
-                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                          Diagnoses
-                        </p>
-                        <ul className="text-sm text-neutral-900 dark:text-white">
-                          {patient.diagnoses.map(
-                            (diagnosis: string, index: number) => (
-                              <li
-                                key={`${patient.id}-diagnosis-${index}`}
-                                className="truncate"
-                              >
-                                • {diagnosis}
-                              </li>
-                            ),
-                          )}
-                        </ul>
-                      </div>
+                    </span> */}
+                      <span className="mr-4 rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-800 dark:bg-neutral-800 dark:text-neutral-400">
+                        Risk: N/A {/* Placeholder */}
+                      </span>
+                      <span className="text-sm text-neutral-500 dark:text-neutral-400">
+                        Last Updated: {patient.lastUpdated.toLocaleDateString()}{" "}
+                        {/* Use lastUpdated */}
+                      </span>
                     </div>
                   </div>
-
-                  <div className="flex items-center justify-between border-t border-neutral-100 pt-4 dark:border-neutral-800">
+                  <div className="mt-3 border-t border-neutral-100 pt-3 dark:border-neutral-700">
+                    <h3 className="mb-1 text-xs font-medium uppercase text-neutral-400">
+                      Diagnoses
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {/* Access diagnoses via clinicalHistory */}
+                      {[
+                        patient.clinicalHistory.primaryDiagnosis,
+                        ...(patient.clinicalHistory.secondaryDiagnoses || []),
+                      ].map((diagnosis, index) => (
+                        <span
+                          key={index}
+                          className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                        >
+                          {diagnosis}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-3 border-t border-neutral-100 pt-3 dark:border-neutral-700">
+                    <h3 className="mb-1 text-xs font-medium uppercase text-neutral-400">
+                      Current Medications
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {patient.medications.map(
+                        (
+                          med,
+                          index, // Use medications array
+                        ) => (
+                          <span
+                            key={med.id || index} // Use med.id if available, fallback to index
+                            className="rounded bg-purple-100 px-2 py-1 text-xs text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                          >
+                            {med.name} ({med.dosage})
+                          </span>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between border-t border-neutral-100 pt-3 dark:border-neutral-700">
                     <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                      Last Visit: {patient.lastVisit}
+                      Last Updated: {patient.lastUpdated.toLocaleDateString()}
                     </span>
                     <Button
                       variant="outline"
@@ -501,10 +560,11 @@ const PatientsList: React.FC = () => {
                     >
                       Brain Model
                     </Button>
+                    {/* Removed extra closing div */}
                   </div>
                 </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
         )}
       </div>

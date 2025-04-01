@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { enhancedMockApiClient } from "./EnhancedMockApiClient";
+import { enhancedMockApiClient } from "@api/EnhancedMockApiClient";
 
 describe("enhancedMockApiClient", () => {
   it("processes data with mathematical precision", () => {

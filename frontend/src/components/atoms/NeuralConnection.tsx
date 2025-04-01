@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import React, { useRef, useEffect, useMemo } from "react";
 import * as THREE from "three";
 
-import { NeuralConnection as NeuralConnectionType } from "../../types/brain";
+import { NeuralConnection as NeuralConnectionType } from "@/types/brain";
 
 interface NeuralConnectionProps {
   connection: NeuralConnectionType;

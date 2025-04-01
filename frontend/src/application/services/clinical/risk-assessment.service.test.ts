@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { RiskAssessmentService } from "./risk-assessment.service";
+import { RiskAssessmentService } from "@application/services/clinical/risk-assessment.service";
 import { RiskLevel } from "@domain/types/RiskLevel";
 
 describe("RiskAssessmentService", () => {

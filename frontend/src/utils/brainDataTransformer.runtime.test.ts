@@ -9,14 +9,14 @@ import {
   validateRenderMode,
   validateThemeSettings,
   isThemeSettings, // Import guard for direct testing
-} from "./brainDataTransformer.runtime";
+} from "@/utils/brainDataTransformer.runtime";
 import {
   BrainModel,
   BrainRegion,
   ThemeSettings,
   RenderMode,
 } from "@domain/types/brain"; // Assuming index export in domain/types/brain
-import { generateMockBrainData } from "./brainDataTransformer"; // For valid data
+import { generateMockBrainData } from "@/utils/brainDataTransformer"; // For valid data
 import { visualizationThemes } from "@domain/types/brain/visualization"; // For valid theme settings
 
 // --- Mock Data ---

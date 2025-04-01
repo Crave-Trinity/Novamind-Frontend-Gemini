@@ -1,10 +1,10 @@
 import React, { useCallback, useState, Suspense } from "react";
 
-import { useBrainVisualization } from "../../application/hooks/useBrainVisualization";
-import { RenderMode } from "../../domain/models/BrainModel";
-import Card from "../atoms/Card";
-import BrainVisualizationControls from "../molecules/BrainVisualizationControls";
-import BrainVisualization from "../organisms/BrainVisualization";
+import { useBrainVisualization } from "@hooks/useBrainVisualization";
+import { RenderMode } from "@domain/types/brain/visualization";
+import Card from "@presentation/atoms/Card";
+import BrainVisualizationControls from "@presentation/molecules/BrainVisualizationControls";
+import BrainVisualization from "@presentation/organisms/BrainVisualization";
 
 /**
  * DigitalTwin Demo Page
@@ -143,7 +143,7 @@ const DigitalTwinDemo: React.FC = () => {
                 <div className="mr-2 h-4 w-4 rounded-full bg-gray-500"></div>
                 <span>Inactive Region</span>
               </div>
-              {renderMode === RenderMode.ACTIVITY && (
+              {renderMode === RenderMode.FUNCTIONAL && ( // Corrected enum member
                 <div className="flex items-center">
                   <div className="mr-2 h-4 w-4 rounded-full bg-blue-500"></div>
                   <span>Activity Level</span>

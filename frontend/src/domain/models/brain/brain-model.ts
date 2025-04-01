@@ -17,6 +17,18 @@ export interface BrainRegion {
   activityLevel: number;
   volumeMl?: number;
   riskFactor?: number;
+  description?: string; // Added based on usage
+  connections?: NeuralConnection[]; // Added based on usage (assuming array of connections)
+  size?: number; // Added based on usage
+  data?: {
+    // Added based on usage
+    activity?: number;
+    volumes?: {
+      current?: number;
+      percentile?: number;
+    };
+    anomalies?: string[]; // Refine type based on usage
+  };
 }
 
 // Neural connection with typed endpoints
@@ -50,16 +62,22 @@ export function isBrainRegion(value: unknown): value is BrainRegion {
 
   const region = value as Partial<BrainRegion>;
 
+  // Adjusted type guard for optional properties
   return (
     typeof region.id === "string" &&
     typeof region.name === "string" &&
-    region.position &&
+    typeof region.position === "object" &&
+    region.position !== null &&
     typeof region.position.x === "number" &&
     typeof region.position.y === "number" &&
     typeof region.position.z === "number" &&
     typeof region.isActive === "boolean" &&
-    typeof region.activityLevel === "number"
-  );
+    typeof region.activityLevel === "number" &&
+    // Optional checks (add others if needed)
+    (region.description === undefined ||
+      typeof region.description === "string") &&
+    (region.volumeMl === undefined || typeof region.volumeMl === "number")
+  ); // Removed extra closing parenthesis causing parsing error
 }
 
 // Type guard for neural connections
@@ -98,17 +116,18 @@ export function isBrainModel(value: unknown): value is BrainModel {
 export function createBrainModel(
   partial: Partial<BrainModel> = {},
 ): BrainModel {
+  // Explicitly define all properties, including optional ones as undefined if not provided
   return {
     id: partial.id || crypto.randomUUID(),
     name: partial.name || "New Brain Model",
     regions: partial.regions || [],
     connections: partial.connections || [],
     version: partial.version || 1,
-    patientId: partial.patientId,
-    scanDate: partial.scanDate,
-    modelType: partial.modelType,
-    isTemplate: partial.isTemplate || false,
-    metadata: partial.metadata || {},
+    patientId: partial.patientId === undefined ? undefined : partial.patientId,
+    scanDate: partial.scanDate === undefined ? undefined : partial.scanDate,
+    modelType: partial.modelType === undefined ? undefined : partial.modelType,
+    isTemplate: partial.isTemplate ?? false,
+    metadata: partial.metadata ?? {},
   };
 }
 
@@ -116,6 +135,7 @@ export function createBrainModel(
 export function createBrainRegion(
   partial: Partial<BrainRegion> = {},
 ): BrainRegion {
+  // Explicitly define all properties, including optional ones as undefined if not provided
   return {
     id: partial.id || crypto.randomUUID(),
     name: partial.name || "New Region",
@@ -123,8 +143,15 @@ export function createBrainRegion(
     color: partial.color || "#cccccc",
     isActive: partial.isActive ?? false,
     activityLevel: partial.activityLevel ?? 0,
-    volumeMl: partial.volumeMl,
-    riskFactor: partial.riskFactor,
+    volumeMl: partial.volumeMl === undefined ? undefined : partial.volumeMl,
+    riskFactor:
+      partial.riskFactor === undefined ? undefined : partial.riskFactor,
+    description:
+      partial.description === undefined ? undefined : partial.description,
+    connections:
+      partial.connections === undefined ? undefined : partial.connections,
+    size: partial.size === undefined ? undefined : partial.size,
+    data: partial.data === undefined ? undefined : partial.data,
   };
 }
 
@@ -132,13 +159,15 @@ export function createBrainRegion(
 export function createNeuralConnection(
   partial: Partial<NeuralConnection> = {},
 ): NeuralConnection {
+  // Explicitly define all properties, including optional ones as undefined if not provided
   return {
     id: partial.id || crypto.randomUUID(),
     sourceRegionId: partial.sourceRegionId || "",
     targetRegionId: partial.targetRegionId || "",
-    connectionType: partial.connectionType,
+    connectionType:
+      partial.connectionType === undefined ? undefined : partial.connectionType,
     strength: partial.strength ?? 1.0,
     isActive: partial.isActive ?? true,
-    color: partial.color || "#888888",
+    color: partial.color ?? "#888888",
   };
 }

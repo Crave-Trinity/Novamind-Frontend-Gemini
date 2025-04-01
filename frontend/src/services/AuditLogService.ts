@@ -9,7 +9,7 @@
  */
 
 import { useEffect } from "react";
-import { validateLogEventData } from "./AuditLogService.runtime"; // Import validator
+import { validateLogEventData } from "@/services/AuditLogService.runtime"; // Import validator
 import { Err } from "ts-results"; // Import Err for returning errors
 
 /**

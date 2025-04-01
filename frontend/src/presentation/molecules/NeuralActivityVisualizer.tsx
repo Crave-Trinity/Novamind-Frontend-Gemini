@@ -5,7 +5,7 @@
  */
 
 import React, { useRef, useMemo, useEffect, useState } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame, useThree , extend } from "@react-three/fiber";
 import {
   Sphere,
   Line,
@@ -23,7 +23,6 @@ import {
   Event,
 } from "three";
 import { useSpring, animated } from "@react-spring/three";
-import { extend } from "@react-three/fiber";
 
 // Domain types
 import {

@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { useTheme } from "./useTheme";
+import { useTheme } from "@hooks/useTheme";
 
 describe("useTheme", () => {
   it("processes data with mathematical precision", () => {

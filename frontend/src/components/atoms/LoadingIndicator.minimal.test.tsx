@@ -9,7 +9,7 @@
 import React from "react";
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import LoadingIndicator from "./LoadingIndicator";
+import LoadingIndicator from "@/components/atoms/LoadingIndicator";
 
 // Import the actual component props interface to ensure type safety
 interface LoadingIndicatorProps {

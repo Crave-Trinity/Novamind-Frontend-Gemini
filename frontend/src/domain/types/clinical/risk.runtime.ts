@@ -14,7 +14,7 @@ import {
   NeuralRiskCorrelate,
   RiskTimelineEvent,
   BiometricRiskAlert,
-} from "./risk";
+} from "@types/clinical/risk";
 
 /**
  * Runtime validation for RiskLevel enum values

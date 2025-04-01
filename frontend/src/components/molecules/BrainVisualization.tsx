@@ -3,17 +3,17 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import React, { useMemo, useRef, Suspense } from "react";
 
-import { useTheme } from "../../application/contexts/ThemeProviderComponent";
-import { BrainData, BrainVisualizationProps } from "../../types/brain";
+import { useTheme } from "@contexts/ThemeProviderComponent";
+import { BrainData, BrainVisualizationProps } from "@/types/brain";
 import {
   transformBrainData,
   getActiveRegions,
   getActiveConnections,
   generateConnectionPositionMap,
   applyVisualizationMode,
-} from "../../utils/brainDataTransformer";
-import NeuralConnection from "../atoms/NeuralConnection";
-import RegionMesh from "../atoms/RegionMesh";
+} from "@/utils/brainDataTransformer";
+import NeuralConnection from "@/components/atoms/NeuralConnection";
+import RegionMesh from "@/components/atoms/RegionMesh";
 
 /**
  * Error boundary for 3D visualization to prevent crashes
