@@ -6,11 +6,11 @@
 import { describe, it, expect } from "vitest";
 import * as modelExports from "./index";
 // Import brain mapping functions for direct testing
-import { 
+import {
   calculateNeuralActivation,
   mapSymptomsToRegions,
   mapDiagnosesToRegions,
-  calculateTreatmentImpact
+  calculateTreatmentImpact,
 } from "./brain/mapping/brain-mapping";
 
 describe("Domain models index exports", () => {
@@ -30,12 +30,16 @@ describe("Domain models index exports", () => {
     expect(modelExports.mapSymptomsToRegions).toBeDefined();
     expect(modelExports.mapDiagnosesToRegions).toBeDefined();
     expect(modelExports.calculateTreatmentImpact).toBeDefined();
-    
+
     // Verify function identity
-    expect(modelExports.calculateNeuralActivation).toBe(calculateNeuralActivation);
+    expect(modelExports.calculateNeuralActivation).toBe(
+      calculateNeuralActivation,
+    );
     expect(modelExports.mapSymptomsToRegions).toBe(mapSymptomsToRegions);
     expect(modelExports.mapDiagnosesToRegions).toBe(mapDiagnosesToRegions);
-    expect(modelExports.calculateTreatmentImpact).toBe(calculateTreatmentImpact);
+    expect(modelExports.calculateTreatmentImpact).toBe(
+      calculateTreatmentImpact,
+    );
   });
 
   it("exports patient model functions", () => {
@@ -47,6 +51,8 @@ describe("Domain models index exports", () => {
   it("does not export legacy model implementations", () => {
     // Assert legacy exports are not available
     expect(typeof modelExports).toBe("object");
-    expect(Object.keys(modelExports).some(key => key.includes('legacy'))).toBe(false);
+    expect(
+      Object.keys(modelExports).some((key) => key.includes("legacy")),
+    ).toBe(false);
   });
 });

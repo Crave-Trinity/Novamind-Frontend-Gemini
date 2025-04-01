@@ -4,21 +4,27 @@
  */
 
 /**
- * Custom error type for type verification failures 
+ * Custom error type for type verification failures
  */
 export class TypeVerificationError extends Error {
   constructor(
     public readonly expectedType: string,
     public readonly receivedValue: unknown,
-    public readonly propertyPath?: string
+    public readonly propertyPath?: string,
   ) {
-    const path = propertyPath ? ` at ${propertyPath}` : '';
+    const path = propertyPath ? ` at ${propertyPath}` : "";
     const receivedType = typeof receivedValue;
-    const receivedStr = receivedValue === null ? 'null' : 
-      Array.isArray(receivedValue) ? 'array' : receivedType;
-    
-    super(`Expected type '${expectedType}'${path}, but received '${receivedStr}'`);
-    this.name = 'TypeVerificationError';
+    const receivedStr =
+      receivedValue === null
+        ? "null"
+        : Array.isArray(receivedValue)
+          ? "array"
+          : receivedType;
+
+    super(
+      `Expected type '${expectedType}'${path}, but received '${receivedStr}'`,
+    );
+    this.name = "TypeVerificationError";
   }
 }
 
@@ -26,11 +32,11 @@ export class TypeVerificationError extends Error {
  * Ensure a value is defined (not undefined)
  */
 export function assertDefined<T>(
-  value: T | undefined, 
-  propertyPath?: string
+  value: T | undefined,
+  propertyPath?: string,
 ): asserts value is T {
   if (value === undefined) {
-    throw new TypeVerificationError('defined', value, propertyPath);
+    throw new TypeVerificationError("defined", value, propertyPath);
   }
 }
 
@@ -38,11 +44,11 @@ export function assertDefined<T>(
  * Ensure a value is not null or undefined
  */
 export function assertPresent<T>(
-  value: T | null | undefined, 
-  propertyPath?: string
+  value: T | null | undefined,
+  propertyPath?: string,
 ): asserts value is T {
   if (value === null || value === undefined) {
-    throw new TypeVerificationError('non-null', value, propertyPath);
+    throw new TypeVerificationError("non-null", value, propertyPath);
   }
 }
 
@@ -50,11 +56,11 @@ export function assertPresent<T>(
  * Ensure a value is a string
  */
 export function assertString(
-  value: unknown, 
-  propertyPath?: string
+  value: unknown,
+  propertyPath?: string,
 ): asserts value is string {
-  if (typeof value !== 'string') {
-    throw new TypeVerificationError('string', value, propertyPath);
+  if (typeof value !== "string") {
+    throw new TypeVerificationError("string", value, propertyPath);
   }
 }
 
@@ -62,11 +68,11 @@ export function assertString(
  * Ensure a value is a number
  */
 export function assertNumber(
-  value: unknown, 
-  propertyPath?: string
+  value: unknown,
+  propertyPath?: string,
 ): asserts value is number {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
-    throw new TypeVerificationError('number', value, propertyPath);
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    throw new TypeVerificationError("number", value, propertyPath);
   }
 }
 
@@ -74,11 +80,11 @@ export function assertNumber(
  * Ensure a value is a boolean
  */
 export function assertBoolean(
-  value: unknown, 
-  propertyPath?: string
+  value: unknown,
+  propertyPath?: string,
 ): asserts value is boolean {
-  if (typeof value !== 'boolean') {
-    throw new TypeVerificationError('boolean', value, propertyPath);
+  if (typeof value !== "boolean") {
+    throw new TypeVerificationError("boolean", value, propertyPath);
   }
 }
 
@@ -86,11 +92,11 @@ export function assertBoolean(
  * Ensure a value is an array
  */
 export function assertArray<T = unknown>(
-  value: unknown, 
-  propertyPath?: string
+  value: unknown,
+  propertyPath?: string,
 ): asserts value is T[] {
   if (!Array.isArray(value)) {
-    throw new TypeVerificationError('array', value, propertyPath);
+    throw new TypeVerificationError("array", value, propertyPath);
   }
 }
 
@@ -98,11 +104,11 @@ export function assertArray<T = unknown>(
  * Ensure a value is an object
  */
 export function assertObject(
-  value: unknown, 
-  propertyPath?: string
+  value: unknown,
+  propertyPath?: string,
 ): asserts value is Record<string, unknown> {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
-    throw new TypeVerificationError('object', value, propertyPath);
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeVerificationError("object", value, propertyPath);
   }
 }
 
@@ -110,11 +116,11 @@ export function assertObject(
  * Ensure a value is a Date
  */
 export function assertDate(
-  value: unknown, 
-  propertyPath?: string
+  value: unknown,
+  propertyPath?: string,
 ): asserts value is Date {
   if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
-    throw new TypeVerificationError('Date', value, propertyPath);
+    throw new TypeVerificationError("Date", value, propertyPath);
   }
 }
 
@@ -125,7 +131,7 @@ export function assertType<T>(
   value: unknown,
   typeGuard: (v: unknown) => v is T,
   typeName: string,
-  propertyPath?: string
+  propertyPath?: string,
 ): asserts value is T {
   if (!typeGuard(value)) {
     throw new TypeVerificationError(typeName, value, propertyPath);
@@ -137,7 +143,7 @@ export function assertType<T>(
  */
 export function asString(value: unknown): string | undefined {
   if (value === null || value === undefined) return undefined;
-  
+
   try {
     return String(value);
   } catch {
@@ -150,7 +156,7 @@ export function asString(value: unknown): string | undefined {
  */
 export function asNumber(value: unknown): number | undefined {
   if (value === null || value === undefined) return undefined;
-  
+
   const num = Number(value);
   return Number.isNaN(num) ? undefined : num;
 }
@@ -160,11 +166,11 @@ export function asNumber(value: unknown): number | undefined {
  */
 export function asBoolean(value: unknown): boolean | undefined {
   if (value === null || value === undefined) return undefined;
-  
-  if (typeof value === 'boolean') return value;
-  if (value === 'true' || value === '1' || value === 1) return true;
-  if (value === 'false' || value === '0' || value === 0) return false;
-  
+
+  if (typeof value === "boolean") return value;
+  if (value === "true" || value === "1" || value === 1) return true;
+  if (value === "false" || value === "0" || value === 0) return false;
+
   return undefined;
 }
 
@@ -173,16 +179,16 @@ export function asBoolean(value: unknown): boolean | undefined {
  */
 export function asDate(value: unknown): Date | undefined {
   if (value === null || value === undefined) return undefined;
-  
+
   try {
     if (value instanceof Date) return new Date(value);
-    if (typeof value === 'number' || typeof value === 'string') {
+    if (typeof value === "number" || typeof value === "string") {
       const date = new Date(value);
       return Number.isNaN(date.getTime()) ? undefined : date;
     }
   } catch {
     return undefined;
   }
-  
+
   return undefined;
 }

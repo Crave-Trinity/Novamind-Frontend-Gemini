@@ -4,13 +4,13 @@
  * with HIPAA compliance and psychiatric precision
  */
 
+import { RiskAssessment } from "../../../domain/types/clinical/risk";
+import { TreatmentResponsePrediction } from "../../../domain/types/clinical/treatment";
 import {
-  RiskAssessment,
-} from "../../../domain/types/clinical/risk";
-import {
-  TreatmentResponsePrediction,
-} from "../../../domain/types/clinical/treatment";
-import { Symptom, Diagnosis, Treatment } from "../../../domain/types/clinical/patient";
+  Symptom,
+  Diagnosis,
+  Treatment,
+} from "../../../domain/types/clinical/patient";
 import { Result, success, failure } from "../../../domain/types/shared/common";
 
 // Custom error class for type verification errors
@@ -19,7 +19,7 @@ class TypeVerificationError extends Error {
     message: string,
     public expectedType: string,
     public actualType: string,
-    public field?: string
+    public field?: string,
   ) {
     super(message);
     this.name = "TypeVerificationError";
@@ -35,9 +35,9 @@ export function isSymptom(obj: unknown): obj is Symptom {
   if (!obj || typeof obj !== "object") {
     return false;
   }
-  
+
   const symptom = obj as Partial<Symptom>;
-  
+
   return (
     typeof symptom.id === "string" &&
     typeof symptom.name === "string" &&
@@ -62,8 +62,8 @@ export function validateSymptom(obj: unknown, field?: string): Result<Symptom> {
         "Invalid Symptom: expected an object",
         "Symptom",
         typeof obj,
-        field
-      )
+        field,
+      ),
     );
   }
 
@@ -76,8 +76,8 @@ export function validateSymptom(obj: unknown, field?: string): Result<Symptom> {
         "Invalid Symptom: missing or invalid 'id'",
         "string",
         typeof symptom.id,
-        field ? `${field}.id` : "id"
-      )
+        field ? `${field}.id` : "id",
+      ),
     );
   }
 
@@ -87,8 +87,8 @@ export function validateSymptom(obj: unknown, field?: string): Result<Symptom> {
         "Invalid Symptom: missing or invalid 'name'",
         "string",
         typeof symptom.name,
-        field ? `${field}.name` : "name"
-      )
+        field ? `${field}.name` : "name",
+      ),
     );
   }
 
@@ -98,20 +98,24 @@ export function validateSymptom(obj: unknown, field?: string): Result<Symptom> {
         "Invalid Symptom: missing or invalid 'category'",
         "string",
         typeof symptom.category,
-        field ? `${field}.category` : "category"
-      )
+        field ? `${field}.category` : "category",
+      ),
     );
   }
 
   // Validate numeric fields
-  if (typeof symptom.severity !== "number" || symptom.severity < 0 || symptom.severity > 10) {
+  if (
+    typeof symptom.severity !== "number" ||
+    symptom.severity < 0 ||
+    symptom.severity > 10
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid Symptom: missing or invalid 'severity', must be a number between 0 and 10",
         "number",
         typeof symptom.severity,
-        field ? `${field}.severity` : "severity"
-      )
+        field ? `${field}.severity` : "severity",
+      ),
     );
   }
 
@@ -122,8 +126,8 @@ export function validateSymptom(obj: unknown, field?: string): Result<Symptom> {
         "Invalid Symptom: missing or invalid 'frequency'",
         "string",
         typeof symptom.frequency,
-        field ? `${field}.frequency` : "frequency"
-      )
+        field ? `${field}.frequency` : "frequency",
+      ),
     );
   }
 
@@ -134,8 +138,8 @@ export function validateSymptom(obj: unknown, field?: string): Result<Symptom> {
         "Invalid Symptom: missing or invalid 'impact'",
         "string",
         typeof symptom.impact,
-        field ? `${field}.impact` : "impact"
-      )
+        field ? `${field}.impact` : "impact",
+      ),
     );
   }
 
@@ -146,8 +150,8 @@ export function validateSymptom(obj: unknown, field?: string): Result<Symptom> {
         "Invalid Symptom: missing or invalid 'progression'",
         "string",
         typeof symptom.progression,
-        field ? `${field}.progression` : "progression"
-      )
+        field ? `${field}.progression` : "progression",
+      ),
     );
   }
 
@@ -158,8 +162,8 @@ export function validateSymptom(obj: unknown, field?: string): Result<Symptom> {
         "Invalid Symptom: invalid 'onsetDate', must be a valid date string",
         "string (date)",
         typeof symptom.onsetDate,
-        field ? `${field}.onsetDate` : "onsetDate"
-      )
+        field ? `${field}.onsetDate` : "onsetDate",
+      ),
     );
   }
 
@@ -170,8 +174,8 @@ export function validateSymptom(obj: unknown, field?: string): Result<Symptom> {
         "Invalid Symptom: invalid 'duration', must be a string",
         "string",
         typeof symptom.duration,
-        field ? `${field}.duration` : "duration"
-      )
+        field ? `${field}.duration` : "duration",
+      ),
     );
   }
 
@@ -182,8 +186,8 @@ export function validateSymptom(obj: unknown, field?: string): Result<Symptom> {
         "Invalid Symptom: invalid 'triggers', must be an array of strings",
         "string[]",
         typeof symptom.triggers,
-        field ? `${field}.triggers` : "triggers"
-      )
+        field ? `${field}.triggers` : "triggers",
+      ),
     );
   }
 
@@ -199,9 +203,9 @@ export function isDiagnosis(obj: unknown): obj is Diagnosis {
   if (!obj || typeof obj !== "object") {
     return false;
   }
-  
+
   const diagnosis = obj as Partial<Diagnosis>;
-  
+
   return (
     typeof diagnosis.id === "string" &&
     typeof diagnosis.code === "string" &&
@@ -219,15 +223,18 @@ export function isDiagnosis(obj: unknown): obj is Diagnosis {
  * @param field - Optional field name for error context
  * @returns A Result with the validated Diagnosis or an error
  */
-export function validateDiagnosis(obj: unknown, field?: string): Result<Diagnosis> {
+export function validateDiagnosis(
+  obj: unknown,
+  field?: string,
+): Result<Diagnosis> {
   if (!obj || typeof obj !== "object") {
     return failure(
       new TypeVerificationError(
         "Invalid Diagnosis: expected an object",
         "Diagnosis",
         typeof obj,
-        field
-      )
+        field,
+      ),
     );
   }
 
@@ -240,8 +247,8 @@ export function validateDiagnosis(obj: unknown, field?: string): Result<Diagnosi
         "Invalid Diagnosis: missing or invalid 'id'",
         "string",
         typeof diagnosis.id,
-        field ? `${field}.id` : "id"
-      )
+        field ? `${field}.id` : "id",
+      ),
     );
   }
 
@@ -251,8 +258,8 @@ export function validateDiagnosis(obj: unknown, field?: string): Result<Diagnosi
         "Invalid Diagnosis: missing or invalid 'code'",
         "string",
         typeof diagnosis.code,
-        field ? `${field}.code` : "code"
-      )
+        field ? `${field}.code` : "code",
+      ),
     );
   }
 
@@ -262,8 +269,8 @@ export function validateDiagnosis(obj: unknown, field?: string): Result<Diagnosi
         "Invalid Diagnosis: missing or invalid 'codingSystem'",
         "string",
         typeof diagnosis.codingSystem,
-        field ? `${field}.codingSystem` : "codingSystem"
-      )
+        field ? `${field}.codingSystem` : "codingSystem",
+      ),
     );
   }
 
@@ -273,8 +280,8 @@ export function validateDiagnosis(obj: unknown, field?: string): Result<Diagnosi
         "Invalid Diagnosis: missing or invalid 'name'",
         "string",
         typeof diagnosis.name,
-        field ? `${field}.name` : "name"
-      )
+        field ? `${field}.name` : "name",
+      ),
     );
   }
 
@@ -285,8 +292,8 @@ export function validateDiagnosis(obj: unknown, field?: string): Result<Diagnosi
         "Invalid Diagnosis: missing or invalid 'severity', must be a string",
         "string",
         typeof diagnosis.severity,
-        field ? `${field}.severity` : "severity"
-      )
+        field ? `${field}.severity` : "severity",
+      ),
     );
   }
 
@@ -297,20 +304,23 @@ export function validateDiagnosis(obj: unknown, field?: string): Result<Diagnosi
         "Invalid Diagnosis: missing or invalid 'status'",
         "string",
         typeof diagnosis.status,
-        field ? `${field}.status` : "status"
-      )
+        field ? `${field}.status` : "status",
+      ),
     );
   }
 
   // Validate diagnosis date
-  if (typeof diagnosis.diagnosisDate !== "string" || !isValidDate(diagnosis.diagnosisDate)) {
+  if (
+    typeof diagnosis.diagnosisDate !== "string" ||
+    !isValidDate(diagnosis.diagnosisDate)
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid Diagnosis: missing or invalid 'diagnosisDate', must be a valid date string",
         "string (date)",
         typeof diagnosis.diagnosisDate,
-        field ? `${field}.diagnosisDate` : "diagnosisDate"
-      )
+        field ? `${field}.diagnosisDate` : "diagnosisDate",
+      ),
     );
   }
 
@@ -326,9 +336,9 @@ export function isTreatment(obj: unknown): obj is Treatment {
   if (!obj || typeof obj !== "object") {
     return false;
   }
-  
+
   const treatment = obj as Partial<Treatment>;
-  
+
   return (
     typeof treatment.id === "string" &&
     typeof treatment.name === "string" &&
@@ -344,15 +354,18 @@ export function isTreatment(obj: unknown): obj is Treatment {
  * @param field - Optional field name for error context
  * @returns A Result with the validated Treatment or an error
  */
-export function validateTreatment(obj: unknown, field?: string): Result<Treatment> {
+export function validateTreatment(
+  obj: unknown,
+  field?: string,
+): Result<Treatment> {
   if (!obj || typeof obj !== "object") {
     return failure(
       new TypeVerificationError(
         "Invalid Treatment: expected an object",
         "Treatment",
         typeof obj,
-        field
-      )
+        field,
+      ),
     );
   }
 
@@ -365,8 +378,8 @@ export function validateTreatment(obj: unknown, field?: string): Result<Treatmen
         "Invalid Treatment: missing or invalid 'id'",
         "string",
         typeof treatment.id,
-        field ? `${field}.id` : "id"
-      )
+        field ? `${field}.id` : "id",
+      ),
     );
   }
 
@@ -376,8 +389,8 @@ export function validateTreatment(obj: unknown, field?: string): Result<Treatmen
         "Invalid Treatment: missing or invalid 'name'",
         "string",
         typeof treatment.name,
-        field ? `${field}.name` : "name"
-      )
+        field ? `${field}.name` : "name",
+      ),
     );
   }
 
@@ -387,31 +400,37 @@ export function validateTreatment(obj: unknown, field?: string): Result<Treatmen
         "Invalid Treatment: missing or invalid 'type'",
         "string",
         typeof treatment.type,
-        field ? `${field}.type` : "type"
-      )
+        field ? `${field}.type` : "type",
+      ),
     );
   }
 
   // Validate date fields
-  if (typeof treatment.startDate !== "string" || !isValidDate(treatment.startDate)) {
+  if (
+    typeof treatment.startDate !== "string" ||
+    !isValidDate(treatment.startDate)
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid Treatment: missing or invalid 'startDate', must be a valid date string",
         "string (date)",
         typeof treatment.startDate,
-        field ? `${field}.startDate` : "startDate"
-      )
+        field ? `${field}.startDate` : "startDate",
+      ),
     );
   }
 
-  if (treatment.endDate && (typeof treatment.endDate !== "string" || !isValidDate(treatment.endDate))) {
+  if (
+    treatment.endDate &&
+    (typeof treatment.endDate !== "string" || !isValidDate(treatment.endDate))
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid Treatment: invalid 'endDate', must be a valid date string",
         "string (date)",
         typeof treatment.endDate,
-        field ? `${field}.endDate` : "endDate"
-      )
+        field ? `${field}.endDate` : "endDate",
+      ),
     );
   }
 
@@ -422,8 +441,8 @@ export function validateTreatment(obj: unknown, field?: string): Result<Treatmen
         "Invalid Treatment: missing or invalid 'status'",
         "string",
         typeof treatment.status,
-        field ? `${field}.status` : "status"
-      )
+        field ? `${field}.status` : "status",
+      ),
     );
   }
 
@@ -439,9 +458,9 @@ export function isRiskAssessment(obj: unknown): obj is RiskAssessment {
   if (!obj || typeof obj !== "object") {
     return false;
   }
-  
+
   const assessment = obj as Partial<RiskAssessment>;
-  
+
   return (
     typeof assessment.id === "string" &&
     typeof assessment.patientId === "string" &&
@@ -463,15 +482,18 @@ export function isRiskAssessment(obj: unknown): obj is RiskAssessment {
  * @param field - Optional field name for error context
  * @returns A Result with the validated RiskAssessment or an error
  */
-export function validateRiskAssessment(obj: unknown, field?: string): Result<RiskAssessment> {
+export function validateRiskAssessment(
+  obj: unknown,
+  field?: string,
+): Result<RiskAssessment> {
   if (!obj || typeof obj !== "object") {
     return failure(
       new TypeVerificationError(
         "Invalid RiskAssessment: expected an object",
         "RiskAssessment",
         typeof obj,
-        field
-      )
+        field,
+      ),
     );
   }
 
@@ -484,8 +506,8 @@ export function validateRiskAssessment(obj: unknown, field?: string): Result<Ris
         "Invalid RiskAssessment: missing or invalid 'id'",
         "string",
         typeof assessment.id,
-        field ? `${field}.id` : "id"
-      )
+        field ? `${field}.id` : "id",
+      ),
     );
   }
 
@@ -495,20 +517,23 @@ export function validateRiskAssessment(obj: unknown, field?: string): Result<Ris
         "Invalid RiskAssessment: missing or invalid 'patientId'",
         "string",
         typeof assessment.patientId,
-        field ? `${field}.patientId` : "patientId"
-      )
+        field ? `${field}.patientId` : "patientId",
+      ),
     );
   }
 
   // Validate timestamp
-  if (typeof assessment.timestamp !== "string" || !isValidDate(assessment.timestamp)) {
+  if (
+    typeof assessment.timestamp !== "string" ||
+    !isValidDate(assessment.timestamp)
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid RiskAssessment: missing or invalid 'timestamp', must be a valid date string",
         "string (date)",
         typeof assessment.timestamp,
-        field ? `${field}.timestamp` : "timestamp"
-      )
+        field ? `${field}.timestamp` : "timestamp",
+      ),
     );
   }
 
@@ -519,32 +544,39 @@ export function validateRiskAssessment(obj: unknown, field?: string): Result<Ris
         "Invalid RiskAssessment: missing or invalid 'assessmentType'",
         "string",
         typeof assessment.assessmentType,
-        field ? `${field}.assessmentType` : "assessmentType"
-      )
+        field ? `${field}.assessmentType` : "assessmentType",
+      ),
     );
   }
 
   // Validate overall risk
-  if (typeof assessment.overallRisk !== "string" || !isValidRiskLevel(assessment.overallRisk)) {
+  if (
+    typeof assessment.overallRisk !== "string" ||
+    !isValidRiskLevel(assessment.overallRisk)
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid RiskAssessment: missing or invalid 'overallRisk', must be a valid risk level",
         "RiskLevel",
         typeof assessment.overallRisk,
-        field ? `${field}.overallRisk` : "overallRisk"
-      )
+        field ? `${field}.overallRisk` : "overallRisk",
+      ),
     );
   }
 
   // Validate confidence score
-  if (typeof assessment.confidenceScore !== "number" || assessment.confidenceScore < 0 || assessment.confidenceScore > 1) {
+  if (
+    typeof assessment.confidenceScore !== "number" ||
+    assessment.confidenceScore < 0 ||
+    assessment.confidenceScore > 1
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid RiskAssessment: missing or invalid 'confidenceScore', must be a number between 0 and 1",
         "number",
         typeof assessment.confidenceScore,
-        field ? `${field}.confidenceScore` : "confidenceScore"
-      )
+        field ? `${field}.confidenceScore` : "confidenceScore",
+      ),
     );
   }
 
@@ -555,20 +587,23 @@ export function validateRiskAssessment(obj: unknown, field?: string): Result<Ris
         "Invalid RiskAssessment: missing or invalid 'domainRisks', must be an array",
         "array",
         typeof assessment.domainRisks,
-        field ? `${field}.domainRisks` : "domainRisks"
-      )
+        field ? `${field}.domainRisks` : "domainRisks",
+      ),
     );
   }
 
   // Validate temporal trend
-  if (typeof assessment.temporalTrend !== "string" || !isValidTemporalTrend(assessment.temporalTrend)) {
+  if (
+    typeof assessment.temporalTrend !== "string" ||
+    !isValidTemporalTrend(assessment.temporalTrend)
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid RiskAssessment: missing or invalid 'temporalTrend', must be a valid temporal trend",
         "string",
         typeof assessment.temporalTrend,
-        field ? `${field}.temporalTrend` : "temporalTrend"
-      )
+        field ? `${field}.temporalTrend` : "temporalTrend",
+      ),
     );
   }
 
@@ -579,8 +614,8 @@ export function validateRiskAssessment(obj: unknown, field?: string): Result<Ris
         "Invalid RiskAssessment: missing or invalid 'contributingFactors', must be an array",
         "array",
         typeof assessment.contributingFactors,
-        field ? `${field}.contributingFactors` : "contributingFactors"
-      )
+        field ? `${field}.contributingFactors` : "contributingFactors",
+      ),
     );
   }
 
@@ -591,8 +626,8 @@ export function validateRiskAssessment(obj: unknown, field?: string): Result<Ris
         "Invalid RiskAssessment: missing or invalid 'protectiveFactors', must be an array",
         "array",
         typeof assessment.protectiveFactors,
-        field ? `${field}.protectiveFactors` : "protectiveFactors"
-      )
+        field ? `${field}.protectiveFactors` : "protectiveFactors",
+      ),
     );
   }
 
@@ -603,8 +638,8 @@ export function validateRiskAssessment(obj: unknown, field?: string): Result<Ris
         "Invalid RiskAssessment: missing or invalid 'neuralCorrelates', must be an array",
         "array",
         typeof assessment.neuralCorrelates,
-        field ? `${field}.neuralCorrelates` : "neuralCorrelates"
-      )
+        field ? `${field}.neuralCorrelates` : "neuralCorrelates",
+      ),
     );
   }
 
@@ -616,13 +651,15 @@ export function validateRiskAssessment(obj: unknown, field?: string): Result<Ris
  * @param obj - The object to validate as a TreatmentResponsePrediction
  * @returns A boolean indicating if the object is a valid TreatmentResponsePrediction
  */
-export function isTreatmentResponsePrediction(obj: unknown): obj is TreatmentResponsePrediction {
+export function isTreatmentResponsePrediction(
+  obj: unknown,
+): obj is TreatmentResponsePrediction {
   if (!obj || typeof obj !== "object") {
     return false;
   }
-  
+
   const prediction = obj as Partial<TreatmentResponsePrediction>;
-  
+
   return (
     typeof prediction.requestId === "string" &&
     typeof prediction.patientId === "string" &&
@@ -639,15 +676,18 @@ export function isTreatmentResponsePrediction(obj: unknown): obj is TreatmentRes
  * @param field - Optional field name for error context
  * @returns A Result with the validated TreatmentResponsePrediction or an error
  */
-export function validateTreatmentResponsePrediction(obj: unknown, field?: string): Result<TreatmentResponsePrediction> {
+export function validateTreatmentResponsePrediction(
+  obj: unknown,
+  field?: string,
+): Result<TreatmentResponsePrediction> {
   if (!obj || typeof obj !== "object") {
     return failure(
       new TypeVerificationError(
         "Invalid TreatmentResponsePrediction: expected an object",
         "TreatmentResponsePrediction",
         typeof obj,
-        field
-      )
+        field,
+      ),
     );
   }
 
@@ -660,8 +700,8 @@ export function validateTreatmentResponsePrediction(obj: unknown, field?: string
         "Invalid TreatmentResponsePrediction: missing or invalid 'requestId'",
         "string",
         typeof prediction.requestId,
-        field ? `${field}.requestId` : "requestId"
-      )
+        field ? `${field}.requestId` : "requestId",
+      ),
     );
   }
 
@@ -671,8 +711,8 @@ export function validateTreatmentResponsePrediction(obj: unknown, field?: string
         "Invalid TreatmentResponsePrediction: missing or invalid 'patientId'",
         "string",
         typeof prediction.patientId,
-        field ? `${field}.patientId` : "patientId"
-      )
+        field ? `${field}.patientId` : "patientId",
+      ),
     );
   }
 
@@ -682,20 +722,23 @@ export function validateTreatmentResponsePrediction(obj: unknown, field?: string
         "Invalid TreatmentResponsePrediction: missing or invalid 'treatmentType'",
         "string",
         typeof prediction.treatmentType,
-        field ? `${field}.treatmentType` : "treatmentType"
-      )
+        field ? `${field}.treatmentType` : "treatmentType",
+      ),
     );
   }
 
   // Validate timestamp
-  if (typeof prediction.timestamp !== "string" || !isValidDate(prediction.timestamp)) {
+  if (
+    typeof prediction.timestamp !== "string" ||
+    !isValidDate(prediction.timestamp)
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid TreatmentResponsePrediction: missing or invalid 'timestamp', must be a valid date string",
         "string (date)",
         typeof prediction.timestamp,
-        field ? `${field}.timestamp` : "timestamp"
-      )
+        field ? `${field}.timestamp` : "timestamp",
+      ),
     );
   }
 
@@ -706,8 +749,8 @@ export function validateTreatmentResponsePrediction(obj: unknown, field?: string
         "Invalid TreatmentResponsePrediction: missing or invalid 'algorithm', must be an object",
         "object",
         typeof prediction.algorithm,
-        field ? `${field}.algorithm` : "algorithm"
-      )
+        field ? `${field}.algorithm` : "algorithm",
+      ),
     );
   }
 
@@ -718,8 +761,8 @@ export function validateTreatmentResponsePrediction(obj: unknown, field?: string
         "Invalid TreatmentResponsePrediction: missing or invalid 'algorithm.name'",
         "string",
         typeof algorithm.name,
-        field ? `${field}.algorithm.name` : "algorithm.name"
-      )
+        field ? `${field}.algorithm.name` : "algorithm.name",
+      ),
     );
   }
 
@@ -729,19 +772,23 @@ export function validateTreatmentResponsePrediction(obj: unknown, field?: string
         "Invalid TreatmentResponsePrediction: missing or invalid 'algorithm.version'",
         "string",
         typeof algorithm.version,
-        field ? `${field}.algorithm.version` : "algorithm.version"
-      )
+        field ? `${field}.algorithm.version` : "algorithm.version",
+      ),
     );
   }
 
-  if (typeof algorithm.confidence !== "number" || algorithm.confidence < 0 || algorithm.confidence > 1) {
+  if (
+    typeof algorithm.confidence !== "number" ||
+    algorithm.confidence < 0 ||
+    algorithm.confidence > 1
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid TreatmentResponsePrediction: missing or invalid 'algorithm.confidence', must be a number between 0 and 1",
         "number",
         typeof algorithm.confidence,
-        field ? `${field}.algorithm.confidence` : "algorithm.confidence"
-      )
+        field ? `${field}.algorithm.confidence` : "algorithm.confidence",
+      ),
     );
   }
 
@@ -752,8 +799,8 @@ export function validateTreatmentResponsePrediction(obj: unknown, field?: string
         "Invalid TreatmentResponsePrediction: missing or invalid 'prediction', must be an object",
         "object",
         typeof prediction.prediction,
-        field ? `${field}.prediction` : "prediction"
-      )
+        field ? `${field}.prediction` : "prediction",
+      ),
     );
   }
 
@@ -764,54 +811,69 @@ export function validateTreatmentResponsePrediction(obj: unknown, field?: string
         "Invalid TreatmentResponsePrediction: missing or invalid 'prediction.responseType'",
         "string",
         typeof predictionObj.responseType,
-        field ? `${field}.prediction.responseType` : "prediction.responseType"
-      )
+        field ? `${field}.prediction.responseType` : "prediction.responseType",
+      ),
     );
   }
 
-  if (typeof predictionObj.responseProbability !== "number" || 
-      predictionObj.responseProbability < 0 || 
-      predictionObj.responseProbability > 1) {
+  if (
+    typeof predictionObj.responseProbability !== "number" ||
+    predictionObj.responseProbability < 0 ||
+    predictionObj.responseProbability > 1
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid TreatmentResponsePrediction: missing or invalid 'prediction.responseProbability', must be a number between 0 and 1",
         "number",
         typeof predictionObj.responseProbability,
-        field ? `${field}.prediction.responseProbability` : "prediction.responseProbability"
-      )
+        field
+          ? `${field}.prediction.responseProbability`
+          : "prediction.responseProbability",
+      ),
     );
   }
 
-  if (!Array.isArray(predictionObj.confidenceInterval) || predictionObj.confidenceInterval.length !== 2) {
+  if (
+    !Array.isArray(predictionObj.confidenceInterval) ||
+    predictionObj.confidenceInterval.length !== 2
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid TreatmentResponsePrediction: missing or invalid 'prediction.confidenceInterval', must be an array with two numbers",
         "array",
         typeof predictionObj.confidenceInterval,
-        field ? `${field}.prediction.confidenceInterval` : "prediction.confidenceInterval"
-      )
+        field
+          ? `${field}.prediction.confidenceInterval`
+          : "prediction.confidenceInterval",
+      ),
     );
   }
 
-  if (!predictionObj.timeToEffect || typeof predictionObj.timeToEffect !== "object") {
+  if (
+    !predictionObj.timeToEffect ||
+    typeof predictionObj.timeToEffect !== "object"
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid TreatmentResponsePrediction: missing or invalid 'prediction.timeToEffect', must be an object",
         "object",
         typeof predictionObj.timeToEffect,
-        field ? `${field}.prediction.timeToEffect` : "prediction.timeToEffect"
-      )
+        field ? `${field}.prediction.timeToEffect` : "prediction.timeToEffect",
+      ),
     );
   }
 
-  if (!predictionObj.durability || typeof predictionObj.durability !== "object") {
+  if (
+    !predictionObj.durability ||
+    typeof predictionObj.durability !== "object"
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid TreatmentResponsePrediction: missing or invalid 'prediction.durability', must be an object",
         "object",
         typeof predictionObj.durability,
-        field ? `${field}.prediction.durability` : "prediction.durability"
-      )
+        field ? `${field}.prediction.durability` : "prediction.durability",
+      ),
     );
   }
 
@@ -844,7 +906,9 @@ function isValidSeverity(severity: string): boolean {
  * @returns A boolean indicating if the string is a valid diagnosis status
  */
 function isValidDiagnosisStatus(status: string): boolean {
-  return ["active", "remission", "resolved", "relapse"].includes(status.toLowerCase());
+  return ["active", "remission", "resolved", "relapse"].includes(
+    status.toLowerCase(),
+  );
 }
 
 /**
@@ -854,12 +918,12 @@ function isValidDiagnosisStatus(status: string): boolean {
  */
 function isValidTreatmentType(type: string): boolean {
   return [
-    "medication", 
-    "psychotherapy", 
-    "neurostimulation", 
-    "neurofeedback", 
-    "behavioral", 
-    "cognitive"
+    "medication",
+    "psychotherapy",
+    "neurostimulation",
+    "neurofeedback",
+    "behavioral",
+    "cognitive",
   ].includes(type.toLowerCase());
 }
 
@@ -869,7 +933,9 @@ function isValidTreatmentType(type: string): boolean {
  * @returns A boolean indicating if the string is a valid treatment status
  */
 function isValidTreatmentStatus(status: string): boolean {
-  return ["active", "completed", "discontinued", "planned"].includes(status.toLowerCase());
+  return ["active", "completed", "discontinued", "planned"].includes(
+    status.toLowerCase(),
+  );
 }
 
 /**
@@ -887,7 +953,9 @@ function isValidAssessmentType(type: string): boolean {
  * @returns A boolean indicating if the string is a valid risk level
  */
 function isValidRiskLevel(level: string): boolean {
-  return ["low", "moderate", "high", "severe", "critical"].includes(level.toLowerCase());
+  return ["low", "moderate", "high", "severe", "critical"].includes(
+    level.toLowerCase(),
+  );
 }
 
 /**
@@ -896,5 +964,7 @@ function isValidRiskLevel(level: string): boolean {
  * @returns A boolean indicating if the string is a valid temporal trend
  */
 function isValidTemporalTrend(trend: string): boolean {
-  return ["increasing", "decreasing", "stable", "fluctuating"].includes(trend.toLowerCase());
+  return ["increasing", "decreasing", "stable", "fluctuating"].includes(
+    trend.toLowerCase(),
+  );
 }

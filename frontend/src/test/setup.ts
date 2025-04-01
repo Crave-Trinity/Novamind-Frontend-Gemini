@@ -259,7 +259,8 @@ vi.mock("@react-three/fiber", () => {
     Canvas: vi.fn().mockImplementation(({ children, ...props }) => {
       return document.createElement("div");
     }),
-    useThree: vi.fn().mockReturnValue({ // Removed incorrect generic type argument
+    useThree: vi.fn().mockReturnValue({
+      // Removed incorrect generic type argument
       camera: { position: { set: vi.fn() }, lookAt: vi.fn() },
       gl: { render: vi.fn() },
       scene: {},
@@ -313,7 +314,8 @@ beforeAll(() => {
   });
 
   // Mock canvas methods
-  HTMLCanvasElement.prototype.getContext = vi.fn(() => ({ // Cast mock to any to bypass strict signature check
+  HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
+    // Cast mock to any to bypass strict signature check
     fillRect: vi.fn(),
     clearRect: vi.fn(),
     getImageData: vi.fn(() => ({

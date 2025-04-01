@@ -12,7 +12,7 @@ export type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
-  NeuralImpactRating
+  NeuralImpactRating,
 } from "./brain/mapping/brain-mapping";
 
 // Export brain mapping functions
@@ -20,7 +20,7 @@ export {
   calculateNeuralActivation,
   mapSymptomsToRegions,
   mapDiagnosesToRegions,
-  calculateTreatmentImpact
+  calculateTreatmentImpact,
 } from "./brain/mapping/brain-mapping";
 
 // Export clinical models

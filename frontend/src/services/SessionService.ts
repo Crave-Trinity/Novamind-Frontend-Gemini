@@ -11,7 +11,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { validateSessionOptions } from "./SessionService.runtime"; // Import validator
 import { auditLogService, AuditEventType } from "./AuditLogService";
-import { Result, Ok, Err } from 'ts-results'; // Import Result for consistency (though not used in return types here)
+import { Result, Ok, Err } from "ts-results"; // Import Result for consistency (though not used in return types here)
 
 /**
  * Configuration options for session management
@@ -75,13 +75,20 @@ let isWarningActive = false;
 /**
  * Initialize the session service with options
  */
-export function initializeSessionService(options: SessionOptions = {}): boolean { // Return boolean for success/failure
+export function initializeSessionService(
+  options: SessionOptions = {},
+): boolean {
+  // Return boolean for success/failure
   // Validate options
   const validationResult = validateSessionOptions(options);
   if (validationResult.err) {
-      console.error("[SessionService] Invalid options provided:", validationResult.val.message, options);
-      // Optionally throw or handle the error based on desired strictness
-      return false; // Indicate initialization failure
+    console.error(
+      "[SessionService] Invalid options provided:",
+      validationResult.val.message,
+      options,
+    );
+    // Optionally throw or handle the error based on desired strictness
+    return false; // Indicate initialization failure
   }
   const validatedOptions = validationResult.val; // Use validated options
 
@@ -114,7 +121,8 @@ export function initializeSessionService(options: SessionOptions = {}): boolean 
     startSessionTimer();
 
     // Log initialization
-    auditLogService.log(AuditEventType.SYSTEM_ERROR, { // Consider a more specific type like SYSTEM_INIT or CONFIGURATION_CHANGE
+    auditLogService.log(AuditEventType.SYSTEM_ERROR, {
+      // Consider a more specific type like SYSTEM_INIT or CONFIGURATION_CHANGE
       action: "session_service_initialized",
       details: `Session timeout set to ${sessionTimeout}ms, warning at ${warningTime}ms`,
       result: "success", // Assuming initialization is always success if validation passes
@@ -298,7 +306,7 @@ export function useSessionTimeout(options: SessionOptions = {}): {
       // If hook is disabled, ensure global timers are cleared if they were set by this hook instance
       // This logic might need refinement depending on how global vs hook-specific enabling is intended
       // For now, we assume the hook controls its own timers based on its enabled prop.
-       if (intervalRef.current) clearInterval(intervalRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
       // We don't destroy the global service here, just the hook's interaction
       return;
     }
@@ -335,14 +343,13 @@ export function useSessionTimeout(options: SessionOptions = {}): {
     // This might re-initialize repeatedly if the hook re-renders often with changing options.
     // Consider moving initialization outside the hook or using a context provider.
     const initOptions: SessionOptions = {
-        timeout,
-        warningTime: warning,
-        onWarning: handleWarning,
-        onTimeout: handleTimeout,
-        enabled: true, // Hook always enables the global timer if it's used and enabled
+      timeout,
+      warningTime: warning,
+      onWarning: handleWarning,
+      onTimeout: handleTimeout,
+      enabled: true, // Hook always enables the global timer if it's used and enabled
     };
-     initializeSessionService(initOptions); // Re-initialize global service with potentially new callbacks
-
+    initializeSessionService(initOptions); // Re-initialize global service with potentially new callbacks
 
     // Cleanup on unmount: Clear interval and potentially global timers/listeners
     // if this is the last active hook instance (more complex state needed for that).

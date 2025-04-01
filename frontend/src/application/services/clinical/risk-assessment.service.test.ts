@@ -73,9 +73,9 @@ describe("RiskAssessmentService", () => {
         anxietyScore: 85,
         substanceUseScore: 70,
         suicidalIdeationScore: 80,
-        socialSupportScore: 20
+        socialSupportScore: 20,
       });
-      
+
       expect(result.riskLevel).toBe("critical");
       expect(result.overallScore).toBeGreaterThan(75);
     });
@@ -86,9 +86,9 @@ describe("RiskAssessmentService", () => {
         anxietyScore: 55,
         substanceUseScore: 50,
         suicidalIdeationScore: 60,
-        socialSupportScore: 40
+        socialSupportScore: 40,
       });
-      
+
       expect(result.riskLevel).toBe("high");
       expect(result.overallScore).toBeGreaterThanOrEqual(50);
       expect(result.overallScore).toBeLessThan(75);
@@ -100,9 +100,9 @@ describe("RiskAssessmentService", () => {
         anxietyScore: 35,
         substanceUseScore: 25,
         suicidalIdeationScore: 20,
-        socialSupportScore: 70
+        socialSupportScore: 70,
       });
-      
+
       expect(result.riskLevel).toBe("moderate");
       expect(result.overallScore).toBeGreaterThanOrEqual(25);
       expect(result.overallScore).toBeLessThan(50);
@@ -115,40 +115,45 @@ describe("RiskAssessmentService", () => {
         anxietyScore: 50,
         substanceUseScore: 50,
         suicidalIdeationScore: 90, // High suicidal risk
-        socialSupportScore: 50
+        socialSupportScore: 50,
       });
-      
-      const highDepressionRisk = riskAssessmentService.calculateOverallRiskLevel({
-        depressionScore: 90, // High depression risk
-        anxietyScore: 50,
-        substanceUseScore: 50,
-        suicidalIdeationScore: 50,
-        socialSupportScore: 50
-      });
-      
+
+      const highDepressionRisk =
+        riskAssessmentService.calculateOverallRiskLevel({
+          depressionScore: 90, // High depression risk
+          anxietyScore: 50,
+          substanceUseScore: 50,
+          suicidalIdeationScore: 50,
+          socialSupportScore: 50,
+        });
+
       // Suicidal ideation should have more weight than depression
-      expect(highSuicidalRisk.overallScore).toBeGreaterThan(highDepressionRisk.overallScore);
+      expect(highSuicidalRisk.overallScore).toBeGreaterThan(
+        highDepressionRisk.overallScore,
+      );
     });
-    
+
     it("correctly accounts for social support as a protective factor", () => {
       const lowSupportRisk = riskAssessmentService.calculateOverallRiskLevel({
         depressionScore: 50,
         anxietyScore: 50,
         substanceUseScore: 50,
         suicidalIdeationScore: 50,
-        socialSupportScore: 20 // Low support = higher risk
+        socialSupportScore: 20, // Low support = higher risk
       });
-      
+
       const highSupportRisk = riskAssessmentService.calculateOverallRiskLevel({
         depressionScore: 50,
         anxietyScore: 50,
         substanceUseScore: 50,
         suicidalIdeationScore: 50,
-        socialSupportScore: 80 // High support = lower risk
+        socialSupportScore: 80, // High support = lower risk
       });
-      
+
       // Lower social support should result in higher risk
-      expect(lowSupportRisk.overallScore).toBeGreaterThan(highSupportRisk.overallScore);
+      expect(lowSupportRisk.overallScore).toBeGreaterThan(
+        highSupportRisk.overallScore,
+      );
     });
   });
 });

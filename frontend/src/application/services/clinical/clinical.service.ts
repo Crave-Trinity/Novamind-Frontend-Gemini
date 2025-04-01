@@ -5,20 +5,24 @@
  */
 
 import axios from "axios";
-import { Result, success, failure, SafeArray } from "../../../domain/types/shared/common";
+import {
+  Result,
+  success,
+  failure,
+  SafeArray,
+} from "../../../domain/types/shared/common";
 import {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
 } from "../../../domain/models/brain/mapping/brain-mapping";
+import { RiskAssessment, RiskLevel } from "../../../domain/types/clinical/risk";
+import { TreatmentResponsePrediction } from "../../../domain/types/clinical/treatment";
 import {
-  RiskAssessment,
-  RiskLevel,
-} from "../../../domain/types/clinical/risk";
-import {
-  TreatmentResponsePrediction,
-} from "../../../domain/types/clinical/treatment";
-import { Symptom, Diagnosis, Treatment } from "../../../domain/types/clinical/patient";
+  Symptom,
+  Diagnosis,
+  Treatment,
+} from "../../../domain/types/clinical/patient";
 
 // API endpoints
 const API_BASE_URL =
@@ -336,7 +340,9 @@ export const clinicalService = {
               );
             case 500:
               return failure(
-                new Error("Server error while retrieving treatment predictions"),
+                new Error(
+                  "Server error while retrieving treatment predictions",
+                ),
               );
             default:
               return failure(new Error(data.message || `API error: ${status}`));
@@ -608,9 +614,7 @@ export const clinicalService = {
 
           switch (status) {
             case 404:
-              return failure(
-                new Error(`Patient or symptom not found`),
-              );
+              return failure(new Error(`Patient or symptom not found`));
             case 400:
               return failure(
                 new Error(`Invalid symptom update: ${data.message}`),
@@ -620,9 +624,7 @@ export const clinicalService = {
                 new Error("Insufficient permissions to update patient symptom"),
               );
             case 500:
-              return failure(
-                new Error("Server error while updating symptom"),
-              );
+              return failure(new Error("Server error while updating symptom"));
             default:
               return failure(new Error(data.message || `API error: ${status}`));
           }
@@ -673,17 +675,14 @@ export const clinicalService = {
         confidenceLevel: number;
         limitations: string[];
         references: string[];
-      }>(
-        `${CLINICAL_ENDPOINT}/predictions/${predictionId}/explanation`,
-        {
-          params: { detailLevel },
-          timeout: 15000,
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
+      }>(`${CLINICAL_ENDPOINT}/predictions/${predictionId}/explanation`, {
+        params: { detailLevel },
+        timeout: 15000,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
         },
-      );
+      });
 
       // Successful response
       return success(response.data);
@@ -705,7 +704,9 @@ export const clinicalService = {
               );
             case 403:
               return failure(
-                new Error("Insufficient permissions to access algorithm explanation"),
+                new Error(
+                  "Insufficient permissions to access algorithm explanation",
+                ),
               );
             case 500:
               return failure(
@@ -797,7 +798,9 @@ export const clinicalService = {
               );
             case 403:
               return failure(
-                new Error("Insufficient permissions to generate temporal projections"),
+                new Error(
+                  "Insufficient permissions to generate temporal projections",
+                ),
               );
             case 500:
               return failure(

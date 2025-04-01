@@ -4,7 +4,11 @@
  * with clinical precision and mathematical integrity
  */
 
-import { BrainModel, BrainRegion, NeuralConnection } from "../../../domain/types/brain/models";
+import {
+  BrainModel,
+  BrainRegion,
+  NeuralConnection,
+} from "../../../domain/types/brain/models";
 import { Result, success, failure } from "../../../domain/types/shared/common";
 import { TypeVerificationError } from "../../../domain/utils/shared/type-verification.runtime";
 
@@ -17,9 +21,9 @@ export function isBrainModel(obj: unknown): obj is BrainModel {
   if (!obj || typeof obj !== "object") {
     return false;
   }
-  
+
   const model = obj as Partial<BrainModel>;
-  
+
   return (
     typeof model.id === "string" &&
     typeof model.name === "string" &&
@@ -35,15 +39,18 @@ export function isBrainModel(obj: unknown): obj is BrainModel {
  * @param field - Optional field name for error context
  * @returns A Result with the validated BrainModel or an error
  */
-export function validateBrainModel(obj: unknown, field?: string): Result<BrainModel> {
+export function validateBrainModel(
+  obj: unknown,
+  field?: string,
+): Result<BrainModel> {
   if (!obj || typeof obj !== "object") {
     return failure(
       new TypeVerificationError(
         "Invalid BrainModel: expected an object",
         "BrainModel",
         typeof obj,
-        field
-      )
+        field,
+      ),
     );
   }
 
@@ -56,8 +63,8 @@ export function validateBrainModel(obj: unknown, field?: string): Result<BrainMo
         "Invalid BrainModel: missing or invalid 'id'",
         "string",
         typeof model.id,
-        field ? `${field}.id` : "id"
-      )
+        field ? `${field}.id` : "id",
+      ),
     );
   }
 
@@ -67,8 +74,8 @@ export function validateBrainModel(obj: unknown, field?: string): Result<BrainMo
         "Invalid BrainModel: missing or invalid 'name'",
         "string",
         typeof model.name,
-        field ? `${field}.name` : "name"
-      )
+        field ? `${field}.name` : "name",
+      ),
     );
   }
 
@@ -79,8 +86,8 @@ export function validateBrainModel(obj: unknown, field?: string): Result<BrainMo
         "Invalid BrainModel: missing or invalid 'regions'",
         "Array<BrainRegion>",
         typeof model.regions,
-        field ? `${field}.regions` : "regions"
-      )
+        field ? `${field}.regions` : "regions",
+      ),
     );
   }
 
@@ -90,8 +97,8 @@ export function validateBrainModel(obj: unknown, field?: string): Result<BrainMo
         "Invalid BrainModel: missing or invalid 'connections'",
         "Array<NeuralConnection>",
         typeof model.connections,
-        field ? `${field}.connections` : "connections"
-      )
+        field ? `${field}.connections` : "connections",
+      ),
     );
   }
 
@@ -102,8 +109,8 @@ export function validateBrainModel(obj: unknown, field?: string): Result<BrainMo
         "Invalid BrainModel: missing or invalid 'version'",
         "number",
         typeof model.version,
-        field ? `${field}.version` : "version"
-      )
+        field ? `${field}.version` : "version",
+      ),
     );
   }
 
@@ -115,8 +122,8 @@ export function validateBrainModel(obj: unknown, field?: string): Result<BrainMo
           `Invalid BrainModel: invalid region at index ${i}`,
           "BrainRegion",
           typeof model.regions[i],
-          field ? `${field}.regions[${i}]` : `regions[${i}]`
-        )
+          field ? `${field}.regions[${i}]` : `regions[${i}]`,
+        ),
       );
     }
   }
@@ -129,8 +136,8 @@ export function validateBrainModel(obj: unknown, field?: string): Result<BrainMo
           `Invalid BrainModel: invalid connection at index ${i}`,
           "NeuralConnection",
           typeof model.connections[i],
-          field ? `${field}.connections[${i}]` : `connections[${i}]`
-        )
+          field ? `${field}.connections[${i}]` : `connections[${i}]`,
+        ),
       );
     }
   }
@@ -147,9 +154,9 @@ export function isBrainRegion(obj: unknown): obj is BrainRegion {
   if (!obj || typeof obj !== "object") {
     return false;
   }
-  
+
   const region = obj as Partial<BrainRegion>;
-  
+
   return (
     typeof region.id === "string" &&
     typeof region.name === "string" &&
@@ -164,15 +171,18 @@ export function isBrainRegion(obj: unknown): obj is BrainRegion {
  * @param field - Optional field name for error context
  * @returns A Result with the validated BrainRegion or an error
  */
-export function validateBrainRegion(obj: unknown, field?: string): Result<BrainRegion> {
+export function validateBrainRegion(
+  obj: unknown,
+  field?: string,
+): Result<BrainRegion> {
   if (!obj || typeof obj !== "object") {
     return failure(
       new TypeVerificationError(
         "Invalid BrainRegion: expected an object",
         "BrainRegion",
         typeof obj,
-        field
-      )
+        field,
+      ),
     );
   }
 
@@ -185,8 +195,8 @@ export function validateBrainRegion(obj: unknown, field?: string): Result<BrainR
         "Invalid BrainRegion: missing or invalid 'id'",
         "string",
         typeof region.id,
-        field ? `${field}.id` : "id"
-      )
+        field ? `${field}.id` : "id",
+      ),
     );
   }
 
@@ -196,20 +206,24 @@ export function validateBrainRegion(obj: unknown, field?: string): Result<BrainR
         "Invalid BrainRegion: missing or invalid 'name'",
         "string",
         typeof region.name,
-        field ? `${field}.name` : "name"
-      )
+        field ? `${field}.name` : "name",
+      ),
     );
   }
 
   // Validate numeric fields
-  if (typeof region.activityLevel !== "number" || region.activityLevel < 0 || region.activityLevel > 1) {
+  if (
+    typeof region.activityLevel !== "number" ||
+    region.activityLevel < 0 ||
+    region.activityLevel > 1
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid BrainRegion: missing or invalid 'activityLevel', must be a number between 0 and 1",
         "number",
         typeof region.activityLevel,
-        field ? `${field}.activityLevel` : "activityLevel"
-      )
+        field ? `${field}.activityLevel` : "activityLevel",
+      ),
     );
   }
 
@@ -220,8 +234,8 @@ export function validateBrainRegion(obj: unknown, field?: string): Result<BrainR
         "Invalid BrainRegion: missing or invalid 'isActive'",
         "boolean",
         typeof region.isActive,
-        field ? `${field}.isActive` : "isActive"
-      )
+        field ? `${field}.isActive` : "isActive",
+      ),
     );
   }
 
@@ -237,9 +251,9 @@ export function isNeuralConnection(obj: unknown): obj is NeuralConnection {
   if (!obj || typeof obj !== "object") {
     return false;
   }
-  
+
   const connection = obj as Partial<NeuralConnection>;
-  
+
   return (
     typeof connection.id === "string" &&
     typeof connection.sourceId === "string" &&
@@ -256,15 +270,18 @@ export function isNeuralConnection(obj: unknown): obj is NeuralConnection {
  * @param field - Optional field name for error context
  * @returns A Result with the validated NeuralConnection or an error
  */
-export function validateNeuralConnection(obj: unknown, field?: string): Result<NeuralConnection> {
+export function validateNeuralConnection(
+  obj: unknown,
+  field?: string,
+): Result<NeuralConnection> {
   if (!obj || typeof obj !== "object") {
     return failure(
       new TypeVerificationError(
         "Invalid NeuralConnection: expected an object",
         "NeuralConnection",
         typeof obj,
-        field
-      )
+        field,
+      ),
     );
   }
 
@@ -277,8 +294,8 @@ export function validateNeuralConnection(obj: unknown, field?: string): Result<N
         "Invalid NeuralConnection: missing or invalid 'id'",
         "string",
         typeof connection.id,
-        field ? `${field}.id` : "id"
-      )
+        field ? `${field}.id` : "id",
+      ),
     );
   }
 
@@ -288,8 +305,8 @@ export function validateNeuralConnection(obj: unknown, field?: string): Result<N
         "Invalid NeuralConnection: missing or invalid 'sourceId'",
         "string",
         typeof connection.sourceId,
-        field ? `${field}.sourceId` : "sourceId"
-      )
+        field ? `${field}.sourceId` : "sourceId",
+      ),
     );
   }
 
@@ -299,33 +316,39 @@ export function validateNeuralConnection(obj: unknown, field?: string): Result<N
         "Invalid NeuralConnection: missing or invalid 'targetId'",
         "string",
         typeof connection.targetId,
-        field ? `${field}.targetId` : "targetId"
-      )
+        field ? `${field}.targetId` : "targetId",
+      ),
     );
   }
 
   // Validate numeric fields
-  if (typeof connection.strength !== "number" || connection.strength < 0 || connection.strength > 1) {
+  if (
+    typeof connection.strength !== "number" ||
+    connection.strength < 0 ||
+    connection.strength > 1
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid NeuralConnection: missing or invalid 'strength', must be a number between 0 and 1",
         "number",
         typeof connection.strength,
-        field ? `${field}.strength` : "strength"
-      )
+        field ? `${field}.strength` : "strength",
+      ),
     );
   }
 
   // Validate type field
-  if (typeof connection.type !== "string" || 
-     (connection.type !== "excitatory" && connection.type !== "inhibitory")) {
+  if (
+    typeof connection.type !== "string" ||
+    (connection.type !== "excitatory" && connection.type !== "inhibitory")
+  ) {
     return failure(
       new TypeVerificationError(
         "Invalid NeuralConnection: missing or invalid 'type', must be 'excitatory' or 'inhibitory'",
         "string",
         typeof connection.type,
-        field ? `${field}.type` : "type"
-      )
+        field ? `${field}.type` : "type",
+      ),
     );
   }
 
@@ -336,8 +359,8 @@ export function validateNeuralConnection(obj: unknown, field?: string): Result<N
         "Invalid NeuralConnection: missing or invalid 'active'",
         "boolean",
         typeof connection.active,
-        field ? `${field}.active` : "active"
-      )
+        field ? `${field}.active` : "active",
+      ),
     );
   }
 

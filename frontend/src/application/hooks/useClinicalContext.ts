@@ -174,18 +174,18 @@ export function useClinicalContext(
   } = useQuery<TreatmentResponsePrediction[], Error>({
     queryKey: [treatmentPredictionsKey, patientId],
     queryFn: async () => {
-       if (!patientId) {
-         // As above, consider return vs throw based on desired state handling
-         throw new Error("No patient ID provided for treatment predictions");
-       }
-       const result = await clinicalService.fetchTreatmentPredictions(patientId);
-       if (result.success) {
-         return result.data;
-       } else {
-         throw (
-           result.error || new Error("Failed to fetch treatment predictions")
-         );
-       }
+      if (!patientId) {
+        // As above, consider return vs throw based on desired state handling
+        throw new Error("No patient ID provided for treatment predictions");
+      }
+      const result = await clinicalService.fetchTreatmentPredictions(patientId);
+      if (result.success) {
+        return result.data;
+      } else {
+        throw (
+          result.error || new Error("Failed to fetch treatment predictions")
+        );
+      }
     },
     enabled: !!patientId, // Only run query if patientId exists
     staleTime: 30 * 60 * 1000, // 30 minutes

@@ -15,9 +15,13 @@ import {
   isRiskAssessment,
   validateRiskAssessment,
   isTreatmentResponsePrediction,
-  validateTreatmentResponsePrediction
+  validateTreatmentResponsePrediction,
 } from "./clinical.service.runtime";
-import { Symptom, Diagnosis, Treatment } from "../../../domain/types/clinical/patient";
+import {
+  Symptom,
+  Diagnosis,
+  Treatment,
+} from "../../../domain/types/clinical/patient";
 import { RiskAssessment, RiskLevel } from "../../../domain/types/clinical/risk";
 import { TreatmentResponsePrediction } from "../../../domain/types/clinical/treatment";
 import { Result } from "../../../domain/types/shared/common";
@@ -30,11 +34,15 @@ type TypeVerificationError = Error & {
 };
 
 // Helper functions for testing the Result type
-function isSuccess<T, E = Error>(result: Result<T, E>): result is { success: true; value: T } {
+function isSuccess<T, E = Error>(
+  result: Result<T, E>,
+): result is { success: true; value: T } {
   return result.success === true;
 }
 
-function isFailure<T, E = Error>(result: Result<T, E>): result is { success: false; error: E } {
+function isFailure<T, E = Error>(
+  result: Result<T, E>,
+): result is { success: false; error: E } {
   return result.success === false;
 }
 
@@ -52,7 +60,7 @@ describe("ClinicalService Runtime Validation", () => {
         onsetDate: "2025-03-01T00:00:00Z",
         duration: "4 weeks",
         triggers: ["stress", "poor-sleep"],
-        notes: "Worse in evenings"
+        notes: "Worse in evenings",
       };
 
       expect(isSymptom(validSymptom)).toBe(true);
@@ -68,28 +76,32 @@ describe("ClinicalService Runtime Validation", () => {
 
     it("returns false for objects missing required properties", () => {
       // Missing id
-      expect(isSymptom({
-        name: "Depressed Mood",
-        category: "affective",
-        severity: 0.7,
-        frequency: "daily",
-        impact: "moderate",
-        progression: "stable",
-        onsetDate: "2025-03-01T00:00:00Z",
-        duration: "4 weeks"
-      })).toBe(false);
+      expect(
+        isSymptom({
+          name: "Depressed Mood",
+          category: "affective",
+          severity: 0.7,
+          frequency: "daily",
+          impact: "moderate",
+          progression: "stable",
+          onsetDate: "2025-03-01T00:00:00Z",
+          duration: "4 weeks",
+        }),
+      ).toBe(false);
 
       // Missing name
-      expect(isSymptom({
-        id: "symptom-123",
-        category: "affective",
-        severity: 0.7,
-        frequency: "daily",
-        impact: "moderate",
-        progression: "stable",
-        onsetDate: "2025-03-01T00:00:00Z",
-        duration: "4 weeks"
-      })).toBe(false);
+      expect(
+        isSymptom({
+          id: "symptom-123",
+          category: "affective",
+          severity: 0.7,
+          frequency: "daily",
+          impact: "moderate",
+          progression: "stable",
+          onsetDate: "2025-03-01T00:00:00Z",
+          duration: "4 weeks",
+        }),
+      ).toBe(false);
     });
   });
 
@@ -106,7 +118,7 @@ describe("ClinicalService Runtime Validation", () => {
         onsetDate: "2025-03-01T00:00:00Z",
         duration: "4 weeks",
         triggers: ["stress", "poor-sleep"],
-        notes: "Worse in evenings"
+        notes: "Worse in evenings",
       };
 
       const result = validateSymptom(validSymptom);
@@ -140,7 +152,7 @@ describe("ClinicalService Runtime Validation", () => {
         impact: "moderate",
         progression: "stable",
         onsetDate: "2025-03-01T00:00:00Z",
-        duration: "4 weeks"
+        duration: "4 weeks",
       };
 
       const result = validateSymptom(symptomWithInvalidSeverity);
@@ -160,7 +172,7 @@ describe("ClinicalService Runtime Validation", () => {
         impact: "moderate",
         progression: "stable",
         onsetDate: "not-a-date",
-        duration: "4 weeks"
+        duration: "4 weeks",
       };
 
       const result = validateSymptom(symptomWithInvalidOnset);
@@ -190,7 +202,7 @@ describe("ClinicalService Runtime Validation", () => {
         severity: "moderate",
         diagnosisDate: "2025-02-15T00:00:00Z",
         status: "active",
-        notes: "Patient exhibits persistent low mood and anhedonia"
+        notes: "Patient exhibits persistent low mood and anhedonia",
       };
 
       expect(isDiagnosis(validDiagnosis)).toBe(true);
@@ -206,14 +218,16 @@ describe("ClinicalService Runtime Validation", () => {
 
     it("returns false for objects missing required properties", () => {
       // Missing id
-      expect(isDiagnosis({
-        code: "F32.1",
-        codingSystem: "ICD-10",
-        name: "Major Depressive Disorder, Single Episode, Moderate",
-        severity: "moderate",
-        diagnosisDate: "2025-02-15T00:00:00Z",
-        status: "active"
-      })).toBe(false);
+      expect(
+        isDiagnosis({
+          code: "F32.1",
+          codingSystem: "ICD-10",
+          name: "Major Depressive Disorder, Single Episode, Moderate",
+          severity: "moderate",
+          diagnosisDate: "2025-02-15T00:00:00Z",
+          status: "active",
+        }),
+      ).toBe(false);
     });
   });
 
@@ -227,7 +241,7 @@ describe("ClinicalService Runtime Validation", () => {
         severity: "moderate",
         diagnosisDate: "2025-02-15T00:00:00Z",
         status: "active",
-        notes: "Patient exhibits persistent low mood and anhedonia"
+        notes: "Patient exhibits persistent low mood and anhedonia",
       };
 
       const result = validateDiagnosis(validDiagnosis);
@@ -245,7 +259,7 @@ describe("ClinicalService Runtime Validation", () => {
         name: "Major Depressive Disorder, Single Episode, Moderate",
         severity: 3, // Should be a string, not a number
         diagnosisDate: "2025-02-15T00:00:00Z",
-        status: "active"
+        status: "active",
       };
 
       const result = validateDiagnosis(diagnosisWithInvalidSeverity);
@@ -263,7 +277,7 @@ describe("ClinicalService Runtime Validation", () => {
         name: "Major Depressive Disorder, Single Episode, Moderate",
         severity: "moderate",
         diagnosisDate: "2025-02-15T00:00:00Z",
-        status: 123 // Should be a string, not a number
+        status: 123, // Should be a string, not a number
       };
 
       const result = validateDiagnosis(diagnosisWithInvalidStatus);
@@ -284,7 +298,7 @@ describe("ClinicalService Runtime Validation", () => {
         startDate: "2025-03-15T00:00:00Z",
         status: "active",
         dose: "20mg daily",
-        provider: "Dr. Smith"
+        provider: "Dr. Smith",
       };
 
       expect(isTreatment(validTreatment)).toBe(true);
@@ -308,7 +322,7 @@ describe("ClinicalService Runtime Validation", () => {
         startDate: "2025-03-15T00:00:00Z",
         status: "active",
         dose: "20mg daily",
-        provider: "Dr. Smith"
+        provider: "Dr. Smith",
       };
 
       const result = validateTreatment(validTreatment);
@@ -328,7 +342,7 @@ describe("ClinicalService Runtime Validation", () => {
         endDate: "2025-06-15T00:00:00Z",
         status: "completed",
         dose: "20mg daily",
-        provider: "Dr. Smith"
+        provider: "Dr. Smith",
       };
 
       const result = validateTreatment(validTreatment);
@@ -347,7 +361,7 @@ describe("ClinicalService Runtime Validation", () => {
         startDate: "2025-03-15T00:00:00Z",
         endDate: "not-a-date",
         status: "completed",
-        dose: "20mg daily"
+        dose: "20mg daily",
       };
 
       const result = validateTreatment(treatmentWithInvalidEndDate);
@@ -373,14 +387,14 @@ describe("ClinicalService Runtime Validation", () => {
             riskLevel: RiskLevel.LOW,
             confidenceScore: 0.9,
             evidence: ["no ideation reported", "strong social support"],
-            urgency: "routine"
-          }
+            urgency: "routine",
+          },
         ],
         temporalTrend: "stable",
         contributingFactors: [],
         protectiveFactors: [],
         neuralCorrelates: [],
-        nextAssessmentDue: "2025-04-15T10:00:00Z"
+        nextAssessmentDue: "2025-04-15T10:00:00Z",
       };
 
       expect(isRiskAssessment(validRiskAssessment)).toBe(true);
@@ -409,14 +423,14 @@ describe("ClinicalService Runtime Validation", () => {
             riskLevel: RiskLevel.LOW,
             confidenceScore: 0.9,
             evidence: ["no ideation reported", "strong social support"],
-            urgency: "routine"
-          }
+            urgency: "routine",
+          },
         ],
         temporalTrend: "stable",
         contributingFactors: [],
         protectiveFactors: [],
         neuralCorrelates: [],
-        nextAssessmentDue: "2025-04-15T10:00:00Z"
+        nextAssessmentDue: "2025-04-15T10:00:00Z",
       };
 
       const result = validateRiskAssessment(validRiskAssessment);
@@ -440,13 +454,13 @@ describe("ClinicalService Runtime Validation", () => {
             riskLevel: "LOW",
             confidenceScore: 0.9,
             evidence: ["No suicidal ideation reported"],
-            urgency: "low"
-          }
+            urgency: "low",
+          },
         ],
         temporalTrend: "stable",
         contributingFactors: [],
         protectiveFactors: [],
-        neuralCorrelates: []
+        neuralCorrelates: [],
       };
 
       const result = validateRiskAssessment(assessmentWithInvalidRiskLevel);
@@ -467,7 +481,7 @@ describe("ClinicalService Runtime Validation", () => {
         algorithm: {
           name: "Neural Treatment Predictor",
           version: "2.1",
-          confidence: 0.85
+          confidence: 0.85,
         },
         prediction: {
           responseType: "response",
@@ -475,19 +489,19 @@ describe("ClinicalService Runtime Validation", () => {
           confidenceInterval: [0.65, 0.85],
           timeToEffect: {
             expected: 14,
-            range: [7, 21]
+            range: [7, 21],
           },
           durability: {
             expected: 6,
-            probability: 0.8
-          }
+            probability: 0.8,
+          },
         },
         symptomSpecificPredictions: [
           {
             symptom: "depressed-mood",
             improvementProbability: 0.8,
-            expectedImprovement: 70
-          }
+            expectedImprovement: 70,
+          },
         ],
         sideEffectRisks: [
           {
@@ -495,24 +509,25 @@ describe("ClinicalService Runtime Validation", () => {
             probability: 0.3,
             severity: "mild",
             timeline: "acute",
-            mitigationPossible: true
-          }
+            mitigationPossible: true,
+          },
         ],
         neurobiologicalMechanisms: [
           {
             pathwayName: "Serotonergic transmission",
-            impactDescription: "Increased serotonin availability in synaptic cleft",
+            impactDescription:
+              "Increased serotonin availability in synaptic cleft",
             confidenceLevel: "established",
-            relevantRegions: ["Prefrontal cortex", "Hippocampus"]
-          }
+            relevantRegions: ["Prefrontal cortex", "Hippocampus"],
+          },
         ],
         personalizationFactors: [
           {
             factor: "Age",
             impact: "neutral",
             strength: "moderate",
-            evidenceQuality: "high"
-          }
+            evidenceQuality: "high",
+          },
         ],
         limitations: ["Limited data on long-term outcomes"],
         alternatives: [
@@ -520,14 +535,14 @@ describe("ClinicalService Runtime Validation", () => {
             treatmentType: "psychotherapy",
             treatmentName: "CBT",
             predictedResponseProbability: 0.65,
-            rationale: "Evidence-based for depressive symptoms"
-          }
+            rationale: "Evidence-based for depressive symptoms",
+          },
         ],
         dataQualityAssessment: {
           overallQuality: "high",
           missingDataImpact: "minimal",
-          biasRiskLevel: "low"
-        }
+          biasRiskLevel: "low",
+        },
       };
 
       expect(isTreatmentResponsePrediction(validPrediction)).toBe(true);
@@ -551,7 +566,7 @@ describe("ClinicalService Runtime Validation", () => {
         algorithm: {
           name: "Neural Treatment Predictor",
           version: "2.1",
-          confidence: 0.85
+          confidence: 0.85,
         },
         prediction: {
           responseType: "response",
@@ -559,19 +574,19 @@ describe("ClinicalService Runtime Validation", () => {
           confidenceInterval: [0.65, 0.85],
           timeToEffect: {
             expected: 14,
-            range: [7, 21]
+            range: [7, 21],
           },
           durability: {
             expected: 6,
-            probability: 0.8
-          }
+            probability: 0.8,
+          },
         },
         symptomSpecificPredictions: [
           {
             symptom: "depressed-mood",
             improvementProbability: 0.8,
-            expectedImprovement: 70
-          }
+            expectedImprovement: 70,
+          },
         ],
         sideEffectRisks: [
           {
@@ -579,24 +594,25 @@ describe("ClinicalService Runtime Validation", () => {
             probability: 0.3,
             severity: "mild",
             timeline: "acute",
-            mitigationPossible: true
-          }
+            mitigationPossible: true,
+          },
         ],
         neurobiologicalMechanisms: [
           {
             pathwayName: "Serotonergic transmission",
-            impactDescription: "Increased serotonin availability in synaptic cleft",
+            impactDescription:
+              "Increased serotonin availability in synaptic cleft",
             confidenceLevel: "established",
-            relevantRegions: ["Prefrontal cortex", "Hippocampus"]
-          }
+            relevantRegions: ["Prefrontal cortex", "Hippocampus"],
+          },
         ],
         personalizationFactors: [
           {
             factor: "Age",
             impact: "neutral",
             strength: "moderate",
-            evidenceQuality: "high"
-          }
+            evidenceQuality: "high",
+          },
         ],
         limitations: ["Limited data on long-term outcomes"],
         alternatives: [
@@ -604,14 +620,14 @@ describe("ClinicalService Runtime Validation", () => {
             treatmentType: "psychotherapy",
             treatmentName: "CBT",
             predictedResponseProbability: 0.65,
-            rationale: "Evidence-based for depressive symptoms"
-          }
+            rationale: "Evidence-based for depressive symptoms",
+          },
         ],
         dataQualityAssessment: {
           overallQuality: "high",
           missingDataImpact: "minimal",
-          biasRiskLevel: "low"
-        }
+          biasRiskLevel: "low",
+        },
       };
 
       const result = validateTreatmentResponsePrediction(validPrediction);
@@ -630,7 +646,7 @@ describe("ClinicalService Runtime Validation", () => {
         algorithm: {
           name: "Neural Treatment Predictor",
           version: "2.1",
-          confidence: 0.85
+          confidence: 0.85,
         },
         prediction: {
           responseType: "response",
@@ -639,8 +655,8 @@ describe("ClinicalService Runtime Validation", () => {
           timeToEffect: "not-an-object", // Invalid type
           durability: {
             expected: 6,
-            probability: 0.8
-          }
+            probability: 0.8,
+          },
         },
         symptomSpecificPredictions: [],
         sideEffectRisks: [],
@@ -651,11 +667,13 @@ describe("ClinicalService Runtime Validation", () => {
         dataQualityAssessment: {
           overallQuality: "high",
           missingDataImpact: "minimal",
-          biasRiskLevel: "low"
-        }
+          biasRiskLevel: "low",
+        },
       };
 
-      const result = validateTreatmentResponsePrediction(predictionWithInvalidTimeToEffect);
+      const result = validateTreatmentResponsePrediction(
+        predictionWithInvalidTimeToEffect,
+      );
       expect(result.success).toBe(false);
       if (isFailure(result)) {
         expect(result.error.message).toContain("timeToEffect");

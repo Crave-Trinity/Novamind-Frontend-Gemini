@@ -6,7 +6,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import axios from "axios";
 import { clinicalService } from "./clinical.service";
-import { SymptomNeuralMapping, DiagnosisNeuralMapping, TreatmentNeuralMapping } from "@domain/models/brainMapping";
+import {
+  SymptomNeuralMapping,
+  DiagnosisNeuralMapping,
+  TreatmentNeuralMapping,
+} from "@domain/models/brainMapping";
 import { RiskAssessment } from "@domain/types/clinical/risk";
 import { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
 import { Symptom, Diagnosis, Treatment } from "@domain/types/clinical/patient";
@@ -30,13 +34,13 @@ describe("Clinical Service", () => {
           brainRegions: ["prefrontal-cortex", "amygdala"],
           connectionTypes: ["inhibitory"],
           mappingConfidence: 0.85,
-          mappingSource: "clinical-research-v2"
-        }
+          mappingSource: "clinical-research-v2",
+        },
       ];
-      
+
       mockedAxios.get.mockResolvedValueOnce({
         data: mockMappings,
-        status: 200
+        status: 200,
       });
 
       // Act
@@ -48,8 +52,8 @@ describe("Clinical Service", () => {
       expect(mockedAxios.get).toHaveBeenCalledWith(
         expect.stringContaining("/mappings/symptoms"),
         expect.objectContaining({
-          timeout: 10000
-        })
+          timeout: 10000,
+        }),
       );
     });
 
@@ -58,11 +62,11 @@ describe("Clinical Service", () => {
       const mockError = {
         response: {
           status: 403,
-          data: { message: "Insufficient permissions" }
+          data: { message: "Insufficient permissions" },
         },
-        isAxiosError: true
+        isAxiosError: true,
       };
-      
+
       mockedAxios.get.mockRejectedValueOnce(mockError);
       mockedAxios.isAxiosError.mockReturnValueOnce(true);
 
@@ -83,15 +87,17 @@ describe("Clinical Service", () => {
           diagnosisId: "d1",
           diagnosisName: "Major Depressive Disorder",
           brainRegions: ["prefrontal-cortex", "hippocampus"],
-          activityPatterns: [{ regionId: "prefrontal-cortex", activity: "reduced" }],
+          activityPatterns: [
+            { regionId: "prefrontal-cortex", activity: "reduced" },
+          ],
           mappingConfidence: 0.8,
-          mappingSource: "clinical-research-v2"
-        }
+          mappingSource: "clinical-research-v2",
+        },
       ];
-      
+
       mockedAxios.get.mockResolvedValueOnce({
         data: mockMappings,
-        status: 200
+        status: 200,
       });
 
       // Act
@@ -112,15 +118,17 @@ describe("Clinical Service", () => {
           treatmentName: "SSRI",
           targetRegions: ["raphe-nuclei", "prefrontal-cortex"],
           primaryMechanism: "serotonin-reuptake-inhibition",
-          expectedResponse: [{ regionId: "prefrontal-cortex", response: "increased-activity" }],
+          expectedResponse: [
+            { regionId: "prefrontal-cortex", response: "increased-activity" },
+          ],
           mappingConfidence: 0.9,
-          mappingSource: "clinical-research-v2"
-        }
+          mappingSource: "clinical-research-v2",
+        },
       ];
-      
+
       mockedAxios.get.mockResolvedValueOnce({
         data: mockMappings,
-        status: 200
+        status: 200,
       });
 
       // Act
@@ -140,15 +148,15 @@ describe("Clinical Service", () => {
         overallRiskScore: 0.65,
         riskFactors: [
           { factor: "prior-history", score: 0.8, confidence: 0.9 },
-          { factor: "recent-life-events", score: 0.7, confidence: 0.85 }
+          { factor: "recent-life-events", score: 0.7, confidence: 0.85 },
         ],
         assessmentDate: "2023-04-01T10:00:00Z",
-        nextAssessmentDue: "2023-04-15T10:00:00Z"
+        nextAssessmentDue: "2023-04-15T10:00:00Z",
       };
-      
+
       mockedAxios.get.mockResolvedValueOnce({
         data: mockAssessment,
-        status: 200
+        status: 200,
       });
 
       // Act
@@ -159,7 +167,7 @@ describe("Clinical Service", () => {
       expect(result.value).toEqual(mockAssessment);
       expect(mockedAxios.get).toHaveBeenCalledWith(
         expect.stringContaining("/patients/p1/risk-assessment"),
-        expect.anything()
+        expect.anything(),
       );
     });
 
@@ -168,11 +176,11 @@ describe("Clinical Service", () => {
       const mockError = {
         response: {
           status: 404,
-          data: { message: "Patient not found" }
+          data: { message: "Patient not found" },
         },
-        isAxiosError: true
+        isAxiosError: true,
       };
-      
+
       mockedAxios.get.mockRejectedValueOnce(mockError);
       mockedAxios.isAxiosError.mockReturnValueOnce(true);
 
@@ -196,16 +204,16 @@ describe("Clinical Service", () => {
           confidence: 0.8,
           timeToResponse: { min: 14, max: 28, unit: "days" },
           sideEffectRisks: [
-            { effect: "nausea", probability: 0.3, severity: "mild" }
+            { effect: "nausea", probability: 0.3, severity: "mild" },
           ],
           recommendationStrength: "strong",
-          neuralBasis: "altered-serotonin-activity"
-        }
+          neuralBasis: "altered-serotonin-activity",
+        },
       ];
-      
+
       mockedAxios.get.mockResolvedValueOnce({
         data: mockPredictions,
-        status: 200
+        status: 200,
       });
 
       // Act
@@ -229,13 +237,13 @@ describe("Clinical Service", () => {
           duration: { value: 3, unit: "weeks" },
           frequency: "daily",
           triggers: ["stress", "poor-sleep"],
-          notes: "Worse in evenings"
-        }
+          notes: "Worse in evenings",
+        },
       ];
-      
+
       mockedAxios.get.mockResolvedValueOnce({
         data: mockSymptoms,
-        status: 200
+        status: 200,
       });
 
       // Act
@@ -258,34 +266,30 @@ describe("Clinical Service", () => {
         duration: { value: 3, unit: "weeks" },
         frequency: "daily",
         triggers: ["stress", "poor-sleep"],
-        notes: "Improving with treatment"
+        notes: "Improving with treatment",
       };
-      
+
       mockedAxios.patch.mockResolvedValueOnce({
         data: updatedSymptom,
-        status: 200
+        status: 200,
       });
 
       // Act
-      const result = await clinicalService.updateSymptom(
-        "p1", 
-        "s1", 
-        { 
-          severity: 0.5,
-          notes: "Improving with treatment"
-        }
-      );
+      const result = await clinicalService.updateSymptom("p1", "s1", {
+        severity: 0.5,
+        notes: "Improving with treatment",
+      });
 
       // Assert
       expect(result.success).toBe(true);
       expect(result.value).toEqual(updatedSymptom);
       expect(mockedAxios.patch).toHaveBeenCalledWith(
         expect.stringContaining("/patients/p1/symptoms/s1"),
-        expect.objectContaining({ 
+        expect.objectContaining({
           severity: 0.5,
-          notes: "Improving with treatment"
+          notes: "Improving with treatment",
         }),
-        expect.anything()
+        expect.anything(),
       );
     });
   });
@@ -295,22 +299,30 @@ describe("Clinical Service", () => {
       // Arrange
       const mockExplanation = {
         algorithmName: "Neural Treatment Response Predictor",
-        description: "Uses neural connectivity patterns to predict treatment efficacy",
-        factorsConsidered: ["neural-activity-patterns", "genetic-markers", "prior-treatment-responses"],
+        description:
+          "Uses neural connectivity patterns to predict treatment efficacy",
+        factorsConsidered: [
+          "neural-activity-patterns",
+          "genetic-markers",
+          "prior-treatment-responses",
+        ],
         confidenceLevel: 0.85,
-        limitations: ["limited-data-for-comorbid-conditions", "genetic-marker-specificity"],
-        references: ["doi:10.1000/journal.123", "doi:10.1000/journal.456"]
+        limitations: [
+          "limited-data-for-comorbid-conditions",
+          "genetic-marker-specificity",
+        ],
+        references: ["doi:10.1000/journal.123", "doi:10.1000/journal.456"],
       };
-      
+
       mockedAxios.get.mockResolvedValueOnce({
         data: mockExplanation,
-        status: 200
+        status: 200,
       });
 
       // Act
       const result = await clinicalService.generateAlgorithmExplanation(
-        "pred123", 
-        "technical"
+        "pred123",
+        "technical",
       );
 
       // Assert
@@ -319,8 +331,8 @@ describe("Clinical Service", () => {
       expect(mockedAxios.get).toHaveBeenCalledWith(
         expect.stringContaining("/predictions/pred123/explanation"),
         expect.objectContaining({
-          params: { detailLevel: "technical" }
-        })
+          params: { detailLevel: "technical" },
+        }),
       );
     });
   });
@@ -335,33 +347,33 @@ describe("Clinical Service", () => {
             dayOffset: 0,
             date: "2023-04-01T00:00:00Z",
             metrics: { "symptom-severity": 0.7 },
-            confidenceIntervals: { "symptom-severity": [0.65, 0.75] }
+            confidenceIntervals: { "symptom-severity": [0.65, 0.75] },
           },
           {
             dayOffset: 14,
             date: "2023-04-15T00:00:00Z",
             metrics: { "symptom-severity": 0.5 },
-            confidenceIntervals: { "symptom-severity": [0.45, 0.55] }
+            confidenceIntervals: { "symptom-severity": [0.45, 0.55] },
           },
           {
             dayOffset: 28,
             date: "2023-04-29T00:00:00Z",
             metrics: { "symptom-severity": 0.3 },
-            confidenceIntervals: { "symptom-severity": [0.25, 0.35] }
-          }
-        ]
+            confidenceIntervals: { "symptom-severity": [0.25, 0.35] },
+          },
+        ],
       };
-      
+
       mockedAxios.post.mockResolvedValueOnce({
         data: mockProjection,
-        status: 200
+        status: 200,
       });
 
       // Act
       const result = await clinicalService.generateTemporalProjections(
-        "p1", 
-        ["t1", "t2"], 
-        30
+        "p1",
+        ["t1", "t2"],
+        30,
       );
 
       // Assert
@@ -372,9 +384,9 @@ describe("Clinical Service", () => {
         expect.stringContaining("/patients/p1/temporal-projections"),
         expect.objectContaining({
           treatmentIds: ["t1", "t2"],
-          projectionDuration: 30
+          projectionDuration: 30,
         }),
-        expect.anything()
+        expect.anything(),
       );
     });
   });

@@ -53,28 +53,28 @@ export interface Coordinate {
 
 // Type guard for brain regions
 export function isBrainRegion(obj: unknown): obj is BrainRegion {
-  if (!obj || typeof obj !== 'object') return false;
-  
+  if (!obj || typeof obj !== "object") return false;
+
   const region = obj as Partial<BrainRegion>;
-  
+
   return (
-    typeof region.id === 'string' &&
-    typeof region.name === 'string' &&
-    typeof region.activityLevel === 'number' &&
-    typeof region.isActive === 'boolean' &&
+    typeof region.id === "string" &&
+    typeof region.name === "string" &&
+    typeof region.activityLevel === "number" &&
+    typeof region.isActive === "boolean" &&
     Array.isArray(region.connections)
   );
 }
 
 // Type guard for brain model
 export function isBrainModel(obj: unknown): obj is BrainModel {
-  if (!obj || typeof obj !== 'object') return false;
-  
+  if (!obj || typeof obj !== "object") return false;
+
   const model = obj as Partial<BrainModel>;
-  
+
   return (
-    typeof model.id === 'string' &&
-    typeof model.name === 'string' &&
+    typeof model.id === "string" &&
+    typeof model.name === "string" &&
     Array.isArray(model.regions) &&
     Array.isArray(model.connections)
   );

@@ -6,7 +6,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import axios from "axios";
 import { brainModelService } from "./brain-model.service";
-import { BrainModel, BrainRegion, NeuralConnection } from "@domain/types/brain/models";
+import {
+  BrainModel,
+  BrainRegion,
+  NeuralConnection,
+} from "@domain/types/brain/models";
 
 // Mock axios for isolated testing
 vi.mock("axios");
@@ -25,12 +29,12 @@ describe("Brain Model Service", () => {
         name: "Test Brain Model",
         regions: [],
         connections: [],
-        version: 1
+        version: 1,
       };
-      
+
       mockedAxios.get.mockResolvedValueOnce({
         data: mockBrainModel,
-        status: 200
+        status: 200,
       });
 
       // Act
@@ -42,8 +46,8 @@ describe("Brain Model Service", () => {
       expect(mockedAxios.get).toHaveBeenCalledWith(
         expect.stringContaining("/scan123"),
         expect.objectContaining({
-          timeout: 15000
-        })
+          timeout: 15000,
+        }),
       );
     });
 
@@ -52,11 +56,11 @@ describe("Brain Model Service", () => {
       const mockError = {
         response: {
           status: 404,
-          data: { message: "Brain scan not found" }
+          data: { message: "Brain scan not found" },
         },
-        isAxiosError: true
+        isAxiosError: true,
       };
-      
+
       mockedAxios.get.mockRejectedValueOnce(mockError);
       mockedAxios.isAxiosError.mockReturnValueOnce(true);
 
@@ -72,9 +76,9 @@ describe("Brain Model Service", () => {
       // Arrange - Mock a network error
       const mockError = {
         request: {},
-        isAxiosError: true
+        isAxiosError: true,
       };
-      
+
       mockedAxios.get.mockRejectedValueOnce(mockError);
       mockedAxios.isAxiosError.mockReturnValueOnce(true);
 
@@ -92,21 +96,29 @@ describe("Brain Model Service", () => {
       // Arrange
       const mockResponse = {
         data: {
-          data: [{ id: "scan123", name: "Test Model", regions: [], connections: [], version: 1 }],
-          total: 1
+          data: [
+            {
+              id: "scan123",
+              name: "Test Model",
+              regions: [],
+              connections: [],
+              version: 1,
+            },
+          ],
+          total: 1,
         },
-        status: 200
+        status: 200,
       };
-      
+
       mockedAxios.get.mockResolvedValueOnce(mockResponse);
 
       // Act
       const result = await brainModelService.searchBrainModels(
-        "patient456", 
+        "patient456",
         { from: "2025-01-01", to: "2025-04-01" },
         "fMRI",
         10,
-        0
+        0,
       );
 
       // Assert
@@ -122,9 +134,9 @@ describe("Brain Model Service", () => {
             to: "2025-04-01",
             scanType: "fMRI",
             limit: 10,
-            offset: 0
-          })
-        })
+            offset: 0,
+          }),
+        }),
       );
     });
   });
@@ -136,19 +148,19 @@ describe("Brain Model Service", () => {
         id: "region123",
         name: "Updated Region",
         activityLevel: 0.8,
-        isActive: true
+        isActive: true,
       };
-      
+
       mockedAxios.patch.mockResolvedValueOnce({
         data: mockRegion,
-        status: 200
+        status: 200,
       });
 
       // Act
       const result = await brainModelService.updateRegion(
-        "scan123", 
-        "region123", 
-        { activityLevel: 0.8, isActive: true }
+        "scan123",
+        "region123",
+        { activityLevel: 0.8, isActive: true },
       );
 
       // Assert
@@ -163,19 +175,19 @@ describe("Brain Model Service", () => {
       const mockConnection: Partial<NeuralConnection> = {
         id: "conn123",
         strength: 0.6,
-        isActive: true
+        isActive: true,
       };
-      
+
       mockedAxios.patch.mockResolvedValueOnce({
         data: mockConnection,
-        status: 200
+        status: 200,
       });
 
       // Act
       const result = await brainModelService.updateConnection(
-        "scan123", 
-        "conn123", 
-        { strength: 0.6, isActive: true }
+        "scan123",
+        "conn123",
+        { strength: 0.6, isActive: true },
       );
 
       // Assert
@@ -189,26 +201,26 @@ describe("Brain Model Service", () => {
       // Arrange
       const mockResponse = {
         id: "anno123",
-        createdAt: "2025-04-01T00:00:00Z"
+        createdAt: "2025-04-01T00:00:00Z",
       };
-      
+
       const mockAnnotation = {
         regionIds: ["r1", "r2"],
         text: "Important finding",
         author: "Dr. Smith",
         category: "clinical" as const,
-        visibility: "team" as const
+        visibility: "team" as const,
       };
-      
+
       mockedAxios.post.mockResolvedValueOnce({
         data: mockResponse,
-        status: 201
+        status: 201,
       });
 
       // Act
       const result = await brainModelService.createAnnotation(
-        "scan123", 
-        mockAnnotation
+        "scan123",
+        mockAnnotation,
       );
 
       // Assert
@@ -217,7 +229,7 @@ describe("Brain Model Service", () => {
       expect(mockedAxios.post).toHaveBeenCalledWith(
         expect.stringContaining("/annotations"),
         mockAnnotation,
-        expect.anything()
+        expect.anything(),
       );
     });
   });
@@ -227,12 +239,12 @@ describe("Brain Model Service", () => {
       // Arrange
       const mockResponse = {
         scanId: "scan-gen-123",
-        status: "processing"
+        status: "processing",
       };
-      
+
       mockedAxios.post.mockResolvedValueOnce({
         data: mockResponse,
-        status: 202
+        status: 202,
       });
 
       // Act
@@ -244,7 +256,7 @@ describe("Brain Model Service", () => {
       expect(mockedAxios.post).toHaveBeenCalledWith(
         expect.stringContaining("/generate"),
         { patientId: "patient456" },
-        expect.anything()
+        expect.anything(),
       );
     });
   });
@@ -256,12 +268,12 @@ describe("Brain Model Service", () => {
         status: "processing",
         progress: 0.65,
         scanId: undefined,
-        error: undefined
+        error: undefined,
       };
-      
+
       mockedAxios.get.mockResolvedValueOnce({
         data: mockResponse,
-        status: 200
+        status: 200,
       });
 
       // Act

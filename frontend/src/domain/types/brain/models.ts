@@ -3,7 +3,10 @@
  * Core domain entities for brain visualization with quantum-level type safety
  */
 
-import { Vector3 as ImportedVector3, SafeArray } from "@domain/types/shared/common"; // Import Vector3 with alias
+import {
+  Vector3 as ImportedVector3,
+  SafeArray,
+} from "@domain/types/shared/common"; // Import Vector3 with alias
 
 // Define Vector3 locally if needed, or ensure it's correctly imported and used
 // Assuming Vector3 should be the imported one, remove local declaration if present
@@ -116,14 +119,32 @@ export function isBrainRegion(obj: unknown): obj is BrainRegion {
   );
 }
 
-// Type guard for neural connections
+// Type guard for neural connections (refined for stricter validation)
 export function isNeuralConnection(obj: unknown): obj is NeuralConnection {
+  if (typeof obj !== "object" || obj === null) return false;
+  const conn = obj as Partial<NeuralConnection>; // Cast for property access
+
+  const isValidType =
+    typeof conn.type === "string" &&
+    ["structural", "functional", "effective"].includes(conn.type);
+  const isValidDirectionality =
+    typeof conn.directionality === "string" &&
+    ["unidirectional", "bidirectional"].includes(conn.directionality);
+
   return (
-    typeof obj === "object" &&
-    obj !== null &&
-    "sourceId" in obj &&
-    "targetId" in obj &&
-    "strength" in obj
+    typeof conn.id === "string" &&
+    typeof conn.sourceId === "string" &&
+    typeof conn.targetId === "string" &&
+    typeof conn.strength === "number" &&
+    conn.strength >= 0 &&
+    conn.strength <= 1 && // Check range
+    isValidType &&
+    isValidDirectionality &&
+    typeof conn.activityLevel === "number" &&
+    typeof conn.dataConfidence === "number" &&
+    conn.dataConfidence >= 0 &&
+    conn.dataConfidence <= 1 // Check range
+    // Optional: pathwayLength check if needed: (conn.pathwayLength === undefined || typeof conn.pathwayLength === 'number')
   );
 }
 
@@ -147,20 +168,22 @@ export function isBrainModel(obj: unknown): obj is BrainModel {
   // Check if regions and connections are arrays and validate their contents
   const model = obj as Partial<BrainModel>; // Cast to partial for safe access
   if (!Array.isArray(model.regions) || !model.regions.every(isBrainRegion)) {
-      return false;
+    return false;
   }
-  if (!Array.isArray(model.connections) || !model.connections.every(isNeuralConnection)) {
-      return false;
+  if (
+    !Array.isArray(model.connections) ||
+    !model.connections.every(isNeuralConnection)
+  ) {
+    return false;
   }
 
   // Add basic checks for other required fields if needed (e.g., string types)
-  if (typeof model.patientId !== 'string') return false;
+  if (typeof model.patientId !== "string") return false;
   // Add check for scan object structure if needed (isBrainScan guard)
-  if (typeof model.timestamp !== 'string') return false;
-  if (typeof model.version !== 'string') return false;
+  if (typeof model.timestamp !== "string") return false;
+  if (typeof model.version !== "string") return false;
   // Add check for processingLevel enum if needed
-  if (typeof model.lastUpdated !== 'string') return false;
-
+  if (typeof model.lastUpdated !== "string") return false;
 
   return true; // All checks passed
 }

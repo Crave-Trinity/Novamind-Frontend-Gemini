@@ -27,7 +27,7 @@ export interface VersionedEntity {
 }
 
 // Sort direction type
-export type SortOrder = 'asc' | 'desc';
+export type SortOrder = "asc" | "desc";
 
 // Numeric range type
 export interface Range {
@@ -250,9 +250,7 @@ export const VisualizationState = {
     return state.status === "idle";
   },
 
-  isLoading<T>(
-    state: VisualizationState<T>,
-  ): state is { status: "loading" } {
+  isLoading<T>(state: VisualizationState<T>): state is { status: "loading" } {
     return state.status === "loading";
   },
 
@@ -274,9 +272,7 @@ export const Result = {
   success,
   failure,
 
-  isSuccess<T, E>(
-    result: Result<T, E>,
-  ): result is { success: true; value: T } {
+  isSuccess<T, E>(result: Result<T, E>): result is { success: true; value: T } {
     return result.success === true;
   },
 
@@ -296,7 +292,9 @@ export const Result = {
     result: Result<T, E>,
     fn: (value: T) => Result<U, E>,
   ): Result<U, E> {
-    return result.success ? fn(result.value) : (result as unknown as Result<U, E>);
+    return result.success
+      ? fn(result.value)
+      : (result as unknown as Result<U, E>);
   },
 
   getOrElse<T, E>(result: Result<T, E>, defaultValue: T): T {

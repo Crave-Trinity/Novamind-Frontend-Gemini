@@ -199,9 +199,7 @@ export const brainModelService = {
 
           switch (status) {
             case 404:
-              return failure(
-                new Error(`Brain scan or region not found`),
-              );
+              return failure(new Error(`Brain scan or region not found`));
             case 400:
               return failure(
                 new Error(`Invalid region update: ${data.message}`),
@@ -270,9 +268,7 @@ export const brainModelService = {
 
           switch (status) {
             case 404:
-              return failure(
-                new Error(`Brain scan or connection not found`),
-              );
+              return failure(new Error(`Brain scan or connection not found`));
             case 400:
               return failure(
                 new Error(`Invalid connection update: ${data.message}`),
@@ -347,16 +343,16 @@ export const brainModelService = {
 
           switch (status) {
             case 404:
-              return failure(
-                new Error(`Brain scan not found`),
-              );
+              return failure(new Error(`Brain scan not found`));
             case 400:
               return failure(
                 new Error(`Invalid annotation data: ${data.message}`),
               );
             case 403:
               return failure(
-                new Error("Insufficient permissions to annotate this brain scan"),
+                new Error(
+                  "Insufficient permissions to annotate this brain scan",
+                ),
               );
             case 500:
               return failure(
@@ -429,9 +425,7 @@ export const brainModelService = {
                 new Error("Insufficient permissions to generate brain models"),
               );
             case 500:
-              return failure(
-                new Error("Server error during model generation"),
-              );
+              return failure(new Error("Server error during model generation"));
             default:
               return failure(new Error(data.message || `API error: ${status}`));
           }
@@ -475,16 +469,13 @@ export const brainModelService = {
         progress: number;
         scanId?: string;
         error?: string;
-      }>(
-        `${BRAIN_MODEL_ENDPOINT}/generation/${generationId}`,
-        {
-          timeout: 10000,
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
+      }>(`${BRAIN_MODEL_ENDPOINT}/generation/${generationId}`, {
+        timeout: 10000,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
         },
-      );
+      });
 
       // Successful response
       return success(response.data);
@@ -497,12 +488,12 @@ export const brainModelService = {
 
           switch (status) {
             case 404:
-              return failure(
-                new Error(`Generation process not found`),
-              );
+              return failure(new Error(`Generation process not found`));
             case 403:
               return failure(
-                new Error("Insufficient permissions to check generation status"),
+                new Error(
+                  "Insufficient permissions to check generation status",
+                ),
               );
             case 500:
               return failure(

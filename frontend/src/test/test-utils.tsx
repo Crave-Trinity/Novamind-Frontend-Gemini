@@ -1,14 +1,14 @@
-import React, { PropsWithChildren, ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import ThemeContext from '../contexts/ThemeContext';
+import React, { PropsWithChildren, ReactElement } from "react";
+import { render, RenderOptions } from "@testing-library/react";
+import ThemeContext from "../contexts/ThemeContext";
 // Fixed imports for Theme components
-import ThemeContext from '../contexts/ThemeContext';
-import { ThemeProvider } from '../contexts/ThemeContext';
+import ThemeContext from "../contexts/ThemeContext";
+import { ThemeProvider } from "../contexts/ThemeContext";
 
 /**
  * Custom renderer that wraps components with necessary providers
  */
-interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+interface ExtendedRenderOptions extends Omit<RenderOptions, "wrapper"> {
   initialTheme?: ThemeOption;
 }
 
@@ -20,16 +20,14 @@ interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
  */
 export function renderWithProviders(
   ui: ReactElement,
-  { initialTheme = 'clinical', ...renderOptions }: ExtendedRenderOptions = {}
+  { initialTheme = "clinical", ...renderOptions }: ExtendedRenderOptions = {},
 ) {
   function Wrapper({ children }: PropsWithChildren<{}>): ReactElement {
     return (
-      <ThemeProvider initialTheme={initialTheme}>
-        {children}
-      </ThemeProvider>
+      <ThemeProvider initialTheme={initialTheme}>{children}</ThemeProvider>
     );
   }
-  
+
   return render(ui, { wrapper: Wrapper, ...renderOptions });
 }
 
@@ -38,12 +36,10 @@ export function renderWithProviders(
  * @param initialTheme - Initial theme option
  * @returns A wrapper component with ThemeProvider
  */
-export function createThemeWrapper(initialTheme: ThemeOption = 'clinical') {
-  const ThemeWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <ThemeProvider initialTheme={initialTheme}>
-      {children}
-    </ThemeProvider>
-  );
-  
+export function createThemeWrapper(initialTheme: ThemeOption = "clinical") {
+  const ThemeWrapper: React.FC<{ children: React.ReactNode }> = ({
+    children,
+  }) => <ThemeProvider initialTheme={initialTheme}>{children}</ThemeProvider>;
+
   return ThemeWrapper;
 }

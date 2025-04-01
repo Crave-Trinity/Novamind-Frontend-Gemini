@@ -486,38 +486,33 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
               Key Risk Factors
             </h4>
             <div className="space-y-2">
-              {predictionResult.factors
-                .slice(0, 5)
-                .map(
-                  (
-                    factor: {
-                      name: string;
-                      contribution: number;
-                      direction: "positive" | "negative";
-                    },
-                    idx: number,
-                  ) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between"
-                    >
-                      <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                        {factor.name}
-                      </span>
-                      <div className="h-2 w-1/2 rounded-full bg-neutral-200 dark:bg-neutral-700">
-                        <div
-                          className={`h-2 rounded-full ${factor.direction === "positive" ? "bg-red-500" : "bg-blue-500"}`}
-                          style={{
-                            width: `${Math.abs(factor.contribution) * 100}%`,
-                          }}
-                        ></div>
-                      </div>
-                      <span className="w-12 text-right text-xs text-neutral-500">
-                        {(factor.contribution * 100).toFixed(1)}%
-                      </span>
+              {predictionResult.factors.slice(0, 5).map(
+                (
+                  factor: {
+                    name: string;
+                    contribution: number;
+                    direction: "positive" | "negative";
+                  },
+                  idx: number,
+                ) => (
+                  <div key={idx} className="flex items-center justify-between">
+                    <span className="text-sm text-neutral-700 dark:text-neutral-300">
+                      {factor.name}
+                    </span>
+                    <div className="h-2 w-1/2 rounded-full bg-neutral-200 dark:bg-neutral-700">
+                      <div
+                        className={`h-2 rounded-full ${factor.direction === "positive" ? "bg-red-500" : "bg-blue-500"}`}
+                        style={{
+                          width: `${Math.abs(factor.contribution) * 100}%`,
+                        }}
+                      ></div>
                     </div>
-                  ),
-                )}
+                    <span className="w-12 text-right text-xs text-neutral-500">
+                      {(factor.contribution * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                ),
+              )}
             </div>
           </div>
         )}

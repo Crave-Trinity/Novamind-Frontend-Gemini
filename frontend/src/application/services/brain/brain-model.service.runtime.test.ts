@@ -11,9 +11,13 @@ import {
   isBrainRegion,
   validateBrainRegion,
   isNeuralConnection,
-  validateNeuralConnection
+  validateNeuralConnection,
 } from "./brain-model.service.runtime";
-import { BrainModel, BrainRegion, NeuralConnection } from "../../../domain/types/brain/models";
+import {
+  BrainModel,
+  BrainRegion,
+  NeuralConnection,
+} from "../../../domain/types/brain/models";
 
 describe("BrainModelService Runtime Validation", () => {
   describe("isBrainModel", () => {
@@ -26,8 +30,8 @@ describe("BrainModelService Runtime Validation", () => {
             id: "region-1",
             name: "Prefrontal Cortex",
             activityLevel: 0.8,
-            isActive: true
-          }
+            isActive: true,
+          },
         ],
         connections: [
           {
@@ -36,10 +40,10 @@ describe("BrainModelService Runtime Validation", () => {
             targetId: "region-2",
             strength: 0.7,
             type: "excitatory",
-            active: true
-          }
+            active: true,
+          },
         ],
-        version: 1
+        version: 1,
       };
 
       expect(isBrainModel(validModel)).toBe(true);
@@ -55,44 +59,54 @@ describe("BrainModelService Runtime Validation", () => {
 
     it("returns false for objects missing required properties", () => {
       // Missing id
-      expect(isBrainModel({
-        name: "Test Model",
-        regions: [],
-        connections: [],
-        version: 1
-      })).toBe(false);
+      expect(
+        isBrainModel({
+          name: "Test Model",
+          regions: [],
+          connections: [],
+          version: 1,
+        }),
+      ).toBe(false);
 
       // Missing name
-      expect(isBrainModel({
-        id: "model-123",
-        regions: [],
-        connections: [],
-        version: 1
-      })).toBe(false);
+      expect(
+        isBrainModel({
+          id: "model-123",
+          regions: [],
+          connections: [],
+          version: 1,
+        }),
+      ).toBe(false);
 
       // Missing regions
-      expect(isBrainModel({
-        id: "model-123",
-        name: "Test Model",
-        connections: [],
-        version: 1
-      })).toBe(false);
+      expect(
+        isBrainModel({
+          id: "model-123",
+          name: "Test Model",
+          connections: [],
+          version: 1,
+        }),
+      ).toBe(false);
 
       // Missing connections
-      expect(isBrainModel({
-        id: "model-123",
-        name: "Test Model",
-        regions: [],
-        version: 1
-      })).toBe(false);
+      expect(
+        isBrainModel({
+          id: "model-123",
+          name: "Test Model",
+          regions: [],
+          version: 1,
+        }),
+      ).toBe(false);
 
       // Missing version
-      expect(isBrainModel({
-        id: "model-123",
-        name: "Test Model",
-        regions: [],
-        connections: []
-      })).toBe(false);
+      expect(
+        isBrainModel({
+          id: "model-123",
+          name: "Test Model",
+          regions: [],
+          connections: [],
+        }),
+      ).toBe(false);
     });
   });
 
@@ -106,8 +120,8 @@ describe("BrainModelService Runtime Validation", () => {
             id: "region-1",
             name: "Prefrontal Cortex",
             activityLevel: 0.8,
-            isActive: true
-          }
+            isActive: true,
+          },
         ],
         connections: [
           {
@@ -116,10 +130,10 @@ describe("BrainModelService Runtime Validation", () => {
             targetId: "region-2",
             strength: 0.7,
             type: "excitatory",
-            active: true
-          }
+            active: true,
+          },
         ],
-        version: 1
+        version: 1,
       };
 
       const result = validateBrainModel(validModel);
@@ -150,11 +164,11 @@ describe("BrainModelService Runtime Validation", () => {
             id: "region-1",
             // Missing name property
             activityLevel: 0.8,
-            isActive: true
-          }
+            isActive: true,
+          },
         ],
         connections: [],
-        version: 1
+        version: 1,
       };
 
       const result = validateBrainModel(modelWithInvalidRegion);
@@ -171,8 +185,8 @@ describe("BrainModelService Runtime Validation", () => {
             id: "region-1",
             name: "Prefrontal Cortex",
             activityLevel: 0.8,
-            isActive: true
-          }
+            isActive: true,
+          },
         ],
         connections: [
           {
@@ -181,10 +195,10 @@ describe("BrainModelService Runtime Validation", () => {
             targetId: "region-2",
             strength: 0.7,
             type: "excitatory",
-            active: true
-          }
+            active: true,
+          },
         ],
-        version: 1
+        version: 1,
       };
 
       const result = validateBrainModel(modelWithInvalidConnection);
@@ -205,7 +219,7 @@ describe("BrainModelService Runtime Validation", () => {
         id: "region-1",
         name: "Prefrontal Cortex",
         activityLevel: 0.8,
-        isActive: true
+        isActive: true,
       };
 
       expect(isBrainRegion(validRegion)).toBe(true);
@@ -220,32 +234,40 @@ describe("BrainModelService Runtime Validation", () => {
 
     it("returns false for objects missing required properties", () => {
       // Missing id
-      expect(isBrainRegion({
-        name: "Prefrontal Cortex",
-        activityLevel: 0.8,
-        isActive: true
-      })).toBe(false);
+      expect(
+        isBrainRegion({
+          name: "Prefrontal Cortex",
+          activityLevel: 0.8,
+          isActive: true,
+        }),
+      ).toBe(false);
 
       // Missing name
-      expect(isBrainRegion({
-        id: "region-1",
-        activityLevel: 0.8,
-        isActive: true
-      })).toBe(false);
+      expect(
+        isBrainRegion({
+          id: "region-1",
+          activityLevel: 0.8,
+          isActive: true,
+        }),
+      ).toBe(false);
 
       // Missing activityLevel
-      expect(isBrainRegion({
-        id: "region-1",
-        name: "Prefrontal Cortex",
-        isActive: true
-      })).toBe(false);
+      expect(
+        isBrainRegion({
+          id: "region-1",
+          name: "Prefrontal Cortex",
+          isActive: true,
+        }),
+      ).toBe(false);
 
       // Missing isActive
-      expect(isBrainRegion({
-        id: "region-1",
-        name: "Prefrontal Cortex",
-        activityLevel: 0.8
-      })).toBe(false);
+      expect(
+        isBrainRegion({
+          id: "region-1",
+          name: "Prefrontal Cortex",
+          activityLevel: 0.8,
+        }),
+      ).toBe(false);
     });
   });
 
@@ -255,7 +277,7 @@ describe("BrainModelService Runtime Validation", () => {
         id: "region-1",
         name: "Prefrontal Cortex",
         activityLevel: 0.8,
-        isActive: true
+        isActive: true,
       };
 
       const result = validateBrainRegion(validRegion);
@@ -274,7 +296,7 @@ describe("BrainModelService Runtime Validation", () => {
         id: "region-1",
         name: "Prefrontal Cortex",
         activityLevel: 1.5, // Above the valid range (0-1)
-        isActive: true
+        isActive: true,
       };
 
       const result = validateBrainRegion(regionWithInvalidActivityLevel);
@@ -297,7 +319,7 @@ describe("BrainModelService Runtime Validation", () => {
         targetId: "region-2",
         strength: 0.7,
         type: "excitatory",
-        active: true
+        active: true,
       };
 
       expect(isNeuralConnection(validConnection)).toBe(true);
@@ -312,22 +334,26 @@ describe("BrainModelService Runtime Validation", () => {
 
     it("returns false for objects missing required properties", () => {
       // Missing id
-      expect(isNeuralConnection({
-        sourceId: "region-1",
-        targetId: "region-2",
-        strength: 0.7,
-        type: "excitatory",
-        active: true
-      })).toBe(false);
+      expect(
+        isNeuralConnection({
+          sourceId: "region-1",
+          targetId: "region-2",
+          strength: 0.7,
+          type: "excitatory",
+          active: true,
+        }),
+      ).toBe(false);
 
       // Missing sourceId
-      expect(isNeuralConnection({
-        id: "connection-1",
-        targetId: "region-2",
-        strength: 0.7,
-        type: "excitatory",
-        active: true
-      })).toBe(false);
+      expect(
+        isNeuralConnection({
+          id: "connection-1",
+          targetId: "region-2",
+          strength: 0.7,
+          type: "excitatory",
+          active: true,
+        }),
+      ).toBe(false);
     });
   });
 
@@ -339,7 +365,7 @@ describe("BrainModelService Runtime Validation", () => {
         targetId: "region-2",
         strength: 0.7,
         type: "excitatory",
-        active: true
+        active: true,
       };
 
       const result = validateNeuralConnection(validConnection);
@@ -360,7 +386,7 @@ describe("BrainModelService Runtime Validation", () => {
         targetId: "region-2",
         strength: 1.5, // Above the valid range (0-1)
         type: "excitatory",
-        active: true
+        active: true,
       };
 
       const result = validateNeuralConnection(connectionWithInvalidStrength);
@@ -375,7 +401,7 @@ describe("BrainModelService Runtime Validation", () => {
         targetId: "region-2",
         strength: 0.7,
         type: "invalid-type", // Not a valid connection type
-        active: true
+        active: true,
       };
 
       const result = validateNeuralConnection(connectionWithInvalidType);

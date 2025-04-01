@@ -147,7 +147,8 @@ const DEFAULT_THEME_SETTINGS: Record<string, ThemeSettings> = {
 // Use the actual default defined in the domain types
 import { defaultVisualizationSettings } from "@domain/types/brain/visualization";
 
-const DEFAULT_VISUALIZATION_SETTINGS: VisualizationSettings = defaultVisualizationSettings;
+const DEFAULT_VISUALIZATION_SETTINGS: VisualizationSettings =
+  defaultVisualizationSettings;
 // Remove properties not present in the domain type:
 // activityThreshold, showInactiveRegions, enableDepthOfField, showRegionCount, performanceMode, themeSettings
 // These should be added to the domain type if they are truly part of the core settings.

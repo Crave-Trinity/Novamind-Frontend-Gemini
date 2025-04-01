@@ -22,7 +22,7 @@ import { brainModelService } from "@application/services/brain/brain-model.servi
 import { clinicalService } from "@application/services/clinical/clinical.service"; // Corrected path
 
 // Placeholders for missing/corrected types
-type NeuralTransitionType = NeuralStateTransition['transitionType']; // Extract from interface
+type NeuralTransitionType = NeuralStateTransition["transitionType"]; // Extract from interface
 type NeuralFrequencyBand = any;
 type SymptomNeuralMapping = any; // Placeholder
 
@@ -98,15 +98,25 @@ export function useNeuralActivityController(patientId: string) {
 
     try {
       // TODO: Implement actual service call when available (getBaselineActivity doesn't exist on brainModelService)
-      console.warn("getBaselineActivity service method not implemented on brainModelService.");
-      const result: Result<any> = failure(new Error("Service method getBaselineActivity not implemented.")); // Placeholder failure
+      console.warn(
+        "getBaselineActivity service method not implemented on brainModelService.",
+      );
+      const result: Result<any> = failure(
+        new Error("Service method getBaselineActivity not implemented."),
+      ); // Placeholder failure
 
-      if (result.success) { // Check success first
+      if (result.success) {
+        // Check success first
         // Assuming result.value has regionActivations and connectionStrengths arrays
         if (result.value && Array.isArray(result.value.regionActivations)) {
-            result.value.regionActivations.forEach((activation: any) => { // Use 'any' for activation
+          result.value.regionActivations.forEach((activation: any) => {
+            // Use 'any' for activation
             // Ensure activation.level is a valid ActivationLevel before setting
-            const level = Object.values(ActivationLevel).includes(activation.level) ? activation.level : ActivationLevel.MEDIUM; // Default to MEDIUM if invalid
+            const level = Object.values(ActivationLevel).includes(
+              activation.level,
+            )
+              ? activation.level
+              : ActivationLevel.MEDIUM; // Default to MEDIUM if invalid
             neuralState.metrics.activationLevels.set(
               activation.regionId,
               level, // Use validated level
@@ -118,21 +128,26 @@ export function useNeuralActivityController(patientId: string) {
               level === ActivationLevel.EXTREME // Use Enum
             ) {
               neuralState.activeRegions.add(activation.regionId);
-            } else if (level === ActivationLevel.LOW || level === ActivationLevel.NONE) { // Assuming LOW/NONE map to suppressed? Adjust if needed
+            } else if (
+              level === ActivationLevel.LOW ||
+              level === ActivationLevel.NONE
+            ) {
+              // Assuming LOW/NONE map to suppressed? Adjust if needed
               neuralState.inhibitedRegions.add(activation.regionId);
             }
           });
         }
 
         // Initialize connection strengths
-         if (result.value && Array.isArray(result.value.connectionStrengths)) {
-            result.value.connectionStrengths.forEach((connection: any) => { // Use 'any' for connection
-                neuralState.metrics.connectionStrengths.set(
-                `${connection.sourceId}-${connection.targetId}`,
-                connection.strength,
-                );
-            });
-         }
+        if (result.value && Array.isArray(result.value.connectionStrengths)) {
+          result.value.connectionStrengths.forEach((connection: any) => {
+            // Use 'any' for connection
+            neuralState.metrics.connectionStrengths.set(
+              `${connection.sourceId}-${connection.targetId}`,
+              connection.strength,
+            );
+          });
+        }
 
         // Set baseline loaded flag
         neuralState.baselineLoaded = true;
@@ -141,10 +156,12 @@ export function useNeuralActivityController(patientId: string) {
       }
 
       // If result was failure initially, or became one.
-      return failure(result.error || new Error("Failed to load baseline activity"));
-
+      return failure(
+        result.error || new Error("Failed to load baseline activity"),
+      );
     } catch (error) {
-      return failure( // Ensure error object is passed
+      return failure(
+        // Ensure error object is passed
         error instanceof Error
           ? error
           : new Error("Unknown error loading baseline"),
@@ -175,10 +192,17 @@ export function useNeuralActivityController(patientId: string) {
             newLevel,
           );
 
-          if (newLevel === ActivationLevel.HIGH || newLevel === ActivationLevel.EXTREME) {
+          if (
+            newLevel === ActivationLevel.HIGH ||
+            newLevel === ActivationLevel.EXTREME
+          ) {
             neuralState.activeRegions.add(transform.regionId);
             neuralState.inhibitedRegions.delete(transform.regionId);
-          } else if (newLevel === ActivationLevel.LOW || newLevel === ActivationLevel.NONE) { // Assuming LOW/NONE map to suppressed?
+          } else if (
+            newLevel === ActivationLevel.LOW ||
+            newLevel === ActivationLevel.NONE
+          ) {
+            // Assuming LOW/NONE map to suppressed?
             neuralState.inhibitedRegions.add(transform.regionId);
             neuralState.activeRegions.delete(transform.regionId);
           } else {
@@ -208,7 +232,8 @@ export function useNeuralActivityController(patientId: string) {
 
   // Update global metrics based on current neural state
   const updateGlobalMetrics = useCallback(() => {
-    const activationCounts: Record<ActivationLevel, number> = { // Corrected type
+    const activationCounts: Record<ActivationLevel, number> = {
+      // Corrected type
       [ActivationLevel.NONE]: 0,
       [ActivationLevel.LOW]: 0,
       [ActivationLevel.MEDIUM]: 0,
@@ -218,11 +243,14 @@ export function useNeuralActivityController(patientId: string) {
 
     neuralState.metrics.activationLevels.forEach((level) => {
       if (level in activationCounts) {
-         activationCounts[level]++;
+        activationCounts[level]++;
       }
     });
 
-    const total = Object.values(activationCounts).reduce((sum, count) => sum + count, 0);
+    const total = Object.values(activationCounts).reduce(
+      (sum, count) => sum + count,
+      0,
+    );
     const numLevels = Object.keys(activationCounts).length;
 
     if (total > 0 && numLevels > 1) {
@@ -236,7 +264,7 @@ export function useNeuralActivityController(patientId: string) {
       const maxEntropy = Math.log2(numLevels);
       neuralState.metrics.entropyLevel = entropy / maxEntropy;
     } else {
-        neuralState.metrics.entropyLevel = 0;
+      neuralState.metrics.entropyLevel = 0;
     }
 
     const activeRegions = neuralState.activeRegions.size;
@@ -244,18 +272,37 @@ export function useNeuralActivityController(patientId: string) {
 
     if (totalRegions > 0) {
       const activeRatio = activeRegions / totalRegions;
-      neuralState.metrics.synchronizationIndex = 1 - 2 * Math.abs(activeRatio - 0.5);
+      neuralState.metrics.synchronizationIndex =
+        1 - 2 * Math.abs(activeRatio - 0.5);
     } else {
-        neuralState.metrics.synchronizationIndex = 1;
+      neuralState.metrics.synchronizationIndex = 1;
     }
 
     // Simplified frequency dominance update
     if (neuralState.metrics.entropyLevel < 0.3) {
-      neuralState.metrics.frequencyDominance = new Map([["delta", 0.3], ["theta", 0.15], ["alpha", 0.4], ["beta", 0.1], ["gamma", 0.05]]);
+      neuralState.metrics.frequencyDominance = new Map([
+        ["delta", 0.3],
+        ["theta", 0.15],
+        ["alpha", 0.4],
+        ["beta", 0.1],
+        ["gamma", 0.05],
+      ]);
     } else if (neuralState.metrics.entropyLevel > 0.7) {
-      neuralState.metrics.frequencyDominance = new Map([["delta", 0.1], ["theta", 0.1], ["alpha", 0.2], ["beta", 0.3], ["gamma", 0.3]]);
+      neuralState.metrics.frequencyDominance = new Map([
+        ["delta", 0.1],
+        ["theta", 0.1],
+        ["alpha", 0.2],
+        ["beta", 0.3],
+        ["gamma", 0.3],
+      ]);
     } else {
-      neuralState.metrics.frequencyDominance = new Map([["delta", 0.2], ["theta", 0.2], ["alpha", 0.2], ["beta", 0.2], ["gamma", 0.2]]);
+      neuralState.metrics.frequencyDominance = new Map([
+        ["delta", 0.2],
+        ["theta", 0.2],
+        ["alpha", 0.2],
+        ["beta", 0.2],
+        ["gamma", 0.2],
+      ]);
     }
   }, [neuralState]);
 
@@ -263,8 +310,10 @@ export function useNeuralActivityController(patientId: string) {
   const calculateNewActivationLevel = (
     currentLevel: ActivationLevel, // Corrected type
     activationChange: number,
-  ): ActivationLevel => { // Corrected type
-    const levelValues: Record<ActivationLevel, number> = { // Corrected type
+  ): ActivationLevel => {
+    // Corrected type
+    const levelValues: Record<ActivationLevel, number> = {
+      // Corrected type
       [ActivationLevel.NONE]: -1, // Adjusted mapping based on enum
       [ActivationLevel.LOW]: -0.5,
       [ActivationLevel.MEDIUM]: 0,
@@ -289,9 +338,11 @@ export function useNeuralActivityController(patientId: string) {
       try {
         const mappingsResult = await clinicalService.fetchSymptomMappings(); // Corrected method name
 
-        if (!mappingsResult.success) { // Check failure first
+        if (!mappingsResult.success) {
+          // Check failure first
           return failure(
-            mappingsResult.error || new Error("Failed to load symptom mappings"),
+            mappingsResult.error ||
+              new Error("Failed to load symptom mappings"),
           );
         }
 
@@ -304,20 +355,24 @@ export function useNeuralActivityController(patientId: string) {
 
         relevantMappings.forEach((mapping: any) => {
           if (Array.isArray(mapping.activationPatterns)) {
-              mapping.activationPatterns.forEach((pattern: any) => {
-                // Use optional chaining and nullish coalescing for safety
-                if (pattern && typeof pattern.regionId === 'string' && typeof pattern.activityLevel === 'number') {
-                    transforms.push({
-                        regionId: pattern.regionId,
-                        activationChange: pattern.activityLevel, // Assuming activityLevel maps to activationChange
-                        transitionType: pattern.transitionType ?? "gradual",
-                        frequencyBand: pattern.frequencyBand, // Still 'any'
-                        sourceTrigger: "symptom",
-                    });
-                } else {
-                    console.warn("Skipping invalid activation pattern:", pattern);
-                }
-              });
+            mapping.activationPatterns.forEach((pattern: any) => {
+              // Use optional chaining and nullish coalescing for safety
+              if (
+                pattern &&
+                typeof pattern.regionId === "string" &&
+                typeof pattern.activityLevel === "number"
+              ) {
+                transforms.push({
+                  regionId: pattern.regionId,
+                  activationChange: pattern.activityLevel, // Assuming activityLevel maps to activationChange
+                  transitionType: pattern.transitionType ?? "gradual",
+                  frequencyBand: pattern.frequencyBand, // Still 'any'
+                  sourceTrigger: "symptom",
+                });
+              } else {
+                console.warn("Skipping invalid activation pattern:", pattern);
+              }
+            });
           }
         });
 
@@ -339,35 +394,43 @@ export function useNeuralActivityController(patientId: string) {
       try {
         // TODO: Implement actual service call when available (getMedicationEffects doesn't exist on clinicalService)
         console.warn("getMedicationEffects service method not implemented.");
-        const medicationEffectsResult: Result<any> = failure(new Error("Service method getMedicationEffects not implemented.")); // Placeholder
+        const medicationEffectsResult: Result<any> = failure(
+          new Error("Service method getMedicationEffects not implemented."),
+        ); // Placeholder
 
-        if (!medicationEffectsResult.success) { // Check failure first
+        if (!medicationEffectsResult.success) {
+          // Check failure first
           return failure(
-            medicationEffectsResult.error || new Error("Failed to load medication effects"),
+            medicationEffectsResult.error ||
+              new Error("Failed to load medication effects"),
           );
         }
 
         const transforms: NeuralTransform[] = [];
 
-         if (Array.isArray(medicationEffectsResult.value)) {
-            medicationEffectsResult.value.forEach((medication: any) => {
-                if (Array.isArray(medication.regionalEffects)) {
-                    medication.regionalEffects.forEach((effect: any) => {
-                        if (effect && typeof effect.regionId === 'string' && typeof effect.activationChange === 'number') {
-                            transforms.push({
-                                regionId: effect.regionId,
-                                activationChange: effect.activationChange,
-                                transitionType: effect.transitionType ?? "gradual",
-                                frequencyBand: effect.frequencyBand, // Still 'any'
-                                sourceTrigger: "medication",
-                            });
-                        } else {
-                             console.warn("Skipping invalid medication effect:", effect);
-                        }
-                    });
+        if (Array.isArray(medicationEffectsResult.value)) {
+          medicationEffectsResult.value.forEach((medication: any) => {
+            if (Array.isArray(medication.regionalEffects)) {
+              medication.regionalEffects.forEach((effect: any) => {
+                if (
+                  effect &&
+                  typeof effect.regionId === "string" &&
+                  typeof effect.activationChange === "number"
+                ) {
+                  transforms.push({
+                    regionId: effect.regionId,
+                    activationChange: effect.activationChange,
+                    transitionType: effect.transitionType ?? "gradual",
+                    frequencyBand: effect.frequencyBand, // Still 'any'
+                    sourceTrigger: "medication",
+                  });
+                } else {
+                  console.warn("Skipping invalid medication effect:", effect);
                 }
-            });
-         }
+              });
+            }
+          });
+        }
 
         return success(transforms);
       } catch (error) {
@@ -387,14 +450,16 @@ export function useNeuralActivityController(patientId: string) {
       try {
         const baselineResult = await loadBaselineActivity();
         if (!baselineResult.success) {
-             console.error("Baseline load failed:", baselineResult.error);
-             return failure(baselineResult.error);
+          console.error("Baseline load failed:", baselineResult.error);
+          return failure(baselineResult.error);
         }
 
         const transformsResult = await generateSymptomTransforms(symptomIds);
-        if (!transformsResult.success) { // Check failure first
+        if (!transformsResult.success) {
+          // Check failure first
           return failure(
-            transformsResult.error || new Error("Failed to generate symptom transforms"),
+            transformsResult.error ||
+              new Error("Failed to generate symptom transforms"),
           );
         }
 
@@ -416,14 +481,17 @@ export function useNeuralActivityController(patientId: string) {
       try {
         const baselineResult = await loadBaselineActivity();
         if (!baselineResult.success) {
-             console.error("Baseline load failed:", baselineResult.error);
-             return failure(baselineResult.error);
+          console.error("Baseline load failed:", baselineResult.error);
+          return failure(baselineResult.error);
         }
 
-        const transformsResult = await generateMedicationTransforms(medicationIds);
-        if (!transformsResult.success) { // Check failure first
+        const transformsResult =
+          await generateMedicationTransforms(medicationIds);
+        if (!transformsResult.success) {
+          // Check failure first
           return failure(
-            transformsResult.error || new Error("Failed to generate medication transforms"),
+            transformsResult.error ||
+              new Error("Failed to generate medication transforms"),
           );
         }
 
@@ -451,10 +519,10 @@ export function useNeuralActivityController(patientId: string) {
       const result = await loadBaselineActivity();
       updateGlobalMetrics();
 
-       if (!result.success) {
-           console.error("Reset to baseline failed during reload:", result.error);
-           return failure(result.error);
-       }
+      if (!result.success) {
+        console.error("Reset to baseline failed during reload:", result.error);
+        return failure(result.error);
+      }
 
       return success(undefined);
     } catch (error) {
@@ -478,12 +546,12 @@ export function useNeuralActivityController(patientId: string) {
   const getCurrentState = useCallback((): NeuralState => {
     return {
       metrics: {
-          activationLevels: new Map(neuralState.metrics.activationLevels),
-          connectionStrengths: new Map(neuralState.metrics.connectionStrengths),
-          frequencyDominance: new Map(neuralState.metrics.frequencyDominance),
-          entropyLevel: neuralState.metrics.entropyLevel,
-          synchronizationIndex: neuralState.metrics.synchronizationIndex,
-       },
+        activationLevels: new Map(neuralState.metrics.activationLevels),
+        connectionStrengths: new Map(neuralState.metrics.connectionStrengths),
+        frequencyDominance: new Map(neuralState.metrics.frequencyDominance),
+        entropyLevel: neuralState.metrics.entropyLevel,
+        synchronizationIndex: neuralState.metrics.synchronizationIndex,
+      },
       activeRegions: new Set(neuralState.activeRegions),
       inhibitedRegions: new Set(neuralState.inhibitedRegions),
       baselineLoaded: neuralState.baselineLoaded,
@@ -495,10 +563,10 @@ export function useNeuralActivityController(patientId: string) {
   // Initialize on first use
   useEffect(() => {
     loadBaselineActivity().catch((errorResult) => {
-        // Check if it's a failure Result before logging error
-        if (!errorResult.success) {
-             console.error("Failed to load baseline activity:", errorResult.error);
-        }
+      // Check if it's a failure Result before logging error
+      if (!errorResult.success) {
+        console.error("Failed to load baseline activity:", errorResult.error);
+      }
     });
   }, [loadBaselineActivity]);
 

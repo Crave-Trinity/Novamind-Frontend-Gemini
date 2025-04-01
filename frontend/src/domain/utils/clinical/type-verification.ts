@@ -3,16 +3,19 @@
  * Clinical-specific type verification utilities with quantum-level precision
  */
 
-import { 
-  Patient, 
-  Diagnosis, 
-  Symptom, 
-  Treatment, 
-  TreatmentResponse 
+import {
+  Patient,
+  Diagnosis,
+  Symptom,
+  Treatment,
+  TreatmentResponse,
 } from "../../types/clinical/patient";
 import { RiskLevel, RiskAssessment } from "../../types/clinical/risk-level";
 import { Result } from "../../types/shared/common";
-import { typeVerifier, TypeVerificationError } from "../shared/type-verification";
+import {
+  typeVerifier,
+  TypeVerificationError,
+} from "../shared/type-verification";
 
 /**
  * Clinical model type verification utilities
@@ -23,24 +26,28 @@ export class ClinicalTypeVerifier {
    */
   verifyRiskLevel(level: unknown, field?: string): Result<RiskLevel> {
     const validLevels = Object.values(RiskLevel);
-    
-    if (typeof level === 'string' && validLevels.includes(level as RiskLevel)) {
+
+    if (typeof level === "string" && validLevels.includes(level as RiskLevel)) {
       return {
         success: true,
-        value: level as RiskLevel
+        value: level as RiskLevel,
       };
     }
-    
+
     return {
       success: false,
       error: new TypeVerificationError(
         `Invalid RiskLevel`,
-        `one of [${validLevels.join(', ')}]`,
-        typeof level === 'object'
-          ? (level === null ? 'null' : Array.isArray(level) ? 'array' : 'object')
+        `one of [${validLevels.join(", ")}]`,
+        typeof level === "object"
+          ? level === null
+            ? "null"
+            : Array.isArray(level)
+              ? "array"
+              : "object"
           : typeof level,
-        field
-      )
+        field,
+      ),
     };
   }
 
@@ -54,33 +61,42 @@ export class ClinicalTypeVerifier {
     }
 
     const object = objResult.value;
-    
+
     // Verify required properties
-    const idResult = typeVerifier.verifyString(object.id, field ? `${field}.id` : 'id');
+    const idResult = typeVerifier.verifyString(
+      object.id,
+      field ? `${field}.id` : "id",
+    );
     if (!idResult.success) return idResult as Result<Symptom>;
-    
-    const nameResult = typeVerifier.verifyString(object.name, field ? `${field}.name` : 'name');
+
+    const nameResult = typeVerifier.verifyString(
+      object.name,
+      field ? `${field}.name` : "name",
+    );
     if (!nameResult.success) return nameResult as Result<Symptom>;
-    
+
     const severityResult = typeVerifier.verifyNumber(
-      object.severity, 
-      field ? `${field}.severity` : 'severity'
+      object.severity,
+      field ? `${field}.severity` : "severity",
     );
     if (!severityResult.success) return severityResult as Result<Symptom>;
-    
+
     // Optional properties
-    const description = object.description !== undefined 
-      ? typeVerifier.safelyParseString(object.description, '')
-      : undefined;
-      
-    const onsetDate = object.onsetDate !== undefined 
-      ? new Date(typeVerifier.safelyParseString(object.onsetDate, ''))
-      : undefined;
-      
-    const frequency = object.frequency !== undefined
-      ? typeVerifier.safelyParseString(object.frequency, '')
-      : undefined;
-      
+    const description =
+      object.description !== undefined
+        ? typeVerifier.safelyParseString(object.description, "")
+        : undefined;
+
+    const onsetDate =
+      object.onsetDate !== undefined
+        ? new Date(typeVerifier.safelyParseString(object.onsetDate, ""))
+        : undefined;
+
+    const frequency =
+      object.frequency !== undefined
+        ? typeVerifier.safelyParseString(object.frequency, "")
+        : undefined;
+
     // Return verified symptom
     return {
       success: true,
@@ -90,8 +106,8 @@ export class ClinicalTypeVerifier {
         severity: severityResult.value,
         description,
         onsetDate,
-        frequency
-      }
+        frequency,
+      },
     };
   }
 
@@ -105,42 +121,55 @@ export class ClinicalTypeVerifier {
     }
 
     const object = objResult.value;
-    
+
     // Verify required properties
-    const idResult = typeVerifier.verifyString(object.id, field ? `${field}.id` : 'id');
+    const idResult = typeVerifier.verifyString(
+      object.id,
+      field ? `${field}.id` : "id",
+    );
     if (!idResult.success) return idResult as Result<Diagnosis>;
-    
-    const nameResult = typeVerifier.verifyString(object.name, field ? `${field}.name` : 'name');
+
+    const nameResult = typeVerifier.verifyString(
+      object.name,
+      field ? `${field}.name` : "name",
+    );
     if (!nameResult.success) return nameResult as Result<Diagnosis>;
-    
-    const diagnosisDateResult = object.diagnosisDate instanceof Date
-      ? { success: true, value: object.diagnosisDate }
-      : { 
-          success: false, 
-          error: new TypeVerificationError(
-            'Invalid date',
-            'Date',
-            typeof object.diagnosisDate === 'object'
-              ? (object.diagnosisDate === null ? 'null' : 'object')
-              : typeof object.diagnosisDate,
-            field ? `${field}.diagnosisDate` : 'diagnosisDate'
-          )
-        };
-    if (!diagnosisDateResult.success) return diagnosisDateResult as Result<Diagnosis>;
-    
+
+    const diagnosisDateResult =
+      object.diagnosisDate instanceof Date
+        ? { success: true, value: object.diagnosisDate }
+        : {
+            success: false,
+            error: new TypeVerificationError(
+              "Invalid date",
+              "Date",
+              typeof object.diagnosisDate === "object"
+                ? object.diagnosisDate === null
+                  ? "null"
+                  : "object"
+                : typeof object.diagnosisDate,
+              field ? `${field}.diagnosisDate` : "diagnosisDate",
+            ),
+          };
+    if (!diagnosisDateResult.success)
+      return diagnosisDateResult as Result<Diagnosis>;
+
     // Optional properties
-    const description = object.description !== undefined 
-      ? typeVerifier.safelyParseString(object.description, '')
-      : undefined;
-      
-    const icdCode = object.icdCode !== undefined
-      ? typeVerifier.safelyParseString(object.icdCode, '')
-      : undefined;
-      
-    const severity = object.severity !== undefined
-      ? typeVerifier.safelyParseNumber(object.severity, 0)
-      : undefined;
-      
+    const description =
+      object.description !== undefined
+        ? typeVerifier.safelyParseString(object.description, "")
+        : undefined;
+
+    const icdCode =
+      object.icdCode !== undefined
+        ? typeVerifier.safelyParseString(object.icdCode, "")
+        : undefined;
+
+    const severity =
+      object.severity !== undefined
+        ? typeVerifier.safelyParseNumber(object.severity, 0)
+        : undefined;
+
     // Return verified diagnosis
     return {
       success: true,
@@ -150,8 +179,8 @@ export class ClinicalTypeVerifier {
         diagnosisDate: diagnosisDateResult.value,
         description,
         icdCode,
-        severity
-      }
+        severity,
+      },
     };
   }
 
@@ -165,38 +194,52 @@ export class ClinicalTypeVerifier {
     }
 
     const object = objResult.value;
-    
+
     // Verify required properties
-    const idResult = typeVerifier.verifyString(object.id, field ? `${field}.id` : 'id');
+    const idResult = typeVerifier.verifyString(
+      object.id,
+      field ? `${field}.id` : "id",
+    );
     if (!idResult.success) return idResult as Result<Treatment>;
-    
-    const nameResult = typeVerifier.verifyString(object.name, field ? `${field}.name` : 'name');
+
+    const nameResult = typeVerifier.verifyString(
+      object.name,
+      field ? `${field}.name` : "name",
+    );
     if (!nameResult.success) return nameResult as Result<Treatment>;
-    
-    const typeResult = typeVerifier.verifyString(object.type, field ? `${field}.type` : 'type');
+
+    const typeResult = typeVerifier.verifyString(
+      object.type,
+      field ? `${field}.type` : "type",
+    );
     if (!typeResult.success) return typeResult as Result<Treatment>;
-    
+
     // Optional properties
-    const description = object.description !== undefined 
-      ? typeVerifier.safelyParseString(object.description, '')
-      : undefined;
-      
-    const startDate = object.startDate !== undefined 
-      ? new Date(typeVerifier.safelyParseString(object.startDate, ''))
-      : undefined;
-      
-    const endDate = object.endDate !== undefined 
-      ? new Date(typeVerifier.safelyParseString(object.endDate, ''))
-      : undefined;
-      
-    const dosage = object.dosage !== undefined
-      ? typeVerifier.safelyParseString(object.dosage, '')
-      : undefined;
-      
-    const frequency = object.frequency !== undefined
-      ? typeVerifier.safelyParseString(object.frequency, '')
-      : undefined;
-      
+    const description =
+      object.description !== undefined
+        ? typeVerifier.safelyParseString(object.description, "")
+        : undefined;
+
+    const startDate =
+      object.startDate !== undefined
+        ? new Date(typeVerifier.safelyParseString(object.startDate, ""))
+        : undefined;
+
+    const endDate =
+      object.endDate !== undefined
+        ? new Date(typeVerifier.safelyParseString(object.endDate, ""))
+        : undefined;
+
+    const dosage =
+      object.dosage !== undefined
+        ? typeVerifier.safelyParseString(object.dosage, "")
+        : undefined;
+
+    const frequency =
+      object.frequency !== undefined
+        ? typeVerifier.safelyParseString(object.frequency, "")
+        : undefined;
+
     // Return verified treatment
     return {
       success: true,
@@ -208,71 +251,87 @@ export class ClinicalTypeVerifier {
         startDate,
         endDate,
         dosage,
-        frequency
-      }
+        frequency,
+      },
     };
   }
 
   /**
    * Verify that an object conforms to the TreatmentResponse interface
    */
-  verifyTreatmentResponse(obj: unknown, field?: string): Result<TreatmentResponse> {
+  verifyTreatmentResponse(
+    obj: unknown,
+    field?: string,
+  ): Result<TreatmentResponse> {
     const objResult = typeVerifier.verifyObject(obj, field);
     if (!objResult.success) {
       return objResult as Result<TreatmentResponse>;
     }
 
     const object = objResult.value;
-    
+
     // Verify required properties
-    const idResult = typeVerifier.verifyString(object.id, field ? `${field}.id` : 'id');
+    const idResult = typeVerifier.verifyString(
+      object.id,
+      field ? `${field}.id` : "id",
+    );
     if (!idResult.success) return idResult as Result<TreatmentResponse>;
-    
+
     const treatmentIdResult = typeVerifier.verifyString(
-      object.treatmentId, 
-      field ? `${field}.treatmentId` : 'treatmentId'
+      object.treatmentId,
+      field ? `${field}.treatmentId` : "treatmentId",
     );
-    if (!treatmentIdResult.success) return treatmentIdResult as Result<TreatmentResponse>;
-    
+    if (!treatmentIdResult.success)
+      return treatmentIdResult as Result<TreatmentResponse>;
+
     const effectivenessResult = typeVerifier.verifyNumber(
-      object.effectiveness, 
-      field ? `${field}.effectiveness` : 'effectiveness'
+      object.effectiveness,
+      field ? `${field}.effectiveness` : "effectiveness",
     );
-    if (!effectivenessResult.success) return effectivenessResult as Result<TreatmentResponse>;
-    
-    const dateResult = object.date instanceof Date
-      ? { success: true, value: object.date }
-      : { 
-          success: false, 
-          error: new TypeVerificationError(
-            'Invalid date',
-            'Date',
-            typeof object.date === 'object'
-              ? (object.date === null ? 'null' : 'object')
-              : typeof object.date,
-            field ? `${field}.date` : 'date'
-          )
-        };
+    if (!effectivenessResult.success)
+      return effectivenessResult as Result<TreatmentResponse>;
+
+    const dateResult =
+      object.date instanceof Date
+        ? { success: true, value: object.date }
+        : {
+            success: false,
+            error: new TypeVerificationError(
+              "Invalid date",
+              "Date",
+              typeof object.date === "object"
+                ? object.date === null
+                  ? "null"
+                  : "object"
+                : typeof object.date,
+              field ? `${field}.date` : "date",
+            ),
+          };
     if (!dateResult.success) return dateResult as Result<TreatmentResponse>;
-    
+
     // Optional properties
-    const notes = object.notes !== undefined 
-      ? typeVerifier.safelyParseString(object.notes, '')
-      : undefined;
-      
-    const sideEffects = object.sideEffects !== undefined
-      ? typeVerifier.verifyArray(
-          object.sideEffects,
-          (effect, index) => typeVerifier.verifyString(
-            effect, 
-            field ? `${field}.sideEffects[${index}]` : `sideEffects[${index}]`
-          ),
-          field ? `${field}.sideEffects` : 'sideEffects'
-        ).success 
-          ? object.sideEffects as string[]
+    const notes =
+      object.notes !== undefined
+        ? typeVerifier.safelyParseString(object.notes, "")
+        : undefined;
+
+    const sideEffects =
+      object.sideEffects !== undefined
+        ? typeVerifier.verifyArray(
+            object.sideEffects,
+            (effect, index) =>
+              typeVerifier.verifyString(
+                effect,
+                field
+                  ? `${field}.sideEffects[${index}]`
+                  : `sideEffects[${index}]`,
+              ),
+            field ? `${field}.sideEffects` : "sideEffects",
+          ).success
+          ? (object.sideEffects as string[])
           : []
-      : undefined;
-      
+        : undefined;
+
     // Return verified treatment response
     return {
       success: true,
@@ -282,8 +341,8 @@ export class ClinicalTypeVerifier {
         effectiveness: effectivenessResult.value,
         date: dateResult.value,
         notes,
-        sideEffects
-      }
+        sideEffects,
+      },
     };
   }
 
@@ -297,73 +356,85 @@ export class ClinicalTypeVerifier {
     }
 
     const object = objResult.value;
-    
+
     // Verify required properties
-    const idResult = typeVerifier.verifyString(object.id, field ? `${field}.id` : 'id');
+    const idResult = typeVerifier.verifyString(
+      object.id,
+      field ? `${field}.id` : "id",
+    );
     if (!idResult.success) return idResult as Result<Patient>;
-    
+
     const firstNameResult = typeVerifier.verifyString(
-      object.firstName, 
-      field ? `${field}.firstName` : 'firstName'
+      object.firstName,
+      field ? `${field}.firstName` : "firstName",
     );
     if (!firstNameResult.success) return firstNameResult as Result<Patient>;
-    
+
     const lastNameResult = typeVerifier.verifyString(
-      object.lastName, 
-      field ? `${field}.lastName` : 'lastName'
+      object.lastName,
+      field ? `${field}.lastName` : "lastName",
     );
     if (!lastNameResult.success) return lastNameResult as Result<Patient>;
-    
+
     // Verify array properties
     const symptomsResult = typeVerifier.verifyArray(
       object.symptoms,
-      (symptom, index) => this.verifySymptom(
-        symptom, 
-        field ? `${field}.symptoms[${index}]` : `symptoms[${index}]`
-      ),
-      field ? `${field}.symptoms` : 'symptoms'
+      (symptom, index) =>
+        this.verifySymptom(
+          symptom,
+          field ? `${field}.symptoms[${index}]` : `symptoms[${index}]`,
+        ),
+      field ? `${field}.symptoms` : "symptoms",
     );
     if (!symptomsResult.success) return symptomsResult as Result<Patient>;
-    
+
     const diagnosesResult = typeVerifier.verifyArray(
       object.diagnoses,
-      (diagnosis, index) => this.verifyDiagnosis(
-        diagnosis, 
-        field ? `${field}.diagnoses[${index}]` : `diagnoses[${index}]`
-      ),
-      field ? `${field}.diagnoses` : 'diagnoses'
+      (diagnosis, index) =>
+        this.verifyDiagnosis(
+          diagnosis,
+          field ? `${field}.diagnoses[${index}]` : `diagnoses[${index}]`,
+        ),
+      field ? `${field}.diagnoses` : "diagnoses",
     );
     if (!diagnosesResult.success) return diagnosesResult as Result<Patient>;
-    
+
     const treatmentsResult = typeVerifier.verifyArray(
       object.treatments,
-      (treatment, index) => this.verifyTreatment(
-        treatment, 
-        field ? `${field}.treatments[${index}]` : `treatments[${index}]`
-      ),
-      field ? `${field}.treatments` : 'treatments'
+      (treatment, index) =>
+        this.verifyTreatment(
+          treatment,
+          field ? `${field}.treatments[${index}]` : `treatments[${index}]`,
+        ),
+      field ? `${field}.treatments` : "treatments",
     );
     if (!treatmentsResult.success) return treatmentsResult as Result<Patient>;
-    
+
     const treatmentResponsesResult = typeVerifier.verifyArray(
       object.treatmentResponses,
-      (response, index) => this.verifyTreatmentResponse(
-        response, 
-        field ? `${field}.treatmentResponses[${index}]` : `treatmentResponses[${index}]`
-      ),
-      field ? `${field}.treatmentResponses` : 'treatmentResponses'
+      (response, index) =>
+        this.verifyTreatmentResponse(
+          response,
+          field
+            ? `${field}.treatmentResponses[${index}]`
+            : `treatmentResponses[${index}]`,
+        ),
+      field ? `${field}.treatmentResponses` : "treatmentResponses",
     );
-    if (!treatmentResponsesResult.success) return treatmentResponsesResult as Result<Patient>;
-    
+    if (!treatmentResponsesResult.success)
+      return treatmentResponsesResult as Result<Patient>;
+
     // Optional properties
-    const dateOfBirth = object.dateOfBirth !== undefined 
-      ? new Date(typeVerifier.safelyParseString(object.dateOfBirth, ''))
-      : undefined;
-      
-    const contactInfo = object.contactInfo !== undefined && typeof object.contactInfo === 'object'
-      ? object.contactInfo as Record<string, unknown>
-      : undefined;
-      
+    const dateOfBirth =
+      object.dateOfBirth !== undefined
+        ? new Date(typeVerifier.safelyParseString(object.dateOfBirth, ""))
+        : undefined;
+
+    const contactInfo =
+      object.contactInfo !== undefined && typeof object.contactInfo === "object"
+        ? (object.contactInfo as Record<string, unknown>)
+        : undefined;
+
     // Return verified patient
     return {
       success: true,
@@ -376,11 +447,11 @@ export class ClinicalTypeVerifier {
         symptoms: symptomsResult.value,
         diagnoses: diagnosesResult.value,
         treatments: treatmentsResult.value,
-        treatmentResponses: treatmentResponsesResult.value
-      }
+        treatmentResponses: treatmentResponsesResult.value,
+      },
     };
   }
-  
+
   /**
    * Assert that a value is a valid RiskLevel
    */
@@ -390,7 +461,7 @@ export class ClinicalTypeVerifier {
       throw result.error;
     }
   }
-  
+
   /**
    * Assert that an object is a Symptom
    */
@@ -400,7 +471,7 @@ export class ClinicalTypeVerifier {
       throw result.error;
     }
   }
-  
+
   /**
    * Assert that an object is a Diagnosis
    */
@@ -410,7 +481,7 @@ export class ClinicalTypeVerifier {
       throw result.error;
     }
   }
-  
+
   /**
    * Assert that an object is a Treatment
    */
@@ -420,17 +491,20 @@ export class ClinicalTypeVerifier {
       throw result.error;
     }
   }
-  
+
   /**
    * Assert that an object is a TreatmentResponse
    */
-  assertTreatmentResponse(value: unknown, field?: string): asserts value is TreatmentResponse {
+  assertTreatmentResponse(
+    value: unknown,
+    field?: string,
+  ): asserts value is TreatmentResponse {
     const result = this.verifyTreatmentResponse(value, field);
     if (!result.success) {
       throw result.error;
     }
   }
-  
+
   /**
    * Assert that an object is a Patient
    */

@@ -144,37 +144,45 @@ class AuditLogService {
   public log(
     eventType: AuditEventType,
     data: Partial<AuditLogEvent> = {},
-  ): void { // Keep return type void, handle validation errors internally
+  ): void {
+    // Keep return type void, handle validation errors internally
     // Validate input data
     const validationResult = validateLogEventData(data);
     if (validationResult.err) {
-        // Log an error, but don't necessarily stop the logging process
-        // Alternatively, could throw or return a Result if the caller needs to know
-        console.error(`[AuditLogService] Invalid data passed to log for event ${eventType}:`, validationResult.val.message, data);
-        // Optionally modify data or skip logging based on policy
-        // For now, proceed with potentially incomplete data but log the error
+      // Log an error, but don't necessarily stop the logging process
+      // Alternatively, could throw or return a Result if the caller needs to know
+      console.error(
+        `[AuditLogService] Invalid data passed to log for event ${eventType}:`,
+        validationResult.val.message,
+        data,
+      );
+      // Optionally modify data or skip logging based on policy
+      // For now, proceed with potentially incomplete data but log the error
     }
 
     // Use validated data if successful, otherwise use original (potentially flawed) data
     const validatedData = validationResult.ok ? validationResult.val : data;
 
     // Construct base event, conditionally add optional fields
-    const eventBase: Omit<AuditLogEvent, 'userId' | 'sessionId'> & { userId?: string; sessionId?: string } = {
-        timestamp: new Date().toISOString(),
-        eventType,
-        result: validatedData.result || "success",
-        ...validatedData, // Spread validated data first
-        clientInfo: {
-            userAgent: navigator.userAgent,
-            ...(validatedData.clientInfo || {}),
-        },
+    const eventBase: Omit<AuditLogEvent, "userId" | "sessionId"> & {
+      userId?: string;
+      sessionId?: string;
+    } = {
+      timestamp: new Date().toISOString(),
+      eventType,
+      result: validatedData.result || "success",
+      ...validatedData, // Spread validated data first
+      clientInfo: {
+        userAgent: navigator.userAgent,
+        ...(validatedData.clientInfo || {}),
+      },
     };
 
     if (this.userId !== null) {
-        eventBase.userId = this.userId;
+      eventBase.userId = this.userId;
     }
     if (this.sessionId !== null) {
-        eventBase.sessionId = this.sessionId;
+      eventBase.sessionId = this.sessionId;
     }
 
     const event: AuditLogEvent = eventBase as AuditLogEvent; // Assert type after conditional assignment

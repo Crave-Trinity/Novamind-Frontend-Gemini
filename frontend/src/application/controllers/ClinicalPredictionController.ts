@@ -76,14 +76,14 @@ const createInitialPredictionState = (): PredictionState => ({
 export function useClinicalPredictionController(patientId: string) {
   // State with thread-safe operations
   const [state, setState] = useState<PredictionState>(
-    createInitialPredictionState()
+    createInitialPredictionState(),
   );
 
   // Generate predictions for symptoms with type-safe error handling
   const predictSymptomTrajectories = useCallback(
     async (
       symptomIds: string[],
-      predictionHorizon?: number
+      predictionHorizon?: number,
     ): Promise<Result<Map<string, SymptomTrajectory>>> => {
       try {
         const horizon = predictionHorizon || state.predictionHorizon;
@@ -101,17 +101,23 @@ export function useClinicalPredictionController(patientId: string) {
 
         // TODO: Implement actual service call when available
         // const result = await clinicalService.predictSymptomTrajectories(predictionParams);
-        console.warn("predictSymptomTrajectories service method not implemented.");
-        const result = failure(new Error("Service method predictSymptomTrajectories not implemented.")); // Placeholder failure
+        console.warn(
+          "predictSymptomTrajectories service method not implemented.",
+        );
+        const result = failure(
+          new Error(
+            "Service method predictSymptomTrajectories not implemented.",
+          ),
+        ); // Placeholder failure
 
         if (result.success && result.data) {
           // Update state with new predictions
           setState((prevState) => {
             const newSymptomTrajectories = new Map(
-              prevState.symptomTrajectories
+              prevState.symptomTrajectories,
             );
             const newConfidenceIntervals = new Map(
-              prevState.confidenceIntervals
+              prevState.confidenceIntervals,
             );
 
             // Add each symptom trajectory to the maps
@@ -134,26 +140,26 @@ export function useClinicalPredictionController(patientId: string) {
               lastUpdated: new Date(),
               dataPoints: result.data.reduce(
                 (sum: number, traj: any) => sum + (traj.dataPoints || 0), // Add types
-                0
+                0,
               ),
             };
           });
 
           // Return a copy of the trajectories map
           return success(
-            new Map(result.data.map((t: any) => [t.symptomId, t]))
+            new Map(result.data.map((t: any) => [t.symptomId, t])),
           ); // Add type
         }
 
         return failure(
-          result.error || new Error("Failed to predict symptom trajectories") // Wrap string in Error
+          result.error || new Error("Failed to predict symptom trajectories"), // Wrap string in Error
         );
       } catch (error) {
         return failure(
           // Ensure error object is passed
           error instanceof Error
             ? error
-            : new Error("Unknown error in prediction")
+            : new Error("Unknown error in prediction"),
         );
       }
     },
@@ -164,14 +170,14 @@ export function useClinicalPredictionController(patientId: string) {
       state.includeEnvironmentalFactors,
       state.activeModels,
       state.aggregationMethod,
-    ]
+    ],
   );
 
   // Generate predictions for treatment outcomes
   const predictTreatmentOutcomes = useCallback(
     async (
       treatmentIds: string[],
-      predictionHorizon?: number
+      predictionHorizon?: number,
     ): Promise<Result<Map<string, TreatmentOutcome>>> => {
       try {
         const horizon = predictionHorizon || state.predictionHorizon;
@@ -189,15 +195,19 @@ export function useClinicalPredictionController(patientId: string) {
 
         // TODO: Implement actual service call when available
         // const result = await clinicalService.predictTreatmentOutcomes(predictionParams);
-        console.warn("predictTreatmentOutcomes service method not implemented.");
-        const result = failure(new Error("Service method predictTreatmentOutcomes not implemented.")); // Placeholder failure
+        console.warn(
+          "predictTreatmentOutcomes service method not implemented.",
+        );
+        const result = failure(
+          new Error("Service method predictTreatmentOutcomes not implemented."),
+        ); // Placeholder failure
 
         if (result.success && result.data) {
           // Update state with new predictions
           setState((prevState) => {
             const newTreatmentOutcomes = new Map(prevState.treatmentOutcomes);
             const newConfidenceIntervals = new Map(
-              prevState.confidenceIntervals
+              prevState.confidenceIntervals,
             );
 
             // Add each treatment outcome to the maps
@@ -220,24 +230,26 @@ export function useClinicalPredictionController(patientId: string) {
               lastUpdated: new Date(),
               dataPoints: result.data.reduce(
                 (sum: number, outcome: any) => sum + (outcome.dataPoints || 0), // Add types
-                0
+                0,
               ),
             };
           });
 
           // Return a copy of the outcomes map
           return success(
-            new Map(result.data.map((o: any) => [o.treatmentId, o]))
+            new Map(result.data.map((o: any) => [o.treatmentId, o])),
           ); // Add type
         }
 
-        return failure(result.error || new Error("Failed to predict treatment outcomes")); // Wrap string in Error
+        return failure(
+          result.error || new Error("Failed to predict treatment outcomes"),
+        ); // Wrap string in Error
       } catch (error) {
         return failure(
           // Ensure error object is passed
           error instanceof Error
             ? error
-            : new Error("Unknown error in prediction")
+            : new Error("Unknown error in prediction"),
         );
       }
     },
@@ -248,14 +260,14 @@ export function useClinicalPredictionController(patientId: string) {
       state.includeEnvironmentalFactors,
       state.activeModels,
       state.aggregationMethod,
-    ]
+    ],
   );
 
   // Predict risk of relapse
   const predictRelapse = useCallback(
     async (
       disorderIds: string[],
-      predictionHorizon?: number
+      predictionHorizon?: number,
     ): Promise<Result<RelapsePrediction[]>> => {
       try {
         const horizon = predictionHorizon || state.predictionHorizon;
@@ -274,14 +286,16 @@ export function useClinicalPredictionController(patientId: string) {
         // TODO: Implement actual service call when available
         // const result = await clinicalService.predictRelapse(predictionParams);
         console.warn("predictRelapse service method not implemented.");
-        const result = failure(new Error("Service method predictRelapse not implemented.")); // Placeholder failure
+        const result = failure(
+          new Error("Service method predictRelapse not implemented."),
+        ); // Placeholder failure
 
         if (result.success && result.data) {
           // Update state with new predictions
           setState((prevState) => {
             // Update confidence intervals
             const newConfidenceIntervals = new Map(
-              prevState.confidenceIntervals
+              prevState.confidenceIntervals,
             );
 
             result.data.forEach((prediction: any) => {
@@ -300,7 +314,7 @@ export function useClinicalPredictionController(patientId: string) {
               lastUpdated: new Date(),
               dataPoints: result.data.reduce(
                 (sum: number, pred: any) => sum + (pred.dataPoints || 0), // Add types
-                0
+                0,
               ),
             };
           });
@@ -314,7 +328,7 @@ export function useClinicalPredictionController(patientId: string) {
           // Ensure error object is passed
           error instanceof Error
             ? error
-            : new Error("Unknown error in prediction")
+            : new Error("Unknown error in prediction"),
         );
       }
     },
@@ -325,13 +339,13 @@ export function useClinicalPredictionController(patientId: string) {
       state.includeEnvironmentalFactors,
       state.activeModels,
       state.aggregationMethod,
-    ]
+    ],
   );
 
   // Assess clinical risks
   const assessRisks = useCallback(
     async (
-      riskFactors: string[]
+      riskFactors: string[],
     ): Promise<Result<Map<string, RiskAssessment>>> => {
       try {
         // Configure assessment parameters
@@ -347,14 +361,16 @@ export function useClinicalPredictionController(patientId: string) {
         // TODO: Implement actual service call when available
         // const result = await clinicalService.assessRisks(assessmentParams);
         console.warn("assessRisks service method not implemented.");
-        const result = failure(new Error("Service method assessRisks not implemented.")); // Placeholder failure
+        const result = failure(
+          new Error("Service method assessRisks not implemented."),
+        ); // Placeholder failure
 
         if (result.success && result.data) {
           // Update state with new assessments
           setState((prevState) => {
             const newRiskAssessments = new Map(prevState.riskAssessments);
             const newConfidenceIntervals = new Map(
-              prevState.confidenceIntervals
+              prevState.confidenceIntervals,
             );
 
             // Add each risk assessment to the maps
@@ -378,14 +394,14 @@ export function useClinicalPredictionController(patientId: string) {
               dataPoints: result.data.reduce(
                 (sum: number, assessment: any) =>
                   sum + (assessment.dataPoints || 0), // Add types
-                0
+                0,
               ),
             };
           });
 
           // Return a copy of the assessments map
           return success(
-            new Map(result.data.map((a: any) => [a.riskFactorId, a]))
+            new Map(result.data.map((a: any) => [a.riskFactorId, a])),
           ); // Add type
         }
 
@@ -395,7 +411,7 @@ export function useClinicalPredictionController(patientId: string) {
           // Ensure error object is passed
           error instanceof Error
             ? error
-            : new Error("Unknown error in assessment")
+            : new Error("Unknown error in assessment"),
         );
       }
     },
@@ -405,7 +421,7 @@ export function useClinicalPredictionController(patientId: string) {
       state.includeEnvironmentalFactors,
       state.activeModels,
       state.aggregationMethod,
-    ]
+    ],
   );
 
   // Configure prediction parameters
@@ -431,32 +447,34 @@ export function useClinicalPredictionController(patientId: string) {
           prevState.includeEnvironmentalFactors,
       }));
     },
-    []
+    [],
   );
 
   // Get confidence interval for a specific prediction
   const getConfidenceInterval = useCallback(
     (
       type: "symptom" | "treatment" | "relapse" | "risk",
-      id: string
+      id: string,
     ): PredictionInterval | null => {
       const key = `${type}-${id}`;
       return state.confidenceIntervals.get(key) || null;
     },
-    [state.confidenceIntervals]
+    [state.confidenceIntervals],
   );
 
   // Calculate prediction accuracy against actual outcomes
   const calculateAccuracy = useCallback(
     async (
       predictionType: "symptom" | "treatment" | "relapse" | "risk",
-      timeframe: "week" | "month" | "quarter" | "year"
+      timeframe: "week" | "month" | "quarter" | "year",
     ): Promise<Result<PredictionAccuracy>> => {
       try {
         // TODO: Implement actual service call when available
         // const result = await clinicalService.calculateAccuracy({ /* ... params ... */ });
         console.warn("calculateAccuracy service method not implemented.");
-        const result = failure(new Error("Service method calculateAccuracy not implemented.")); // Placeholder failure
+        const result = failure(
+          new Error("Service method calculateAccuracy not implemented."),
+        ); // Placeholder failure
 
         return result;
       } catch (error) {
@@ -464,18 +482,18 @@ export function useClinicalPredictionController(patientId: string) {
           // Ensure error object is passed
           error instanceof Error
             ? error
-            : new Error("Unknown error calculating accuracy")
+            : new Error("Unknown error calculating accuracy"),
         );
       }
     },
-    [patientId, state.activeModels]
+    [patientId, state.activeModels],
   );
 
   // Combine multiple prediction models for improved accuracy
   const combineModels = useCallback(
     async <T extends PredictionResult>(
       results: T[],
-      confidenceLevels: ConfidenceLevel[]
+      confidenceLevels: ConfidenceLevel[],
     ): Promise<Result<T>> => {
       try {
         if (results.length === 0) {
@@ -491,7 +509,7 @@ export function useClinicalPredictionController(patientId: string) {
           case "weighted": {
             const totalConfidence = confidenceLevels.reduce(
               (sum, level) => sum + level,
-              0
+              0,
             );
 
             if (totalConfidence === 0) {
@@ -515,23 +533,24 @@ export function useClinicalPredictionController(patientId: string) {
             const maxIndex = confidenceLevels.reduce(
               (maxIdx, confidence, idx) =>
                 confidence > confidenceLevels[maxIdx] ? idx : maxIdx,
-              0
+              0,
             );
             return success(results[maxIndex]);
           }
 
-          default: return failure(new Error("Unknown aggregation method")); // Corrected failure call
+          default:
+            return failure(new Error("Unknown aggregation method")); // Corrected failure call
         }
       } catch (error) {
         return failure(
           // Ensure error object is passed
           error instanceof Error
             ? error
-            : new Error("Unknown error combining models")
+            : new Error("Unknown error combining models"),
         );
       }
     },
-    [state.aggregationMethod]
+    [state.aggregationMethod],
   );
 
   // Get available prediction models
@@ -542,14 +561,17 @@ export function useClinicalPredictionController(patientId: string) {
       // TODO: Implement actual service call when available
       // const result = await clinicalService.getAvailableModels();
       console.warn("getAvailableModels service method not implemented.");
-      const result = failure(new Error("Service method getAvailableModels not implemented.")); // Placeholder failure
+      const result = failure(
+        new Error("Service method getAvailableModels not implemented."),
+      ); // Placeholder failure
 
       return result;
     } catch (error) {
-      return failure( // Ensure error object is passed
+      return failure(
+        // Ensure error object is passed
         error instanceof Error
           ? error
-          : new Error("Unknown error fetching available models")
+          : new Error("Unknown error fetching available models"),
       );
     }
   }, []);
