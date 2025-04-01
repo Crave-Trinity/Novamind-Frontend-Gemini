@@ -1,44 +1,52 @@
 /**
  * NOVAMIND Neural Test Suite
- * index testing with quantum precision
+ * Domain model exports validation with quantum precision
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
+import * as modelExports from "./index";
+// Import brain mapping functions for direct testing
+import { 
+  calculateNeuralActivation,
+  mapSymptomsToRegions,
+  mapDiagnosesToRegions,
+  calculateTreatmentImpact
+} from "./brain/mapping/brain-mapping";
 
-import { index } from "./index";
-
-describe("index", () => {
-  it("processes data with mathematical precision", () => {
-    // Arrange test data
-    const testData = {};
-
-    // Act
-    // Replaced function call with object access
-    // Original: const result = index(testData);
-    // In this test we're validating the properties of the exported object
-    const result = index;
-
-    // Assert
-    // Replaced generic assertion with more specific validation
-    expect(result).not.toBeNull();
-    // Add more specific assertions for this particular test case
+describe("Domain models index exports", () => {
+  it("exports brain model functions", () => {
+    // Assert brain-related function exports are available
+    expect(modelExports.isBrainModel).toBeDefined();
+    expect(modelExports.isBrainRegion).toBeDefined();
+    expect(modelExports.isNeuralConnection).toBeDefined();
+    expect(modelExports.createBrainModel).toBeDefined();
+    expect(modelExports.createBrainRegion).toBeDefined();
+    expect(modelExports.createNeuralConnection).toBeDefined();
   });
 
-  it("handles edge cases with clinical precision", () => {
-    // Test edge cases
-    const edgeCaseData = {};
-
-    // Act
-    // Replaced function call with object access
-    // Original: const result = index(edgeCaseData);
-    // In this test we're validating the properties of the exported object
-    const result = index;
-
-    // Assert
-    // Replaced generic assertion with more specific validation
-    expect(result).not.toBeNull();
-    // Add more specific assertions for this particular test case
+  it("exports brain mapping functions", () => {
+    // Assert brain mapping function exports are available
+    expect(modelExports.calculateNeuralActivation).toBeDefined();
+    expect(modelExports.mapSymptomsToRegions).toBeDefined();
+    expect(modelExports.mapDiagnosesToRegions).toBeDefined();
+    expect(modelExports.calculateTreatmentImpact).toBeDefined();
+    
+    // Verify function identity
+    expect(modelExports.calculateNeuralActivation).toBe(calculateNeuralActivation);
+    expect(modelExports.mapSymptomsToRegions).toBe(mapSymptomsToRegions);
+    expect(modelExports.mapDiagnosesToRegions).toBe(mapDiagnosesToRegions);
+    expect(modelExports.calculateTreatmentImpact).toBe(calculateTreatmentImpact);
   });
 
-  // Add more utility-specific tests
+  it("exports patient model functions", () => {
+    // Assert patient-related exports are available
+    expect(modelExports.isPatientModel).toBeDefined();
+    expect(modelExports.createPatientModel).toBeDefined();
+  });
+
+  it("does not export legacy model implementations", () => {
+    // Assert legacy exports are not available
+    expect(typeof modelExports).toBe("object");
+    expect(Object.keys(modelExports).some(key => key.includes('legacy'))).toBe(false);
+  });
 });

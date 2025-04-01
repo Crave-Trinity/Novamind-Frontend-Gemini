@@ -3,7 +3,7 @@
  * Clinical risk assessment with quantum-level type safety
  */
 
-import { Vector3, SafeArray } from "../common";
+import { Vector3, SafeArray } from "../shared/common";
 
 // Risk level with clinical precision
 export enum RiskLevel {
