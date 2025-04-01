@@ -47,9 +47,15 @@ export default defineConfig({
     exclude: ['node_modules', '.git', 'dist'],
     testTimeout: 20000,
     
-    // Critical: Prevent transformation of node_modules
-    deps: {
-      inline: []
+    // Use newer server.deps syntax
+    // Explicitly inline contexts to potentially resolve module issues in test env
+    server: {
+      deps: {
+        inline: [
+          // Add pattern for contexts or specific file if needed
+          /src\/contexts\//,
+        ]
+      }
     },
     
     // Ensure proper isolation and cleanup

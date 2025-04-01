@@ -3,7 +3,7 @@
  * Common type verification utilities with quantum-level precision
  */
 
-import { Result, NeuralError } from "@types/shared/common";
+import { Result, NeuralError } from "@domain/types/shared/common"; // Corrected path
 
 /**
  * Type Verification Error with clinical precision
@@ -134,6 +134,18 @@ export class TypeVerifier {
   }
 
   /**
+   * Verify that a value is a string or undefined/null
+   */
+  verifyOptionalString(value: unknown, field?: string): Result<string | undefined> {
+    if (value === undefined || value === null) {
+      return { success: true, value: undefined };
+    }
+    const result = this.verifyString(value, field);
+    // We explicitly allow undefined here, so map success to undefined value
+    return result.success ? result : { success: true, value: undefined };
+  }
+
+  /**
    * Verify that a value is a number
    */
   verifyNumber(value: unknown, field?: string): Result<number> {
@@ -235,6 +247,35 @@ export class TypeVerifier {
         typeof val === "object" && val !== null && !Array.isArray(val),
       field,
     );
+  }
+
+  /**
+   * Verify that a value is one of the specified enum values (string literals)
+   */
+  verifyEnum<T extends string>(
+    value: unknown,
+    allowedValues: readonly T[],
+    field?: string,
+  ): Result<T> {
+    const stringResult = this.verifyString(value, field);
+    if (!stringResult.success) {
+      return stringResult as Result<T>; // Keep the original error message
+    }
+
+    const stringValue = stringResult.value;
+    if (allowedValues.includes(stringValue as T)) { // Check against the specific literal type T
+      return { success: true, value: stringValue as T };
+    }
+
+    return {
+      success: false,
+      error: new TypeVerificationError(
+        `Invalid enum value`,
+        `one of [${allowedValues.join(", ")}]`,
+        `'${stringValue}'`,
+        field,
+      ),
+    };
   }
 
   /**

@@ -252,12 +252,10 @@ export const TemporalDynamicsVisualizer: React.FC<
     const majorCount = Math.ceil(timespan / scale.majorGridInterval);
     for (let i = 0; i <= majorCount; i++) {
       const timestamp = effectiveTimeRange.start + i * scale.majorGridInterval;
-      const x = MathUtils.mapLinear(
-        timestamp,
-        effectiveTimeRange.start,
-        effectiveTimeRange.end,
-        -width / 2,
+      const x = MathUtils.lerp(
+        -width / 2, 
         width / 2,
+        (timestamp - effectiveTimeRange.start) / (effectiveTimeRange.end - effectiveTimeRange.start)
       );
 
       // Vertical line
@@ -277,12 +275,10 @@ export const TemporalDynamicsVisualizer: React.FC<
       // Skip if this coincides with a major line
       if (timestamp % scale.majorGridInterval === 0) continue;
 
-      const x = MathUtils.mapLinear(
-        timestamp,
-        effectiveTimeRange.start,
-        effectiveTimeRange.end,
-        -width / 2,
+      const x = MathUtils.lerp(
+        -width / 2, 
         width / 2,
+        (timestamp - effectiveTimeRange.start) / (effectiveTimeRange.end - effectiveTimeRange.start)
       );
 
       // Vertical line
@@ -297,12 +293,10 @@ export const TemporalDynamicsVisualizer: React.FC<
     // Add horizontal grid lines
     const horizontalLines = 6;
     for (let i = 0; i <= horizontalLines; i++) {
-      const y = MathUtils.mapLinear(
-        i,
+      const y = MathUtils.lerp(
         0,
-        horizontalLines,
-        -height / 2,
-        height / 2,
+        height,
+        i / horizontalLines
       );
 
       // Horizontal line
@@ -329,37 +323,29 @@ export const TemporalDynamicsVisualizer: React.FC<
   const processedTransitions = useMemo(() => {
     return stateTransitions.map((transition) => {
       // Map transition timestamps to visualization space
-      const startX = MathUtils.mapLinear(
-        transition.startState.timestamp,
-        effectiveTimeRange.start,
-        effectiveTimeRange.end,
-        -width / 2,
+      const startX = MathUtils.lerp(
+        -width / 2, 
         width / 2,
+        (transition.startState.timestamp - effectiveTimeRange.start) / (effectiveTimeRange.end - effectiveTimeRange.start)
       );
 
-      const endX = MathUtils.mapLinear(
-        transition.startState.timestamp + transition.transitionDuration,
-        effectiveTimeRange.start,
-        effectiveTimeRange.end,
-        -width / 2,
+      const endX = MathUtils.lerp(
+        -width / 2, 
         width / 2,
+        (transition.startState.timestamp + transition.transitionDuration - effectiveTimeRange.start) / (effectiveTimeRange.end - effectiveTimeRange.start)
       );
 
       // Map activity levels to y position
-      const startY = MathUtils.mapLinear(
-        transition.startState.rawActivity,
-        0,
-        1,
+      const startY = MathUtils.lerp(
         -height / 2,
         height / 2,
+        transition.startState.rawActivity
       );
 
-      const endY = MathUtils.mapLinear(
-        transition.endState.rawActivity,
-        0,
-        1,
+      const endY = MathUtils.lerp(
         -height / 2,
         height / 2,
+        transition.endState.rawActivity
       );
 
       // Determine color based on whether transition is clinically significant
@@ -433,20 +419,16 @@ export const TemporalDynamicsVisualizer: React.FC<
           ) / Math.max(1, step.activationStates.length);
 
         // Map to visualization space
-        const x = MathUtils.mapLinear(
-          step.timeOffset,
-          effectiveTimeRange.start,
-          effectiveTimeRange.end,
-          -width / 2,
+        const x = MathUtils.lerp(
+          -width / 2, 
           width / 2,
+          (step.timeOffset - effectiveTimeRange.start) / (effectiveTimeRange.end - effectiveTimeRange.start)
         );
 
-        const y = MathUtils.mapLinear(
-          avgActivity,
-          0,
-          1,
+        const y = MathUtils.lerp(
           -height / 2,
           height / 2,
+          avgActivity
         );
 
         return new Vector3(x, y, 0);
@@ -626,7 +608,7 @@ export const TemporalDynamicsVisualizer: React.FC<
 
           {/* Activity level labels */}
           {[0, 0.25, 0.5, 0.75, 1].map((level) => {
-            const y = MathUtils.mapLinear(level, 0, 1, -height / 2, height / 2);
+            const y = MathUtils.lerp(-height / 2, height / 2, level);
 
             return (
               <Text

@@ -4,10 +4,16 @@
  * with mathematically precise type definitions
  */
 
-import {
-  NeuralFrequencyBand,
-  NeuralTransitionType,
-} from "@domain/types/brain/activity";
+// NeuralFrequencyBand and NeuralTransitionType are not exported from activity.ts
+// Defining them locally or using literals directly.
+
+// Define common EEG frequency bands
+export type NeuralFrequencyBand =
+  | "delta" // 0.5-4 Hz
+  | "theta" // 4-8 Hz
+  | "alpha" // 8-13 Hz
+  | "beta" // 13-30 Hz
+  | "gamma"; // 30-100+ Hz
 
 /**
  * Neural-safe transform definition with clinical precision
@@ -33,7 +39,7 @@ export interface NeuralTransform {
   /**
    * Type of transition to apply
    */
-  transitionType: NeuralTransitionType;
+  transitionType: "gradual" | "abrupt" | "oscillating"; // Use literal union directly
 
   /**
    * Optional frequency band to affect
