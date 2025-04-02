@@ -183,12 +183,10 @@ export function validateProperty(
   const path = propertyPath ? `${propertyPath}.${property}` : property;
   const value = (obj as Record<string, unknown>)[property];
 
-  return (
-    validator(value) ||
-    (() => {
-      throw new TypeVerificationError("valid property value", value, path);
-    })()
-  );
+  // Directly return the boolean result of the validator.
+  // The calling context (like createObjectValidator) might handle
+  // error reporting or logging if needed based on this boolean result.
+  return validator(value);
 }
 
 /**

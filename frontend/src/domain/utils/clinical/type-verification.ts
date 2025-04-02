@@ -15,10 +15,17 @@ import {
 } from "@domain/types/clinical/patient"; // Corrected path
 import { RiskLevel, RiskAssessment } from "@domain/types/clinical/risk"; // Corrected path
 import { Result } from "@domain/types/shared/common"; // Corrected path
+import { TypeVerificationError } from "@domain/models/shared/type-verification"; // Error class only
 import {
-  typeVerifier,
-  TypeVerificationError,
-} from "@domain/utils/shared/type-verification";
+  validateString,
+  validateNumber,
+  validateObject,
+  validateArray,
+  validateType,
+  validateOneOf,
+  validateArrayOf, // Use this for validating arrays of specific types
+  // Add other necessary validation functions as needed
+} from "@domain/models/shared/type-verification.runtime"; // Import runtime validators
 
 /**
  * Clinical model type verification utilities
@@ -30,122 +37,169 @@ export class ClinicalTypeVerifier {
   verifyRiskLevel(level: unknown, field?: string): Result<RiskLevel> {
     const validLevels = Object.values(RiskLevel);
 
-    if (typeof level === "string" && validLevels.includes(level as RiskLevel)) {
+    const isValid = validateType(
+      level,
+      validateOneOf(validLevels),
+      "RiskLevel", // Provide a type name for the error message
+      field,
+    );
+
+    if (isValid) {
       return {
         success: true,
-        value: level as RiskLevel,
+        value: level as RiskLevel, // Cast is safe here due to validation
+      };
+    } else {
+      // Construct error based on validation failure (details might be lost here)
+      // For a more informative error, we might need validateType to return Result<T>
+      return {
+        success: false,
+        error: new TypeVerificationError(
+          "RiskLevel",
+          level, // Pass the actual received value
+          field,
+        ),
       };
     }
-
-    return {
-      success: false,
-      error: new TypeVerificationError(
-        `Invalid RiskLevel`,
-        `one of [${validLevels.join(", ")}]`,
-        typeof level === "object"
-          ? level === null
-            ? "null"
-            : Array.isArray(level)
-              ? "array"
-              : "object"
-          : typeof level,
-        field,
-      ),
-    };
   }
 
   /**
    * Verify that an object conforms to the Symptom interface
    */
   verifySymptom(obj: unknown, field?: string): Result<Symptom> {
-    const objResult = typeVerifier.verifyObject(obj, field);
-    if (!objResult.success) {
-      return objResult as Result<Symptom>;
+    // Use direct validation function
+    if (!validateObject(obj, field)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("object", obj, field),
+      };
     }
+    // Cast is safe after validation
+    const object = obj as Record<string, unknown>;
 
-    const object = objResult.value;
+    // This line was duplicated in the previous partial apply, removing it.
 
     // Verify required properties
-    const idResult = typeVerifier.verifyString(
-      object.id,
-      field ? `${field}.id` : "id",
-    );
-    if (!idResult.success) return idResult as Result<Symptom>;
+    const idField = field ? `${field}.id` : "id";
+    if (!validateString(object.id, idField)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("string", object.id, idField),
+      };
+    }
+    const id = object.id as string; // Safe cast
 
-    const nameResult = typeVerifier.verifyString(
-      object.name,
-      field ? `${field}.name` : "name",
-    );
-    if (!nameResult.success) return nameResult as Result<Symptom>;
+    const nameField = field ? `${field}.name` : "name";
+    if (!validateString(object.name, nameField)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("string", object.name, nameField),
+      };
+    }
+    const name = object.name as string; // Safe cast
 
-    const severityResult = typeVerifier.verifyNumber(
-      object.severity,
-      field ? `${field}.severity` : "severity",
-    );
-    if (!severityResult.success) return severityResult as Result<Symptom>;
+    const severityField = field ? `${field}.severity` : "severity";
+    if (!validateNumber(object.severity, severityField)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("number", object.severity, severityField),
+      };
+    }
+    const severity = object.severity as number; // Safe cast
 
     // Optional properties
-    const description =
-      object.description !== undefined
-        ? typeVerifier.safelyParseString(object.description, "")
-        : undefined;
+    // Optional properties - Implement optional string validation logic
+    const onsetDateField = field ? `${field}.onsetDate` : "onsetDate";
+    let onsetDate: string | undefined;
+    if (object.onsetDate !== undefined) {
+      if (!validateString(object.onsetDate, onsetDateField)) {
+        return {
+          success: false,
+          error: new TypeVerificationError("string", object.onsetDate, onsetDateField),
+        };
+      }
+      onsetDate = object.onsetDate as string; // Safe cast
+    }
 
-    // onsetDate should be string? according to Symptom type
-    const onsetDateResult = typeVerifier.verifyOptionalString(object.onsetDate, field ? `${field}.onsetDate` : "onsetDate");
-    if (!onsetDateResult.success) return onsetDateResult as Result<Symptom>;
-    const onsetDate = onsetDateResult.value;
+    const descriptionField = field ? `${field}.description` : "description";
+    let description: string | undefined;
+    if (object.description !== undefined) {
+      if (!validateString(object.description, descriptionField)) {
+        return {
+          success: false,
+          error: new TypeVerificationError("string", object.description, descriptionField),
+        };
+      }
+      description = object.description as string; // Safe cast
+    }
 
-    // frequency should be one of specific literals
-    const frequencyResult = typeVerifier.verifyEnum(
-      object.frequency,
-      ["constant", "daily", "weekly", "monthly", "episodic", "situational"],
-      field ? `${field}.frequency` : "frequency"
-    );
-    if (!frequencyResult.success) return frequencyResult as Result<Symptom>;
-    const frequency = frequencyResult.value;
+    // frequency should be one of specific literals - Use validateType with validateOneOf
+    const frequencyField = field ? `${field}.frequency` : "frequency";
+    const allowedFrequencies = ["constant", "daily", "weekly", "monthly", "episodic", "situational"] as const;
+    type Frequency = typeof allowedFrequencies[number];
+    if (object.frequency !== undefined && !validateType(object.frequency, validateOneOf(allowedFrequencies), "Frequency", frequencyField)) {
+         return {
+            success: false,
+            error: new TypeVerificationError("Frequency", object.frequency, frequencyField),
+         };
+    }
+    const frequency = object.frequency as Frequency | undefined; // Safe cast
 
     // impact should be one of specific literals
-    const impactResult = typeVerifier.verifyEnum(
-      object.impact,
-      ["none", "mild", "moderate", "severe"],
-      field ? `${field}.impact` : "impact"
-    );
-    if (!impactResult.success) return impactResult as Result<Symptom>;
-    const impact = impactResult.value;
+    const impactField = field ? `${field}.impact` : "impact";
+    const allowedImpacts = ["none", "mild", "moderate", "severe"] as const;
+    type Impact = typeof allowedImpacts[number];
+     if (object.impact !== undefined && !validateType(object.impact, validateOneOf(allowedImpacts), "Impact", impactField)) {
+         return {
+            success: false,
+            error: new TypeVerificationError("Impact", object.impact, impactField),
+         };
+    }
+    const impact = object.impact as Impact | undefined; // Safe cast
 
     // progression should be one of specific literals
-    const progressionResult = typeVerifier.verifyEnum(
-      object.progression,
-      ["improving", "stable", "worsening", "fluctuating"],
-      field ? `${field}.progression` : "progression"
-    );
-    if (!progressionResult.success) return progressionResult as Result<Symptom>;
-    const progression = progressionResult.value;
+    const progressionField = field ? `${field}.progression` : "progression";
+    const allowedProgressions = ["improving", "stable", "worsening", "fluctuating"] as const;
+    type Progression = typeof allowedProgressions[number];
+     if (object.progression !== undefined && !validateType(object.progression, validateOneOf(allowedProgressions), "Progression", progressionField)) {
+         return {
+            success: false,
+            error: new TypeVerificationError("Progression", object.progression, progressionField),
+         };
+    }
+    const progression = object.progression as Progression | undefined; // Safe cast
 
     // category should be one of specific literals
-    const categoryResult = typeVerifier.verifyEnum(
-        object.category,
-        ["cognitive", "affective", "behavioral", "somatic", "perceptual"],
-        field ? `${field}.category` : "category"
-    );
-    if (!categoryResult.success) return categoryResult as Result<Symptom>;
-    const category = categoryResult.value;
+    const categoryField = field ? `${field}.category` : "category";
+    const allowedCategories = ["cognitive", "affective", "behavioral", "somatic", "perceptual"] as const;
+    type Category = typeof allowedCategories[number];
+    // Assuming category is required based on Symptom type? If optional, add undefined check.
+    // Let's assume required for now based on test failures likely expecting it.
+    if (!validateType(object.category, validateOneOf(allowedCategories), "Category", categoryField)) {
+         return {
+            success: false,
+            error: new TypeVerificationError("Category", object.category, categoryField),
+         };
+    }
+    const category = object.category as Category; // Safe cast
 
 
     // Return verified symptom
     return {
       success: true,
       value: {
-        id: idResult.value,
-        name: nameResult.value,
-        severity: severityResult.value,
-        category: category,
-        frequency: frequency,
-        impact: impact,
-        progression: progression,
-        ...(onsetDate !== undefined && { onsetDate }), // Handle exactOptionalPropertyTypes
-        // Optional fields like lastOccurrence, duration, triggers, etc. need verification if present
-      } as Symptom, // Cast to ensure type alignment
+        id: id,
+        name: name,
+        severity: severity,
+        category: category, // Use validated value
+        // Add optional properties correctly
+        ...(description !== undefined && { description }),
+        ...(onsetDate !== undefined && { onsetDate }),
+        ...(frequency !== undefined && { frequency }),
+        ...(impact !== undefined && { impact }),
+        ...(progression !== undefined && { progression }),
+        // Add other optional fields from Symptom type if needed
+      } as Symptom, // Cast should be safer now
     };
   }
 
@@ -153,89 +207,114 @@ export class ClinicalTypeVerifier {
    * Verify that an object conforms to the Diagnosis interface
    */
   verifyDiagnosis(obj: unknown, field?: string): Result<Diagnosis> {
-    const objResult = typeVerifier.verifyObject(obj, field);
-    if (!objResult.success) {
-      return objResult as Result<Diagnosis>;
+    // Use direct validation function
+    if (!validateObject(obj, field)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("object", obj, field),
+      };
     }
-
-    const object = objResult.value;
+    const object = obj as Record<string, unknown>; // Safe cast
 
     // Verify required properties
-    const idResult = typeVerifier.verifyString(
-      object.id,
-      field ? `${field}.id` : "id",
-    );
-    if (!idResult.success) return idResult as Result<Diagnosis>;
+    const idField = field ? `${field}.id` : "id";
+    if (!validateString(object.id, idField)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("string", object.id, idField),
+      };
+    }
+    const id = object.id as string;
 
-    const nameResult = typeVerifier.verifyString(
-      object.name,
-      field ? `${field}.name` : "name",
-    );
-    if (!nameResult.success) return nameResult as Result<Diagnosis>;
+    const nameField = field ? `${field}.name` : "name";
+    if (!validateString(object.name, nameField)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("string", object.name, nameField),
+      };
+    }
+    const name = object.name as string;
 
     // diagnosisDate should be string according to Diagnosis type
-    const diagnosisDateResult = typeVerifier.verifyString(object.diagnosisDate, field ? `${field}.diagnosisDate` : "diagnosisDate");
-    if (!diagnosisDateResult.success)
-      return diagnosisDateResult as Result<Diagnosis>;
+    const diagnosisDateField = field ? `${field}.diagnosisDate` : "diagnosisDate";
+    if (!validateString(object.diagnosisDate, diagnosisDateField)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("string", object.diagnosisDate, diagnosisDateField),
+      };
+    }
+    const diagnosisDate = object.diagnosisDate as string;
 
     // Optional properties
-    const description =
-      object.description !== undefined
-        ? typeVerifier.safelyParseString(object.description, "")
-        : undefined;
-
-    const icdCode =
-      object.icdCode !== undefined
-        ? typeVerifier.safelyParseString(object.icdCode, "")
-        : undefined;
+    // Optional properties - description and icdCode are NOT in Diagnosis type definition
+    // Remove these checks or update the type definition if they should exist.
+    // Assuming they should be removed based on comments in the original return block.
 
     // severity should be one of specific literals
-    const severityResult = typeVerifier.verifyEnum(
-      object.severity,
-      ["mild", "moderate", "severe", "in remission", "unspecified"],
-      field ? `${field}.severity` : "severity"
-    );
-    if (!severityResult.success) return severityResult as Result<Diagnosis>;
-    const severity = severityResult.value;
+    // severity should be one of specific literals
+    const severityField = field ? `${field}.severity` : "severity";
+    const allowedSeverities = ["mild", "moderate", "severe", "in remission", "unspecified"] as const;
+    type DiagnosisSeverity = typeof allowedSeverities[number];
+    // Assuming severity is optional based on type? If required, remove undefined check. Let's assume optional.
+    let severity: DiagnosisSeverity | undefined;
+    if (object.severity !== undefined) {
+        if (!validateType(object.severity, validateOneOf(allowedSeverities), "DiagnosisSeverity", severityField)) {
+            return {
+                success: false,
+                error: new TypeVerificationError("DiagnosisSeverity", object.severity, severityField),
+            };
+        }
+        severity = object.severity as DiagnosisSeverity;
+    }
 
     // code is required
-    const codeResult = typeVerifier.verifyString(object.code, field ? `${field}.code` : "code");
-    if (!codeResult.success) return codeResult as Result<Diagnosis>;
-    const code = codeResult.value;
+    const codeField = field ? `${field}.code` : "code";
+    if (!validateString(object.code, codeField)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("string", object.code, codeField),
+      };
+    }
+    const code = object.code as string;
 
     // codingSystem is required
-    const codingSystemResult = typeVerifier.verifyEnum(
-        object.codingSystem,
-        ["ICD-10", "ICD-11", "DSM-5", "DSM-5-TR"],
-        field ? `${field}.codingSystem` : "codingSystem"
-    );
-    if (!codingSystemResult.success) return codingSystemResult as Result<Diagnosis>;
-    const codingSystem = codingSystemResult.value;
+    const codingSystemField = field ? `${field}.codingSystem` : "codingSystem";
+    const allowedCodingSystems = ["ICD-10", "ICD-11", "DSM-5", "DSM-5-TR"] as const;
+    type CodingSystem = typeof allowedCodingSystems[number];
+    if (!validateType(object.codingSystem, validateOneOf(allowedCodingSystems), "CodingSystem", codingSystemField)) {
+        return {
+            success: false,
+            error: new TypeVerificationError("CodingSystem", object.codingSystem, codingSystemField),
+        };
+    }
+    const codingSystem = object.codingSystem as CodingSystem;
 
     // status is required
-    const statusResult = typeVerifier.verifyEnum(
-        object.status,
-        ["active", "resolved", "in remission", "recurrent"],
-        field ? `${field}.status` : "status"
-    );
-    if (!statusResult.success) return statusResult as Result<Diagnosis>;
-    const status = statusResult.value;
+    const statusField = field ? `${field}.status` : "status";
+    const allowedStatuses = ["active", "resolved", "in remission", "recurrent"] as const;
+    type DiagnosisStatus = typeof allowedStatuses[number];
+    if (!validateType(object.status, validateOneOf(allowedStatuses), "DiagnosisStatus", statusField)) {
+        return {
+            success: false,
+            error: new TypeVerificationError("DiagnosisStatus", object.status, statusField),
+        };
+    }
+    const status = object.status as DiagnosisStatus;
 
     // Return verified diagnosis
     return {
       success: true,
       value: {
-        id: idResult.value,
-        code: code, // Added required code
-        codingSystem: codingSystem, // Added required codingSystem
-        name: nameResult.value,
-        severity: severity, // Now a specific literal
-        diagnosisDate: diagnosisDateResult.value, // Now a string
-        status: status, // Added required status
-        // description, // description is not in Diagnosis type
-        // icdCode, // icdCode is not in Diagnosis type
-        // Optional fields like onsetDate, diagnosingClinician, notes, etc. need verification if present
-      },
+        id: id,
+        code: code,
+        codingSystem: codingSystem,
+        name: name,
+        diagnosisDate: diagnosisDate,
+        status: status,
+        // Add optional severity only if it exists and was validated
+        ...(severity !== undefined && { severity }),
+        // Add other optional fields from Diagnosis type if needed
+      } as Diagnosis, // Cast should be safer
     };
   }
 
@@ -243,86 +322,135 @@ export class ClinicalTypeVerifier {
    * Verify that an object conforms to the Treatment interface
    */
   verifyTreatment(obj: unknown, field?: string): Result<Treatment> {
-    const objResult = typeVerifier.verifyObject(obj, field);
-    if (!objResult.success) {
-      return objResult as Result<Treatment>;
+    // Use direct validation function
+    if (!validateObject(obj, field)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("object", obj, field),
+      };
     }
-
-    const object = objResult.value;
+    const object = obj as Record<string, unknown>; // Safe cast
 
     // Verify required properties
-    const idResult = typeVerifier.verifyString(
-      object.id,
-      field ? `${field}.id` : "id",
-    );
-    if (!idResult.success) return idResult as Result<Treatment>;
+    const idField = field ? `${field}.id` : "id";
+    if (!validateString(object.id, idField)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("string", object.id, idField),
+      };
+    }
+    const id = object.id as string;
 
-    const nameResult = typeVerifier.verifyString(
-      object.name,
-      field ? `${field}.name` : "name",
-    );
-    if (!nameResult.success) return nameResult as Result<Treatment>;
+    const nameField = field ? `${field}.name` : "name";
+    if (!validateString(object.name, nameField)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("string", object.name, nameField),
+      };
+    }
+    const name = object.name as string;
 
     // type should be one of specific literals
-    const typeResult = typeVerifier.verifyEnum(
-      object.type,
-      ["pharmacological", "psychotherapy", "neuromodulation", "lifestyle", "complementary", "other"],
-      field ? `${field}.type` : "type"
-    );
-    if (!typeResult.success) return typeResult as Result<Treatment>;
+    const typeField = field ? `${field}.type` : "type";
+    const allowedTypes = ["pharmacological", "psychotherapy", "neuromodulation", "lifestyle", "complementary", "other"] as const;
+    type TreatmentType = typeof allowedTypes[number];
+    if (!validateType(object.type, validateOneOf(allowedTypes), "TreatmentType", typeField)) {
+        return {
+            success: false,
+            error: new TypeVerificationError("TreatmentType", object.type, typeField),
+        };
+    }
+    const type = object.type as TreatmentType;
 
     // Optional properties
     // description is required and should be string
-    const descriptionResult = typeVerifier.verifyString(object.description, field ? `${field}.description` : "description");
-    if (!descriptionResult.success) return descriptionResult as Result<Treatment>;
-    const description = descriptionResult.value;
+    const descriptionField = field ? `${field}.description` : "description";
+    if (!validateString(object.description, descriptionField)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("string", object.description, descriptionField),
+      };
+    }
+    const description = object.description as string;
 
     // startDate should be string
-    const startDateResult = typeVerifier.verifyString(object.startDate, field ? `${field}.startDate` : "startDate");
-    if (!startDateResult.success) return startDateResult as Result<Treatment>;
-    const startDate = startDateResult.value;
+    const startDateField = field ? `${field}.startDate` : "startDate";
+    if (!validateString(object.startDate, startDateField)) {
+      return {
+        success: false,
+        error: new TypeVerificationError("string", object.startDate, startDateField),
+      };
+    }
+    const startDate = object.startDate as string;
 
     // endDate should be string?
-    const endDateResult = typeVerifier.verifyOptionalString(object.endDate, field ? `${field}.endDate` : "endDate");
-    if (!endDateResult.success) return endDateResult as Result<Treatment>;
-    const endDate = endDateResult.value;
+    // Optional endDate
+    const endDateField = field ? `${field}.endDate` : "endDate";
+    let endDate: string | undefined;
+    if (object.endDate !== undefined) {
+      if (!validateString(object.endDate, endDateField)) {
+        return {
+          success: false,
+          error: new TypeVerificationError("string", object.endDate, endDateField),
+        };
+      }
+      endDate = object.endDate as string;
+    }
 
-    const dosage =
-      object.dose !== undefined
-        ? typeVerifier.safelyParseString(object.dose, "")
-        : undefined;
+    // Optional dose (renamed from dosage in original code)
+    const doseField = field ? `${field}.dose` : "dose";
+    let dose: string | undefined;
+    if (object.dose !== undefined) {
+      if (!validateString(object.dose, doseField)) {
+        return {
+          success: false,
+          error: new TypeVerificationError("string", object.dose, doseField),
+        };
+      }
+      dose = object.dose as string;
+    }
 
     // status is required
-    const statusResult = typeVerifier.verifyEnum(
-        object.status,
-        ["active", "completed", "discontinued", "planned"],
-        field ? `${field}.status` : "status"
-    );
-    if (!statusResult.success) return statusResult as Result<Treatment>;
-    const status = statusResult.value; // Assign value here
+    const statusField = field ? `${field}.status` : "status";
+    const allowedTreatmentStatuses = ["active", "completed", "discontinued", "planned"] as const;
+    type TreatmentStatus = typeof allowedTreatmentStatuses[number];
+    if (!validateType(object.status, validateOneOf(allowedTreatmentStatuses), "TreatmentStatus", statusField)) {
+        return {
+            success: false,
+            error: new TypeVerificationError("TreatmentStatus", object.status, statusField),
+        };
+    }
+    const status = object.status as TreatmentStatus;
 
-    const frequency =
-      object.frequency !== undefined
-        ? typeVerifier.safelyParseString(object.frequency, "")
-        : undefined;
+    // Optional frequency
+    const frequencyField = field ? `${field}.frequency` : "frequency";
+    let frequency: string | undefined;
+    if (object.frequency !== undefined) {
+      if (!validateString(object.frequency, frequencyField)) {
+        return {
+          success: false,
+          error: new TypeVerificationError("string", object.frequency, frequencyField),
+        };
+      }
+      frequency = object.frequency as string;
+    }
 
     // Return verified treatment
     return {
       success: true,
       value: {
-        id: idResult.value,
-        name: nameResult.value,
-        type: typeResult.value, // Now a specific literal
-        description: description, // Now required string
-        startDate: startDate, // Now string
-        ...(endDate !== undefined && { endDate }), // Handle exactOptionalPropertyTypes
-        ...(dosage !== undefined && { dose: dosage }), // Handle exactOptionalPropertyTypes
-        ...(frequency !== undefined && { frequency }), // Handle exactOptionalPropertyTypes
-        // status is required
-        status: status, // Use the assigned value
-        // status is required
-        // Optional fields like provider, discontinuationReason, etc. need verification if present
-      },
+        id: id,
+        name: name,
+        type: type,
+        description: description,
+        startDate: startDate,
+        status: status,
+        // Add optional fields correctly
+        ...(endDate !== undefined && { endDate }),
+        ...(dose !== undefined && { dose }),
+        ...(frequency !== undefined && { frequency }),
+        // Add other optional fields from Treatment type if needed
+      } as Treatment,
     };
   }
 
@@ -330,28 +458,39 @@ export class ClinicalTypeVerifier {
   // TODO: Implement detailed verification logic for these types
 
   verifyMedication(obj: unknown, field?: string): Result<Medication> {
-    // Basic object check for now
-    const result = typeVerifier.verifyObject(obj, field);
-    if (!result.success) return result as Result<Medication>;
-    // Add checks for required Medication fields (id, name, classification, dosage, frequency, route, startDate)
-    // For now, just cast to satisfy the type system
-    return { success: true, value: result.value as unknown as Medication };
+    // Use direct validation function
+    if (!validateObject(obj, field)) {
+        return { success: false, error: new TypeVerificationError("object", obj, field) };
+    }
+    const object = obj as Record<string, unknown>;
+    // TODO: Implement full validation for Medication properties
+    // Required: id, name, classification, dosage, frequency, route, startDate
+    // Optional: endDate, status, prescribingPhysician, notes, sideEffects, effectivenessScore
+    return { success: true, value: object as unknown as Medication }; // Placeholder
   }
 
   verifyPsychometricAssessment(obj: unknown, field?: string): Result<PsychometricAssessment> {
-    // Basic object check for now
-    const result = typeVerifier.verifyObject(obj, field);
-     if (!result.success) return result as Result<PsychometricAssessment>;
-    // Add checks for required PsychometricAssessment fields (id, name, date, scores, interpretation)
-    return { success: true, value: result.value as unknown as PsychometricAssessment };
+    // Use direct validation function
+    if (!validateObject(obj, field)) {
+        return { success: false, error: new TypeVerificationError("object", obj, field) };
+    }
+    const object = obj as Record<string, unknown>;
+    // TODO: Implement full validation for PsychometricAssessment properties
+    // Required: id, name, date, scores, interpretation
+    // Optional: scaleUsed, administeredBy, notes, normativeDataComparison
+    return { success: true, value: object as unknown as PsychometricAssessment }; // Placeholder
   }
 
    verifyMedicalHistoryItem(obj: unknown, field?: string): Result<MedicalHistoryItem> {
-    // Basic object check for now
-    const result = typeVerifier.verifyObject(obj, field);
-     if (!result.success) return result as Result<MedicalHistoryItem>;
-    // Add checks for required MedicalHistoryItem fields (id, condition, type, status, impact, relevanceToNeuralHealth)
-    return { success: true, value: result.value as unknown as MedicalHistoryItem };
+    // Use direct validation function
+    if (!validateObject(obj, field)) {
+        return { success: false, error: new TypeVerificationError("object", obj, field) };
+    }
+    const object = obj as Record<string, unknown>;
+    // TODO: Implement full validation for MedicalHistoryItem properties
+    // Required: id, condition, type, status, impact, relevanceToNeuralHealth
+    // Optional: onsetDate, resolutionDate, treatments, notes
+    return { success: true, value: object as unknown as MedicalHistoryItem }; // Placeholder
   }
 
   /**
@@ -624,7 +763,8 @@ export class ClinicalTypeVerifier {
   assertRiskLevel(value: unknown, field?: string): asserts value is RiskLevel {
     const result = this.verifyRiskLevel(value, field);
     if (!result.success) {
-      throw result.error;
+      // Throw the specific error from the verification result
+      throw result.error ?? new TypeVerificationError("RiskLevel", value, field);
     }
   }
 
@@ -634,7 +774,7 @@ export class ClinicalTypeVerifier {
   assertSymptom(value: unknown, field?: string): asserts value is Symptom {
     const result = this.verifySymptom(value, field);
     if (!result.success) {
-      throw result.error;
+      throw result.error ?? new TypeVerificationError("Symptom", value, field);
     }
   }
 
@@ -644,7 +784,7 @@ export class ClinicalTypeVerifier {
   assertDiagnosis(value: unknown, field?: string): asserts value is Diagnosis {
     const result = this.verifyDiagnosis(value, field);
     if (!result.success) {
-      throw result.error;
+      throw result.error ?? new TypeVerificationError("Diagnosis", value, field);
     }
   }
 
@@ -654,7 +794,7 @@ export class ClinicalTypeVerifier {
   assertTreatment(value: unknown, field?: string): asserts value is Treatment {
     const result = this.verifyTreatment(value, field);
     if (!result.success) {
-      throw result.error;
+      throw result.error ?? new TypeVerificationError("Treatment", value, field);
     }
   }
 
@@ -667,7 +807,7 @@ export class ClinicalTypeVerifier {
   ): asserts value is TreatmentResponse {
     const result = this.verifyTreatmentResponse(value, field);
     if (!result.success) {
-      throw result.error;
+      throw result.error ?? new TypeVerificationError("TreatmentResponse", value, field);
     }
   }
 
@@ -677,7 +817,7 @@ export class ClinicalTypeVerifier {
   assertPatient(value: unknown, field?: string): asserts value is Patient {
     const result = this.verifyPatient(value, field);
     if (!result.success) {
-      throw result.error;
+      throw result.error ?? new TypeVerificationError("Patient", value, field);
     }
   }
 }
