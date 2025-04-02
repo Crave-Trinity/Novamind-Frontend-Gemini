@@ -120,7 +120,11 @@ import "vitest-canvas-mock"; // Integrate vitest-canvas-mock
 
 // Import required testing libraries
 import "@testing-library/jest-dom";
-import { beforeAll, vi } from "vitest";
+import * as matchers from '@testing-library/jest-dom/matchers'; // Import matchers explicitly
+import { beforeAll, vi, expect, beforeEach, afterEach } from "vitest"; // Import expect and hooks
+
+// Extend Vitest's expect with jest-dom matchers
+expect.extend(matchers);
 
 // Define proper TypeScript interfaces for our mocks
 interface Vector3 {

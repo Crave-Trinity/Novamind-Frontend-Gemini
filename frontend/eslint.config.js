@@ -14,6 +14,7 @@ export default [
 
   // Consolidated TS, Import, React, Hooks, A11y configuration for source files
   { 
+    // Apply this config to all relevant source files initially
     files: ["src/**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx}"],
     languageOptions: {
       parserOptions: {
@@ -73,7 +74,7 @@ export default [
     }
   },
 
-  // Keep ignores separate
+  // Ignores block (should come after main config, before test override)
   { 
     ignores: [
         "dist/",
@@ -89,5 +90,23 @@ export default [
         "public/",
         "*.html"
         ]
+  },
+  
+  // Override parserOptions specifically for test files (Place this LAST)
+  {
+    files: ["src/**/*.{test,spec}.{ts,tsx}"], // Target test files
+    languageOptions: {
+      parserOptions: {
+        project: './tsconfig.test.json', // Point to the test TSConfig for type-aware linting
+      },
+      globals: { // Add test-specific globals
+        ...globals.jest, 
+        ...globals.vitest, // Explicitly add vitest globals
+      }
+    },
+    // Optionally add/override rules specific to tests here
+    // rules: {
+    //   "@typescript-eslint/no-explicit-any": "off", 
+    // }
   }
 ];

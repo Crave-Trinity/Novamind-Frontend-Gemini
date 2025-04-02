@@ -137,9 +137,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     setTheme(isDarkMode ? "clinical" : "sleek-dark");
   }, [isDarkMode, setTheme]);
 
-  // Set initial theme on mount
+  // Set initial theme on mount and handle system changes
   useEffect(() => {
-    setTheme(theme);
+    // Remove redundant setTheme(theme) call here
 
     // Apply prefers-color-scheme if user hasn't selected a theme
     const savedTheme = localStorage.getItem("novamind-theme");

@@ -14,17 +14,12 @@ export default defineConfig({
     tsconfigPaths({
       root: __dirname,
       projects: [path.resolve(__dirname, './tsconfig.json')]
-    }) as any // Cast to bypass type mismatch
+    }) // Remove unnecessary cast
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@domain': path.resolve(__dirname, './src/domain'),
-      '@application': path.resolve(__dirname, './src/application'),
-      '@infrastructure': path.resolve(__dirname, './src/infrastructure'),
-      '@presentation': path.resolve(__dirname, './src/presentation'),
-      '@test': path.resolve(__dirname, './src/test'),
-      // Precise atom component resolution
+      // Keep specific aliases not covered or needing override from tsconfig.json
+      // Let vite-tsconfig-paths handle the general aliases like @, @domain, @application etc.
       '@presentation/atoms/Badge': path.resolve(__dirname, './src/presentation/atoms/Badge.tsx'),
       '@presentation/atoms/Button': path.resolve(__dirname, './src/presentation/atoms/Button.tsx'),
       '@presentation/atoms/Card': path.resolve(__dirname, './src/presentation/atoms/Card.tsx'),

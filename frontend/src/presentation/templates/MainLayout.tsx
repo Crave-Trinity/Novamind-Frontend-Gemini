@@ -311,6 +311,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <button
                 className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
                 onClick={toggleDarkMode}
+                data-testid="theme-toggle-button" // Add test ID
               >
                 {isDarkMode ? (
                   <svg

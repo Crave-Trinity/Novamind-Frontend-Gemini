@@ -2,24 +2,39 @@
  * NOVAMIND Neural Test Suite
  * DigitalTwinDemo testing with quantum precision
  */
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"; // Import hooks
 
-import { render, screen, fireEvent } from "@testing-library/react";
-import React from "react"; // Added missing React import
+import { render, screen, cleanup } from "@testing-library/react"; // Import cleanup
+import React from "react";
 import userEvent from "@testing-library/user-event";
-import DigitalTwinDemo from "@pages/DigitalTwinDemo"; // Assuming default export
-import { renderWithProviders } from "@test/test-utils.tsx";
+// Adjust import path based on actual file location if needed
+import DigitalTwinDemo from "./DigitalTwinDemo"; // Use relative path
+import { renderWithProviders } from "../../test/test-utils"; // Use relative path, remove extension
 
 // Mock data with clinical precision
 // Mock data with clinical precision - DigitalTwinDemo likely doesn't need props
 const mockProps = {};
 
 describe("DigitalTwinDemo", () => {
-  it("renders with neural precision", () => {
-    renderWithProviders(<DigitalTwinDemo {...mockProps} />); // Use renderWithProviders
+  beforeEach(() => {
+    // Optional: Add specific setup for DigitalTwinDemo if needed
+    vi.clearAllMocks(); // Ensure mocks are cleared before each test
+  });
 
-    // Add assertions for rendered content
-    expect(screen).toBeDefined();
+  afterEach(() => {
+    cleanup(); // Ensure DOM cleanup after each test
+    vi.restoreAllMocks(); // Restore mocks to original state
+  });
+
+  it("renders the visualization canvas", () => {
+    const { container } = renderWithProviders(<DigitalTwinDemo {...mockProps} />);
+
+    // Assert that a canvas element is rendered (common for R3F)
+    const canvasElement = container.querySelector("canvas");
+    expect(canvasElement).toBeInTheDocument();
+
+    // Add more specific assertions if known elements exist
+    // Example: expect(screen.getByText(/Digital Twin Demo Title/i)).toBeInTheDocument();
   });
 
   it("responds to user interaction with quantum precision", async () => {
@@ -27,9 +42,12 @@ describe("DigitalTwinDemo", () => {
     renderWithProviders(<DigitalTwinDemo {...mockProps} />); // Use renderWithProviders
 
     // Simulate user interactions
-    // await user.click(screen.getByText(/example text/i));
+    // Example: await user.click(screen.getByRole('button', { name: /load model/i }));
 
     // Add assertions for behavior after interaction
+    // Example: expect(mockLoadFunction).toHaveBeenCalled();
+    // For now, just a placeholder assertion
+    expect(true).toBe(true);
   });
 
   // Add more component-specific tests
