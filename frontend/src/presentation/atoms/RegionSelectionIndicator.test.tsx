@@ -8,11 +8,14 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RegionSelectionIndicator } from "./RegionSelectionIndicator";
+import { Vector3 } from "three"; // Import from mocked three
 import { renderWithProviders } from "@test/test-utils";
 
 // Mock data with clinical precision
 const mockProps = {
-  // Add component props here
+  position: new Vector3(0, 0, 0), // Provide a valid Vector3
+  scale: 1,                       // Provide a valid scale number
+  selected: false,                // Provide required boolean prop
 };
 
 describe("RegionSelectionIndicator", () => {

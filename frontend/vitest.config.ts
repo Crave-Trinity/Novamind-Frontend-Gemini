@@ -10,18 +10,19 @@ import tsconfigPaths from 'vite-tsconfig-paths';
  */
 export default defineConfig({
   plugins: [
-    tsconfigPaths({ // Run tsconfigPaths before react plugin
+    tsconfigPaths({ // Restore plugin for general alias resolution
       root: __dirname,
       projects: [path.resolve(__dirname, './tsconfig.json')]
     }),
     react() as any,
   ],
-  // Removed manual resolve.alias block. Relying on vite-tsconfig-paths plugin.
+  // optimizeDeps removed
+  // Removed explicit resolve.alias for 'three'. Relying on automocking.
   test: {
     globals: true,
     environment: 'jsdom',  // MUST BE JSDOM
     setupFiles: [
-      'tsconfig-paths/register',        // Attempt runtime path registration here
+      // 'tsconfig-paths/register',     // Removed: Handled by vite-tsconfig-paths plugin
       './src/test/textencoder-fix.ts',
       './src/test/url-fix.ts',
       './src/test/setup.ts'
@@ -32,16 +33,22 @@ export default defineConfig({
     // Use newer server.deps syntax
     // Explicitly inline contexts to potentially resolve module issues in test env
     server: {
-      deps: {
+      deps: { // This is server.deps
         inline: [
           // Add pattern for contexts or specific file if needed
-          /src\/contexts\//,
+          // /src\/contexts\//, // Keep commented out unless needed for context issues
+          // 'three', // Removed to test automocking without forced inlining
+          // '@react-three/fiber', // Removed
+          // '@react-three/drei', // Removed
         ]
       }
+      // experimentalOptimizer removed from server config
     },
-    
+    // deps object removed from test config
+
     // Ensure proper isolation and cleanup
     isolate: true,
+    // Correct placement for deps is directly under the 'test' object
     mockReset: true,
     restoreMocks: true,
     clearMocks: true,
@@ -65,5 +72,6 @@ export default defineConfig({
         statements: 80,
       }
     },
+    // deps object removed from here, will be placed at top level
   },
 });
