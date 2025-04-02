@@ -8,7 +8,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import Login from "@/pages/Login"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils.tsx";
+import { renderWithProviders } from "@test/test-utils.tsx";
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Assuming no specific props are required for Login page

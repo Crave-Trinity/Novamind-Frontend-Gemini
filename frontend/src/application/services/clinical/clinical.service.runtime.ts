@@ -3,11 +3,10 @@
  * ClinicalService Runtime Validation - Quantum-level runtime validation
  * with HIPAA compliance and psychiatric precision
  */
-
-import { RiskAssessment } from "@types/clinical/risk";
-import { TreatmentResponsePrediction } from "@types/clinical/treatment";
-import { Symptom, Diagnosis, Treatment } from "@types/clinical/patient";
-import { Result, success, failure } from "@types/shared/common";
+import { RiskAssessment } from "@domain/types/clinical/risk";
+import { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
+import { Symptom, Diagnosis, Treatment } from "@domain/types/clinical/patient";
+import { Result, success, failure } from "@domain/types/shared/common";
 
 // Custom error class for type verification errors
 class TypeVerificationError extends Error {

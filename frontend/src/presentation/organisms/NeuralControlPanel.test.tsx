@@ -7,8 +7,8 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react"; // Added missing React import
 import userEvent from "@testing-library/user-event";
-import { NeuralControlPanel } from "@presentation/organisms/NeuralControlPanel"; // Corrected to named import
-import { renderWithProviders } from "@test/testUtils.tsx";
+import { NeuralControlPanel } from "./NeuralControlPanel"; // Corrected to named import
+import { renderWithProviders } from "@test/test-utils.tsx";
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for NeuralControlPanel

@@ -9,7 +9,7 @@ import {
   NeuralTransformBatchValidator,
   NeuralTransformSequenceValidator,
   NeuralTransformResultValidator,
-} from "@types/neural/transforms.runtime";
+} from "@domain/types/neural/transforms.runtime";
 
 describe("Neural Transforms runtime validators", () => {
   it("NeuralTransformValidator validates correct NeuralTransform objects", () => {

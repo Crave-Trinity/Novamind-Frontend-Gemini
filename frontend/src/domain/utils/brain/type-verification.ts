@@ -7,9 +7,9 @@ import {
   BrainModel,
   BrainRegion,
   NeuralConnection,
-} from "@types/brain/core-models";
-import { RenderMode, VisualizationSettings } from "@types/brain/visualization";
-import { Vector3, Result } from "@types/shared/common";
+} from "@domain/types/brain/core-models";
+import { RenderMode, VisualizationSettings } from "@domain/types/brain/visualization";
+import { Vector3, Result } from "@domain/types/shared/common";
 import {
   typeVerifier,
   TypeVerificationError,

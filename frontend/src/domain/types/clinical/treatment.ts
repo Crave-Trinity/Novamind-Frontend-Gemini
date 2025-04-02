@@ -2,9 +2,8 @@
  * NOVAMIND Neural-Safe Treatment Prediction Types
  * Treatment response prediction with quantum-level type safety
  */
-
-import { RiskLevel } from "@types/clinical/risk";
-import { SafeArray, Result } from "@types/shared/common"; // Corrected path
+import { RiskLevel } from "@domain/types/clinical/risk";
+import { SafeArray, Result } from "@domain/types/shared/common";
 
 // Treatment prediction types with clinical precision
 export type TreatmentType =

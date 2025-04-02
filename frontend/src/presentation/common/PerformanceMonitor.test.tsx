@@ -7,8 +7,8 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react"; // Added missing React import
 import userEvent from "@testing-library/user-event";
-import PerformanceMonitor from "@presentation/common/PerformanceMonitor"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils.tsx";
+import PerformanceMonitor from "./PerformanceMonitor"; // Assuming default export
+import { renderWithProviders } from "@test/test-utils.tsx";
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Assuming no specific props are required for PerformanceMonitor

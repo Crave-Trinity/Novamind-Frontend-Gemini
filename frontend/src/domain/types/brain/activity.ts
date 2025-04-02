@@ -5,7 +5,7 @@
  */
 
 import { Vector3 } from "three";
-import { Result } from "@types/common";
+import { Result } from "@domain/types/shared/common";
 
 /**
  * Neural activation level classifications

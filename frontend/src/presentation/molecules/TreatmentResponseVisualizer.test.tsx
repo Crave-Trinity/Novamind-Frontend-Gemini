@@ -5,10 +5,10 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import "@test/unified-three.mock"; // Ensure this mock setup is correct
-import { renderWithProviders } from "@test/testUtils"; // Added renderWithProviders
+import { renderWithProviders } from "@test/test-utils"; // Added renderWithProviders
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import TreatmentResponseVisualizer from "@presentation/molecules/TreatmentResponseVisualizer";
+import TreatmentResponseVisualizer from "./TreatmentResponseVisualizer";
 import {
   TreatmentResponsePrediction,
   TreatmentType,

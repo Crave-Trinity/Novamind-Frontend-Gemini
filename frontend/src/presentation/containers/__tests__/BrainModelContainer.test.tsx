@@ -8,8 +8,8 @@
 import React from "react";
 import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import BrainModelContainer from "@presentation/containers/BrainModelContainer"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils"; // Corrected relative path
+import BrainModelContainer from "../BrainModelContainer"; // Assuming default export
+import { renderWithProviders } from "@test/test-utils"; // Corrected relative path
 
 // Create simplified test data
 const mockBrainRegions = [

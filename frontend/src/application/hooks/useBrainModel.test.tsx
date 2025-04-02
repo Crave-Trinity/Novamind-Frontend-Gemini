@@ -5,7 +5,7 @@ import * as React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useBrainModel } from "@hooks/useBrainModel";
-import { createMockBrainRegions } from "@test/testUtils";
+import { createMockBrainRegions } from "@test/test-utils";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Create a quantum-precise mock API client

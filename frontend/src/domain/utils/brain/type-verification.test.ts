@@ -8,7 +8,7 @@ import {
   brainTypeVerifier,
   BrainTypeVerifier,
 } from "@domain/utils/brain/type-verification";
-import { RenderMode } from "@types/brain/visualization";
+import { RenderMode } from "@domain/types/brain/visualization";
 import { TypeVerificationError } from "@domain/utils/shared/type-verification";
 
 describe("Brain type verification", () => {

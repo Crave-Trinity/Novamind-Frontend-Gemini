@@ -17,7 +17,7 @@ import {
   TreatmentPredictionVisualizationSettings,
   TreatmentPredictionState,
   TreatmentComparisonState,
-} from "@types/clinical/treatment";
+} from "@domain/types/clinical/treatment";
 
 describe("Treatment type definitions", () => {
   it("TreatmentType has correct literal union types", () => {

@@ -15,7 +15,7 @@ import type {
   NeuroimagingFeatures,
   TreatmentResponsePrediction,
   TreatmentComparisonResult,
-} from "@types/clinical/treatment";
+} from "@domain/types/clinical/treatment";
 
 /**
  * Runtime validation for TreatmentType

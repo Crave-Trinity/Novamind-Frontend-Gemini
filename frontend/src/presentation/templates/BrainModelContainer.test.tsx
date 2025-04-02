@@ -5,7 +5,7 @@
 
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import BrainModelContainer from "@presentation/templates/BrainModelContainer";
+import BrainModelContainer from "./BrainModelContainer";
 import React from "react"; // Ensure React is imported for JSX
 
 // Mock minimal dependencies if absolutely necessary for basic render

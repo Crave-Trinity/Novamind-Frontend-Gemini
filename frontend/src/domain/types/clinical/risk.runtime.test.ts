@@ -4,14 +4,14 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { RiskLevel } from "@types/clinical/risk";
+import { RiskLevel } from "@domain/types/clinical/risk";
 import {
   RiskLevelValidator,
   RiskAssessmentValidator,
   DomainRiskValidator,
   ContributingFactorValidator,
   ProtectiveFactorValidator,
-} from "@types/clinical/risk.runtime";
+} from "@domain/types/clinical/risk.runtime";
 
 describe("Risk runtime validators", () => {
   it("RiskLevelValidator validates correct RiskLevel values", () => {

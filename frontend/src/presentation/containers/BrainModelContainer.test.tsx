@@ -5,8 +5,8 @@
 import { describe, it, expect, vi } from "vitest";
 import React from "react"; // Added missing React import
 import { render, screen } from "@testing-library/react";
-import BrainModelContainer from "@presentation/containers/BrainModelContainer"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils"; // Added renderWithProviders
+import BrainModelContainer from "./BrainModelContainer"; // Assuming default export
+import { renderWithProviders } from "@test/test-utils"; // Added renderWithProviders
 
 // Removed local prop definition; will rely on imported component props
 

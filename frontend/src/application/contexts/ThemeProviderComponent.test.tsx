@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook, act } from "@testing-library/react";
 import { useTheme } from "@contexts/ThemeProviderComponent";
 
 describe("useTheme", () => {

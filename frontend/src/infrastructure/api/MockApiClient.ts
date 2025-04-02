@@ -3,7 +3,7 @@ import {
   RenderMode,
   ModelSource,
   NeuralPathway,
-} from "@models/BrainModel";
+} from "@domain/models/brain/BrainModel";
 
 /**
  * Mock API Client for development & testing
@@ -15,7 +15,7 @@ export class MockApiClient {
    * @param patientId The ID of the patient
    * @returns A sample brain model
    */
-  async getBrainModel(patientId = "demo-patient"): Promise<BrainModel> {
+  async getBrainModel(patientId = "demo-patient"): Promise<ReturnType<typeof BrainModel>> {
     // Simulate network latency for realistic testing
     await new Promise((resolve) => setTimeout(resolve, 800));
 

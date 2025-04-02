@@ -3,7 +3,7 @@
  * SymptomRegionMappingVisualizer testing with quantum precision
  */
 
-import { SymptomRegionMappingVisualizer } from "@presentation/molecules/SymptomRegionMappingVisualizer";
+import { SymptomRegionMappingVisualizer } from "./SymptomRegionMappingVisualizer";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
@@ -15,7 +15,7 @@ import { SymptomNeuralMapping } from "@domain/models/brain/mapping/brain-mapping
 import {
   createMockBrainRegions,
   mockUseThree,
-} from "../../test/three-test-utils";
+} from '@test/three-test-utils';
 
 // Mock the @react-three/fiber module
 vi.mock("@react-three/fiber", async (importOriginal) => {

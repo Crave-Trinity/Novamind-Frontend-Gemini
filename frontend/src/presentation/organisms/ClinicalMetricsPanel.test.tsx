@@ -6,10 +6,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ClinicalMetricsPanel } from "@presentation/organisms/ClinicalMetricsPanel";
+import { ClinicalMetricsPanel } from "./ClinicalMetricsPanel";
 
 // Mock the dependencies that might be causing import errors
-vi.mock("@presentation/atoms/Tabs", () => ({
+vi.mock("../atoms/Tabs", () => ({
   Tabs: ({ children }: any) => <div data-testid="tabs">{children}</div>,
   TabsContent: ({ children, value }: any) => (
     <div data-testid={`tab-content-${value}`}>{children}</div>
@@ -22,13 +22,13 @@ vi.mock("@presentation/atoms/Tabs", () => ({
   ),
 }));
 
-vi.mock("@presentation/atoms/Button", () => ({
+vi.mock("../atoms/Button", () => ({
   Button: ({ children, onClick }: any) => (
     <button onClick={onClick}>{children}</button>
   ),
 }));
 
-vi.mock("@presentation/atoms/Tooltip", () => ({
+vi.mock("../atoms/Tooltip", () => ({
   Tooltip: ({ children }: any) => <div data-testid="tooltip">{children}</div>,
   TooltipContent: ({ children }: any) => (
     <div data-testid="tooltip-content">{children}</div>
@@ -41,7 +41,7 @@ vi.mock("@presentation/atoms/Tooltip", () => ({
   ),
 }));
 
-vi.mock("@presentation/atoms/Badge", () => ({
+vi.mock("../atoms/Badge", () => ({
   Badge: ({ children, variant, className }: any) => (
     <span data-testid="badge" data-variant={variant} className={className}>
       {children}
@@ -49,7 +49,7 @@ vi.mock("@presentation/atoms/Badge", () => ({
   ),
 }));
 
-vi.mock("@presentation/atoms/Card", () => ({
+vi.mock("../atoms/Card", () => ({
   Card: ({ children, className }: any) => (
     <div data-testid="card" className={className}>
       {children}
@@ -72,7 +72,7 @@ vi.mock("@presentation/atoms/Card", () => ({
   ),
 }));
 
-vi.mock("@presentation/atoms/ScrollArea", () => ({
+vi.mock("../atoms/ScrollArea", () => ({
   ScrollArea: ({ children }: any) => (
     <div data-testid="scroll-area">{children}</div>
   ),
@@ -81,7 +81,7 @@ vi.mock("@presentation/atoms/ScrollArea", () => ({
   ),
 }));
 
-vi.mock("@presentation/atoms/Progress", () => ({
+vi.mock("../atoms/Progress", () => ({
   Progress: ({ value }: any) => (
     <div data-testid="progress" data-value={value}></div>
   ),

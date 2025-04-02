@@ -11,7 +11,7 @@ import type {
   Connection,
   BrainModel,
   Coordinate,
-} from "@types/brain/core-models";
+} from "@domain/types/brain/core-models";
 
 /**
  * Runtime validation for Vector3 objects

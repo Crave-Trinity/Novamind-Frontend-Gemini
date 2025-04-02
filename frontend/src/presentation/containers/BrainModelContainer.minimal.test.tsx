@@ -8,8 +8,8 @@
 import React from "react";
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import BrainModelContainer from "@presentation/containers/BrainModelContainer";
-import { renderWithProviders } from "@test/testUtils"; // Added import
+import BrainModelContainer from "./BrainModelContainer";
+import { renderWithProviders } from "@test/test-utils"; // Added import
 
 // Removed local prop definition; will rely on imported component props
 

@@ -10,7 +10,7 @@ import {
   defaultVisualizationSettings,
   isValidTheme,
   isValidRenderMode,
-} from "../../../domain/types/brain/visualization"; // Use relative path
+} from '@types/brain/visualization'; // Use relative path
 
 // Type imports for type annotations only, not for runtime checks
 import type {
@@ -22,8 +22,8 @@ import type {
   ProcessedBrainData,
   ProcessedBrainRegion,
   ProcessedNeuralConnection,
-} from "../../../domain/types/brain/visualization";
-import type { BrainModel } from "../../../domain/types/brain/models";
+} from '@types/brain/visualization';
+import type { BrainModel } from '@types/brain/models';
 
 describe("visualization type definitions", () => {
   it("exports visualizationThemes with correct structure", () => {

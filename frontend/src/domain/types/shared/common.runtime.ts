@@ -17,7 +17,7 @@ import type {
   ColorRGB,
   ColorRGBA,
   Dimensions,
-} from "@types/shared/common";
+} from "@domain/types/shared/common";
 
 /**
  * Runtime validation for ID

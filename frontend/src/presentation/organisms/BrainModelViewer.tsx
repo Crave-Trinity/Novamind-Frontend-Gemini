@@ -46,7 +46,11 @@ import {
   defaultVisualizationSettings, // Import defaults
 } from "@domain/types/brain/visualization";
 // Use relative path for common types
-import { SafeArray, Result, VisualizationState } from "../../domain/types/shared/common";
+import {
+  SafeArray,
+  Result,
+  VisualizationState,
+} from '@types/shared/common';
 
 // Neural-safe prop definition with explicit typing
 interface BrainModelViewerProps {
@@ -188,27 +192,32 @@ const Brain3DScene: React.FC<{
   // Group regions by lobe/functional system for neuroanatomical precision
   const regionGroups = useMemo(() => {
     const groups: Record<string, BrainRegion[]> = {
-        frontal: [], parietal: [], temporal: [], occipital: [], subcortical: [], other: []
+      frontal: [],
+      parietal: [],
+      temporal: [],
+      occipital: [],
+      subcortical: [],
+      other: [],
     };
-     safeRegions.forEach((region: BrainRegion) => {
-       const [x, y, z] = Array.isArray(region.position)
-         ? region.position
-         : [region.position.x, region.position.y, region.position.z];
-       // Simplified grouping logic - replace with actual neuroanatomical data if available
-       if (y > 2) groups.frontal.push(region);
-       else if (y < -2) groups.occipital.push(region);
-       else if (x > 2) groups.temporal.push(region);
-       else if (x < -2) groups.parietal.push(region);
-       else if (Math.abs(z) < 2) groups.subcortical.push(region);
-       else groups.other.push(region);
-     });
-     return Object.entries(groups)
-       .filter(([_, regions]) => regions.length > 0)
-       .map(([name, regions]) => ({
-         groupId: `group-${name}`,
-         groupName: name.charAt(0).toUpperCase() + name.slice(1),
-         regions,
-       }));
+    safeRegions.forEach((region: BrainRegion) => {
+      const [x, y, z] = Array.isArray(region.position)
+        ? region.position
+        : [region.position.x, region.position.y, region.position.z];
+      // Simplified grouping logic - replace with actual neuroanatomical data if available
+      if (y > 2) groups.frontal.push(region);
+      else if (y < -2) groups.occipital.push(region);
+      else if (x > 2) groups.temporal.push(region);
+      else if (x < -2) groups.parietal.push(region);
+      else if (Math.abs(z) < 2) groups.subcortical.push(region);
+      else groups.other.push(region);
+    });
+    return Object.entries(groups)
+      .filter(([_, regions]) => regions.length > 0)
+      .map(([name, regions]) => ({
+        groupId: `group-${name}`,
+        groupName: name.charAt(0).toUpperCase() + name.slice(1),
+        regions,
+      }));
   }, [brainModel.regions]);
 
   return (
@@ -255,24 +264,26 @@ const Brain3DScene: React.FC<{
         />
       ))}
 
-       {/* Add contact shadows for visual depth */}
-       {!highPerformanceMode && visualizationSettings.enableShadows && (
-         <ContactShadows
-           position={[0, -5, 0]} // Make configurable?
-           scale={30}
-           blur={2}
-           opacity={0.4}
-           // color={themeSettings.shadowColor} // Property missing
-         />
-       )}
+      {/* Add contact shadows for visual depth */}
+      {!highPerformanceMode && visualizationSettings.enableShadows && (
+        <ContactShadows
+          position={[0, -5, 0]} // Make configurable?
+          scale={30}
+          blur={2}
+          opacity={0.4}
+          // color={themeSettings.shadowColor} // Property missing
+        />
+      )}
 
-       {/* Optional environment lighting */}
-       {/* {!highPerformanceMode && visualizationSettings.useEnvironmentLighting && ( // Property missing
+      {/* Optional environment lighting */}
+      {/* {!highPerformanceMode && visualizationSettings.useEnvironmentLighting && ( // Property missing
          <Environment preset="sunset" /> // Example preset
        )} */}
 
-       {/* Performance optimization for shadows */}
-       {!highPerformanceMode && visualizationSettings.enableShadows && <BakeShadows />}
+      {/* Performance optimization for shadows */}
+      {!highPerformanceMode && visualizationSettings.enableShadows && (
+        <BakeShadows />
+      )}
     </group>
   );
 };
@@ -333,7 +344,6 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
     // Only include dependencies that affect the merged settings object
   }, [visualizationSettingsProp, renderModeProp, enableBloomProp]);
 
-
   // Process search query to highlight matching regions
   const searchHighlightedRegions = useMemo(() => {
     if (!regionSearchQuery || !brainModel) return [];
@@ -361,45 +371,53 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
     }
   }, [visualizationState.status, onLoadComplete]);
 
-
   // --- Render Functions ---
   const renderLoadingState = () => (
     <div className="w-full h-full flex items-center justify-center bg-gray-900">
-       <div className="text-center">
-         <div className="animate-pulse flex space-x-4 mb-4 justify-center">
-           <div className="rounded-full bg-blue-400 h-3 w-3"></div>
-           <div className="rounded-full bg-blue-400 h-3 w-3"></div>
-           <div className="rounded-full bg-blue-400 h-3 w-3"></div>
-         </div>
-         <p className="text-gray-300 text-sm">Loading neural architecture...</p>
-       </div>
+      <div className="text-center">
+        <div className="animate-pulse flex space-x-4 mb-4 justify-center">
+          <div className="rounded-full bg-blue-400 h-3 w-3"></div>
+          <div className="rounded-full bg-blue-400 h-3 w-3"></div>
+          <div className="rounded-full bg-blue-400 h-3 w-3"></div>
+        </div>
+        <p className="text-gray-300 text-sm">Loading neural architecture...</p>
+      </div>
     </div>
   );
 
   const renderErrorState = (error: Error) => (
     <div className="w-full h-full flex items-center justify-center bg-gray-900">
-       <div className="text-center max-w-md px-4">
-         <div className="text-red-500 mb-2 text-2xl"> {/* Icon placeholder */} </div>
-         <h3 className="text-white text-lg font-medium mb-2">Neural Visualization Error</h3>
-         <p className="text-gray-300 text-sm mb-4">{error.message}</p>
-         <button
-           className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-sm"
-           onClick={() => window.location.reload()}
-         >
-           Reinitialize Visualization
-         </button>
-       </div>
+      <div className="text-center max-w-md px-4">
+        <div className="text-red-500 mb-2 text-2xl">
+          {" "}
+          {/* Icon placeholder */}{" "}
+        </div>
+        <h3 className="text-white text-lg font-medium mb-2">
+          Neural Visualization Error
+        </h3>
+        <p className="text-gray-300 text-sm mb-4">{error.message}</p>
+        <button
+          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-sm"
+          onClick={() => window.location.reload()}
+        >
+          Reinitialize Visualization
+        </button>
+      </div>
     </div>
   );
 
-   const renderEmptyState = () => (
-     <div className="w-full h-full flex items-center justify-center bg-gray-900">
-       <div className="text-center max-w-md px-4">
-         <h3 className="text-white text-lg font-medium mb-2">No Neural Data Available</h3>
-         <p className="text-gray-300 text-sm">Please select a neural model to visualize.</p>
-       </div>
-     </div>
-   );
+  const renderEmptyState = () => (
+    <div className="w-full h-full flex items-center justify-center bg-gray-900">
+      <div className="text-center max-w-md px-4">
+        <h3 className="text-white text-lg font-medium mb-2">
+          No Neural Data Available
+        </h3>
+        <p className="text-gray-300 text-sm">
+          Please select a neural model to visualize.
+        </p>
+      </div>
+    </div>
+  );
 
   const renderVisualization = (model: BrainModel) => (
     <Canvas
@@ -416,9 +434,9 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
         {/* Lighting - Use settings from merged object */}
         <ambientLight intensity={settings.ambientLightIntensity} />
         <directionalLight
-           position={[10, 10, 5]} // Make configurable?
-           intensity={settings.directionalLightIntensity}
-           // color={settings.directionalLightColor} // Property missing
+          position={[10, 10, 5]} // Make configurable?
+          intensity={settings.directionalLightIntensity}
+          // color={settings.directionalLightColor} // Property missing
         />
 
         {/* Camera controller */}
@@ -446,9 +464,12 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
         />
 
         {/* Post-processing effects - Use settings and direct props */}
-        {!highPerformanceMode && (settings.enableBloom || enableDepthOfFieldProp) ? (
+        {!highPerformanceMode &&
+        (settings.enableBloom || enableDepthOfFieldProp) ? (
           <EffectComposer>
-            <> {/* Wrap conditional elements in Fragment */}
+            <>
+              {" "}
+              {/* Wrap conditional elements in Fragment */}
               {settings.enableBloom ? (
                 <Bloom
                   luminanceThreshold={settings.bloomThreshold}
@@ -458,7 +479,9 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                 />
               ) : null}
             </>
-            <> {/* Wrap conditional elements in Fragment */}
+            <>
+              {" "}
+              {/* Wrap conditional elements in Fragment */}
               {enableDepthOfFieldProp ? ( // Use direct prop
                 <DepthOfField
                   focusDistance={0} // Example values, make configurable?
@@ -487,7 +510,6 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
     }
   };
 
-
   // Render with appropriate sizing and overlays
   return (
     <div
@@ -506,47 +528,51 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
 
       {/* Legend for current render mode */}
       {visualizationState.status === "success" && showLegend && (
-          <div className="absolute top-4 right-4 bg-black/50 text-white text-xs p-2 rounded shadow-lg">
-            <div className="font-medium mb-1">
-              {settings.renderMode === RenderMode.ANATOMICAL && "Anatomical View"}
-              {settings.renderMode === RenderMode.FUNCTIONAL && "Functional View"}
-              {settings.renderMode === RenderMode.CONNECTIVITY && "Connectivity View"}
-              {/* Add other render modes as needed */}
-            </div>
-            {settings.renderMode === RenderMode.FUNCTIONAL && (
-              <div className="flex space-x-2 mt-1">
-                <div className="flex items-center">
-                  <div
-                    className="w-3 h-3 rounded-full mr-1"
-                    style={{
-                      backgroundColor: settings.activityColorScale?.[4] || '#E74C3C', // Safe access
-                    }}
-                  ></div>
-                  <span>High</span>
-                </div>
-                <div className="flex items-center">
-                  <div
-                    className="w-3 h-3 rounded-full mr-1"
-                    style={{
-                      backgroundColor: settings.activityColorScale?.[2] || '#F1C40F', // Safe access
-                    }}
-                  ></div>
-                  <span>Medium</span>
-                </div>
-                <div className="flex items-center">
-                  <div
-                    className="w-3 h-3 rounded-full mr-1"
-                    style={{
-                      backgroundColor: settings.activityColorScale?.[0] || '#3498DB', // Safe access
-                    }}
-                  ></div>
-                  <span>Low</span>
-                </div>
-              </div>
-            )}
-            {/* Add legend content for other render modes if necessary */}
+        <div className="absolute top-4 right-4 bg-black/50 text-white text-xs p-2 rounded shadow-lg">
+          <div className="font-medium mb-1">
+            {settings.renderMode === RenderMode.ANATOMICAL && "Anatomical View"}
+            {settings.renderMode === RenderMode.FUNCTIONAL && "Functional View"}
+            {settings.renderMode === RenderMode.CONNECTIVITY &&
+              "Connectivity View"}
+            {/* Add other render modes as needed */}
           </div>
-        )}
+          {settings.renderMode === RenderMode.FUNCTIONAL && (
+            <div className="flex space-x-2 mt-1">
+              <div className="flex items-center">
+                <div
+                  className="w-3 h-3 rounded-full mr-1"
+                  style={{
+                    backgroundColor:
+                      settings.activityColorScale?.[4] || "#E74C3C", // Safe access
+                  }}
+                ></div>
+                <span>High</span>
+              </div>
+              <div className="flex items-center">
+                <div
+                  className="w-3 h-3 rounded-full mr-1"
+                  style={{
+                    backgroundColor:
+                      settings.activityColorScale?.[2] || "#F1C40F", // Safe access
+                  }}
+                ></div>
+                <span>Medium</span>
+              </div>
+              <div className="flex items-center">
+                <div
+                  className="w-3 h-3 rounded-full mr-1"
+                  style={{
+                    backgroundColor:
+                      settings.activityColorScale?.[0] || "#3498DB", // Safe access
+                  }}
+                ></div>
+                <span>Low</span>
+              </div>
+            </div>
+          )}
+          {/* Add legend content for other render modes if necessary */}
+        </div>
+      )}
     </div>
   );
 };

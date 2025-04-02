@@ -7,8 +7,8 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react"; // Added missing React import
 import userEvent from "@testing-library/user-event";
-import BrainRegionGroup from "@presentation/molecules/BrainRegionGroup"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils"; // Reverted to relative path
+import BrainRegionGroup from "./BrainRegionGroup"; // Assuming default export
+import { renderWithProviders } from "@test/test-utils"; // Reverted to relative path
 import { RenderMode, ThemeOption } from "@domain/types/brain/visualization"; // Import RenderMode and ThemeOption
 
 // Mock data with clinical precision

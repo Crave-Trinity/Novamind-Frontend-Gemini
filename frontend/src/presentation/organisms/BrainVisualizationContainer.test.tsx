@@ -7,8 +7,26 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react"; // Added missing React import
 import userEvent from "@testing-library/user-event";
-import BrainVisualizationContainer from "@presentation/organisms/BrainVisualizationContainer"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils.tsx";
+import BrainVisualizationContainer from "./BrainVisualizationContainer"; // Assuming default export
+import { renderWithProviders } from "@test/test-utils.tsx";
+
+// Mock the Three.js and React Three Fiber dependencies
+vi.mock("@react-three/drei", () => ({
+  OrbitControls: vi.fn(() => null),
+  Environment: vi.fn(() => null),
+  Loader: vi.fn(() => null),
+  Stars: vi.fn(() => null)
+}));
+
+vi.mock("@react-three/fiber", () => ({
+  Canvas: vi.fn(({ children }) => <div data-testid="canvas-mock">{children}</div>),
+  useFrame: vi.fn((callback) => callback({ clock: { getElapsedTime: () => 0 } }))
+}));
+
+vi.mock("@react-three/postprocessing", () => ({
+  EffectComposer: vi.fn(({ children }) => <div>{children}</div>),
+  Bloom: vi.fn(() => null)
+}));
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for BrainVisualizationContainer

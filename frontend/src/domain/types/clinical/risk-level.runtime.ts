@@ -5,7 +5,7 @@
  * This module provides runtime validation for the RiskLevel type.
  */
 
-import type { RiskLevel } from "@types/clinical/risk-level";
+import type { RiskLevel } from "@domain/types/clinical/risk-level";
 
 /**
  * Runtime validation for RiskLevel

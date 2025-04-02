@@ -7,8 +7,8 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react"; // Added missing React import
 import userEvent from "@testing-library/user-event";
-import ErrorBoundary from "@presentation/templates/ErrorBoundary"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils.tsx";
+import ErrorBoundary from "./ErrorBoundary"; // Assuming default export
+import { renderWithProviders } from "@test/test-utils.tsx";
 
 // Mock data with clinical precision
 // Mock data with clinical precision - ErrorBoundary requires children

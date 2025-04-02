@@ -6,7 +6,7 @@ import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import NeuralActivityVisualizer from "@presentation/molecules/NeuralActivityVisualizer";
+import NeuralActivityVisualizer from "./NeuralActivityVisualizer";
 import {
   NeuralActivityState,
   ActivationLevel,
@@ -17,7 +17,7 @@ import { BrainRegion, NeuralConnection } from "@domain/types/brain/models";
 
 // Import neural-safe Three.js mocks with quantum precision
 import "@test/unified-three.mock"; // Ensure this mock setup is correct
-import { renderWithProviders } from "@test/testUtils"; // Added renderWithProviders
+import { renderWithProviders } from "@test/test-utils"; // Added renderWithProviders
 
 // Neural-safe activity states with clinical precision
 const createActivityState = (
@@ -347,6 +347,24 @@ describe("NeuralActivityVisualizer", () => {
         connections={mockConnections}
         activityStates={manyActivityStates}
         maxVisibleActivities={5} // Only show 5 most important
+
+// Mock the Three.js and React Three Fiber dependencies
+vi.mock("@react-three/drei", () => ({
+  OrbitControls: vi.fn(() => null),
+  Environment: vi.fn(() => null),
+  Loader: vi.fn(() => null),
+  Stars: vi.fn(() => null)
+}));
+
+vi.mock("@react-three/fiber", () => ({
+  Canvas: vi.fn(({ children }) => <div data-testid="canvas-mock">{children}</div>),
+  useFrame: vi.fn((callback) => callback({ clock: { getElapsedTime: () => 0 } }))
+}));
+
+vi.mock("@react-three/postprocessing", () => ({
+  EffectComposer: vi.fn(({ children }) => <div>{children}</div>),
+  Bloom: vi.fn(() => null)
+}));
       />,
     );
 

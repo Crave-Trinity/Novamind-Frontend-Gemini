@@ -4,10 +4,20 @@
  */
 
 // Placeholder types - Replace 'any' with specific imported types later
-type RiskAssessment = any;
-type AssessmentScore = any;
-type TreatmentPlan = any;
-type Biomarker = any;
+export type RiskAssessment = any;
+
+export interface AssessmentScore {
+  id: string;
+  type: string;
+  score: number;
+  maxScore: number;
+  change?: number;
+  clinicalSignificance: "none" | "mild" | "moderate" | "severe";
+  date?: string;
+  notes?: string;
+}
+export type TreatmentPlan = any;
+export type Biomarker = any;
 
 export interface DigitalTwinProfile {
   // Properties accessed in DigitalTwinDashboard.tsx

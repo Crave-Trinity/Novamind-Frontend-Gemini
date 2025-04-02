@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // Removed incorrect import for MathUtils as it's mocked below
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import TemporalDynamicsVisualizer from "@presentation/molecules/TemporalDynamicsVisualizer";
+import TemporalDynamicsVisualizer from "./TemporalDynamicsVisualizer";
 import {
   NeuralStateTransition,
   TemporalActivationSequence,
@@ -16,7 +16,7 @@ import {
 } from "@domain/types/brain/activity";
 import { Vector3 } from "three";
 
-import { renderWithProviders } from "@test/testUtils"; // Added renderWithProviders
+import { renderWithProviders } from "@test/test-utils"; // Added renderWithProviders
 // Mock Three.js and related components to prevent WebGL errors
 vi.mock("@react-three/fiber", () => ({
   useThree: () => ({

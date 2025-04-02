@@ -2,8 +2,7 @@
  * NOVAMIND Neural-Safe Visualization Type Definitions
  * Brain visualization types with quantum-level type safety
  */
-
-import { BrainModel, BrainRegion, NeuralConnection } from "@types/brain/models";
+import { BrainModel, BrainRegion, NeuralConnection } from "@domain/types/brain/models";
 
 // Digital Twin visualization modes with clinical precision
 export enum RenderMode {

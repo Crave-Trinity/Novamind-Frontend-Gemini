@@ -8,7 +8,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ThemeProvider } from "@/contexts/Theme"; // Corrected import source and type (named)
-import { renderWithProviders } from "@test/testUtils"; // Removed .tsx extension from alias
+import { renderWithProviders } from "@test/test-utils"; // Removed .tsx extension from alias
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for ThemeProvider

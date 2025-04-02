@@ -5,7 +5,7 @@
 
 import { describe, it, expect } from "vitest";
 import { Vector3 } from "three";
-import { ActivationLevel } from "../../../domain/types/brain/activity"; // Use relative path
+import { ActivationLevel } from '@types/brain/activity'; // Use relative path
 
 // Type imports for type annotations only, not for runtime checks
 import type {
@@ -15,7 +15,7 @@ import type {
   TemporalActivationSequence,
   NeuralActivityHeatmap,
   ActivityVisualizationSettings,
-} from "../../../domain/types/brain/activity";
+} from '@types/brain/activity';
 
 describe("activity type definitions", () => {
   it("exports ActivationLevel with correct structure", () => {

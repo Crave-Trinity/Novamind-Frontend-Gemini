@@ -7,8 +7,8 @@ import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { RegionSelectionIndicator } from "@presentation/atoms/RegionSelectionIndicator";
-import { renderWithProviders } from "@test/testUtils";
+import { RegionSelectionIndicator } from "./RegionSelectionIndicator";
+import { renderWithProviders } from "@test/test-utils";
 
 // Mock data with clinical precision
 const mockProps = {

@@ -10,7 +10,7 @@ import {
   RenderMode,
   BrainRegion,
   type NeuralPathway,
-} from "@models/BrainModel";
+} from "@domain/models/brain/BrainModel";
 
 interface BrainVisualizationProps {
   /** Patient ID for data fetching */
@@ -37,13 +37,14 @@ interface BrainVisualizationProps {
  * Brain Region Mesh Component
  * Renders a single brain region as a 3D mesh
  */
+// eslint-disable-next-line react/no-unknown-property
 const RegionMesh: React.FC<{
   region: BrainRegion;
   isActive: boolean;
   isHighlighted: boolean;
   glowIntensity: number;
   renderMode: RenderMode;
-  onClick?: () => void;
+  onClick?: (() => void) | undefined;
 }> = ({
   region,
   isActive,
@@ -103,28 +104,29 @@ const RegionMesh: React.FC<{
       }
     }
   });
-
-  return (
-    <mesh
-      ref={meshRef}
-      position={[region.position[0], region.position[1], region.position[2]]}
-      scale={[region.scale, region.scale, region.scale]}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.();
-      }}
-    >
-      <sphereGeometry args={[1, 16, 16]} />
-      <meshStandardMaterial
-        ref={materialRef}
-        color={color}
-        emissive={color}
-        emissiveIntensity={isHighlighted || isActive ? glowIntensity : 0}
-        roughness={0.3}
-        metalness={0.7}
-      />
-    </mesh>
-  );
+/* eslint-disable react/no-unknown-property */
+return (
+  <mesh
+    ref={meshRef}
+    position={[region.position[0], region.position[1], region.position[2]]}
+    scale={[region.scale, region.scale, region.scale]}
+    onClick={(e) => {
+      e.stopPropagation();
+      if (onClick) onClick();
+    }}
+  >
+    <sphereGeometry args={[1, 16, 16]} />
+    <meshStandardMaterial
+      ref={materialRef}
+      color={color}
+      emissive={color}
+      emissiveIntensity={isHighlighted || isActive ? glowIntensity : 0}
+      roughness={0.3}
+      metalness={0.7}
+    />
+  </mesh>
+);
+/* eslint-enable react/no-unknown-property */
 };
 
 /**
@@ -185,6 +187,7 @@ const NeuralPathwayMesh: React.FC<{
       : new THREE.Color("#ff6b6b");
   }, [pathway.type, isActive]);
 
+  /* eslint-disable react/no-unknown-property */
   return (
     <line>
       <bufferGeometry>
@@ -198,6 +201,7 @@ const NeuralPathwayMesh: React.FC<{
       <lineBasicMaterial color={color} linewidth={thickness} />
     </line>
   );
+  /* eslint-enable react/no-unknown-property */
 };
 
 /**
@@ -243,7 +247,7 @@ const BrainModel: React.FC<{
           isHighlighted={highlightedRegions.includes(region.id)}
           renderMode={renderMode}
           glowIntensity={glowIntensity}
-          onClick={interactive ? () => onRegionClick?.(region.id) : undefined}
+          onClick={interactive && onRegionClick ? () => onRegionClick(region.id) : undefined}
         />
       ))}
 
@@ -305,7 +309,7 @@ const BrainVisualization: React.FC<BrainVisualizationProps> = ({
     // highlightRegion, // Removed unused variable
     // clearHighlights, // Removed unused variable
   } = useBrainVisualization({
-    patientId,
+    patientId: patientId || '',
     autoRotate,
     highlightActiveRegions: true,
   });
@@ -448,19 +452,26 @@ const BrainVisualization: React.FC<BrainVisualizationProps> = ({
       className={`relative overflow-hidden rounded-lg ${className}`}
       style={{ height, width: "100%" }}
     >
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <Canvas
         dpr={[1, 2]} // Responsive resolution
         camera={{ position: [0, 0, 30], fov: 50 }}
         gl={{ antialias: true }}
       >
         {/* Scene background */}
+        {/* eslint-disable-next-line react/no-unknown-property */}
         <color attach="background" args={[currentSettings.bgColor]} />
 
         {/* Lighting */}
+        {/* eslint-disable-next-line react/no-unknown-property */}
         <ambientLight intensity={currentSettings.ambientLight} />
+        {/* eslint-disable-next-line react/no-unknown-property */}
         <directionalLight
+          /* eslint-disable-next-line react/no-unknown-property */
           position={[10, 10, 5]}
+          /* eslint-disable-next-line react/no-unknown-property */
           intensity={currentSettings.directionalLight}
+          /* eslint-disable-next-line react/no-unknown-property */
           castShadow
         />
 

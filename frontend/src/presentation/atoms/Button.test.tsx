@@ -7,8 +7,8 @@ import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import Button from "@presentation/atoms/Button"; // Changed to default import
-import { renderWithProviders } from "@test/testUtils";
+import Button from "./Button"; // Changed to default import
+import { renderWithProviders } from "@test/test-utils";
 
 // Mock data with clinical precision
 const mockProps = {

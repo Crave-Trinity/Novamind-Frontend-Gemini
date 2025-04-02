@@ -7,7 +7,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import BrainVisualizationPage from "@/pages/BrainVisualizationPage"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils.tsx";
+import { renderWithProviders } from "@test/test-utils.tsx";
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for BrainVisualizationPage

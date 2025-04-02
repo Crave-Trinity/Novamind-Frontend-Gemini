@@ -7,7 +7,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import BrainVisualizationContainer from "@/components/organisms/BrainVisualizationContainer"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils.tsx";
+import { renderWithProviders } from "@test/test-utils.tsx";
 // Removed incorrect type imports, BrainRegion is defined locally in the component
 
 // Mock data with clinical precision

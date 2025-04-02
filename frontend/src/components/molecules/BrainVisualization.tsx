@@ -4,7 +4,8 @@ import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import React, { useMemo, useRef, Suspense } from "react";
 
 import { useTheme } from "@contexts/ThemeProviderComponent";
-import { BrainData, BrainVisualizationProps } from "@/types/brain";
+import { BrainModelData, RenderMode, BrainRegion, NeuralPathway } from "@domain/models/brain/BrainModel";
+import { Result } from "@domain/types/shared/common";
 import {
   transformBrainData,
   getActiveRegions,
@@ -12,6 +13,62 @@ import {
   generateConnectionPositionMap,
   applyVisualizationMode,
 } from "@/utils/brainDataTransformer";
+
+/**
+ * Props for the BrainVisualization component
+ */
+interface BrainVisualizationProps {
+  /**
+   * Brain data to visualize
+   */
+  brainData: {
+    regions: BrainRegion[];
+    pathways: NeuralPathway[];
+  };
+  /**
+   * Currently active brain regions
+   */
+  activeRegions?: string[];
+  /**
+   * Theme to use for visualization
+   */
+  theme?: "sleek-dark" | "retro" | "wes" | "clinical";
+  /**
+   * Whether to show connections between regions
+   */
+  showConnections?: boolean;
+  /**
+   * Size settings for the visualization
+   */
+  size?: {
+    width?: string | number;
+    height?: string | number;
+  };
+  /**
+   * Callback when a region is clicked
+   */
+  onRegionClick?: (regionId: string) => void;
+  /**
+   * Callback when a connection is clicked
+   */
+  onConnectionClick?: (connectionId: string) => void;
+  /**
+   * Whether to auto-rotate the visualization
+   */
+  autoRotate?: boolean;
+  /**
+   * Camera position
+   */
+  cameraPosition?: [number, number, number];
+  /**
+   * Mode of visualization
+   */
+  mode?: RenderMode;
+  /**
+   * Class name for custom styling
+   */
+  className?: string;
+}
 import NeuralConnection from "@/components/atoms/NeuralConnection";
 import RegionMesh from "@/components/atoms/RegionMesh";
 
@@ -31,11 +88,11 @@ class BrainVisualizationErrorBoundary extends React.Component<
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("Brain visualization error:", error, errorInfo);
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         <div className="flex h-64 w-full items-center justify-center rounded-lg bg-gray-900 md:h-96">
@@ -72,9 +129,12 @@ const BrainModel = React.memo(
     onConnectionClick,
     autoRotate,
   }: {
-    brainData: BrainData;
+    brainData: {
+      regions: BrainRegion[];
+      pathways: NeuralPathway[];
+    };
     activeRegionIds: string[];
-    mode: "anatomical" | "functional" | "activity";
+    mode: RenderMode;
     onRegionClick?: (id: string) => void;
     onConnectionClick?: (id: string) => void;
     autoRotate?: boolean;
@@ -83,26 +143,38 @@ const BrainModel = React.memo(
     const groupRef = useRef<THREE.Group>(null);
 
     // Get active regions and their positions
-    const activeRegions = useMemo(
-      () => getActiveRegions(brainData, activeRegionIds),
+    const activeRegions = useMemo<BrainRegion[]>(
+      () => {
+        const result = getActiveRegions(brainData, activeRegionIds);
+        return Result.isSuccess(result) ? result.value : [];
+      },
       [brainData, activeRegionIds],
     );
 
     // Get active connections between regions
-    const activeConnections = useMemo(
-      () => getActiveConnections(brainData, activeRegionIds),
+    const activeConnections = useMemo<NeuralPathway[]>(
+      () => {
+        const result = getActiveConnections(brainData, activeRegionIds);
+        return Result.isSuccess(result) ? result.value : [];
+      },
       [brainData, activeRegionIds],
     );
 
     // Generate a map of positions for efficient lookup
-    const positionMap = useMemo(
-      () => generateConnectionPositionMap(brainData),
+    const positionMap = useMemo<Record<string, [number, number, number]>>(
+      () => {
+        const result = generateConnectionPositionMap(brainData);
+        return Result.isSuccess(result) ? result.value : {};
+      },
       [brainData],
     );
 
     // Apply visual styling based on mode
-    const visualizedRegions = useMemo(
-      () => applyVisualizationMode(brainData.regions, mode, settings),
+    const visualizedRegions = useMemo<BrainRegion[]>(
+      () => {
+        const result = applyVisualizationMode(brainData.regions, mode, settings);
+        return Result.isSuccess(result) ? result.value : [];
+      },
       [brainData.regions, mode, settings],
     );
 

@@ -10,7 +10,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import BiometricAlertVisualizer, {
   ClinicalAlert,
-} from "@presentation/molecules/BiometricAlertVisualizer";
+} from "./BiometricAlertVisualizer";
 import { Vector3 } from "three";
 import { BrainRegion } from "@domain/types/brain/models";
 

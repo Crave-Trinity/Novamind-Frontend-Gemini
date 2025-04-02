@@ -25,6 +25,10 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
 }) => {
   // Get saved theme from localStorage or use default
   const getSavedTheme = (): ThemeOption => {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return initialTheme;
+    }
+    
     try {
       const savedTheme = localStorage.getItem("novamind-theme");
       return savedTheme && isValidTheme(savedTheme)
@@ -49,22 +53,29 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   // Set theme and save to localStorage
   const setTheme = useCallback((newTheme: ThemeOption) => {
-    try {
-      localStorage.setItem("novamind-theme", newTheme);
-    } catch (e) {
-      console.error("Error saving theme to localStorage", e);
+    // Save to localStorage if available
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        localStorage.setItem("novamind-theme", newTheme);
+      } catch (e) {
+        console.error("Error saving theme to localStorage", e);
+      }
     }
 
     setThemeState(newTheme);
 
-    // Update the document with the current theme for global CSS
-    document.documentElement.setAttribute("data-theme", newTheme);
+    // Update the document with the current theme for global CSS if document is available
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute("data-theme", newTheme);
+    }
 
-    // Set dark mode class for Tailwind
-    if (newTheme === "dark" || newTheme === "sleek") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
+    // Set dark mode class for Tailwind if document is available
+    if (typeof document !== 'undefined') {
+      if (newTheme === "dark" || newTheme === "sleek") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
     }
   }, []);
 
@@ -77,26 +88,46 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
   useEffect(() => {
     setTheme(theme);
 
-    // Apply prefers-color-scheme if user hasn't selected a theme
-    const savedTheme = localStorage.getItem("novamind-theme");
-    if (!savedTheme) {
+    // Apply prefers-color-scheme if user hasn't selected a theme and window.matchMedia is available
+    const savedTheme = typeof window !== 'undefined' && window.localStorage
+      ? localStorage.getItem("novamind-theme")
+      : null;
+    if (!savedTheme && typeof window !== 'undefined' && window.matchMedia) {
       const prefersDark = window.matchMedia(
         "(prefers-color-scheme: dark)",
       ).matches;
       setTheme(prefersDark ? "dark" : "clinical");
     }
 
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (e: MediaQueryListEvent) => {
-      const savedTheme = localStorage.getItem("novamind-theme");
-      if (!savedTheme) {
-        setTheme(e.matches ? "dark" : "clinical");
-      }
-    };
+    // Listen for system theme changes if window.matchMedia is available
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      try {
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        const handleChange = (e: MediaQueryListEvent) => {
+          const savedTheme = typeof window !== 'undefined' && window.localStorage
+            ? localStorage.getItem("novamind-theme")
+            : null;
+          if (!savedTheme) {
+            setTheme(e.matches ? "dark" : "clinical");
+          }
+        };
 
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+        // Use addEventListener if available, otherwise use deprecated addListener for older browsers
+        if (mediaQuery && mediaQuery.addEventListener) {
+          mediaQuery.addEventListener("change", handleChange);
+          return () => mediaQuery.removeEventListener("change", handleChange);
+        } else if (mediaQuery && mediaQuery.addListener) {
+          // For older browsers
+          mediaQuery.addListener(handleChange);
+          return () => mediaQuery.removeListener(handleChange);
+        }
+      } catch (error) {
+        console.error("Error setting up media query listener:", error);
+      }
+    }
+    
+    // Return empty cleanup function if matchMedia is not available
+    return () => {};
   }, [setTheme, theme]);
 
   // Context value

@@ -12,7 +12,7 @@ import {
   BrainViewState,
   NeuralPathway,
   RenderMode,
-} from "@models/BrainModel";
+} from "@domain/models/brain/BrainModel";
 import { apiClient } from "@api/ApiClient";
 
 interface UseBrainVisualizationOptions {

@@ -7,8 +7,8 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react"; // Added missing React import
 import userEvent from "@testing-library/user-event";
-import NeuralConnections from "@presentation/molecules/NeuralConnections"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils"; // Reverted to relative path
+import NeuralConnections from "./NeuralConnections"; // Assuming default export
+import { renderWithProviders } from "@test/test-utils"; // Reverted to relative path
 import {
   RenderMode,
   ThemeSettings,

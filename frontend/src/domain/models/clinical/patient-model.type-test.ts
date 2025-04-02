@@ -13,7 +13,7 @@ import {
   Symptom,
   TreatmentResponse,
   PatientModel,
-} from "@models/clinical/patient-model";
+} from "@domain/models/clinical/patient-model";
 
 describe("Patient Model type definitions", () => {
   it("PatientDemographics has correct structure", () => {

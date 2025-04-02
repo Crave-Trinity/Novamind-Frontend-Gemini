@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 
-import { RenderMode } from "@models/BrainModel";
+import { RenderMode } from "@domain/models/brain/BrainModel";
 import Button from "@presentation/atoms/Button";
 
 interface BrainVisualizationControlsProps {

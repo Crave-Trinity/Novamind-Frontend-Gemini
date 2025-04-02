@@ -11,14 +11,14 @@ import {
   DataStreamVisualizer,
   DataStream,
   DataPoint,
-} from "@presentation/molecules/DataStreamVisualizer"; // Import types
+} from "./DataStreamVisualizer"; // Import types
 // Import types and mock helpers
 import { BrainRegion, NeuralConnection } from "@domain/types/brain"; // Adjust path if needed
 import {
   mockUseThree,
   createMockBrainRegions,
   createMockNeuralConnections,
-} from "../../test/three-test-utils";
+} from '@test/three-test-utils';
 
 // Mock the @react-three/fiber module
 vi.mock("@react-three/fiber", async (importOriginal) => {

@@ -7,12 +7,12 @@ import { describe, it, expect, vi, beforeEach, SpyInstance } from "vitest"; // E
 import { renderHook } from "@testing-library/react-hooks";
 import React from "react";
 // Import the hook itself and the context type, but not the provider
-import { useTheme } from "./useTheme";
+import { useTheme } from '@hooks/useTheme';
 // Import the actual Context object as well
 import ThemeContext, {
   ThemeContextType,
   ThemeOption,
-} from "../../contexts/ThemeContext";
+} from '@/contexts/ThemeContext';
 
 // Mock the ThemeContext module directly if needed, or just mock useContext
 // We will mock useContext directly

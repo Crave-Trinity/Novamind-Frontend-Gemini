@@ -3,16 +3,34 @@
  * AdaptiveLOD testing with quantum precision
  */
 
-import { AdaptiveLOD, DetailConfig } from "@presentation/common/AdaptiveLOD"; // Import DetailConfig/Level
+import { AdaptiveLOD, DetailConfig } from "./AdaptiveLOD"; // Import DetailConfig/Level
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 // Import the mock helper
-import { mockUseThree } from "../../test/three-test-utils";
+import { mockUseThree } from '@test/three-test-utils';
 
 // Mock the @react-three/fiber module
 vi.mock("@react-three/fiber", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@react-three/fiber")>();
+
+// Mock the Three.js and React Three Fiber dependencies
+vi.mock("@react-three/drei", () => ({
+  OrbitControls: vi.fn(() => null),
+  Environment: vi.fn(() => null),
+  Loader: vi.fn(() => null),
+  Stars: vi.fn(() => null)
+}));
+
+vi.mock("@react-three/fiber", () => ({
+  Canvas: vi.fn(({ children }) => <div data-testid="canvas-mock">{children}</div>),
+  useFrame: vi.fn((callback) => callback({ clock: { getElapsedTime: () => 0 } }))
+}));
+
+vi.mock("@react-three/postprocessing", () => ({
+  EffectComposer: vi.fn(({ children }) => <div>{children}</div>),
+  Bloom: vi.fn(() => null)
+}));
   return {
     ...actual,
     useThree: mockUseThree, // Replace useThree with our mock

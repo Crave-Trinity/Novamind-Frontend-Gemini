@@ -7,9 +7,9 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react"; // Added missing React import
 import userEvent from "@testing-library/user-event";
-import ClinicalDataOverlay from "@presentation/molecules/ClinicalDataOverlay"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils"; // Reverted to relative path
-import { BrainModel } from "@types/brain/models"; // Import BrainModel
+import ClinicalDataOverlay from "./ClinicalDataOverlay"; // Assuming default export
+import { renderWithProviders } from "@test/test-utils"; // Reverted to relative path
+import { BrainModel } from "@domain/types/brain/models"; // Import BrainModel
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for ClinicalDataOverlay

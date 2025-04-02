@@ -8,7 +8,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react"; // Added missing React import
 import userEvent from "@testing-library/user-event";
 import BrainModelViewer from "@pages/BrainModelViewer"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils.tsx";
+import { renderWithProviders } from "@test/test-utils.tsx";
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for BrainModelViewer page

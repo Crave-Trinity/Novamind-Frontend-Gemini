@@ -6,7 +6,16 @@
 import { describe, it, expect } from "vitest";
 import { clinicalTypeVerifier } from "@domain/utils/clinical/type-verification";
 import { RiskLevel } from "@domain/types/clinical/risk";
-import { Patient, Symptom, Diagnosis, Medication, PsychometricAssessment, MedicalHistoryItem, Treatment, TreatmentResponse } from "@domain/types/clinical/patient"; // Import necessary types
+import {
+  Patient,
+  Symptom,
+  Diagnosis,
+  Medication,
+  PsychometricAssessment,
+  MedicalHistoryItem,
+  Treatment,
+  TreatmentResponse,
+} from "@domain/types/clinical/patient"; // Import necessary types
 import { TypeVerificationError } from "@domain/utils/shared/type-verification";
 
 describe("Clinical type verification", () => {
@@ -85,7 +94,9 @@ describe("Clinical type verification", () => {
         // );
         expect(result.value.frequency).toBe("daily");
         expect(result.value.onsetDate).toBe(symptomWithOptionals.onsetDate);
-        expect(result.value.lastOccurrence).toBe(symptomWithOptionals.lastOccurrence);
+        expect(result.value.lastOccurrence).toBe(
+          symptomWithOptionals.lastOccurrence,
+        );
         expect(result.value.duration).toBe("2 hours");
         expect(result.value.triggers).toEqual(["stress", "light"]);
         expect(result.value.alleviatingFactors).toEqual(["dark room"]);
@@ -335,9 +346,15 @@ describe("Clinical type verification", () => {
       // Note: 'notes' is not a valid property on TreatmentResponse type
       if (result.success) {
         // expect(result.value.notes).toBe("Pain relief within 30 minutes"); // Removed assertion for invalid property
-        expect(result.value.symptomChanges).toEqual(responseWithOptionals.symptomChanges);
-        expect(result.value.sideEffects).toEqual(responseWithOptionals.sideEffects);
-        expect(result.value.neurobiologicalChanges).toEqual(responseWithOptionals.neurobiologicalChanges);
+        expect(result.value.symptomChanges).toEqual(
+          responseWithOptionals.symptomChanges,
+        );
+        expect(result.value.sideEffects).toEqual(
+          responseWithOptionals.sideEffects,
+        );
+        expect(result.value.neurobiologicalChanges).toEqual(
+          responseWithOptionals.neurobiologicalChanges,
+        );
         expect(result.value.functionalImprovements).toEqual(["Improved focus"]);
         expect(result.value.patientReportedOutcome).toBe(7);
         expect(result.value.clinicianEvaluation).toBe("Good response");
@@ -373,7 +390,8 @@ describe("Clinical type verification", () => {
 
   describe("verifyPatient", () => {
     it("verifies valid Patient objects", () => {
-      const validPatient: Patient = { // Add type annotation
+      const validPatient: Patient = {
+        // Add type annotation
         id: "patient1",
         demographicData: {
           age: 45,
@@ -435,7 +453,8 @@ describe("Clinical type verification", () => {
     });
 
     it("accepts optional properties", () => {
-      const patientWithOptionals: Patient = { // Add type annotation
+      const patientWithOptionals: Patient = {
+        // Add type annotation
         id: "patient1",
         demographicData: {
           age: 45,
@@ -453,7 +472,11 @@ describe("Clinical type verification", () => {
           medications: [],
           psychometricAssessments: [],
           medicalHistory: [],
-          familyHistory: { psychiatricConditions: [], neurologicalConditions: [], relevanceLevel: "low" }, // Optional
+          familyHistory: {
+            psychiatricConditions: [],
+            neurologicalConditions: [],
+            relevanceLevel: "low",
+          }, // Optional
           substanceUse: { substances: [], relevanceToNeuralHealth: "low" }, // Optional
           sleepData: [], // Optional
           nutritionalData: { relevanceToNeuralHealth: "low" }, // Optional
@@ -463,7 +486,8 @@ describe("Clinical type verification", () => {
           currentTreatments: [],
           historicalTreatments: [],
           treatmentResponses: [],
-          treatmentPlan: { // Optional
+          treatmentPlan: {
+            // Optional
             id: "plan1",
             creationDate: new Date().toISOString(),
             modificationDate: new Date().toISOString(),
@@ -498,37 +522,80 @@ describe("Clinical type verification", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.value.demographicData.ethnicity).toBe("Caucasian");
-        expect(result.value.demographicData.occupationalStatus).toBe("Engineer");
+        expect(result.value.demographicData.occupationalStatus).toBe(
+          "Engineer",
+        );
         // Add more checks for other optional fields if needed
       }
     });
 
     it("verifies arrays of clinical data", () => {
-      const symptomExample: Symptom = { /* ... valid symptom ... */
-        id: "symptom1", name: "Headache", category: "somatic", severity: 3, frequency: "daily", impact: "moderate", progression: "stable"
+      const symptomExample: Symptom = {
+        /* ... valid symptom ... */ id: "symptom1",
+        name: "Headache",
+        category: "somatic",
+        severity: 3,
+        frequency: "daily",
+        impact: "moderate",
+        progression: "stable",
       };
-      const diagnosisExample: Diagnosis = { /* ... valid diagnosis ... */
-        id: "diagnosis1", code: "G43.1", codingSystem: "ICD-10", name: "Migraine", severity: "moderate", diagnosisDate: new Date().toISOString(), status: "active"
+      const diagnosisExample: Diagnosis = {
+        /* ... valid diagnosis ... */ id: "diagnosis1",
+        code: "G43.1",
+        codingSystem: "ICD-10",
+        name: "Migraine",
+        severity: "moderate",
+        diagnosisDate: new Date().toISOString(),
+        status: "active",
       };
-      const medicationExample: Medication = { /* ... valid medication ... */
-        id: "med1", name: "Sumatriptan", classification: "Triptan", dosage: "50mg", frequency: "prn", route: "oral", startDate: new Date().toISOString()
+      const medicationExample: Medication = {
+        /* ... valid medication ... */ id: "med1",
+        name: "Sumatriptan",
+        classification: "Triptan",
+        dosage: "50mg",
+        frequency: "prn",
+        route: "oral",
+        startDate: new Date().toISOString(),
       };
-      const assessmentExample: PsychometricAssessment = { /* ... valid assessment ... */
-        id: "assess1", name: "PHQ-9", date: new Date().toISOString(), scores: [], interpretation: "Mild"
+      const assessmentExample: PsychometricAssessment = {
+        /* ... valid assessment ... */ id: "assess1",
+        name: "PHQ-9",
+        date: new Date().toISOString(),
+        scores: [],
+        interpretation: "Mild",
       };
-      const historyItemExample: MedicalHistoryItem = { /* ... valid history item ... */
-        id: "hist1", condition: "Hypertension", type: "cardiovascular", status: "active", impact: "minimal", relevanceToNeuralHealth: "moderate"
+      const historyItemExample: MedicalHistoryItem = {
+        /* ... valid history item ... */ id: "hist1",
+        condition: "Hypertension",
+        type: "cardiovascular",
+        status: "active",
+        impact: "minimal",
+        relevanceToNeuralHealth: "moderate",
       };
-      const treatmentExample: Treatment = { /* ... valid treatment ... */
-        id: "treat1", type: "pharmacological", name: "Sumatriptan", description: "Migraine", startDate: new Date().toISOString(), status: "active"
+      const treatmentExample: Treatment = {
+        /* ... valid treatment ... */ id: "treat1",
+        type: "pharmacological",
+        name: "Sumatriptan",
+        description: "Migraine",
+        startDate: new Date().toISOString(),
+        status: "active",
       };
-      const responseExample: TreatmentResponse = { /* ... valid response ... */
-        treatmentId: "treat1", assessmentDate: new Date().toISOString(), clinicalResponse: "response", symptomChanges: [], sideEffects: []
+      const responseExample: TreatmentResponse = {
+        /* ... valid response ... */ treatmentId: "treat1",
+        assessmentDate: new Date().toISOString(),
+        clinicalResponse: "response",
+        symptomChanges: [],
+        sideEffects: [],
       };
 
-      const patientWithArrays: Patient = { // Add type annotation
+      const patientWithArrays: Patient = {
+        // Add type annotation
         id: "patient1",
-        demographicData: { age: 45, biologicalSex: "male", anonymizationLevel: "clinical" },
+        demographicData: {
+          age: 45,
+          biologicalSex: "male",
+          anonymizationLevel: "clinical",
+        },
         clinicalData: {
           diagnoses: [diagnosisExample],
           symptoms: [symptomExample],
@@ -542,7 +609,13 @@ describe("Clinical type verification", () => {
           treatmentResponses: [responseExample],
         },
         neuralData: { brainScans: [] },
-        dataAccessPermissions: { accessLevel: "full", authorizedUsers: [], consentStatus: "full", dataRetentionPolicy: "standard", lastReviewDate: new Date().toISOString() },
+        dataAccessPermissions: {
+          accessLevel: "full",
+          authorizedUsers: [],
+          consentStatus: "full",
+          dataRetentionPolicy: "standard",
+          lastReviewDate: new Date().toISOString(),
+        },
         lastUpdated: new Date().toISOString(),
         version: "1.0",
       };
@@ -554,7 +627,9 @@ describe("Clinical type verification", () => {
         expect(result.value.clinicalData.symptoms).toHaveLength(1);
         expect(result.value.clinicalData.diagnoses).toHaveLength(1);
         expect(result.value.clinicalData.medications).toHaveLength(1);
-        expect(result.value.clinicalData.psychometricAssessments).toHaveLength(1);
+        expect(result.value.clinicalData.psychometricAssessments).toHaveLength(
+          1,
+        );
         expect(result.value.clinicalData.medicalHistory).toHaveLength(1);
         expect(result.value.treatmentData.currentTreatments).toHaveLength(1);
         expect(result.value.treatmentData.treatmentResponses).toHaveLength(1);
@@ -655,7 +730,8 @@ describe("Clinical type verification", () => {
     });
 
     it("assertSymptom passes for valid Symptom", () => {
-      const validSymptom: Symptom = { // Add type annotation and required fields
+      const validSymptom: Symptom = {
+        // Add type annotation and required fields
         id: "symptom1",
         name: "Headache",
         severity: 3,
@@ -664,7 +740,9 @@ describe("Clinical type verification", () => {
         impact: "moderate",
         progression: "stable",
       };
-      expect(() => clinicalTypeVerifier.assertSymptom(validSymptom)).not.toThrow();
+      expect(() =>
+        clinicalTypeVerifier.assertSymptom(validSymptom),
+      ).not.toThrow();
     });
 
     it("assertSymptom throws for invalid Symptom", () => {

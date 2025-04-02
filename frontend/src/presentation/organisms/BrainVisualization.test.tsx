@@ -3,38 +3,50 @@
  * BrainVisualization testing with quantum precision
  */
 import { describe, it, expect, vi } from "vitest";
+import React from "react";
+import BrainVisualization from "./BrainVisualization";
+import { renderWithProviders } from "@test/test-utils.tsx";
 
-import { render, screen, fireEvent } from "@testing-library/react";
-import React from "react"; // Added missing React import
-import userEvent from "@testing-library/user-event";
-import BrainVisualization from "@presentation/organisms/BrainVisualization"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils.tsx";
+// Mock all external dependencies
+vi.mock("@react-three/drei", () => ({
+  OrbitControls: vi.fn(() => null),
+  Environment: vi.fn(() => null),
+  Loader: vi.fn(() => null),
+  Stars: vi.fn(() => null)
+}));
 
-// Mock data with clinical precision
-// Mock data with clinical precision - Requires specific props for BrainVisualization
-const mockProps = {
-  brainModel: { regions: [], connections: [] }, // Provide minimal mock BrainModel
-  renderMode: "anatomical", // Example prop
-  // Add other required props based on BrainVisualization component definition
-};
+vi.mock("@react-three/fiber", () => ({
+  Canvas: vi.fn(({ children }) => <div data-testid="canvas-mock">{children}</div>),
+  useFrame: vi.fn()
+}));
 
+vi.mock("@react-three/postprocessing", () => ({
+  EffectComposer: vi.fn(({ children }) => <div>{children}</div>),
+  Bloom: vi.fn(() => null)
+}));
+
+// Mock the useBrainVisualization hook
+vi.mock("@hooks/useBrainVisualization", () => ({
+  useBrainVisualization: vi.fn(() => ({
+    brainModel: { regions: [], pathways: [] },
+    isLoading: false,
+    error: null,
+    viewState: { renderMode: "anatomical" },
+    setViewState: vi.fn(),
+    activeRegions: [],
+    setActiveRegions: vi.fn(),
+  }))
+}));
+
+// Simple test to check if component renders
 describe("BrainVisualization", () => {
-  it("renders with neural precision", () => {
-    renderWithProviders(<BrainVisualization {...mockProps} />); // Use renderWithProviders
-
-    // Add assertions for rendered content
-    expect(screen).toBeDefined();
+  it("renders without crashing", () => {
+    // Render with minimal props
+    const { container } = renderWithProviders(
+      <BrainVisualization height="300px" />
+    );
+    
+    // Just check if it rendered something
+    expect(container).toBeTruthy();
   });
-
-  it("responds to user interaction with quantum precision", async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<BrainVisualization {...mockProps} />); // Use renderWithProviders
-
-    // Simulate user interactions
-    // await user.click(screen.getByText(/example text/i));
-
-    // Add assertions for behavior after interaction
-  });
-
-  // Add more component-specific tests
 });

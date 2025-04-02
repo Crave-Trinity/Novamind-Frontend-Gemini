@@ -12,7 +12,7 @@ import {
   Connection,
   BrainModel,
   Coordinate,
-} from "@types/brain/core-models";
+} from "@domain/types/brain/core-models";
 
 describe("Brain Core Models type definitions", () => {
   it("Vector3 has correct structure", () => {

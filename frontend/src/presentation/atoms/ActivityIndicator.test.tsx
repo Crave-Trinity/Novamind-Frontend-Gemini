@@ -9,8 +9,26 @@ import { ActivationLevel } from "@domain/types/brain/activity"; // Import Activa
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ActivityIndicator from "@presentation/atoms/ActivityIndicator"; // Assuming default export
-import { renderWithProviders } from "@test/testUtils"; // Reverted to relative path with extension
+import ActivityIndicator from "./ActivityIndicator"; // Assuming default export
+import { renderWithProviders } from "@test/test-utils"; // Reverted to relative path with extension
+
+// Mock the Three.js and React Three Fiber dependencies
+vi.mock("@react-three/drei", () => ({
+  OrbitControls: vi.fn(() => null),
+  Environment: vi.fn(() => null),
+  Loader: vi.fn(() => null),
+  Stars: vi.fn(() => null)
+}));
+
+vi.mock("@react-three/fiber", () => ({
+  Canvas: vi.fn(({ children }) => <div data-testid="canvas-mock">{children}</div>),
+  useFrame: vi.fn((callback) => callback({ clock: { getElapsedTime: () => 0 } }))
+}));
+
+vi.mock("@react-three/postprocessing", () => ({
+  EffectComposer: vi.fn(({ children }) => <div>{children}</div>),
+  Bloom: vi.fn(() => null)
+}));
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for ActivityIndicator

@@ -15,7 +15,7 @@ import type {
   ProcessedBrainData,
   ProcessedBrainRegion,
   ProcessedNeuralConnection,
-} from "@types/brain/visualization";
+} from "@domain/types/brain/visualization";
 
 /**
  * Runtime validation for RenderMode

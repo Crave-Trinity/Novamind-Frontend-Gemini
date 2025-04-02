@@ -1,15 +1,15 @@
 import React from "react";
 
-import { AssessmentScore } from "@models/PatientModel";
+import { AssessmentScore } from "@domain/models/clinical/digital-twin-profile";
 
 interface ClinicalMetricProps {
   title: string;
   value: number;
   maxValue: number;
-  change?: number;
+  change?: number | undefined;
   severity: "none" | "mild" | "moderate" | "severe";
-  date?: string;
-  description?: string;
+  date?: string | undefined;
+  description?: string | undefined;
   className?: string;
 }
 

@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"; // Add
 import { render, screen } from "@testing-library/react"; // Removed fireEvent (unused)
 import userEvent from "@testing-library/user-event";
 import { ThemeProvider } from "@/contexts/Theme"; // Corrected to named import
-// import { renderWithProviders } from "@test/testUtils.tsx"; // Removed unused import
+// import { renderWithProviders } from "@test/test-utils.tsx"; // Removed unused import
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for ThemeProvider

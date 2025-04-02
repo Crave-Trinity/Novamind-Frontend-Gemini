@@ -7,7 +7,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ThemeProvider from "@application/providers/ThemeProvider"; // Corrected to default import
-import { renderWithProviders } from "@test/testUtils.tsx";
+import { renderWithProviders } from "@test/test-utils.tsx";
 
 // Mock data with clinical precision
 const mockProps = {

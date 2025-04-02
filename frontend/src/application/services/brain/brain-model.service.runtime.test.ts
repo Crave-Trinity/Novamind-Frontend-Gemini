@@ -13,7 +13,7 @@ import {
   isNeuralConnection,
   validateNeuralConnection,
 } from "@application/services/brain/brain-model.service.runtime";
-import { BrainModel, BrainRegion, NeuralConnection } from "@types/brain/models";
+import { BrainModel, BrainRegion, NeuralConnection } from "@domain/types/brain/models";
 
 describe("BrainModelService Runtime Validation", () => {
   describe("isBrainModel", () => {

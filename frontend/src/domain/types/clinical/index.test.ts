@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from "vitest";
 
-import { index } from "@types/clinical/index";
+import { index } from "@domain/types/clinical/index";
 
 // Mock data with clinical precision
 const mockData = {

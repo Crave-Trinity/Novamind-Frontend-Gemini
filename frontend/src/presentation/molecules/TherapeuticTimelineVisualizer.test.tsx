@@ -5,7 +5,7 @@
 import React from "react";
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import TherapeuticTimelineVisualizer from "@presentation/molecules/TherapeuticTimelineVisualizer";
+import TherapeuticTimelineVisualizer from "./TherapeuticTimelineVisualizer";
 
 describe("TherapeuticTimelineVisualizer", () => {
   it("renders with clinical precision", () => {

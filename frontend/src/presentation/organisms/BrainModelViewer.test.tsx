@@ -6,15 +6,33 @@ import React from "react"; // Added missing React import
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import BrainModelViewer from "@presentation/organisms/BrainModelViewer"; // Changed to default import
+import BrainModelViewer from "./BrainModelViewer"; // Changed to default import
 import { RenderMode } from "@domain/types/brain/visualization";
 import { VisualizationState } from "@domain/types/shared/common"; // Corrected path for VisualizationState
-import { renderWithProviders, createMockBrainRegions } from "@test/testUtils";
+import { renderWithProviders, createMockBrainRegions } from "@test/test-utils";
+
+// Mock the Three.js and React Three Fiber dependencies
+vi.mock("@react-three/drei", () => ({
+  OrbitControls: vi.fn(() => null),
+  Environment: vi.fn(() => null),
+  Loader: vi.fn(() => null),
+  Stars: vi.fn(() => null)
+}));
+
+vi.mock("@react-three/fiber", () => ({
+  Canvas: vi.fn(({ children }) => <div data-testid="canvas-mock">{children}</div>),
+  useFrame: vi.fn((callback) => callback({ clock: { getElapsedTime: () => 0 } }))
+}));
+
+vi.mock("@react-three/postprocessing", () => ({
+  EffectComposer: vi.fn(({ children }) => <div>{children}</div>),
+  Bloom: vi.fn(() => null)
+}));
 // Import for non-existent mock removed. Global mocks in setup.ts should suffice.
 
 // Global mocks from setup.ts should handle Three.js, Fiber, Drei, etc.
 // Local mocks removed to avoid conflicts.
-vi.mock("@presentation/molecules/BrainRegionGroup", () => ({
+vi.mock("../molecules/BrainRegionGroup", () => ({
   default: ({ regions, onRegionClick }: any) =>
     React.createElement(
       "div",
@@ -34,7 +52,7 @@ vi.mock("@presentation/molecules/BrainRegionGroup", () => ({
     ),
 }));
 
-vi.mock("@presentation/molecules/NeuralConnections", () => ({
+vi.mock("../molecules/NeuralConnections", () => ({
   default: () =>
     React.createElement("div", { "data-testid": "neural-connections" }),
 }));
