@@ -391,29 +391,44 @@ vi.mock("three", () => {
       setClearColor = vi.fn();
       dispose = vi.fn();
     },
+    MeshBasicMaterial: class MeshBasicMaterial extends MockMaterial { // Add mock
+        constructor() { super(); }
+    },
+    LineBasicMaterial: class LineBasicMaterial extends MockMaterial { // Existing mock
+      constructor() {
+        super();
+      }
+    },
     Mesh: class Mesh extends MockObject3D {
-      // Ensure material has correctly mocked color and emissive
-      material: MockMaterial | MockMaterial[] = new MockMaterial(); // Ensure type allows array for potential multi-material meshes
+      material: MockMaterial | MockMaterial[] = new MockMaterial();
       geometry = new MockBufferGeometry();
-      // Ensure scale is an instance of our Vector3 mock class
-      override scale = new Vector3MockClass(1, 1, 1); // Added override keyword
+      override scale = new Vector3MockClass(1, 1, 1);
       constructor() {
         super();
         // Explicitly ensure scale and material are set in constructor
-        // this.scale = new Vector3MockClass(1, 1, 1); // Removed duplicate assignment
-        this.material = new MockMaterial(); // Explicitly set material in constructor
+        this.material = new MockMaterial(); // Use base mock, specific tests might need MeshBasicMaterial
+        this.scale = new Vector3MockClass(1, 1, 1);
       }
+    },
+    Line: class Line extends MockObject3D {
+        // Use the specific LineBasicMaterial mock
+        material = new LineBasicMaterial();
+        geometry = new MockBufferGeometry();
+        constructor() {
+            super();
+            // Explicitly set specific material in constructor
+            this.material = new LineBasicMaterial();
+        }
     },
     Object3D: MockObject3D,
     SphereGeometry: class SphereGeometry {},
     ShaderMaterial: class ShaderMaterial extends MockMaterial {
       constructor() {
         super();
-        // Explicitly ensure scale is set if constructor logic differs - removed duplicate assignment
       }
     },
     BufferGeometry: MockBufferGeometry,
-    LineBasicMaterial: class LineBasicMaterial extends MockMaterial { // Add mock for LineBasicMaterial
+    // LineBasicMaterial already added above
       constructor() {
         super();
       }
@@ -432,7 +447,7 @@ vi.mock("three", () => {
         this.v2 = v2;
       }
       getPoints = vi.fn(() => [this.v0, this.v1, this.v2]);
-    },
+    }, // Removed duplicate closing brace if present
     DoubleSide: 2,
   };
 });
