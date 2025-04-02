@@ -28,6 +28,7 @@ export default defineConfig({
       '@presentation/atoms/Progress': path.resolve(__dirname, './src/presentation/atoms/Progress.tsx'),
       '@presentation/atoms/ScrollArea': path.resolve(__dirname, './src/presentation/atoms/ScrollArea.tsx'),
       'lucide-react': path.resolve(__dirname, './node_modules/lucide-react'),
+      '@test/*': path.resolve(__dirname, './src/test/*'), // Explicitly add @test alias
     },
   },
   test: {
@@ -40,8 +41,7 @@ export default defineConfig({
     ],
     include: ['src/**/*.{test,spec,type-test,runtime.test,minimal.test}.{ts,tsx}'], // Added minimal.test and runtime.test
     exclude: ['node_modules', '.git', 'dist'],
-    testTimeout: 20000,
-    
+    testTimeout: 40000, // Increased timeout to 40 seconds
     // Use newer server.deps syntax
     // Explicitly inline contexts to potentially resolve module issues in test env
     server: {

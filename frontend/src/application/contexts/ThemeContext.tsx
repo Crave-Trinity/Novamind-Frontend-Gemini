@@ -1,99 +1,44 @@
-import { createContext, useContext } from "react";
+import { useContext } from "react";
+// Import the actual context instance from the provider file
+import { ThemeContext } from "./ThemeProvider";
+import type { ThemeSettings, ThemeType as ThemeOption } from "@/types/brain"; // Use types from domain
 
-/**
- * Available theme options
- * Following clean architecture, we define this in the application layer but it's domain-driven
- */
-export type ThemeOption = "light" | "dark" | "sleek" | "clinical";
-
-/**
- * Theme settings interface
- * Pure data structure that doesn't depend on React or any UI framework
- */
-export interface ThemeSettings {
-  bgColor: string;
-  primaryColor: string;
-  secondaryColor: string;
-  textColor: string;
-  glowIntensity: number;
-  useBloom: boolean;
-}
+// Re-export types for consumers if needed, or rely on imports from provider/domain types
+export type { ThemeOption, ThemeSettings };
 
 /**
  * Theme context interface
- * Defines the contract for theme operations
+ * Defines the contract for theme operations.
+ * This should match the value provided by ThemeProvider.
  */
 export interface ThemeContextType {
   theme: ThemeOption;
   isDarkMode: boolean;
   settings: ThemeSettings;
   setTheme: (newTheme: ThemeOption) => void;
-  toggleDarkMode: () => void;
+  toggleTheme: () => void; // Renamed from toggleDarkMode to match provider
 }
 
-/**
- * Default theme settings
- * These are the canonical settings for each theme option
- */
-export const themeSettings: Record<ThemeOption, ThemeSettings> = {
-  light: {
-    bgColor: "#ffffff",
-    primaryColor: "#4c6ef5",
-    secondaryColor: "#adb5bd",
-    textColor: "#000000",
-    glowIntensity: 0,
-    useBloom: false,
-  },
-  dark: {
-    bgColor: "#121212",
-    primaryColor: "#4c6ef5",
-    secondaryColor: "#343a40",
-    textColor: "#ffffff",
-    glowIntensity: 0.3,
-    useBloom: true,
-  },
-  sleek: {
-    bgColor: "#1a1a2e",
-    primaryColor: "#00bcd4",
-    secondaryColor: "#2a2a5a",
-    textColor: "#ffffff",
-    glowIntensity: 0.8,
-    useBloom: true,
-  },
-  clinical: {
-    bgColor: "#f8f9fa",
-    primaryColor: "#2c7be5",
-    secondaryColor: "#edf2f9",
-    textColor: "#12263f",
-    glowIntensity: 0,
-    useBloom: false,
-  },
-};
-
-/**
- * Create context with default values
- * Following clean architecture, this is the application layer interface
- */
-const ThemeContext = createContext<ThemeContextType>({
-  theme: "clinical",
-  isDarkMode: false,
-  settings: themeSettings.clinical,
-  setTheme: () => {},
-  toggleDarkMode: () => {},
-});
 
 /**
  * Custom hook for consuming the theme context
- * Provides type safety and clear error messages
+ * Provides type safety and clear error messages.
+ * It now consumes the context imported from the ThemeProvider file.
  */
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
+export const useTheme = (): ThemeContextType => {
+  // We cast the context type here because the actual context instance
+  // is created in ThemeProvider.tsx with potentially slightly different
+  // initialization values (like functions being () => {} initially).
+  // The real value comes from the Provider component itself.
+  const context = useContext(ThemeContext) as ThemeContextType | undefined;
 
   if (context === undefined) {
+    // This error signifies that useTheme() is called outside of a <ThemeProvider>
     throw new Error("useTheme must be used within a ThemeProvider");
   }
 
   return context;
 };
 
-export default ThemeContext;
+// Note: We no longer export ThemeContext from here.
+// Consumers should import ThemeProvider and useTheme.

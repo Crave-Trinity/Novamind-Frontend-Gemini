@@ -4,7 +4,7 @@
  */
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import "@test/unified-three.mock"; // Ensure this mock setup is correct
+import "@test/mocks/react-three-elements.mock"; // Corrected path to mock file
 import { renderWithProviders } from "@test/test-utils"; // Added renderWithProviders
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

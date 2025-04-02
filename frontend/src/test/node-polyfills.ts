@@ -79,17 +79,18 @@ if (typeof global.fetch === "undefined") {
 }
 
 // Mock requestAnimationFrame and cancelAnimationFrame
-if (typeof global.requestAnimationFrame === "undefined") {
-  global.requestAnimationFrame = (callback: FrameRequestCallback): number => {
-    return setTimeout(() => callback(Date.now()), 0) as unknown as number;
-  };
-}
-
-if (typeof global.cancelAnimationFrame === "undefined") {
-  global.cancelAnimationFrame = (handle: number): void => {
-    clearTimeout(handle);
-  };
-}
+// if (typeof global.requestAnimationFrame === "undefined") {
+//   global.requestAnimationFrame = (callback: FrameRequestCallback): number => {
+//     // Using setTimeout(..., 0) can sometimes cause issues in test environments
+//     return setTimeout(() => callback(Date.now()), 0) as unknown as number;
+//   };
+// }
+//
+// if (typeof global.cancelAnimationFrame === "undefined") {
+//   global.cancelAnimationFrame = (handle: number): void => {
+//     clearTimeout(handle);
+//   };
+// }
 
 // Export a dummy function to make TypeScript happy
 export const setupNodePolyfills = (): void => {

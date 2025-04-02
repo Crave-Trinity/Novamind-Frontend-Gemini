@@ -66,7 +66,8 @@ interface ThemeContextType {
 }
 
 // Create context with default values
-const ThemeContext = createContext<ThemeContextType>({
+// Export the context so it can be imported by ThemeContext.tsx for the useTheme hook
+export const ThemeContext = createContext<ThemeContextType>({
   theme: "clinical",
   setTheme: () => {},
   toggleTheme: () => {},
@@ -89,7 +90,7 @@ interface ThemeProviderProps {
  * Standalone Theme Provider Component
  * Explicitly created to resolve import issues
  */
-const ThemeProviderComponent: React.FC<ThemeProviderProps> = ({
+const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
   defaultTheme = "clinical",
 }) => {
@@ -209,4 +210,4 @@ const ThemeProviderComponent: React.FC<ThemeProviderProps> = ({
   );
 };
 
-export default ThemeProviderComponent;
+export default ThemeProvider;

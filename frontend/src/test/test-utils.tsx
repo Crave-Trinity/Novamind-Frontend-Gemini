@@ -1,7 +1,7 @@
 import React, { PropsWithChildren, ReactElement } from "react";
 import { render, RenderOptions } from "@testing-library/react";
-import { ThemeProvider } from "@/contexts/Theme";
-import { ThemeOption } from "@/contexts/Theme";
+import ThemeProvider from "@/application/contexts/ThemeProvider"; // Updated path
+import { ThemeOption } from "@/application/contexts/ThemeContext"; // Updated path
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom"; // Import MemoryRouter
 
@@ -41,7 +41,7 @@ export function renderWithProviders(
       // Wrap with MemoryRouter for components using react-router hooks
       <MemoryRouter>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider initialTheme={initialTheme}>{children}</ThemeProvider>
+          <ThemeProvider>{children}</ThemeProvider>
         </QueryClientProvider>
       </MemoryRouter>
     );
@@ -73,7 +73,7 @@ export function createThemeWrapper(initialTheme: ThemeOption = "clinical") {
     // Also wrap the hook wrapper if needed, though less common
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider initialTheme={initialTheme}>{children}</ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </QueryClientProvider>
     </MemoryRouter>
   );
