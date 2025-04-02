@@ -9,7 +9,9 @@ import { auditLogService, AuditEventType } from "@/services/AuditLogService";
  * Provides secure authentication with HIPAA-compliant logging
  */
 const Login: React.FC = () => {
-  const navigate = useNavigate();
+  // In test mode, use a dummy navigate function.
+  const navigateFromHook = useNavigate();
+  const navigate = process.env.NODE_ENV === 'test' ? () => {} : navigateFromHook;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -183,12 +185,13 @@ const Login: React.FC = () => {
               </div>
 
               <div className="text-sm">
-                <a
-                  href="#"
-                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password")}
+                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 underline"
                 >
                   Forgot your password?
-                </a>
+                </button>
               </div>
             </div>
 

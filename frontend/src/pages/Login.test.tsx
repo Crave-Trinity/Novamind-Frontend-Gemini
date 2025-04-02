@@ -5,6 +5,7 @@
 import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
+import { MemoryRouter } from 'react-router-dom';
 import userEvent from "@testing-library/user-event";
 import Login from "@/pages/Login"; // Assuming default export
 import { renderWithProviders } from "@test/testUtils.tsx";
@@ -15,7 +16,11 @@ const mockProps = {};
 
 describe("Login", () => {
   it("renders with neural precision", () => {
-    render(<Login {...mockProps} />);
+    render(
+      <MemoryRouter>
+        <Login {...mockProps} />
+      </MemoryRouter>
+    );
 
     // Add assertions for rendered content
     expect(screen).toBeDefined();
@@ -23,7 +28,11 @@ describe("Login", () => {
 
   it("responds to user interaction with quantum precision", async () => {
     const user = userEvent.setup();
-    render(<Login {...mockProps} />);
+    render(
+      <MemoryRouter>
+        <Login {...mockProps} />
+      </MemoryRouter>
+    );
 
     // Simulate user interactions
     // await user.click(screen.getByText(/example text/i));

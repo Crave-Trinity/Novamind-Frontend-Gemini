@@ -5,6 +5,7 @@
 import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
+import { MemoryRouter } from 'react-router-dom';
 import userEvent from "@testing-library/user-event";
 import NotFound from "@/pages/NotFound"; // Assuming default export
 import { renderWithProviders } from "@test/testUtils.tsx";
@@ -15,7 +16,11 @@ const mockProps = {};
 
 describe("NotFound", () => {
   it("renders with neural precision", () => {
-    render(<NotFound {...mockProps} />);
+    render(
+      <MemoryRouter>
+        <NotFound {...mockProps} />
+      </MemoryRouter>
+    );
 
     // Add assertions for rendered content
     expect(screen).toBeDefined();
@@ -23,7 +28,11 @@ describe("NotFound", () => {
 
   it("responds to user interaction with quantum precision", async () => {
     const user = userEvent.setup();
-    render(<NotFound {...mockProps} />);
+    render(
+      <MemoryRouter>
+        <NotFound {...mockProps} />
+      </MemoryRouter>
+    );
 
     // Simulate user interactions
     // await user.click(screen.getByText(/example text/i));

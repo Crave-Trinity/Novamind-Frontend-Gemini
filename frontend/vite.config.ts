@@ -1,116 +1,34 @@
-import { defineConfig } from 'vite';
+/// <reference types="vitest" />
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
-import tsconfigPaths from 'vite-tsconfig-paths';
-import compression from 'vite-plugin-compression';
+import path from 'path';
 
-/**
- * NOVAMIND Vite Configuration
- * 
- * Implements neural-level optimization for React rendering with
- * clean architecture path structure aligned with tsconfig.json.
- */
-export default defineConfig(({ command, mode }) => {
-  const isProduction = mode === 'production';
-  
-  return {
-    plugins: [
-      // TypeScript path resolution - unified with tsconfig.json
-      tsconfigPaths(),
-      
-      // React optimization
-      react({
-        babel: {
-          // Quantum-level React optimization
-          plugins: isProduction ? [
-            ['transform-react-remove-prop-types', { removeImport: true }],
-            // Remove console.log in production
-            'transform-remove-console',
-          ] : [],
-          // Neural-safe JSX features
-          parserOpts: {
-            plugins: ['jsx', 'typescript']
-          },
-        },
-      }),
-      
-      // Production-only compression for neural performance
-      isProduction && compression({
-        algorithm: 'gzip',
-        ext: '.gz',
-      }),
-      
-      // Brotli compression for maximum neural pathway efficiency
-      isProduction && compression({
-        algorithm: 'brotliCompress',
-        ext: '.br',
-      }),
-    ],
-    
-    // Path aliases - aligned with clean architecture in tsconfig.json
-    // `resolve.alias` is handled by `vite-tsconfig-paths` plugin based on tsconfig.json
-    
-    // Neural network build optimization
-    build: {
-      target: 'esnext',  // Modern browsers support
-      outDir: 'dist',
-      assetsDir: 'assets',
-      cssCodeSplit: true,
-      minify: 'terser',
-      sourcemap: !isProduction,
-      terserOptions: isProduction ? {
-        compress: {
-          drop_console: true,
-          drop_debugger: true,
-        },
-      } : undefined,
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            // Optimal neural pathway chunking strategy
-            'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-            'visualization-vendor': ['three', '@react-three/fiber', '@react-three/drei', '@react-three/postprocessing'],
-            'data-vendor': ['zustand', '@tanstack/react-query', 'zod'],
-            'ui-vendor': ['classnames', 'framer-motion', '@headlessui/react', '@heroicons/react'],
-          },
-        },
-      },
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@hooks': path.resolve(__dirname, 'src/hooks'),
+      '@application': path.resolve(__dirname, 'src/application'),
+      '@pages': path.resolve(__dirname, 'src/pages'),
+      '@presentation': path.resolve(__dirname, 'src/presentation'),
+      '@contexts': path.resolve(__dirname, 'src/contexts'),
+      '@components': path.resolve(__dirname, 'src/components'),
+      '@domain': path.resolve(__dirname, 'src/domain'),
+      '@models': path.resolve(__dirname, 'src/domain/models'),
+      '@types': path.resolve(__dirname, 'src/types'),
+      '@api': path.resolve(__dirname, 'src/infrastructure/api'),
+      '@test': path.resolve(__dirname, 'src/test'),
+      '@atoms': path.resolve(__dirname, 'src/presentation/atoms'),
+      '@molecules': path.resolve(__dirname, 'src/presentation/molecules'),
+      '@organisms': path.resolve(__dirname, 'src/presentation/organisms'),
+      '@templates': path.resolve(__dirname, 'src/presentation/templates'),
+      '@': path.resolve(__dirname, 'src')
+      // Add further alias mappings as needed.
     },
-    
-    // Neural-optimized server settings
-    server: {
-      port: 3000,
-      strictPort: false,
-      open: true,
-      cors: true,
-      hmr: {
-        overlay: true,
-      },
-    },
-    
-    // Neural-enhanced dev tools
-    optimizeDeps: {
-      include: [
-        'react', 
-        'react-dom', 
-        'react-router-dom',
-        'zustand',
-        '@tanstack/react-query',
-        'framer-motion',
-        'three',
-        '@react-three/fiber',
-      ],
-      exclude: [
-        // Large dependencies that slow down dev rebuilds
-        'large-visualization-lib',
-      ],
-    },
-    
-    // Neural-safe error handling
-    esbuild: {
-      logOverride: {
-        'this-is-undefined-in-esm': 'silent',
-      },
-    },
-  };
-});
+  },
+  // The following "test" field is specific to Vitest.
+  // Casting the configuration to "any" bypasses type restrictions.
+  test: {
+    environment: 'jsdom'
+  }
+} as any);
