@@ -111,9 +111,10 @@ function calculateMappingConnections(
 
     // Process each activation pattern
     mapping.activationPatterns.forEach((pattern) => {
-      pattern.regionActivations.forEach((activation) => {
+      // Use regionIds as defined in NeuralActivationPattern type
+      pattern.regionIds.forEach((regionId) => {
         // Get the brain region
-        const region = regionMap.get(activation.regionId);
+        const region = regionMap.get(regionId);
 
         if (region) {
           // Determine connection properties
@@ -149,7 +150,8 @@ function calculateMappingConnections(
             symptomName: mapping.symptomName,
             regionId: region.id,
             regionName: region.name,
-            strength: activation.activityLevel,
+            // Assuming activityLevel should come from the pattern itself or a default
+            strength: pattern.intensity, // Use pattern intensity as strength? Or activation.activityLevel if that exists elsewhere? Needs clarification. Using pattern.intensity for now.
             isPrimary,
             isDiagnosis: false,
             points: [symptomPosition, region.position],
@@ -179,9 +181,10 @@ function calculateMappingConnections(
 
     // Process each activation pattern
     mapping.activationPatterns.forEach((pattern) => {
-      pattern.regionActivations.forEach((activation) => {
+      // Use regionIds as defined in NeuralActivationPattern type
+      pattern.regionIds.forEach((regionId) => {
         // Get the brain region
-        const region = regionMap.get(activation.regionId);
+        const region = regionMap.get(regionId);
 
         if (region) {
           // Determine connection properties
@@ -217,7 +220,8 @@ function calculateMappingConnections(
             symptomName: mapping.diagnosisName, // Using diagnosis name
             regionId: region.id,
             regionName: region.name,
-            strength: activation.activityLevel,
+            // Assuming activityLevel should come from the pattern itself or a default
+            strength: pattern.intensity, // Use pattern intensity as strength? Or activation.activityLevel if that exists elsewhere? Needs clarification. Using pattern.intensity for now.
             isPrimary,
             isDiagnosis: true,
             points: [diagnosisPosition, region.position],

@@ -119,7 +119,7 @@ import "@test/node-polyfills"; // Correct syntax for side-effect imports
 
 // Import required testing libraries
 import "@testing-library/jest-dom";
-import { vi, beforeAll } from "vitest";
+import { beforeAll, vi } from "vitest";
 
 // Define proper TypeScript interfaces for our mocks
 interface Vector3 {
@@ -175,22 +175,21 @@ interface WebGLRenderer {
 }
 
 interface Material {
-    clone: () => Material;
-    dispose: () => void;
-    needsUpdate: boolean;
-    color: Color;
-    opacity: number;
-    transparent: boolean;
+  clone: () => Material;
+  dispose: () => void;
+  needsUpdate: boolean;
+  color: Color;
+  opacity: number;
+  transparent: boolean;
 }
 
 interface BufferGeometry {
-    setAttribute: (name: string, attribute: any) => void;
-    setIndex: (index: any) => void;
-    computeVertexNormals: () => void;
-    dispose: () => void;
-    setFromPoints: (points: Vector3[]) => void;
+  setAttribute: (name: string, attribute: any) => void;
+  setIndex: (index: any) => void;
+  computeVertexNormals: () => void;
+  dispose: () => void;
+  setFromPoints: (points: Vector3[]) => void;
 }
-
 
 interface Mesh extends Object3D {
   material?: Material | Material[];
@@ -200,45 +199,66 @@ interface Mesh extends Object3D {
 // --- Mock Implementations ---
 
 class MockVector3 implements Vector3 {
-    x = 0;
-    y = 0;
-    z = 0;
-    constructor(x = 0, y = 0, z = 0) {
-      this.x = x;
-      this.y = y;
-      this.z = z;
-    }
-    set(x: number, y: number, z: number) { this.x = x; this.y = y; this.z = z; return this; }
-    clone() { return new MockVector3(this.x, this.y, this.z); }
-    normalize() { return this; }
-    multiplyScalar(scalar: number) {
-        this.x *= scalar;
-        this.y *= scalar;
-        this.z *= scalar;
-        return this;
-    }
-    length() { return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z); }
-    add(v: Vector3) {
-        this.x += v.x;
-        this.y += v.y;
-        this.z += v.z;
-        return this;
-    }
-    subVectors(a: Vector3, b: Vector3) {
-        this.x = a.x - b.x;
-        this.y = a.y - b.y;
-        this.z = a.z - b.z;
-        return this;
-    }
-    applyMatrix4(m: any) { return this; } // No-op mock
-    project(camera: any) { return this; } // No-op mock
+  x = 0;
+  y = 0;
+  z = 0;
+  constructor(x = 0, y = 0, z = 0) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+  }
+  set(x: number, y: number, z: number) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    return this;
+  }
+  clone() {
+    return new MockVector3(this.x, this.y, this.z);
+  }
+  normalize() {
+    return this;
+  }
+  multiplyScalar(scalar: number) {
+    this.x *= scalar;
+    this.y *= scalar;
+    this.z *= scalar;
+    return this;
+  }
+  length() {
+    return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+  }
+  add(v: Vector3) {
+    this.x += v.x;
+    this.y += v.y;
+    this.z += v.z;
+    return this;
+  }
+  subVectors(a: Vector3, b: Vector3) {
+    this.x = a.x - b.x;
+    this.y = a.y - b.y;
+    this.z = a.z - b.z;
+    return this;
+  }
+  applyMatrix4(m: any) {
+    return this;
+  } // No-op mock
+  project(camera: any) {
+    return this;
+  } // No-op mock
 }
 
 class MockColor implements Color {
-    r = 1; g = 1; b = 1;
-    constructor() {}
-    set() { return this; } // Basic mock for set, returns this
-    clone() { return new MockColor(); } // Return a new instance
+  r = 1;
+  g = 1;
+  b = 1;
+  constructor() {}
+  set() {
+    return this;
+  } // Basic mock for set, returns this
+  clone() {
+    return new MockColor();
+  } // Return a new instance
 }
 
 class MockObject3D implements Object3D {
@@ -254,34 +274,133 @@ class MockObject3D implements Object3D {
 }
 
 class MockMaterial implements Material {
-    clone = vi.fn(() => new MockMaterial()); // Return new instance
-    dispose = vi.fn();
-    needsUpdate = false;
-    color = new MockColor(); // Use MockColor
-    opacity = 1;
-    transparent = false;
+  clone = vi.fn(() => new MockMaterial()); // Return new instance
+  dispose = vi.fn();
+  needsUpdate = false;
+  color = new MockColor(); // Use MockColor
+  opacity = 1;
+  transparent = false;
 }
 
 class MockBufferGeometry implements BufferGeometry {
-    setAttribute = vi.fn();
-    setIndex = vi.fn();
-    computeVertexNormals = vi.fn();
-    dispose = vi.fn();
-    setFromPoints = vi.fn(); // Add setFromPoints mock
+  setAttribute = vi.fn();
+  setIndex = vi.fn();
+  computeVertexNormals = vi.fn();
+  dispose = vi.fn();
+  setFromPoints = vi.fn(); // Add setFromPoints mock
 }
 
 // Create minimal Three.js mocks that won't conflict
+// Mock the three module (Global - More Robust Vector3)
 vi.mock("three", () => {
+  // Define the mock implementation for Vector3 carefully
+  const Vector3Mock = vi.fn().mockImplementation((x = 0, y = 0, z = 0) => {
+    const self: any = { x, y, z };
+    self.set = vi.fn().mockImplementation(function (newX, newY, newZ) {
+      self.x = newX;
+      self.y = newY;
+      self.z = newZ;
+      return self;
+    });
+    self.copy = vi.fn().mockImplementation(function (v) {
+      self.x = v.x;
+      self.y = v.y;
+      self.z = v.z;
+      return self;
+    });
+    self.add = vi.fn().mockImplementation(function (v) {
+      self.x += v.x;
+      self.y += v.y;
+      self.z += v.z;
+      return self;
+    });
+    self.sub = vi.fn().mockImplementation(function (v) {
+      self.x -= v.x;
+      self.y -= v.y;
+      self.z -= v.z;
+      return self;
+    });
+    self.multiply = vi.fn().mockImplementation(function (v) {
+      self.x *= v.x;
+      self.y *= v.y;
+      self.z *= v.z;
+      return self;
+    });
+    self.multiplyScalar = vi.fn().mockImplementation(function (s) {
+      self.x *= s;
+      self.y *= s;
+      self.z *= s;
+      return self;
+    }); // Added multiplyScalar
+    self.divide = vi.fn().mockImplementation(function (v) {
+      self.x /= v.x;
+      self.y /= v.y;
+      self.z /= v.z;
+      return self;
+    });
+    self.length = vi
+      .fn()
+      .mockImplementation(() =>
+        Math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+      );
+    self.normalize = vi.fn().mockImplementation(function () {
+      const l = self.length();
+      if (l > 0) {
+        self.x /= l;
+        self.y /= l;
+        self.z /= l;
+      }
+      return self;
+    });
+    self.clone = vi
+      .fn()
+      .mockImplementation(() => Vector3Mock(self.x, self.y, self.z));
+    self.applyQuaternion = vi.fn().mockReturnThis();
+    self.toArray = vi.fn().mockImplementation(() => [self.x, self.y, self.z]);
+    self.cross = vi.fn().mockImplementation(function (v) {
+      const ax = self.x,
+        ay = self.y,
+        az = self.z;
+      const bx = v.x,
+        by = v.y,
+        bz = v.z;
+      self.x = ay * bz - az * by;
+      self.y = az * bx - ax * bz;
+      self.z = ax * by - ay * bx;
+      return self;
+    });
+    self.addVectors = vi.fn().mockImplementation(function (a, b) {
+      self.x = a.x + b.x;
+      self.y = a.y + b.y;
+      self.z = a.z + b.z;
+      return self;
+    }); // Added addVectors
+    return self;
+  });
+
+  // Return all mocked properties from the factory function
   return {
-    Vector3: MockVector3,
-    Color: MockColor,
+    Vector3: Vector3Mock,
+    Color: MockColor, // Use the existing MockColor class
+    MathUtils: {
+      lerp: vi.fn((a, b, t) => a + (b - a) * t),
+      mapLinear: vi.fn(
+        (x, a1, a2, b1, b2) => b1 + ((x - a1) * (b2 - b1)) / (a2 - a1)
+      ),
+      randFloatSpread: vi.fn((range) => (Math.random() - 0.5) * range),
+    },
     Group: class Group extends MockObject3D {
+      // Keep existing class mocks if they work
       children: any[] = [];
-      constructor() { super(); }
+      constructor() {
+        super();
+      }
     },
     Scene: class Scene extends MockObject3D {
       background = { set: vi.fn() };
-      constructor() { super(); }
+      constructor() {
+        super();
+      }
     },
     WebGLRenderer: class WebGLRenderer implements WebGLRenderer {
       domElement = document.createElement("canvas");
@@ -292,29 +411,36 @@ vi.mock("three", () => {
       dispose = vi.fn();
     },
     Mesh: class Mesh extends MockObject3D {
-        material = new MockMaterial();
-        geometry = new MockBufferGeometry();
-        constructor() { super(); }
+      material = new MockMaterial();
+      geometry = new MockBufferGeometry();
+      constructor() {
+        super();
+      }
     },
     Object3D: MockObject3D,
-    SphereGeometry: class SphereGeometry {}, // Mock SphereGeometry if used directly
-    ShaderMaterial: class ShaderMaterial extends MockMaterial { constructor() { super(); } },
+    SphereGeometry: class SphereGeometry {},
+    ShaderMaterial: class ShaderMaterial extends MockMaterial {
+      constructor() {
+        super();
+      }
+    },
     BufferGeometry: MockBufferGeometry,
-    QuadraticBezierCurve3: class QuadraticBezierCurve3 { // Add mock
-        v0: Vector3; v1: Vector3; v2: Vector3;
-        constructor(v0 = new MockVector3(), v1 = new MockVector3(), v2 = new MockVector3()) {
-            this.v0 = v0; this.v1 = v1; this.v2 = v2;
-        }
-        getPoints = vi.fn(() => [this.v0, this.v1, this.v2]); // Simple points mock
+    QuadraticBezierCurve3: class QuadraticBezierCurve3 {
+      v0: Vector3;
+      v1: Vector3;
+      v2: Vector3;
+      constructor(
+        v0 = new Vector3Mock(),
+        v1 = new Vector3Mock(),
+        v2 = new Vector3Mock()
+      ) {
+        this.v0 = v0;
+        this.v1 = v1;
+        this.v2 = v2;
+      }
+      getPoints = vi.fn(() => [this.v0, this.v1, this.v2]);
     },
-    MathUtils: {
-      mapLinear: vi.fn((value) => value), // Simple pass-through mock
-      randFloatSpread: vi.fn((range) => (Math.random() - 0.5) * range),
-      // Add other MathUtils functions if needed by tests
-    },
-    // Constants
-    DoubleSide: 2, // Mock constant value
-    // Add other constants like FrontSide, BackSide, AdditiveBlending etc. if needed
+    DoubleSide: 2,
   };
 });
 

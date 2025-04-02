@@ -74,7 +74,8 @@ export const createMockBrainRegions = (count = 5) => {
     connections: [],
     activityLevel: Math.random(),
     isActive: Math.random() > 0.5,
-    hemisphereLocation: Math.random() > 0.5 ? 'left' : 'right',
+    // Ensure hemisphereLocation matches the expected literal types
+    hemisphereLocation: ['left', 'right', 'central'][Math.floor(Math.random() * 3)] as 'left' | 'right' | 'central',
     dataConfidence: Math.random(),
   }));
 };
@@ -93,8 +94,10 @@ export const createMockNeuralConnections = (regions: any[], connectionCount = 10
       sourceId: regions[sourceIndex].id,
       targetId: regions[targetIndex].id,
       strength: Math.random(),
-      type: Math.random() > 0.5 ? 'functional' : 'structural',
-      directionality: Math.random() > 0.5 ? 'bidirectional' : 'unidirectional',
+      // Ensure type matches the expected literal types
+      type: ['functional', 'structural', 'effective'][Math.floor(Math.random() * 3)] as 'functional' | 'structural' | 'effective',
+      // Ensure directionality matches the expected literal types
+      directionality: ['bidirectional', 'unidirectional'][Math.floor(Math.random() * 2)] as 'bidirectional' | 'unidirectional',
       activityLevel: Math.random(),
       dataConfidence: Math.random(),
     };
