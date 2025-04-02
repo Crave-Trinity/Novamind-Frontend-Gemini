@@ -10,34 +10,21 @@ import tsconfigPaths from 'vite-tsconfig-paths';
  */
 export default defineConfig({
   plugins: [
-    react() as any, // Cast to bypass type mismatch
-    tsconfigPaths({
+    tsconfigPaths({ // Run tsconfigPaths before react plugin
       root: __dirname,
       projects: [path.resolve(__dirname, './tsconfig.json')]
-    }) // Remove unnecessary cast
+    }),
+    react() as any,
   ],
-  resolve: {
-    alias: {
-      // Keep specific aliases not covered or needing override from tsconfig.json
-      // Let vite-tsconfig-paths handle the general aliases like @, @domain, @application etc.
-      '@presentation/atoms/Badge': path.resolve(__dirname, './src/presentation/atoms/Badge.tsx'),
-      '@presentation/atoms/Button': path.resolve(__dirname, './src/presentation/atoms/Button.tsx'),
-      '@presentation/atoms/Card': path.resolve(__dirname, './src/presentation/atoms/Card.tsx'),
-      '@presentation/atoms/Tooltip': path.resolve(__dirname, './src/presentation/atoms/Tooltip.tsx'),
-      '@presentation/atoms/Tabs': path.resolve(__dirname, './src/presentation/atoms/Tabs.tsx'),
-      '@presentation/atoms/Progress': path.resolve(__dirname, './src/presentation/atoms/Progress.tsx'),
-      '@presentation/atoms/ScrollArea': path.resolve(__dirname, './src/presentation/atoms/ScrollArea.tsx'),
-      'lucide-react': path.resolve(__dirname, './node_modules/lucide-react'),
-      '@test/*': path.resolve(__dirname, './src/test/*'), // Explicitly add @test alias
-    },
-  },
+  // Removed manual resolve.alias block. Relying on vite-tsconfig-paths plugin.
   test: {
     globals: true,
     environment: 'jsdom',  // MUST BE JSDOM
     setupFiles: [
-      './src/test/textencoder-fix.ts',  // MUST BE FIRST
-      './src/test/url-fix.ts',          // URL fix second
-      './src/test/setup.ts'             // Regular setup last
+      'tsconfig-paths/register',        // Attempt runtime path registration here
+      './src/test/textencoder-fix.ts',
+      './src/test/url-fix.ts',
+      './src/test/setup.ts'
     ],
     include: ['src/**/*.{test,spec,type-test,runtime.test,minimal.test}.{ts,tsx}'], // Added minimal.test and runtime.test
     exclude: ['node_modules', '.git', 'dist'],

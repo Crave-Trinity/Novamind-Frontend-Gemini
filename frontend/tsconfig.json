@@ -59,12 +59,12 @@
       "@presentation/*": ["src/presentation/*"],
       
       /* Atomic Design Components */
-      "@components/*": ["src/presentation/components/*"],
-      "@atoms/*": ["src/presentation/components/atoms/*"],
-      "@molecules/*": ["src/presentation/components/molecules/*"],
-      "@organisms/*": ["src/presentation/components/organisms/*"],
-      "@templates/*": ["src/presentation/components/templates/*"],
-      "@pages/*": ["src/presentation/pages/*"],
+      // Removed "@components/*" alias as it was potentially redundant/confusing
+      "@atoms/*": ["src/presentation/atoms/*"], // Corrected path
+      "@molecules/*": ["src/presentation/molecules/*"], // Corrected path
+      "@organisms/*": ["src/presentation/organisms/*"], // Corrected path
+      "@templates/*": ["src/presentation/templates/*"], // Corrected path
+      "@pages/*": ["src/presentation/pages/*"], // Path seems correct
       
       /* Domain-Driven Architecture Shortcuts */
       "@services/*": ["src/infrastructure/services/*"],

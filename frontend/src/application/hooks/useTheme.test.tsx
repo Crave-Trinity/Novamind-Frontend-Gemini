@@ -4,26 +4,42 @@
  */
 
 import { describe, it, expect, vi, beforeEach, SpyInstance } from "vitest"; // Explicitly import SpyInstance
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook } from "@testing-library/react"; // Updated import source
 import React from "react";
 // Import the hook itself and the context type, but not the provider
-import { useTheme } from '@hooks/useTheme';
+import { useTheme } from '@/application/contexts/ThemeContext'; // Corrected import path
 // Import the actual Context object as well
-import ThemeContext, {
+import { ThemeContext } from '@/application/contexts/ThemeProvider'; // Import the actual context instance
+import {
   ThemeContextType,
   ThemeOption,
-} from '@/contexts/ThemeContext';
+  ThemeSettings, // Import ThemeSettings type
+} from '@/application/contexts/ThemeContext';
 
 // Mock the ThemeContext module directly if needed, or just mock useContext
 // We will mock useContext directly
 // Skipping due to persistent mocking/environment issues
 describe.skip("useTheme", () => {
   // Define a mock context value
+  // Provide a default settings object for the mock
+  const mockDefaultSettings: ThemeSettings = {
+    bgColor: "#ffffff",
+    glowIntensity: 0,
+    useBloom: false,
+    activeRegionColor: "#2196f3",
+    inactiveRegionColor: "#e0e0e0",
+    excitationColor: "#00897b",
+    inhibitionColor: "#e53935",
+    connectionOpacity: 0.8,
+    regionOpacity: 0.95,
+  };
+
   const mockThemeContextValue: ThemeContextType = {
     theme: "clinical",
     setTheme: vi.fn(),
-    toggleDarkMode: vi.fn(),
+    toggleTheme: vi.fn(),
     isDarkMode: false,
+    settings: mockDefaultSettings, // Added missing settings property
   };
 
   // Use 'any' for the spy variable type due to persistent inference issues

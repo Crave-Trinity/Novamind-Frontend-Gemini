@@ -7,13 +7,13 @@
 import React, { useMemo } from "react";
 
 // UI components
-import { Badge } from "@presentation/atoms/Badge";
+import { Badge } from "@/presentation/atoms/Badge"; // Corrected alias path
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@presentation/atoms/Tooltip";
+} from "@/presentation/atoms/Tooltip"; // Corrected alias path
 
 // Icons
 import { Brain, Activity, Zap } from "lucide-react";
