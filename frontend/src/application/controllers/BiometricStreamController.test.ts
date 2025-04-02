@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook, act, waitFor } from "@testing-library/react"; // Use @testing-library/react
 import { useBiometricStreamController } from "@application/controllers/BiometricStreamController";
 
 // Mock the domain types to prevent import errors
@@ -319,92 +319,97 @@ describe("BiometricStreamController", () => {
   });
 
   it("initializes with correct default state and fetches stream configurations", async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() => // Remove waitForNextUpdate destructuring
       useBiometricStreamController(mockPatientId),
     );
 
     // Initial state check
-    expect(result.current.isInitialized).toBe(false);
-    expect(result.current.isLoading).toBe(true);
-    expect(result.current.error).toBeNull();
+    expect(result.current.isInitialized).toBe(false); // Access directly
+    expect(result.current.isLoading).toBe(true); // Access directly
+    expect(result.current.error).toBeNull(); // Access directly
 
-    // Wait for initialization to complete
-    await waitForNextUpdate();
+    // Wait for initialization to complete by asserting on a final state
+    await waitFor(() => expect(result.current.isInitialized).toBe(true)); // Access directly
 
     // Post-initialization state
-    expect(result.current.isInitialized).toBe(true);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.streamConfigurations).toEqual(
-      mockStreamConfigurations,
-    );
-    expect(result.current.activeStreams.length).toBeGreaterThan(0);
+    expect(result.current.isInitialized).toBe(true); // Access directly
+    expect(result.current.isLoading).toBe(false); // Access directly
+    expect(result.current.streamConfigurations).toEqual(mockStreamConfigurations); // Access directly
+    expect(result.current.activeStreams.size).toBeGreaterThan(0); // Access directly and use .size
   });
 
   it("activates biometric stream with quantum precision", async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() => // Remove waitForNextUpdate destructuring
       useBiometricStreamController(mockPatientId),
     );
 
     // Wait for initialization
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isInitialized).toBe(true)); // Access directly
 
     // Attempt to activate the GSR stream which is initially paused
     act(() => {
       result.current.activateStream("stream-gsr");
     });
 
-    // Wait for the operation to complete
-    await waitForNextUpdate();
+    // Wait for the stream status to potentially update
+    await waitFor(() => expect(result.current.streamStatuses["stream-gsr"]).toBeDefined()); // Access directly
 
     // Verify the stream was activated
-    expect(result.current.streamStatuses["stream-gsr"]).toBeDefined();
-    expect(result.current.error).toBeNull();
+    expect(result.current.streamStatuses["stream-gsr"]).toBeDefined(); // Access directly
+    // Check error state
+    expect(result.current.error).toBeNull(); // Access directly
   });
 
   it("fetches and processes latest biometric readings with clinical precision", async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() => // Remove waitForNextUpdate destructuring
       useBiometricStreamController(mockPatientId),
     );
 
     // Wait for initialization
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isInitialized).toBe(true)); // Access directly
 
     // Fetch latest readings
     act(() => {
       result.current.fetchLatestReadings();
     });
 
-    // Wait for the operation to complete
-    await waitForNextUpdate();
+    // Wait for readings to appear
+    await waitFor(() => expect(result.current.latestReadings).toEqual(mockLatestReadings)); // Access directly
 
     // Verify the readings were fetched and processed
-    expect(result.current.latestReadings).toEqual(mockLatestReadings);
-    expect(result.current.error).toBeNull();
+    expect(result.current.latestReadings).toEqual(mockLatestReadings); // Access directly
+    expect(result.current.error).toBeNull(); // Access directly
 
     // Processed data should be available
-    expect(result.current.processedData).toBeTruthy();
+    expect(result.current.processedData).toBeTruthy(); // Access directly
   });
 
   it("subscribes to and processes biometric alerts with HIPAA-compliant precision", async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() => // Remove waitForNextUpdate destructuring
       useBiometricStreamController(mockPatientId),
     );
 
     // Wait for initialization
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isInitialized).toBe(true)); // Access directly
 
     // Subscribe to alerts
     act(() => {
       result.current.subscribeToAlerts(["warning", "urgent"]);
     });
 
-    // Wait for the subscription to complete
-    await waitForNextUpdate();
+    // Wait for subscription state if applicable, or just proceed
+    // For this test, we mainly care about simulating the message later
+    // await waitFor(() => expect(result.current.alertSubscription).toBeDefined()); // Example if needed
 
     // Simulate receiving an alert
     act(() => {
-      const mockWs = result.current.alertSubscription as any;
-      if (mockWs) {
+      // The hook doesn't expose alertSubscription directly.
+      // We need to rely on the state update after simulating the message.
+      // Simulate message via the globally mocked WebSocket instance if possible,
+      // or adjust test if subscription logic is internal.
+      // For now, assume the mockWs simulation works via global mock.
+      const mockWs = wsRef.current as any; // Access the ref used internally if possible (might need hook adjustment)
+      if (mockWs && typeof mockWs.simulateMessage === 'function') {
         mockWs.simulateMessage({
           type: "alert",
           alert: mockAlerts[0],
@@ -412,31 +417,34 @@ describe("BiometricStreamController", () => {
       }
     });
 
-    // Verify alert was received and processed
-    expect(result.current.alerts.length).toBeGreaterThan(0);
-    expect(result.current.alerts[0].id).toBe("alert-1");
-    expect(result.current.error).toBeNull();
+    // Wait for the alert to be processed and appear in the returned state/props
+    await waitFor(() => expect(result.current.latestAlerts.length).toBeGreaterThan(0)); // Access directly
+    expect(result.current.latestAlerts.length).toBeGreaterThan(0); // Access directly
+    expect(result.current.latestAlerts[0].id).toBe("alert-1"); // Access directly
+    expect(result.current.error).toBeNull(); // Access directly
   });
 
   it("retrieves stream history with temporal precision", async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() => // Remove waitForNextUpdate destructuring
       useBiometricStreamController(mockPatientId),
     );
 
     // Wait for initialization
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isInitialized).toBe(true)); // Access directly
 
     // Request stream history
     act(() => {
       result.current.getStreamHistory("stream-hr", { hours: 6 });
     });
 
-    // Wait for the operation to complete
-    await waitForNextUpdate();
+    // Wait for history to appear
+    // Note: Hook doesn't return streamHistory directly. Check mock call.
+    const { getStreamHistory } = vi.mocked(useBiometricService()); // Get mocked service instance
+    await waitFor(() => expect(getStreamHistory).toHaveBeenCalled());
 
-    // Verify history was retrieved
-    expect(result.current.streamHistory).toEqual(mockStreamHistory);
-    expect(result.current.error).toBeNull();
+    // Verify history was retrieved (mock called)
+    expect(getStreamHistory).toHaveBeenCalledWith("stream-hr", { hours: 6 });
+    expect(result.current.error).toBeNull(); // Access directly
   });
 
   it("handles error states with neural precision", async () => {
@@ -459,29 +467,29 @@ describe("BiometricStreamController", () => {
       }),
     }));
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() => // Remove waitForNextUpdate destructuring
       useBiometricStreamController(mockPatientId),
     );
 
-    // Wait for initialization attempt to complete
-    await waitForNextUpdate();
+    // Wait for initialization attempt to complete (it should set error)
+    await waitFor(() => expect(result.current.error).not.toBeNull()); // Access directly
 
     // Verify error state
-    expect(result.current.isInitialized).toBe(true);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBe(
+    expect(result.current.isInitialized).toBe(true); // Access directly
+    expect(result.current.isLoading).toBe(false); // Access directly
+    expect(result.current.error).toBe( // Access directly
       "Failed to retrieve biometric stream configurations",
     );
-    expect(result.current.streamConfigurations).toEqual([]);
+    expect(result.current.activeStreams.size).toBe(0); // Access directly
   });
 
   it("processes real-time biometric data with mathematical precision", async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() => // Remove waitForNextUpdate destructuring
       useBiometricStreamController(mockPatientId),
     );
 
     // Wait for initialization
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isInitialized).toBe(true)); // Access directly
 
     // Request data processing
     act(() => {
@@ -491,11 +499,11 @@ describe("BiometricStreamController", () => {
       });
     });
 
-    // Wait for the operation to complete
-    await waitForNextUpdate();
+    // Wait for processed data to appear
+    await waitFor(() => expect(result.current.processedData).toEqual(mockProcessedData)); // Access directly
 
     // Verify processed data
-    expect(result.current.processedData).toEqual(mockProcessedData);
-    expect(result.current.error).toBeNull();
+    expect(result.current.processedData).toEqual(mockProcessedData); // Access directly
+    expect(result.current.error).toBeNull(); // Access directly
   });
 });

@@ -10,7 +10,7 @@ import {
   NeuralTransformSequence,
   NeuralTransformResult,
 } from "@domain/types/neural/transforms"; // Corrected path
-import { NeuralTransitionType } from "@domain/types/brain/activity"; // Reverted to alias path
+// Removed incorrect import: import { NeuralTransitionType } from "@domain/types/brain/activity";
 
 describe("transforms type definitions", () => {
   it("exports NeuralTransform with correct structure", () => {
@@ -18,7 +18,7 @@ describe("transforms type definitions", () => {
     const sampleTransform: NeuralTransform = {
       regionId: "test-region",
       activationChange: 0.5,
-      transitionType: NeuralTransitionType.SMOOTH, // Use imported enum value
+      transitionType: "gradual", // Use string literal as defined in NeuralTransform interface
       sourceTrigger: "manual",
     };
     expect(sampleTransform).toBeDefined();

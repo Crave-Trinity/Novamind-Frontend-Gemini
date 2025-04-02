@@ -14,8 +14,16 @@ window.addEventListener("unhandledrejection", (event) => {
   console.error("Unhandled promise rejection:", event.reason);
 });
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-);
+// Ensure the root element exists before rendering (prevents errors in test environments)
+const rootElement = document.getElementById("root");
+if (rootElement) {
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  );
+} else {
+  // Optional: Log a warning if the root element is not found,
+  // which might indicate an issue in the HTML or test setup.
+  console.warn('Root element with ID "root" not found. React app not rendered.');
+}

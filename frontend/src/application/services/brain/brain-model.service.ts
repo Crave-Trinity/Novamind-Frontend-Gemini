@@ -10,7 +10,7 @@ import {
   BrainRegion,
   NeuralConnection,
 } from "@domain/types/brain/models";
-import { Result, success, failure } from "@domain/types/common";
+import { Result, success, failure } from "@/domain/types/shared/common"; // Corrected path alias and location
 
 // API endpoints
 const API_BASE_URL =

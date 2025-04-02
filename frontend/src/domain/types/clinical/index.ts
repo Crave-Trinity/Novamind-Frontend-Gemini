@@ -17,4 +17,4 @@ export {
   failure,
   NeuralError,
   VisualizationState,
-} from "../common";
+} from "../shared/common"; // Corrected path to explicitly point to common.ts

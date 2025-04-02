@@ -4,9 +4,9 @@
  * with clinical precision and mathematical integrity
  */
 
-import { BrainModel, BrainRegion, NeuralConnection } from "@types/brain/models";
-import { Result, success, failure } from "@types/shared/common";
-import { TypeVerificationError } from "@domain/utils/shared/type-verification.runtime";
+import { BrainModel, BrainRegion, NeuralConnection } from "@/domain/types/brain/models"; // Corrected path alias
+import { Result, success, failure } from "@/domain/types/shared/common"; // Corrected path alias
+import { TypeVerificationError } from "@/domain/models/shared/type-verification"; // Import from the definition file
 
 /**
  * Runtime validation for BrainModel objects
@@ -22,7 +22,7 @@ export function isBrainModel(obj: unknown): obj is BrainModel {
 
   return (
     typeof model.id === "string" &&
-    typeof model.name === "string" &&
+    // typeof model.name === "string" && // Removed check for non-existent 'name' property
     Array.isArray(model.regions) &&
     Array.isArray(model.connections) &&
     typeof model.version === "number"
@@ -42,10 +42,9 @@ export function validateBrainModel(
   if (!obj || typeof obj !== "object") {
     return failure(
       new TypeVerificationError(
-        "Invalid BrainModel: expected an object",
-        "BrainModel",
-        typeof obj,
-        field,
+        "BrainModel", // Expected type
+        typeof obj, // Received value (type)
+        field, // Property path
       ),
     );
   }
@@ -56,33 +55,30 @@ export function validateBrainModel(
   if (typeof model.id !== "string") {
     return failure(
       new TypeVerificationError(
-        "Invalid BrainModel: missing or invalid 'id'",
-        "string",
-        typeof model.id,
-        field ? `${field}.id` : "id",
+        "string", // Expected type
+        typeof model.id, // Received value (type)
+        field ? `${field}.id` : "id", // Property path
       ),
     );
   }
 
-  if (typeof model.name !== "string") {
-    return failure(
-      new TypeVerificationError(
-        "Invalid BrainModel: missing or invalid 'name'",
-        "string",
-        typeof model.name,
-        field ? `${field}.name` : "name",
-      ),
-    );
-  }
-
+  // Removed check for non-existent 'name' property
+  // if (typeof model.name !== "string") {
+  //   return failure(
+  //     new TypeVerificationError(
+  //       "string", // Expected type
+  //       typeof model.name, // Received value (type)
+  //       field ? `${field}.name` : "name", // Property path
+  //     ),
+  //   );
+  // }
   // Validate arrays
   if (!Array.isArray(model.regions)) {
     return failure(
       new TypeVerificationError(
-        "Invalid BrainModel: missing or invalid 'regions'",
-        "Array<BrainRegion>",
-        typeof model.regions,
-        field ? `${field}.regions` : "regions",
+        "Array<BrainRegion>", // Expected type
+        typeof model.regions, // Received value (type)
+        field ? `${field}.regions` : "regions", // Property path
       ),
     );
   }
@@ -90,10 +86,9 @@ export function validateBrainModel(
   if (!Array.isArray(model.connections)) {
     return failure(
       new TypeVerificationError(
-        "Invalid BrainModel: missing or invalid 'connections'",
-        "Array<NeuralConnection>",
-        typeof model.connections,
-        field ? `${field}.connections` : "connections",
+        "Array<NeuralConnection>", // Expected type
+        typeof model.connections, // Received value (type)
+        field ? `${field}.connections` : "connections", // Property path
       ),
     );
   }
@@ -102,10 +97,9 @@ export function validateBrainModel(
   if (typeof model.version !== "number") {
     return failure(
       new TypeVerificationError(
-        "Invalid BrainModel: missing or invalid 'version'",
-        "number",
-        typeof model.version,
-        field ? `${field}.version` : "version",
+        "number", // Expected type
+        typeof model.version, // Received value (type)
+        field ? `${field}.version` : "version", // Property path
       ),
     );
   }
@@ -115,10 +109,9 @@ export function validateBrainModel(
     if (!isBrainRegion(model.regions[i])) {
       return failure(
         new TypeVerificationError(
-          `Invalid BrainModel: invalid region at index ${i}`,
-          "BrainRegion",
-          typeof model.regions[i],
-          field ? `${field}.regions[${i}]` : `regions[${i}]`,
+          "BrainRegion", // Expected type
+          typeof model.regions[i], // Received value (type)
+          field ? `${field}.regions[${i}]` : `regions[${i}]`, // Property path
         ),
       );
     }
@@ -129,10 +122,9 @@ export function validateBrainModel(
     if (!isNeuralConnection(model.connections[i])) {
       return failure(
         new TypeVerificationError(
-          `Invalid BrainModel: invalid connection at index ${i}`,
-          "NeuralConnection",
-          typeof model.connections[i],
-          field ? `${field}.connections[${i}]` : `connections[${i}]`,
+          "NeuralConnection", // Expected type
+          typeof model.connections[i], // Received value (type)
+          field ? `${field}.connections[${i}]` : `connections[${i}]`, // Property path
         ),
       );
     }
@@ -174,10 +166,9 @@ export function validateBrainRegion(
   if (!obj || typeof obj !== "object") {
     return failure(
       new TypeVerificationError(
-        "Invalid BrainRegion: expected an object",
-        "BrainRegion",
-        typeof obj,
-        field,
+        "BrainRegion", // Expected type
+        typeof obj, // Received value (type)
+        field, // Property path
       ),
     );
   }
@@ -188,10 +179,9 @@ export function validateBrainRegion(
   if (typeof region.id !== "string") {
     return failure(
       new TypeVerificationError(
-        "Invalid BrainRegion: missing or invalid 'id'",
-        "string",
-        typeof region.id,
-        field ? `${field}.id` : "id",
+        "string", // Expected type
+        typeof region.id, // Received value (type)
+        field ? `${field}.id` : "id", // Property path
       ),
     );
   }
@@ -199,10 +189,9 @@ export function validateBrainRegion(
   if (typeof region.name !== "string") {
     return failure(
       new TypeVerificationError(
-        "Invalid BrainRegion: missing or invalid 'name'",
-        "string",
-        typeof region.name,
-        field ? `${field}.name` : "name",
+        "string", // Expected type
+        typeof region.name, // Received value (type)
+        field ? `${field}.name` : "name", // Property path
       ),
     );
   }
@@ -215,10 +204,9 @@ export function validateBrainRegion(
   ) {
     return failure(
       new TypeVerificationError(
-        "Invalid BrainRegion: missing or invalid 'activityLevel', must be a number between 0 and 1",
-        "number",
-        typeof region.activityLevel,
-        field ? `${field}.activityLevel` : "activityLevel",
+        "number (0-1)", // Expected type
+        typeof region.activityLevel, // Received value (type)
+        field ? `${field}.activityLevel` : "activityLevel", // Property path
       ),
     );
   }
@@ -227,10 +215,9 @@ export function validateBrainRegion(
   if (typeof region.isActive !== "boolean") {
     return failure(
       new TypeVerificationError(
-        "Invalid BrainRegion: missing or invalid 'isActive'",
-        "boolean",
-        typeof region.isActive,
-        field ? `${field}.isActive` : "isActive",
+        "boolean", // Expected type
+        typeof region.isActive, // Received value (type)
+        field ? `${field}.isActive` : "isActive", // Property path
       ),
     );
   }
@@ -256,7 +243,7 @@ export function isNeuralConnection(obj: unknown): obj is NeuralConnection {
     typeof connection.targetId === "string" &&
     typeof connection.strength === "number" &&
     typeof connection.type === "string" &&
-    typeof connection.active === "boolean"
+    true // Removed check for non-existent 'active' property, placeholder true
   );
 }
 
@@ -273,10 +260,9 @@ export function validateNeuralConnection(
   if (!obj || typeof obj !== "object") {
     return failure(
       new TypeVerificationError(
-        "Invalid NeuralConnection: expected an object",
-        "NeuralConnection",
-        typeof obj,
-        field,
+        "NeuralConnection", // Expected type
+        typeof obj, // Received value (type)
+        field, // Property path
       ),
     );
   }
@@ -287,10 +273,9 @@ export function validateNeuralConnection(
   if (typeof connection.id !== "string") {
     return failure(
       new TypeVerificationError(
-        "Invalid NeuralConnection: missing or invalid 'id'",
-        "string",
-        typeof connection.id,
-        field ? `${field}.id` : "id",
+        "string", // Expected type
+        typeof connection.id, // Received value (type)
+        field ? `${field}.id` : "id", // Property path
       ),
     );
   }
@@ -298,10 +283,9 @@ export function validateNeuralConnection(
   if (typeof connection.sourceId !== "string") {
     return failure(
       new TypeVerificationError(
-        "Invalid NeuralConnection: missing or invalid 'sourceId'",
-        "string",
-        typeof connection.sourceId,
-        field ? `${field}.sourceId` : "sourceId",
+        "string", // Expected type
+        typeof connection.sourceId, // Received value (type)
+        field ? `${field}.sourceId` : "sourceId", // Property path
       ),
     );
   }
@@ -309,10 +293,9 @@ export function validateNeuralConnection(
   if (typeof connection.targetId !== "string") {
     return failure(
       new TypeVerificationError(
-        "Invalid NeuralConnection: missing or invalid 'targetId'",
-        "string",
-        typeof connection.targetId,
-        field ? `${field}.targetId` : "targetId",
+        "string", // Expected type
+        typeof connection.targetId, // Received value (type)
+        field ? `${field}.targetId` : "targetId", // Property path
       ),
     );
   }
@@ -325,40 +308,38 @@ export function validateNeuralConnection(
   ) {
     return failure(
       new TypeVerificationError(
-        "Invalid NeuralConnection: missing or invalid 'strength', must be a number between 0 and 1",
-        "number",
-        typeof connection.strength,
-        field ? `${field}.strength` : "strength",
+        "number (0-1)", // Expected type
+        typeof connection.strength, // Received value (type)
+        field ? `${field}.strength` : "strength", // Property path
       ),
     );
   }
 
-  // Validate type field
+  // Validate type field according to actual definition in models.ts
+  const validTypes = ["structural", "functional", "effective"];
   if (
     typeof connection.type !== "string" ||
-    (connection.type !== "excitatory" && connection.type !== "inhibitory")
+    !validTypes.includes(connection.type)
   ) {
     return failure(
       new TypeVerificationError(
-        "Invalid NeuralConnection: missing or invalid 'type', must be 'excitatory' or 'inhibitory'",
-        "string",
-        typeof connection.type,
-        field ? `${field}.type` : "type",
+        "'structural' | 'functional' | 'effective'", // Expected type
+        typeof connection.type, // Received value (type)
+        field ? `${field}.type` : "type", // Property path
       ),
     );
   }
 
-  // Validate boolean fields
-  if (typeof connection.active !== "boolean") {
-    return failure(
-      new TypeVerificationError(
-        "Invalid NeuralConnection: missing or invalid 'active'",
-        "boolean",
-        typeof connection.active,
-        field ? `${field}.active` : "active",
-      ),
-    );
-  }
+  // Removed check for non-existent 'active' property
+  // if (typeof connection.active !== "boolean") {
+  //   return failure(
+  //     new TypeVerificationError(
+  //       "boolean", // Expected type
+  //       typeof connection.active, // Received value (type)
+  //       field ? `${field}.active` : "active", // Property path
+  //     ),
+  //   );
+  // }
 
   return success(connection as NeuralConnection);
 }

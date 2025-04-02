@@ -4,35 +4,35 @@
  * with mathematically precise data propagation
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer } from "react"; // Import useReducer
 
 // Domain types
 import {
   BrainRegion,
   NeuralConnection,
   BrainModel,
-} from "@domain/types/brain/models";
+} from "@/domain/types/brain/models";
 import {
-  NeuralActivationLevel,
+  ActivationLevel,
   NeuralActivityState,
-} from "@domain/types/brain/activity";
+} from "@/domain/types/brain/activity";
 import {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
-} from "@domain/types/clinical/mapping";
-import { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
+} from "@/domain/models/brain/mapping/brain-mapping"; // Use @/ alias (already correct)
+import { TreatmentResponsePrediction } from "@/domain/types/clinical/treatment";
 import {
   BiometricAlert,
   BiometricStream,
-} from "@domain/types/biometric/streams";
-import { TemporalDynamics } from "@domain/types/temporal/dynamics";
-import { Result, success, failure } from "@domain/types/common/result";
+} from "@/domain/types/biometric/streams";
+import { TemporalDynamics } from "@/domain/types/temporal/dynamics"; // Revert to specific file, maybe index isn't picked up
+import { Result, success, failure } from "@/domain/types/shared/common"; // Use @/ alias (already correct)
 
 // Services
-import { brainModelService } from "@application/services/brainModelService";
-import { clinicalService } from "@application/services/clinicalService";
-import { biometricService } from "@application/services/biometricService";
-import { temporalService } from "@application/services/temporalService";
+import { brainModelService } from "@/application/services/brain/brain-model.service"; // Corrected path and added extension
+import { clinicalService } from "@/application/services/clinicalService";
+import { biometricService } from "@/application/services/biometricService";
+import { temporalService } from "@/application/services/temporal/temporal.service"; // Revert to specific file
 
 // Types for the orchestration state
 export interface NeuroSyncState {
@@ -230,22 +230,22 @@ export function useNeuroSyncOrchestrator(
   timingConfig: SyncTimingConfig = defaultTimingConfig,
 ) {
   // State using useReducer pattern internally
-  const [state, dispatch] = useState<NeuroSyncState>(initialNeuroSyncState);
+  const [state, dispatch] = useReducer(neuroSyncReducer, initialNeuroSyncState); // Use useReducer
 
   // Fetch brain model with error handling
   const fetchBrainModel = useCallback(async () => {
     try {
       dispatch({ type: "SET_LOADING_STATE", payload: "loading" });
 
-      const result = await brainModelService.getBrainModel(patientId);
+      const result = await brainModelService.fetchBrainModel(patientId);
 
-      if (result.success && result.data) {
-        dispatch({ type: "SET_BRAIN_MODEL", payload: result.data });
+      if (result.success && result.value) { // Corrected: Check result.value
+        dispatch({ type: "SET_BRAIN_MODEL", payload: result.value }); // Use .value for success case
         dispatch({ type: "SET_LOADING_STATE", payload: "loaded" });
       } else {
         dispatch({
           type: "SET_ERROR",
-          payload: result.error || "Failed to load brain model",
+          payload: result.error?.message || "Failed to load brain model", // Access error message correctly
         });
       }
     } catch (error) {
@@ -265,7 +265,7 @@ export function useNeuroSyncOrchestrator(
       // Fetch symptom mappings
       const symptomResult = await clinicalService.getSymptomMappings(patientId);
       if (symptomResult.success && symptomResult.data) {
-        dispatch({ type: "SET_SYMPTOM_MAPPINGS", payload: symptomResult.data });
+        dispatch({ type: "SET_SYMPTOM_MAPPINGS", payload: symptomResult.value }); // Use .value for success case
       }
 
       // Fetch diagnosis mappings
@@ -274,7 +274,7 @@ export function useNeuroSyncOrchestrator(
       if (diagnosisResult.success && diagnosisResult.data) {
         dispatch({
           type: "SET_DIAGNOSIS_MAPPINGS",
-          payload: diagnosisResult.data,
+          payload: diagnosisResult.value, // Use .value for success case
         });
       }
 
@@ -284,7 +284,7 @@ export function useNeuroSyncOrchestrator(
       if (treatmentResult.success && treatmentResult.data) {
         dispatch({
           type: "SET_TREATMENT_PREDICTIONS",
-          payload: treatmentResult.data,
+          payload: treatmentResult.value, // Use .value for success case
         });
       }
     } catch (error) {
@@ -304,7 +304,7 @@ export function useNeuroSyncOrchestrator(
       // Fetch biometric alerts
       const alertsResult = await biometricService.getBiometricAlerts(patientId);
       if (alertsResult.success && alertsResult.data) {
-        dispatch({ type: "SET_BIOMETRIC_ALERTS", payload: alertsResult.data });
+        dispatch({ type: "SET_BIOMETRIC_ALERTS", payload: alertsResult.value }); // Use .value for success case
       }
 
       // Fetch biometric streams
@@ -313,7 +313,7 @@ export function useNeuroSyncOrchestrator(
       if (streamsResult.success && streamsResult.data) {
         dispatch({
           type: "SET_BIOMETRIC_STREAMS",
-          payload: streamsResult.data,
+          payload: streamsResult.value, // Use .value for success case
         });
       }
     } catch (error) {
@@ -330,8 +330,8 @@ export function useNeuroSyncOrchestrator(
         state.timeScale,
       );
 
-      if (result.success && result.data) {
-        dispatch({ type: "SET_TEMPORAL_DYNAMICS", payload: result.data });
+      if (result.success && result.value) { // Check result.value
+        dispatch({ type: "SET_TEMPORAL_DYNAMICS", payload: result.value }); // Use .value for success case
       }
     } catch (error) {
       // Non-blocking error for temporal data
@@ -354,8 +354,8 @@ export function useNeuroSyncOrchestrator(
       // Calculate which regions should be active based on symptom mappings
       const activatedRegions = state.symptomMappings
         .filter((mapping) => activeSymptomIds.includes(mapping.symptomId))
-        .flatMap((mapping) =>
-          mapping.activationPatterns.map((pattern) => pattern.regionId),
+        .flatMap((mapping) => // flatMap over mappings
+          mapping.activationPatterns.flatMap((pattern) => pattern.regionIds), // Corrected flattening logic
         );
 
       // Set active regions in state
