@@ -1617,6 +1617,21 @@ export class ClinicalTypeVerifier {
       }
       ethnicity = demographicData.ethnicity as string;
     }
+    const occupationalStatusField = `${demographicDataField}.occupationalStatus`;
+    let occupationalStatus: string | undefined;
+    if (demographicData.occupationalStatus !== undefined) {
+      if (!validateString(demographicData.occupationalStatus, occupationalStatusField)) {
+        return {
+          success: false,
+          error: new TypeVerificationError(
+            "string",
+            demographicData.occupationalStatus,
+            occupationalStatusField,
+          ),
+        };
+      }
+      occupationalStatus = demographicData.occupationalStatus as string;
+    }
     // ... add validation for other optional demographic fields ...
 
     // --- Verify Clinical Data ---
@@ -1975,6 +1990,7 @@ export class ClinicalTypeVerifier {
         biologicalSex,
         anonymizationLevel,
         ...(ethnicity !== undefined && { ethnicity }),
+        ...(occupationalStatus !== undefined && { occupationalStatus }),
         // ... other optional demographic fields
       },
       clinicalData: {
@@ -2018,7 +2034,17 @@ export class ClinicalTypeVerifier {
   assertRiskLevel(value: unknown, field?: string): asserts value is RiskLevel {
     const result = this.verifyRiskLevel(value, field);
     if (!result.success) {
-      throw result.error;
+      if (result.error instanceof TypeVerificationError) {
+        // Throw a new error instance created in this context
+        throw new TypeVerificationError(
+          result.error.expectedType,
+          result.error.receivedValue,
+          result.error.propertyPath, // Corrected property name
+        );
+      } else {
+        // Throw a generic error if the error type is unexpected
+        throw new Error(`Type verification failed: ${result.error?.message ?? 'Unknown error'}`);
+      }
     }
   }
 
@@ -2028,7 +2054,17 @@ export class ClinicalTypeVerifier {
   assertSymptom(value: unknown, field?: string): asserts value is Symptom {
     const result = this.verifySymptom(value, field);
     if (!result.success) {
-      throw result.error;
+      if (result.error instanceof TypeVerificationError) {
+        // Throw a new error instance created in this context
+        throw new TypeVerificationError(
+          result.error.expectedType,
+          result.error.receivedValue,
+          result.error.propertyPath, // Corrected property name
+        );
+      } else {
+        // Throw a generic error if the error type is unexpected
+        throw new Error(`Type verification failed: ${result.error?.message ?? 'Unknown error'}`);
+      }
     }
   }
 
@@ -2038,7 +2074,17 @@ export class ClinicalTypeVerifier {
   assertDiagnosis(value: unknown, field?: string): asserts value is Diagnosis {
     const result = this.verifyDiagnosis(value, field);
     if (!result.success) {
-      throw result.error;
+       if (result.error instanceof TypeVerificationError) {
+        // Throw a new error instance created in this context
+        throw new TypeVerificationError(
+          result.error.expectedType,
+          result.error.receivedValue,
+          result.error.propertyPath, // Corrected property name
+        );
+      } else {
+        // Throw a generic error if the error type is unexpected
+        throw new Error(`Type verification failed: ${result.error?.message ?? 'Unknown error'}`);
+      }
     }
   }
 
@@ -2048,7 +2094,17 @@ export class ClinicalTypeVerifier {
   assertTreatment(value: unknown, field?: string): asserts value is Treatment {
     const result = this.verifyTreatment(value, field);
     if (!result.success) {
-      throw result.error;
+       if (result.error instanceof TypeVerificationError) {
+        // Throw a new error instance created in this context
+        throw new TypeVerificationError(
+          result.error.expectedType,
+          result.error.receivedValue,
+          result.error.propertyPath, // Corrected property name
+        );
+      } else {
+        // Throw a generic error if the error type is unexpected
+        throw new Error(`Type verification failed: ${result.error?.message ?? 'Unknown error'}`);
+      }
     }
   }
 
@@ -2061,7 +2117,17 @@ export class ClinicalTypeVerifier {
   ): asserts value is TreatmentResponse {
     const result = this.verifyTreatmentResponse(value, field);
     if (!result.success) {
-      throw result.error;
+       if (result.error instanceof TypeVerificationError) {
+        // Throw a new error instance created in this context
+        throw new TypeVerificationError(
+          result.error.expectedType,
+          result.error.receivedValue,
+          result.error.propertyPath, // Corrected property name
+        );
+      } else {
+        // Throw a generic error if the error type is unexpected
+        throw new Error(`Type verification failed: ${result.error?.message ?? 'Unknown error'}`);
+      }
     }
   }
 
@@ -2071,7 +2137,12 @@ export class ClinicalTypeVerifier {
   assertPatient(value: unknown, field?: string): asserts value is Patient {
     const result = this.verifyPatient(value, field);
     if (!result.success) {
-      throw result.error;
+      // Throw a new error instance created in this context
+      throw new TypeVerificationError(
+        result.error.expectedType,
+        result.error.receivedValue,
+        result.error.field,
+      );
     }
   }
 }

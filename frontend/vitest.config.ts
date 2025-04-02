@@ -10,11 +10,11 @@ import tsconfigPaths from 'vite-tsconfig-paths';
  */
 export default defineConfig({
   plugins: [
-    react(),
+    react() as any, // Cast to bypass type mismatch
     tsconfigPaths({
       root: __dirname,
       projects: [path.resolve(__dirname, './tsconfig.json')]
-    })
+    }) as any // Cast to bypass type mismatch
   ],
   resolve: {
     alias: {
@@ -43,7 +43,7 @@ export default defineConfig({
       './src/test/url-fix.ts',          // URL fix second
       './src/test/setup.ts'             // Regular setup last
     ],
-    include: ['src/**/*.{test,spec,type-test,runtime.test}.{ts,tsx}'], // Added runtime.test
+    include: ['src/**/*.{test,spec,type-test,runtime.test,minimal.test}.{ts,tsx}'], // Added minimal.test and runtime.test
     exclude: ['node_modules', '.git', 'dist'],
     testTimeout: 20000,
     
