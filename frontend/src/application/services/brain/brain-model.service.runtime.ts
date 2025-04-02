@@ -4,7 +4,11 @@
  * with clinical precision and mathematical integrity
  */
 
-import { BrainModel, BrainRegion, NeuralConnection } from "@/domain/types/brain/models"; // Corrected path alias
+import {
+  BrainModel,
+  BrainRegion,
+  NeuralConnection,
+} from "@/domain/types/brain/models"; // Corrected path alias
 import { Result, success, failure } from "@/domain/types/shared/common"; // Corrected path alias
 import { TypeVerificationError } from "@/domain/models/shared/type-verification"; // Import from the definition file
 

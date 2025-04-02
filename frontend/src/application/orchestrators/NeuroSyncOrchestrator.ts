@@ -239,7 +239,8 @@ export function useNeuroSyncOrchestrator(
 
       const result = await brainModelService.fetchBrainModel(patientId);
 
-      if (result.success && result.value) { // Corrected: Check result.value
+      if (result.success && result.value) {
+        // Corrected: Check result.value
         dispatch({ type: "SET_BRAIN_MODEL", payload: result.value }); // Use .value for success case
         dispatch({ type: "SET_LOADING_STATE", payload: "loaded" });
       } else {
@@ -265,7 +266,10 @@ export function useNeuroSyncOrchestrator(
       // Fetch symptom mappings
       const symptomResult = await clinicalService.getSymptomMappings(patientId);
       if (symptomResult.success && symptomResult.data) {
-        dispatch({ type: "SET_SYMPTOM_MAPPINGS", payload: symptomResult.value }); // Use .value for success case
+        dispatch({
+          type: "SET_SYMPTOM_MAPPINGS",
+          payload: symptomResult.value,
+        }); // Use .value for success case
       }
 
       // Fetch diagnosis mappings
@@ -330,7 +334,8 @@ export function useNeuroSyncOrchestrator(
         state.timeScale,
       );
 
-      if (result.success && result.value) { // Check result.value
+      if (result.success && result.value) {
+        // Check result.value
         dispatch({ type: "SET_TEMPORAL_DYNAMICS", payload: result.value }); // Use .value for success case
       }
     } catch (error) {
@@ -354,8 +359,11 @@ export function useNeuroSyncOrchestrator(
       // Calculate which regions should be active based on symptom mappings
       const activatedRegions = state.symptomMappings
         .filter((mapping) => activeSymptomIds.includes(mapping.symptomId))
-        .flatMap((mapping) => // flatMap over mappings
-          mapping.activationPatterns.flatMap((pattern) => pattern.regionIds), // Corrected flattening logic
+        .flatMap(
+          (
+            mapping, // flatMap over mappings
+          ) =>
+            mapping.activationPatterns.flatMap((pattern) => pattern.regionIds), // Corrected flattening logic
         );
 
       // Set active regions in state

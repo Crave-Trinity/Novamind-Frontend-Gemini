@@ -26,7 +26,7 @@ describe("useTemporalDynamicsController", () => {
 
     // Assert: Check the initial state properties (spread from state) and returned functions
     expect(result.current.currentTimeScale).toBe("daily"); // Access directly
-    expect(result.current.isProcessing).toBe(false);      // Access directly
+    expect(result.current.isProcessing).toBe(false); // Access directly
     // Config is used internally but not returned, so we can't assert on it directly.
     // We can infer it was used if the hook's behavior changes based on the config override.
     expect(result.current.loadTemporalDynamics).toBeInstanceOf(Function);

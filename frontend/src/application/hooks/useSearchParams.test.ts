@@ -8,14 +8,14 @@ import { describe, it, expect, vi } from "vitest";
 import { useSearchParams } from "@hooks/useSearchParams";
 
 // Skipping due to context dependency (Next.js Router) issues in test environment
-describe.skip("useSearchParams", () => { 
+describe.skip("useSearchParams", () => {
   it("processes data with mathematical precision", () => {
     // Arrange test data
     const testData = {};
 
     // Act
     // This test needs proper mocking of Next.js router context
-    // const result = useSearchParams(testData); 
+    // const result = useSearchParams(testData);
 
     // Assert
     // expect(result).toBeDefined();

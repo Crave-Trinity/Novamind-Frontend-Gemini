@@ -5,7 +5,7 @@
 import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import NotFound from "@/pages/NotFound"; // Assuming default export
 import { renderWithProviders } from "@test/testUtils.tsx";
@@ -19,7 +19,7 @@ describe("NotFound", () => {
     render(
       <MemoryRouter>
         <NotFound {...mockProps} />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Add assertions for rendered content
@@ -31,7 +31,7 @@ describe("NotFound", () => {
     render(
       <MemoryRouter>
         <NotFound {...mockProps} />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Simulate user interactions

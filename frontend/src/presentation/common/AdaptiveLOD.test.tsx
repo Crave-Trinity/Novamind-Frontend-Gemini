@@ -23,7 +23,7 @@ vi.mock("@react-three/fiber", async (importOriginal) => {
 const mockProps = {
   distanceLevels: [10, 20, 30], // Example distance levels
   children: (
-    detailConfig: DetailConfig // Children is now a function
+    detailConfig: DetailConfig, // Children is now a function
   ) => (
     <>
       <mesh key="1" data-testid="child-mesh-1" />

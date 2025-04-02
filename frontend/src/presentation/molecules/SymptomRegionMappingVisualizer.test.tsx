@@ -83,7 +83,7 @@ vi.mock("three", () => {
     self.length = vi
       .fn()
       .mockImplementation(() =>
-        Math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+        Math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z),
       );
     self.normalize = vi.fn().mockImplementation(function () {
       const l = self.length();
@@ -120,7 +120,7 @@ vi.mock("three", () => {
     MathUtils: {
       lerp: vi.fn((a, b, t) => a + (b - a) * t),
       mapLinear: vi.fn(
-        (x, a1, a2, b1, b2) => b1 + ((x - a1) * (b2 - b1)) / (a2 - a1)
+        (x, a1, a2, b1, b2) => b1 + ((x - a1) * (b2 - b1)) / (a2 - a1),
       ),
     },
     Group: vi.fn(() => ({ add: vi.fn(), remove: vi.fn(), children: [] })),

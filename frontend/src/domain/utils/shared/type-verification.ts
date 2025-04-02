@@ -136,7 +136,10 @@ export class TypeVerifier {
   /**
    * Verify that a value is a string or undefined/null
    */
-  verifyOptionalString(value: unknown, field?: string): Result<string | undefined> {
+  verifyOptionalString(
+    value: unknown,
+    field?: string,
+  ): Result<string | undefined> {
     if (value === undefined || value === null) {
       return { success: true, value: undefined };
     }
@@ -263,7 +266,8 @@ export class TypeVerifier {
     }
 
     const stringValue = stringResult.value;
-    if (allowedValues.includes(stringValue as T)) { // Check against the specific literal type T
+    if (allowedValues.includes(stringValue as T)) {
+      // Check against the specific literal type T
       return { success: true, value: stringValue as T };
     }
 

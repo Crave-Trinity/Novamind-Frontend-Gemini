@@ -116,6 +116,7 @@ if (typeof globalThis.TextEncoder === "undefined") {
 
 // Import polyfills after TextEncoder fix
 import "@test/node-polyfills"; // Correct syntax for side-effect imports
+import "vitest-canvas-mock"; // Integrate vitest-canvas-mock
 
 // Import required testing libraries
 import "@testing-library/jest-dom";
@@ -341,7 +342,7 @@ vi.mock("three", () => {
     self.length = vi
       .fn()
       .mockImplementation(() =>
-        Math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+        Math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z),
       );
     self.normalize = vi.fn().mockImplementation(function () {
       const l = self.length();
@@ -385,7 +386,7 @@ vi.mock("three", () => {
     MathUtils: {
       lerp: vi.fn((a, b, t) => a + (b - a) * t),
       mapLinear: vi.fn(
-        (x, a1, a2, b1, b2) => b1 + ((x - a1) * (b2 - b1)) / (a2 - a1)
+        (x, a1, a2, b1, b2) => b1 + ((x - a1) * (b2 - b1)) / (a2 - a1),
       ),
       randFloatSpread: vi.fn((range) => (Math.random() - 0.5) * range),
     },
@@ -432,7 +433,7 @@ vi.mock("three", () => {
       constructor(
         v0 = new Vector3Mock(),
         v1 = new Vector3Mock(),
-        v2 = new Vector3Mock()
+        v2 = new Vector3Mock(),
       ) {
         this.v0 = v0;
         this.v1 = v1;
@@ -499,29 +500,14 @@ vi.mock("@react-three/drei", () => {
 // Mock browser APIs
 beforeAll(() => {
   // Mock window.matchMedia for JSDOM environment (needed for ThemeProvider tests)
-  Object.defineProperty(window, 'matchMedia', {
+  Object.defineProperty(window, "matchMedia", {
     writable: true,
-    value: vi.fn().mockImplementation(query => ({
+    value: vi.fn().mockImplementation((query) => ({
       matches: false, // Default to false (light mode)
       media: query,
       onchange: null,
       addListener: vi.fn(), // Deprecated but included for compatibility
       removeListener: vi.fn(), // Deprecated but included for compatibility
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })),
-  });
-
-  // Mock window.matchMedia
-  Object.defineProperty(window, "matchMedia", {
-    writable: true,
-    value: vi.fn().mockImplementation((query) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
       dispatchEvent: vi.fn(),
@@ -541,62 +527,7 @@ beforeAll(() => {
     return 0;
   });
 
-  // Mock canvas methods
-  HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
-    // Cast mock to any to bypass strict signature check
-    fillRect: vi.fn(),
-    clearRect: vi.fn(),
-    getImageData: vi.fn(() => ({
-      data: new Uint8ClampedArray(0),
-    })),
-    putImageData: vi.fn(),
-    setTransform: vi.fn(),
-    drawImage: vi.fn(),
-    save: vi.fn(),
-    restore: vi.fn(),
-    scale: vi.fn(),
-    rotate: vi.fn(),
-    translate: vi.fn(),
-    transform: vi.fn(),
-    beginPath: vi.fn(),
-    moveTo: vi.fn(),
-    lineTo: vi.fn(),
-    bezierCurveTo: vi.fn(),
-    quadraticCurveTo: vi.fn(),
-    arc: vi.fn(),
-    arcTo: vi.fn(),
-    ellipse: vi.fn(),
-    rect: vi.fn(),
-    closePath: vi.fn(),
-    stroke: vi.fn(),
-    fill: vi.fn(),
-    clip: vi.fn(),
-    isPointInPath: vi.fn(),
-    isPointInStroke: vi.fn(),
-    measureText: vi.fn(() => ({ width: 0 })),
-    createLinearGradient: vi.fn(() => ({
-      addColorStop: vi.fn(),
-    })),
-    createRadialGradient: vi.fn(() => ({
-      addColorStop: vi.fn(),
-    })),
-    createPattern: vi.fn(() => ({})),
-    getLineDash: vi.fn(() => []),
-    setLineDash: vi.fn(),
-    getTransform: vi.fn(() => ({
-      a: 1,
-      b: 0,
-      c: 0,
-      d: 1,
-      e: 0,
-      f: 0,
-    })),
-    drawFocusIfNeeded: vi.fn(),
-    scrollPathIntoView: vi.fn(),
-    fillText: vi.fn(),
-    strokeText: vi.fn(),
-    createImageData: vi.fn(() => []),
-  })) as any; // Added 'as any' cast here
+  // Canvas/WebGL mocking is now handled by vitest-canvas-mock, imported above.
 });
 
 // Filter console noise

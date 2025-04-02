@@ -17,7 +17,7 @@ describe("useAuditLogPHIView", () => {
     const dependencies = [mockResourceType, mockResourceId];
 
     // Mock the auditLogService.log method using the imported module
-    const logSpy = vi.spyOn(AuditLogService.auditLogService, 'log');
+    const logSpy = vi.spyOn(AuditLogService.auditLogService, "log");
 
     // Act: Use renderHook to test the hook
     const { result } = renderHook(() =>
@@ -47,13 +47,16 @@ describe("useAuditLogPHIView", () => {
     // Dependencies for the edge case
     const dependenciesEdge = [mockResourceTypeEdge, mockResourceIdEdge];
 
-
     // Mock the auditLogService.log method
-    const logSpyEdge = vi.spyOn(AuditLogService.auditLogService, 'log');
+    const logSpyEdge = vi.spyOn(AuditLogService.auditLogService, "log");
 
     // Act: Use renderHook
     const { result: edgeResult } = renderHook(() =>
-      useAuditLogPHIView(mockResourceTypeEdge, mockResourceIdEdge, dependenciesEdge),
+      useAuditLogPHIView(
+        mockResourceTypeEdge,
+        mockResourceIdEdge,
+        dependenciesEdge,
+      ),
     );
 
     // Assert

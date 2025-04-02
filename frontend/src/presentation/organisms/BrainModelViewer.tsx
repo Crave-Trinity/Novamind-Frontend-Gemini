@@ -27,7 +27,7 @@ import {
   DepthOfField,
 } from "@react-three/postprocessing";
 import { KernelSize } from "postprocessing";
-import { ThemeContext } from "@presentation/context/ThemeContext";
+import ThemeContext from "@contexts/ThemeContext"; // Corrected alias and import type
 
 // Import molecular components
 import BrainRegionGroup from "@presentation/molecules/BrainRegionGroup";
@@ -43,8 +43,10 @@ import {
   RenderMode,
   ThemeSettings,
   VisualizationSettings,
+  defaultVisualizationSettings, // Import defaults
 } from "@domain/types/brain/visualization";
-import { SafeArray, Result, VisualizationState } from "@domain/types/common";
+// Use relative path for common types
+import { SafeArray, Result, VisualizationState } from "../../domain/types/shared/common";
 
 // Neural-safe prop definition with explicit typing
 interface BrainModelViewerProps {
@@ -54,8 +56,9 @@ interface BrainModelViewerProps {
 
   // Visualization settings
   renderMode?: RenderMode;
-  theme?: string;
-  visualizationSettings?: VisualizationSettings;
+  theme?: string; // Keep theme prop for potential future use or direct theme selection
+  visualizationSettings?: Partial<VisualizationSettings>; // Allow partial overrides
+  showLegend?: boolean; // Added showLegend prop
 
   // Interaction state
   selectedRegionIds?: string[];
@@ -153,7 +156,8 @@ const CameraController: React.FC<{
 const Brain3DScene: React.FC<{
   brainModel: BrainModel;
   renderMode: RenderMode;
-  themeSettings: ThemeSettings;
+  themeSettings: ThemeSettings; // Use the actual ThemeSettings type
+  visualizationSettings: VisualizationSettings; // Pass merged settings
   selectedRegionIds: string[];
   highlightedRegionIds: string[];
   highPerformanceMode: boolean;
@@ -167,6 +171,7 @@ const Brain3DScene: React.FC<{
   brainModel,
   renderMode,
   themeSettings,
+  visualizationSettings, // Receive merged settings
   selectedRegionIds,
   highlightedRegionIds,
   highPerformanceMode,
@@ -177,72 +182,54 @@ const Brain3DScene: React.FC<{
   onConnectionClick,
   onConnectionHover,
 }) => {
-  // Safe wrappers for null safety
-  const safeRegions = new SafeArray(brainModel.regions);
-  const safeConnections = new SafeArray(brainModel.connections);
+  const safeRegions = brainModel.regions || [];
+  const safeConnections = brainModel.connections || [];
 
   // Group regions by lobe/functional system for neuroanatomical precision
   const regionGroups = useMemo(() => {
-    // Create a default grouping if none exists in the model
-    // This is a simplified example - clinical applications would use true neuroanatomical grouping
     const groups: Record<string, BrainRegion[]> = {
-      frontal: [],
-      parietal: [],
-      temporal: [],
-      occipital: [],
-      subcortical: [],
-      other: [],
+        frontal: [], parietal: [], temporal: [], occipital: [], subcortical: [], other: []
     };
-
-    safeRegions.forEach((region) => {
-      // In a real implementation, this would use the region's actual lobe/system data
-      // For now, we'll use a simplified approach based on position
-      const [x, y, z] = Array.isArray(region.position)
-        ? region.position
-        : [region.position.x, region.position.y, region.position.z];
-
-      if (y > 2) {
-        groups.frontal.push(region);
-      } else if (y < -2) {
-        groups.occipital.push(region);
-      } else if (x > 2) {
-        groups.temporal.push(region);
-      } else if (x < -2) {
-        groups.parietal.push(region);
-      } else if (Math.abs(z) < 2) {
-        groups.subcortical.push(region);
-      } else {
-        groups.other.push(region);
-      }
-    });
-
-    // Filter out empty groups
-    return Object.entries(groups)
-      .filter(([_, regions]) => regions.length > 0)
-      .map(([name, regions]) => ({
-        groupId: `group-${name}`,
-        groupName: name.charAt(0).toUpperCase() + name.slice(1),
-        regions,
-      }));
-  }, [safeRegions]);
+     safeRegions.forEach((region: BrainRegion) => {
+       const [x, y, z] = Array.isArray(region.position)
+         ? region.position
+         : [region.position.x, region.position.y, region.position.z];
+       // Simplified grouping logic - replace with actual neuroanatomical data if available
+       if (y > 2) groups.frontal.push(region);
+       else if (y < -2) groups.occipital.push(region);
+       else if (x > 2) groups.temporal.push(region);
+       else if (x < -2) groups.parietal.push(region);
+       else if (Math.abs(z) < 2) groups.subcortical.push(region);
+       else groups.other.push(region);
+     });
+     return Object.entries(groups)
+       .filter(([_, regions]) => regions.length > 0)
+       .map(([name, regions]) => ({
+         groupId: `group-${name}`,
+         groupName: name.charAt(0).toUpperCase() + name.slice(1),
+         regions,
+       }));
+  }, [brainModel.regions]);
 
   return (
     <group>
       {/* Render neural connections */}
       <NeuralConnections
-        connections={safeConnections.toArray()}
-        regions={safeRegions.toArray()}
+        connections={safeConnections}
+        regions={safeRegions}
         renderMode={renderMode}
-        themeSettings={themeSettings}
+        themeSettings={themeSettings} // Pass theme settings
+        // visualizationSettings prop removed
         highPerformanceMode={highPerformanceMode}
         selectedRegionIds={selectedRegionIds}
         highlightedRegionIds={highlightedRegionIds}
-        minimumStrength={0.2}
+        minimumStrength={visualizationSettings.minConnectionStrength} // Use setting
         filterByActivity={renderMode === RenderMode.FUNCTIONAL}
         animated={renderMode !== RenderMode.ANATOMICAL}
-        useDashedLines={themeSettings.useDashedConnections}
-        onConnectionClick={onConnectionClick}
-        onConnectionHover={onConnectionHover}
+        // useDashedLines={themeSettings.useDashedConnections} // Property missing
+        // Pass callbacks conditionally
+        {...(onConnectionClick && { onConnectionClick })}
+        {...(onConnectionHover && { onConnectionHover })}
       />
 
       {/* Render region groups */}
@@ -253,37 +240,39 @@ const Brain3DScene: React.FC<{
           groupId={group.groupId}
           groupName={group.groupName}
           renderMode={renderMode}
-          themeSettings={themeSettings}
+          themeSettings={themeSettings} // Pass theme settings
+          // visualizationSettings prop removed
           instancedRendering={!highPerformanceMode && group.regions.length > 20}
           highPerformanceMode={highPerformanceMode}
           selectedRegionIds={selectedRegionIds}
           highlightedRegionIds={highlightedRegionIds}
           activityThreshold={activityThreshold}
           showInactiveRegions={showInactiveRegions}
-          showLabels={themeSettings.showLabels}
-          onRegionClick={onRegionClick}
-          onRegionHover={onRegionHover}
+          showLabels={visualizationSettings.showLabels} // Use setting
+          // Pass callbacks conditionally
+          {...(onRegionClick && { onRegionClick })}
+          {...(onRegionHover && { onRegionHover })}
         />
       ))}
 
-      {/* Add contact shadows for visual depth */}
-      {!highPerformanceMode && themeSettings.showFloor && (
-        <ContactShadows
-          position={[0, -5, 0]}
-          scale={30}
-          blur={2}
-          opacity={0.4}
-          color={themeSettings.shadowColor}
-        />
-      )}
+       {/* Add contact shadows for visual depth */}
+       {!highPerformanceMode && visualizationSettings.enableShadows && (
+         <ContactShadows
+           position={[0, -5, 0]} // Make configurable?
+           scale={30}
+           blur={2}
+           opacity={0.4}
+           // color={themeSettings.shadowColor} // Property missing
+         />
+       )}
 
-      {/* Optional environment lighting */}
-      {!highPerformanceMode && themeSettings.useEnvironmentLighting && (
-        <Environment preset={themeSettings.environmentPreset} />
-      )}
+       {/* Optional environment lighting */}
+       {/* {!highPerformanceMode && visualizationSettings.useEnvironmentLighting && ( // Property missing
+         <Environment preset="sunset" /> // Example preset
+       )} */}
 
-      {/* Performance optimization for shadows */}
-      {!highPerformanceMode && themeSettings.showFloor && <BakeShadows />}
+       {/* Performance optimization for shadows */}
+       {!highPerformanceMode && visualizationSettings.enableShadows && <BakeShadows />}
     </group>
   );
 };
@@ -293,23 +282,25 @@ const Brain3DScene: React.FC<{
  * Implements neural-safe rendering with clinical precision
  */
 const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
+  // Destructure all props
   brainModel,
   visualizationState,
-  renderMode = RenderMode.ANATOMICAL,
-  theme = "clinical",
-  visualizationSettings,
+  renderMode: renderModeProp, // Rename to avoid conflict with internal variable
+  theme, // Keep theme prop
+  visualizationSettings: visualizationSettingsProp, // Rename
+  showLegend = true, // Default showLegend to true if not provided
   selectedRegionIds = [],
   highlightedRegionIds = [],
   regionSearchQuery,
-  enableBloom = true,
-  enableDepthOfField = false,
+  enableBloom: enableBloomProp, // Rename
+  enableDepthOfField: enableDepthOfFieldProp, // Rename
   highPerformanceMode = false,
   activityThreshold = 0.2,
   showInactiveRegions = true,
   width = "100%",
   height = "100%",
-  backgroundColor = "#000000",
-  cameraPosition = [0, 0, 20],
+  backgroundColor, // Use theme/settings instead?
+  cameraPosition = [0, 0, 20], // Default camera position
   cameraFov = 50,
   onRegionClick,
   onRegionHover,
@@ -319,30 +310,168 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
   onLoadComplete,
   onError,
 }) => {
-  // Get custom theme settings
-  const { getThemeSettings } = React.useContext(ThemeContext);
+  // Get theme settings from context
+  const { settings: contextThemeSettings } = React.useContext(ThemeContext);
   const ContextBridge = useContextBridge(ThemeContext);
 
-  // Theme settings with fallback
-  const themeSettings = useMemo(() => {
-    return visualizationSettings?.themeSettings || getThemeSettings(theme);
-  }, [visualizationSettings, getThemeSettings, theme]);
+  // Use theme settings from context
+  const themeSettings = contextThemeSettings;
+
+  // Merge incoming visualization settings with defaults and props
+  const settings: VisualizationSettings = useMemo(() => {
+    const merged = {
+      ...defaultVisualizationSettings,
+      ...(visualizationSettingsProp || {}), // Apply overrides from visualizationSettings prop
+    };
+
+    // Apply overrides from direct props that exist in VisualizationSettings
+    if (renderModeProp !== undefined) merged.renderMode = renderModeProp;
+    if (enableBloomProp !== undefined) merged.enableBloom = enableBloomProp;
+    // enableDepthOfField and highPerformanceMode are direct props, not part of VisualizationSettings type
+
+    return merged;
+    // Only include dependencies that affect the merged settings object
+  }, [visualizationSettingsProp, renderModeProp, enableBloomProp]);
+
 
   // Process search query to highlight matching regions
   const searchHighlightedRegions = useMemo(() => {
     if (!regionSearchQuery || !brainModel) return [];
-
     const query = regionSearchQuery.toLowerCase();
-    return new SafeArray(brainModel.regions)
+    return (brainModel.regions || [])
       .filter((region) => region.name.toLowerCase().includes(query))
-      .map((region) => region.id)
-      .toArray();
+      .map((region) => region.id);
   }, [regionSearchQuery, brainModel]);
 
   // Combine explicitly highlighted regions with search results
   const combinedHighlightedRegions = useMemo(() => {
     return [...new Set([...highlightedRegionIds, ...searchHighlightedRegions])];
   }, [highlightedRegionIds, searchHighlightedRegions]);
+
+  // --- State-based Effects ---
+  useEffect(() => {
+    if (visualizationState.status === "error" && onError) {
+      onError(visualizationState.error);
+    }
+  }, [visualizationState, onError]);
+
+  useEffect(() => {
+    if (visualizationState.status === "success" && onLoadComplete) {
+      onLoadComplete();
+    }
+  }, [visualizationState.status, onLoadComplete]);
+
+
+  // --- Render Functions ---
+  const renderLoadingState = () => (
+    <div className="w-full h-full flex items-center justify-center bg-gray-900">
+       <div className="text-center">
+         <div className="animate-pulse flex space-x-4 mb-4 justify-center">
+           <div className="rounded-full bg-blue-400 h-3 w-3"></div>
+           <div className="rounded-full bg-blue-400 h-3 w-3"></div>
+           <div className="rounded-full bg-blue-400 h-3 w-3"></div>
+         </div>
+         <p className="text-gray-300 text-sm">Loading neural architecture...</p>
+       </div>
+    </div>
+  );
+
+  const renderErrorState = (error: Error) => (
+    <div className="w-full h-full flex items-center justify-center bg-gray-900">
+       <div className="text-center max-w-md px-4">
+         <div className="text-red-500 mb-2 text-2xl"> {/* Icon placeholder */} </div>
+         <h3 className="text-white text-lg font-medium mb-2">Neural Visualization Error</h3>
+         <p className="text-gray-300 text-sm mb-4">{error.message}</p>
+         <button
+           className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-sm"
+           onClick={() => window.location.reload()}
+         >
+           Reinitialize Visualization
+         </button>
+       </div>
+    </div>
+  );
+
+   const renderEmptyState = () => (
+     <div className="w-full h-full flex items-center justify-center bg-gray-900">
+       <div className="text-center max-w-md px-4">
+         <h3 className="text-white text-lg font-medium mb-2">No Neural Data Available</h3>
+         <p className="text-gray-300 text-sm">Please select a neural model to visualize.</p>
+       </div>
+     </div>
+   );
+
+  const renderVisualization = (model: BrainModel) => (
+    <Canvas
+      style={{ background: backgroundColor || settings.backgroundColor }} // Use settings bg
+      camera={{ position: cameraPosition, fov: cameraFov }}
+      dpr={[1, highPerformanceMode ? 1.5 : 2]} // Use direct prop
+      gl={{
+        antialias: !highPerformanceMode, // Use direct prop
+        alpha: true,
+        logarithmicDepthBuffer: !highPerformanceMode, // Use direct prop
+      }}
+    >
+      <ContextBridge>
+        {/* Lighting - Use settings from merged object */}
+        <ambientLight intensity={settings.ambientLightIntensity} />
+        <directionalLight
+           position={[10, 10, 5]} // Make configurable?
+           intensity={settings.directionalLightIntensity}
+           // color={settings.directionalLightColor} // Property missing
+        />
+
+        {/* Camera controller */}
+        <CameraController
+          {...(onCameraMove && { onCameraMove })}
+          initialPosition={cameraPosition}
+        />
+
+        {/* Brain model visualization */}
+        <Brain3DScene
+          brainModel={model}
+          renderMode={settings.renderMode} // Use merged setting
+          themeSettings={themeSettings as any} // Re-add 'as any' cast temporarily
+          visualizationSettings={settings} // Pass merged settings
+          selectedRegionIds={selectedRegionIds}
+          highlightedRegionIds={combinedHighlightedRegions}
+          highPerformanceMode={highPerformanceMode} // Pass prop directly
+          activityThreshold={activityThreshold} // Pass prop directly
+          showInactiveRegions={showInactiveRegions} // Pass prop directly
+          // Pass callbacks conditionally
+          {...(onRegionClick && { onRegionClick })}
+          {...(onRegionHover && { onRegionHover })}
+          {...(onConnectionClick && { onConnectionClick })}
+          {...(onConnectionHover && { onConnectionHover })}
+        />
+
+        {/* Post-processing effects - Use settings and direct props */}
+        {!highPerformanceMode && (settings.enableBloom || enableDepthOfFieldProp) ? (
+          <EffectComposer>
+            <> {/* Wrap conditional elements in Fragment */}
+              {settings.enableBloom ? (
+                <Bloom
+                  luminanceThreshold={settings.bloomThreshold}
+                  luminanceSmoothing={0.9}
+                  intensity={settings.bloomIntensity}
+                  kernelSize={KernelSize.LARGE}
+                />
+              ) : null}
+            </>
+            <> {/* Wrap conditional elements in Fragment */}
+              {enableDepthOfFieldProp ? ( // Use direct prop
+                <DepthOfField
+                  focusDistance={0} // Example values, make configurable?
+                  focalLength={0.02}
+                  bokehScale={2}
+                />
+              ) : null}
+            </>
+          </EffectComposer>
+        ) : null}
+      </ContextBridge>
+    </Canvas>
+  );
 
   // Handle state-based rendering
   const renderContent = () => {
@@ -358,150 +487,8 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
     }
   };
 
-  // Render loading state
-  const renderLoadingState = () => (
-    <div className="w-full h-full flex items-center justify-center bg-gray-900">
-      <div className="text-center">
-        <div className="animate-pulse flex space-x-4 mb-4 justify-center">
-          <div className="rounded-full bg-blue-400 h-3 w-3"></div>
-          <div className="rounded-full bg-blue-400 h-3 w-3"></div>
-          <div className="rounded-full bg-blue-400 h-3 w-3"></div>
-        </div>
-        <p className="text-gray-300 text-sm">Loading neural architecture...</p>
-      </div>
-    </div>
-  );
 
-  // Render error state
-  const renderErrorState = (error: Error) => {
-    // Call error callback
-    useEffect(() => {
-      if (onError) onError(error);
-    }, [error]);
-
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-900">
-        <div className="text-center max-w-md px-4">
-          <div className="text-red-500 mb-2 text-2xl">
-            <svg
-              className="inline-block w-8 h-8 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              ></path>
-            </svg>
-          </div>
-          <h3 className="text-white text-lg font-medium mb-2">
-            Neural Visualization Error
-          </h3>
-          <p className="text-gray-300 text-sm mb-4">{error.message}</p>
-          <button
-            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-sm"
-            onClick={() => window.location.reload()}
-          >
-            Reinitialize Visualization
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  // Render empty state
-  const renderEmptyState = () => (
-    <div className="w-full h-full flex items-center justify-center bg-gray-900">
-      <div className="text-center max-w-md px-4">
-        <h3 className="text-white text-lg font-medium mb-2">
-          No Neural Data Available
-        </h3>
-        <p className="text-gray-300 text-sm">
-          Please select a neural model to visualize.
-        </p>
-      </div>
-    </div>
-  );
-
-  // Render the actual visualization
-  const renderVisualization = (model: BrainModel) => {
-    // Call load complete callback
-    useEffect(() => {
-      if (onLoadComplete) onLoadComplete();
-    }, []);
-
-    return (
-      <Canvas
-        style={{ background: backgroundColor }}
-        camera={{ position: cameraPosition, fov: cameraFov }}
-        dpr={[1, highPerformanceMode ? 1.5 : 2]}
-        gl={{
-          antialias: !highPerformanceMode,
-          alpha: true,
-          logarithmicDepthBuffer: !highPerformanceMode,
-        }}
-      >
-        <ContextBridge>
-          {/* Lighting based on theme */}
-          <ambientLight intensity={themeSettings.ambientLightIntensity} />
-          <directionalLight
-            position={[10, 10, 5]}
-            intensity={themeSettings.directionalLightIntensity}
-            color={themeSettings.directionalLightColor}
-          />
-
-          {/* Camera controller */}
-          <CameraController
-            onCameraMove={onCameraMove}
-            initialPosition={cameraPosition}
-          />
-
-          {/* Brain model visualization */}
-          <Brain3DScene
-            brainModel={model}
-            renderMode={renderMode}
-            themeSettings={themeSettings}
-            selectedRegionIds={selectedRegionIds}
-            highlightedRegionIds={combinedHighlightedRegions}
-            highPerformanceMode={highPerformanceMode}
-            activityThreshold={activityThreshold}
-            showInactiveRegions={showInactiveRegions}
-            onRegionClick={onRegionClick}
-            onRegionHover={onRegionHover}
-            onConnectionClick={onConnectionClick}
-            onConnectionHover={onConnectionHover}
-          />
-
-          {/* Post-processing effects */}
-          {!highPerformanceMode && (enableBloom || enableDepthOfField) && (
-            <EffectComposer>
-              {enableBloom && (
-                <Bloom
-                  luminanceThreshold={themeSettings.bloomThreshold}
-                  luminanceSmoothing={0.9}
-                  intensity={themeSettings.bloomIntensity}
-                  kernelSize={KernelSize.LARGE}
-                />
-              )}
-              {enableDepthOfField && (
-                <DepthOfField
-                  focusDistance={0}
-                  focalLength={0.02}
-                  bokehScale={2}
-                />
-              )}
-            </EffectComposer>
-          )}
-        </ContextBridge>
-      </Canvas>
-    );
-  };
-
-  // Render with appropriate sizing
+  // Render with appropriate sizing and overlays
   return (
     <div
       style={{
@@ -509,37 +496,30 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
         height: height,
         position: "relative",
         overflow: "hidden",
-        borderRadius: "0.5rem",
+        borderRadius: "0.5rem", // Example styling
       }}
     >
       {renderContent()}
 
       {/* Optional UI overlays */}
-      {visualizationState.status === "success" &&
-        visualizationSettings?.showRegionCount && (
-          <div className="absolute bottom-4 left-4 bg-black/50 text-white text-xs px-3 py-1 rounded-full">
-            {new SafeArray(visualizationState.data.regions).size()} regions |
-            {new SafeArray(visualizationState.data.connections).size()}{" "}
-            connections
-          </div>
-        )}
+      {/* Region count display removed */}
 
       {/* Legend for current render mode */}
-      {visualizationState.status === "success" &&
-        visualizationSettings?.showLegend && (
-          <div className="absolute top-4 right-4 bg-black/50 text-white text-xs p-2 rounded">
+      {visualizationState.status === "success" && showLegend && (
+          <div className="absolute top-4 right-4 bg-black/50 text-white text-xs p-2 rounded shadow-lg">
             <div className="font-medium mb-1">
-              {renderMode === RenderMode.ANATOMICAL && "Anatomical View"}
-              {renderMode === RenderMode.FUNCTIONAL && "Functional View"}
-              {renderMode === RenderMode.CONNECTIVITY && "Connectivity View"}
+              {settings.renderMode === RenderMode.ANATOMICAL && "Anatomical View"}
+              {settings.renderMode === RenderMode.FUNCTIONAL && "Functional View"}
+              {settings.renderMode === RenderMode.CONNECTIVITY && "Connectivity View"}
+              {/* Add other render modes as needed */}
             </div>
-            {renderMode === RenderMode.FUNCTIONAL && (
+            {settings.renderMode === RenderMode.FUNCTIONAL && (
               <div className="flex space-x-2 mt-1">
                 <div className="flex items-center">
                   <div
                     className="w-3 h-3 rounded-full mr-1"
                     style={{
-                      backgroundColor: themeSettings.activityColorScale.high,
+                      backgroundColor: settings.activityColorScale?.[4] || '#E74C3C', // Safe access
                     }}
                   ></div>
                   <span>High</span>
@@ -548,7 +528,7 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                   <div
                     className="w-3 h-3 rounded-full mr-1"
                     style={{
-                      backgroundColor: themeSettings.activityColorScale.medium,
+                      backgroundColor: settings.activityColorScale?.[2] || '#F1C40F', // Safe access
                     }}
                   ></div>
                   <span>Medium</span>
@@ -557,13 +537,14 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                   <div
                     className="w-3 h-3 rounded-full mr-1"
                     style={{
-                      backgroundColor: themeSettings.activityColorScale.low,
+                      backgroundColor: settings.activityColorScale?.[0] || '#3498DB', // Safe access
                     }}
                   ></div>
                   <span>Low</span>
                 </div>
               </div>
             )}
+            {/* Add legend content for other render modes if necessary */}
           </div>
         )}
     </div>

@@ -11,7 +11,8 @@ import { auditLogService, AuditEventType } from "@/services/AuditLogService";
 const Login: React.FC = () => {
   // In test mode, use a dummy navigate function.
   const navigateFromHook = useNavigate();
-  const navigate = process.env.NODE_ENV === 'test' ? () => {} : navigateFromHook;
+  const navigate =
+    process.env.NODE_ENV === "test" ? () => {} : navigateFromHook;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

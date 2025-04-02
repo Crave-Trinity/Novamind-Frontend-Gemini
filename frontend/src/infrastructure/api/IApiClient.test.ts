@@ -22,7 +22,7 @@ describe("IApiClient", () => {
       getPatientById: vi.fn().mockResolvedValue({ id: "patient-1" }),
       getBrainModel: vi.fn().mockResolvedValue({ id: "model-1" }),
       predictTreatmentResponse: vi.fn().mockResolvedValue({ efficacy: 0.85 }),
-      getRiskAssessment: vi.fn().mockResolvedValue({ risk: "low" })
+      getRiskAssessment: vi.fn().mockResolvedValue({ risk: "low" }),
     };
 
     // Act
@@ -48,13 +48,14 @@ describe("IApiClient", () => {
       getPatientById: vi.fn().mockRejectedValue(new Error("Patient not found")),
       getBrainModel: vi.fn().mockResolvedValue(null),
       predictTreatmentResponse: vi.fn().mockResolvedValue({ efficacy: 0 }),
-      getRiskAssessment: vi.fn().mockResolvedValue({ risk: "unknown" })
+      getRiskAssessment: vi.fn().mockResolvedValue({ risk: "unknown" }),
     };
 
     // Test edge case - error handling
     // Act & Assert
-    expect(mockApiClient.login("test@example.com", "password"))
-      .rejects.toThrow("Invalid credentials");
+    expect(mockApiClient.login("test@example.com", "password")).rejects.toThrow(
+      "Invalid credentials",
+    );
     expect(mockApiClient.isAuthenticated()).toBe(false);
   });
 });

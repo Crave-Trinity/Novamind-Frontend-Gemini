@@ -385,7 +385,11 @@ describe("BiometricStreamController", () => {
 
     // Wait for readings to appear
     // Wait for readings to appear in the data buffer
-    await waitFor(() => expect(result.current.state.streamData.get("stream-hr")?.length).toBeGreaterThan(0)); // Check state.streamData
+    await waitFor(() =>
+      expect(
+        result.current.state.streamData.get("stream-hr")?.length,
+      ).toBeGreaterThan(0),
+    ); // Check state.streamData
 
     // Verify the readings were fetched (mock called)
     const { getLatestReadings } = useBiometricService();
@@ -424,7 +428,7 @@ describe("BiometricStreamController", () => {
       // For now, assume the mockWs simulation works via global mock.
       // Access the globally mocked WebSocket instance for simulation
       const mockWs = global.WebSocket as any;
-      if (mockWs && typeof mockWs.simulateMessage === 'function') {
+      if (mockWs && typeof mockWs.simulateMessage === "function") {
         mockWs.simulateMessage({
           type: "alert",
           alert: mockAlerts[0],
@@ -433,7 +437,9 @@ describe("BiometricStreamController", () => {
     });
 
     // Wait for the alert to be processed and appear in the returned state/props
-    await waitFor(() => expect(result.current.state.alerts.length).toBeGreaterThan(0)); // Check state.alerts
+    await waitFor(() =>
+      expect(result.current.state.alerts.length).toBeGreaterThan(0),
+    ); // Check state.alerts
     expect(result.current.state.alerts.length).toBeGreaterThan(0); // Check state.alerts
     expect(result.current.state.alerts[0].id).toBe("alert-1"); // Check state.alerts
     expect(result.current.state.errorState).toBeNull(); // Check state
@@ -493,7 +499,8 @@ describe("BiometricStreamController", () => {
     // Verify error state
     // expect(result.current.isInitialized).toBe(true); // isInitialized doesn't exist
     expect(result.current.state.isProcessing).toBe(false); // Check state
-    expect(result.current.state.errorState).toBe( // Check state
+    expect(result.current.state.errorState).toBe(
+      // Check state
       "Failed to retrieve biometric stream configurations",
     );
     expect(result.current.state.activeStreams.size).toBe(0); // Check state
@@ -518,7 +525,11 @@ describe("BiometricStreamController", () => {
 
     // Wait for processed data to appear
     // Wait for processed data to affect state (e.g., update metrics)
-    await waitFor(() => expect(result.current.state.metrics.dataPointsProcessed).toBeGreaterThan(0)); // Check state
+    await waitFor(() =>
+      expect(result.current.state.metrics.dataPointsProcessed).toBeGreaterThan(
+        0,
+      ),
+    ); // Check state
 
     // Verify processed data (check state changes)
     expect(result.current.state.metrics.dataPointsProcessed).toBeGreaterThan(0); // Check state

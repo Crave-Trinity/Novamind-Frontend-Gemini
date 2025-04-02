@@ -25,5 +25,7 @@ if (rootElement) {
 } else {
   // Optional: Log a warning if the root element is not found,
   // which might indicate an issue in the HTML or test setup.
-  console.warn('Root element with ID "root" not found. React app not rendered.');
+  console.warn(
+    'Root element with ID "root" not found. React app not rendered.',
+  );
 }

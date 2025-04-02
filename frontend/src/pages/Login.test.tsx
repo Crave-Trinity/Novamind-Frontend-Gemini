@@ -5,7 +5,7 @@
 import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import Login from "@/pages/Login"; // Assuming default export
 import { renderWithProviders } from "@test/testUtils.tsx";
@@ -19,7 +19,7 @@ describe("Login", () => {
     render(
       <MemoryRouter>
         <Login {...mockProps} />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Add assertions for rendered content
@@ -31,7 +31,7 @@ describe("Login", () => {
     render(
       <MemoryRouter>
         <Login {...mockProps} />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     // Simulate user interactions

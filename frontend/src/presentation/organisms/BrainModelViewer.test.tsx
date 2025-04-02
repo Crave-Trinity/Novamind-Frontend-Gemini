@@ -10,45 +10,10 @@ import BrainModelViewer from "@presentation/organisms/BrainModelViewer"; // Chan
 import { RenderMode } from "@domain/types/brain/visualization";
 import { VisualizationState } from "@domain/types/shared/common"; // Corrected path for VisualizationState
 import { renderWithProviders, createMockBrainRegions } from "@test/testUtils";
-// Import neural-safe Three.js mock with quantum precision
-import "@test/unified-three.mock";
+// Import for non-existent mock removed. Global mocks in setup.ts should suffice.
 
-// Mock Three.js and related components to prevent WebGL errors
-vi.mock("@react-three/fiber", () => ({
-  Canvas: ({ children }: { children: React.ReactNode }) =>
-    React.createElement("div", { "data-testid": "three-canvas" }, children),
-  useThree: () => ({
-    camera: { position: { set: vi.fn() }, lookAt: vi.fn() },
-    gl: { setPixelRatio: vi.fn(), setSize: vi.fn() },
-    set: vi.fn(),
-  }),
-  useFrame: vi.fn((callback) =>
-    callback({ camera: { position: { x: 0, y: 0, z: 10 } } }, 0),
-  ),
-}));
-
-vi.mock("@react-three/drei", () => ({
-  OrbitControls: () =>
-    React.createElement("div", { "data-testid": "orbit-controls" }),
-  ContactShadows: () =>
-    React.createElement("div", { "data-testid": "contact-shadows" }),
-  Environment: () =>
-    React.createElement("div", { "data-testid": "environment" }),
-  BakeShadows: () =>
-    React.createElement("div", { "data-testid": "bake-shadows" }),
-  useContextBridge: () => vi.fn(),
-}));
-
-vi.mock("@react-three/postprocessing", () => ({
-  EffectComposer: ({ children }: { children: React.ReactNode }) =>
-    React.createElement("div", { "data-testid": "effect-composer" }, children),
-  Bloom: () => React.createElement("div", { "data-testid": "bloom-effect" }),
-  SelectiveBloom: () =>
-    React.createElement("div", { "data-testid": "selective-bloom" }),
-  DepthOfField: () =>
-    React.createElement("div", { "data-testid": "depth-of-field" }),
-}));
-
+// Global mocks from setup.ts should handle Three.js, Fiber, Drei, etc.
+// Local mocks removed to avoid conflicts.
 vi.mock("@presentation/molecules/BrainRegionGroup", () => ({
   default: ({ regions, onRegionClick }: any) =>
     React.createElement(

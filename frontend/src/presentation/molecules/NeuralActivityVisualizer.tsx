@@ -5,7 +5,7 @@
  */
 
 import React, { useRef, useMemo, useEffect, useState } from "react";
-import { useFrame, useThree , extend } from "@react-three/fiber";
+import { useFrame, useThree, extend } from "@react-three/fiber";
 import {
   Sphere,
   Line,

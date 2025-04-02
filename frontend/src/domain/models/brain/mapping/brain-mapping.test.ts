@@ -19,12 +19,12 @@ describe("calculateNeuralActivation", () => {
     expect(true).toBe(true);
   });
 
-   it.skip("should calculate activation based on diagnoses", () => {
+  it.skip("should calculate activation based on diagnoses", () => {
     // Placeholder
     expect(true).toBe(true);
   });
 
-   it.skip("should combine symptom and diagnosis activations", () => {
+  it.skip("should combine symptom and diagnosis activations", () => {
     // Placeholder
     expect(true).toBe(true);
   });

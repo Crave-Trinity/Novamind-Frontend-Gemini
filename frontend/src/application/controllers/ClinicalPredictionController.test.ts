@@ -19,11 +19,13 @@ describe("useClinicalPredictionController", () => {
     // vi.mock('@/services/apiClient', () => ({ ... }));
 
     // Act: Use renderHook
-    const { result } = renderHook(() => useClinicalPredictionController(patientId));
+    const { result } = renderHook(() =>
+      useClinicalPredictionController(patientId),
+    );
 
     // Assert: Check the initial state properties and returned functions directly
     expect(result.current.predictionHorizon).toBe(90); // Access directly
-    expect(result.current.lastUpdated).toBeNull();     // Access directly
+    expect(result.current.lastUpdated).toBeNull(); // Access directly
     expect(result.current.symptomTrajectories).toBeInstanceOf(Map); // Access directly
     // Check if the expected functions are returned
     // Check if the expected functions are returned
@@ -44,7 +46,9 @@ describe("useClinicalPredictionController", () => {
     // }));
 
     // Act: Use renderHook with edge case data
-    const { result: edgeResult } = renderHook(() => useClinicalPredictionController(invalidPatientId));
+    const { result: edgeResult } = renderHook(() =>
+      useClinicalPredictionController(invalidPatientId),
+    );
 
     // Assert: Check the state after potential actions or initial render with edge case
     // The hook doesn't expose isLoading directly in its state object based on the interface.

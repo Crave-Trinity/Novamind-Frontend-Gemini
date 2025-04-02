@@ -253,9 +253,10 @@ export const TemporalDynamicsVisualizer: React.FC<
     for (let i = 0; i <= majorCount; i++) {
       const timestamp = effectiveTimeRange.start + i * scale.majorGridInterval;
       const x = MathUtils.lerp(
-        -width / 2, 
+        -width / 2,
         width / 2,
-        (timestamp - effectiveTimeRange.start) / (effectiveTimeRange.end - effectiveTimeRange.start)
+        (timestamp - effectiveTimeRange.start) /
+          (effectiveTimeRange.end - effectiveTimeRange.start),
       );
 
       // Vertical line
@@ -276,9 +277,10 @@ export const TemporalDynamicsVisualizer: React.FC<
       if (timestamp % scale.majorGridInterval === 0) continue;
 
       const x = MathUtils.lerp(
-        -width / 2, 
+        -width / 2,
         width / 2,
-        (timestamp - effectiveTimeRange.start) / (effectiveTimeRange.end - effectiveTimeRange.start)
+        (timestamp - effectiveTimeRange.start) /
+          (effectiveTimeRange.end - effectiveTimeRange.start),
       );
 
       // Vertical line
@@ -293,11 +295,7 @@ export const TemporalDynamicsVisualizer: React.FC<
     // Add horizontal grid lines
     const horizontalLines = 6;
     for (let i = 0; i <= horizontalLines; i++) {
-      const y = MathUtils.lerp(
-        0,
-        height,
-        i / horizontalLines
-      );
+      const y = MathUtils.lerp(0, height, i / horizontalLines);
 
       // Horizontal line
       lines.push({
@@ -324,28 +322,32 @@ export const TemporalDynamicsVisualizer: React.FC<
     return stateTransitions.map((transition) => {
       // Map transition timestamps to visualization space
       const startX = MathUtils.lerp(
-        -width / 2, 
+        -width / 2,
         width / 2,
-        (transition.startState.timestamp - effectiveTimeRange.start) / (effectiveTimeRange.end - effectiveTimeRange.start)
+        (transition.startState.timestamp - effectiveTimeRange.start) /
+          (effectiveTimeRange.end - effectiveTimeRange.start),
       );
 
       const endX = MathUtils.lerp(
-        -width / 2, 
+        -width / 2,
         width / 2,
-        (transition.startState.timestamp + transition.transitionDuration - effectiveTimeRange.start) / (effectiveTimeRange.end - effectiveTimeRange.start)
+        (transition.startState.timestamp +
+          transition.transitionDuration -
+          effectiveTimeRange.start) /
+          (effectiveTimeRange.end - effectiveTimeRange.start),
       );
 
       // Map activity levels to y position
       const startY = MathUtils.lerp(
         -height / 2,
         height / 2,
-        transition.startState.rawActivity
+        transition.startState.rawActivity,
       );
 
       const endY = MathUtils.lerp(
         -height / 2,
         height / 2,
-        transition.endState.rawActivity
+        transition.endState.rawActivity,
       );
 
       // Determine color based on whether transition is clinically significant
@@ -420,16 +422,13 @@ export const TemporalDynamicsVisualizer: React.FC<
 
         // Map to visualization space
         const x = MathUtils.lerp(
-          -width / 2, 
+          -width / 2,
           width / 2,
-          (step.timeOffset - effectiveTimeRange.start) / (effectiveTimeRange.end - effectiveTimeRange.start)
+          (step.timeOffset - effectiveTimeRange.start) /
+            (effectiveTimeRange.end - effectiveTimeRange.start),
         );
 
-        const y = MathUtils.lerp(
-          -height / 2,
-          height / 2,
-          avgActivity
-        );
+        const y = MathUtils.lerp(-height / 2, height / 2, avgActivity);
 
         return new Vector3(x, y, 0);
       });

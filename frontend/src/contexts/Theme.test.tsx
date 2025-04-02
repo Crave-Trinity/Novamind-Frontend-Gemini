@@ -17,7 +17,7 @@ const mockProps = {
 
 describe("ThemeProvider", () => {
   // Mock window.matchMedia locally for this test suite
-  const matchMediaMock = vi.fn(query => ({
+  const matchMediaMock = vi.fn((query) => ({
     matches: false, // Default to light mode
     media: query,
     onchange: null,
@@ -30,7 +30,7 @@ describe("ThemeProvider", () => {
 
   beforeEach(() => {
     // Assign the mock before each test
-    Object.defineProperty(window, 'matchMedia', {
+    Object.defineProperty(window, "matchMedia", {
       writable: true,
       value: matchMediaMock,
     });

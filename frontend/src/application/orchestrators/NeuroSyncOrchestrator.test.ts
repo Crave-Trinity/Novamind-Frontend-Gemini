@@ -16,36 +16,46 @@ vi.mock("@/application/services/brain/brain-model.service", () => ({
     fetchBrainModel: vi.fn().mockResolvedValue({ success: true, value: null }),
     // Add other methods if needed
   },
-  default: { // Also mock default export just in case
-     fetchBrainModel: vi.fn().mockResolvedValue({ success: true, value: null }),
-  }
+  default: {
+    // Also mock default export just in case
+    fetchBrainModel: vi.fn().mockResolvedValue({ success: true, value: null }),
+  },
 }));
 vi.mock("@/application/services/clinicalService", () => ({
   clinicalService: {
     // Mock methods actually used, even if commented out in source for now
     getSymptomMappings: vi.fn().mockResolvedValue({ success: true, value: [] }), // Use .value
-    getDiagnosisMappings: vi.fn().mockResolvedValue({ success: true, value: [] }), // Use .value
-    getTreatmentPredictions: vi.fn().mockResolvedValue({ success: true, value: [] }), // Use .value
+    getDiagnosisMappings: vi
+      .fn()
+      .mockResolvedValue({ success: true, value: [] }), // Use .value
+    getTreatmentPredictions: vi
+      .fn()
+      .mockResolvedValue({ success: true, value: [] }), // Use .value
     // Add other potential methods if needed by tests later
     submitBiometricAlert: vi.fn().mockResolvedValue({ success: true }),
   },
 }));
 vi.mock("@/application/services/biometricService", () => ({
   biometricService: {
-     // Mock methods actually used, even if commented out in source for now
+    // Mock methods actually used, even if commented out in source for now
     getBiometricAlerts: vi.fn().mockResolvedValue({ success: true, value: [] }), // Use .value
-    getBiometricStreams: vi.fn().mockResolvedValue({ success: true, value: [] }), // Use .value
-     // Add other potential methods if needed by tests later
+    getBiometricStreams: vi
+      .fn()
+      .mockResolvedValue({ success: true, value: [] }), // Use .value
+    // Add other potential methods if needed by tests later
     getStreamMetadata: vi.fn().mockResolvedValue({ success: true, value: [] }),
-    calculateStreamCorrelations: vi.fn().mockResolvedValue({ success: true, value: {} }),
+    calculateStreamCorrelations: vi
+      .fn()
+      .mockResolvedValue({ success: true, value: {} }),
   },
 }));
 vi.mock("@/application/services/temporal", () => ({
   temporalService: {
-    getTemporalDynamics: vi.fn().mockResolvedValue({ success: true, value: null }), // Use .value
+    getTemporalDynamics: vi
+      .fn()
+      .mockResolvedValue({ success: true, value: null }), // Use .value
   },
 }));
-
 
 describe("useNeuroSyncOrchestrator", () => {
   const mockPatientId = "patient-123";
@@ -54,15 +64,15 @@ describe("useNeuroSyncOrchestrator", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
-  it("should initialize with default state", async () => { // Make test async if needed for effects
+  it("should initialize with default state", async () => {
+    // Make test async if needed for effects
     // Act
     // Wrap in act because the hook likely has useEffect for initial fetches
     let renderedHook;
     await act(async () => {
-       renderedHook = renderHook(() => useNeuroSyncOrchestrator(mockPatientId));
+      renderedHook = renderHook(() => useNeuroSyncOrchestrator(mockPatientId));
     });
     const { result } = renderedHook!;
-
 
     // Assert
     // Initial state might briefly be 'loading' due to useEffect, check final expected state
@@ -74,14 +84,14 @@ describe("useNeuroSyncOrchestrator", () => {
     // Add more initial state checks as needed
   });
 
-  it("should provide actions object", async () => { // Make test async if needed
+  it("should provide actions object", async () => {
+    // Make test async if needed
     // Act
     let renderedHook;
-     await act(async () => {
-       renderedHook = renderHook(() => useNeuroSyncOrchestrator(mockPatientId));
+    await act(async () => {
+      renderedHook = renderHook(() => useNeuroSyncOrchestrator(mockPatientId));
     });
     const { result } = renderedHook!;
-
 
     // Assert
     expect(result.current.actions).toBeDefined();

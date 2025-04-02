@@ -9,7 +9,7 @@ import {
   visualizationThemes,
   defaultVisualizationSettings,
   isValidTheme,
-  isValidRenderMode
+  isValidRenderMode,
 } from "../../../domain/types/brain/visualization"; // Use relative path
 
 // Type imports for type annotations only, not for runtime checks
@@ -21,7 +21,7 @@ import type {
   BrainVisualizationState,
   ProcessedBrainData,
   ProcessedBrainRegion,
-  ProcessedNeuralConnection
+  ProcessedNeuralConnection,
 } from "../../../domain/types/brain/visualization";
 import type { BrainModel } from "../../../domain/types/brain/models";
 
@@ -47,7 +47,7 @@ describe("visualization type definitions", () => {
   it("can use VisualizationSettings type for settings objects", () => {
     // Test by using the type
     const settings: VisualizationSettings = {
-      ...defaultVisualizationSettings
+      ...defaultVisualizationSettings,
     };
     expect(settings).toBeDefined();
   });
@@ -61,7 +61,7 @@ describe("visualization type definitions", () => {
   it("can use ThemeSettings type for theme configuration", () => {
     // Test by using the type
     const settings: ThemeSettings = {
-      ...visualizationThemes.clinical
+      ...visualizationThemes.clinical,
     };
     expect(settings).toBeDefined();
   });
@@ -78,17 +78,17 @@ describe("visualization type definitions", () => {
         patientId: "patient-123",
         scanDate: "2025-01-01T00:00:00Z",
         scanType: "fMRI",
-        dataQualityScore: 0.98
+        dataQualityScore: 0.98,
       },
       timestamp: "2025-01-01T00:00:00Z",
       version: "1.0.0",
       processingLevel: "analyzed",
-      lastUpdated: "2025-01-01T00:00:00Z"
+      lastUpdated: "2025-01-01T00:00:00Z",
     };
-    
+
     const props: Partial<BrainVisualizationProps> = {
       brainModel: mockBrainModel,
-      theme: "clinical"
+      theme: "clinical",
     };
     expect(props).toBeDefined();
   });
@@ -97,7 +97,7 @@ describe("visualization type definitions", () => {
     // Test by creating values that satisfy the interface
     const idleState: BrainVisualizationState = { status: "idle" };
     const loadingState: BrainVisualizationState = { status: "loading" };
-    
+
     expect(idleState.status).toBe("idle");
     expect(loadingState.status).toBe("loading");
   });
@@ -107,7 +107,7 @@ describe("visualization type definitions", () => {
     const data: Partial<ProcessedBrainData> = {
       regions: [],
       connections: [],
-      centerOfMass: [0, 0, 0]
+      centerOfMass: [0, 0, 0],
     };
     expect(data).toBeDefined();
   });
@@ -116,7 +116,7 @@ describe("visualization type definitions", () => {
     // Test by creating a stub that satisfies the interface
     const region: Partial<ProcessedBrainRegion> = {
       renderPosition: [0, 0, 0],
-      renderColor: "#ffffff"
+      renderColor: "#ffffff",
     };
     expect(region).toBeDefined();
   });
@@ -125,7 +125,7 @@ describe("visualization type definitions", () => {
     // Test by creating a stub that satisfies the interface
     const connection: Partial<ProcessedNeuralConnection> = {
       sourcePosition: [0, 0, 0],
-      targetPosition: [1, 1, 1]
+      targetPosition: [1, 1, 1],
     };
     expect(connection).toBeDefined();
   });
@@ -133,7 +133,7 @@ describe("visualization type definitions", () => {
   it("exports utility functions for type validation", () => {
     expect(isValidTheme).toBeDefined();
     expect(typeof isValidTheme).toBe("function");
-    
+
     expect(isValidRenderMode).toBeDefined();
     expect(typeof isValidRenderMode).toBe("function");
   });

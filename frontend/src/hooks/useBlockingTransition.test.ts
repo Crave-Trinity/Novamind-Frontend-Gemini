@@ -42,11 +42,13 @@ describe("useBlockingTransition", () => {
     expect(result.current.isPending).toBe(false);
   });
 
-   it("should handle functional updates in the transition setter", async () => {
+  it("should handle functional updates in the transition setter", async () => {
     // Arrange
     const initialState = { count: 5 };
-    const increment = (prevState: { count: number }) => ({ count: prevState.count + 1 });
-     const { result } = renderHook(() => useBlockingTransition(initialState));
+    const increment = (prevState: { count: number }) => ({
+      count: prevState.count + 1,
+    });
+    const { result } = renderHook(() => useBlockingTransition(initialState));
 
     // Act
     await act(async () => {

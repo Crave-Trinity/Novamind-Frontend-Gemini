@@ -5,9 +5,7 @@
 
 import { describe, it, expect } from "vitest";
 import { Vector3 } from "three";
-import {
-  ActivationLevel
-} from "../../../domain/types/brain/activity"; // Use relative path
+import { ActivationLevel } from "../../../domain/types/brain/activity"; // Use relative path
 
 // Type imports for type annotations only, not for runtime checks
 import type {
@@ -16,7 +14,7 @@ import type {
   NeuralStateTransition,
   TemporalActivationSequence,
   NeuralActivityHeatmap,
-  ActivityVisualizationSettings
+  ActivityVisualizationSettings,
 } from "../../../domain/types/brain/activity";
 
 describe("activity type definitions", () => {
@@ -66,14 +64,14 @@ describe("activity type definitions", () => {
       activationLevel: ActivationLevel.LOW,
       activationDuration: 100,
     };
-    
+
     const targetActivityState: NeuralActivityState = {
       ...baseActivityState,
       rawActivity: 0.8,
       activationLevel: ActivationLevel.HIGH,
       timestamp: baseActivityState.timestamp + 500,
     };
-    
+
     const sampleTransition: NeuralStateTransition = {
       id: "t1",
       entityId: "r1",
@@ -101,7 +99,7 @@ describe("activity type definitions", () => {
         {
           timeOffset: 100,
           activationStates: [],
-        }
+        },
       ],
       clinicalSignificance: 0.8,
       evidenceLevel: "established",
