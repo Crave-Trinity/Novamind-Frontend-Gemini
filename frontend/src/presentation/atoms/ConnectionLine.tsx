@@ -75,9 +75,10 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
   onHover,
 }) => {
   // References
-  // Explicitly type refs with correct THREE types
-  const lineRef = useRef<THREE.Line<THREE.BufferGeometry, THREE.Material | THREE.Material[]>>(null);
-  const materialRef = useRef<THREE.LineBasicMaterial | THREE.LineDashedMaterial>(null);
+  const lineRef = useRef<THREE.Line>(null); // Revert ref type
+  const materialRef = useRef<
+    THREE.LineBasicMaterial | THREE.LineDashedMaterial
+  >(null); // Revert ref type
 
   // Calculate the points for the line
   const points = useMemo(() => {
@@ -240,39 +241,37 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
 
   // Render the connection
   return dashed ? (
-    <line {/* Restore original lowercase primitive */}
+    <line
       ref={lineRef}
       geometry={geometry}
       onClick={handleClick}
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
     >
-      <lineDashedMaterial {/* Restore original lowercase primitive */}
-        ref={materialRef} // Restore original ref assignment
-        // attach="material" // Remove attach for now, might be implicit or handled differently
+      <lineDashedMaterial
+        ref={materialRef}
         color={visualParams.color}
         opacity={visualParams.opacity}
         transparent={true}
-        linewidth={visualParams.thickness} // Restore linewidth temporarily
+        linewidth={visualParams.thickness}
         dashSize={dashSize}
         gapSize={dashGap}
       />
     </line>
   ) : (
-    <line {/* Restore original lowercase primitive */}
+    <line
       ref={lineRef}
       geometry={geometry}
       onClick={handleClick}
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
     >
-      <lineBasicMaterial {/* Restore original lowercase primitive */}
-        ref={materialRef} // Restore original ref assignment
-        // attach="material" // Remove attach for now
+      <lineBasicMaterial
+        ref={materialRef}
         color={visualParams.color}
         opacity={visualParams.opacity}
         transparent={true}
-        linewidth={visualParams.thickness} // Restore linewidth temporarily
+        linewidth={visualParams.thickness}
       />
     </line>
   );
