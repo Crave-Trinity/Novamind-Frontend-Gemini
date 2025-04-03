@@ -27,7 +27,8 @@ import {
   DepthOfField,
 } from "@react-three/postprocessing";
 import { KernelSize } from "postprocessing";
-import ThemeContext from "@contexts/ThemeContext"; // Corrected alias and import type
+// Use relative path to ensure the correct context instance is imported
+import { ThemeContext } from "../../application/contexts/ThemeProvider";
 
 // Import molecular components
 import BrainRegionGroup from "@presentation/molecules/BrainRegionGroup";
@@ -50,7 +51,7 @@ import {
   SafeArray,
   Result,
   VisualizationState,
-} from '@types/shared/common';
+} from "@domain/types/shared/common"; // Correct alias for common types
 
 // Neural-safe prop definition with explicit typing
 interface BrainModelViewerProps {
@@ -432,10 +433,10 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
     >
       <ContextBridge>
         {/* Lighting - Use settings from merged object */}
-        <ambientLight intensity={settings.ambientLightIntensity} />
+        <ambientLight intensity={themeSettings.ambientLightIntensity} />
         <directionalLight
           position={[10, 10, 5]} // Make configurable?
-          intensity={settings.directionalLightIntensity}
+          intensity={themeSettings.directionalLightIntensity}
           // color={settings.directionalLightColor} // Property missing
         />
 

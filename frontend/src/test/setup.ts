@@ -376,6 +376,8 @@ vi.mock("@react-three/drei", async (importOriginal) => {
         Sphere: vi.fn(() => React.createElement('mock-sphere')), // Simple placeholder
         Line: vi.fn(() => React.createElement('mock-line')), // Mock Line as well if used directly
         // shaderMaterial removed
+        // Add mock for useContextBridge
+        useContextBridge: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children), // Directly return the component
     };
 });
 

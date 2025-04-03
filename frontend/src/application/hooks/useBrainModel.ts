@@ -9,7 +9,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 // Domain types
 import { BrainModel } from "@domain/types/brain/models";
 import { RenderMode } from "@domain/types/brain/visualization";
-import { Result, success, failure, SafeArray } from "@domain/types/common";
+import { Result, success, failure, SafeArray } from "@domain/types/shared/common"; // Corrected path
 
 // Domain utilities
 import { verifyBrainModel } from "@domain/utils/typeVerification";

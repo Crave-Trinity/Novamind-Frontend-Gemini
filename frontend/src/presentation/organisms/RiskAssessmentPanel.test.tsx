@@ -7,17 +7,57 @@ import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { RiskAssessmentPanel } from "./RiskAssessmentPanel";
+import RiskAssessmentPanel from "./RiskAssessmentPanel"; // Correct to default import
 import { renderWithProviders } from "@test/test-utils";
+import { RiskAssessment, RiskLevel } from "@domain/types/clinical/risk"; // Add missing RiskLevel import
 
 // Mock data with clinical precision
-const mockProps = {
-  // Add component props here
-};
+const mockRiskAssessments: RiskAssessment[] = [
+  {
+    id: 'risk-1',
+    patientId: 'patient-xyz', // Added patientId
+    timestamp: new Date().toISOString(),
+    assessmentType: 'clinician', // Added assessmentType
+    overallRisk: RiskLevel.MODERATE, // Use enum
+    confidenceScore: 0.85,
+    domainRisks: [ // Nested domain risk
+      { domain: 'suicide', riskLevel: RiskLevel.MODERATE, confidenceScore: 0.85, evidence: ['hopelessness', 'past attempt'], urgency: 'urgent' }
+    ],
+    temporalTrend: 'stable',
+    contributingFactors: [], // Add empty arrays for required fields
+    protectiveFactors: [],
+    neuralCorrelates: [],
+    clinicianId: 'Dr. Smith', // Correct field name from assessor
+    notes: 'Increased monitoring needed'
+  },
+  {
+    id: 'risk-2',
+    patientId: 'patient-xyz',
+    timestamp: new Date(Date.now() - 86400000 * 7).toISOString(),
+    assessmentType: 'clinician',
+    overallRisk: RiskLevel.LOW,
+    confidenceScore: 0.9,
+    domainRisks: [
+      { domain: 'self_harm', riskLevel: RiskLevel.LOW, confidenceScore: 0.9, evidence: ['stress'], urgency: 'monitor' }
+    ],
+    temporalTrend: 'decreasing',
+    contributingFactors: [],
+    protectiveFactors: [],
+    neuralCorrelates: [],
+    clinicianId: 'Dr. Smith', // Correct field name from assessor
+    notes: 'Coping strategies discussed'
+  },
+];
 
-describe("RiskAssessmentPanel", () => {
+const mockProps = {
+  patientId: 'patient-xyz',
+  riskAssessments: mockRiskAssessments,
+};
+// Removed duplicate empty mockProps declaration
+
+describe("RiskAssessmentPanel", () => { // Unskip the tests
   it("renders with neural precision", () => {
-    render(<RiskAssessmentPanel {...mockProps} />);
+    renderWithProviders(<RiskAssessmentPanel {...mockProps} />); // Ensure renderWithProviders is used
 
     // Add assertions for rendered content
     expect(screen).toBeDefined();
@@ -25,7 +65,7 @@ describe("RiskAssessmentPanel", () => {
 
   it("responds to user interaction with quantum precision", async () => {
     const user = userEvent.setup();
-    render(<RiskAssessmentPanel {...mockProps} />);
+    renderWithProviders(<RiskAssessmentPanel {...mockProps} />); // Ensure renderWithProviders is used
 
     // Simulate user interactions
     // await user.click(screen.getByText(/example text/i));
