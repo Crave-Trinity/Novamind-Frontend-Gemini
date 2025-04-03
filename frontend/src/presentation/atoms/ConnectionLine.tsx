@@ -75,10 +75,11 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
   onHover,
 }) => {
   // References
-  const lineRef = useRef<THREE.Line>(null); // Revert ref type
+  // Restore original ref types
+  const lineRef = useRef<THREE.Line>(null);
   const materialRef = useRef<
     THREE.LineBasicMaterial | THREE.LineDashedMaterial
-  >(null); // Revert ref type
+  >(null);
 
   // Calculate the points for the line
   const points = useMemo(() => {
