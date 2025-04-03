@@ -9,13 +9,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 // Domain types
 import { BrainModel } from "@domain/types/brain/models";
 import { RenderMode } from "@domain/types/brain/visualization";
-import { Result, success, failure, SafeArray } from "@domain/types/shared/common"; // Corrected path
+import { Result, success, failure, SafeArray } from "../../domain/types/shared/common"; // Corrected relative path
 
 // Domain utilities
-import { verifyBrainModel } from "@domain/utils/typeVerification";
+import { brainTypeVerifier } from "../../domain/utils/brain/type-verification"; // Correct relative path to brain utils
 
 // Application services
-import { brainModelService } from "@application/services/brainModelService";
+import { brainModelService } from "../services/brain/brain-model.service"; // Correct relative path
 
 /**
  * Hook return type with discriminated union for type safety
@@ -65,9 +65,9 @@ export function useBrainModel(): UseBrainModelReturn {
     isError,
     error: queryError,
     refetch,
-  } = useQuery<BrainModel, Error>(
-    [brainModelQueryKey],
-    async () => {
+  } = useQuery<BrainModel, Error>({ // Use v5 object syntax
+    queryKey: [brainModelQueryKey],
+    queryFn: async () => {
       // Return cached model if available (this is just a placeholder)
       const cachedModel = queryClient.getQueryData<BrainModel>([
         brainModelQueryKey,
@@ -75,23 +75,20 @@ export function useBrainModel(): UseBrainModelReturn {
       if (cachedModel) {
         return cachedModel;
       }
-
+      // In a real scenario, you might fetch initial data here or rely on fetchBrainModel
+      // For now, throwing error if not explicitly fetched is okay for the hook's logic
       throw new Error(
         "No brain model loaded - call fetchBrainModel with a scan ID",
       );
     },
-    {
-      // Don't fetch on mount, wait for explicit fetch
-      enabled: false,
-      // Keep previous data on error
-      keepPreviousData: true,
-      // Retry configuration
-      retry: 1,
-      // Don't refetch automatically
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-    },
-  );
+    // Options remain largely the same in v5
+    enabled: false,
+    // placeholderData: queryClient.getQueryData([brainModelQueryKey]), // Removed placeholderData to simplify type issues
+    retry: 1,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity, // Keep staleTime for cache behavior
+    gcTime: Infinity, // Use gcTime for garbage collection control
+  });
 
   // Fetch brain model - explicitly called with scan ID
   const fetchBrainModel = useCallback(
@@ -101,14 +98,14 @@ export function useBrainModel(): UseBrainModelReturn {
 
         if (result.success) {
           // Verify model integrity with domain utility
-          const verificationResult = verifyBrainModel(result.data);
+          const verificationResult = brainTypeVerifier.verifyBrainModel(result.value); // Correct usage
 
           if (verificationResult.success) {
             // Update cache
-            queryClient.setQueryData([brainModelQueryKey], result.data);
+            queryClient.setQueryData([brainModelQueryKey], result.value); // Correct usage
             // Trigger refetch to update state
             refetch();
-            return success(result.data);
+            return success(result.value); // Correct usage
           } else {
             // Type verification failed
             return failure(
@@ -138,10 +135,11 @@ export function useBrainModel(): UseBrainModelReturn {
     BrainModel,
     Error,
     { regionId: string; activityLevel: number }
-  >(
-    async ({ regionId, activityLevel }) => {
+  >({ // Use v5 object syntax
+    mutationFn: async ({ regionId, activityLevel }) => {
       // Validate inputs
-      if (!brainModel) {
+      const currentModel = queryClient.getQueryData<BrainModel>([brainModelQueryKey]); // Get current model from cache
+      if (!currentModel) {
         throw new Error("No brain model loaded");
       }
 
@@ -150,7 +148,7 @@ export function useBrainModel(): UseBrainModelReturn {
       }
 
       // Create a deep copy of the brain model to avoid mutation
-      const updatedModel: BrainModel = JSON.parse(JSON.stringify(brainModel));
+      const updatedModel: BrainModel = JSON.parse(JSON.stringify(currentModel));
 
       // Find and update the region
       const regionIndex = updatedModel.regions.findIndex(
@@ -164,32 +162,31 @@ export function useBrainModel(): UseBrainModelReturn {
       updatedModel.regions[regionIndex].activityLevel = activityLevel;
 
       // Update active state based on threshold
-      updatedModel.regions[regionIndex].isActive = activityLevel > 0.3;
+      updatedModel.regions[regionIndex].isActive = activityLevel > 0.3; // Assuming 0.3 is the threshold
 
       return updatedModel;
     },
-    {
-      onSuccess: (updatedModel) => {
-        // Update cache
-        queryClient.setQueryData([brainModelQueryKey], updatedModel);
-      },
+    onSuccess: (updatedModel) => {
+      // Update cache
+      queryClient.setQueryData([brainModelQueryKey], updatedModel);
     },
-  );
+  });
 
   // Toggle region active mutation
   const toggleRegionActiveMutation = useMutation<
     BrainModel,
     Error,
     string // regionId
-  >(
-    async (regionId) => {
+  >({ // Use v5 object syntax
+    mutationFn: async (regionId) => {
       // Validate inputs
-      if (!brainModel) {
+      const currentModel = queryClient.getQueryData<BrainModel>([brainModelQueryKey]); // Get current model from cache
+      if (!currentModel) {
         throw new Error("No brain model loaded");
       }
 
       // Create a deep copy of the brain model to avoid mutation
-      const updatedModel: BrainModel = JSON.parse(JSON.stringify(brainModel));
+      const updatedModel: BrainModel = JSON.parse(JSON.stringify(currentModel));
 
       // Find and update the region
       const regionIndex = updatedModel.regions.findIndex(
@@ -204,24 +201,22 @@ export function useBrainModel(): UseBrainModelReturn {
       updatedModel.regions[regionIndex].isActive = isActive;
 
       // Update activity level based on active state
-      if (isActive && updatedModel.regions[regionIndex].activityLevel < 0.3) {
+      if (isActive && updatedModel.regions[regionIndex].activityLevel < 0.3) { // Assuming 0.3 threshold
         updatedModel.regions[regionIndex].activityLevel = 0.5; // Default active level
       } else if (
         !isActive &&
-        updatedModel.regions[regionIndex].activityLevel > 0.3
+        updatedModel.regions[regionIndex].activityLevel > 0.3 // Assuming 0.3 threshold
       ) {
         updatedModel.regions[regionIndex].activityLevel = 0.1; // Default inactive level
       }
 
       return updatedModel;
     },
-    {
-      onSuccess: (updatedModel) => {
-        // Update cache
-        queryClient.setQueryData([brainModelQueryKey], updatedModel);
-      },
+    onSuccess: (updatedModel) => {
+      // Update cache
+      queryClient.setQueryData([brainModelQueryKey], updatedModel);
     },
-  );
+  });
 
   // Update region activity
   const updateRegionActivity = useCallback(
@@ -284,7 +279,7 @@ export function useBrainModel(): UseBrainModelReturn {
   const reset = useCallback(() => {
     setSelectedRegionIds([]);
     setHighlightedRegionIds([]);
-    queryClient.removeQueries([brainModelQueryKey]);
+    queryClient.removeQueries({ queryKey: [brainModelQueryKey] }); // Correct v5 syntax
   }, [queryClient]);
 
   // Combine errors
@@ -298,10 +293,10 @@ export function useBrainModel(): UseBrainModelReturn {
     brainModel: brainModel || null,
 
     // State
-    isLoading:
-      isLoading ||
-      updateRegionActivityMutation.isLoading ||
-      toggleRegionActiveMutation.isLoading,
+    isLoading: // Use isPending in v5
+      isLoading || // from useQuery (keep using isLoading for useQuery result)
+      updateRegionActivityMutation.isPending || // Correct v5 property
+      toggleRegionActiveMutation.isPending, // Correct v5 property
     isError:
       isError ||
       updateRegionActivityMutation.isError ||
