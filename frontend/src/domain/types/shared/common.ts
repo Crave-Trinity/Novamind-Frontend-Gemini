@@ -83,8 +83,13 @@ export class SafeArray<T> {
     this.items = items || [];
   }
 
-  // Get raw array
+  // Get raw array (alias for toArray)
   get(): T[] {
+    return this.toArray();
+  }
+
+  // Convert back to a standard array
+  toArray(): T[] {
     return [...this.items];
   }
 
@@ -113,6 +118,16 @@ export class SafeArray<T> {
     return this.items.find(predicate);
   }
 
+  // Neural-safe includes operation
+  includes(item: T): boolean {
+    return this.items.includes(item);
+  }
+
+  // Neural-safe some operation
+  some(predicate: (item: T) => boolean): boolean {
+    return this.items.some(predicate);
+  }
+
   // Neural-safe forEach operation
   forEach(callback: (item: T, index: number) => void): void {
     this.items.forEach(callback);
@@ -123,11 +138,21 @@ export class SafeArray<T> {
     this.items.push(item);
   }
 
+  // Neural-safe push operation (alias for add)
+  push(item: T): void {
+    this.add(item);
+  } // Added missing closing brace
+
   // Neural-safe size operation
   size(): number {
     return this.items.length;
   }
-}
+
+  // Neural-safe flatMap operation
+  flatMap<U>(callback: (item: T, index: number) => U[]): SafeArray<U> {
+    return new SafeArray(this.items.flatMap(callback));
+  }
+} // Added missing closing brace for the class
 
 // Type guard utilities
 export function isNonNullable<T>(value: T): value is NonNullable<T> {
@@ -138,7 +163,7 @@ export function isNonNullable<T>(value: T): value is NonNullable<T> {
 export class NeuralError extends Error {
   code: string;
   severity: "warning" | "error" | "fatal";
-  component?: string;
+  component?: string | undefined; // Allow undefined for exactOptionalPropertyTypes
   timestamp: number;
 
   constructor(
@@ -285,7 +310,7 @@ export const Result = {
   map<T, U, E>(result: Result<T, E>, fn: (value: T) => U): Result<U, E> {
     return result.success
       ? success(fn(result.value))
-      : (result as unknown as Result<U, E>);
+      : result; // Return the original failure result, preserving the error type E
   },
 
   flatMap<T, U, E>(

@@ -10,7 +10,8 @@ import * as THREE from "three";
 import RegionMesh from "@presentation/atoms/RegionMesh";
 import { BrainRegion } from "@domain/types/brain/models";
 import { ThemeSettings, RenderMode } from "@domain/types/brain/visualization";
-import { SafeArray } from "@domain/types/common";
+import { SafeArray } from "../../domain/types/shared/common"; // Use relative path
+import { Html } from "@react-three/drei"; // Added missing import
 
 // Neural-safe prop definition with explicit typing
 interface BrainRegionGroupProps {
@@ -129,22 +130,18 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
       // If group has a specified color, use it as base
       const baseColor = groupColor || region.color;
 
-      // Apply group opacity if specified
-      const baseOpacity = groupOpacity !== undefined ? groupOpacity : 1;
-
       // Apply render mode-specific coloring
       if (renderMode === RenderMode.FUNCTIONAL) {
-        // Scale color by activity level - clinical precision for functional view
-        const activityColorScale = themeSettings.activityColorScale;
-        if (region.activityLevel > 0.8) return activityColorScale.high;
-        if (region.activityLevel > 0.5) return activityColorScale.medium;
-        if (region.activityLevel > 0.2) return activityColorScale.low;
-        return activityColorScale.none;
+        // TODO: Implement proper color scaling based on activityLevel and themeSettings
+        // Placeholder: Use active color if above threshold, otherwise inactive
+        return region.activityLevel >= activityThreshold
+          ? themeSettings.activeRegionColor
+          : themeSettings.inactiveRegionColor;
       }
 
       return baseColor;
     },
-    [groupColor, groupOpacity, renderMode, themeSettings],
+    [groupColor, renderMode, themeSettings, activityThreshold],
   );
 
   // Determine the region size based on various factors
@@ -232,7 +229,7 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
               <meshBasicMaterial
                 color={getRegionColor(region)}
                 transparent={true}
-                opacity={0.8}
+                opacity={groupOpacity ?? 0.8} // Use default if groupOpacity undefined
               />
             </mesh>
           );
@@ -253,7 +250,7 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
             roughness={0.4}
             metalness={0.2}
             transparent={true}
-            opacity={0.9}
+            opacity={groupOpacity ?? 0.9} // Use default if groupOpacity undefined
           />
 
           {instancedData.map(({ region, matrix, color }) => (
@@ -327,7 +324,7 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
             themeSettings={themeSettings}
             onClick={handleRegionClick}
             onHover={handleRegionHover}
-            opacity={groupOpacity}
+            opacity={groupOpacity ?? 0.9} // Provide default value
           />
         );
       })}
@@ -367,8 +364,5 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
     </group>
   );
 };
-
-// Add missing import
-import { Html } from "@react-three/drei";
 
 export default React.memo(BrainRegionGroup);

@@ -15,8 +15,8 @@ import { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
 import {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
-} from "@domain/models/brainMapping";
-import { SafeArray } from "@domain/types/common";
+} from "@domain/models/brain/mapping/brain-mapping"; // Corrected import path
+import { SafeArray } from "@domain/types/shared/common"; // Corrected import path
 
 // Neural-safe prop definition with explicit typing
 interface BrainRegionDetailsProps {
@@ -71,34 +71,15 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
   const safeDiagnosisMappings = new SafeArray(diagnosisMappings);
   const safeTreatmentPredictions = new SafeArray(treatmentPredictions);
 
+  // --- Moved Hooks Before Early Return ---
   // Get the region data with null safety
   const region = useMemo(() => {
     return safeRegions.find((r) => r.id === regionId);
   }, [safeRegions, regionId]);
 
-  // If region not found, display error
-  if (!region) {
-    return (
-      <div className={`bg-gray-900 rounded-lg shadow-xl p-4 ${className}`}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-white text-lg font-medium">Region Not Found</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white"
-            aria-label="Close"
-          >
-            &times;
-          </button>
-        </div>
-        <p className="text-gray-300">
-          The specified region could not be found.
-        </p>
-      </div>
-    );
-  }
-
   // Get connections for this region
   const regionConnections = useMemo(() => {
+    // Ensure SafeArray has filter and toArray methods implemented
     return safeConnections
       .filter(
         (conn) => conn.sourceId === regionId || conn.targetId === regionId,
@@ -108,6 +89,7 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
 
   // Get connected regions
   const connectedRegions = useMemo(() => {
+    // Ensure SafeArray has flatMap and includes methods implemented
     const connectedIds = regionConnections.flatMap((conn) => {
       if (conn.sourceId === regionId) return [conn.targetId];
       if (conn.targetId === regionId) return [conn.sourceId];
@@ -119,9 +101,9 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
 
   // Map symptoms to this region using symptom mappings
   const relatedSymptoms = useMemo(() => {
-    const symptoms = new SafeArray([]);
+    const symptomsResult = new SafeArray<Symptom>([]); // Explicit type
 
-    // Search through symptom mappings for this region
+    // Ensure SafeArray has forEach, some, includes, push, find methods implemented
     safeSymptomMappings.forEach((mapping) => {
       const patterns = new SafeArray(mapping.activationPatterns);
       const affectsRegion = patterns.some((pattern) =>
@@ -129,25 +111,23 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
       );
 
       if (affectsRegion) {
-        // Find the corresponding symptom in the active symptoms
         const matchingSymptom = safeSymptoms.find(
           (s) => s.id === mapping.symptomId || s.name === mapping.symptomName,
         );
-
         if (matchingSymptom) {
-          symptoms.push(matchingSymptom);
+          symptomsResult.push(matchingSymptom);
         }
       }
     });
 
-    return symptoms.toArray();
+    return symptomsResult.toArray();
   }, [safeSymptomMappings, safeSymptoms, regionId]);
 
   // Map diagnoses to this region using diagnosis mappings
   const relatedDiagnoses = useMemo(() => {
-    const diagnoses = new SafeArray([]);
+    const diagnosesResult = new SafeArray<Diagnosis>([]); // Explicit type
 
-    // Search through diagnosis mappings for this region
+    // Ensure SafeArray has forEach, some, includes, push, find methods implemented
     safeDiagnosisMappings.forEach((mapping) => {
       const patterns = new SafeArray(mapping.activationPatterns);
       const affectsRegion = patterns.some((pattern) =>
@@ -155,39 +135,35 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
       );
 
       if (affectsRegion) {
-        // Find the corresponding diagnosis in the active diagnoses
         const matchingDiagnosis = safeDiagnoses.find(
           (d) =>
             d.id === mapping.diagnosisId || d.name === mapping.diagnosisName,
         );
-
         if (matchingDiagnosis) {
-          diagnoses.push(matchingDiagnosis);
+          diagnosesResult.push(matchingDiagnosis);
         }
       }
     });
 
-    return diagnoses.toArray();
+    return diagnosesResult.toArray();
   }, [safeDiagnosisMappings, safeDiagnoses, regionId]);
 
   // Find treatment effects on this region
   const treatmentEffects = useMemo(() => {
-    // Check all treatment predictions for effects on this region
+    // Ensure SafeArray has flatMap, filter, includes, size, toArray methods implemented
     const effects = safeTreatmentPredictions
       .flatMap((prediction) => {
         const neurobiologicalMechanisms = new SafeArray(
           prediction.neurobiologicalMechanisms,
         );
 
-        // Filter mechanisms that affect this region
         const relevantMechanisms = neurobiologicalMechanisms.filter(
-          (mechanism) =>
-            new SafeArray(mechanism.relevantRegions).includes(regionId),
+          (mechanism: any) => // Add type assertion or guard if needed
+            new SafeArray(mechanism?.relevantRegions).includes(regionId),
         );
 
         if (relevantMechanisms.size() === 0) return [];
 
-        // Return effect information
         return [
           {
             treatmentType: prediction.treatmentType,
@@ -207,6 +183,28 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
 
     return effects;
   }, [safeTreatmentPredictions, regionId]);
+  // --- End Moved Hooks ---
+
+  // If region not found, display error (Early return check)
+  if (!region) {
+    return (
+      <div className={`bg-gray-900 rounded-lg shadow-xl p-4 ${className}`}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-white text-lg font-medium">Region Not Found</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
+        <p className="text-gray-300">
+          The specified region could not be found.
+        </p>
+      </div>
+    );
+  }
 
   // Handle tab change
   const handleTabChange = (
@@ -428,10 +426,11 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
                     return (
                       <div
                         key={connectedRegion.id}
-                        className="bg-gray-700 rounded p-2 cursor-pointer hover:bg-gray-600"
-                        onClick={() =>
-                          handleConnectedRegionClick(connectedRegion.id)
-                        }
+                        className="bg-gray-700 rounded p-2 cursor-pointer hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onClick={() => handleConnectedRegionClick(connectedRegion.id)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleConnectedRegionClick(connectedRegion.id); }}
+                        role="button" // Added role
+                        tabIndex={0} // Added tabIndex
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
@@ -515,34 +514,35 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
                       Average Strength
                     </p>
                     <p className="text-sm font-medium">
-                      {regionConnections.length > 0
-                        ? `${((regionConnections.reduce((sum, conn) => sum + conn.strength, 0) / regionConnections.length) * 100).toFixed(0)}%`
-                        : "N/A"}
+                      {(
+                        (regionConnections.reduce(
+                          (sum, conn) => sum + conn.strength,
+                          0,
+                        ) /
+                          regionConnections.length || 0) * 100
+                      ).toFixed(0)}
+                      %
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-400 text-xs mb-1">
-                      Connection Types
+                      Dominant Connection Type
                     </p>
                     <p className="text-sm font-medium">
-                      {(() => {
-                        const types = regionConnections.map(
-                          (conn) => conn.type,
-                        );
-                        const uniqueTypes = [...new Set(types)];
-                        return uniqueTypes.join(", ");
-                      })()}
+                      {/* Simple majority check */}
+                      {regionConnections.filter((conn) => conn.type === "excitatory")
+                        .length >
+                      regionConnections.filter((conn) => conn.type === "inhibitory")
+                        .length
+                        ? "Excitatory"
+                        : "Inhibitory"}
                     </p>
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="bg-gray-800 rounded-lg p-4 text-center">
-              <p className="text-sm text-gray-400">
-                No connections found for this region.
-              </p>
-            </div>
+            <p className="text-gray-400 text-sm">No connections found.</p>
           )}
         </div>
       )}
@@ -551,91 +551,47 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
         <div className="text-white">
           <h4 className="text-sm font-medium mb-3">Clinical Correlations</h4>
 
-          {/* Symptoms */}
+          {/* Related Symptoms */}
           <div className="bg-gray-800 rounded-lg p-4 mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <h5 className="text-sm font-medium">Related Symptoms</h5>
-              <span className="text-xs text-gray-400">
-                {relatedSymptoms.length} Found
-              </span>
-            </div>
-
+            <h5 className="text-sm font-medium mb-2">Related Symptoms</h5>
             {relatedSymptoms.length > 0 ? (
-              <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+              <ul className="space-y-2 max-h-40 overflow-y-auto pr-1">
                 {relatedSymptoms.map((symptom) => (
-                  <div key={symptom.id} className="bg-gray-700 rounded p-2">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="text-sm font-medium">
-                          {symptom.name}
-                        </div>
-                        <div className="text-xs text-gray-400 mt-0.5">
-                          {symptom.category}
-                        </div>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="bg-red-900 rounded-full w-5 h-5 flex items-center justify-center">
-                          <span className="text-xs">{symptom.severity}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-2 text-xs">
-                      <span className="text-gray-400">Impact: </span>
-                      <span>{symptom.impact}</span>
-                      <span className="mx-2">•</span>
-                      <span className="text-gray-400">Progression: </span>
-                      <span>{symptom.progression}</span>
-                    </div>
-                  </div>
+                  <li
+                    key={symptom.id}
+                    className="bg-gray-700 rounded p-2 flex justify-between items-center"
+                  >
+                    <span className="text-sm">{symptom.name}</span>
+                    <span className="text-xs bg-red-600 rounded-full px-2 py-0.5">
+                      Severity: {symptom.severity}
+                    </span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             ) : (
-              <p className="text-sm text-gray-400">
-                No symptoms associated with this region.
-              </p>
+              <p className="text-gray-400 text-sm">No related symptoms found.</p>
             )}
           </div>
 
-          {/* Diagnoses */}
+          {/* Related Diagnoses */}
           <div className="bg-gray-800 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <h5 className="text-sm font-medium">Related Diagnoses</h5>
-              <span className="text-xs text-gray-400">
-                {relatedDiagnoses.length} Found
-              </span>
-            </div>
-
+            <h5 className="text-sm font-medium mb-2">Related Diagnoses</h5>
             {relatedDiagnoses.length > 0 ? (
-              <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+              <ul className="space-y-2 max-h-40 overflow-y-auto pr-1">
                 {relatedDiagnoses.map((diagnosis) => (
-                  <div key={diagnosis.id} className="bg-gray-700 rounded p-2">
-                    <div className="flex justify-between">
-                      <div className="text-sm font-medium">
-                        {diagnosis.name}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {diagnosis.code}
-                      </div>
-                    </div>
-
-                    <div className="mt-1.5 flex justify-between text-xs">
-                      <div>
-                        <span className="text-gray-400">Severity: </span>
-                        <span>{diagnosis.severity}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-400">Status: </span>
-                        <span>{diagnosis.status}</span>
-                      </div>
-                    </div>
-                  </div>
+                  <li
+                    key={diagnosis.id}
+                    className="bg-gray-700 rounded p-2 flex justify-between items-center"
+                  >
+                    <span className="text-sm">{diagnosis.name}</span>
+                    <span className="text-xs bg-purple-600 rounded-full px-2 py-0.5">
+                      {diagnosis.status}
+                    </span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             ) : (
-              <p className="text-sm text-gray-400">
-                No diagnoses associated with this region.
-              </p>
+              <p className="text-gray-400 text-sm">No related diagnoses found.</p>
             )}
           </div>
         </div>
@@ -643,88 +599,49 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
 
       {activeTab === "treatment" && (
         <div className="text-white">
-          <h4 className="text-sm font-medium mb-3">
-            Treatment Response Predictions
-          </h4>
+          <h4 className="text-sm font-medium mb-3">Treatment Response</h4>
 
           {treatmentEffects.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
               {treatmentEffects.map((effect, index) => (
                 <div key={index} className="bg-gray-800 rounded-lg p-4">
                   <div className="flex justify-between items-center mb-2">
-                    <h5 className="text-sm font-medium">
-                      {effect.treatmentType.charAt(0).toUpperCase() +
-                        effect.treatmentType.slice(1).replace("_", " ")}
-                    </h5>
-                    <div
-                      className={`
-                      text-xs px-2 py-0.5 rounded-full font-medium
-                      ${
+                    <span className="text-sm font-medium">
+                      {effect.treatmentType}
+                    </span>
+                    <span
+                      className={`text-xs rounded-full px-2 py-0.5 ${
                         effect.expectedImpact === "positive"
-                          ? "bg-green-900 text-green-300"
+                          ? "bg-green-600"
                           : effect.expectedImpact === "moderate"
-                            ? "bg-yellow-900 text-yellow-300"
-                            : "bg-red-900 text-red-300"
-                      }
-                    `}
+                            ? "bg-yellow-600"
+                            : "bg-red-600"
+                      }`}
                     >
-                      {effect.expectedImpact.charAt(0).toUpperCase() +
-                        effect.expectedImpact.slice(1)}{" "}
-                      Impact
-                    </div>
+                      {(effect.responseProbability * 100).toFixed(0)}% Response
+                    </span>
                   </div>
-
-                  <div className="mb-3">
-                    <div className="text-xs text-gray-400 mb-1">
-                      Response Probability
-                    </div>
-                    <div className="w-full bg-gray-900 rounded-full h-2 overflow-hidden">
-                      <div
-                        className={`
-                          ${
-                            effect.responseProbability > 0.7
-                              ? "bg-green-500"
-                              : effect.responseProbability > 0.4
-                                ? "bg-yellow-500"
-                                : "bg-red-500"
-                          } 
-                          h-full rounded-full
-                        `}
-                        style={{
-                          width: `${Math.max(1, Math.round(effect.responseProbability * 100))}%`,
-                        }}
-                      ></div>
-                    </div>
-                    <div className="mt-1 text-right text-xs text-gray-400">
-                      {Math.round(effect.responseProbability * 100)}%
-                      probability
-                    </div>
-                  </div>
-
-                  <div className="text-xs text-gray-300">
-                    <h6 className="font-medium mb-1">
-                      Neurobiological Mechanisms:
-                    </h6>
-                    <ul className="space-y-1 pl-4 list-disc">
-                      {effect.mechanisms.map((mechanism, i) => (
-                        <li key={i}>
-                          {mechanism.pathwayName}
-                          <span className="text-gray-400 ml-1">
-                            ({mechanism.confidenceLevel})
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <p className="text-xs text-gray-400 mb-2">
+                    Expected Impact:{" "}
+                    <span className="capitalize">{effect.expectedImpact}</span>
+                  </p>
+                  <h6 className="text-xs font-medium mb-1">
+                    Neurobiological Mechanisms:
+                  </h6>
+                  <ul className="list-disc list-inside text-xs text-gray-300 space-y-1">
+                    {effect.mechanisms.map((mech, mechIndex) => (
+                      <li key={mechIndex}>
+                        {mech.description} (Target: {mech.neurotransmitter || "N/A"})
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="bg-gray-800 rounded-lg p-4 text-center">
-              <p className="text-sm text-gray-400">
-                No treatment data available for this region.
-              </p>
-            </div>
+            <p className="text-gray-400 text-sm">
+              No predicted treatment effects for this region.
+            </p>
           )}
         </div>
       )}
@@ -732,4 +649,4 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
   );
 };
 
-export default React.memo(BrainRegionDetails);
+export default BrainRegionDetails;

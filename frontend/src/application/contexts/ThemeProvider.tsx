@@ -178,17 +178,34 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
       root.classList.remove("dark");
     }
 
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (e: MediaQueryListEvent) => {
-      const savedTheme = localStorage.getItem("theme");
-      if (!savedTheme) {
-        setTheme(e.matches ? "sleek-dark" : "clinical");
-      }
-    };
+    // Listen for system theme changes - with safeguards for test environments
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      try {
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        const handleChange = (e: MediaQueryListEvent) => {
+          const savedTheme = localStorage.getItem("theme");
+          if (!savedTheme) {
+            setTheme(e.matches ? "sleek-dark" : "clinical");
+          }
+        };
 
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+        // Modern API - addEventListener
+        if (mediaQuery.addEventListener) {
+          mediaQuery.addEventListener("change", handleChange);
+          return () => mediaQuery.removeEventListener("change", handleChange);
+        }
+        // Fallback for older browsers - addListener (deprecated but more widely supported)
+        else if (mediaQuery.addListener) {
+          mediaQuery.addListener(handleChange as any);
+          return () => mediaQuery.removeListener(handleChange as any);
+        }
+      } catch (error) {
+        console.warn("Error setting up media query listener:", error);
+      }
+    }
+    
+    // Return empty cleanup function if matchMedia isn't available
+    return () => {};
   }, [theme, isDarkMode, setTheme]);
 
   // Get theme settings from defaultThemeSettings

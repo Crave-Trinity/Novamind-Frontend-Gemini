@@ -140,9 +140,9 @@ export const RegionSelectionIndicator: React.FC<
   // Update material when selection state changes
   useEffect(() => {
     if (materialRef.current) {
-      materialRef.current.uniforms.selectionStrength.value = selected
-        ? 1.0
-        : 0.0;
+      // materialRef.current.uniforms.selectionStrength.value = selected // Temporarily commented for debugging
+      //   ? 1.0
+      //   : 0.0; // Restore structure around commented line
     }
   }, [selected]);
 

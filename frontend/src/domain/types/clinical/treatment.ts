@@ -165,6 +165,7 @@ export interface NeuroimagingFeatures {
 export interface TreatmentResponsePrediction {
   requestId: string;
   patientId: string;
+  treatmentId: string; // Added missing treatmentId
   treatmentType: TreatmentType;
   timestamp: string;
   algorithm: {
@@ -231,6 +232,17 @@ export interface TreatmentResponsePrediction {
     missingDataImpact: "minimal" | "moderate" | "significant";
     biasRiskLevel: "low" | "moderate" | "high";
   };
+  // Optional fields added in test mock - ensure they are optional here too
+  treatmentName?: string;
+  efficacy?: TreatmentEfficacy;
+  confidenceLevel?: number;
+  responseTrajectory?: "rapid" | "gradual" | "delayed" | "fluctuating";
+  daysToEffect?: number;
+  impactedRegions?: {
+      regionId: string;
+      impactStrength: number;
+      impactType: string;
+  }[];
 }
 
 // Temporal treatment response prediction
@@ -434,3 +446,6 @@ export function isTreatmentComparisonResult(
     "efficacyComparison" in obj
   );
 }
+
+// Added TreatmentEfficacy type definition
+export type TreatmentEfficacy = "high" | "moderate" | "low";

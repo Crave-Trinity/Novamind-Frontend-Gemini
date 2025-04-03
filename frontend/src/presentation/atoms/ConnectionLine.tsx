@@ -8,7 +8,6 @@ import { useFrame, extend } from "@react-three/fiber"; // Ensure fiber is import
 import * as THREE from "three";
 import { Vector3, Line, BufferGeometry, NormalBufferAttributes, Material, Object3DEventMap, LineBasicMaterial, LineDashedMaterial } from "three"; // Import Vector3 from three
 import { ThemeSettings } from "@domain/types/brain/visualization";
-extend({ Line_: THREE.Line, LineBasicMaterial_: THREE.LineBasicMaterial, LineDashedMaterial_: THREE.LineDashedMaterial });
 // Neural-safe prop definition with explicit typing
 interface ConnectionLineProps {
   // Connection endpoints
@@ -75,11 +74,14 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
   onHover,
 }) => {
   // References
-  // Restore original ref types
   const lineRef = useRef<THREE.Line>(null);
-  const materialRef = useRef<
-    THREE.LineBasicMaterial | THREE.LineDashedMaterial
-  >(null);
+  // Use separate refs for each material type to avoid type conflicts
+  const dashedMaterialRef = useRef<THREE.LineDashedMaterial>(null);
+  const basicMaterialRef = useRef<THREE.LineBasicMaterial>(null);
+  
+  // Helper function to get the current material ref based on dashed state
+  const getCurrentMaterialRef = () =>
+    dashed ? dashedMaterialRef.current : basicMaterialRef.current;
 
   // Calculate the points for the line
   const points = useMemo(() => {
@@ -178,16 +180,17 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
 
   // Update material when visual parameters change
   useEffect(() => {
-    if (!materialRef.current) return;
+    const material = getCurrentMaterialRef();
+    if (!material) return;
 
-    // materialRef.current.color.set(visualParams.color); // Keep commented for debugging mocking issue
-    materialRef.current.opacity = visualParams.opacity;
+    // material.color.set(visualParams.color); // Keep commented for debugging mocking issue
+    material.opacity = visualParams.opacity;
 
-    // If using LineDashedMaterial, update the scale
-    if (dashed && "scale" in materialRef.current) {
-      materialRef.current.scale = dashSize + dashGap;
-      materialRef.current.dashSize = dashSize;
-      materialRef.current.gapSize = dashGap;
+    // If using LineDashedMaterial, update the dashed properties
+    if (dashed && dashedMaterialRef.current) {
+      dashedMaterialRef.current.scale = dashSize + dashGap;
+      dashedMaterialRef.current.dashSize = dashSize;
+      dashedMaterialRef.current.gapSize = dashGap;
     }
   }, [visualParams, dashed, dashSize, dashGap]);
 
@@ -196,14 +199,15 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
     if (!lineRef.current || !animated || activityLevel <= 0) return;
 
     // Animate material based on activity level
-    if (materialRef.current) {
+    const material = getCurrentMaterialRef();
+    if (material) {
       // Pulsing opacity for activity visualization
       const time = clock.getElapsedTime() * animationSpeed;
       const pulse = Math.sin(time * 3) * 0.2 * activityLevel + 0.8;
-      materialRef.current.opacity = visualParams.opacity * pulse;
+      material.opacity = visualParams.opacity * pulse;
 
       // For dashed materials, animate dash offset for flow direction
-      if (dashed && "dashOffset" in materialRef.current) {
+      if (dashed && dashedMaterialRef.current) {
         let speed =
           time * (dashSize + dashGap) * animationSpeed * activityLevel;
 
@@ -220,7 +224,7 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
             activityLevel;
         }
 
-        materialRef.current.dashOffset = speed;
+        dashedMaterialRef.current.dashOffset = speed;
       }
     }
   });
@@ -250,11 +254,11 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
       onPointerOut={handlePointerOut}
     >
       <lineDashedMaterial
-        ref={materialRef}
+        ref={dashedMaterialRef}
         color={visualParams.color}
         opacity={visualParams.opacity}
         transparent={true}
-        linewidth={visualParams.thickness}
+        linewidth={visualParams.thickness} // Restore linewidth temporarily
         dashSize={dashSize}
         gapSize={dashGap}
       />
@@ -268,11 +272,11 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
       onPointerOut={handlePointerOut}
     >
       <lineBasicMaterial
-        ref={materialRef}
+        ref={basicMaterialRef}
         color={visualParams.color}
         opacity={visualParams.opacity}
         transparent={true}
-        linewidth={visualParams.thickness}
+        linewidth={visualParams.thickness} // Restore linewidth temporarily
       />
     </line>
   );

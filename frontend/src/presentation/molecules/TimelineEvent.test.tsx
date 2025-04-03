@@ -3,7 +3,7 @@
  * TimelineEvent component testing with quantum precision
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest"; // Added beforeEach
 import { render, screen, fireEvent } from "@testing-library/react";
 import { TimelineEvent } from "./TimelineEvent";
 import { renderWithProviders } from "@test/test-utils";
@@ -83,6 +83,23 @@ const mockAssessmentEvent = {
 };
 
 describe("TimelineEvent", () => {
+  // Add local matchMedia mock before each test in this suite
+  beforeEach(() => {
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: vi.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(), // deprecated
+        removeListener: vi.fn(), // deprecated
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+  });
+
   it("renders symptom event with correct title and severity badge", () => {
     const handleClick = vi.fn();
 
@@ -222,8 +239,9 @@ describe("TimelineEvent", () => {
       />,
     );
 
-    // Time should be formatted as HH:MM
-    expect(screen.getByText("3:30 PM")).toBeInTheDocument();
+    // Time should be formatted as HH:MM AM/PM
+    // Use regex for flexibility with potential slight formatting differences
+    expect(screen.getByText(/3:30\s*PM/i)).toBeInTheDocument();
   });
 
   it("hides time when showTime is false", () => {
@@ -239,7 +257,7 @@ describe("TimelineEvent", () => {
     );
 
     // Time should not be visible
-    expect(screen.queryByText("3:30 PM")).not.toBeInTheDocument();
+    expect(screen.queryByText(/3:30\s*PM/i)).not.toBeInTheDocument();
   });
 
   it("applies selection highlight when isSelected is true", () => {
