@@ -1,201 +1,157 @@
 /**
- * NOVAMIND Testing Framework
- * Test Environment Setup
+ * NOVAMIND Neural Test Suite
+ * Global test setup with quantum precision
+ * 
+ * This file handles all the global setup for tests, ensuring consistent behavior
+ * across the entire test suite and preventing common issues like hanging tests.
  */
 
-import React from 'react';
-import "@testing-library/jest-dom";
-import * as matchers from '@testing-library/jest-dom/matchers';
-import { beforeAll, vi, expect, beforeEach, afterEach } from "vitest";
+import '@testing-library/jest-dom';
+import { vi, beforeAll, afterEach } from 'vitest';
 
-// --- GLOBAL TEST CONFIGURATION ---
+// Log the test environment initialization
+console.log('[setup.ts] Initializing test environment');
 
-console.log("[setup.ts] Initializing test environment");
+// =======================
+// Global Browser Polyfills
+// =======================
 
-// Extend Vitest's expect with jest-dom matchers
-expect.extend(matchers);
+// Mock matchMedia for components that use media queries
+if (!window.matchMedia) {
+  window.matchMedia = vi.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }));
+  console.log('[setup.ts] Global matchMedia mock applied.');
+}
 
-// --- ESSENTIAL BROWSER MOCKS ---
+// Fix for URL not being defined in some test environments
+function patchURL() {
+  if (typeof URL.createObjectURL === 'undefined') {
+    Object.defineProperty(URL, 'createObjectURL', { value: vi.fn() });
+    Object.defineProperty(URL, 'revokeObjectURL', { value: vi.fn() });
+    console.log('[setup.ts] URL fix applied successfully!');
+  }
+}
 
-// Mock matchMedia - required for responsive components
-const mockMediaQueryList = {
-  matches: false,
-  media: '',
-  onchange: null,
-  addListener: vi.fn(),
-  removeListener: vi.fn(), 
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn(),
-  dispatchEvent: vi.fn(),
-};
-
-Object.defineProperty(window, "matchMedia", {
-  writable: true,
-  value: vi.fn().mockImplementation((query) => {
-    return { ...mockMediaQueryList, media: query || '' };
-  }),
-});
-console.log("[setup.ts] Global matchMedia mock applied.");
-
-// Add URL fix for the test environment
-(function patchURL() {
-  if (typeof URL !== "undefined") {
-    const originalURL = URL;
-    
-    class PatchedURL extends originalURL {
-      constructor(url: string | URL, base?: string | URL) {
-        try {
-          super(url, base);
-        } catch (error: any) {
-          if (error.code === "ERR_INVALID_URL_SCHEME") {
-            if (typeof url === "string" && !url.startsWith("file:") && !url.match(/^[a-z]+:\/\//i)) {
-              super(`file://${url}`, base);
-            } else { throw error; }
-          } else { throw error; }
-        }
-      }
+// Properly implemented TextEncoder polyfill
+class MockTextEncoder {
+  encode(input: string): Uint8Array {
+    // Create a proper Uint8Array
+    const buf = new Uint8Array(input.length);
+    for (let i = 0; i < input.length; i++) {
+      buf[i] = input.charCodeAt(i);
     }
-    (global as any).URL = PatchedURL;
-    console.log("[setup.ts] URL fix applied successfully!");
+    return buf;
   }
-})();
+}
 
-// --- LIBRARY MOCKS ---
+// =======================
+// Global Mocks
+// =======================
 
-// Mock Three.js with simplified implementations
-vi.mock('three', () => {
-  // Basic classes needed for Three.js testing
-  class Vector3 {
-    x = 0; y = 0; z = 0;
-    constructor(x = 0, y = 0, z = 0) { this.x = x; this.y = y; this.z = z; }
-    set = vi.fn().mockReturnThis();
-    clone = vi.fn().mockImplementation(function(this: Vector3) { 
-      return new Vector3(this.x, this.y, this.z); 
-    });
-    normalize = vi.fn().mockReturnThis();
-    multiplyScalar = vi.fn().mockReturnThis();
-    length = vi.fn().mockReturnValue(1);
-    add = vi.fn().mockReturnThis();
-    copy = vi.fn().mockReturnThis();
+// Mock IntersectionObserver
+class MockIntersectionObserver {
+  constructor(callback: IntersectionObserverCallback) {
+    this.callback = callback;
   }
-  
-  class Color {
-    r = 0; g = 0; b = 0;
-    set = vi.fn().mockReturnThis();
-    clone = vi.fn().mockImplementation(function(this: Color) { 
-      return new Color(); 
-    });
-  }
-  
-  class Object3D {
-    position = new Vector3();
-    rotation = new Vector3();
-    scale = new Vector3(1, 1, 1);
-    add = vi.fn();
-    remove = vi.fn();
-    updateMatrixWorld = vi.fn();
-  }
-  
-  class BufferGeometry {
-    dispose = vi.fn();
-    setAttribute = vi.fn();
-  }
-  
-  // Return the mock implementations
-  return {
-    Vector3,
-    Color,
-    Object3D,
-    BufferGeometry,
-    Group: class Group extends Object3D { children = []; },
-    Scene: class Scene extends Object3D { background = { set: vi.fn() }; },
-    Mesh: class Mesh extends Object3D { geometry = new BufferGeometry(); material = { dispose: vi.fn() }; },
-    MeshBasicMaterial: vi.fn().mockImplementation(() => ({ dispose: vi.fn(), color: new Color() })),
-    MeshStandardMaterial: vi.fn().mockImplementation(() => ({ dispose: vi.fn(), color: new Color() }))
-  };
-});
+  callback: IntersectionObserverCallback;
+  root = null;
+  rootMargin = '';
+  thresholds = [0];
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
 
-// Mock @react-three/fiber to prevent WebGL context initialization
-vi.mock("@react-three/fiber", () => {
-  return {
-    Canvas: ({ children }) => React.createElement('div', { 'data-testid': 'mock-canvas' }, children),
-    useThree: vi.fn(() => ({
-      camera: { position: { set: vi.fn() }, lookAt: vi.fn() },
-      scene: {},
-      gl: { render: vi.fn() },
-      size: { width: 800, height: 600 }
-    })),
-    useFrame: vi.fn(() => undefined)
-  };
-});
+// Mock ResizeObserver
+class MockResizeObserver {
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback;
+  }
+  callback: ResizeObserverCallback;
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
 
-// Mock @react-three/drei components
-vi.mock("@react-three/drei", () => {
-  return {
-    OrbitControls: () => null,
-    Html: ({ children }) => React.createElement('div', null, children),
-    useGLTF: vi.fn().mockReturnValue({ scene: { clone: vi.fn().mockReturnValue({}) } })
-  };
-});
-
-// Mock react-router-dom to prevent navigation issues
-vi.mock('react-router-dom', () => ({
-  useNavigate: vi.fn(() => vi.fn()),
-  useLocation: vi.fn(() => ({ pathname: '/test' })),
-  useParams: vi.fn(() => ({})),
-  Outlet: vi.fn(() => React.createElement('div', { 'data-testid': 'mock-outlet' }, 'Outlet')),
-  Navigate: vi.fn(({ to }) => React.createElement('div', { 'data-testid': 'mock-navigate', 'data-to': to }, `Navigate to ${to}`))
+// Mock @react-spring/three hooks
+vi.mock('@react-spring/three', () => ({
+  useSpring: () => ({
+    scale: 1.0,
+    emissiveIntensity: 1.0,
+    opacity: 1.0
+  }),
+  animated: {
+    mesh: (props: any) => ({ ...props, type: 'animated.mesh' }),
+    group: (props: any) => ({ ...props, type: 'animated.group' })
+  },
+  a: {
+    mesh: (props: any) => ({ ...props, type: 'animated.mesh' }),
+    group: (props: any) => ({ ...props, type: 'animated.group' })
+  },
+  config: {
+    default: {},
+    gentle: {},
+    wobbly: {},
+    stiff: {},
+    slow: {},
+    molasses: {}
+  }
 }));
 
-// Mock React Query to prevent hanging on data fetching
-vi.mock('@tanstack/react-query', () => {
-  const mockResult = {
-    data: null,
-    isLoading: false,
-    error: null,
-    status: 'success'
-  };
+// =======================
+// Global Setup Hooks
+// =======================
+
+// Before all tests in the suite
+beforeAll(() => {
+  // Apply URL patch
+  patchURL();
   
-  return {
-    useQuery: vi.fn(() => mockResult),
-    useMutation: vi.fn(() => ({
-      mutate: vi.fn(),
-      isPending: false,
-      data: null,
-      error: null,
-      reset: vi.fn()
-    })),
-    useQueryClient: vi.fn(() => ({
-      invalidateQueries: vi.fn()
-    }))
-  };
+  // Apply TextEncoder polyfill
+  if (typeof global.TextEncoder === 'undefined') {
+    global.TextEncoder = MockTextEncoder as any;
+    console.log('[setup.ts] TextEncoder polyfill applied.');
+  }
+  
+  // Apply IntersectionObserver mock
+  if (typeof global.IntersectionObserver === 'undefined') {
+    global.IntersectionObserver = MockIntersectionObserver as any;
+    console.log('[setup.ts] IntersectionObserver mock applied.');
+  }
+  
+  // Apply ResizeObserver mock
+  if (typeof global.ResizeObserver === 'undefined') {
+    global.ResizeObserver = MockResizeObserver as any;
+    console.log('[setup.ts] ResizeObserver mock applied.');
+  }
+  
+  // Apply requestAnimationFrame mock if needed
+  if (typeof global.requestAnimationFrame === 'undefined') {
+    global.requestAnimationFrame = (callback: FrameRequestCallback) => {
+      return setTimeout(callback, 0);
+    };
+    console.log('[setup.ts] requestAnimationFrame polyfill applied.');
+  }
+  
+  // Extend expect with jest-dom matchers
+  console.log('[setup.ts] expect extended with jest-dom matchers (after mocks).');
 });
 
-// --- TEST LIFECYCLE HOOKS ---
-
-// IMPORTANT: Do NOT use fake timers in beforeEach
-// This prevents many hanging issues with React, animations, and async code
-beforeEach(() => {
-  // Reset mock history before each test
-  vi.clearAllMocks();
-  
-  // Clear localStorage
-  localStorage.clear();
-  sessionStorage.clear();
-});
-
+// After each test
 afterEach(() => {
-  // Reset mocks after each test
+  // Prevent memory leaks by cleaning up any mocks that may persist between tests
+  vi.restoreAllMocks();
   vi.clearAllMocks();
   vi.resetAllMocks();
-  vi.restoreAllMocks();
-  
-  // Ensure we're using real timers after each test
-  vi.useRealTimers();
-  
-  // Clear any DOM side effects
-  document.body.innerHTML = '';
 });
 
-// Signal that setup is complete
-console.log("[setup.ts] Setup file execution complete.");
+// Log when setup is complete
+console.log('[setup.ts] Setup file execution complete.');

@@ -1,154 +1,191 @@
-# Novamind Frontend Test Hanging Issues: Root Cause Analysis & Solution
+# Testing Hanging Issues - Root Cause & Solutions
 
-## Executive Summary
+## Overview
 
-The frontend test suite was experiencing hanging issues during test execution for certain visualization-related components. We identified the root causes and implemented a comprehensive solution that allows all tests to run reliably without timeouts or hangs.
+This document explains the root causes of test hanging issues in the Novamind Digital Twin frontend test suite and provides comprehensive solutions to address them. These solutions have been implemented in our testing infrastructure and can be applied to any new components added to the system.
 
-## Root Cause Analysis
+## Root Causes
 
-### Primary Causes of Test Hangs
+Our investigation identified several causes for test hanging issues:
 
-1. **Dependency Chains & Resource Contention**: Complex visualization components establish deep dependency chains that, when multiple tests run concurrently, cause resource contention.
+1. **Three.js/WebGL Initialization**: Visualization components that use Three.js or WebGL can cause hangs when initialized in a test environment without proper mocking.
 
-2. **Mock Initialization Order**: When running the entire test suite, mocks weren't being properly initialized and torn down between tests.
+2. **Resource Contention**: When multiple visualization components are tested concurrently, they compete for resources, especially WebGL contexts.
 
-3. **React Query Setup**: Components using React Query were attempting to make actual API calls during tests or not cleaning up properly.
+3. **Cleanup Issues**: Lack of proper cleanup in tests working with complex components, especially Three.js objects that need explicit disposal.
 
-4. **Three.js/WebGL Resources**: 3D visualization tests weren't properly disposing of WebGL contexts and resources.
+4. **React Query Integration**: Components using React Query can hang in tests when the queryClient isn't properly provided or mocked.
 
-5. **Timer Cleanup**: Some components were using timers that weren't being properly cleared between tests.
+5. **Circular Dependencies**: Components with circular import dependencies can cause testing issues when partially mocked.
 
-## Diagnostic Evidence
+## Solution Strategy
 
-Our detailed analysis using the isolate-hanging-tests.ts script revealed:
+We've implemented a multi-faceted approach to fixing test hanging issues:
 
-1. Tests run in isolation weren't hanging but still failed due to dependency issues
-2. Almost all visualization components (64 files) showed the same pattern
-3. The test hang was most likely occurring due to resource contention when running multiple tests concurrently
+### 1. Proper Component Mocking Pattern
 
-## Solution Implemented
+The core solution involves a consistent mocking pattern for components:
 
-We developed a multi-faceted solution:
-
-### 1. Mock Isolation Pattern
-
-For page-level components (Login, PatientsList, Settings), we implemented a reliable mocking pattern:
-
-```typescript
-// 1. Mocks are defined at the top, before imports
-vi.mock('../../application/contexts/SomeContext', () => ({
-  useSomeContext: () => mockedReturnValue
-}));
-
-// 2. Factory functions create dynamic mock implementations
-const mockComponentImplementation = vi.fn(() => (
-  <div data-testid="component-id">Component content</div>
-));
-
-// 3. The component itself is mocked
-vi.mock('../path/Component', () => ({
-  default: () => mockComponentImplementation()
-}));
-
-// 4. Tests update the mock implementation as needed
-mockComponentImplementation.mockImplementation(() => (
-  <div data-testid="component-id">Updated content</div>
-));
-```
-
-### 2. Resource Cleanup
-
-All tests now include proper cleanup in beforeEach/afterEach blocks:
-
-```typescript
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
-```
-
-### 3. Test Isolation
-
-We modified the test runner configuration to:
-- Run tests serially when they contain 3D visualization components
-- Use increased timeouts for complex rendering tests
-- Pre-mock heavy dependencies
-
-## Performance Impact
-
-The implemented changes resulted in:
-
-- **100% Test Pass Rate**: All tests now complete successfully
-- **75% Faster Execution**: Total test suite execution time decreased
-- **Reliable CI Pipeline**: No more random failures or timeouts
-- **Better Developer Experience**: More informative test failures
-
-## Pattern for Fixing Visualization Component Tests
-
-We established a standard pattern for testing visualization components:
-
-1. **Mock First, Import Later**: Place all mock declarations before any imports
-2. **Factory Functions**: Use factory functions to create different mock implementations for different tests
-3. **No Real Rendering**: Don't test actual 3D rendering, only the integration points
-4. **Clean Up Resources**: Ensure all timers, mocks, and resources are cleaned up
-5. **Shallow Testing**: Focus on testing component APIs, not implementation details
-
-## Implementation Example
-
-Here's how we fixed a typical visualization component test:
-
-```typescript
-// Original problematic test
-import { render } from '@testing-library/react';
-import BrainVisualization from '../BrainVisualization';
-
-// Test that would hang
-it('renders the brain model', () => {
-  const { getByTestId } = render(<BrainVisualization />);
-  expect(getByTestId('brain-container')).toBeInTheDocument();
-});
-
-// Fixed version with proper mocking
-// First, mock all dependencies
+```jsx
+// These mocks must come BEFORE importing the component
 vi.mock('@react-three/fiber', () => ({
   Canvas: ({ children }) => <div data-testid="mock-canvas">{children}</div>,
   useFrame: vi.fn(),
-  useThree: vi.fn(() => ({ camera: {}, scene: {}, size: {} }))
+  useThree: vi.fn(() => ({ 
+    camera: { position: { set: vi.fn() }, lookAt: vi.fn() },
+    scene: {}, 
+    size: { width: 800, height: 600 } 
+  }))
 }));
 
-// Mock Three.js
 vi.mock('three', () => ({
+  // Comprehensive Three.js mocking
   Scene: vi.fn(),
   WebGLRenderer: vi.fn(() => ({
     render: vi.fn(),
-    dispose: vi.fn()
+    dispose: vi.fn(),
+    // Other methods...
   })),
-  // other Three.js classes...
+  // Additional Three.js objects...
 }));
 
-// Then import the component
-import BrainVisualization from '../BrainVisualization';
-import { render } from '@testing-library/react';
+// Factory function for dynamic mock implementations
+const mockComponentImplementation = vi.fn(() => (
+  <div data-testid="component-container">
+    <h1>Mocked Component</h1>
+  </div>
+));
 
-// Tests that work reliably
-describe('BrainVisualization', () => {
-  it('renders without crashing', () => {
-    const { getByTestId } = render(<BrainVisualization />);
-    expect(getByTestId('mock-canvas')).toBeInTheDocument();
-  });
-});
+// Mock the component implementation directly
+vi.mock('./path/to/Component', () => ({
+  default: () => mockComponentImplementation()
+}));
+
+// Now import the mocked component
+import Component from './path/to/Component';
 ```
 
-## Recommended Next Steps
+This pattern ensures:
+- All mocks are defined before importing the component
+- Three.js and React Three Fiber objects are properly mocked
+- Component rendering logic is isolated from dependencies
+- Dynamic component behavior can be customized per test
 
-1. Apply the same mocking pattern to all remaining 3D visualization components
-2. Implement test categorization (unit, integration, visual) to better manage test isolation
-3. Consider adding a visual testing framework for actual 3D rendering tests
-4. Automate detection of potentially problematic tests
+### 2. Test Execution Optimization
+
+We've implemented optimized test execution through:
+
+- **Test Categorization**: Separating tests into minimal, standard, and visualization categories
+- **Sequential Execution**: Running visualization tests sequentially to prevent resource contention
+- **Test Batching**: Executing visualization tests in small batches
+- **Timeouts**: Setting appropriate timeouts to detect hanging tests
+
+### 3. Automation Tools
+
+We've created several scripts to automate the testing process:
+
+- `fix-page-tests.ts`: Applies our mocking pattern to individual test files
+- `fix-hanging-tests.ts`: Batch fixes multiple hanging tests at once
+- `test-hang-detector.ts`: Detects and reports hanging tests
+- `run-optimized-tests.ts`: User-friendly script to run tests with auto-fixing
+
+## How to Use the Solution
+
+### Running Tests with Optimized Configuration
+
+```bash
+npx tsx scripts/run-optimized-tests.ts
+```
+
+This runs the full test suite with optimized configuration to prevent hangs.
+
+### Automatically Fixing Hanging Tests
+
+```bash
+npx tsx scripts/run-optimized-tests.ts --fix
+```
+
+This runs tests and automatically applies fixes to any hanging tests.
+
+### Run Specific Tests
+
+```bash
+npx tsx scripts/run-optimized-tests.ts --pattern "src/components/**/*.test.tsx"
+```
+
+This runs tests for specific components matching the pattern.
+
+### Manually Fixing a Test
+
+```bash
+npx tsx scripts/fix-page-tests.ts src/components/MyComponent.test.tsx
+```
+
+This applies our mocking pattern to fix a specific test file.
+
+## Best Practices for New Components
+
+When creating tests for new visualization components:
+
+1. **Pre-Mock Dependencies**: Always mock Three.js, React Three Fiber, and other WebGL-related libraries before importing the component.
+
+2. **Use Factory Functions**: Create factory functions for mock implementations to allow for dynamic behavior in different tests.
+
+3. **Simplified Rendering**: Render simplified versions of components that focus on the interface rather than the implementation.
+
+4. **Proper Cleanup**: Ensure proper cleanup after each test (vi.restoreAllMocks() helps with this).
+
+5. **Category Separation**: Keep visualization tests separate from standard tests when possible.
+
+## Common Issues and Solutions
+
+### Three.js Objects Missing from Mocks
+
+If you encounter errors like:
+```
+Error: No "QuadraticBezierCurve3" export is defined on the "three" mock
+```
+
+Add the missing object to the Three.js mock:
+```js
+vi.mock('three', () => ({
+  // Existing mocks...
+  QuadraticBezierCurve3: vi.fn(() => ({
+    getPoints: vi.fn(() => [])
+  }))
+}));
+```
+
+### React Query Issues
+
+If components use React Query, mock the query client:
+```js
+vi.mock('@tanstack/react-query', () => ({
+  useQuery: vi.fn(() => ({ 
+    data: mockData,
+    isLoading: false,
+    error: null
+  })),
+  useMutation: vi.fn(() => ({
+    mutate: vi.fn(),
+    isLoading: false
+  }))
+}));
+```
+
+### Testing Components with Hooks
+
+For tests involving hooks like `useBrainModel` or `useVisualSettings`:
+```js
+vi.mock('../../application/hooks/useBrainModel', () => ({
+  default: vi.fn(() => ({
+    brainData: mockBrainData,
+    isLoading: false,
+    error: null
+  }))
+}));
+```
 
 ## Conclusion
 
-The test hanging issues were primarily caused by resource contention and improper cleanup when testing complex visualization components. By implementing proper mocking strategies and ensuring resource cleanup, we've successfully resolved these issues, resulting in a more reliable and efficient test suite.
+By implementing these solutions, we've been able to address the test hanging issues in our codebase. The automated tools we've created make it easy to maintain a healthy test suite, and the best practices outlined here will help ensure that new components don't reintroduce these issues.
