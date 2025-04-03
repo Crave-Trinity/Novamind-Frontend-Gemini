@@ -87,14 +87,25 @@ function isStringArray(value: unknown): value is string[] {
   );
 }
 
-// Basic guard for RiskAssessment (assuming it's an object with at least an ID)
-// TODO: Replace with actual guard from @domain/types/clinical/risk.runtime.ts when available
+// Enhanced type guard for RiskAssessment
 function isRiskAssessment(obj: unknown): obj is RiskAssessment {
+  if (typeof obj !== "object" || obj === null) return false;
+  
+  const assessment = obj as Partial<RiskAssessment>;
+  
+  // Check all required fields with appropriate types
   return (
-    typeof obj === "object" &&
-    obj !== null &&
-    "riskFactorId" in obj &&
-    "riskLevel" in obj
+    typeof assessment.id === "string" &&
+    typeof assessment.patientId === "string" &&
+    typeof assessment.overallRisk === "string" &&
+    typeof assessment.confidenceScore === "number" &&
+    typeof assessment.timestamp === "string" &&
+    typeof assessment.assessmentType === "string" &&
+    Array.isArray(assessment.domainRisks) &&
+    typeof assessment.temporalTrend === "string" &&
+    Array.isArray(assessment.contributingFactors) &&
+    Array.isArray(assessment.protectiveFactors) &&
+    Array.isArray(assessment.neuralCorrelates)
   );
 }
 
@@ -385,9 +396,32 @@ export function validatePredictionResultData(
 export function validateRiskAssessmentData(
   data: unknown,
 ): Result<RiskAssessment, Error> {
-  // TODO: Replace with actual guard from risk.runtime.ts when available
+  // First check if it's a valid RiskAssessment object
   if (isRiskAssessment(data)) {
     return Ok(data);
   }
-  return Err(new Error("Invalid RiskAssessmentData structure."));
+  
+  // If not, provide detailed error message
+  let errorMessage = "Invalid RiskAssessmentData structure.";
+  
+  if (typeof data !== "object" || data === null) {
+    errorMessage += " Expected an object but received " + (typeof data);
+  } else {
+    // Check which fields are missing and add to error message
+    const assessment = data as Partial<RiskAssessment>;
+    const missingFields: string[] = []; // Explicitly type as string array
+    
+    if (!assessment.id) missingFields.push("id");
+    if (!assessment.patientId) missingFields.push("patientId");
+    if (!assessment.overallRisk) missingFields.push("overallRisk");
+    if (assessment.confidenceScore === undefined) missingFields.push("confidenceScore");
+    if (!assessment.timestamp) missingFields.push("timestamp");
+    if (!assessment.assessmentType) missingFields.push("assessmentType");
+    
+    if (missingFields.length > 0) {
+      errorMessage += " Missing required fields: " + missingFields.join(", ");
+    }
+  }
+  
+  return Err(new Error(errorMessage));
 }

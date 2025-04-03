@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ThemeProvider } from './ThemeProvider';
+import ThemeProvider from '@application/providers/ThemeProvider';
 
 // Mocks
 vi.mock('@react-three/fiber', () => ({
@@ -18,6 +18,19 @@ vi.mock('../../domain/types/theme/theme-types', () => ({
     LIGHT: 'light',
     DARK: 'dark',
     NEURAL: 'neural'
+  }
+}));
+
+// Skip real context initialization by mocking useTheme
+vi.mock('@contexts/ThemeContext', () => ({
+  useTheme: () => ({
+    themeMode: 'light',
+    setThemeMode: vi.fn(),
+    toggleTheme: vi.fn(),
+  }),
+  themeSettings: {
+    light: { bgColor: '#ffffff' },
+    dark: { bgColor: '#121212' }
   }
 }));
 
