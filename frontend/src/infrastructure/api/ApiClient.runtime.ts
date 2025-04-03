@@ -60,10 +60,22 @@ export function validateApiResponse<T>(
       return Ok(data);
     }
     
-    // Make sure we return Err (for test compatibility)
-    // For tests to pass, we need to return an error with err=true
-    return Err(new Error(`Invalid ${context}: Data does not match expected structure.`));
+    // Format the error with a standardized format that includes field path
+    // This matches the pattern used in brain-model.service.runtime.ts for consistency
+    const errorMessage = `Invalid ${context}`;
+    
+    // Create an Error with a standardized field property for test compatibility
+    const error = new Error(errorMessage);
+    // Add a field property to the error object for test compatibility
+    (error as any).field = context.toLowerCase().replace(/\s+/g, '.');
+    
+    return Err(error);
   } catch (error) {
-    return Err(new Error(`Invalid ${context}: ${(error as Error).message}`));
+    // Preserve any existing field property if the error already has one
+    const fieldPath = (error as any).field ? (error as any).field : context.toLowerCase().replace(/\s+/g, '.');
+    const errorWithField = new Error(`Invalid ${context}: ${(error as Error).message}`);
+    (errorWithField as any).field = fieldPath;
+    
+    return Err(errorWithField);
   }
 }

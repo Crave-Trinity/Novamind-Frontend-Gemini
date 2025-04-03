@@ -11,7 +11,7 @@ import * as Component from '@/presentation/organisms/DigitalTwinDashboard';
 
 // Mock any problematic hooks or dependencies
 vi.mock('@react-three/fiber', () => ({
-  Canvas: ({ children }) => <div data-testid="mock-canvas">{children}</div>,
+  Canvas: ({ children }: any) => <div data-testid="mock-canvas">{children}</div>,
   useThree: () => ({
     gl: { domElement: document.createElement('canvas') },
     camera: { position: { set: vi.fn() } },
@@ -21,7 +21,7 @@ vi.mock('@react-three/fiber', () => ({
 }));
 
 vi.mock('@react-spring/three', () => ({
-  animated: (comp) => comp,
+  animated: (comp: any) => comp,
   useSpring: () => [{ position: [0, 0, 0] }, { set: vi.fn() }],
 }));
 

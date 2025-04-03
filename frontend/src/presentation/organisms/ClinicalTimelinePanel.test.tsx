@@ -1,108 +1,58 @@
 /**
  * ClinicalTimelinePanel - Minimal Test
- * This is a minimal test to ensure the component can be imported without hanging.
- * Full tests are disabled until animation and 3D rendering issues are resolved.
+ * Replaced with minimal test to prevent hanging from useFrame animation loop
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as Component from '@/presentation/organisms/ClinicalTimelinePanel';
+import { describe, it, expect, vi } from 'vitest';
+import { ClinicalTimelinePanel } from './ClinicalTimelinePanel';
 
-// Mock any problematic hooks or dependencies
+// Mock React Three Fiber
 vi.mock('@react-three/fiber', () => ({
-  Canvas: ({ children }) => <div data-testid="mock-canvas">{children}</div>,
+  useFrame: vi.fn(),
   useThree: () => ({
-    gl: { domElement: document.createElement('canvas') },
-    camera: { position: { set: vi.fn() } },
-    scene: { background: null, add: vi.fn(), remove: vi.fn() },
+    gl: {
+      setSize: vi.fn(),
+      render: vi.fn(),
+      dispose: vi.fn()
+    },
+    camera: {
+      position: { set: vi.fn() },
+      lookAt: vi.fn()
+    },
+    scene: {}
   }),
-  useFrame: vi.fn(cb => cb({ delta: 0.1 })),
-}));
-
-vi.mock('@react-spring/three', () => ({
-  animated: (comp) => comp,
-  useSpring: () => [{ position: [0, 0, 0] }, { set: vi.fn() }],
+  Canvas: ({ children }) => <div data-testid="mock-canvas">{children}</div>
 }));
 
 // Mock Three.js
 vi.mock('three', () => ({
-  Color: class {
-    constructor() { return this; }
+  WebGLRenderer: vi.fn().mockImplementation(() => ({
+    setSize: vi.fn(),
+    render: vi.fn(),
+    dispose: vi.fn()
+  })),
+  Scene: vi.fn(),
+  PerspectiveCamera: vi.fn().mockImplementation(() => ({
+    position: { set: vi.fn() },
+    lookAt: vi.fn()
+  })),
+  Vector3: vi.fn().mockImplementation(() => ({
     set: vi.fn(),
-  },
-  Vector3: class {
-    constructor(x = 0, y = 0, z = 0) {
-      return { x, y, z, set: vi.fn() };
-    }
-  },
-  Group: class {
-    constructor() { 
-      return { 
-        add: vi.fn(),
-        remove: vi.fn(),
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0 },
-      };
-    }
-  },
-  Mesh: class {
-    constructor() { return this; }
-  },
-  MeshStandardMaterial: class {
-    constructor() { return this; }
-  },
-  SphereGeometry: class {
-    constructor() { return this; }
-  },
-  Object3D: class {
-    constructor() { return { children: [] }; }
-  },
-  Raycaster: class {
-    constructor() { return { 
-      setFromCamera: vi.fn(),
-      intersectObjects: () => [],
-    }; }
-  },
-  WebGLRenderer: class {
-    constructor() { 
-      return {
-        setSize: vi.fn(),
-        render: vi.fn(),
-        domElement: document.createElement('canvas'),
-        shadowMap: {},
-      };
-    }
-  },
-  Scene: class {
-    constructor() { 
-      return {
-        add: vi.fn(),
-        remove: vi.fn(),
-        children: [],
-      };
-    }
-  },
-  PerspectiveCamera: class {
-    constructor() { 
-      return {
-        position: { set: vi.fn() },
-        lookAt: vi.fn(),
-      };
-    }
-  },
-  Clock: class {
-    constructor() { 
-      return {
-        getElapsedTime: () => 0,
-      };
-    }
-  },
+    normalize: vi.fn(),
+    multiplyScalar: vi.fn()
+  })),
+  Color: vi.fn(),
+  MeshBasicMaterial: vi.fn(),
+  MeshStandardMaterial: vi.fn(),
+  SphereGeometry: vi.fn(),
+  BoxGeometry: vi.fn(),
+  Mesh: vi.fn()
 }));
 
-// Basic test to verify component can be imported
+// Minimal test to verify component can be imported
 describe('ClinicalTimelinePanel (Minimal)', () => {
   it('exists as a module', () => {
-    expect(Component).toBeDefined();
+    expect(ClinicalTimelinePanel).toBeDefined();
   });
 });
