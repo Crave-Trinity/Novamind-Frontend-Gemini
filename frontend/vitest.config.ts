@@ -40,6 +40,8 @@ export default defineConfig({
       '@validation': path.resolve(__dirname, './src/domain/validation'), // Assuming validation is domain
       '@visualizations': path.resolve(__dirname, './src/presentation/visualizations'), // Assuming visualizations are presentation
       '@test': path.resolve(__dirname, './src/test'),
+      // External library mocks
+      'next-themes': path.resolve(__dirname, './src/test/mocks/next-themes.ts'),
     },
   },
   test: {
