@@ -72,8 +72,7 @@ global.WebSocket = vi.fn().mockImplementation((url: string) => {
 
 
 describe("BiometricStreamController (Rebuilt)", () => {
-  // Use real timers to avoid conflicts with WebSocket mock's async events
-  vi.useRealTimers();
+  // Removed local vi.useRealTimers(); Global setup now manages timers.
 
   const mockedBiometricService = biometricService as Mocked<typeof biometricService>;
 
@@ -122,6 +121,7 @@ describe("BiometricStreamController (Rebuilt)", () => {
     // Re-introduce act wrapper around the async action initiation
     await act(async () => {
       await result.current.connectStreams();
+      vi.runAllTimers(); // Ensure any timers set during connection are flushed
     });
 
     // State should be updated synchronously after connectStreams resolves (metadata fetch)

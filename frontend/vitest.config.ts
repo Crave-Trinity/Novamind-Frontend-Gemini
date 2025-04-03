@@ -2,7 +2,7 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-// import tsconfigPaths from 'vite-tsconfig-paths'; // Keep plugin disabled
+import tsconfigPaths from 'vite-tsconfig-paths'; // Enable plugin
 
 /**
  * NOVAMIND Testing Framework
@@ -10,42 +10,10 @@ import path from 'path';
  */
 export default defineConfig({
   plugins: [
-    // tsconfigPaths removed
+    tsconfigPaths(), // Add the plugin instance
     react() as any,
   ],
-  resolve: { // Restore manual alias block
-    alias: [
-      // Manually define all aliases from tsconfig.json
-      { find: '@', replacement: path.resolve(__dirname, 'src') },
-      { find: '@domain', replacement: path.resolve(__dirname, 'src/domain') },
-      { find: '@application', replacement: path.resolve(__dirname, 'src/application') },
-      { find: '@infrastructure', replacement: path.resolve(__dirname, 'src/infrastructure') },
-      { find: '@presentation', replacement: path.resolve(__dirname, 'src/presentation') },
-      { find: '@atoms', replacement: path.resolve(__dirname, 'src/presentation/atoms') },
-      { find: '@molecules', replacement: path.resolve(__dirname, 'src/presentation/molecules') },
-      { find: '@organisms', replacement: path.resolve(__dirname, 'src/presentation/organisms') },
-      { find: '@templates', replacement: path.resolve(__dirname, 'src/presentation/templates') },
-      { find: '@pages', replacement: path.resolve(__dirname, 'src/presentation/pages') },
-      { find: '@services', replacement: path.resolve(__dirname, 'src/infrastructure/services') },
-      { find: '@hooks', replacement: path.resolve(__dirname, 'src/application/hooks') },
-      { find: '@utils', replacement: path.resolve(__dirname, 'src/application/utils') },
-      { find: '@contexts', replacement: path.resolve(__dirname, 'src/application/contexts') },
-      { find: '@types', replacement: path.resolve(__dirname, 'src/domain/types') },
-      { find: '@models', replacement: path.resolve(__dirname, 'src/domain/models') },
-      { find: '@assets', replacement: path.resolve(__dirname, 'src/presentation/assets') },
-      { find: '@shaders', replacement: path.resolve(__dirname, 'src/presentation/shaders') },
-      { find: '@store', replacement: path.resolve(__dirname, 'src/application/store') },
-      { find: '@styles', replacement: path.resolve(__dirname, 'src/presentation/styles') },
-      { find: '@api', replacement: path.resolve(__dirname, 'src/infrastructure/api') },
-      { find: '@config', replacement: path.resolve(__dirname, 'src/infrastructure/config') },
-      { find: '@constants', replacement: path.resolve(__dirname, 'src/domain/constants') },
-      { find: '@validation', replacement: path.resolve(__dirname, 'src/domain/validation') },
-      { find: '@visualizations', replacement: path.resolve(__dirname, 'src/presentation/visualizations') },
-      { find: '@test', replacement: path.resolve(__dirname, 'src/test') },
-      // Keep the explicit 'three' alias as well
-      { find: 'three', replacement: path.resolve(__dirname, 'node_modules/three') },
-    ],
-  },
+  // Remove the manual resolve.alias block, tsconfigPaths handles it
   test: {
     globals: true,
     environment: 'jsdom',  // MUST BE JSDOM

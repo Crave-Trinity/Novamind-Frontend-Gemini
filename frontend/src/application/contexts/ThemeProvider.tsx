@@ -189,15 +189,27 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
           }
         };
 
-        // Modern API - addEventListener
-        if (mediaQuery.addEventListener) {
-          mediaQuery.addEventListener("change", handleChange);
-          return () => mediaQuery.removeEventListener("change", handleChange);
-        }
-        // Fallback for older browsers - addListener (deprecated but more widely supported)
-        else if (mediaQuery.addListener) {
-          mediaQuery.addListener(handleChange as any);
-          return () => mediaQuery.removeListener(handleChange as any);
+        // Ensure mediaQuery was successfully created before using it
+        if (mediaQuery) {
+          const handleChange = (e: MediaQueryListEvent) => {
+            const savedTheme = localStorage.getItem("theme");
+            if (!savedTheme) {
+              setTheme(e.matches ? "sleek-dark" : "clinical");
+            }
+          };
+
+          // Modern API - addEventListener
+          if (mediaQuery.addEventListener) {
+            mediaQuery.addEventListener("change", handleChange);
+            return () => mediaQuery.removeEventListener("change", handleChange);
+          }
+          // Fallback for older browsers - addListener
+          else if (mediaQuery.addListener) {
+            mediaQuery.addListener(handleChange as any);
+            return () => mediaQuery.removeListener(handleChange as any);
+          }
+        } else {
+          console.warn("window.matchMedia returned undefined or null, cannot add listener.");
         }
       } catch (error) {
         console.warn("Error setting up media query listener:", error);

@@ -95,15 +95,12 @@ export function useNeuralActivityController(patientId: string) {
   // Load baseline activity for current patient
   const loadBaselineActivity = useCallback(async (): Promise<Result<void>> => {
     if (neuralState.baselineLoaded) return success(undefined);
+    // Removed remnant of useState logic
 
     try {
-      // TODO: Implement actual service call when available (getBaselineActivity doesn't exist on brainModelService)
-      console.warn(
-        "getBaselineActivity service method not implemented on brainModelService.",
-      );
-      const result: Result<any> = failure(
-        new Error("Service method getBaselineActivity not implemented."),
-      ); // Placeholder failure
+      // Call the actual (mocked in test) service method
+      // Correctly call the service method now that it exists
+      const result = await brainModelService.getBaselineActivity(patientId);
 
       if (result.success) {
         // Check success first
@@ -227,7 +224,9 @@ export function useNeuralActivityController(patientId: string) {
         );
       }
     },
-    [neuralState], // Removed updateGlobalMetrics from deps
+    // Corrected dependencies: updateGlobalMetrics and calculateNewActivationLevel are stable references
+    // defined within the hook scope. Only neuralState is needed as a dependency.
+    [neuralState],
   );
 
   // Update global metrics based on current neural state
@@ -241,6 +240,7 @@ export function useNeuralActivityController(patientId: string) {
       [ActivationLevel.EXTREME]: 0,
     };
 
+    // This function now needs to read from the current state via neuralState variable
     neuralState.metrics.activationLevels.forEach((level) => {
       if (level in activationCounts) {
         activationCounts[level]++;
@@ -267,6 +267,7 @@ export function useNeuralActivityController(patientId: string) {
       neuralState.metrics.entropyLevel = 0;
     }
 
+    // Read from current state
     const activeRegions = neuralState.activeRegions.size;
     const totalRegions = neuralState.metrics.activationLevels.size;
 
@@ -304,7 +305,7 @@ export function useNeuralActivityController(patientId: string) {
         ["gamma", 0.2],
       ]);
     }
-  }, [neuralState]);
+  }, [neuralState]); // updateGlobalMetrics depends only on neuralState
 
   // Calculate a new activation level based on current level and change
   const calculateNewActivationLevel = (
@@ -556,7 +557,7 @@ export function useNeuralActivityController(patientId: string) {
       inhibitedRegions: new Set(neuralState.inhibitedRegions),
       baselineLoaded: neuralState.baselineLoaded,
       transitionHistory: [...neuralState.transitionHistory],
-      computationalIntensity: neuralState.computationalIntensity,
+      computationalIntensity: neuralState.computationalIntensity, // Read from state
     };
   }, [neuralState]);
 

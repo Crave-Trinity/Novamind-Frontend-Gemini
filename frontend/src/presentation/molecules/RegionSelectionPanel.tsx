@@ -6,7 +6,7 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { BrainRegion } from "@domain/types/brain/models";
-import { SafeArray } from "@domain/types/common";
+import { SafeArray } from "@domain/types/shared/common";
 
 // Define neural-safe props
 interface RegionSelectionPanelProps {

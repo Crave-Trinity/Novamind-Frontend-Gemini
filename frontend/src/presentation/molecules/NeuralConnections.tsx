@@ -10,7 +10,7 @@ import * as THREE from "three";
 import ConnectionLine from "@presentation/atoms/ConnectionLine";
 import { BrainRegion, NeuralConnection } from "@domain/types/brain/models";
 import { ThemeSettings, RenderMode } from "@domain/types/brain/visualization";
-import { SafeArray, Vector3 } from "@domain/types/common";
+import { SafeArray, Vector3 } from "@domain/types/shared/common";
 
 // Neural-safe prop definition with explicit typing
 interface NeuralConnectionsProps {
@@ -90,13 +90,19 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
       const region = regionsById.get(regionId);
       if (!region) return [0, 0, 0];
 
-      // Handle different position formats
-      if (Array.isArray(region.position)) {
-        return region.position as [number, number, number];
+      // Ensure consistent return type [number, number, number]
+      // Type-safe handling of position formats - check array first
+      if (Array.isArray(region.position) && region.position.length === 3 && region.position.every(n => typeof n === 'number')) {
+        // If it's an array of 3 numbers, construct the tuple explicitly
+        return [region.position[0], region.position[1], region.position[2]];
+      } else if (typeof region.position === 'object' && region.position !== null && 'x' in region.position && 'y' in region.position && 'z' in region.position) {
+        // If it's a Vector3-like object, construct the tuple
+        const pos = region.position as Vector3; // Safe assertion after checks
+        return [pos.x, pos.y, pos.z];
       }
-
-      const pos = region.position as Vector3;
-      return [pos.x, pos.y, pos.z];
+      // Fallback if position format is unexpected or invalid
+      console.warn(`Unexpected position format for region ${regionId}:`, region.position);
+      return [0, 0, 0];
     },
     [regionsById],
   );
@@ -108,6 +114,7 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
       // Filter by connection strength
       .filter((conn) => conn.strength >= minimumStrength)
       // Limit maximum connections for performance
+      .toArray() // Convert to array before slicing
       .slice(0, maximumConnections);
 
     // If specific regions are selected, prioritize their connections
@@ -134,6 +141,8 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
     }
 
     // Sort by strength for better visual hierarchy
+    // Convert SafeArray result back to array before sorting
+    // 'filtered' is already a NeuralConnection[] array here from the slice operation
     return filtered.sort((a, b) => b.strength - a.strength);
   }, [
     safeConnections,
@@ -149,10 +158,11 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
   const connectionBatches = useMemo(() => {
     if (!highPerformanceMode) return [];
 
-    // Create batches of connections for efficient rendering
-    const batches = [];
-    for (let i = 0; i < filteredConnections.size(); i += batchSize) {
-      batches.push(filteredConnections.slice(i, i + batchSize));
+    // Create batches of connections for efficient rendering with explicit typing
+    const batches: NeuralConnection[][] = [];
+    const connectionsArray = filteredConnections; // Already an array from previous step
+    for (let i = 0; i < connectionsArray.length; i += batchSize) {
+      batches.push(connectionsArray.slice(i, i + batchSize));
     }
     return batches;
   }, [filteredConnections, highPerformanceMode, batchSize]);
@@ -231,10 +241,17 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
   // Calculate connection color based on various factors
   const getConnectionColor = useCallback(
     (conn: NeuralConnection): string => {
-      // In functional mode, color by activity
+      // In functional mode, color by activity - Use placeholder scale logic
       if (renderMode === RenderMode.FUNCTIONAL) {
         const activity = getConnectionActivity(conn);
-        const scale = themeSettings.activityColorScale;
+        // Placeholder scale - replace with actual scale from VisualizationSettings when available
+        // Using theme colors as placeholders for activity scale
+        const scale = {
+          high: themeSettings.accentColor || "#FF0000",
+          medium: themeSettings.secondaryColor || "#FFA500",
+          low: themeSettings.primaryColor || "#FFFF00",
+          none: themeSettings.connectionBaseColor || "#808080"
+        };
 
         if (activity > 0.7) return scale.high;
         if (activity > 0.4) return scale.medium;
@@ -242,17 +259,18 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
         return scale.none;
       }
 
-      // In connectivity mode, color by connection type or strength
+      // In connectivity mode, color by connection type (structural, functional, effective)
+      // Using base color as placeholder since excitatory/inhibitory colors are not in ThemeSettings
       if (renderMode === RenderMode.CONNECTIVITY) {
-        return conn.type === "excitatory"
-          ? themeSettings.excitatoryColor
-          : themeSettings.inhibitoryColor;
+        // TODO: Define appropriate colors based on conn.type ('structural', 'functional', 'effective')
+        return themeSettings.connectionBaseColor;
       }
 
       // Default color
       return themeSettings.connectionBaseColor;
     },
-    [renderMode, getConnectionActivity, themeSettings],
+    // Removed themeSettings from dependencies as specific color props are missing/placeholders used
+    [renderMode, getConnectionActivity, themeSettings.accentColor, themeSettings.secondaryColor, themeSettings.primaryColor, themeSettings.connectionBaseColor],
   );
 
   // Use optimized batch rendering for high performance mode
@@ -294,11 +312,16 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
             dashSize={0.1}
             dashGap={0.1}
             strength={conn.strength}
+            // Use 'directionality' property for flow direction
+            flowDirection={
+              conn.directionality === "bidirectional" ? "bidirectional" : "forward"
+            }
             activityLevel={getConnectionActivity(conn)}
             animated={animated && renderMode !== RenderMode.ANATOMICAL}
             animationSpeed={animationSpeed}
+            // Use 'directionality' property for flow direction
             flowDirection={
-              conn.type === "bidirectional" ? "bidirectional" : "forward"
+              conn.directionality === "bidirectional" ? "bidirectional" : "forward"
             }
             isActive={isConnectionActive(conn)}
             isHighlighted={isConnectionHighlighted(conn)}

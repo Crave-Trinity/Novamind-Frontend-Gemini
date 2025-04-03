@@ -9,5 +9,6 @@
 export { default as Button } from "./Button";
 export { default as Card } from "./Card";
 export { DocumentTitle } from "./DocumentTitle";
+export { default as Avatar } from "./Avatar"; // Export the new Avatar component
 
 // Add additional atom exports here as the application grows

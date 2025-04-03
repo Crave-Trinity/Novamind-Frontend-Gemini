@@ -11,8 +11,23 @@ import { PatientHeader } from "./PatientHeader";
 import { renderWithProviders } from "@test/test-utils";
 
 // Mock data with clinical precision
+const mockPatient = {
+  patientId: "P12345",
+  firstName: "Jane",
+  lastName: "Doe",
+  dateOfBirth: "1985-07-15", // Required for age calculation
+  profileImage: null,
+  riskLevel: "moderate",
+  lastVisit: new Date().toISOString(),
+  lastUpdated: new Date().toISOString(),
+  diagnoses: ["Major Depressive Disorder", "Generalized Anxiety Disorder"],
+  alerts: ["Medication review overdue"],
+  gender: "Female",
+  riskNotes: "Moderate risk due to recent life events.",
+};
+
 const mockProps = {
-  // Add component props here
+  patient: mockPatient,
 };
 
 describe("PatientHeader", () => {

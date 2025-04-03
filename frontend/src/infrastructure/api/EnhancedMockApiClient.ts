@@ -169,7 +169,6 @@ export class EnhancedMockApiClient implements IApiClient {
       console.error(`Mock API: Unknown POST endpoint ${url}`);
       result = { success: true, message: `Mock POST to ${url} successful` };
     }
-
     return result as T;
   }
 
@@ -327,7 +326,18 @@ export class EnhancedMockApiClient implements IApiClient {
 
     return this.get<any>(`/patients/${patientId}/risk-assessment`);
   }
+  /**
+   * Process data using mock logic for testing.
+   */
+  public processData(data: any): any {
+      return { processed: true, data };
+  }
 }
 
-// Export as singleton instance
-export const enhancedMockApiClient = new EnhancedMockApiClient();
+// Export as callable singleton instance
+const instance = new EnhancedMockApiClient();
+function callableEnhancedMockApiClient(data: any) {
+    return instance.processData(data);
+}
+Object.assign(callableEnhancedMockApiClient, instance);
+export const enhancedMockApiClient = callableEnhancedMockApiClient;

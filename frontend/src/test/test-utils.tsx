@@ -3,13 +3,17 @@ import { render, RenderOptions } from "@testing-library/react";
 import ThemeProvider from "@/application/contexts/ThemeProvider"; // Updated path
 import { ThemeOption } from "@/application/contexts/ThemeContext"; // Updated path
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter } from "react-router-dom"; // Import MemoryRouter
+import { MemoryRouter } from "react-router-dom";
+// Import the mocked Canvas type/component if needed, or rely on global mock
+// Assuming setup.ts handles the global mock for Canvas
+import { Canvas } from "@react-three/fiber"; // Import Canvas for type usage if needed, mock handles implementation
 
 /**
  * Custom renderer that wraps components with necessary providers
  */
 interface ExtendedRenderOptions extends Omit<RenderOptions, "wrapper"> {
   initialTheme?: ThemeOption;
+  wrapInCanvas?: boolean; // Add option to wrap in Canvas
 }
 
 /**
@@ -20,7 +24,7 @@ interface ExtendedRenderOptions extends Omit<RenderOptions, "wrapper"> {
  */
 export function renderWithProviders(
   ui: ReactElement,
-  { initialTheme = "clinical", ...renderOptions }: ExtendedRenderOptions = {},
+  { initialTheme = "clinical", wrapInCanvas = false, ...renderOptions }: ExtendedRenderOptions = {},
 ) {
   // Create a new QueryClient for each test
   const queryClient = new QueryClient({
@@ -41,7 +45,9 @@ export function renderWithProviders(
       // Wrap with MemoryRouter for components using react-router hooks
       <MemoryRouter>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            {wrapInCanvas ? <Canvas>{children}</Canvas> : children}
+          </ThemeProvider>
         </QueryClientProvider>
       </MemoryRouter>
     );

@@ -521,4 +521,33 @@ export const brainModelService = {
       );
     }
   },
+
+  /**
+   * Fetch baseline neural activity for a patient
+   */
+  getBaselineActivity: async (patientId: string): Promise<Result<any>> => { // Using 'any' for baseline type for now
+    try {
+      // Define the correct endpoint for baseline activity
+      const BASELINE_ENDPOINT = `${API_BASE_URL}/v1/patients/${patientId}/baseline-activity`;
+      const response = await axios.get<any>(BASELINE_ENDPOINT, {
+        timeout: 15000,
+        headers: { Accept: "application/json" },
+      });
+      // Assuming the response data structure matches what the hook expects
+      // (e.g., { regionActivations: [], connectionStrengths: [] })
+      return success(response.data);
+    } catch (error) {
+      // Simplified error handling for now, reuse patterns from other methods if needed
+       if (axios.isAxiosError(error)) {
+         if (error.response?.status === 404) {
+           return failure(new Error(`Baseline activity not found for patient ${patientId}`));
+         }
+       }
+      return failure(
+        new Error(
+          `Failed to fetch baseline activity: ${error instanceof Error ? error.message : String(error)}`,
+        ),
+      );
+    }
+  },
 };

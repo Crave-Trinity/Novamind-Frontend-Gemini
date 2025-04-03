@@ -12,7 +12,7 @@ import {
   RiskLevel,
   RiskAssessmentOps,
 } from "@domain/types/clinical/risk";
-import { SafeArray } from "@domain/types/common";
+import { SafeArray } from "@domain/types/shared/common";
 
 // Neural-safe prop definition with explicit typing
 interface ClinicalDataOverlayProps {
@@ -81,15 +81,17 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
 
   // Filter symptoms by severity and recentness
   const prioritizedSymptoms = useMemo(() => {
-    return safeSymptoms
+    // Convert to array before sorting
+    return safeSymptoms.toArray()
       .sort((a, b) => b.severity - a.severity) // Sort by severity (high to low)
       .slice(0, expanded ? undefined : maxSymptoms) // Limit if not expanded
-      .toArray();
+      // Removed redundant .toArray()
   }, [safeSymptoms, maxSymptoms, expanded]);
 
   // Filter diagnoses for display
   const prioritizedDiagnoses = useMemo(() => {
-    return safeDiagnoses
+    // Convert to array before sorting and slicing
+    return safeDiagnoses.toArray()
       .sort((a, b) => {
         // "active" status gets priority
         if (a.status === "active" && b.status !== "active") return -1;
@@ -105,7 +107,7 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
         return severityScore(b.severity) - severityScore(a.severity);
       })
       .slice(0, expanded ? undefined : maxDiagnoses) // Limit if not expanded
-      .toArray();
+      // Removed redundant .toArray()
   }, [safeDiagnoses, maxDiagnoses, expanded]);
 
   // Get risk level with null safety
@@ -119,7 +121,8 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
   const priorityRiskDomain = useMemo(() => {
     if (!riskAssessment) return null;
 
-    const sortedDomains = new SafeArray(riskAssessment.domainRisks).sort(
+    // Convert to array before sorting
+    const sortedDomains = new SafeArray(riskAssessment.domainRisks).toArray().sort(
       (a, b) => {
         // Sort by risk level (severe > high > moderate > low)
         const riskScore = (level: RiskLevel): number => {
@@ -140,7 +143,8 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
       },
     );
 
-    return sortedDomains.size() > 0 ? sortedDomains.get(0) : null;
+    // Access the sorted array directly
+    return sortedDomains.length > 0 ? sortedDomains[0] : null;
   }, [riskAssessment]);
 
   // Event handlers
@@ -445,7 +449,7 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
 
             {safeSymptoms.size() > 0 ? (
               <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
-                {(expanded ? safeSymptoms : safeSymptoms.slice(0, 10)).map(
+                {(expanded ? safeSymptoms.toArray() : safeSymptoms.toArray().slice(0, 10)).map(
                   (symptom) => (
                     <div
                       key={symptom.id}

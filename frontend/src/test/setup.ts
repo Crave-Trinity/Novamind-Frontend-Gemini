@@ -135,22 +135,65 @@ vi.mock('three', async (importOriginal) => {
     x = 0;
     y = 0;
     z = 0;
-    set = vi.fn().mockReturnThis();
-    clone = vi.fn().mockImplementation(function(this: MockVector3) {
-        const newVec = new MockVector3(); // Create a new instance of the mock class
-        newVec.x = this.x;
-        newVec.y = this.y;
-        newVec.z = this.z;
-        // The new instance will inherently have the mocked 'add' method
-        return newVec;
+
+    constructor(x = 0, y = 0, z = 0) { // Add constructor
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    set = vi.fn().mockImplementation(function(this: MockVector3, x, y, z) {
+        this.x = x; this.y = y; this.z = z; return this;
     });
-    normalize = vi.fn().mockReturnThis();
-    multiplyScalar = vi.fn().mockReturnThis();
-    length = vi.fn().mockReturnValue(0);
-    add = vi.fn().mockReturnThis(); // Ensure add returns 'this' for chaining
-    subVectors = vi.fn().mockReturnThis();
-    applyMatrix4 = vi.fn().mockReturnThis();
-    project = vi.fn().mockReturnThis();
+    // Improved clone implementation: create a new instance and copy all function properties
+    clone = vi.fn().mockImplementation(function(this: MockVector3) {
+        const cloned = new MockVector3(this.x, this.y, this.z);
+        Object.keys(this).forEach(key => {
+            if (typeof this[key] === 'function') {
+                cloned[key] = this[key];
+            }
+        });
+        return cloned;
+    });
+    normalize = vi.fn().mockImplementation(function(this: MockVector3) {
+        const len = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+        if (len !== 0) {
+            this.x /= len;
+            this.y /= len;
+            this.z /= len;
+        }
+        return this;
+    });
+    multiplyScalar = vi.fn().mockImplementation(function(this: MockVector3, scalar: number) {
+        this.x *= scalar;
+        this.y *= scalar;
+        this.z *= scalar;
+        return this;
+    });
+    length = vi.fn().mockImplementation(function(this: MockVector3) {
+        return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+    });
+    // Explicitly implement add to ensure correct behavior and return value
+    add = vi.fn().mockImplementation(function(this: MockVector3, v: Vector3Interface) {
+        this.x += v.x;
+        this.y += v.y;
+        this.z += v.z;
+        return this; // Return the modified instance
+    });
+    subVectors = vi.fn().mockImplementation(function(this: MockVector3, a: Vector3Interface, b: Vector3Interface) {
+        this.x = a.x - b.x;
+        this.y = a.y - b.y;
+        this.z = a.z - b.z;
+        return this;
+    });
+    applyMatrix4 = vi.fn().mockImplementation(function(this: MockVector3, m: any) {
+        // Dummy implementation: return this without modifying coordinates.
+        return this;
+    });
+    project = vi.fn().mockImplementation(function(this: MockVector3, camera: any) {
+        // Dummy implementation: return this.
+        return this;
+    });
     copy = vi.fn().mockImplementation(function(this: MockVector3, source: MockVector3) {
         this.x = source.x;
         this.y = source.y;
@@ -236,15 +279,17 @@ vi.mock('three', async (importOriginal) => {
     ...originalThree, // Keep original exports not explicitly mocked
     Vector3: MockVector3,
     Color: MockColor,
-    MeshBasicMaterial: vi.fn().mockImplementation(() => ({ ...mockMaterial })),
+    MeshBasicMaterial: vi.fn().mockImplementation(() => ({ ...mockMaterial })), // Keep material mocks as factories returning objects
     LineBasicMaterial: vi.fn().mockImplementation(() => ({ ...mockMaterial })),
     MeshStandardMaterial: vi.fn().mockImplementation(() => ({ ...mockMaterial })),
-    BufferGeometry: MockBufferGeometry,
-    Object3D: vi.fn().mockImplementation(() => ({ ...mockObject3D })),
-    Mesh: vi.fn().mockImplementation(() => ({ ...mockMesh })),
-    Line: vi.fn().mockImplementation(() => ({ ...mockLine })),
-    Group: vi.fn().mockImplementation(() => ({ ...mockObject3D, children: [] })),
-    Scene: vi.fn().mockImplementation(() => ({ ...mockScene })),
+    BufferGeometry: MockBufferGeometry, // Keep geometry mock as class
+    // Define MockObject3D class first
+    Object3D: class MockObject3D { constructor() { Object.assign(this, { ...mockObject3D }); } },
+    // Define other classes extending MockObject3D (corrected syntax)
+    Mesh: class MockMesh extends (vi.mocked(originalThree.Object3D)) { constructor() { super(); Object.assign(this, { ...mockMesh }); } },
+    Line: class MockLine extends (vi.mocked(originalThree.Object3D)) { constructor() { super(); Object.assign(this, { ...mockLine }); } },
+    Group: class MockGroup extends (vi.mocked(originalThree.Object3D)) { constructor() { super(); Object.assign(this, { ...mockObject3D, children: [] }); } },
+    Scene: class MockScene extends (vi.mocked(originalThree.Object3D)) { constructor() { super(); Object.assign(this, { ...mockScene }); } },
     Raycaster: vi.fn().mockImplementation(() => ({
         setFromCamera: vi.fn(),
         intersectObjects: vi.fn().mockReturnValue([]),
@@ -263,43 +308,74 @@ vi.mock('three', async (importOriginal) => {
 
 
 // Mock React Three Fiber hooks - Reverting to mocking extend
+// Mock React Three Fiber hooks - Provide a more realistic context
 vi.mock("@react-three/fiber", async (importOriginal) => {
-  // const actual = await importOriginal<typeof import('@react-three/fiber')>(); // Keep commented out
-  return {
-    // ...actual, // Don't spread actual to avoid bringing in real extend
-    Canvas: vi.fn(({ children }) => React.createElement('div', { 'data-testid': 'canvas-mock' }, children)),
-    useThree: vi.fn().mockReturnValue({
-      camera: { position: { set: vi.fn() }, lookAt: vi.fn() },
-      gl: { render: vi.fn(), domElement: { style: {} } },
-      scene: { add: vi.fn(), remove: vi.fn() },
-      size: { width: 800, height: 600 },
-      invalidate: vi.fn(),
-      raycaster: { setFromCamera: vi.fn(), intersectObjects: vi.fn(() => []) },
+  const actual = await importOriginal<typeof import('@react-three/fiber')>();
+  const mockGL = {
+    render: vi.fn(),
+    setSize: vi.fn(),
+    setPixelRatio: vi.fn(),
+    domElement: { style: {}, getContext: vi.fn(() => ({})), addEventListener: vi.fn(), removeEventListener: vi.fn() } as unknown as HTMLCanvasElement, // Basic canvas mock
+  };
+  const mockCamera = { position: { set: vi.fn() }, lookAt: vi.fn(), updateProjectionMatrix: vi.fn() };
+  const mockScene = { add: vi.fn(), remove: vi.fn() };
+  const mockRaycaster = { setFromCamera: vi.fn(), intersectObjects: vi.fn(() => []) };
+  const mockSize = { width: 800, height: 600 };
+
+  // Mock state object similar to what useThree provides
+  const mockThreeState = {
+    gl: mockGL,
+    camera: mockCamera,
+    scene: mockScene,
+    size: mockSize,
+    raycaster: mockRaycaster,
+    invalidate: vi.fn(),
+    viewport: { width: 2, height: 2, factor: 1 }, // Add basic viewport mock
+    controls: null, // Add null controls
+    get: vi.fn((key) => mockThreeState[key]), // Basic get implementation
+    set: vi.fn(), // Basic set implementation
+  };
+
+  // Mock the Zustand store structure expected by the Provider
+  const mockStore = {
+    getState: vi.fn(() => mockThreeState),
+    setState: vi.fn((updater) => {
+      if (typeof updater === 'function') {
+        Object.assign(mockThreeState, updater(mockThreeState));
+      } else {
+        Object.assign(mockThreeState, updater);
+      }
     }),
-    useFrame: vi.fn((_callback) => null), // Explicitly mock useFrame
-    extend: vi.fn(), // Mock extend again
+    subscribe: vi.fn(() => vi.fn()), // Return a mock unsubscribe function
+    destroy: vi.fn(),
+  } as any; // Use 'as any' to bypass strict store type checking if complex
+
+  // Simplify Canvas mock - just render children directly
+  return {
+    ...actual, // Keep original exports, including extend
+    Canvas: vi.fn(({ children }) => React.createElement(React.Fragment, null, children)), // Simple fragment, no provider
+    useThree: vi.fn(() => mockStore.getState()), // Keep this as it seemed closer
+    useFrame: vi.fn((_callback) => null),
   };
 });
-// Mock problematic/heavy React Three Drei components/hooks - Enhanced
+// Mock problematic/heavy React Three Drei components/hooks - Aggressively Simplified
 vi.mock("@react-three/drei", async (importOriginal) => {
     const actual = await importOriginal<typeof import('@react-three/drei')>();
+    // Mock heavy components to render null or simple placeholders
     return {
         ...actual, // Keep original exports
-        OrbitControls: vi.fn(() => null),
-        Environment: vi.fn(() => null),
-        useGLTF: vi.fn().mockReturnValue({
+        OrbitControls: vi.fn(() => React.createElement('mock-orbit-controls')),
+        Environment: vi.fn(() => React.createElement('mock-environment')),
+        useGLTF: vi.fn().mockReturnValue({ // Keep useGLTF somewhat functional if needed elsewhere
             nodes: {},
             materials: {},
             scene: { clone: vi.fn().mockReturnValue({}) },
         }),
-        Html: vi.fn(({ children }) => children),
-        Text: vi.fn(() => null),
-        shaderMaterial: vi.fn((_uniforms, _vertexShader, _fragmentShader) => {
-            // Return a basic material constructor mock
-            const MockMaterial = () => React.createElement('meshBasicMaterial'); // Simple placeholder using React.createElement
-            MockMaterial.key = 'mockShaderMaterial';
-            return MockMaterial;
-        }), // Add shaderMaterial mock
+        Html: vi.fn(({ children }) => React.createElement('mock-html', null, children)), // Render children in a mock tag
+        Text: vi.fn(() => React.createElement('mock-text')), // Simple placeholder
+        Sphere: vi.fn(() => React.createElement('mock-sphere')), // Simple placeholder
+        Line: vi.fn(() => React.createElement('mock-line')), // Mock Line as well if used directly
+        // shaderMaterial removed
     };
 });
 
@@ -309,11 +385,15 @@ expect.extend(matchers);
 console.log("[setup.ts] expect extended with jest-dom matchers (after mocks).");
 
 afterEach(() => {
-  vi.clearAllMocks();
+  vi.useRealTimers(); // Restore real timers AFTER the test
+  vi.clearAllMocks(); // Clears call history
+  vi.resetAllMocks();  // Resets mocks to initial state (empty function)
+  vi.restoreAllMocks(); // Restores original implementations for spies
 });
 
 // Optional: Global setup/teardown if needed
 beforeEach(() => {
+  vi.useFakeTimers(); // Use fake timers BEFORE each test
   // Reset mocks or setup global state before each test
 });
 

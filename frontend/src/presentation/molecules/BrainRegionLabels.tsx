@@ -7,7 +7,7 @@ import React, { useMemo } from "react";
 import { Html } from "@react-three/drei";
 import { BrainRegion } from "@domain/types/brain/models";
 import { ThemeSettings } from "@domain/types/brain/visualization";
-import { SafeArray, Vector3 } from "@domain/types/common";
+import { SafeArray, Vector3 } from "@domain/types/shared/common";
 
 // Neural-safe prop definition with explicit typing
 interface BrainRegionLabelsProps {
@@ -75,7 +75,7 @@ const BrainRegionLabels: React.FC<BrainRegionLabelsProps> = ({
     ]);
 
     // Sort by importance (selected > highlighted > active > others)
-    const sorted = filtered.sort((a, b) => {
+    const sorted = filtered.toArray().sort((a, b) => { // Convert SafeArray to array before sorting
       // First priority: selected regions
       if (safeSelectedIds.includes(a.id) && !safeSelectedIds.includes(b.id))
         return -1;
@@ -103,11 +103,11 @@ const BrainRegionLabels: React.FC<BrainRegionLabelsProps> = ({
       const priorityRegions = sorted.filter((r) => priorityIds.has(r.id));
       const otherRegions = sorted
         .filter((r) => !priorityIds.has(r.id))
-        .slice(0, maxLabels - priorityRegions.size());
-      return [...priorityRegions.toArray(), ...otherRegions];
+        .slice(0, maxLabels - priorityRegions.length); // Use .length for standard array
+      return [...priorityRegions, ...otherRegions]; // priorityRegions is already an array
     }
 
-    return sorted.toArray();
+    return sorted; // sorted is already an array
   }, [
     safeRegions,
     safeSelectedIds,
@@ -163,22 +163,7 @@ const BrainRegionLabels: React.FC<BrainRegionLabelsProps> = ({
             transform
             sprite
             scale={[labelScale, labelScale, labelScale]}
-            calculatePosition={(el, cam, size) => {
-              // Add occlusion handling to prevent label overlap
-              // This is a simplified implementation - a real one would do proper 3D occlusion testing
-              // Here we're just adjusting based on camera distance
-              const distance = Math.sqrt(
-                Math.pow(cam.position.x - position[0], 2) +
-                  Math.pow(cam.position.y - position[1], 2) +
-                  Math.pow(cam.position.z - position[2], 2),
-              );
-
-              // Scale based on distance
-              const scale =
-                Math.max(0.6, Math.min(1, 10 / distance)) * labelScale;
-              el.style.transform = `translate(-50%, -50%) scale(${scale})`;
-              return true;
-            }}
+            // Removed problematic calculatePosition prop - rely on transform and scale props
             // Make labels non-visible to raycaster so they don't interfere with region selection
             occlude={false}
           >
