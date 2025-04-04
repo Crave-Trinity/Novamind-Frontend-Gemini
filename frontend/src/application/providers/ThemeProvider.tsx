@@ -1,150 +1,115 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  ThemeContext,
-  ThemeContextType,
-  ThemeOption,
-  themeSettings
-} from "../contexts/ThemeContext";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { ThemeContext, ThemeMode } from '../contexts/ThemeContext';
 
-/**
- * Theme provider props
- */
+const STORAGE_KEY = 'novamind-theme-preference';
+
 interface ThemeProviderProps {
-  children: React.ReactNode;
-  initialTheme?: ThemeOption;
+  children: ReactNode;
+  defaultTheme?: ThemeMode;
 }
 
 /**
- * Theme provider component
- *
- * Provides theme context to the entire application following clean architecture
- * This provider is purely in the application layer and connects to the domain
+ * Provides theme context to the application
+ * Implements dark mode with Tailwind CSS and system preference detection
  */
-const ThemeProvider: React.FC<ThemeProviderProps> = ({
-  children,
-  initialTheme = "clinical",
-}) => {
-  // Get saved theme from localStorage or use default
-  const getSavedTheme = (): ThemeOption => {
-    if (typeof window === 'undefined' || !window.localStorage) {
-      return initialTheme;
+export const ThemeProvider = ({ 
+  children, 
+  defaultTheme = 'system' 
+}: ThemeProviderProps): JSX.Element => {
+  const [mode, setMode] = useState<ThemeMode>(() => {
+    // Try to get stored preference from localStorage
+    const storedTheme = localStorage.getItem(STORAGE_KEY);
+    return (storedTheme as ThemeMode) || defaultTheme;
+  });
+
+  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() => {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  // Listen for system preference changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    const handleChange = (e: MediaQueryListEvent): void => {
+      setSystemPrefersDark(e.matches);
+    };
+    
+    // Add listener, using addEventListener or deprecated addListener for older browsers
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange);
+    } else {
+      // Support for older browsers with legacy MediaQueryList interface
+      (mediaQuery as MediaQueryList & {
+        addListener: (listener: (e: MediaQueryListEvent) => void) => void
+      }).addListener(handleChange);
     }
     
-    try {
-      const savedTheme = localStorage.getItem("novamind-theme");
-      return savedTheme && isValidTheme(savedTheme)
-        ? (savedTheme as ThemeOption)
-        : initialTheme;
-    } catch (e) {
-      console.error("Error accessing localStorage", e);
-      return initialTheme;
-    }
-  };
-
-  // Check if theme is valid
-  function isValidTheme(theme: string): theme is ThemeOption {
-    return ["light", "dark", "sleek", "clinical"].includes(theme);
-  }
-
-  // State for current theme
-  const [theme, setThemeState] = useState<ThemeOption>(getSavedTheme);
-
-  // Computed state for dark mode
-  const isDarkMode = theme === "dark" || theme === "sleek";
-
-  // Set theme and save to localStorage
-  const setTheme = useCallback((newTheme: ThemeOption) => {
-    // Save to localStorage if available
-    if (typeof window !== 'undefined' && window.localStorage) {
-      try {
-        localStorage.setItem("novamind-theme", newTheme);
-      } catch (e) {
-        console.error("Error saving theme to localStorage", e);
-      }
-    }
-
-    setThemeState(newTheme);
-
-    // Update the document with the current theme for global CSS if document is available
-    if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute("data-theme", newTheme);
-    }
-
-    // Set dark mode class for Tailwind if document is available
-    if (typeof document !== 'undefined') {
-      if (newTheme === "dark" || newTheme === "sleek") {
-        document.documentElement.classList.add("dark");
+    return () => {
+      // Cleanup listener
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handleChange);
       } else {
-        document.documentElement.classList.remove("dark");
+        // Support for older browsers with legacy MediaQueryList interface
+        (mediaQuery as MediaQueryList & {
+          removeListener: (listener: (e: MediaQueryListEvent) => void) => void
+        }).removeListener(handleChange);
       }
-    }
+    };
   }, []);
 
-  // Toggle between dark and light mode
-  const toggleTheme = useCallback(() => {
-    setTheme(isDarkMode ? "clinical" : "dark");
-  }, [isDarkMode, setTheme]);
-
-  // Set initial theme on mount
+  // Determine if dark mode is active based on mode and system preference
+  const isDarkMode = useMemo((): boolean => {
+    return mode === 'dark' || (mode === 'system' && systemPrefersDark);
+  }, [mode, systemPrefersDark]);
+  
+  // Apply dark mode class to html element
   useEffect(() => {
-    setTheme(theme);
-
-    // Apply prefers-color-scheme if user hasn't selected a theme and window.matchMedia is available
-    const savedTheme = typeof window !== 'undefined' && window.localStorage
-      ? localStorage.getItem("novamind-theme")
-      : null;
-    if (!savedTheme && typeof window !== 'undefined' && window.matchMedia) {
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      ).matches;
-      setTheme(prefersDark ? "dark" : "clinical");
-    }
-
-    // Listen for system theme changes if window.matchMedia is available
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      try {
-        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-        const handleChange = (e: MediaQueryListEvent) => {
-          const savedTheme = typeof window !== 'undefined' && window.localStorage
-            ? localStorage.getItem("novamind-theme")
-            : null;
-          if (!savedTheme) {
-            setTheme(e.matches ? "dark" : "clinical");
-          }
-        };
-
-        // Use addEventListener if available, otherwise use deprecated addListener for older browsers
-        if (mediaQuery && mediaQuery.addEventListener) {
-          mediaQuery.addEventListener("change", handleChange);
-          return () => mediaQuery.removeEventListener("change", handleChange);
-        } else if (mediaQuery && mediaQuery.addListener) {
-          // For older browsers
-          mediaQuery.addListener(handleChange);
-          return () => mediaQuery.removeListener(handleChange);
-        }
-      } catch (error) {
-        console.error("Error setting up media query listener:", error);
-      }
-    }
+    const htmlElement = document.documentElement;
     
-    // Return empty cleanup function if matchMedia is not available
-    return () => {};
-  }, [setTheme, theme]);
-
-  // Context value
-  const contextValue: ThemeContextType = {
-    theme,
+    if (isDarkMode) {
+      htmlElement.classList.add('dark');
+    } else {
+      htmlElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+  
+  // Save preference to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, mode);
+  }, [mode]);
+  
+  // Set theme mode
+  const setTheme = useCallback((newMode: ThemeMode): void => {
+    setMode(newMode);
+  }, []);
+  
+  // Toggle between light and dark modes
+  const toggleTheme = useCallback((): void => {
+    setMode(prevMode => {
+      // If system, toggle to light/dark based on current appearance
+      if (prevMode === 'system') {
+        return systemPrefersDark ? 'light' : 'dark';
+      }
+      // If light, toggle to dark
+      if (prevMode === 'light') {
+        return 'dark';
+      }
+      // If dark, toggle to light
+      return 'light';
+    });
+  }, [systemPrefersDark]);
+  
+  // Create memoized context value
+  const contextValue = useMemo(() => ({
+    mode,
     isDarkMode,
-    settings: themeSettings[theme],
     setTheme,
     toggleTheme,
-  };
-
+  }), [mode, isDarkMode, setTheme, toggleTheme]);
+  
   return (
     <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );
 };
-
-export default ThemeProvider;

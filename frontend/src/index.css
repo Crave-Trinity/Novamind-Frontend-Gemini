@@ -1,130 +1,248 @@
-/* Base Tailwind CSS imports */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom layer for Novamind-specific styles */
+/* Base Styles */
 @layer base {
   html {
-    @apply font-sans antialiased;
+    @apply antialiased font-sans scroll-smooth;
   }
   
   body {
-    @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+    @apply bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-200;
   }
   
-  /* Ensure the app takes full height */
-  html, body, #root {
-    @apply h-full;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+  
+  h1 {
+    @apply text-3xl lg:text-4xl;
+  }
+  
+  h2 {
+    @apply text-2xl lg:text-3xl;
+  }
+  
+  h3 {
+    @apply text-xl lg:text-2xl;
+  }
+  
+  a {
+    @apply text-primary-600 hover:text-primary-500 transition-colors duration-200;
+  }
+
+  /* Override default focus styles for better accessibility and aesthetic */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
   }
 }
 
-/* Clinical theme components */
+/* Component Classes */
 @layer components {
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-500 text-white hover:bg-primary-600 shadow-md;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700;
+  }
+  
+  .btn-outline {
+    @apply border border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800;
+  }
+  
+  .btn-danger {
+    @apply bg-danger text-white hover:bg-red-600;
+  }
+  
+  /* Cards */
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-card p-6 transition-all duration-300;
+  }
+  
+  .card-hover {
+    @apply hover:shadow-lg hover:-translate-y-1;
+  }
+  
+  .card-clinical {
+    @apply bg-white dark:bg-gray-800 rounded-clinical shadow-clinical border border-gray-100 dark:border-gray-700;
+  }
+  
+  /* Clinical UI Elements */
   .clinical-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
   
-  .clinical-panel {
-    @apply bg-white dark:bg-gray-800 shadow rounded-lg p-6;
+  .clinical-section {
+    @apply py-8;
   }
   
-  .clinical-card {
-    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 shadow-sm hover:shadow transition-shadow;
+  /* Form Elements */
+  .form-input {
+    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm;
   }
   
-  .stat-container {
-    @apply rounded-lg bg-white dark:bg-gray-800 p-4 shadow;
+  .form-select {
+    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm;
   }
   
-  .stat-title {
-    @apply text-sm font-medium text-gray-500 dark:text-gray-400 truncate;
+  .form-checkbox {
+    @apply h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700;
   }
   
-  .stat-value {
-    @apply mt-1 text-3xl font-semibold text-primary-600 dark:text-primary-500;
+  .form-radio {
+    @apply h-4 w-4 border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700;
   }
   
-  .stat-description {
-    @apply mt-1 text-sm text-gray-600 dark:text-gray-300;
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
   }
   
-  /* Buttons */
-  .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500;
+  .form-error {
+    @apply mt-1 text-sm text-danger;
   }
   
-  .btn-secondary {
-    @apply bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 font-medium py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500;
+  .form-hint {
+    @apply mt-1 text-sm text-gray-500 dark:text-gray-400;
   }
   
-  .btn-outline {
-    @apply border border-primary-500 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-gray-800 font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500;
-  }
-}
-
-/* Brain visualization specific styles */
-@layer utilities {
-  .brain-region {
-    @apply transition-opacity duration-300;
-  }
-  
-  .brain-region-inactive {
-    @apply opacity-50;
-  }
-  
-  .brain-region-active {
-    @apply opacity-100;
+  /* Data Visualization */
+  .neural-node {
+    @apply transition-all duration-300 ease-in-out;
   }
   
   .neural-connection {
-    @apply stroke-primary-500 transition-all duration-300;
+    @apply stroke-neural-400 dark:stroke-neural-600 transition-all duration-300 ease-in-out;
   }
   
-  .neural-connection-active {
-    @apply stroke-primary-600 stroke-2;
+  .neural-active {
+    @apply animate-neural-pulse;
+  }
+  
+  /* Dashboard UI */
+  .dashboard-stat {
+    @apply flex flex-col p-6 rounded-xl bg-white dark:bg-gray-800 shadow-card;
+  }
+  
+  .dashboard-stat-title {
+    @apply text-sm font-medium text-gray-500 dark:text-gray-400;
+  }
+  
+  .dashboard-stat-value {
+    @apply mt-2 text-3xl font-semibold text-gray-900 dark:text-white;
+  }
+
+  .dashboard-nav-item {
+    @apply flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200;
+  }
+  
+  .dashboard-nav-item-active {
+    @apply bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300;
+  }
+  
+  .dashboard-nav-item-inactive {
+    @apply text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white;
   }
 }
 
-/* Animation utilities */
+/* Utility Classes */
 @layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-in-out forwards;
+  .text-balance {
+    text-wrap: balance;
   }
   
-  .animate-slide-in {
-    animation: slideIn 0.5s ease-out forwards;
+  .neural-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-neural-600;
   }
   
-  @keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+  .luxury-gradient {
+    @apply bg-gradient-to-r from-luxury-gold via-luxury-platinum to-neural-500;
   }
   
-  @keyframes slideIn {
-    0% { transform: translateY(20px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
+  .glass-effect {
+    @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-md backdrop-saturate-150;
+  }
+  
+  .truncate-2-lines {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 
-/* Sleek dark theme enhanced styles */
-.theme-sleek .clinical-panel {
-  @apply bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700;
+/* Special Elements */
+.brain-visualization-container {
+  @apply relative w-full h-80 sm:h-96 lg:h-[32rem] bg-gray-900 rounded-xl overflow-hidden;
 }
 
-.theme-sleek .btn-primary {
-  @apply bg-gradient-to-r from-primary-500 to-primary-600;
+.neural-activity-indicator {
+  @apply absolute inset-0 flex items-center justify-center;
 }
 
-/* Critical specific component styles that need to be applied regardless of purging */
-#brain-model-canvas {
-  @apply w-full h-full min-h-[400px];
+/* Loading state animations */
+.loading-pulse {
+  @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded-md;
 }
 
-.dashboard-stats-container {
-  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8;
+/* Sophisticated neural network animation effect */
+.neural-node-animation {
+  animation: neuralPulse 3s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95);
 }
 
-.patient-list-item {
-  @apply flex items-center p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors;
+@keyframes neuralPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Clinical patient chart elements */
+.clinical-chart-container {
+  @apply rounded-xl overflow-hidden shadow-card bg-white dark:bg-gray-800 p-4;
+}
+
+/* Custom scrollbars for the application */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800 rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-700 rounded-full hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors;
+}
+
+/* Ensure all modals have proper z-indexing */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50;
+}
+
+.modal-content {
+  @apply relative bg-white dark:bg-gray-800 rounded-xl shadow-xl z-50 max-w-lg mx-auto overflow-hidden;
 }

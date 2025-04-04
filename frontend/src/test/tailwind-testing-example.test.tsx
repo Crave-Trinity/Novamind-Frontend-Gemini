@@ -1,83 +1,135 @@
-import React from 'react';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { render, screen, renderWithProviders } from './test-utils';
-import { tailwindMock } from './tailwind-mock';
+/**
+ * Tailwind CSS Testing Example
+ * 
+ * This file demonstrates how to properly test components that use Tailwind CSS classes
+ * and theme-dependent styling in a JSDOM test environment.
+ */
 
-// Sample component that uses Tailwind classes including dark mode variants
-const TailwindComponent: React.FC<{ title: string }> = ({ title }) => {
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { cssMock, initTailwindMock, applyClassBasedDarkMode } from './tailwind-mock';
+
+// Initialize the Tailwind mocking system before tests
+beforeAll(() => {
+  initTailwindMock();
+});
+
+// Reset dark mode between tests
+afterEach(() => {
+  cssMock.disableDarkMode();
+});
+
+// Example component that uses Tailwind classes and responds to theme
+const ThemeAwareButton: React.FC<{ onClick: () => void; children: React.ReactNode }> = ({ 
+  onClick, 
+  children 
+}) => (
+  <button
+    onClick={onClick}
+    className="p-4 transition rounded-md dark:bg-dark-700 dark:text-white bg-primary-500 text-white"
+    data-testid="theme-button"
+  >
+    {children}
+  </button>
+);
+
+// Simple toggle component that changes theme
+const ThemeToggler: React.FC = () => {
+  const toggleTheme = () => {
+    cssMock.toggleDarkMode();
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded shadow">
-      <h2 className="text-gray-800 dark:text-white">{title}</h2>
-      <div className="bg-primary-500 text-white px-4 py-2 rounded">
-        This is a primary button
-      </div>
-      <div className="mt-2 bg-gray-100 dark:bg-gray-900 p-2">
-        <p className="text-black dark:text-gray-300">
-          This text changes color in dark mode
-        </p>
-      </div>
+    <div className="flex flex-col items-center">
+      <h2 className="dark:text-white text-black">Current Theme: {cssMock.darkMode ? 'Dark' : 'Light'}</h2>
+      <ThemeAwareButton onClick={toggleTheme}>
+        Toggle Theme
+      </ThemeAwareButton>
     </div>
   );
 };
 
-describe('Tailwind CSS Testing Example', () => {
-  // Ensure we have clean state before each test
-  beforeEach(() => {
-    tailwindMock.disableDarkMode();
-  });
-
-  afterEach(() => {
-    tailwindMock.disableDarkMode();
-  });
-
-  it('renders correctly in light mode', () => {
-    render(<TailwindComponent title="Light Mode Test" />);
+// Test suite
+describe('Tailwind CSS and Theme Testing', () => {
+  test('renders correctly with initial theme', () => {
+    render(<ThemeToggler />);
     
-    // Check if title is rendered
-    expect(screen.getByText('Light Mode Test')).toBeInTheDocument();
+    // Check initial state is light mode
+    expect(cssMock.darkMode).toBe(false);
+    expect(screen.getByText('Current Theme: Light')).toBeInTheDocument();
     
-    // Check if dark mode is disabled
+    // HTML document should not have dark class
     expect(document.documentElement.classList.contains('dark')).toBe(false);
-    
-    // Check that light mode styles are applied (we can't actually check the computed styles,
-    // but we can verify the elements have the expected classes)
-    const container = screen.getByText('Light Mode Test').parentElement;
-    expect(container).toHaveClass('bg-white');
-    expect(container).not.toHaveClass('bg-gray-800');
   });
 
-  it('components have proper dark mode classes', () => {
-    // Just check that components have appropriate classes for dark mode
-    // This doesn't test if dark mode is actually active, just the component structure
-    render(<TailwindComponent title="Dark Mode Classes Test" />);
+  test('toggles dark mode when button is clicked', async () => {
+    render(<ThemeToggler />);
     
-    // Verify the component has dark mode variant classes present
-    const container = screen.getByText('Dark Mode Classes Test').parentElement;
-    expect(container).toHaveClass('dark:bg-gray-800');
+    // Initial state
+    expect(cssMock.darkMode).toBe(false);
     
-    // Check that dark mode text class is applied to paragraph
-    const paragraph = screen.getByText('This text changes color in dark mode');
-    expect(paragraph).toHaveClass('dark:text-gray-300');
+    // Click the button
+    const button = screen.getByTestId('theme-button');
+    await userEvent.click(button);
     
-    // Also check container
-    const textContainer = paragraph.parentElement;
-    expect(textContainer).toHaveClass('dark:bg-gray-900');
-  });
-
-  it('can toggle dark mode during test execution', () => {
-    const { enableDarkMode, disableDarkMode } = renderWithProviders(
-      <TailwindComponent title="Toggle Dark Mode Test" />
-    );
+    // Check dark mode is enabled
+    expect(cssMock.darkMode).toBe(true);
+    expect(screen.getByText('Current Theme: Dark')).toBeInTheDocument();
     
-    // Initially in light mode
-    expect(document.documentElement.classList.contains('dark')).toBe(false);
-    
-    // Toggle to dark mode
-    enableDarkMode();
+    // HTML document should have dark class
     expect(document.documentElement.classList.contains('dark')).toBe(true);
     
-    // Toggle back to light mode
-    disableDarkMode();
+    // Click again to toggle back
+    await userEvent.click(button);
+    
+    // Check dark mode is disabled
+    expect(cssMock.darkMode).toBe(false);
+    expect(screen.getByText('Current Theme: Light')).toBeInTheDocument();
+    
+    // HTML document should not have dark class
     expect(document.documentElement.classList.contains('dark')).toBe(false);
+  });
+
+  test('programmatically toggle dark mode', () => {
+    render(<ThemeToggler />);
+    
+    // Initial state
+    expect(screen.getByText('Current Theme: Light')).toBeInTheDocument();
+    
+    // Programmatically enable dark mode
+    cssMock.enableDarkMode();
+    
+    // Check dark mode is enabled
+    expect(cssMock.darkMode).toBe(true);
+    expect(screen.getByText('Current Theme: Dark')).toBeInTheDocument();
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+  });
+});
+
+// Integration with React Testing Library custom render
+describe('Integration with React Testing Library', () => {
+  // Example of a custom render function that could be used in test-utils.tsx
+  const renderWithTheme = (
+    ui: React.ReactElement,
+    { isDarkMode = false } = {}
+  ) => {
+    // Set the theme before rendering
+    if (isDarkMode) {
+      cssMock.enableDarkMode();
+    } else {
+      cssMock.disableDarkMode();
+    }
+    
+    return render(ui);
+  };
+  
+  test('custom render function with dark mode', () => {
+    renderWithTheme(<ThemeToggler />, { isDarkMode: true });
+    
+    // Should be rendered in dark mode
+    expect(cssMock.darkMode).toBe(true);
+    expect(screen.getByText('Current Theme: Dark')).toBeInTheDocument();
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
 });

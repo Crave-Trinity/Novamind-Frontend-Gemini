@@ -1,115 +1,176 @@
 /**
- * Tailwind CSS Mock for Testing
- * 
- * This module provides utilities for testing components that use Tailwind CSS,
- * particularly those with dark mode variants.
+ * Mock implementation for Tailwind CSS in tests
+ * Provides utilities to simulate dark mode and CSS class functionality in a test environment
  */
 
-// Global state for dark mode that persists between tests
-let darkMode = false;
+// For backward compatibility with existing imports
+export const cssMock = {
+  darkMode: false,
+  enableDarkMode: (): void => { cssMock.darkMode = true; applyClassBasedDarkMode(); },
+  disableDarkMode: (): void => { cssMock.darkMode = false; applyClassBasedDarkMode(); }
+};
 
 /**
- * Tailwind CSS mock for testing environment
+ * Apply dark mode classes to the document element based on the cssMock state
+ * Used for compatibility with existing tests
  */
-export const tailwindMock = {
-  // Dark mode state
-  darkMode,
-  
-  // Enable dark mode in tests and return true to confirm operation
-  enableDarkMode: () => {
-    darkMode = true;
-    applyDarkModeClass();
-    console.log('[tailwind-mock.ts] Dark mode enabled');
-    return true;
-  },
-  
-  // Disable dark mode in tests and return false to confirm operation
-  disableDarkMode: () => {
-    darkMode = false;
-    applyDarkModeClass();
-    console.log('[tailwind-mock.ts] Dark mode disabled');
-    return false;
-  },
-  
-  // Get current dark mode state
-  isDarkMode: () => darkMode,
-  
-  // Initialize Tailwind mock in test environment
-  initialize: () => {
-    injectTailwindStyles();
-    applyDarkModeClass();
-    console.log('[tailwind-mock.ts] Tailwind mock styles applied to document');
+export const applyClassBasedDarkMode = (): void => {
+  if (!document || !document.documentElement) {
+    return;
+  }
+
+  if (cssMock.darkMode) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+};
+
+// Global state for the mock
+export interface TailwindMockState {
+  /** Whether dark mode is currently active */
+  darkMode: boolean;
+  /** Element class lists for assertions */
+  classList: Map<HTMLElement, Set<string>>;
+}
+
+const mockState: TailwindMockState = {
+  darkMode: false,
+  classList: new Map(),
+};
+
+/**
+ * Enable dark mode in the test environment
+ */
+export const enableDarkMode = (): void => {
+  mockState.darkMode = true;
+  applyDarkModeToDocument();
+};
+
+/**
+ * Disable dark mode in the test environment
+ */
+export const disableDarkMode = (): void => {
+  mockState.darkMode = false;
+  applyDarkModeToDocument();
+};
+
+/**
+ * Toggle dark mode in the test environment
+ */
+export const toggleDarkMode = (): void => {
+  mockState.darkMode = !mockState.darkMode;
+  applyDarkModeToDocument();
+};
+
+/**
+ * Get the current mock state
+ */
+export const getMockState = (): TailwindMockState => mockState;
+
+/**
+ * Reset the mock state
+ */
+export const resetMockState = (): void => {
+  mockState.darkMode = false;
+  mockState.classList.clear();
+  applyDarkModeToDocument();
+};
+
+/**
+ * Apply dark mode to the document element
+ */
+const applyDarkModeToDocument = (): void => {
+  if (!document || !document.documentElement) {
+    return;
+  }
+
+  if (mockState.darkMode) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
   }
 };
 
 /**
- * Apply dark mode class to document root
- * This is how Tailwind's dark mode detection works with class strategy
+ * Mock implementation for classList that tracks changes for assertions
+ * @param element The element to create a mock classList for
+ * @returns A mock classList with add, remove, and contains methods
  */
-function applyDarkModeClass() {
-  if (typeof document !== 'undefined' && document.documentElement) {
-    // Always ensure we remove first to avoid duplicates
-    document.documentElement.classList.remove('dark');
-    document.documentElement.classList.remove('light');
-    
-    // Add the appropriate class
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.add('light');
-    }
+export const createMockClassList = (element: HTMLElement): DOMTokenList => {
+  // Initialize the classList for this element
+  if (!mockState.classList.has(element)) {
+    mockState.classList.set(element, new Set<string>());
   }
-}
+
+  const elementClasses = mockState.classList.get(element) as Set<string>;
+
+  return {
+    add: (...tokens: string[]): void => {
+      tokens.forEach((token) => elementClasses.add(token));
+    },
+    remove: (...tokens: string[]): void => {
+      tokens.forEach((token) => elementClasses.delete(token));
+    },
+    contains: (token: string): boolean => elementClasses.has(token),
+    toggle: (token: string, force?: boolean): boolean => {
+      if (force !== undefined) {
+        if (force) {
+          elementClasses.add(token);
+          return true;
+        } else {
+          elementClasses.delete(token);
+          return false;
+        }
+      }
+
+      if (elementClasses.has(token)) {
+        elementClasses.delete(token);
+        return false;
+      } else {
+        elementClasses.add(token);
+        return true;
+      }
+    },
+    // Implement other DOMTokenList methods as needed
+    replace: (oldToken: string, newToken: string): boolean => {
+      if (!elementClasses.has(oldToken)) return false;
+      elementClasses.delete(oldToken);
+      elementClasses.add(newToken);
+      return true;
+    },
+    supports: (): boolean => true,
+    value: Array.from(elementClasses).join(' '),
+    length: elementClasses.size,
+    item: (index: number): string | null => {
+      return Array.from(elementClasses)[index] || null;
+    },
+    toString: (): string => Array.from(elementClasses).join(' '),
+    [Symbol.iterator]: function* (): Generator<string> {
+      for (const className of elementClasses) {
+        yield className;
+      }
+    },
+  } as unknown as DOMTokenList;
+};
 
 /**
- * Inject minimal Tailwind-like styles for testing purposes
+ * Setup the document mock for testing
+ * This should be called in the test setup file
  */
-function injectTailwindStyles() {
-  if (typeof document !== 'undefined') {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      /* Minimal Tailwind-like reset */
-      *, ::before, ::after { box-sizing: border-box; }
-      html { line-height: 1.5; }
-      body { margin: 0; font-family: system-ui, sans-serif; }
-      
-      /* Common utilities */
-      .bg-white { background-color: #ffffff; }
-      .bg-black { background-color: #000000; }
-      .bg-primary-500 { background-color: #0066F0; }
-      .bg-gray-100 { background-color: #f3f4f6; }
-      .bg-gray-200 { background-color: #e5e7eb; }
-      .bg-gray-800 { background-color: #1f2937; }
-      .bg-gray-900 { background-color: #111827; }
-      
-      .text-white { color: #ffffff; }
-      .text-black { color: #000000; }
-      .text-primary-500 { color: #0066F0; }
-      .text-gray-800 { color: #1f2937; }
-      .text-gray-300 { color: #d1d5db; }
-      
-      .p-4 { padding: 1rem; }
-      .px-4 { padding-left: 1rem; padding-right: 1rem; }
-      .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-      .m-2 { margin: 0.5rem; }
-      .rounded { border-radius: 0.25rem; }
-      .shadow { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-      
-      /* Dark mode variants */
-      .dark .bg-white { background-color: #111827; }
-      .dark .bg-black { background-color: #000000; }
-      .dark .bg-gray-100 { background-color: #374151; }
-      .dark .bg-gray-200 { background-color: #1f2937; }
-      .dark .bg-gray-800 { background-color: #111827; }
-      .dark .text-white { color: #ffffff; }
-      .dark .text-black { color: #d1d5db; }
-      .dark .text-gray-800 { color: #f3f4f6; }
-      .dark .text-gray-300 { color: #9ca3af; }
-      
-      /* Component-specific styles */
-      .dark .bg-primary-500 { background-color: #0066F0; }
-      .dark .text-primary-500 { color: #0066F0; }
-    `;
-    document.head.appendChild(style);
+export const setupTailwindMock = (): void => {
+  // Apply initial dark mode state to the document
+  applyDarkModeToDocument();
+
+  // Install mock for element.classList
+  if (typeof window !== 'undefined') {
+    Object.defineProperty(HTMLElement.prototype, 'classList', {
+      get() {
+        return createMockClassList(this);
+      },
+    });
   }
-}
+};
+
+// Export the mock state for testing
+export default mockState;

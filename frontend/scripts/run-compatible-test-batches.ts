@@ -4,8 +4,10 @@
  * Tests are organized based on their dependencies and potential conflicts
  */
 
-// Import from Node.js built-in modules using ESM syntax
-import { execSync } from 'node:child_process';
+/// <reference types="node" />
+
+// Import using standard syntax that's compatible with the project's TypeScript config
+import { execSync } from 'child_process';
 
 // Define interfaces for type safety
 interface TestBatch {
@@ -67,3 +69,43 @@ function runBatch(batch: TestBatch): boolean {
     // Create pattern arguments
     const patterns: string = batch.patterns.map(p => `"${p}"`).join(' ');
     
+    // Run the tests with a timeout
+    const command: string = `npm run test -- ${patterns} --timeout=10000`;
+    console.log(`Executing: ${command}\n`);
+    
+    execSync(command, { stdio: 'inherit' });
+    console.log(`\n✅ Batch "${batch.name}" completed successfully\n`);
+    return true;
+  } catch (error) {
+    console.error(`\n❌ Error in batch "${batch.name}":`);
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error('Unknown error occurred');
+    }
+    return false;
+  }
+}
+
+// Run all batches
+console.log('Starting Compatible Test Batches Runner');
+console.log('=======================================');
+
+let successful: number = 0;
+let failed: number = 0;
+
+batches.forEach(batch => {
+  if (runBatch(batch)) {
+    successful++;
+  } else {
+    failed++;
+  }
+});
+
+console.log('\n=======================================');
+console.log(`Test Batches Summary: ${successful} successful, ${failed} failed`);
+console.log('=======================================\n');
+
+// Using explicit condition with type-safe exit code
+const exitCode: 0 | 1 = failed > 0 ? 1 : 0;
+process.exit(exitCode);

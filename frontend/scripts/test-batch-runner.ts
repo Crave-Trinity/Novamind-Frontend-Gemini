@@ -12,7 +12,6 @@
  *   --type: Run only type validation tests
  */
 
-// Add Node.js type definitions
 /// <reference types="node" />
 
 import { execSync } from 'child_process';
@@ -173,4 +172,5 @@ console.log(`${successCount} passed, ${failCount} failed, ${skipCount} skipped`)
 console.log('=======================================\n');
 
 // Exit with error if any batch failed
-process.exit(failCount > 0 ? 1 : 0);
+const exitCode: 0 | 1 = failCount > 0 ? 1 : 0;
+process.exit(exitCode);
