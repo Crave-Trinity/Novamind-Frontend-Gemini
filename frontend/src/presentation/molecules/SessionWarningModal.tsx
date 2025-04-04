@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@application/hooks/useAuth";
 import { auditLogService, AuditEventType } from "@infrastructure/services/AuditLogService";
 
 interface SessionWarningModalProps {
@@ -14,12 +15,6 @@ interface SessionWarningModalProps {
    * Default: 5 minutes (300,000ms)
    */
   logoutTime?: number;
-  
-  /**
-   * Whether the user is authenticated
-   * If false, the session monitoring is disabled
-   */
-  isAuthenticated: boolean;
 }
 
 /**
@@ -34,8 +29,9 @@ interface SessionWarningModalProps {
 const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
   warningTime = 25 * 60 * 1000, // 25 minutes
   logoutTime = 5 * 60 * 1000, // 5 minutes
-  isAuthenticated,
 }) => {
+  // Get authentication state from context
+  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   
   // Modal state
@@ -123,9 +119,9 @@ const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
       result: "success",
     });
     
-    // Redirect to login
-    navigate("/login");
-  }, [clearAllTimers, navigate]);
+    // Use auth context logout function
+    logout();
+  }, [clearAllTimers, logout]);
   
   // Initialize activity monitoring
   useEffect(() => {

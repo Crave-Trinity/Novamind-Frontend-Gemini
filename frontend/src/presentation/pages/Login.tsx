@@ -1,16 +1,16 @@
-import React, { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { auditLogService, AuditEventType } from "@infrastructure/services/AuditLogService";
-import LoadingIndicator from "@atoms/LoadingIndicator";
+import React, { useState, useCallback, useEffect } from "react";
+import { useAuth } from "@application/hooks/useAuth";
+import LoadingIndicator from "@presentation/atoms/LoadingIndicator";
 
 /**
  * Login Page Component
- * 
+ *
  * HIPAA-compliant authentication gateway for the Novamind Digital Twin platform.
  * Implements secure login with audit logging capabilities.
  */
 const Login: React.FC = () => {
-  const navigate = useNavigate();
+  // Get authentication methods and state from context
+  const { login, isLoading: authLoading, error: authError } = useAuth();
   
   // Form state
   const [email, setEmail] = useState("");
@@ -18,6 +18,13 @@ const Login: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Sync local error state with auth context error
+  useEffect(() => {
+    if (authError) {
+      setError(authError);
+    }
+  }, [authError]);
   
   // Handle form submission
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -32,48 +39,11 @@ const Login: React.FC = () => {
       return;
     }
     
-    try {
-      setIsLoading(true);
-      
-      // In a real app, this would be an API call to authenticate
-      // Simulating API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Demo login - in a real app we would verify credentials with the backend
-      if (email === "demo@novamind.com" && password === "demo123") {
-        // Log successful login
-        auditLogService.log(AuditEventType.USER_LOGIN, {
-          action: "user_login",
-          details: "User logged in successfully",
-          result: "success",
-        });
-        
-        // Redirect to dashboard
-        navigate("/dashboard");
-      } else {
-        // Log failed login attempt
-        auditLogService.log(AuditEventType.UNAUTHORIZED_ACCESS_ATTEMPT, {
-          action: "user_login",
-          details: "Failed login attempt",
-          result: "failure",
-        });
-        
-        setError("Invalid email or password");
-        setIsLoading(false);
-      }
-    } catch (err) {
-      setError("Authentication service unavailable. Please try again later.");
-      setIsLoading(false);
-      
-      // Log error
-      auditLogService.log(AuditEventType.SYSTEM_ERROR, {
-        action: "user_login_error",
-        details: "Authentication service error",
-        result: "failure",
-        errorMessage: err instanceof Error ? err.message : "Unknown error",
-      });
-    }
-  }, [email, password, navigate]);
+    // Use the auth context login function
+    setIsLoading(true);
+    await login(email, password, rememberMe);
+    setIsLoading(false);
+  }, [email, password, rememberMe, login]);
   
   // Demo login helper
   const fillDemoCredentials = useCallback(() => {
@@ -186,10 +156,10 @@ const Login: React.FC = () => {
             <div>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || authLoading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
               >
-                {isLoading ? (
+                {(isLoading || authLoading) ? (
                   <LoadingIndicator size="sm" color="white" />
                 ) : (
                   "Sign in"
@@ -241,3 +211,4 @@ const Login: React.FC = () => {
 };
 
 export default Login;
+
