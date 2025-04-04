@@ -1,139 +1,112 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback } from "react";
 
-import { RenderMode } from "@domain/models/brain/BrainModel";
-import Button from "@presentation/atoms/Button";
-
-interface BrainVisualizationControlsProps {
-  activeRegions: string[];
-  onRegionToggle?: (regionId: string) => void;
-  onRenderModeChange?: (mode: RenderMode) => void;
-  onResetView?: () => void;
-  currentRenderMode?: RenderMode;
-  disabled?: boolean;
-  className?: string;
+export interface BrainVisualizationControlsProps {
+  viewMode: "normal" | "activity" | "connections";
+  rotationSpeed: number;
+  rotationEnabled: boolean;
+  onViewModeChange: (mode: "normal" | "activity" | "connections") => void;
+  onRotationSpeedChange: (speed: number) => void;
+  onRotationToggle: () => void;
 }
 
 /**
- * Controls for Brain Visualization
- * Provides UI for adjusting visualization parameters
+ * Brain Visualization Controls
+ * 
+ * Control panel for the 3D brain visualization with various
+ * visualization modes and rotation controls.
  */
 const BrainVisualizationControls: React.FC<BrainVisualizationControlsProps> = ({
-  activeRegions,
-  onRegionToggle,
-  onRenderModeChange,
-  onResetView,
-  currentRenderMode = RenderMode.ANATOMICAL,
-  disabled = false,
-  className = "",
+  viewMode,
+  rotationSpeed,
+  rotationEnabled,
+  onViewModeChange,
+  onRotationSpeedChange,
+  onRotationToggle
 }) => {
-  const [expanded, setExpanded] = useState(false);
-
-  // Handle render mode change
-  const handleRenderModeChange = useCallback(
-    (mode: RenderMode) => {
-      if (onRenderModeChange) {
-        onRenderModeChange(mode);
-      }
-    },
-    [onRenderModeChange],
-  );
-
-  // Toggle expanded state
-  const toggleExpanded = useCallback(() => {
-    setExpanded((prev) => !prev);
-  }, []);
-
-  // Reset view callback
-  const handleResetView = useCallback(() => {
-    if (onResetView && !disabled) {
-      onResetView();
-    }
-  }, [onResetView, disabled]);
-
+  // Handle view mode button click
+  const handleViewModeClick = useCallback((mode: "normal" | "activity" | "connections") => {
+    onViewModeChange(mode);
+  }, [onViewModeChange]);
+  
+  // Handle rotation speed change
+  const handleRotationSpeedChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    onRotationSpeedChange(value);
+  }, [onRotationSpeedChange]);
+  
   return (
-    <div
-      className={`rounded-lg bg-white p-4 shadow-md dark:bg-gray-800 ${className}`}
-    >
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Visualization Controls
-        </h3>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={toggleExpanded}
-          aria-label={expanded ? "Collapse controls" : "Expand controls"}
-        >
-          {expanded ? "Hide" : "Show"}
-        </Button>
-      </div>
-
-      {expanded && (
-        <div className="space-y-4">
-          {/* Render mode selection */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Render Mode
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {Object.values(RenderMode).map((mode) => (
-                <Button
-                  key={mode}
-                  variant={currentRenderMode === mode ? "primary" : "ghost"}
-                  size="sm"
-                  onClick={() => handleRenderModeChange(mode)}
-                  disabled={disabled}
-                  className="justify-start"
-                >
-                  {mode.charAt(0).toUpperCase() +
-                    mode.slice(1).toLowerCase().replace("_", " ")}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Active regions */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Active Regions ({activeRegions.length})
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {activeRegions.length === 0 ? (
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  No active regions
-                </span>
-              ) : (
-                activeRegions.map((regionId) => (
-                  <Button
-                    key={regionId}
-                    variant="outline"
-                    size="xs"
-                    onClick={() => onRegionToggle && onRegionToggle(regionId)}
-                    disabled={disabled}
-                  >
-                    {regionId}
-                  </Button>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Reset view */}
-          <div className="border-t border-gray-200 pt-2 dark:border-gray-700">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleResetView}
-              disabled={disabled}
-              fullWidth
-            >
-              Reset View
-            </Button>
-          </div>
+    <div className="flex flex-col sm:flex-row items-center gap-3">
+      {/* View mode controls */}
+      <div className="flex items-center space-x-2">
+        <span className="text-xs text-gray-600 dark:text-gray-300">View:</span>
+        <div className="flex rounded-md shadow-sm">
+          <button
+            type="button"
+            className={`px-3 py-1 text-xs font-medium rounded-l-md border ${
+              viewMode === "normal"
+                ? "bg-primary-500 text-white border-primary-600"
+                : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600"
+            }`}
+            onClick={() => handleViewModeClick("normal")}
+          >
+            Normal
+          </button>
+          <button
+            type="button"
+            className={`px-3 py-1 text-xs font-medium border-t border-b ${
+              viewMode === "activity"
+                ? "bg-primary-500 text-white border-primary-600"
+                : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600"
+            }`}
+            onClick={() => handleViewModeClick("activity")}
+          >
+            Activity
+          </button>
+          <button
+            type="button"
+            className={`px-3 py-1 text-xs font-medium rounded-r-md border ${
+              viewMode === "connections"
+                ? "bg-primary-500 text-white border-primary-600"
+                : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600"
+            }`}
+            onClick={() => handleViewModeClick("connections")}
+          >
+            Connections
+          </button>
         </div>
-      )}
+      </div>
+      
+      {/* Rotation controls */}
+      <div className="flex items-center space-x-2">
+        <button
+          type="button"
+          className={`px-3 py-1 text-xs font-medium rounded-md ${
+            rotationEnabled
+              ? "bg-primary-500 text-white"
+              : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600"
+          }`}
+          onClick={onRotationToggle}
+        >
+          {rotationEnabled ? "Rotation: On" : "Rotation: Off"}
+        </button>
+        
+        {rotationEnabled && (
+          <div className="flex items-center space-x-1">
+            <span className="text-xs text-gray-600 dark:text-gray-300">Speed:</span>
+            <input
+              type="range"
+              min="0"
+              max="2"
+              step="0.1"
+              value={rotationSpeed}
+              onChange={handleRotationSpeedChange}
+              className="w-20 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default BrainVisualizationControls;
+export default React.memo(BrainVisualizationControls);

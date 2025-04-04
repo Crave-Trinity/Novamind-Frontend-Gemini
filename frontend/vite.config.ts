@@ -61,7 +61,7 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'ui-vendor': ['@headlessui/react'],
-          'three-vendor': ['three', '@react-three/fiber', '@react-three/postprocessing']
+          'three-vendor': ['three', '@react-three/fiber', '@react-three/drei', '@react-three/postprocessing']
         }
       }
     }
@@ -76,6 +76,6 @@ export default defineConfig({
   
   // Optimizations for Three.js and WebGL
   optimizeDeps: {
-    include: ['three', '@react-three/fiber', '@react-three/postprocessing']
+    include: ['three', '@react-three/fiber', '@react-three/drei', '@react-three/postprocessing']
   }
 });

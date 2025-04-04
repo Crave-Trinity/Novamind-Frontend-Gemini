@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { ThemeContext, ThemeMode } from '../contexts/ThemeContext';
-import { isValidTheme } from '../../types/theme';
-import { auditLogService, AuditEventType } from '../../services/AuditLogService';
+import { ThemeContext, ThemeMode } from '@application/contexts/ThemeContext';
+import { auditLogService, AuditEventType } from '@infrastructure/services/AuditLogService';
+
+// Validate if a string is a valid theme mode
+const isValidTheme = (theme: string | null): theme is ThemeMode => {
+  if (!theme) return false;
+  
+  const validThemes: ThemeMode[] = ['light', 'dark', 'system', 'clinical', 'sleek-dark', 'retro', 'wes'];
+  return validThemes.includes(theme as ThemeMode);
+};
 
 interface ThemeProviderProps {
   defaultTheme?: ThemeMode;
@@ -24,7 +31,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     return isValidTheme(savedTheme) ? savedTheme : defaultTheme;
   };
 
-  const [mode, setMode] = useState<ThemeMode>(getInitialTheme);
+  const [mode, setMode] = useState<ThemeMode>(getInitialTheme());
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   // Detect system preference for dark mode
@@ -82,6 +89,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   // Context value with memoization for performance
   const contextValue = useMemo(() => ({
     mode,
+    theme: isDarkMode ? 'dark' as const : 'light' as const, // Add simple theme property for components with correct type
     isDarkMode,
     setTheme,
     toggleTheme

@@ -15,6 +15,11 @@ export interface ThemeContextType {
   mode: ThemeMode;
   
   /**
+   * Simple theme value ('light' or 'dark') for component usage
+   */
+  theme: 'light' | 'dark';
+  
+  /**
    * Whether dark mode is currently active
    * (either 'dark' mode or 'system' mode with system preference for dark)
    */
