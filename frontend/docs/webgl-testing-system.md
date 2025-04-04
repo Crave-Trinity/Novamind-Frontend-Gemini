@@ -58,3 +58,33 @@ npm run test:visualization  # Run specific visualization tests
 ### Writing Tests for WebGL Components
 
 When writing tests for components that use Three.js/WebGL, follow these best practices:
+
+1. **Proper Cleanup**: Ensure all Three.js resources are properly disposed
+2. **Use Memory Monitoring**: Enable memory monitoring to detect leaks
+3. **Mock Neural Controllers**: Use the neural controller mocks for coordinator tests
+
+Example test with WebGL mocking:
+
+```typescript
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl';
+import { render, screen } from '@testing-library/react';
+import BrainVisualization from '@presentation/components/BrainVisualization';
+
+describe('BrainVisualization', () => {
+  beforeAll(() => {
+    setupWebGLMocks({ monitorMemory: true });
+  });
+
+  afterAll(() => {
+    cleanupWebGLMocks();
+  });
+
+  it('renders the brain model', () => {
+    render(<BrainVisualization />);
+    expect(screen.getByTestId('brain-container')).toBeInTheDocument();
+  });
+});
+```
+
+### Testing Neural Visualization Components
