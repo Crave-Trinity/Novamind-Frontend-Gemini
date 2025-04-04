@@ -4,11 +4,11 @@
  */
 import { describe, it, expect, vi } from "vitest";
 
-import { render, screen, fireEvent } from "@testing-library/react";
-import React from "react"; // Added missing React import
+import { screen, fireEvent } from "@testing-library/react"; // render is imported from unified utils
+import React from "react";
 import userEvent from "@testing-library/user-event";
 import BrainRegionGroup from "./BrainRegionGroup"; // Assuming default export
-import { renderWithProviders } from "@test/test-utils"; // Reverted to relative path
+import { render } from "@test/test-utils.unified"; // Import the unified render
 import { RenderMode, ThemeOption } from "@domain/types/brain/visualization"; // Import RenderMode and ThemeOption
 
 // Mock data with clinical precision
@@ -48,7 +48,7 @@ const mockProps = {
 
 describe("BrainRegionGroup", () => {
   it("renders with neural precision", () => {
-    renderWithProviders(<BrainRegionGroup {...mockProps} />); // Use renderWithProviders
+    render(<BrainRegionGroup {...mockProps} />); // Use the unified render
 
     // Add assertions for rendered content
     expect(screen).toBeDefined();
@@ -56,7 +56,7 @@ describe("BrainRegionGroup", () => {
 
   it("responds to user interaction with quantum precision", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<BrainRegionGroup {...mockProps} />); // Use renderWithProviders
+    render(<BrainRegionGroup {...mockProps} />); // Use the unified render
 
     // Simulate user interactions
     // await user.click(screen.getByText(/example text/i));

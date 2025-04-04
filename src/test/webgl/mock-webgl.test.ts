@@ -5,17 +5,15 @@
  * and prevents test hangs in Three.js components.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { setupWebGLMocks, cleanupWebGLMocks } from './mock-webgl'; // Keep setup/cleanup imports
 import {
-  setupWebGLMocks,
-  cleanupWebGLMocks,
-  MockWebGLRenderer,
-  MockWebGLTexture,
-  MockWebGLGeometry,
-  MockWebGLMaterial
-} from './mock-webgl';
-
-// For direct access to internal functions for testing
-import { default as mockWebGLInternal } from './mock-webgl';
+  WebGLRenderer,
+  Texture, // Assuming Texture is mocked or needed
+  BufferGeometry, // Use exported mock name
+  MeshBasicMaterial, // Use exported mock name
+  Scene, // Add Scene import
+  PerspectiveCamera // Add PerspectiveCamera import
+} from 'three'; // Import standard names - alias will provide mocks
 
 describe('WebGL Mocking', () => {
   beforeEach(() => {
@@ -86,10 +84,12 @@ describe('WebGL Mocking', () => {
 
   it('should create Three.js mock objects', () => {
     // Test that we can create Three.js mock objects
-    const renderer = new MockWebGLRenderer();
-    const texture = new MockWebGLTexture();
-    const geometry = new MockWebGLGeometry();
-    const material = new MockWebGLMaterial();
+    // Instantiate using standard names - alias provides mocks
+    const renderer = new WebGLRenderer();
+    // Assuming MockWebGLTexture was intended to mock Texture
+    const texture = new Texture();
+    const geometry = new BufferGeometry(); // Use standard name
+    const material = new MeshBasicMaterial(); // Use standard name
     
     // Check that the renderer has expected properties
     expect(renderer.domElement).toBeInstanceOf(HTMLCanvasElement);
@@ -143,19 +143,26 @@ describe('Three.js Component Integration', () => {
 
   it('should handle Three.js component rendering without hanging', () => {
     // Create mock Three.js objects
-    const renderer = new MockWebGLRenderer();
-    const geometry = new MockWebGLGeometry();
-    const material = new MockWebGLMaterial();
+    // Instantiate using standard names - alias provides mocks
+    // Instantiate using standard names - alias provides mocks
+    const renderer = new WebGLRenderer();
+    const geometry = new BufferGeometry();
+    const material = new MeshBasicMaterial();
+    // Need mock scene and camera for the render call
+    const scene = new Scene();
+    const camera = new PerspectiveCamera();
     
     // Simulate a render loop - this would normally hang tests
     for (let i = 0; i < 10; i++) {
       // Simulate animation frame
-      renderer.render();
+      // Pass mock scene and camera to render call
+      renderer.render(scene, camera);
     }
     
     // Create and dispose many geometries and materials - this would normally cause memory leaks
-    const geometries = Array(100).fill(0).map(() => new MockWebGLGeometry());
-    const materials = Array(100).fill(0).map(() => new MockWebGLMaterial());
+    // Instantiate using standard names - alias provides mocks
+    const geometries = Array(100).fill(0).map(() => new BufferGeometry());
+    const materials = Array(100).fill(0).map(() => new MeshBasicMaterial());
     
     // Dispose everything
     geometries.forEach(g => g.dispose());

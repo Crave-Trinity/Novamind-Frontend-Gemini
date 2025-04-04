@@ -4,11 +4,11 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"; // Import hooks
 
-import { render, screen, fireEvent } from "@testing-library/react";
-import React from "react"; // Added missing React import
+import { screen, fireEvent } from "@testing-library/react"; // render is imported from unified utils
+import React from "react";
 import userEvent from "@testing-library/user-event";
 import MainLayout from "./MainLayout"; // Assuming default export
-import { renderWithProviders } from "@test/test-utils"; // Remove .tsx extension
+import { render } from "@test/test-utils.unified"; // Import the unified render
 
 // Mock data with clinical precision
 // Mock data with clinical precision - MainLayout requires children
@@ -70,7 +70,7 @@ describe("MainLayout", () => {
   // });
 
   it("renders with neural precision", () => {
-    renderWithProviders(<MainLayout {...mockProps} />); // Use renderWithProviders
+    render(<MainLayout {...mockProps} />); // Use the unified render
 
     // Add assertions for rendered content
     // Check if the child content is rendered
@@ -81,7 +81,7 @@ describe("MainLayout", () => {
 
   it("responds to user interaction with quantum precision", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<MainLayout {...mockProps} />); // Use renderWithProviders
+    render(<MainLayout {...mockProps} />); // Use the unified render
 
     // Simulate user interactions
     // Example: Simulate clicking the theme toggle button (assuming it exists and is accessible)

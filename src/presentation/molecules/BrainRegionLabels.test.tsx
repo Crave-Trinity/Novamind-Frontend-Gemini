@@ -4,11 +4,11 @@
  */
 import { describe, it, expect, vi } from "vitest";
 
-import { render, screen, fireEvent } from "@testing-library/react";
-import React from "react"; // Added missing React import
+import { screen, fireEvent } from "@testing-library/react"; // render is imported from unified utils
+import React from "react";
 import userEvent from "@testing-library/user-event";
 import BrainRegionLabels from "./BrainRegionLabels"; // Assuming default export
-import { renderWithProviders } from "@test/test-utils"; // Reverted to relative path
+import { render } from "@test/test-utils.unified"; // Import the unified render
 import { ThemeSettings, ThemeOption } from "@domain/types/brain/visualization"; // Correct import path and add ThemeOption
 
 // Mock data with clinical precision - Requires specific props for BrainRegionLabels
@@ -43,7 +43,7 @@ const mockProps = {
 
 describe("BrainRegionLabels", () => {
   it("renders with neural precision", () => {
-    renderWithProviders(<BrainRegionLabels {...mockProps} />); // Use renderWithProviders
+    render(<BrainRegionLabels {...mockProps} />); // Use the unified render
 
     // Add assertions for rendered content
     expect(screen).toBeDefined();
@@ -51,7 +51,7 @@ describe("BrainRegionLabels", () => {
 
   it("responds to user interaction with quantum precision", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<BrainRegionLabels {...mockProps} />); // Use renderWithProviders
+    render(<BrainRegionLabels {...mockProps} />); // Use the unified render
 
     // Simulate user interactions
     // await user.click(screen.getByText(/example text/i));

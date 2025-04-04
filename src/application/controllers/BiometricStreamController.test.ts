@@ -109,6 +109,7 @@ describe("BiometricStreamController (Rebuilt)", () => {
   });
 
   it("connects streams and updates state", async () => {
+    vi.useFakeTimers(); // Enable fake timers for this test
     const requestedStreamIds = ["stream-hr", "stream-bp"];
     const { result } = renderHook(() =>
       useBiometricStreamController(mockPatientId, { streamIds: requestedStreamIds })

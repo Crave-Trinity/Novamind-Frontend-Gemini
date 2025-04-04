@@ -7,8 +7,8 @@
 
 import { vi } from 'vitest';
 
-// Mock Geometry classes
-class MockGeometry {
+// Mock Geometry classes (using named exports)
+export class MockGeometry { // Renamed for clarity if needed elsewhere
   dispose = vi.fn();
   attributes = {
     position: { array: new Float32Array([0, 0, 0]) },
@@ -16,9 +16,14 @@ class MockGeometry {
     uv: { array: new Float32Array([0, 0]) }
   };
 }
+export const BoxGeometry = vi.fn().mockImplementation(() => new MockGeometry());
+export const SphereGeometry = vi.fn().mockImplementation(() => new MockGeometry());
+export const CylinderGeometry = vi.fn().mockImplementation(() => new MockGeometry());
+export const PlaneGeometry = vi.fn().mockImplementation(() => new MockGeometry());
+export const BufferGeometry = vi.fn().mockImplementation(() => new MockGeometry());
 
-// Mock Material classes
-class MockMaterial {
+// Mock Material classes (using named exports)
+export class MockMaterial { // Renamed for clarity if needed elsewhere
   dispose = vi.fn();
   side = 0; // FrontSide
   transparent = false;
@@ -27,9 +32,14 @@ class MockMaterial {
   emissive = { r: 0, g: 0, b: 0, set: vi.fn() };
   needsUpdate = false;
 }
+export const MeshBasicMaterial = vi.fn().mockImplementation(() => new MockMaterial());
+export const MeshStandardMaterial = vi.fn().mockImplementation(() => new MockMaterial());
+export const MeshPhongMaterial = vi.fn().mockImplementation(() => new MockMaterial());
+export const MeshLambertMaterial = vi.fn().mockImplementation(() => new MockMaterial());
+export const LineBasicMaterial = vi.fn().mockImplementation(() => new MockMaterial());
 
-// Mock Scene
-class MockScene {
+// Mock Scene (using named export)
+export class Scene {
   children: any[] = [];
   background = null;
   add = vi.fn((obj: any) => {
@@ -47,19 +57,27 @@ class MockScene {
   });
 }
 
-// Mock Camera
-class MockCamera {
-  position = { x: 0, y: 0, z: 5, set: vi.fn() };
+// Mock Camera (using named exports)
+export class MockCamera {
+  // Initialize position with the mocked Vector3 for correct structure
+  position = new Vector3(0, 0, 5);
   lookAt = vi.fn();
   updateProjectionMatrix = vi.fn();
   aspect = 1;
 }
+export const PerspectiveCamera = vi.fn().mockImplementation(() => new MockCamera());
+export const OrthographicCamera = vi.fn().mockImplementation(() => new MockCamera());
 
-// Mock Vector classes
-class MockVector3 {
+// Mock Vector classes (using named exports)
+export class Vector3 {
   x = 0;
   y = 0;
   z = 0;
+  constructor(x = 0, y = 0, z = 0) { // Add constructor
+      this.x = x;
+      this.y = y;
+      this.z = z;
+  }
   set = vi.fn(() => this);
   copy = vi.fn(() => this);
   add = vi.fn(() => this);
@@ -69,23 +87,32 @@ class MockVector3 {
   length = vi.fn(() => 1);
 }
 
-class MockVector2 {
+export class Vector2 {
   x = 0;
   y = 0;
+  constructor(x = 0, y = 0) { // Add constructor
+      this.x = x;
+      this.y = y;
+  }
   set = vi.fn(() => this);
   copy = vi.fn(() => this);
 }
 
-// Mock Color
-class MockColor {
+// Mock Color (using named export)
+export class Color {
   r = 1;
   g = 1;
   b = 1;
+  constructor(r = 1, g = 1, b = 1) { // Add constructor
+      this.r = r;
+      this.g = g;
+      this.b = b;
+  }
   set = vi.fn(() => this);
 }
 
-// Mock Mesh
-class MockMesh {
+// Mock Mesh (using named export)
+export class Mesh {
   position = { x: 0, y: 0, z: 0, set: vi.fn() };
   rotation = { x: 0, y: 0, z: 0, set: vi.fn() };
   scale = { x: 1, y: 1, z: 1, set: vi.fn() };
@@ -105,8 +132,8 @@ class MockMesh {
   });
 }
 
-// Mock Group (same as Mesh but no geometry or material)
-class MockGroup {
+// Mock Group (using named export)
+export class Group {
   position = { x: 0, y: 0, z: 0, set: vi.fn() };
   rotation = { x: 0, y: 0, z: 0, set: vi.fn() };
   scale = { x: 1, y: 1, z: 1, set: vi.fn() };
@@ -126,12 +153,13 @@ class MockGroup {
     this.children.forEach(callback);
   });
 }
+export const Object3D = vi.fn().mockImplementation(() => new Group()); // Alias Object3D to Group
 
 // Utility functions to help with animation cleanup
 export const mockThreeObjects = {
-  renderers: [] as MockWebGLRenderer[],
-  scenes: [] as MockScene[],
-  meshes: [] as MockMesh[]
+  renderers: [] as WebGLRenderer[], // Use exported class name
+  scenes: [] as Scene[],           // Use exported class name
+  meshes: [] as Mesh[]             // Use exported class name
 };
 
 export const cleanupThreeAnimations = (): void => {
@@ -140,96 +168,66 @@ export const cleanupThreeAnimations = (): void => {
   mockThreeObjects.renderers = [];
 };
 
-// Mock Renderer
-class MockWebGLRenderer {
+// Mock Renderer (using named export)
+export class WebGLRenderer {
   domElement = document.createElement('canvas');
   shadowMap = { enabled: false };
   setSize = vi.fn();
   setPixelRatio = vi.fn();
-  render = vi.fn();
+  // Mock render to accept scene and camera, matching the real signature
+  render = vi.fn((scene: any, camera: any) => {});
   dispose = vi.fn();
   setClearColor = vi.fn();
   clear = vi.fn();
-  info = { 
-    render: { calls: 0, triangles: 0, points: 0, lines: 0 } 
+  info = {
+    render: { calls: 0, triangles: 0, points: 0, lines: 0 }
   };
   forceContextLoss = vi.fn();
 }
 
-// Mock Raycaster
-class MockRaycaster {
+// Mock Raycaster (using named export)
+export class Raycaster {
   setFromCamera = vi.fn();
   intersectObjects = vi.fn(() => []);
 }
 
-// Mock Animation-related objects
-const Clock = vi.fn().mockImplementation(() => ({
+// Mock Animation-related objects (using named export)
+export const Clock = vi.fn().mockImplementation(() => ({
   getElapsedTime: vi.fn(() => 0),
   getDelta: vi.fn(() => 0.016),
   start: vi.fn(),
   stop: vi.fn(),
 }));
 
-// Create Three.js mock module
-const ThreeMock = {
-  // Basic objects
-  Object3D: vi.fn().mockImplementation(() => new MockGroup()),
-  Scene: vi.fn().mockImplementation(() => new MockScene()),
-  Group: vi.fn().mockImplementation(() => new MockGroup()),
-  Mesh: vi.fn().mockImplementation(() => new MockMesh()),
-  
-  // Geometries
-  BoxGeometry: vi.fn().mockImplementation(() => new MockGeometry()),
-  SphereGeometry: vi.fn().mockImplementation(() => new MockGeometry()),
-  CylinderGeometry: vi.fn().mockImplementation(() => new MockGeometry()),
-  PlaneGeometry: vi.fn().mockImplementation(() => new MockGeometry()),
-  BufferGeometry: vi.fn().mockImplementation(() => new MockGeometry()),
-  
-  // Materials
-  MeshBasicMaterial: vi.fn().mockImplementation(() => new MockMaterial()),
-  MeshStandardMaterial: vi.fn().mockImplementation(() => new MockMaterial()),
-  MeshPhongMaterial: vi.fn().mockImplementation(() => new MockMaterial()),
-  MeshLambertMaterial: vi.fn().mockImplementation(() => new MockMaterial()),
-  LineBasicMaterial: vi.fn().mockImplementation(() => new MockMaterial()),
-  
-  // Cameras
-  PerspectiveCamera: vi.fn().mockImplementation(() => new MockCamera()),
-  OrthographicCamera: vi.fn().mockImplementation(() => new MockCamera()),
-  
-  // Math
-  Vector3: vi.fn().mockImplementation(() => new MockVector3()),
-  Vector2: vi.fn().mockImplementation(() => new MockVector2()),
-  Color: vi.fn().mockImplementation(() => new MockColor()),
-  
-  // Rendering
-  WebGLRenderer: vi.fn().mockImplementation(() => new MockWebGLRenderer()),
-  
-  // Raycasting
-  Raycaster: vi.fn().mockImplementation(() => new MockRaycaster()),
-  
-  // Clock and animation
-  Clock,
-  
-  // Constants
-  FrontSide: 0,
-  BackSide: 1,
-  DoubleSide: 2,
-  
-  // Texture handling
-  TextureLoader: vi.fn().mockImplementation(() => ({
-    load: vi.fn().mockImplementation(() => ({
-      image: new Image(),
-      dispose: vi.fn(),
-    })),
+// Constants (using named exports)
+// Mock Texture
+export class Texture {
+  image: HTMLImageElement | null = null;
+  needsUpdate = false;
+  dispose = vi.fn();
+  constructor(image?: HTMLImageElement) {
+    this.image = image || null;
+  }
+}
+
+export const FrontSide = 0;
+export const BackSide = 1;
+export const DoubleSide = 2;
+
+// Texture handling (using named export)
+export const TextureLoader = vi.fn().mockImplementation(() => ({
+  load: vi.fn().mockImplementation(() => ({
+    image: new Image(),
+    dispose: vi.fn(),
   })),
-  
-  // Other necessary utilities
-  MathUtils: {
-    DEG2RAD: Math.PI / 180,
-    RAD2DEG: 180 / Math.PI,
-    clamp: vi.fn((value, min, max) => Math.min(Math.max(value, min), max)),
-    lerp: vi.fn((start, end, alpha) => start + (end - start) * alpha),
-  },
+}));
+
+// Other necessary utilities (using named export)
+export const MathUtils = {
+  DEG2RAD: Math.PI / 180,
+  RAD2DEG: 180 / Math.PI,
+  clamp: vi.fn((value, min, max) => Math.min(Math.max(value, min), max)),
+  lerp: vi.fn((start, end, alpha) => start + (end - start) * alpha),
 };
 
-export default ThreeMock;
+// No default export needed anymore

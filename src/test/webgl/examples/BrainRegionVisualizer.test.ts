@@ -7,23 +7,33 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks } from '../index';
+import { setupWebGLMocks, cleanupWebGLMocks } from '../index'; // Keep setup/cleanup
+// Import standard Three.js names - alias will provide mocks
+import {
+  Scene,
+  PerspectiveCamera,
+  WebGLRenderer,
+  SphereGeometry,
+  MeshStandardMaterial,
+  Mesh
+} from 'three';
 
 /**
  * Simple mock Brain Region visualization component
  * This simulates a real Novamind brain visualization component
  */
 class BrainRegionVisualizer {
-  private scene: InstanceType<typeof ThreeMocks.Scene>;
-  private camera: InstanceType<typeof ThreeMocks.PerspectiveCamera>;
-  private renderer: InstanceType<typeof ThreeMocks.WebGLRenderer>;
-  private regions: Map<string, InstanceType<typeof ThreeMocks.Mesh>> = new Map();
+  // Use standard types
+  private scene: Scene;
+  private camera: PerspectiveCamera;
+  private renderer: WebGLRenderer;
+  private regions: Map<string, Mesh> = new Map();
   private disposed = false;
   
   constructor(container: HTMLElement, regions: string[] = []) {
-    // Initialize Three.js scene
-    this.scene = new ThreeMocks.Scene();
-    this.camera = new ThreeMocks.PerspectiveCamera();
+    // Initialize Three.js scene using standard constructors
+    this.scene = new Scene();
+    this.camera = new PerspectiveCamera();
     // Setting properties individually since our mock doesn't use constructor parameters
     this.camera.fov = 75;
     this.camera.aspect = 1.5;
@@ -31,8 +41,8 @@ class BrainRegionVisualizer {
     this.camera.far = 1000;
     this.camera.position.z = 5;
     
-    // Initialize renderer
-    this.renderer = new ThreeMocks.WebGLRenderer({ antialias: true });
+    // Initialize renderer using standard constructor
+    this.renderer = new WebGLRenderer({ antialias: true });
     this.renderer.setSize(900, 600);
     container.appendChild(this.renderer.domElement);
     
@@ -54,12 +64,12 @@ class BrainRegionVisualizer {
    */
   addRegions(regionNames: string[]): void {
     regionNames.forEach((name, index) => {
-      // Create region mesh
-      const geometry = new ThreeMocks.SphereGeometry();
-      const material = new ThreeMocks.MeshStandardMaterial();
+      // Create region mesh using standard constructors
+      const geometry = new SphereGeometry();
+      const material = new MeshStandardMaterial();
       
       // Set position based on index
-      const mesh = new ThreeMocks.Mesh(geometry, material);
+      const mesh = new Mesh(geometry, material);
       mesh.position.x = Math.cos(index * Math.PI / 4) * 3;
       mesh.position.y = Math.sin(index * Math.PI / 4) * 3;
       mesh.position.z = 0;
@@ -121,7 +131,17 @@ class BrainRegionVisualizer {
     // Clean up all meshes
     this.regions.forEach(mesh => {
       this.scene.remove(mesh);
-      mesh.dispose();
+      // Assuming the Mesh mock has a dispose method (as per three.ts mock)
+      if (typeof (mesh as any).dispose === 'function') {
+        (mesh as any).dispose();
+      }
+      // Also dispose geometry and material if necessary
+      if (typeof (mesh.geometry as any).dispose === 'function') {
+        (mesh.geometry as any).dispose();
+      }
+       if (typeof (mesh.material as any).dispose === 'function') {
+        (mesh.material as any).dispose();
+      }
     });
     
     // Clear region map

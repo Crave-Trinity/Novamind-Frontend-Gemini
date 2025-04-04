@@ -8,67 +8,7 @@
 
 import { vi } from 'vitest';
 
-// List of controllers that need to be mocked
-const CONTROLLER_PATHS = [
-  '@application/controllers/neural/useNeuroSyncOrchestrator',
-  '@application/controllers/neural/useNeuralActivityController',
-  '@application/controllers/neural/useClinicalPredictionController',
-  '@application/controllers/neural/useBiometricStreamController',
-  '@application/controllers/neural/useTemporalDynamicsController',
-  '@application/controllers/neural/useNeuralConnectivityController',
-  '@application/controllers/neural/useBrainRegionSelectionController',
-  '@application/controllers/neural/useNeuralVisualizationController',
-];
-
-// Store original modules for cleanup
-const originalModules: Record<string, any> = {};
-
-/**
- * Apply mock implementations to all neural controllers
- */
-export function applyNeuralControllerMocks(): void {
-  console.log('Applying neural controller mocks...');
-  
-  for (const modulePath of CONTROLLER_PATHS) {
-    try {
-      // Store original implementation for cleanup
-      originalModules[modulePath] = vi.importActual(modulePath);
-      
-      // Create mock for this controller
-      const mockImplementation = createMockForController(modulePath);
-      
-      // Apply the mock
-      vi.mock(modulePath, () => mockImplementation);
-      
-      console.log(`Mocked ${modulePath}`);
-    } catch (error) {
-      console.warn(`Failed to mock ${modulePath}:`, error);
-    }
-  }
-}
-
-/**
- * Clean up all neural controller mocks
- */
-export function cleanupNeuralControllerMocks(): void {
-  console.log('Cleaning up neural controller mocks...');
-  
-  for (const modulePath of CONTROLLER_PATHS) {
-    try {
-      // Restore original implementation
-      if (originalModules[modulePath]) {
-        vi.doMock(modulePath, () => originalModules[modulePath]);
-      } else {
-        vi.unmock(modulePath);
-      }
-      
-      console.log(`Unmocked ${modulePath}`);
-    } catch (error) {
-      console.warn(`Failed to unmock ${modulePath}:`, error);
-    }
-  }
-}
-
+// Define the generic mock implementation creator first
 /**
  * Create mock implementation for a specific controller
  */
@@ -121,10 +61,31 @@ function createMockForController(controllerPath: string): Record<string, any> {
   };
   
   // Return the mock for the specific controller
+  // Assuming all controllers are default exports based on usage pattern
   return {
     default: mockImplementation,
   };
 }
+
+// --- Static Mocks ---
+// Apply mocks directly at the top level using string literals
+
+console.log('[neural-controllers-mock.ts] Applying static mocks...');
+
+vi.mock('@application/controllers/neural/useNeuroSyncOrchestrator', () => createMockForController('@application/controllers/neural/useNeuroSyncOrchestrator'));
+vi.mock('@application/controllers/neural/useNeuralActivityController', () => createMockForController('@application/controllers/neural/useNeuralActivityController'));
+vi.mock('@application/controllers/neural/useClinicalPredictionController', () => createMockForController('@application/controllers/neural/useClinicalPredictionController'));
+vi.mock('@application/controllers/neural/useBiometricStreamController', () => createMockForController('@application/controllers/neural/useBiometricStreamController'));
+vi.mock('@application/controllers/neural/useTemporalDynamicsController', () => createMockForController('@application/controllers/neural/useTemporalDynamicsController'));
+vi.mock('@application/controllers/neural/useNeuralConnectivityController', () => createMockForController('@application/controllers/neural/useNeuralConnectivityController'));
+vi.mock('@application/controllers/neural/useBrainRegionSelectionController', () => createMockForController('@application/controllers/neural/useBrainRegionSelectionController'));
+vi.mock('@application/controllers/neural/useNeuralVisualizationController', () => createMockForController('@application/controllers/neural/useNeuralVisualizationController'));
+
+console.log('[neural-controllers-mock.ts] Static mocks applied.');
+
+// Remove the loop and deprecated functions
+
+// createMockForController function remains as defined above
 
 /**
  * Generate mock brain data

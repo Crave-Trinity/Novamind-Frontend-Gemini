@@ -17,35 +17,20 @@ export function setupWebGLForTest(options: SetupOptions = {}): void {
     debugMode: options.debugMode ?? false,
   });
 
-  // Apply neural controller mocks if requested
-  if (options.useNeuralControllerMocks) {
-    try {
-      // Dynamic import to avoid dependency when not needed
-      import('./examples/neural-controllers-mock').then(({ applyNeuralControllerMocks }) => {
-        if (typeof applyNeuralControllerMocks === 'function') {
-          applyNeuralControllerMocks();
-        }
-      });
-    } catch (error) {
-      console.warn('Failed to load neural controller mocks:', error);
-    }
-  }
+  // Neural controller mocks are now applied statically via top-level vi.mock
+  // in neural-controllers-mock.ts. We just need to ensure that file is imported
+  // somewhere in the test setup process (e.g., in src/test/setup.ts).
+  // The conditional logic based on options.useNeuralControllerMocks is removed here,
+  // assuming the mocks should apply if the setupWebGLForTest is called.
+  // If finer control is needed, conditional imports in setup.ts might be required.
 }
 
 /**
  * Clean up WebGL mocks after a test suite
  */
 export function cleanupWebGLAfterTest(options: { failOnLeak?: boolean } = {}): MemoryReport | null {
-  // Clean up neural controller mocks if they were applied
-  try {
-    import('./examples/neural-controllers-mock').then(({ cleanupNeuralControllerMocks }) => {
-      if (typeof cleanupNeuralControllerMocks === 'function') {
-        cleanupNeuralControllerMocks();
-      }
-    });
-  } catch (error) {
-    // Ignore errors during cleanup
-  }
+  // Cleanup for neural controller mocks is handled automatically by Vitest
+  // as vi.mock calls are now top-level.
 
   // Clean up WebGL mocks and report memory leaks
   const report = cleanupWebGLMocks();
@@ -83,6 +68,7 @@ export async function runTestWithWebGL(
     await testFn();
   } finally {
     // Clean up WebGL mocks
-    return cleanupWebGLAfterTest({ failOnLeak: options.failOnLeak });
+    // Conditionally pass failOnLeak only if it's defined, due to exactOptionalPropertyTypes
+    return cleanupWebGLAfterTest(options.failOnLeak !== undefined ? { failOnLeak: options.failOnLeak } : {});
   }
 }

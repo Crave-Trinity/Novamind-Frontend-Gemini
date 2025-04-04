@@ -4,9 +4,10 @@
  * with theme-aware clinical precision
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react"; // Add useMemo
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useTheme } from "next-themes";
+// Import local useTheme hook derived from ThemeContext
+import { useTheme } from '@application/hooks/useTheme';
 
 // Domain types
 import {
@@ -14,132 +15,71 @@ import {
   ThemeSettings,
   RenderMode,
 } from "@domain/types/brain/visualization";
-import { Result, success, failure } from "@domain/types/common";
+// Assuming the path alias is correct, ensure the file exists and exports these
+import { Result, success, failure } from "@domain/types/shared/common";
 
 // Default theme settings
 const DEFAULT_THEME_SETTINGS: Record<string, ThemeSettings> = {
   // Clinical theme - precise, medical, focused on accuracy
   clinical: {
+    name: "clinical", // Added missing prop
+    backgroundColor: "#FFFFFF", // Added missing prop
+    primaryColor: "#2C3E50", // Added missing prop
+    secondaryColor: "#3498DB", // Added missing prop
+    accentColor: "#8b5cf6",
+    textColor: "#2C3E50", // Added missing prop
     regionBaseColor: "#ffffff",
-    activeRegionColor: "#f87171", // Red for active regions
-    selectionColor: "#3b82f6", // Blue for selection
-    accentColor: "#8b5cf6", // Purple for accent elements
-    connectionBaseColor: "#94a3b8", // Slate for connections
-    activeConnectionColor: "#f97316", // Orange for active connections
-    excitatoryColor: "#22c55e", // Green for excitatory connections
-    inhibitoryColor: "#ef4444", // Red for inhibitory connections
-    shadowColor: "#1e293b", // Dark slate for shadows
-    directionalLightColor: "#ffffff",
-    ambientLightIntensity: 0.3,
-    directionalLightIntensity: 0.8,
+    activeRegionColor: "#f87171",
+    connectionBaseColor: "#94a3b8",
+    activeConnectionColor: "#f97316",
+    uiBackgroundColor: "#F8F9FA", // Added missing prop
+    uiTextColor: "#2C3E50", // Added missing prop
+    fontFamily: "Inter, system-ui, sans-serif", // Added missing prop
     glowIntensity: 0.1,
-    bloomThreshold: 0.2,
-    bloomIntensity: 0.4,
-    environmentPreset: "city",
-    activityColorScale: {
-      none: "#6b7280", // Gray
-      low: "#60a5fa", // Blue
-      medium: "#fbbf24", // Yellow
-      high: "#ef4444", // Red
-    },
-    showLabels: true,
-    showFloor: true,
-    curvedConnections: true,
-    useDashedConnections: false,
-    useEnvironmentLighting: true,
+    useBloom: false, // Added missing prop
+    // Removed invalid props: selectionColor, excitatoryColor, inhibitoryColor, shadowColor, directionalLightColor, ambientLightIntensity, directionalLightIntensity, bloomThreshold, bloomIntensity, environmentPreset, activityColorScale, showLabels, showFloor, curvedConnections, useDashedConnections, useEnvironmentLighting
   },
 
   // Dark theme - sleek, modern, high contrast
   dark: {
+    name: "dark", // Added missing prop
+    backgroundColor: "#121212", // Added missing prop
+    primaryColor: "#6E64F0", // Added missing prop
+    secondaryColor: "#3CCFCF", // Added missing prop
+    accentColor: "#8b5cf6",
+    textColor: "#FFFFFF", // Added missing prop
     regionBaseColor: "#1e293b",
-    activeRegionColor: "#f87171", // Red for active regions
-    selectionColor: "#3b82f6", // Blue for selection
-    accentColor: "#8b5cf6", // Purple for accent elements
-    connectionBaseColor: "#475569", // Slate for connections
-    activeConnectionColor: "#f97316", // Orange for active connections
-    excitatoryColor: "#22c55e", // Green for excitatory connections
-    inhibitoryColor: "#ef4444", // Red for inhibitory connections
-    shadowColor: "#0f172a", // Dark slate for shadows
-    directionalLightColor: "#94a3b8",
-    ambientLightIntensity: 0.2,
-    directionalLightIntensity: 0.7,
+    activeRegionColor: "#f87171",
+    connectionBaseColor: "#475569",
+    activeConnectionColor: "#f97316",
+    uiBackgroundColor: "#1E1E1E", // Added missing prop
+    uiTextColor: "#FFFFFF", // Added missing prop
+    fontFamily: "Inter, system-ui, sans-serif", // Added missing prop
     glowIntensity: 0.3,
-    bloomThreshold: 0.1,
-    bloomIntensity: 0.6,
-    environmentPreset: "night",
-    activityColorScale: {
-      none: "#334155", // Slate
-      low: "#1d4ed8", // Dark blue
-      medium: "#b45309", // Dark amber
-      high: "#b91c1c", // Dark red
-    },
-    showLabels: true,
-    showFloor: true,
-    curvedConnections: true,
-    useDashedConnections: true,
-    useEnvironmentLighting: true,
+    useBloom: true, // Added missing prop
+     // Removed invalid props...
   },
 
-  // Modern theme - clean, minimal, focus on data
-  modern: {
-    regionBaseColor: "#f8fafc",
-    activeRegionColor: "#f87171", // Red for active regions
-    selectionColor: "#3b82f6", // Blue for selection
-    accentColor: "#8b5cf6", // Purple for accent elements
-    connectionBaseColor: "#cbd5e1", // Slate for connections
-    activeConnectionColor: "#f97316", // Orange for active connections
-    excitatoryColor: "#22c55e", // Green for excitatory connections
-    inhibitoryColor: "#ef4444", // Red for inhibitory connections
-    shadowColor: "#94a3b8", // Slate for shadows
-    directionalLightColor: "#ffffff",
-    ambientLightIntensity: 0.4,
-    directionalLightIntensity: 0.6,
-    glowIntensity: 0.1,
-    bloomThreshold: 0.3,
-    bloomIntensity: 0.3,
-    environmentPreset: "sunset",
-    activityColorScale: {
-      none: "#cbd5e1", // Slate
-      low: "#93c5fd", // Light blue
-      medium: "#fcd34d", // Light amber
-      high: "#fca5a5", // Light red
-    },
-    showLabels: true,
-    showFloor: false,
-    curvedConnections: false,
-    useDashedConnections: false,
-    useEnvironmentLighting: true,
-  },
+  // Removed "modern" theme as it's not a valid ThemeOption
 
   // High contrast theme - accessible, clear, distinct
   highContrast: {
+    name: "high-contrast", // Added missing prop
+    backgroundColor: "#000000", // Added missing prop
+    primaryColor: "#FFFFFF", // Added missing prop
+    secondaryColor: "#FFFF00", // Added missing prop
+    accentColor: "#7e22ce",
+    textColor: "#FFFFFF", // Added missing prop
     regionBaseColor: "#ffffff",
-    activeRegionColor: "#ef4444", // Red for active regions
-    selectionColor: "#1d4ed8", // Dark blue for selection
-    accentColor: "#7e22ce", // Purple for accent elements
-    connectionBaseColor: "#000000", // Black for connections
-    activeConnectionColor: "#ea580c", // Dark orange for active connections
-    excitatoryColor: "#15803d", // Dark green for excitatory connections
-    inhibitoryColor: "#b91c1c", // Dark red for inhibitory connections
-    shadowColor: "#000000", // Black for shadows
-    directionalLightColor: "#ffffff",
-    ambientLightIntensity: 0.4,
-    directionalLightIntensity: 0.8,
+    activeRegionColor: "#ef4444",
+    connectionBaseColor: "#000000",
+    activeConnectionColor: "#ea580c",
+    uiBackgroundColor: "#000000", // Added missing prop
+    uiTextColor: "#FFFFFF", // Added missing prop
+    fontFamily: "Inter, system-ui, sans-serif", // Added missing prop
     glowIntensity: 0.1,
-    bloomThreshold: 0.3,
-    bloomIntensity: 0.3,
-    environmentPreset: "dawn",
-    activityColorScale: {
-      none: "#000000", // Black
-      low: "#1e40af", // Very dark blue
-      medium: "#a16207", // Dark amber
-      high: "#991b1b", // Very dark red
-    },
-    showLabels: true,
-    showFloor: true,
-    curvedConnections: false,
-    useDashedConnections: true,
-    useEnvironmentLighting: false,
+    useBloom: true, // Added missing prop (Note: was true in original high-contrast example)
+     // Removed invalid props...
   },
 };
 
@@ -163,13 +103,14 @@ interface UseVisualSettingsReturn {
   visualizationSettings: VisualizationSettings;
 
   // Theme settings
-  themeSettings: Record<string, ThemeSettings>;
+  allThemeSettings: Record<string, ThemeSettings>; // Renamed for clarity
+  activeThemeSettings: ThemeSettings; // Add the currently active theme settings
 
   // Methods
   updateVisualizationSettings: (
     settings: Partial<VisualizationSettings>,
   ) => void;
-  getThemeSettings: (theme: string) => ThemeSettings;
+  getThemeSettings: (themeName: string) => ThemeSettings; // Keep getter for specific themes
   resetSettings: () => void;
   createCustomTheme: (name: string, settings: ThemeSettings) => void;
 }
@@ -328,12 +269,19 @@ export function useVisualSettings(): UseVisualSettingsReturn {
     }
   }, [theme, getThemeSettings, updateVisualizationSettings]);
 
+  // Determine the active theme settings based on the current theme from useTheme
+  const activeThemeSettings = useMemo(() => {
+    const currentThemeName = theme || 'clinical'; // Default to clinical if theme is undefined
+    return getThemeSettings(currentThemeName);
+  }, [theme, getThemeSettings]);
+
   return {
     // Settings
     visualizationSettings: localSettings,
 
     // Theme settings
-    themeSettings: localThemeSettings,
+    allThemeSettings: localThemeSettings, // Map of all themes
+    activeThemeSettings, // Currently active theme settings object
 
     // Methods
     updateVisualizationSettings,

@@ -4,11 +4,11 @@
  */
 import { describe, it, expect, vi } from "vitest";
 
-import { render, screen, fireEvent } from "@testing-library/react";
-import React from "react"; // Added missing React import
+import { screen, fireEvent } from "@testing-library/react"; // render is imported from unified utils
+import React from "react";
 import userEvent from "@testing-library/user-event";
 import Dashboard from "@pages/Dashboard"; // Assuming default export
-import { renderWithProviders } from "@test/test-utils.tsx";
+import { render } from "@test/test-utils.unified"; // Import the unified render
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Dashboard likely doesn't need props
@@ -16,7 +16,7 @@ const mockProps = {};
 
 describe("Dashboard", () => {
   it("renders with neural precision", () => {
-    renderWithProviders(<Dashboard {...mockProps} />); // Use renderWithProviders
+    render(<Dashboard {...mockProps} />); // Use the unified render
 
     // Add assertions for rendered content
     expect(screen).toBeDefined();
@@ -24,7 +24,7 @@ describe("Dashboard", () => {
 
   it("responds to user interaction with quantum precision", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<Dashboard {...mockProps} />); // Use renderWithProviders
+    render(<Dashboard {...mockProps} />); // Use the unified render
 
     // Simulate user interactions
     // await user.click(screen.getByText(/example text/i));

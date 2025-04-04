@@ -8,24 +8,26 @@ import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 
 // UI components
+// Correct import paths for Shadcn components
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@presentation/atoms/Tabs";
-import { Button } from "@presentation/atoms/Button";
+} from "@/components/ui/tabs";
+import Button from "@presentation/atoms/Button"; // Use default import
 import { Badge } from "@presentation/atoms/Badge";
-import { Card } from "@presentation/atoms/Card";
-import { Separator } from "@presentation/atoms/Separator";
-import { ScrollArea } from "@presentation/atoms/ScrollArea";
+import Card from "@presentation/atoms/Card"; // Use default import
+import { Separator } from "@/components/ui/separator"; // Correct import path
+// Correct import path for Shadcn component
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@presentation/atoms/Select";
+} from "@/components/ui/select"; // Correct import path
 import {
   Tooltip,
   TooltipContent,

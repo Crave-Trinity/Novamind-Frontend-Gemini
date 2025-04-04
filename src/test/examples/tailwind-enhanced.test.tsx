@@ -5,7 +5,7 @@
  * components that rely on Tailwind CSS classes, dark mode, and WebGL rendering.
  */
 import React from 'react';
-import { render, screen } from '../test-utils.enhanced';
+import { render, screen } from '@test/test-utils.unified'; // Corrected import path
 
 // Simple card component to test
 interface CardProps {
@@ -111,7 +111,8 @@ describe('Card Component with Tailwind CSS', () => {
   });
   
   it('toggles between light and dark mode', () => {
-    const { toggleDarkMode, getIsDarkMode } = render(
+    // Destructure the correct helpers provided by the unified render function
+    const { isDarkMode, enableDarkMode, disableDarkMode } = render(
       <Card 
         title="Toggle Card" 
         description="This card will toggle between modes"
@@ -119,14 +120,14 @@ describe('Card Component with Tailwind CSS', () => {
     );
     
     // Start in light mode
-    expect(getIsDarkMode()).toBe(false);
+    expect(isDarkMode()).toBe(false);
     
     // Toggle to dark mode
-    toggleDarkMode();
-    expect(getIsDarkMode()).toBe(true);
+    enableDarkMode(); // Use the available helper
+    expect(isDarkMode()).toBe(true);
     
     // Toggle back to light mode
-    toggleDarkMode();
-    expect(getIsDarkMode()).toBe(false);
+    disableDarkMode(); // Use the available helper
+    expect(isDarkMode()).toBe(false);
   });
 });

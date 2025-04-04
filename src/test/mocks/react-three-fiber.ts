@@ -47,76 +47,73 @@ const mockCanvasContext = {
   onPointerMissed: vi.fn(),
 };
 
-// Canvas component mock
-const Canvas = vi.fn().mockImplementation(({ children, ...props }) => {
+// Canvas component mock (named export)
+export const Canvas = vi.fn().mockImplementation(({ children, ...props }) => {
+  // Provide a basic context provider if needed, or just render children
+  // For simplicity, just rendering children within a div
   return React.createElement('div', {
     'data-testid': 'mock-canvas',
     className: 'mock-three-canvas',
     style: { width: '100%', height: '100%' },
     ...props,
-    children,
-  });
+  }, children);
 });
 
-// Hook mocks
-const useThree = vi.fn().mockImplementation(() => mockCanvasContext);
-const useFrame = vi.fn().mockImplementation((callback) => {
-  // Call the callback once with mock values but don't set up an animation loop
+// Hook mocks (named exports)
+export const useThree = vi.fn().mockImplementation(() => mockCanvasContext);
+export const useFrame = vi.fn().mockImplementation((callback) => {
+  // Simulate a few frames (e.g., 3) to allow potential async operations
+  // or state updates within the frame loop to progress, without causing an infinite loop.
+  const maxFrames = 3;
   if (typeof callback === 'function') {
-    callback(mockCanvasContext, 0.016);
+    for (let i = 0; i < maxFrames; i++) {
+      try {
+         // Pass slightly increasing time delta if needed, or keep constant
+         callback(mockCanvasContext, 0.016 * (i + 1));
+      } catch (e) {
+         console.error(`Error in mocked useFrame callback (frame ${i + 1}):`, e);
+         break; // Stop simulation if an error occurs
+      }
+    }
   }
+  // R3F useFrame returns undefined
   return undefined;
 });
 
-const useLoader = vi.fn().mockImplementation(() => ({
+export const useLoader = vi.fn().mockImplementation(() => ({
+  // Return a basic mock object, specific tests might need more detail
   clone: vi.fn().mockReturnThis(),
 }));
 
-// Common primitive mocks
-const mesh = vi.fn().mockImplementation(({ children, ...props }) => 
-  React.createElement('div', { 
+// Common primitive mocks (named exports)
+// These are often components in R3F, mocking as simple divs for testing structure
+export const mesh = vi.fn().mockImplementation(({ children, ...props }) =>
+  React.createElement('div', {
     'data-testid': 'mock-mesh',
     className: 'mock-three-mesh',
     ...props,
-    children 
-  })
+  }, children)
 );
 
-const group = vi.fn().mockImplementation(({ children, ...props }) => 
-  React.createElement('div', { 
+export const group = vi.fn().mockImplementation(({ children, ...props }) =>
+  React.createElement('div', {
     'data-testid': 'mock-group',
     className: 'mock-three-group',
     ...props,
-    children 
-  })
+  }, children)
 );
 
-// Mock the standard components from @react-three/fiber
-export const reactThreeFiberMock = {
-  // Entry component
-  Canvas,
+// Utility for cleaning up (can be exported if needed by tests)
+export const cleanupR3FMock = () => {
+  cleanupThreeAnimations(); // Ensure base three mocks are cleaned
   
-  // Hooks
-  useThree,
-  useFrame,
-  useLoader,
-  
-  // Common primitives
-  mesh,
-  group,
-  
-  // Utility for cleaning up
-  cleanup: () => {
-    cleanupThreeAnimations();
-    
-    // Reset all mock functions
-    useThree.mockClear();
-    useFrame.mockClear();
-    useLoader.mockClear();
-    Canvas.mockClear();
-    mesh.mockClear();
-    group.mockClear();
-  }
+  // Reset all mock functions defined in this file
+  useThree.mockClear();
+  useFrame.mockClear();
+  useLoader.mockClear();
+  Canvas.mockClear();
+  mesh.mockClear();
+  group.mockClear();
 };
 
-export default reactThreeFiberMock;
+// No default export needed with named exports

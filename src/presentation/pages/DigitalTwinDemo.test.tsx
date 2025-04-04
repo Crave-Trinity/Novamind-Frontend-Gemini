@@ -4,12 +4,12 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"; // Import hooks
 
-import { render, screen, cleanup } from "@testing-library/react"; // Import cleanup
+import { screen, cleanup } from "@testing-library/react"; // render is imported from unified utils
 import React from "react";
 import userEvent from "@testing-library/user-event";
 // Adjust import path based on actual file location if needed
 import DigitalTwinDemo from "./DigitalTwinDemo"; // Use relative path
-import { renderWithProviders } from "../../test/test-utils"; // Use relative path, remove extension
+import { render } from "@test/test-utils.unified"; // Import the unified render
 
 // Mock data with clinical precision
 // Mock data with clinical precision - DigitalTwinDemo likely doesn't need props
@@ -27,7 +27,7 @@ describe("DigitalTwinDemo", () => {
   });
 
   it("renders the visualization canvas", () => {
-    const { container } = renderWithProviders(<DigitalTwinDemo {...mockProps} />);
+    const { container } = render(<DigitalTwinDemo {...mockProps} />); // Use the unified render
 
     // Assert that a canvas element is rendered (common for R3F)
     const canvasElement = container.querySelector("canvas");
@@ -39,7 +39,7 @@ describe("DigitalTwinDemo", () => {
 
   it("responds to user interaction with quantum precision", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<DigitalTwinDemo {...mockProps} />); // Use renderWithProviders
+    render(<DigitalTwinDemo {...mockProps} />); // Use the unified render
 
     // Simulate user interactions
     // Example: await user.click(screen.getByRole('button', { name: /load model/i }));

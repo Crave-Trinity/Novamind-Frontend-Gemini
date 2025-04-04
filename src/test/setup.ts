@@ -5,92 +5,99 @@
  * It sets up the testing environment with necessary mocks and configurations.
  */
 import '@testing-library/jest-dom';
-import { vi, beforeAll, afterEach, afterAll } from 'vitest';
-import './tailwind-mock'; // Import Tailwind mock for CSS class testing
-import { setupWebGLMocks, cleanupWebGLMocks } from './webgl'; // Import WebGL mocks
+import { vi, afterEach } from 'vitest'; // Keep only necessary imports
+// Removed tailwind-mock import - handled by test utils
+// Removed WebGL setup/cleanup - handle in specific tests or dedicated setup if needed
+import './webgl/examples/neural-controllers-mock'; // Keep static neural controller mocks import
 
 // Mock browser APIs and globals
-const mockMediaQueryList = {
-  matches: false,
+// Define a more complete default mock for MediaQueryList
+const createMockMediaQueryList = (matches: boolean) => ({
+  matches,
+  media: '',
+  onchange: null,
+  addListener: vi.fn(), // Deprecated
+  removeListener: vi.fn(), // Deprecated
   addEventListener: vi.fn(),
   removeEventListener: vi.fn(),
-};
+  dispatchEvent: vi.fn(),
+});
 
-// Setup global mocks before all tests
-beforeAll(() => {
-  // Set up WebGL mocks to prevent test hanging with Three.js/WebGL components
-  setupWebGLMocks({
-    monitorMemory: true, // Enable memory leak detection
-  });
+// Removed beforeAll block - Mocks are defined directly below
 
-  // Mock localStorage
-  global.localStorage = {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
-    length: 0,
-    key: vi.fn(),
-  } as unknown as Storage;
+// Mock localStorage (Using Object.defineProperty as per canonical doc)
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => { store[key] = value.toString(); }),
+    removeItem: vi.fn((key: string) => { delete store[key]; }),
+    clear: vi.fn(() => { store = {}; }),
+    key: vi.fn((index: number) => Object.keys(store)[index] || null),
+    get length() { return Object.keys(store).length; }
+  };
+})();
+Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true, configurable: true });
 
-  // Mock window.matchMedia to avoid errors in tests related to ThemeProvider
-  global.matchMedia = vi.fn().mockImplementation((query) => ({
-    ...mockMediaQueryList,
-    matches: query.includes('dark') ? false : true,
-    media: query,
-  }));
 
-  // Setup document for Tailwind dark mode support
-  if (!document.documentElement.classList.contains('light')) {
-    document.documentElement.classList.add('light');
-  }
+// Mock for window.matchMedia moved to test-utils.unified.tsx
+
+// Removed document setup for Tailwind - handled by test utils or specific tests
 
   // Mock requestAnimationFrame and cancelAnimationFrame to prevent test hangs
-  global.requestAnimationFrame = vi.fn((callback) => setTimeout(callback, 0));
-  global.cancelAnimationFrame = vi.fn((id) => clearTimeout(id));
+// Mock requestAnimationFrame (Using Object.defineProperty as per canonical doc)
+Object.defineProperty(window, 'requestAnimationFrame', {
+  writable: true,
+  configurable: true,
+  value: vi.fn((callback) => setTimeout(callback, 0)),
+});
+Object.defineProperty(window, 'cancelAnimationFrame', {
+  writable: true,
+  configurable: true,
+  value: vi.fn((id) => clearTimeout(id)),
+});
 
   // Mock IntersectionObserver
-  global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+// Mock IntersectionObserver (Using Object.defineProperty as per canonical doc)
+Object.defineProperty(window, 'IntersectionObserver', {
+  writable: true,
+  configurable: true,
+  value: vi.fn().mockImplementation(() => ({
     observe: vi.fn(),
     unobserve: vi.fn(),
     disconnect: vi.fn(),
     root: null,
     rootMargin: '',
     thresholds: [],
-  }));
+  })),
+});
 
   // Mock ResizeObserver
-  global.ResizeObserver = vi.fn().mockImplementation(() => ({
+// Mock ResizeObserver (Using Object.defineProperty as per canonical doc)
+Object.defineProperty(window, 'ResizeObserver', {
+  writable: true,
+  configurable: true,
+  value: vi.fn().mockImplementation(() => ({
     observe: vi.fn(),
     unobserve: vi.fn(),
     disconnect: vi.fn(),
-  }));
-
-  // Silence console errors in tests (comment this out for debugging)
-  // console.error = vi.fn();
-  // console.warn = vi.fn();
+  })),
 });
+
+// Removed console silencing - enable explicitly if needed for debugging
+// console.error = vi.fn();
+// console.warn = vi.fn();
+
+// --- Global Hooks --- (Moved from original position)
 
 // Clean up after each test
 afterEach(() => {
   // Reset all mocks between tests
-  vi.clearAllMocks();
+  vi.clearAllMocks(); // Clear mock history
+  localStorageMock.clear(); // Clear localStorage mock state
 });
 
-// Clean up after all tests
-afterAll(() => {
-  // Clean up WebGL mocks and check for memory leaks
-  const memoryReport = cleanupWebGLMocks();
-  
-  // Report any memory leaks detected
-  if (memoryReport && memoryReport.leakedObjectCount > 0) {
-    console.warn(`Memory leak detected: ${memoryReport.leakedObjectCount} objects not properly disposed`);
-    console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
-  }
-});
+// Removed afterAll block - WebGL cleanup handled elsewhere or per suite
+// Removed vi.setConfig - Timeouts configured in vitest.config.ts
 
-// Global test timeouts to prevent hanging
-vi.setConfig({
-  testTimeout: 10000, // 10 seconds
-  hookTimeout: 10000,
-});
+console.log('[TEST SETUP] Global setup complete.'); // Add log as per canonical doc

@@ -85,7 +85,7 @@
       "@test/*": ["src/test/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "src/test"], // Include test files for better TS integration
   "exclude": ["vite.config.ts", "vite.config.prod.ts", "vite.config.prod.enhanced.ts", "node_modules", "dist"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

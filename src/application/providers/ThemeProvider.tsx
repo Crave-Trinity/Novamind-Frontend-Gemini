@@ -36,7 +36,14 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   // Detect system preference for dark mode
   const prefersDarkMode = useMemo(() => {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // Safely check matchMedia in case of faulty JSDOM/test environment
+    try {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      return mediaQuery && typeof mediaQuery.matches === 'boolean' ? mediaQuery.matches : false;
+    } catch (e) {
+      console.warn('[ThemeProvider] window.matchMedia check failed:', e);
+      return false; // Default to false (light mode) if check fails
+    }
   }, []);
 
   // Apply theme to document

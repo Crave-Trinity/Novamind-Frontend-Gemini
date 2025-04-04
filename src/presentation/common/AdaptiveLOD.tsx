@@ -4,7 +4,7 @@
  * with performance-optimized neural rendering
  */
 
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
 
@@ -16,19 +16,15 @@ const FPS_RECOVERY_DELAY = 2000; // Wait time before increasing detail
 /**
  * Detail level enumeration with neural-safe typing
  */
-export enum DetailLevel {
-  ULTRA = "ultra", // Maximum quality, clinical precision
-  HIGH = "high", // High quality with full features
-  MEDIUM = "medium", // Balanced for clinical utility
-  LOW = "low", // Performance mode for weaker systems
-  MINIMAL = "minimal", // Emergency fallback for critical performance issues
-}
+// Use the type directly from VisualizationSettings for consistency
+import type { VisualizationSettings } from '@domain/types/brain/visualization';
+export type DetailLevelString = VisualizationSettings['levelOfDetail']; // "low" | "medium" | "high" | "dynamic"
 
 /**
  * Detail configuration with neural-safe typing
  */
 export interface DetailConfig {
-  level: DetailLevel;
+  level: DetailLevelString;
   segmentDetail: number; // Geometry segment count
   maxVisibleRegions: number; // Maximum visible regions
   useInstancedMesh: boolean; // Use instancing for regions
@@ -49,9 +45,11 @@ export interface DetailConfig {
 /**
  * Default LOD configurations
  */
-const defaultDetailConfigs: Record<DetailLevel, DetailConfig> = {
-  [DetailLevel.ULTRA]: {
-    level: DetailLevel.ULTRA,
+// Use string literal type for keys and level property, remove ultra/minimal
+const defaultDetailConfigs: Record<DetailLevelString, DetailConfig> = {
+  // Removed "ultra" config
+  "high": {
+    level: "high",
     segmentDetail: 64,
     maxVisibleRegions: Infinity,
     useInstancedMesh: true,
@@ -68,8 +66,8 @@ const defaultDetailConfigs: Record<DetailLevel, DetailConfig> = {
     labelDensity: 1.0,
     physicsFidelity: 1.0,
   },
-  [DetailLevel.HIGH]: {
-    level: DetailLevel.HIGH,
+  "medium": {
+    level: "medium",
     segmentDetail: 32,
     maxVisibleRegions: 1000,
     useInstancedMesh: true,
@@ -86,8 +84,8 @@ const defaultDetailConfigs: Record<DetailLevel, DetailConfig> = {
     labelDensity: 0.8,
     physicsFidelity: 0.8,
   },
-  [DetailLevel.MEDIUM]: {
-    level: DetailLevel.MEDIUM,
+  "low": {
+    level: "low",
     segmentDetail: 24,
     maxVisibleRegions: 500,
     useInstancedMesh: true,
@@ -104,54 +102,37 @@ const defaultDetailConfigs: Record<DetailLevel, DetailConfig> = {
     labelDensity: 0.5,
     physicsFidelity: 0.6,
   },
-  [DetailLevel.LOW]: {
-    level: DetailLevel.LOW,
-    segmentDetail: 16,
-    maxVisibleRegions: 200,
+  "dynamic": { // Add dynamic config - using 'high' as a base for now
+    level: "dynamic",
+    segmentDetail: 32,
+    maxVisibleRegions: 1000,
     useInstancedMesh: true,
-    useShaderEffects: false,
-    usePostProcessing: false,
-    useShadows: false,
-    useBloom: false,
+    useShaderEffects: true,
+    usePostProcessing: true,
+    useShadows: true,
+    useBloom: true,
     useReflections: false,
-    textureDimension: 256,
-    lodTransitionTime: 300,
-    drawDistance: 30,
-    connectionsVisible: 100,
+    textureDimension: 1024,
+    lodTransitionTime: 800,
+    drawDistance: 75,
+    connectionsVisible: 500,
     showLabels: true,
-    labelDensity: 0.3,
-    physicsFidelity: 0.4,
-  },
-  [DetailLevel.MINIMAL]: {
-    level: DetailLevel.MINIMAL,
-    segmentDetail: 8,
-    maxVisibleRegions: 100,
-    useInstancedMesh: true,
-    useShaderEffects: false,
-    usePostProcessing: false,
-    useShadows: false,
-    useBloom: false,
-    useReflections: false,
-    textureDimension: 128,
-    lodTransitionTime: 200,
-    drawDistance: 20,
-    connectionsVisible: 50,
-    showLabels: false,
-    labelDensity: 0.1,
-    physicsFidelity: 0.2,
-  },
+    labelDensity: 0.8,
+    physicsFidelity: 0.8,
+  }
+  // Removed "minimal" and "ultra" config blocks
 };
 
 /**
  * Props with neural-safe typing
  */
 interface AdaptiveLODProps {
-  initialDetailLevel?: DetailLevel;
-  detailConfigs?: Partial<Record<DetailLevel, Partial<DetailConfig>>>;
+  initialDetailLevel?: DetailLevelString;
+  detailConfigs?: Partial<Record<DetailLevelString, Partial<DetailConfig>>>;
   adaptiveMode?: "auto" | "manual" | "hybrid";
-  onDetailLevelChange?: (newLevel: DetailLevel, config: DetailConfig) => void;
+  onDetailLevelChange?: (newLevel: DetailLevelString, config: DetailConfig) => void;
   children: (detailConfig: DetailConfig) => React.ReactNode;
-  forceDetailLevel?: DetailLevel;
+  forceDetailLevel?: DetailLevelString;
   distanceBasedLOD?: boolean;
   cameraPositionInfluence?: number;
   regionCount?: number;
@@ -164,7 +145,7 @@ interface AdaptiveLODProps {
  * Implements clinically-precise performance optimization for neural visualization
  */
 export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
-  initialDetailLevel = DetailLevel.HIGH,
+  initialDetailLevel = "high",
   detailConfigs,
   adaptiveMode = "hybrid",
   onDetailLevelChange,
@@ -188,7 +169,8 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
   const averageFPS = useRef(60);
 
   // LOD control state
-  const [detailLevel, setDetailLevel] = useState(initialDetailLevel);
+  // Use string literal type for state
+  const [detailLevel, setDetailLevel] = useState<DetailLevelString>(initialDetailLevel);
   const lastDetailChangeTime = useRef(performance.now());
   const canIncreaseDetail = useRef(true);
 
@@ -200,9 +182,10 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
     // Apply custom overrides if provided
     if (detailConfigs) {
       Object.entries(detailConfigs).forEach(([level, config]) => {
-        if (level in DetailLevel && config) {
-          configs[level as DetailLevel] = {
-            ...configs[level as DetailLevel],
+        // Check if level is a valid DetailLevelString key
+        if (level in configs && config) {
+          configs[level as DetailLevelString] = {
+            ...configs[level as DetailLevelString], // Correct type assertion
             ...config,
           };
         }
@@ -212,8 +195,8 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
     // Apply device performance class adjustments
     if (devicePerformanceClass === "high") {
       // High-end devices can use higher detail
-      configs[DetailLevel.HIGH].maxVisibleRegions += 200;
-      configs[DetailLevel.MEDIUM].maxVisibleRegions += 100;
+      configs["high"].maxVisibleRegions += 200;
+      configs["medium"].maxVisibleRegions += 100;
     } else if (devicePerformanceClass === "low") {
       // Low-end devices need more aggressive optimization
       Object.values(configs).forEach((config) => {
@@ -320,17 +303,15 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
       (adaptiveMode === "auto" || adaptiveMode === "hybrid") &&
       !forceDetailLevel
     ) {
-      let newLevel = detailLevel;
+      let newLevel: DetailLevelString = detailLevel; // Use string literal type
 
       // Check if performance is too low for current detail level
       if (averageFPS.current < FPS_THRESHOLD_MEDIUM) {
         // Step down detail aggressively
-        if (detailLevel === DetailLevel.ULTRA) newLevel = DetailLevel.HIGH;
-        else if (detailLevel === DetailLevel.HIGH)
-          newLevel = DetailLevel.MEDIUM;
-        else if (detailLevel === DetailLevel.MEDIUM) newLevel = DetailLevel.LOW;
-        else if (detailLevel === DetailLevel.LOW)
-          newLevel = DetailLevel.MINIMAL;
+        // Adjust logic to exclude ultra/minimal
+        if (detailLevel === "high") newLevel = "medium";
+        else if (detailLevel === "medium") newLevel = "low";
+        // Cannot go lower than "low" in adaptive mode based on FPS
 
         canIncreaseDetail.current = false;
       }
@@ -340,11 +321,10 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
         canIncreaseDetail.current
       ) {
         // Step up detail conservatively
-        if (detailLevel === DetailLevel.MINIMAL) newLevel = DetailLevel.LOW;
-        else if (detailLevel === DetailLevel.LOW) newLevel = DetailLevel.MEDIUM;
-        else if (detailLevel === DetailLevel.MEDIUM)
-          newLevel = DetailLevel.HIGH;
-        else if (detailLevel === DetailLevel.HIGH) newLevel = DetailLevel.ULTRA;
+        // Adjust logic to exclude ultra/minimal
+        if (detailLevel === "low") newLevel = "medium";
+        else if (detailLevel === "medium") newLevel = "high";
+        // Cannot go higher than "high" in adaptive mode based on FPS
       }
 
       // Apply additional LOD factors in hybrid mode
@@ -354,14 +334,14 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
         const combinedFactor = Math.max(distanceFactor, densityFactor);
 
         // Use combined factor to potentially adjust level more aggressively
-        if (combinedFactor > 0.8 && detailLevel > DetailLevel.MINIMAL) {
+        if (combinedFactor > 0.8 && detailLevel !== "low") { // Check against new lowest level 'low'
           // Potentially reduce detail one more level when combined factors are high
           if (newLevel !== detailLevel) {
             // Already changing levels, consider more aggressive reduction
-            if (newLevel > DetailLevel.MINIMAL) {
-              newLevel = Object.values(DetailLevel)[
-                Object.values(DetailLevel).indexOf(newLevel) + 1
-              ] as DetailLevel;
+            const levels: DetailLevelString[] = ["high", "medium", "low"]; // Use adjusted levels
+            const currentIndex = levels.indexOf(newLevel);
+            if (currentIndex < levels.length - 1) { // Ensure we don't go below 'low'
+              newLevel = levels[currentIndex + 1];
             }
           }
         }
@@ -417,11 +397,11 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
       let initialLOD = initialDetailLevel;
 
       if (devicePerformanceClass === "high") {
-        initialLOD = DetailLevel.HIGH;
+        initialLOD = "high";
       } else if (devicePerformanceClass === "medium") {
-        initialLOD = DetailLevel.MEDIUM;
+        initialLOD = "medium";
       } else if (devicePerformanceClass === "low") {
-        initialLOD = DetailLevel.LOW;
+        initialLOD = "low";
       }
 
       setDetailLevel(initialLOD);

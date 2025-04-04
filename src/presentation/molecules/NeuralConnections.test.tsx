@@ -4,11 +4,11 @@
  */
 import { describe, it, expect, vi } from "vitest";
 
-import { render, screen, fireEvent } from "@testing-library/react";
-import React from "react"; // Added missing React import
+import { screen, fireEvent } from "@testing-library/react"; // render is imported from unified utils
+import React from "react";
 import userEvent from "@testing-library/user-event";
 import NeuralConnections from "./NeuralConnections"; // Assuming default export
-import { renderWithProviders } from "@test/test-utils"; // Reverted to relative path
+import { render } from "@test/test-utils.unified"; // Import the unified render
 import {
   RenderMode,
   ThemeSettings,
@@ -51,7 +51,7 @@ const mockProps = {
 
 describe("NeuralConnections", () => {
   it("renders with neural precision", () => {
-    renderWithProviders(<NeuralConnections {...mockProps} />); // Use renderWithProviders
+    render(<NeuralConnections {...mockProps} />); // Use the unified render
 
     // Add assertions for rendered content
     expect(screen).toBeDefined();
@@ -59,7 +59,7 @@ describe("NeuralConnections", () => {
 
   it("responds to user interaction with quantum precision", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<NeuralConnections {...mockProps} />); // Use renderWithProviders
+    render(<NeuralConnections {...mockProps} />); // Use the unified render
 
     // Simulate user interactions
     // await user.click(screen.getByText(/example text/i));
