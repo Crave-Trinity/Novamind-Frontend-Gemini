@@ -1,0 +1,152 @@
+[
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/common/VisualizationErrorBoundary.test.tsx",
+    "success": true,
+    "time": 1184,
+    "memoryLeak": false
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/components/organisms/BrainVisualization.test.tsx",
+    "success": true,
+    "time": 1247,
+    "memoryLeak": false
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/containers/__tests__/BrainModelContainer.test.tsx",
+    "success": false,
+    "time": 1105,
+    "memoryLeak": false,
+    "error": "⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/presentation/containers/__tests__/BrainModelContainer.test.tsx [ src/presentation/containers/__tests__/BrainModelContainer.test.tsx ]\nError: Failed to resolve import \"next-themes\" from \"src/presentation/containers/BrainModelContainer.tsx\". Does the file exist?\n ❯ TransformPluginContext._formatError node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:49258:41\n ❯ TransformPluginContext.error node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:49253:16\n ❯ normalizeUrl node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:64229:23\n ❯ async file:/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:64361:39\n ❯ TransformPluginContext.transform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:64288:7\n ❯ PluginContainer.transform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:49099:18\n ❯ loadAndTransform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:51938:27\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/containers/BrainModelContainer.minimal.test.tsx",
+    "success": true,
+    "time": 1046,
+    "memoryLeak": false
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/containers/BrainModelContainer.test.tsx",
+    "success": false,
+    "time": 1050,
+    "memoryLeak": false,
+    "error": "⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/presentation/containers/BrainModelContainer.test.tsx [ src/presentation/containers/BrainModelContainer.test.tsx ]\nError: Failed to resolve import \"next-themes\" from \"src/presentation/containers/BrainModelContainer.tsx\". Does the file exist?\n ❯ TransformPluginContext._formatError node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:49258:41\n ❯ TransformPluginContext.error node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:49253:16\n ❯ normalizeUrl node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:64229:23\n ❯ async file:/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:64361:39\n ❯ TransformPluginContext.transform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:64288:7\n ❯ PluginContainer.transform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:49099:18\n ❯ loadAndTransform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:51938:27\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/BiometricAlertVisualizer.test.tsx",
+    "success": true,
+    "time": 1188,
+    "memoryLeak": false
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/BrainRegionDetails.test.tsx",
+    "success": false,
+    "time": 1075,
+    "memoryLeak": false,
+    "error": "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/presentation/molecules/BrainRegionDetails.test.tsx > BrainRegionDetails (Minimal) > exists as a module\nAssertionError: expected undefined not to be undefined\n ❯ src/presentation/molecules/BrainRegionDetails.test.tsx:56:32\n     54| describe('BrainRegionDetails (Minimal)', () => {\n     55|   it('exists as a module', () => {\n     56|     expect(BrainRegionDetails).toBeDefined();\n       |                                ^\n     57|   });\n     58| });\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/BrainRegionGroup.test.tsx",
+    "success": false,
+    "time": 1330,
+    "memoryLeak": false,
+    "error": "stderr | unknown test\n[DEPRECATED] Default export is deprecated. Instead use `import { create } from 'zustand'`.\n\nstderr | unknown test\nWARNING: Multiple instances of Three.js being imported.\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/presentation/molecules/BrainRegionGroup.test.tsx > BrainRegionGroup > renders with neural precision\nTypeError: renderWithProviders is not a function\n ❯ src/presentation/molecules/BrainRegionGroup.test.tsx:51:5\n     49| describe(\"BrainRegionGroup\", () => {\n     50|   it(\"renders with neural precision\", () => {\n     51|     renderWithProviders(<BrainRegionGroup {...mockProps} />); // Use r…\n       |     ^\n     52| \n     53|     // Add assertions for rendered content\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯\n\n FAIL  src/presentation/molecules/BrainRegionGroup.test.tsx > BrainRegionGroup > responds to user interaction with quantum precision\nTypeError: renderWithProviders is not a function\n ❯ src/presentation/molecules/BrainRegionGroup.test.tsx:59:5\n     57|   it(\"responds to user interaction with quantum precision\", async () =…\n     58|     const user = userEvent.setup();\n     59|     renderWithProviders(<BrainRegionGroup {...mockProps} />); // Use r…\n       |     ^\n     60| \n     61|     // Simulate user interactions\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯\n\n"
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/BrainRegionLabels.test.tsx",
+    "success": false,
+    "time": 1344,
+    "memoryLeak": false,
+    "error": "stderr | unknown test\n[DEPRECATED] Default export is deprecated. Instead use `import { create } from 'zustand'`.\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/presentation/molecules/BrainRegionLabels.test.tsx > BrainRegionLabels > renders with neural precision\nTypeError: renderWithProviders is not a function\n ❯ src/presentation/molecules/BrainRegionLabels.test.tsx:46:5\n     44| describe(\"BrainRegionLabels\", () => {\n     45|   it(\"renders with neural precision\", () => {\n     46|     renderWithProviders(<BrainRegionLabels {...mockProps} />); // Use …\n       |     ^\n     47| \n     48|     // Add assertions for rendered content\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯\n\n FAIL  src/presentation/molecules/BrainRegionLabels.test.tsx > BrainRegionLabels > responds to user interaction with quantum precision\nTypeError: renderWithProviders is not a function\n ❯ src/presentation/molecules/BrainRegionLabels.test.tsx:54:5\n     52|   it(\"responds to user interaction with quantum precision\", async () =…\n     53|     const user = userEvent.setup();\n     54|     renderWithProviders(<BrainRegionLabels {...mockProps} />); // Use …\n       |     ^\n     55| \n     56|     // Simulate user interactions\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯\n\n"
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/BrainRegionSelector.test.tsx",
+    "success": true,
+    "time": 1116,
+    "memoryLeak": false
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/BrainVisualizationControls.test.tsx",
+    "success": false,
+    "time": 1097,
+    "memoryLeak": false,
+    "error": "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/presentation/molecules/BrainVisualizationControls.test.tsx > BrainVisualizationControls (Minimal) > exists as a module\nAssertionError: expected undefined not to be undefined\n ❯ src/presentation/molecules/BrainVisualizationControls.test.tsx:71:40\n     69| \n     70|   it('exists as a module', () => {\n     71|     expect(BrainVisualizationControls).toBeDefined();\n       |                                        ^\n     72|   });\n     73| });\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/DataStreamVisualizer.test.tsx",
+    "success": true,
+    "time": 1241,
+    "memoryLeak": false
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/NeuralActivityVisualizer.test.tsx",
+    "success": true,
+    "time": 1259,
+    "memoryLeak": false
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/SymptomRegionMappingVisualizer.test.tsx",
+    "success": true,
+    "time": 1231,
+    "memoryLeak": false
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/TemporalDynamicsVisualizer.test.tsx",
+    "success": true,
+    "time": 1254,
+    "memoryLeak": false
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/TherapeuticTimelineVisualizer.test.tsx",
+    "success": true,
+    "time": 1120,
+    "memoryLeak": false
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/TreatmentResponseVisualizer.test.tsx",
+    "success": true,
+    "time": 1258,
+    "memoryLeak": false
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/VisualizationControls.test.tsx",
+    "success": false,
+    "time": 1114,
+    "memoryLeak": false,
+    "error": "⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/presentation/molecules/VisualizationControls.test.tsx [ src/presentation/molecules/VisualizationControls.test.tsx ]\nError: Transform failed with 1 error:\n/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/molecules/VisualizationControls.test.tsx:23:7: ERROR: Unexpected \"{\"\n ❯ failureErrorWithLog node_modules/vitest/node_modules/esbuild/lib/main.js:1472:15\n ❯ node_modules/vitest/node_modules/esbuild/lib/main.js:755:50\n ❯ responseCallbacks.<computed> node_modules/vitest/node_modules/esbuild/lib/main.js:622:9\n ❯ handleIncomingPacket node_modules/vitest/node_modules/esbuild/lib/main.js:677:12\n ❯ Socket.readFromStdout node_modules/vitest/node_modules/esbuild/lib/main.js:600:7\n ❯ Socket.emit node:events:507:28\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/organisms/BrainModelViewer.test.tsx",
+    "success": false,
+    "time": 1304,
+    "memoryLeak": false,
+    "error": "stderr | unknown test\n[DEPRECATED] Default export is deprecated. Instead use `import { create } from 'zustand'`.\n\nstderr | unknown test\nWARNING: Multiple instances of Three.js being imported.\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/presentation/organisms/BrainModelViewer.test.tsx > BrainModelViewer (Minimal) > exists as a module\nAssertionError: expected undefined not to be undefined\n ❯ src/presentation/organisms/BrainModelViewer.test.tsx:56:30\n     54| describe('BrainModelViewer (Minimal)', () => {\n     55|   it('exists as a module', () => {\n     56|     expect(BrainModelViewer).toBeDefined();\n       |                              ^\n     57|   });\n     58| });\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/organisms/BrainVisualization.test.tsx",
+    "success": false,
+    "time": 1341,
+    "memoryLeak": false,
+    "error": "stderr | unknown test\n[DEPRECATED] Default export is deprecated. Instead use `import { create } from 'zustand'`.\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/presentation/organisms/BrainVisualization.test.tsx > BrainVisualization (Minimal) > exists as a module\nAssertionError: expected undefined not to be undefined\n ❯ src/presentation/organisms/BrainVisualization.test.tsx:56:32\n     54| describe('BrainVisualization (Minimal)', () => {\n     55|   it('exists as a module', () => {\n     56|     expect(BrainVisualization).toBeDefined();\n       |                                ^\n     57|   });\n     58| });\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/organisms/BrainVisualizationContainer.test.tsx",
+    "success": false,
+    "time": 1089,
+    "memoryLeak": false,
+    "error": "⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/presentation/organisms/BrainVisualizationContainer.test.tsx [ src/presentation/organisms/BrainVisualizationContainer.test.tsx ]\nError: Failed to resolve import \"next/router\" from \"src/presentation/organisms/BrainVisualizationContainer.tsx\". Does the file exist?\n ❯ TransformPluginContext._formatError node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:49258:41\n ❯ TransformPluginContext.error node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:49253:16\n ❯ normalizeUrl node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:64229:23\n ❯ async file:/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:64361:39\n ❯ TransformPluginContext.transform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:64288:7\n ❯ PluginContainer.transform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:49099:18\n ❯ loadAndTransform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:51938:27\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/pages/BrainModelViewer.test.tsx",
+    "success": false,
+    "time": 1251,
+    "memoryLeak": false,
+    "error": "⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/presentation/pages/BrainModelViewer.test.tsx [ src/presentation/pages/BrainModelViewer.test.tsx ]\nError: Failed to resolve import \"classnames\" from \"src/presentation/atoms/Button.tsx\". Does the file exist?\n ❯ TransformPluginContext._formatError node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:49258:41\n ❯ TransformPluginContext.error node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:49253:16\n ❯ normalizeUrl node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:64229:23\n ❯ async file:/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:64361:39\n ❯ TransformPluginContext.transform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:64288:7\n ❯ PluginContainer.transform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:49099:18\n ❯ loadAndTransform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:51938:27\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+  },
+  {
+    "file": "/Users/ray/Desktop/GITHUB/Novamind-Backend/frontend/src/presentation/templates/BrainModelContainer.test.tsx",
+    "success": false,
+    "time": 1274,
+    "memoryLeak": false,
+    "error": "stderr | unknown test\n[DEPRECATED] Default export is deprecated. Instead use `import { create } from 'zustand'`.\n\n⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  src/presentation/templates/BrainModelContainer.test.tsx > BrainModelContainer (Minimal) > exists as a module\nAssertionError: expected undefined not to be undefined\n ❯ src/presentation/templates/BrainModelContainer.test.tsx:71:33\n     69| \n     70|   it('exists as a module', () => {\n     71|     expect(BrainModelContainer).toBeDefined();\n       |                                 ^\n     72|   });\n     73| });\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n"
+  }
+]

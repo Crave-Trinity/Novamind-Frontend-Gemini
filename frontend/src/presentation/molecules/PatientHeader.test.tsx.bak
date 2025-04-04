@@ -1,28 +1,9 @@
-
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
-
-describe('PatientHeader with WebGL Mocks', () => {
-  // Setup WebGL mocks with memory monitoring
-  beforeEach(() => {
-    setupWebGLMocks({ monitorMemory: true, debugMode: true });
-  });
-
-  afterEach(() => {
-    const memoryReport = cleanupWebGLMocks();
-    if (memoryReport && memoryReport.leakedObjectCount > 0) {
-      console.warn(`Memory leak detected in "PatientHeader": ${memoryReport.leakedObjectCount} objects not properly disposed`);
-      console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
-    }
-  });
-
 /**
  * NOVAMIND Neural Test Suite
  * PatientHeader testing with quantum precision
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
+import { describe, it, expect, vi } from "vitest";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -68,6 +49,4 @@ describe.skip("PatientHeader", () => { // Skip this suite for now due to errors/
   });
 
   // Add more component-specific tests
-});
-
 });

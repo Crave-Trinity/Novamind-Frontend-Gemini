@@ -1,118 +1,60 @@
-# WebGL/Three.js Testing System
+# WebGL Testing System for Novamind
 
-## Architecture
+## Overview
 
-The WebGL/Three.js testing system provides a comprehensive solution for testing Three.js visualization components in a Node.js/JSDOM environment without browser compatibility issues or test hanging.
+The WebGL Testing System provides a comprehensive solution for testing Three.js and WebGL-based visualization components within the Novamind platform. This system addresses several critical challenges:
 
-### Core Architecture
+1. **Preventing Test Hanging**: Tests that rely on WebGL often hang in JSDOM test environments
+2. **Memory Monitoring**: Track memory usage to detect leaks in visualization components
+3. **Consistent Mocking**: Ensure reliable test behavior with comprehensive Three.js mocks
+4. **Neural Controller Integration**: Special support for testing the neural visualization components
 
-The system follows a clear separation of concerns with three distinct levels:
+## Core Components
 
-1. **Low-level WebGL Context Mocks** (`mock-webgl.ts`)
-   - Provides the foundation by mocking browser WebGL contexts
-   - Handles HTML5 Canvas getContext() for 'webgl' and 'webgl2'
-   - Mocks core animation frame APIs (requestAnimationFrame)
-   - Exposes `CoreWebGLRenderer` for basic rendering functionality
+The WebGL testing system consists of several key components:
 
-2. **Three.js Object Mocks** (`three-mocks.ts`)
-   - Builds on top of the WebGL context mocks
-   - Provides complete mocks for all Three.js objects (Scene, Camera, Meshes, etc.)
-   - Implements proper object hierarchy and parent-child relationships
-   - Handles memory management through proper dispose() methods
-   - Exposes `MockWebGLRenderer` specifically designed for Three.js
+### 1. Core WebGL Mocking (`src/test/webgl/`)
 
-3. **Integration Layer** (`index.ts`)
-   - Brings both layers together in a unified API
-   - Provides convenience functions for test setup and teardown
-   - Maintains clear naming to avoid confusion
+- **index.ts**: Main entry point with setup/cleanup functions
+- **memory-monitor.ts**: System for tracking memory usage and detecting leaks
+- **mock-webgl.ts**: Low-level WebGL context mocking
+- **three-mocks.ts**: Comprehensive Three.js object mocks
+- **mock-types.ts**: TypeScript definitions for mocks
+- **mock-utils.ts**: Utility functions for mocking
 
-### Source of Truth
+### 2. Neural Controller Mocking (`src/test/webgl/examples/`)
 
-The **clear source of truth** in this architecture is:
+- **neural-controllers-mock.ts**: Specialized mocks for the neural visualization controllers
+  - Provides mocks for: NeuroSyncOrchestrator, NeuralActivityController, etc.
+  - Simulates brain models, neural connections, and biometric data
 
-- `CoreWebGLRenderer` in `mock-webgl.ts` - For low-level WebGL rendering
-- `MockWebGLRenderer` in `three-mocks.ts` - For Three.js specific rendering
-- The integration in `index.ts` - For test usage
+### 3. Test Runner Scripts
 
-## Usage
+- **scripts/run-all-tests-with-webgl.ts**: Run all tests with WebGL mocking enabled
+- **scripts/run-3d-visualization-tests.ts**: Specifically target 3D visualization tests
 
-### Basic Setup
+## Using the WebGL Testing System
 
-```typescript
-import { describe, it, beforeEach, afterEach } from 'vitest';
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks } from '@test/webgl';
+### Running Tests with WebGL Mocks
 
-describe('YourThreeJsComponent', () => {
-  beforeEach(() => {
-    setupWebGLMocks();
-  });
+Add the following commands to your package.json:
 
-  afterEach(() => {
-    cleanupWebGLMocks();
-  });
-
-  it('should render without errors', () => {
-    const scene = new ThreeMocks.Scene();
-    const camera = new ThreeMocks.PerspectiveCamera();
-    const renderer = new ThreeMocks.WebGLRenderer();
-    
-    // Test your component...
-    renderer.render(scene, camera);
-  });
-});
+```json
+"scripts": {
+  "test:webgl": "npx ts-node --esm scripts/run-all-tests-with-webgl.ts",
+  "test:3d": "npx ts-node --esm scripts/run-3d-visualization-tests.ts",
+  "test:visualization": "npx ts-node --esm scripts/run-3d-visualization-tests.ts --dir=src/presentation --pattern=\"**/*{Visual,Render,Brain,3D,Three}*.test.tsx\""
+}
 ```
 
-### Memory Management
+Then run tests using:
 
-The mock system is designed to prevent memory leaks during testing:
-
-```typescript
-// Always dispose Three.js objects when finished
-mesh.dispose(); // Automatically disposes geometry and material
-renderer.dispose(); // Cleans up WebGL context resources
+```bash
+npm run test:webgl      # Run all tests with WebGL mocking
+npm run test:3d         # Run only 3D visualization tests
+npm run test:visualization  # Run specific visualization tests
 ```
 
-## Best Practices
+### Writing Tests for WebGL Components
 
-1. **Always use setupWebGLMocks/cleanupWebGLMocks** in beforeEach/afterEach hooks
-2. **Always dispose resources** after tests to prevent memory leaks
-3. **Use ThreeMocks namespace** for consistent access to all mock objects
-4. **Test memory management** in your components to ensure proper cleanup
-
-## Test Examples
-
-See `frontend/src/test/webgl/examples/ThreeJsComponent.test.ts` for a complete example of testing a Three.js visualization component.
-
-## Resolving Test Hangs
-
-This system was specifically designed to prevent test hanging issues that commonly occur when testing Three.js components in JSDOM environments. The two main causes of test hangs are addressed:
-
-1. **WebGL Context Creation** - Normally crashes in JSDOM, our mocks provide safe alternatives
-2. **Animation Frame Loops** - Replaced with deterministic timing for testing
-3. **Memory Leaks** - Proper disposal of all resources prevents memory accumulation
-
-## Implementation Details
-
-The system uses TypeScript for type safety and follows mock implementation patterns compatible with testing frameworks like Vitest and Jest, but without direct dependencies on them.
-
-## Test Implementation Results
-
-Testing with the new WebGL/Three.js mocking system has produced excellent results:
-
-1. **All Tests Pass**: Both the core WebGL mocks and Three.js component tests now pass
-2. **No More Hanging Tests**: Tests that previously hung due to WebGL and animation frame issues now run correctly
-3. **Clean Memory Management**: The dispose() pattern ensures resources are properly released
-4. **Type Safety**: TypeScript integration provides proper type checking and IDE support
-
-The architecture with clear separation between `CoreWebGLRenderer` (for low-level WebGL) and `MockWebGLRenderer` (for Three.js integration) allows for a more maintainable and understandable testing system.
-
-## Recommended Implementation Pattern
-
-When implementing new Three.js visualization components for the Novamind Digital Twin system, we recommend:
-
-1. **Always implement dispose()**: Every component should have a dispose method that cleans up all resources
-2. **Avoid animation loops in components**: Use a controlled render pattern that can be called by parent components
-3. **Test with provided mocks**: Use the WebGL/Three.js mocking system for all tests
-4. **Verify memory cleanup**: Include specific tests that verify all resources are properly released
-
-Following these patterns will ensure robust, testable, and memory-efficient components that will scale with the complexity of the brain visualization system.
+When writing tests for components that use Three.js/WebGL, follow these best practices:

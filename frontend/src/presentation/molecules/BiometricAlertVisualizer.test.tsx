@@ -4,7 +4,9 @@
  */
 
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
+
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { BiometricAlertVisualizer } from './BiometricAlertVisualizer';
 
 // Mock React Three Fiber
@@ -52,6 +54,19 @@ vi.mock('three', () => ({
 
 // Minimal test to verify component can be imported
 describe('BiometricAlertVisualizer (Minimal)', () => {
+  // Setup WebGL mocks with memory monitoring
+  beforeEach(() => {
+    setupWebGLMocks({ monitorMemory: true, debugMode: true });
+  });
+
+  afterEach(() => {
+    const memoryReport = cleanupWebGLMocks();
+    if (memoryReport && memoryReport.leakedObjectCount > 0) {
+      console.warn(`Memory leak detected in "BiometricAlertVisualizer (Minimal)": ${memoryReport.leakedObjectCount} objects not properly disposed`);
+      console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
+    }
+  });
+
   it('exists as a module', () => {
     expect(BiometricAlertVisualizer).toBeDefined();
   });

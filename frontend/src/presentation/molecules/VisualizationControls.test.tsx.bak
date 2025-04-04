@@ -1,28 +1,9 @@
-
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
-
-describe('VisualizationControls with WebGL Mocks', () => {
-  // Setup WebGL mocks with memory monitoring
-  beforeEach(() => {
-    setupWebGLMocks({ monitorMemory: true, debugMode: true });
-  });
-
-  afterEach(() => {
-    const memoryReport = cleanupWebGLMocks();
-    if (memoryReport && memoryReport.leakedObjectCount > 0) {
-      console.warn(`Memory leak detected in "VisualizationControls": ${memoryReport.leakedObjectCount} objects not properly disposed`);
-      console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
-    }
-  });
-
 /**
  * NOVAMIND Neural Test Suite
  * VisualizationControls testing with quantum precision
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"; import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
-
-// Removed beforeEach import
+import { describe, it, expect, vi } from "vitest"; // Removed beforeEach import
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -73,6 +54,4 @@ describe.skip("VisualizationControls", () => { // Skip this suite for now due to
   });
 
   // Add more component-specific tests, e.g., for settings changes
-});
-
 });

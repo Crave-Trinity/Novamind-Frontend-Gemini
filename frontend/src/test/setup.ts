@@ -7,7 +7,7 @@
 import '@testing-library/jest-dom';
 import { vi, beforeAll, afterEach, afterAll } from 'vitest';
 import './tailwind-mock'; // Import Tailwind mock for CSS class testing
-import './tailwind-mock';
+import { setupWebGLMocks, cleanupWebGLMocks } from './webgl'; // Import WebGL mocks
 
 // Mock browser APIs and globals
 const mockMediaQueryList = {
@@ -18,6 +18,11 @@ const mockMediaQueryList = {
 
 // Setup global mocks before all tests
 beforeAll(() => {
+  // Set up WebGL mocks to prevent test hanging with Three.js/WebGL components
+  setupWebGLMocks({
+    monitorMemory: true, // Enable memory leak detection
+  });
+
   // Mock localStorage
   global.localStorage = {
     getItem: vi.fn(),
@@ -74,7 +79,14 @@ afterEach(() => {
 
 // Clean up after all tests
 afterAll(() => {
-  // Any global cleanup needed
+  // Clean up WebGL mocks and check for memory leaks
+  const memoryReport = cleanupWebGLMocks();
+  
+  // Report any memory leaks detected
+  if (memoryReport && memoryReport.leakedObjectCount > 0) {
+    console.warn(`Memory leak detected: ${memoryReport.leakedObjectCount} objects not properly disposed`);
+    console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
+  }
 });
 
 // Global test timeouts to prevent hanging
