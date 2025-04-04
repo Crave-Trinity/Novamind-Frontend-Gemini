@@ -40,7 +40,9 @@ async function runTestsWithTimeout(options: RunOptions): Promise<number> {
     // Build the test command
     const args = [
       'vitest', 'run',
-      '--config', config
+      '--config', config,
+      '--no-ui', // Explicitly disable UI to avoid dependency prompt
+      '--reporter', 'default'
     ];
     
     // Add test pattern if provided

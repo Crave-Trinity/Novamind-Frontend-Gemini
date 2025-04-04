@@ -13,18 +13,29 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react() as any],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@components': path.resolve(__dirname, './src/components'),
-      '@hooks': path.resolve(__dirname, './src/hooks'),
+      '@domain': path.resolve(__dirname, './src/domain'),
+      '@application': path.resolve(__dirname, './src/application'),
+      '@infrastructure': path.resolve(__dirname, './src/infrastructure'),
+      '@presentation': path.resolve(__dirname, './src/presentation'),
+      '@atoms': path.resolve(__dirname, './src/presentation/atoms'),
+      '@molecules': path.resolve(__dirname, './src/presentation/molecules'),
+      '@organisms': path.resolve(__dirname, './src/presentation/organisms'),
+      '@templates': path.resolve(__dirname, './src/presentation/templates'),
+      '@pages': path.resolve(__dirname, './src/presentation/pages'),
+      '@hooks': path.resolve(__dirname, './src/application/hooks'),
       '@contexts': path.resolve(__dirname, './src/application/contexts'),
       '@providers': path.resolve(__dirname, './src/application/providers'),
-      '@services': path.resolve(__dirname, './src/services'),
-      '@utils': path.resolve(__dirname, './src/utils'),
-      '@types': path.resolve(__dirname, './src/types'),
-      '@test': path.resolve(__dirname, './src/test')
+      '@services': path.resolve(__dirname, './src/infrastructure/services'),
+      '@api': path.resolve(__dirname, './src/infrastructure/api'),
+      '@utils': path.resolve(__dirname, './src/application/utils'),
+      '@types': path.resolve(__dirname, './src/domain/types'),
+      '@models': path.resolve(__dirname, './src/domain/models'),
+      '@test': path.resolve(__dirname, './src/test'),
+      '@shaders': path.resolve(__dirname, './src/presentation/shaders')
     }
   },
   test: {

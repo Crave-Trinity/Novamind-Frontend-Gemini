@@ -3,7 +3,7 @@ import { createContext, useContext } from 'react';
 /**
  * Available themes for the application
  */
-export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeMode = 'light' | 'dark' | 'system' | 'clinical' | 'sleek-dark' | 'retro' | 'wes';
 
 /**
  * Theme context interface definition

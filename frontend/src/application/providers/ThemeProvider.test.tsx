@@ -7,50 +7,76 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Must mock ThemeContext before importing ThemeProvider
-vi.mock('@/application/contexts/ThemeContext', () => {
-  // Create mock context
+// Setup proper mocks for ThemeContext
+vi.mock('@application/contexts/ThemeContext', () => {
   const mockContext = {
-    Provider: ({ children }: any) => <div>{children}</div>,
-    Consumer: ({ children }: any) => children({ theme: 'clinical', isDarkMode: false }),
-  };
-
-  // Mock theme settings
-  const themeSettings = {
-    clinical: { primary: '#123456' },
-    dark: { primary: '#654321' },
-    sleek: { primary: '#abcdef' },
-    retro: { primary: '#fedcba' },
-    wes: { primary: '#fedcba' }
+    Provider: ({ children, value }: any) => <div data-testid="theme-context">{children}</div>,
+    Consumer: ({ children }: any) => children({ theme: 'light', isDarkMode: false }),
   };
 
   return {
     ThemeContext: mockContext,
-    themeSettings,
-    ThemeContextType: {},
-    ThemeOption: {}
+    ThemeMode: {
+      LIGHT: 'light',
+      DARK: 'dark',
+    }
   };
 });
 
-// After mocking ThemeContext, import ThemeProvider
-import ThemeProvider from './ThemeProvider';
+// Setup proper window.matchMedia mock based on Stack Overflow recommendations
+beforeEach(() => {
+  // Mock matchMedia - properly structured according to MDN
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation(query => ({
+      matches: false, // Default to light mode
+      media: query,
+      onchange: null,
+      addListener: vi.fn(), // Deprecated
+      removeListener: vi.fn(), // Deprecated
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+});
+
+// Mock the AuditLogService
+vi.mock('@infrastructure/services/AuditLogService', () => {
+  return {
+    auditLogService: {
+      log: vi.fn()
+    },
+    AuditEventType: {
+      SYSTEM_CONFIG_CHANGE: 'SYSTEM_CONFIG_CHANGE'
+    }
+  };
+});
+
+// Import the mocked service
+import { auditLogService, AuditEventType } from '@infrastructure/services/AuditLogService';
+
+// After mocking dependencies, import ThemeProvider
+import { ThemeProvider } from './ThemeProvider';
 
 // Mock browser APIs
 vi.mock('@react-three/fiber', () => ({
   Canvas: ({ children }: any) => <div data-testid="mock-canvas">{children}</div>,
 }));
 
-// Add any other mocks needed
-vi.stubGlobal('localStorage', {
-  getItem: vi.fn(),
-  setItem: vi.fn()
+// Mock localStorage for testing
+beforeEach(() => {
+  // Reset mocks between tests
+  vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
+  vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
+  
+  // Reset document classList spy
+  document.documentElement.classList.add = vi.fn();
+  document.documentElement.classList.remove = vi.fn();
 });
 
-vi.stubGlobal('matchMedia', () => ({
-  matches: false,
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn()
-}));
+// Import test utilities
+import { render as customRender } from '@test/test-utils';
 
 // Minimal test to verify component can be imported
 describe('ThemeProvider (Minimal)', () => {
@@ -66,5 +92,65 @@ describe('ThemeProvider (Minimal)', () => {
     );
     
     expect(screen.getByTestId('test-child')).toBeInTheDocument();
+  });
+
+  it('accepts a defaultTheme prop', () => {
+    render(
+      <ThemeProvider defaultTheme="dark">
+        <div data-testid="test-child">Test Child</div>
+      </ThemeProvider>
+    );
+    
+    expect(screen.getByTestId('test-child')).toBeInTheDocument();
+  });
+
+  it('calls auditLogService when rendered', () => {
+    const mockAuditLog = vi.mocked(auditLogService.log);
+    render(
+      <ThemeProvider>
+        <div>Test</div>
+      </ThemeProvider>
+    );
+    
+    expect(mockAuditLog).toHaveBeenCalledWith(
+      'SYSTEM_CONFIG_CHANGE',
+      expect.objectContaining({
+        action: 'THEME_CHANGE',
+        result: 'success'
+      })
+    );
+  });
+  
+  it('detects dark mode from system preference', () => {
+    // Override matchMedia mock to simulate dark mode preference
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation(query => ({
+        matches: query.includes('prefers-color-scheme: dark'),
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+    
+    render(
+      <ThemeProvider defaultTheme="system">
+        <div data-testid="dark-mode-test">Dark Mode Test</div>
+      </ThemeProvider>
+    );
+    
+    // Verify dark mode is applied to the document
+    expect(document.documentElement.classList.add).toHaveBeenCalledWith('dark');
+    
+    // Verify the audit log service is called
+    expect(auditLogService.log).toHaveBeenCalledWith(
+      AuditEventType.SYSTEM_CONFIG_CHANGE,
+      expect.objectContaining({
+        action: 'THEME_CHANGE',
+        result: 'success'
+      })
+    );
   });
 });
