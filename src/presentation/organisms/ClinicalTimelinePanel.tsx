@@ -53,7 +53,7 @@ import {
 
 // Services
 import { clinicalService } from "@application/services/clinicalService";
-import { temporalService } from "@application/services/temporalService";
+import { temporalService } from "@application/services/temporal/temporal.service"; // Correct filename
 
 // Domain types
 import {
