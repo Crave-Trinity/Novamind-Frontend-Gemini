@@ -1,100 +1,118 @@
+#!/usr/bin/env ts-node-esm
+
 /**
- * Run a test command with a global timeout
- * This script addresses hanging test issues by forcing termination after a specified duration
+ * Test runner with global timeout for Novamind Digital Twin
+ * 
+ * This script runs tests with a global timeout to prevent hanging tests.
+ * It's particularly useful for tests involving Three.js and WebGL rendering
+ * which can sometimes cause tests to hang indefinitely.
+ * 
+ * Usage:
+ *   npm run test:safe [testPattern]
  */
 
-/// <reference types="node" />
-
 import { spawn } from 'child_process';
+import path from 'path';
 
-// Default timeout in milliseconds (3 minutes)
-const DEFAULT_TIMEOUT = 3 * 60 * 1000;
+// Configuration
+const DEFAULT_TIMEOUT = 60000; // 60 seconds
+const KILL_GRACE_PERIOD = 5000; // 5 seconds
 
-// Parse command-line arguments
-const args = process.argv.slice(2);
-const timeoutFlag = args.findIndex(arg => arg.startsWith('--timeout='));
-const timeout = timeoutFlag >= 0
-  ? parseInt(args[timeoutFlag].split('=')[1], 10)
-  : DEFAULT_TIMEOUT;
-
-// Remove timeout flag from arguments to pass to test command
-if (timeoutFlag >= 0) {
-  args.splice(timeoutFlag, 1);
+interface RunOptions {
+  testPattern?: string;
+  timeout?: number;
+  config?: string;
 }
 
-// Get the test command to run (all remaining arguments)
-const command = args.join(' ');
-
-console.log(`Running: ${command}`);
-console.log(`With timeout: ${timeout}ms (${timeout / 1000} seconds)`);
-
-// Track if the process completed naturally
-let processCompleted = false;
-
-// Function to handle process termination
-function terminateProcess(childProcess: ReturnType<typeof spawn>, reason: string): void {
-  console.log(`\n\n⚠️ ${reason}`);
+/**
+ * Run tests with a global timeout
+ */
+async function runTestsWithTimeout(options: RunOptions): Promise<number> {
+  const {
+    testPattern = '',
+    timeout = DEFAULT_TIMEOUT,
+    config = 'vitest.config.unified.ts'
+  } = options;
   
-  try {
-    // Kill the process and all its children
-    const killSuccess = process.platform === 'win32'
-      ? process.kill(childProcess.pid as number, 'SIGTERM')
-      : process.kill(-(childProcess.pid as number), 'SIGTERM');
+  return new Promise((resolve) => {
+    console.log(`🧪 Running tests with ${timeout / 1000}s timeout...`);
     
-    console.log(`Process termination ${killSuccess ? 'successful' : 'failed'}`);
-  } catch (error) {
-    console.error('Error terminating process:', error);
-  }
-  
-  process.exit(1);
+    // Build the test command
+    const args = [
+      'vitest', 'run',
+      '--config', config
+    ];
+    
+    // Add test pattern if provided
+    if (testPattern) {
+      args.push(testPattern);
+    }
+    
+    // Start the test process
+    const testProcess = spawn('npx', args, { 
+      stdio: 'inherit',
+      cwd: process.cwd()
+    });
+    
+    // Set up timeout
+    const timeoutId = setTimeout(() => {
+      console.warn(`\n⚠️ Tests exceeded timeout of ${timeout / 1000}s. Terminating...`);
+      
+      // Give the process a chance to clean up
+      testProcess.kill('SIGTERM');
+      
+      // Force kill after grace period
+      const forceKillId = setTimeout(() => {
+        console.error(`\n❌ Force killing test process after grace period...`);
+        testProcess.kill('SIGKILL');
+      }, KILL_GRACE_PERIOD);
+      
+      // Clear force kill timeout if process exits during grace period
+      testProcess.on('exit', () => {
+        clearTimeout(forceKillId);
+        resolve(1); // Return non-zero exit code
+      });
+    }, timeout);
+    
+    // Handle process exit
+    testProcess.on('close', (code) => {
+      clearTimeout(timeoutId);
+      console.log(`\n✅ Tests completed with exit code: ${code}`);
+      resolve(code || 0);
+    });
+    
+    // Handle process errors
+    testProcess.on('error', (err) => {
+      clearTimeout(timeoutId);
+      console.error(`\n❌ Error executing tests:`, err);
+      resolve(1); // Return non-zero exit code
+    });
+  });
 }
 
-// Execute the command
-const [cmd, ...cmdArgs] = command.split(' ');
-const childProcess = spawn(cmd, cmdArgs, {
-  stdio: 'inherit',
-  shell: true,
-  detached: true // Create a new process group
-});
-
-// Set the global timeout
-const timeoutId = setTimeout(() => {
-  if (!processCompleted) {
-    terminateProcess(childProcess, `Test execution timed out after ${timeout / 1000} seconds`);
+/**
+ * Main function
+ */
+async function main(): Promise<void> {
+  try {
+    // Get test pattern from command line args
+    const args = process.argv.slice(2);
+    const testPattern = args.length > 0 ? args[0] : '';
+    
+    // Run tests with timeout
+    const exitCode = await runTestsWithTimeout({
+      testPattern,
+      timeout: DEFAULT_TIMEOUT,
+      config: 'vitest.config.unified.ts'
+    });
+    
+    // Exit with the same code as the test process
+    process.exit(exitCode);
+  } catch (error) {
+    console.error('❌ Error running tests:', error);
+    process.exit(1);
   }
-}, timeout);
+}
 
-// Handle process completion
-childProcess.on('close', (code) => {
-  processCompleted = true;
-  clearTimeout(timeoutId);
-  
-  if (code !== 0) {
-    console.log(`\n❌ Process exited with code ${code}`);
-    process.exit(code || 1);
-  } else {
-    console.log('\n✅ Process completed successfully');
-    process.exit(0);
-  }
-});
-
-// Handle process errors
-childProcess.on('error', (err) => {
-  processCompleted = true;
-  clearTimeout(timeoutId);
-  console.error('\n❌ Failed to start test process:', err);
-  process.exit(1);
-});
-
-// Handle Ctrl+C and other termination signals
-process.on('SIGINT', () => {
-  processCompleted = true;
-  clearTimeout(timeoutId);
-  terminateProcess(childProcess, 'Execution interrupted by user');
-});
-
-process.on('SIGTERM', () => {
-  processCompleted = true;
-  clearTimeout(timeoutId);
-  terminateProcess(childProcess, 'Execution terminated');
-});
+// Run the script
+main();

@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 
-import ThemeProvider from "@application/providers/ThemeProvider";
+import { ThemeProvider } from "@application/providers/ThemeProvider";
 import LoadingIndicator from "@/components/atoms/LoadingIndicator";
 import SessionWarningModal from "@/components/molecules/SessionWarningModal";
 import ErrorBoundary from "@/components/utils/ErrorBoundary";

@@ -1,169 +1,84 @@
 /**
- * Global Test Setup
+ * Global test setup for the Novamind Digital Twin frontend application
  * 
- * Configure the test environment before all tests run.
- * This file is used by Vitest to set up the test environment.
+ * This file is loaded automatically before any test files are run.
+ * It sets up the testing environment with necessary mocks and configurations.
  */
-
 import '@testing-library/jest-dom';
-import { afterEach, beforeAll, beforeEach, vi } from 'vitest';
-import { cleanup } from '@testing-library/react';
+import { vi, beforeAll, afterEach, afterAll } from 'vitest';
+import './tailwind-mock'; // Import Tailwind mock for CSS class testing
+import './tailwind-mock';
 
-// Import test utilities and mocks
-import { initTailwindMock } from './tailwind-mock';
+// Mock browser APIs and globals
+const mockMediaQueryList = {
+  matches: false,
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+};
 
-// For tracking animation frames
-const animationFrameIds: number[] = [];
-
-// Mock objects for browser APIs that aren't available in JSDOM
+// Setup global mocks before all tests
 beforeAll(() => {
-  // Initialize the Tailwind mock system
-  initTailwindMock();
-  
-  // Set up document for Tailwind dark mode
-  document.documentElement.classList.add('light');
+  // Mock localStorage
+  global.localStorage = {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn(),
+    length: 0,
+    key: vi.fn(),
+  } as unknown as Storage;
 
-  // Mock window.matchMedia, which isn't available in JSDOM
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: vi.fn().mockImplementation((query) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(), // deprecated
-      removeListener: vi.fn(), // deprecated
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })),
-  });
+  // Mock window.matchMedia to avoid errors in tests related to ThemeProvider
+  global.matchMedia = vi.fn().mockImplementation((query) => ({
+    ...mockMediaQueryList,
+    matches: query.includes('dark') ? false : true,
+    media: query,
+  }));
 
-  // Mock window.ResizeObserver which isn't available in JSDOM
-  Object.defineProperty(window, 'ResizeObserver', {
-    writable: true,
-    value: vi.fn().mockImplementation(() => ({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-    })),
-  });
+  // Setup document for Tailwind dark mode support
+  if (!document.documentElement.classList.contains('light')) {
+    document.documentElement.classList.add('light');
+  }
 
-  // Mock IntersectionObserver which isn't available in JSDOM
-  Object.defineProperty(window, 'IntersectionObserver', {
-    writable: true,
-    value: vi.fn().mockImplementation(() => ({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-      root: null,
-      rootMargin: '',
-      thresholds: [],
-    })),
-  });
+  // Mock requestAnimationFrame and cancelAnimationFrame to prevent test hangs
+  global.requestAnimationFrame = vi.fn((callback) => setTimeout(callback, 0));
+  global.cancelAnimationFrame = vi.fn((id) => clearTimeout(id));
 
-  // Simple counter-based animation frame handling to avoid type issues
-  let animationFrameCounter = 0;
-  
-  // Mock requestAnimationFrame 
-  window.requestAnimationFrame = ((callback: FrameRequestCallback): number => {
-    const id = ++animationFrameCounter;
-    animationFrameIds.push(id);
-    setTimeout(() => callback(performance.now()), 0);
-    return id;
-  });
+  // Mock IntersectionObserver
+  global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+    root: null,
+    rootMargin: '',
+    thresholds: [],
+  }));
 
-  // Mock cancelAnimationFrame
-  window.cancelAnimationFrame = ((id: number): void => {
-    const index = animationFrameIds.indexOf(id);
-    if (index > -1) {
-      animationFrameIds.splice(index, 1);
-    }
-  });
+  // Mock ResizeObserver
+  global.ResizeObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  }));
 
-  // Mock WebGL contexts
-  Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
-    writable: true,
-    value: vi.fn((contextType) => {
-      if (contextType === 'webgl' || contextType === 'webgl2') {
-        return {
-          createShader: vi.fn(() => ({})),
-          createProgram: vi.fn(() => ({})),
-          createBuffer: vi.fn(() => ({})),
-          createTexture: vi.fn(() => ({})),
-          useProgram: vi.fn(),
-          bindBuffer: vi.fn(),
-          vertexAttribPointer: vi.fn(),
-          enableVertexAttribArray: vi.fn(),
-          bindTexture: vi.fn(),
-          drawArrays: vi.fn(),
-          drawElements: vi.fn(),
-          getAttribLocation: vi.fn(() => 0),
-          getUniformLocation: vi.fn(() => ({})),
-          uniform1f: vi.fn(),
-          uniform2f: vi.fn(),
-          uniform3f: vi.fn(),
-          uniform4f: vi.fn(),
-          uniformMatrix4fv: vi.fn(),
-          enable: vi.fn(),
-          disable: vi.fn(),
-          blendFunc: vi.fn(),
-          clearColor: vi.fn(),
-          clear: vi.fn(),
-          viewport: vi.fn(),
-          getExtension: vi.fn(() => null),
-          createFramebuffer: vi.fn(() => ({})),
-          bindFramebuffer: vi.fn(),
-          scissor: vi.fn(),
-        };
-      }
-      return null;
-    }),
-  });
+  // Silence console errors in tests (comment this out for debugging)
+  // console.error = vi.fn();
+  // console.warn = vi.fn();
 });
 
 // Clean up after each test
 afterEach(() => {
-  cleanup();
-  vi.resetAllMocks();
-  
-  // Clear animation frame IDs
-  animationFrameIds.length = 0;
-});
-
-// Apply mocks before each test
-beforeEach(() => {
-  // Reset mocks before each test
+  // Reset all mocks between tests
   vi.clearAllMocks();
 });
 
-// Utility to detect memory leaks
-const memoryLeakDetector = {
-  start: (testName: string) => {
-    // Record heap usage at start of test (for Node environments)
-    if (typeof global.gc === 'function' && process.memoryUsage) {
-      global.gc(); // Force garbage collection
-      memoryLeakDetector.startHeap = process.memoryUsage().heapUsed;
-      memoryLeakDetector.testName = testName;
-    }
-  },
-  end: () => {
-    // Check heap usage at end (for Node environments)
-    if (typeof global.gc === 'function' && process.memoryUsage && memoryLeakDetector.startHeap) {
-      global.gc(); // Force garbage collection
-      const endHeap = process.memoryUsage().heapUsed;
-      const diff = endHeap - memoryLeakDetector.startHeap;
-      
-      // If the difference is large, log it as potential memory leak
-      if (diff > 5 * 1024 * 1024) { // 5MB threshold
-        console.warn(
-          `Potential memory leak in test "${memoryLeakDetector.testName}": ${(diff / 1024 / 1024).toFixed(2)}MB`
-        );
-      }
-    }
-  },
-  startHeap: 0,
-  testName: '',
-};
+// Clean up after all tests
+afterAll(() => {
+  // Any global cleanup needed
+});
 
-// Export memory leak detector for use in specific tests
-export { memoryLeakDetector };
+// Global test timeouts to prevent hanging
+vi.setConfig({
+  testTimeout: 10000, // 10 seconds
+  hookTimeout: 10000,
+});

@@ -1,224 +1,105 @@
-# Enhanced Testing with Tailwind CSS and Three.js
+# Tailwind CSS Testing Enhancement
+
+This document outlines the implementation of Tailwind CSS support in the test environment for the Novamind Digital Twin project.
 
 ## Overview
 
-This document outlines the comprehensive solution for testing React components using Tailwind CSS in the Novamind Digital Twin platform, with special consideration for components using Three.js/WebGL visualizations. The approach addresses common issues in testing environments, including:
+Testing components that use Tailwind CSS classes in a JSDOM environment presents unique challenges since JSDOM doesn't actually process or apply CSS. Our solution provides a robust way to test components that rely on Tailwind CSS classes, particularly those that use dark mode variants.
 
-- Proper handling of Tailwind CSS classes, especially in dark mode
-- Prevention of hanging tests caused by animation loops and WebGL contexts
-- Proper mocking of browser APIs and visual rendering
-- Consistent cleanup to prevent memory leaks and test interference
-- Type-safe testing utilities that maintain strict typing
+## Implementation Details
 
-## Architecture
+### 1. Tailwind Mock System
 
-The enhanced test solution consists of several key components:
+The `tailwind-mock.ts` module provides a mock implementation of Tailwind CSS functionality for tests:
 
-### 1. Enhanced Test Setup (`src/test/setup.enhanced.ts`)
+- **Dark Mode Toggle**: Allows tests to toggle between light and dark modes
+- **Class Injection**: Adds minimal Tailwind-like utility classes to the test environment
+- **DOM Manipulation**: Properly adds/removes the `dark` class to `document.documentElement`
 
-Provides the global test environment including:
-- Tailwind CSS class simulation for proper testing of styled components
-- Browser API mocking (ResizeObserver, IntersectionObserver, etc.)
-- WebGL context handling with proper cleanup
-- Console filtering to reduce noise from React internals
-- DOM element initialization and cleanup
+### 2. Custom Test Renderer
 
-### 2. Enhanced Test Utilities (`src/test/test-utils.enhanced.tsx`)
+The `test-utils.tsx` module provides a custom render function that:
 
-Extends React Testing Library with:
-- Dark mode control (enable, disable, toggle)
-- Proper wrapping of components with ThemeProvider
-- Helper functions for WebGL context cleanup
-- Type-safe render function with enhanced return values
+- Wraps components with necessary providers (ThemeProvider)
+- Injects Tailwind utility classes into the test environment
+- Allows setting initial dark mode state for tests
 
-### 3. Three.js and React Three Fiber Mocks
+### 3. Example Tests
 
-Located in `src/test/mocks/`:
-- Lightweight mocks of Three.js objects to prevent actual rendering
-- Mocks for React Three Fiber hooks and components
-- Animation frame handling without actual execution
+The `tailwind-testing-example.test.tsx` file demonstrates how to:
 
-### 4. Test Script (`scripts/run-enhanced-tests.sh`)
+- Test components with Tailwind classes in light mode
+- Test components with dark mode variants
+- Toggle between light and dark modes during tests
+- Verify class application
 
-A unified test runner that:
-- Uses a specialized test configuration
-- Implements proper timeout handling
-- Prevents test hanging through controlled execution
-- Offers targeted test pattern execution
+### 4. Test Runner
 
-## How to Use
+The `run-tailwind-tests.ts` script provides a dedicated runner for Tailwind-aware tests:
 
-### Basic Component Testing
+- Verifies that the setup file includes the Tailwind mock
+- Uses the unified test configuration
+- Sets appropriate timeouts to prevent hanging tests
 
-To test a component with Tailwind CSS classes:
+## Usage
 
-```tsx
-// example.enhanced.test.tsx
-import { render, screen } from '@/test/test-utils.enhanced';
-import MyComponent from './MyComponent';
-
-describe('MyComponent', () => {
-  it('renders correctly in light mode', () => {
-    render(<MyComponent />);
-    const element = screen.getByTestId('my-element');
-    expect(element).toHaveClass('bg-white');
-    expect(element).not.toHaveClass('dark:bg-gray-800');
-  });
-  
-  it('renders correctly in dark mode', () => {
-    const { enableDarkMode } = render(<MyComponent />);
-    
-    // Enable dark mode
-    enableDarkMode();
-    
-    const element = screen.getByTestId('my-element');
-    // In JSDOM we can only check for presence of classes, not their application
-    expect(element).toHaveClass('dark:bg-gray-800');
-  });
-});
-```
-
-### Running Tests
-
-Use the provided npm scripts:
+### Running Tailwind-Aware Tests
 
 ```bash
-# Run all enhanced tests
-npm run test:enhanced
-
-# Run only Tailwind-specific tests
-npm run test:enhanced:tailwind
-
-# Run only ThemeProvider tests
-npm run test:enhanced:theme
-
-# Run specific test file or pattern
-npm run test:enhanced "src/components/MyComponent.enhanced.test.tsx"
+npm run test:tailwind [testPattern]
 ```
 
-### Testing Three.js Components
+### Writing Tailwind-Aware Tests
 
-For components that use Three.js or React Three Fiber:
+```typescript
+import { render, screen } from '@test/test-utils';
+import { cssMock } from '@test/tailwind-mock';
 
-1. Use minimal rendering tests that verify component existence without full rendering
-2. Test the component's props and state changes without triggering animations
-3. Use the enhanced setup that provides proper WebGL context mocking
-
-Example:
-
-```tsx
-// BrainVisualizer.enhanced.test.tsx
-import { render, screen } from '@/test/test-utils.enhanced';
-import BrainVisualizer from './BrainVisualizer';
-
-describe('BrainVisualizer', () => {
-  it('renders without crashing', () => {
-    render(<BrainVisualizer regions={[]} />);
-    // Basic existence check is often sufficient for complex 3D components
-    expect(screen.getByTestId('brain-visualizer')).toBeInTheDocument();
+describe('Component with Tailwind', () => {
+  it('renders with correct light mode classes', () => {
+    render(<YourComponent />);
+    // Test light mode rendering
   });
-  
-  it('applies the correct classes when a region is active', () => {
-    const { rerender } = render(
-      <BrainVisualizer 
-        regions={[{ id: 'region1', name: 'Region 1', active: false }]} 
-      />
-    );
+
+  it('renders with correct dark mode classes', () => {
+    render(<YourComponent />, { initialDarkMode: true });
+    // Test dark mode rendering
+  });
+
+  it('toggles between light and dark mode', () => {
+    render(<YourComponent />);
+    // Start in light mode
     
-    // Verify inactive state
-    expect(screen.getByTestId('region-region1')).toHaveClass('opacity-50');
+    // Toggle to dark mode
+    cssMock.enableDarkMode();
+    // Test dark mode state
     
-    // Update to active state
-    rerender(
-      <BrainVisualizer 
-        regions={[{ id: 'region1', name: 'Region 1', active: true }]} 
-      />
-    );
-    
-    // Verify active state
-    expect(screen.getByTestId('region-region1')).toHaveClass('opacity-100');
+    // Toggle back to light mode
+    cssMock.disableDarkMode();
+    // Test light mode state
   });
 });
 ```
 
-## Best Practices
+## Benefits
 
-### 1. Testing Styled Components
+1. **Reliable Testing**: Components using Tailwind classes can be tested reliably
+2. **Dark Mode Support**: Full support for testing dark mode variants
+3. **Minimal Dependencies**: Pure TypeScript implementation with no external dependencies
+4. **Performance**: Minimal overhead compared to actual CSS processing
+5. **Integration**: Seamlessly integrates with existing test infrastructure
 
-- Add `data-testid` attributes to elements you want to test
-- Test for the presence of Tailwind classes, not their visual effect
-- Use the enhanced render function's `enableDarkMode` and `disableDarkMode` methods to test dark mode classes
-- Focus on testing class application, not actual styling (JSDOM limitation)
+## Technical Implementation
 
-### 2. Preventing Test Hangs
+The implementation follows these principles:
 
-- Avoid tests that rely on animation loops
-- Use the enhanced test setup that properly cleans up WebGL contexts
-- For complex visualization components, test props and callbacks rather than rendering
-- Separate unit tests (logic) from rendering tests (minimal tests just for validation)
+1. **Pure TypeScript**: All code is written in TypeScript with ESM modules
+2. **No Runtime Dependencies**: No additional runtime dependencies required
+3. **Clean Architecture**: Separation of concerns between mocking, rendering, and testing
+4. **Type Safety**: Full TypeScript type safety throughout the implementation
 
-### 3. Theme Context Testing
+## Future Enhancements
 
-- Use the enhanced render function to properly set up theme context
-- Test theme switching using the provided utilities
-- Verify that components respond to theme changes by checking class changes
-
-### 4. WebGL Cleanup
-
-The enhanced setup automatically:
-- Cleans up WebGL contexts after each test
-- Restores animation frame mocks
-- Removes canvas elements from the DOM
-- Resets mocks between tests
-
-## Technical Implementation Details
-
-### Tailwind CSS Simulation
-
-Since JSDOM doesn't actually apply CSS, we create a simulated environment by:
-
-1. Adding minimal CSS classes that match Tailwind's syntax
-2. Focusing tests on class application rather than visual outcomes
-3. Using the `dark` class on the document root to simulate dark mode
-
-### WebGL Context Management
-
-WebGL contexts can cause memory leaks and hanging tests. We address this by:
-
-1. Mocking Three.js objects to prevent actual rendering
-2. Using `WEBGL_lose_context` extension to properly release contexts
-3. Removing canvas elements from the DOM after each test
-4. Restoring animation frame mocks to prevent memory leaks
-
-### Animation Handling
-
-Animation frames can cause tests to hang indefinitely. Our solution:
-
-1. Mocks `requestAnimationFrame` and `cancelAnimationFrame`
-2. Restores these mocks after each test
-3. Implements a global timeout in the test runner script
-
-## Conclusion
-
-This enhanced testing solution provides a robust, type-safe way to test components that use Tailwind CSS classes and Three.js/WebGL visualizations. By properly handling dark mode, WebGL contexts, and animation frames, it prevents common issues like hanging tests and memory leaks, while maintaining the ability to test component logic and styling.
-
-### WebGL Context Management
-
-WebGL contexts can cause memory leaks and hanging tests. We address this by:
-
-1. Mocking Three.js objects to prevent actual rendering
-2. Using `WEBGL_lose_context` extension to properly release contexts
-3. Removing canvas elements from the DOM after each test
-4. Restoring animation frame mocks to prevent memory leaks
-
-### Animation Handling
-
-Animation frames can cause tests to hang indefinitely. Our solution:
-
-1. Mocks `requestAnimationFrame` and `cancelAnimationFrame`
-2. Restores these mocks after each test
-3. Implements a global timeout in the test runner script
-
-## Conclusion
-
-This enhanced testing solution provides a robust, type-safe way to test components that use Tailwind CSS classes and Three.js/WebGL visualizations. By properly handling dark mode, WebGL contexts, and animation frames, it prevents common issues like hanging tests and memory leaks, while maintaining the ability to test component logic and styling.
+1. **Extended Class Support**: Add more Tailwind utility classes to the mock as needed
+2. **Visual Regression Testing**: Integration with visual testing tools
+3. **Automated Class Extraction**: Automatically extract and mock classes used in components

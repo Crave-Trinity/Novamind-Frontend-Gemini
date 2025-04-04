@@ -1,62 +1,70 @@
-/**
- * Test Utilities
- *
- * Enhanced rendering utilities with Tailwind and theme support.
- */
-import React, { ReactElement } from 'react';
+import React from 'react';
 import { render, RenderOptions } from '@testing-library/react';
-import ThemeProvider from '../application/providers/ThemeProvider';
-import { ThemeOption } from '../application/contexts/ThemeContext';
-import { tailwindMock } from './tailwind-mock';
+import { ThemeProvider } from '@application/providers/ThemeProvider';
+import { cssMock, injectTailwindTestClasses } from './tailwind-mock';
 
 /**
- * Custom render options with theme support
+ * Test wrapper that provides all the necessary providers and context
+ * for testing components in isolation
  */
-interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
-  initialTheme?: ThemeOption;
-  darkMode?: boolean;
+interface AllTheProvidersProps {
+  children: React.ReactNode;
+  initialDarkMode?: boolean;
 }
 
 /**
- * Create a ThemeProvider wrapper with specified options
+ * Custom wrapper component that provides all necessary contexts for testing
+ * - ThemeProvider for dark/light mode themes
+ * - Any other providers needed for the application
  */
-export function createThemeWrapper(initialTheme: ThemeOption = 'clinical', darkMode: boolean = false) {
-  // Apply dark mode if requested
-  if (darkMode) {
-    tailwindMock.enableDarkMode();
-  } else {
-    tailwindMock.disableDarkMode();
-  }
+const AllTheProviders: React.FC<AllTheProvidersProps> = ({
+  children,
+  initialDarkMode = false,
+}) => {
+  // Initialize dark mode state based on the initialDarkMode prop
+  React.useEffect(() => {
+    if (initialDarkMode) {
+      cssMock.enableDarkMode();
+    } else {
+      cssMock.disableDarkMode();
+    }
+  }, [initialDarkMode]);
 
-  return ({ children }: { children: React.ReactNode }) => (
-    <ThemeProvider initialTheme={initialTheme}>
+  return (
+    <ThemeProvider defaultTheme={initialDarkMode ? 'dark' : 'light'}>
       {children}
     </ThemeProvider>
   );
-}
+};
+
+type CustomRenderOptions = {
+  initialDarkMode?: boolean;
+} & Omit<RenderOptions, 'wrapper'>;
 
 /**
- * Custom render with ThemeProvider
- * 
- * Wraps the rendered component with ThemeProvider and applies dark mode if requested
+ * Custom render method that wraps components with the necessary providers
+ * and injects minimal Tailwind-like utility classes for testing
  */
-export function renderWithProviders(
-  ui: ReactElement,
-  { initialTheme = 'clinical', darkMode = false, ...options }: CustomRenderOptions = {}
-) {
-  const AllTheProviders = createThemeWrapper(initialTheme, darkMode);
-  
-  return {
-    ...render(ui, { wrapper: AllTheProviders, ...options }),
-    // Return additional utilities
-    isDarkMode: () => tailwindMock.isDarkMode(),
-    enableDarkMode: () => tailwindMock.enableDarkMode(),
-    disableDarkMode: () => tailwindMock.disableDarkMode(),
-  };
-}
+const customRender = (
+  ui: React.ReactElement,
+  options?: CustomRenderOptions,
+) => {
+  // Inject Tailwind utility classes for testing
+  injectTailwindTestClasses();
+
+  // Set up wrapper with props from options
+  const wrapper = (props: { children: React.ReactNode }) => (
+    <AllTheProviders initialDarkMode={options?.initialDarkMode || false}>
+      {props.children}
+    </AllTheProviders>
+  );
+
+  // Render with the custom wrapper
+  return render(ui, { wrapper, ...options });
+};
 
 // Re-export everything from testing-library
 export * from '@testing-library/react';
 
-// Override render with our custom version
-export { renderWithProviders as render };
+// Override the render method
+export { customRender as render };

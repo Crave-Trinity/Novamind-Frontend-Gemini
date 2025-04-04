@@ -1,7 +1,22 @@
 # Novamind Digital Twin: Concierge Psychiatry Platform
 
-- STAY IN THE /FRONTEND/ DO NOT EXIT /FRONTEND/
-- PURE ESM AND TS; NO JS. 
+## Module System & Language Guidelines
+
+- **Application Code**: PURE TYPESCRIPT & ESM ONLY
+  - All application code must be written in TypeScript
+  - All application code must use ESM (import/export) syntax
+  - NO JavaScript files in application code
+  - NO CommonJS (require/module.exports) in application code
+
+- **Configuration Files**: TypeScript & ESM Preferred with Exceptions
+  - Configuration files should use TypeScript & ESM where supported
+  - EXCEPTION: For build tools that require CommonJS (PostCSS, Tailwind):
+    - Use .cjs configuration files with CommonJS syntax ONLY for these specific tools
+    - The .cjs extension explicitly marks files as CommonJS modules
+    - This exception is due to current ecosystem limitations
+    - These files must be kept to an absolute minimum
+
+- **STAY IN THE /FRONTEND/ DO NOT EXIT /FRONTEND/**
 
 ## Full-Stack Architecture (Backend + Frontend)
 

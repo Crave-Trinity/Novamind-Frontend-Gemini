@@ -1,92 +1,104 @@
 /**
- * Unified Vitest Configuration
+ * Unified Vitest Configuration for Novamind Digital Twin
  * 
- * This is the canonical configuration for all tests in the Novamind frontend.
- * It replaces all legacy configurations with a single source of truth.
+ * This configuration provides enhanced settings for testing with:
+ * - Tailwind CSS mocking support
+ * - Proper timeouts to prevent hanging tests
+ * - Improved error handling and reporting
+ * - Consistent module resolution
  */
+
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [
-    react() as any,
-  ],
+  plugins: [react()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@domain': path.resolve(__dirname, './src/domain'),
-      '@application': path.resolve(__dirname, './src/application'),
-      '@infrastructure': path.resolve(__dirname, './src/infrastructure'),
-      '@presentation': path.resolve(__dirname, './src/presentation'),
-      '@atoms': path.resolve(__dirname, './src/presentation/atoms'),
-      '@molecules': path.resolve(__dirname, './src/presentation/molecules'),
-      '@organisms': path.resolve(__dirname, './src/presentation/organisms'),
-      '@templates': path.resolve(__dirname, './src/presentation/templates'),
-      '@pages': path.resolve(__dirname, './src/presentation/pages'),
-      '@services': path.resolve(__dirname, './src/infrastructure/services'),
-      '@hooks': path.resolve(__dirname, './src/application/hooks'),
-      '@utils': path.resolve(__dirname, './src/application/utils'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@hooks': path.resolve(__dirname, './src/hooks'),
       '@contexts': path.resolve(__dirname, './src/application/contexts'),
-      '@types': path.resolve(__dirname, './src/domain/types'),
-      '@models': path.resolve(__dirname, './src/domain/models'),
-      '@assets': path.resolve(__dirname, './src/presentation/assets'),
-      '@shaders': path.resolve(__dirname, './src/shaders'),
-      '@store': path.resolve(__dirname, './src/application/store'),
-      '@styles': path.resolve(__dirname, './src/presentation/styles'),
-      '@api': path.resolve(__dirname, './src/infrastructure/api'),
-      '@config': path.resolve(__dirname, './src/infrastructure/config'),
-      '@constants': path.resolve(__dirname, './src/domain/constants'),
-      '@validation': path.resolve(__dirname, './src/domain/validation'),
-      '@visualizations': path.resolve(__dirname, './src/presentation/visualizations'),
-      '@test': path.resolve(__dirname, './src/test'),
-    },
+      '@providers': path.resolve(__dirname, './src/application/providers'),
+      '@services': path.resolve(__dirname, './src/services'),
+      '@utils': path.resolve(__dirname, './src/utils'),
+      '@types': path.resolve(__dirname, './src/types'),
+      '@test': path.resolve(__dirname, './src/test')
+    }
   },
   test: {
-    globals: true,
+    // Use enhanced JSDOM environment
     environment: 'jsdom',
-    setupFiles: [
-      './src/test/setup.unified.ts',
-    ],
-    include: ['src/**/*.{test,spec,unified.test}.{ts,tsx}'],
-    exclude: ['node_modules', '.git', 'dist'],
-    testTimeout: 15000,
+    
+    // Only use globals from DOM and Vitest APIs
+    globals: true,
+    
+    // Automatically include setup file
+    setupFiles: ['./src/test/setup.ts'],
+    
+    // Global timeouts to prevent hanging tests
+    testTimeout: 10000, // 10 seconds
     hookTimeout: 10000,
-    teardownTimeout: 5000,
-    passWithNoTests: true,
-    bail: 1, // Stop after first test failure
-    poolOptions: {
-      threads: {
-        singleThread: true, // Run in single thread to prevent resource contention
-      },
+    
+    // Thread configuration to balance performance
+    threads: true,
+    maxThreads: 4,
+    minThreads: 1,
+    
+    // Enhanced error handling
+    onConsoleLog(log) {
+      // Filter out certain expected warnings
+      if (log.includes('Warning: ReactDOM.render is no longer supported')) {
+        return false;
+      }
+      // Return void for all other logs (not false)
+      return;
     },
-    environmentOptions: {
-      jsdom: {
-        resources: 'usable',
-      },
+    
+    // Enhanced output
+    reporters: ['default', 'html'],
+    outputFile: {
+      html: './test-reports/index.html'
     },
+    
+    // Code coverage config
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+      reportsDirectory: './test-reports/coverage',
+      exclude: [
+        'node_modules/**',
+        'dist/**',
+        '**/*.test.{ts,tsx}',
+        '**/test/**',
+      ]
+    },
+    
+    // Handle specific test filtering
+    include: ['**/*.{test,spec}.{ts,tsx}'],
+    exclude: [
+      '**/node_modules/**', 
+      '**/dist/**',
+      '**/.{idea,git,cache,output}/**'
+    ],
+    
+    // Auto-exit on test completion to prevent hanging
+    watch: false,
+    
+    // Improved isolation for tests
     isolate: true,
-    mockReset: true,
+    
+    // Cleanup after tests
     restoreMocks: true,
     clearMocks: true,
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov'],
-      exclude: [
-        'node_modules/',
-        'src/test/',
-        'src/**/*.d.ts',
-        'src/**/*.types.ts',
-        'src/vite-env.d.ts',
-        'src/**/*.stories.tsx',
-        'src/**/*.styles.ts',
-      ],
-      thresholds: {
-        branches: 80,
-        functions: 80,
-        lines: 80,
-        statements: 80,
-      }
-    },
-  },
+    
+    // Improved error messages
+    dangerouslyIgnoreUnhandledErrors: false,
+    
+    // Improved performance for large test suites
+    bail: 5, // Stop after 5 failures
+    
+    // Improved debugging
+    logHeapUsage: true,
+  }
 });

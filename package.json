@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "autoprefixer": "10.4.21",
+    "nanoid": "5.1.5",
+    "postcss": "8.5.3",
+    "source-map-js": "1.2.1",
+    "tailwindcss": "4.1.2"
+  }
+}
