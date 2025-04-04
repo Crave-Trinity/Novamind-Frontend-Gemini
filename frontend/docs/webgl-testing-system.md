@@ -88,3 +88,82 @@ describe('BrainVisualization', () => {
 ```
 
 ### Testing Neural Visualization Components
+
+Neural visualization components often depend on multiple controllers. Use the specialized neural controller mocks:
+
+```typescript
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl';
+import { applyNeuralControllerMocks, cleanupNeuralControllerMocks } from '@test/webgl/examples/neural-controllers-mock';
+import { render, screen } from '@testing-library/react';
+import NeuralVisualizationCoordinator from '@application/controllers/coordinators/NeuralVisualizationCoordinator';
+
+describe('NeuralVisualizationCoordinator', () => {
+  beforeAll(() => {
+    setupWebGLMocks({ monitorMemory: true });
+    applyNeuralControllerMocks();
+  });
+
+  afterAll(() => {
+    cleanupNeuralControllerMocks();
+    cleanupWebGLMocks();
+  });
+
+  it('renders with neural precision', () => {
+    render(<NeuralVisualizationCoordinator patientId="test-123">
+      <div>Test Content</div>
+    </NeuralVisualizationCoordinator>);
+    
+    expect(screen.getByText('Test Content')).toBeInTheDocument();
+  });
+});
+```
+
+## Technical Implementation Details
+
+### WebGL Context Mocking
+
+The system mocks the WebGL context by overriding `HTMLCanvasElement.prototype.getContext` to return a mock implementation instead of attempting to create a real WebGL context (which is not available in JSDOM).
+
+### Memory Monitoring
+
+Memory monitoring tracks objects created during tests and ensures they are properly disposed. This helps identify memory leaks that could impact performance in the production application.
+
+Key features:
+- Track objects by type
+- Monitor disposal calls
+- Generate memory snapshots
+- Provide detailed reports of leaked objects
+
+### Three.js Mock Objects
+
+The system provides mock implementations for common Three.js objects:
+
+- **Scene**: Mock scene with add/remove functions
+- **Camera**: Mock perspective camera
+- **Renderer**: Mock WebGLRenderer
+- **Geometries**: BoxGeometry, SphereGeometry, BufferGeometry
+- **Materials**: MeshStandardMaterial, MeshBasicMaterial
+- **Objects**: Object3D, Mesh, Group
+- **Math**: Vector3, Color
+- **Animation**: Clock
+- **React Three Fiber**: useThree, useFrame, Canvas
+
+### Neural Controller Mocks
+
+Specialized mocks for the neural visualization system:
+
+- **NeuroSyncOrchestrator**: Central orchestration
+- **NeuralActivityController**: Neural activity simulation
+- **ClinicalPredictionController**: Clinical prediction
+- **BiometricStreamController**: Biometric data
+- **TemporalDynamicsController**: Temporal patterns
+
+## Troubleshooting
+
+### Tests Still Hanging
+
+If tests are still hanging despite WebGL mocks:
+
+1. Ensure the test is properly cleaning up resources
+2. Check for async operations that aren't being awaited
