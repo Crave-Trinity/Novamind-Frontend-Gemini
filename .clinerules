@@ -1,5 +1,8 @@
 # Novamind Digital Twin: Concierge Psychiatry Platform
 
+- STAY IN THE /FRONTEND/ DO NOT EXIT /FRONTEND/
+- PURE ESM AND TS; NO JS. 
+
 ## Full-Stack Architecture (Backend + Frontend)
 
 ### Clean Architecture Across the Stack

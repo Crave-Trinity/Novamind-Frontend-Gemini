@@ -65,8 +65,7 @@ const Dashboard: React.FC = () => {
             </div>
             <div className="h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
               <div
-                className="h-2.5 rounded-full bg-green-600"
-                style={{ width: "78%" }}
+                className="h-2.5 w-[78%] rounded-full bg-green-600"
               ></div>
             </div>
           </div>

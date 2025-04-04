@@ -1,101 +1,130 @@
+/* Base Tailwind CSS imports */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --primary-50: 236 253 245;
-  --primary-100: 209 250 229;
-  --primary-200: 167 243 208;
-  --primary-300: 110 231 183;
-  --primary-400: 52 211 153;
-  --primary-500: 16 185 129;
-  --primary-600: 5 150 105;
-  --primary-700: 4 120 87;
-  --primary-800: 6 95 70;
-  --primary-900: 4 78 56;
-  --primary-950: 2 44 34;
-
-  --background: 252 252 253;
-  --background-card: 255 255 255;
-  --foreground: 15 23 42;
-}
-
-.dark {
-  --primary-50: 2 44 34;
-  --primary-100: 4 78 56;
-  --primary-200: 6 95 70;
-  --primary-300: 4 120 87;
-  --primary-400: 5 150 105;
-  --primary-500: 16 185 129;
-  --primary-600: 52 211 153;
-  --primary-700: 110 231 183;
-  --primary-800: 167 243 208;
-  --primary-900: 209 250 229;
-  --primary-950: 236 253 245;
-
-  --background: 10 12 16;
-  --background-card: 17 20 27;
-  --foreground: 255 255 255;
-}
-
+/* Custom layer for Novamind-specific styles */
 @layer base {
+  html {
+    @apply font-sans antialiased;
+  }
+  
   body {
-    @apply text-neutral-900 bg-neutral-50 dark:text-white dark:bg-background;
-    font-feature-settings:
-      "rlig" 1,
-      "calt" 1;
+    @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+  }
+  
+  /* Ensure the app takes full height */
+  html, body, #root {
+    @apply h-full;
   }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-neutral-300 dark:bg-neutral-700 rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-neutral-400 dark:bg-neutral-600;
-}
-
-/* Animations */
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
+/* Clinical theme components */
+@layer components {
+  .clinical-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
-  50% {
-    opacity: 0.5;
+  
+  .clinical-panel {
+    @apply bg-white dark:bg-gray-800 shadow rounded-lg p-6;
+  }
+  
+  .clinical-card {
+    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 shadow-sm hover:shadow transition-shadow;
+  }
+  
+  .stat-container {
+    @apply rounded-lg bg-white dark:bg-gray-800 p-4 shadow;
+  }
+  
+  .stat-title {
+    @apply text-sm font-medium text-gray-500 dark:text-gray-400 truncate;
+  }
+  
+  .stat-value {
+    @apply mt-1 text-3xl font-semibold text-primary-600 dark:text-primary-500;
+  }
+  
+  .stat-description {
+    @apply mt-1 text-sm text-gray-600 dark:text-gray-300;
+  }
+  
+  /* Buttons */
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500;
+  }
+  
+  .btn-secondary {
+    @apply bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 font-medium py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500;
+  }
+  
+  .btn-outline {
+    @apply border border-primary-500 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-gray-800 font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500;
   }
 }
 
-.animate-pulse-slow {
-  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+/* Brain visualization specific styles */
+@layer utilities {
+  .brain-region {
+    @apply transition-opacity duration-300;
+  }
+  
+  .brain-region-inactive {
+    @apply opacity-50;
+  }
+  
+  .brain-region-active {
+    @apply opacity-100;
+  }
+  
+  .neural-connection {
+    @apply stroke-primary-500 transition-all duration-300;
+  }
+  
+  .neural-connection-active {
+    @apply stroke-primary-600 stroke-2;
+  }
 }
 
-/* Transition utilities */
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+/* Animation utilities */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out forwards;
+  }
+  
+  .animate-slide-in {
+    animation: slideIn 0.5s ease-out forwards;
+  }
+  
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  
+  @keyframes slideIn {
+    0% { transform: translateY(20px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
 }
 
-.transition-colors {
-  transition-property:
-    color, background-color, border-color, text-decoration-color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+/* Sleek dark theme enhanced styles */
+.theme-sleek .clinical-panel {
+  @apply bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700;
 }
 
-/* Remove Tailwind focus ring for non-keyboard focus */
-.focus\:outline-none:focus:not(:focus-visible) {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
+.theme-sleek .btn-primary {
+  @apply bg-gradient-to-r from-primary-500 to-primary-600;
+}
+
+/* Critical specific component styles that need to be applied regardless of purging */
+#brain-model-canvas {
+  @apply w-full h-full min-h-[400px];
+}
+
+.dashboard-stats-container {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8;
+}
+
+.patient-list-item {
+  @apply flex items-center p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors;
 }

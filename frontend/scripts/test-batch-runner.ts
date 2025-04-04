@@ -1,10 +1,9 @@
 #!/usr/bin/env node
-/// <reference types="node" />
 /**
  * Test Batch Runner - A specialized script for running tests in compatible batches
  * This prevents test hanging by separating animation/visualization components from pure logic tests
  * 
- * Usage: npx tsx test-batch-runner.ts [--all] [--core] [--ui] [--vis] [--type]
+ * Usage: node --loader ts-node/esm test-batch-runner.ts [--all] [--core] [--ui] [--vis] [--type]
  * Options:
  *   --all: Run all batches (slower, but comprehensive)
  *   --core: Run only core logic tests
@@ -13,14 +12,23 @@
  *   --type: Run only type validation tests
  */
 
+// Add Node.js type definitions
+/// <reference types="node" />
+
 import { execSync } from 'child_process';
 
-// Define batch types
-type TestBatch = {
+// Define interfaces for type safety
+interface TestBatch {
   name: string;
   flag: 'core' | 'ui' | 'vis' | 'type';
   patterns: string[];
-};
+}
+
+interface BatchResult {
+  name: string;
+  success: boolean;
+  skipped: boolean;
+}
 
 // Define test batches that can run together without conflicts
 const batches: TestBatch[] = [
@@ -85,20 +93,15 @@ const batches: TestBatch[] = [
 ];
 
 // Parse command line arguments
-const args = process.argv.slice(2);
-const runAll = args.includes('--all') || args.length === 0;
-const runCore = args.includes('--core') || runAll;
-const runUi = args.includes('--ui') || runAll;
-const runVis = args.includes('--vis') || runAll;
-const runType = args.includes('--type') || runAll;
-
-type BatchResult = {
-  success: boolean;
-  skipped: boolean;
-};
+const args: string[] = process.argv.slice(2);
+const runAll: boolean = args.includes('--all') || args.length === 0;
+const runCore: boolean = args.includes('--core') || runAll;
+const runUi: boolean = args.includes('--ui') || runAll;
+const runVis: boolean = args.includes('--vis') || runAll;
+const runType: boolean = args.includes('--type') || runAll;
 
 // Function to run a batch of tests
-function runBatch(batch: TestBatch): BatchResult {
+function runBatch(batch: TestBatch): { success: boolean; skipped: boolean } {
   // Skip batch if not requested
   if ((batch.flag === 'core' && !runCore) ||
       (batch.flag === 'ui' && !runUi) ||
@@ -114,7 +117,7 @@ function runBatch(batch: TestBatch): BatchResult {
     // Create pattern arguments - join with spaces
     const patterns = batch.patterns.map(p => `"${p}"`).join(' ');
     
-    // Run the tests
+    // Run the tests with a timeout
     const command = `npm run test -- ${patterns}`;
     console.log(`Executing: ${command}\n`);
     
@@ -125,6 +128,8 @@ function runBatch(batch: TestBatch): BatchResult {
     console.error(`\n❌ Error in batch "${batch.name}":`);
     if (error instanceof Error) {
       console.error(error.message);
+    } else {
+      console.error('Unknown error occurred');
     }
     return { success: false, skipped: false };
   }
@@ -134,13 +139,7 @@ function runBatch(batch: TestBatch): BatchResult {
 console.log('Starting Compatible Test Batches Runner');
 console.log('=======================================');
 
-type ResultWithName = {
-  name: string;
-  success: boolean;
-  skipped: boolean;
-};
-
-const results: ResultWithName[] = [];
+const results: BatchResult[] = [];
 
 for (const batch of batches) {
   const result = runBatch(batch);

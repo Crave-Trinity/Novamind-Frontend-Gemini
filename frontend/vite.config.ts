@@ -2,18 +2,48 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import tsconfigPaths from 'vite-tsconfig-paths'; // Added import for the plugin
+import tsconfigPaths from 'vite-tsconfig-paths';
+
 export default defineConfig({
   plugins: [
-    react(),
-    tsconfigPaths() // Added tsconfigPaths plugin
+    react({
+      // Enable processing of CSS including PostCSS plugins
+      babel: {
+        plugins: [
+          // Add any babel plugins if needed
+        ],
+      },
+    }),
+    tsconfigPaths()
   ],
-  // resolve: { // Removed manual aliases - rely on tsconfigPaths plugin
-  //   alias: { ... }
-  // },
-  // The following "test" field is specific to Vitest.
-  // Casting the configuration to "any" bypasses type restrictions.
+  
+  css: {
+    // Enable CSS modules and PostCSS processing
+    modules: {
+      localsConvention: 'camelCase',
+    },
+    postcss: {
+      // Ensure PostCSS plugins are loaded from postcss.config.js
+    },
+    // Enable CSS source maps for better debugging
+    devSourcemap: true,
+  },
+  
+  // Ensure static assets are properly handled
+  publicDir: 'public',
+  
+  // Enable HMR for faster development
+  server: {
+    hmr: true,
+    watch: {
+      usePolling: false,
+    },
+  },
+
+  // Vitest configuration
   test: {
-    environment: 'jsdom'
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test/setup.ts']
   }
-} as any); // Re-added 'as any' cast for Vitest compatibility
+} as any);
