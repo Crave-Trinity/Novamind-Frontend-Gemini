@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser Tools MCP Test</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .log-area {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .error {
+            color: #e74c3c;
+        }
+        .success {
+            color: #27ae60;
+        }
+        .info {
+            color: #3498db;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <h1>Browser Tools MCP Test</h1>
+
+    <div class="container">
+        <h2>Console Log Tests</h2>
+        <button onclick="generateInfoLogs()">Generate Info Logs</button>
+        <button onclick="generateErrorLogs()">Generate Error Logs</button>
+        <button onclick="generateNetworkActivity()">Trigger Network Activity</button>
+        <button onclick="generatePerformanceIssue()">Trigger Performance Issue</button>
+    </div>
+
+    <div class="container">
+        <h2>Content Selection Tests</h2>
+        <div class="test-grid">
+            <div class="card">
+                <h3>Card 1: Selectable Element</h3>
+                <p>This element can be selected for analysis. Try selecting it in the Elements panel.</p>
+                <button onclick="console.log('Card 1 selected')">Select Me</button>
+            </div>
+            <div class="card">
+                <h3>Card 2: DOM Issues</h3>
+                <p>This card has some deliberately <span aria-hidden="true" style="color: red;">inaccessible</span> elements.</p>
+                <img src="nonexistent.jpg" alt="">
+            </div>
+            <div class="card">
+                <h3>Card 3: JavaScript Quirks</h3>
+                <p>This card demonstrates some JS behaviors.</p>
+                <button onclick="demonstrateJSQuirks()">Run JS Demo</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="log-area" id="logArea">
+        <p class="info">Log output will appear here...</p>
+    </div>
+
+    <script>
+        // Helper to add logs both to console and visible log area
+        function log(message, type = 'info') {
+            console.log(message);
+            const logArea = document.getElementById('logArea');
+            const logElement = document.createElement('p');
+            logElement.classList.add(type);
+            logElement.textContent = message;
+            logArea.appendChild(logElement);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        // Test functions
+        function generateInfoLogs() {
+            log('✅ Regular info log', 'info');
+            log('⚠️ Warning level information', 'info');
+            console.info('Additional console.info output');
+            log('Multiple logs triggered successfully', 'success');
+        }
+
+        function generateErrorLogs() {
+            log('⛔ Error: Something went wrong', 'error');
+            console.error('This is a console.error message');
+            try {
+                throw new Error('Deliberate error for testing');
+            } catch (e) {
+                console.error(e);
+                log('Error thrown and caught: ' + e.message, 'error');
+            }
+        }
+
+        function generateNetworkActivity() {
+            log('🌐 Triggering network requests...', 'info');
+            
+            // JSON Placeholder API request
+            fetch('https://jsonplaceholder.typicode.com/todos/1')
+                .then(response => response.json())
+                .then(json => {
+                    log('✅ Network request succeeded', 'success');
+                    console.log('API Response:', json);
+                })
+                .catch(error => {
+                    log('⛔ Network request failed', 'error');
+                    console.error(error);
+                });
+                
+            // Deliberately failing request
+            fetch('https://nonexistentdomain.example/api')
+                .then(response => response.json())
+                .catch(error => {
+                    log('⛔ Expected failure for nonexistent domain', 'error');
+                    console.error('Expected error:', error.message);
+                });
+        }
+
+        function generatePerformanceIssue() {
+            log('⚠️ Starting performance-intensive operation...', 'info');
+            console.time('Heavy operation');
+            
+            // CPU-intensive operation
+            const startTime = performance.now();
+            let result = 0;
+            for (let i = 0; i < 10000000; i++) {
+                result += Math.sqrt(i);
+            }
+            
+            const duration = performance.now() - startTime;
+            console.timeEnd('Heavy operation');
+            log(`✅ Operation completed in ${duration.toFixed(2)}ms`, 'success');
+            console.log('Final result:', result);
+        }
+
+        function demonstrateJSQuirks() {
+            log('🧪 Demonstrating JavaScript behaviors...', 'info');
+            
+            // Equality quirks
+            console.log('== vs ===:');
+            console.log('0 == false:', 0 == false);
+            console.log('0 === false:', 0 === false);
+            
+            // Type coercion
+            console.log('Type coercion:');
+            console.log('1 + "2":', 1 + "2");
+            console.log('true + true:', true + true);
+            
+            // Object behavior
+            const obj = { name: 'Test Object' };
+            console.log('Original object:', obj);
+            const objRef = obj;
+            objRef.name = 'Modified';
+            console.log('After modification:', obj);
+            
+            log('✅ JS demo completed - check console for details', 'success');
+        }
+
+        // Run some initial logs
+        log('🚀 Page loaded successfully', 'success');
+        console.log('Browser Tools MCP test page initialized');
+    </script>
+</body>
+</html>
