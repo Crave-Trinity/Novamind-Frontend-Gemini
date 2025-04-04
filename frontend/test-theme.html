@@ -89,15 +89,13 @@
       toggleTheme: () => undefined,
     });
     
-    // Define ThemeMode types
+    // Define ThemeMode types - simplified set
     const ThemeMode = {
       LIGHT: 'light',
       DARK: 'dark',
       SYSTEM: 'system',
       CLINICAL: 'clinical',
-      SLEEK_DARK: 'sleek-dark',
-      RETRO: 'retro',
-      WES: 'wes'
+      RETRO: 'retro'
     };
     
     // Create ThemeProvider component
@@ -105,7 +103,7 @@
       // Get initial theme from localStorage or use default
       const getInitialTheme = () => {
         const savedTheme = localStorage.getItem('theme');
-        const validThemes = ['light', 'dark', 'system', 'clinical', 'sleek-dark', 'retro', 'wes'];
+        const validThemes = ['light', 'dark', 'system', 'clinical', 'retro'];
         return savedTheme && validThemes.includes(savedTheme) ? savedTheme : defaultTheme;
       };
 
@@ -120,10 +118,10 @@
       // Apply theme to document
       React.useEffect(() => {
         // Determine if dark mode should be active
-        const shouldUseDark = 
-          mode === 'dark' || 
+        const shouldUseDark =
+          mode === 'dark' ||
           (mode === 'system' && prefersDarkMode) ||
-          mode === 'sleek-dark';
+          mode === 'retro';
         
         setIsDarkMode(shouldUseDark);
         
@@ -131,7 +129,7 @@
         const root = document.documentElement;
         
         // Clear existing theme classes
-        root.classList.remove('theme-light', 'theme-dark', 'theme-clinical', 'theme-sleek-dark', 'theme-retro', 'theme-wes');
+        root.classList.remove('theme-light', 'theme-dark', 'theme-system', 'theme-clinical', 'theme-retro');
         
         // Set dark/light mode
         if (shouldUseDark) {
@@ -194,7 +192,7 @@
     const ThemeController = () => {
       const { mode, isDarkMode, setTheme, toggleTheme } = useTheme();
       
-      const themes = ['light', 'dark', 'system', 'clinical', 'sleek-dark', 'retro', 'wes'];
+      const themes = ['light', 'dark', 'system', 'clinical', 'retro'];
       
       return (
         <div className="p-6 max-w-4xl mx-auto">
@@ -203,8 +201,9 @@
             
             <div className="mb-6 p-4 rounded border">
               <h2 className="text-xl font-semibold mb-2">Current Theme State</h2>
-              <p><strong>Active Theme:</strong> {mode}</p>
-              <p><strong>Dark Mode:</strong> {isDarkMode ? 'Enabled' : 'Disabled'}</p>
+              <p id="active-theme"><strong>Active Theme:</strong> {mode}</p>
+              <p id="theme-indicator"><strong>Dark Mode:</strong> {isDarkMode ? 'Enabled' : 'Disabled'}</p>
+              <p id="dark-mode-status"><strong>Dark Mode Status:</strong> {isDarkMode ? 'Enabled' : 'Disabled'}</p>
               <p><strong>System Preference:</strong> {window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light'}</p>
             </div>
             

@@ -6,11 +6,38 @@ import React, {
   ReactNode,
 } from "react";
 
-import { ThemeType, ThemeSettings } from "@/types/brain";
+import { ThemeMode } from "../../domain/types/theme";
+
+// Define ThemeSettings interface for visualization settings
+interface ThemeSettings {
+  bgColor: string;
+  glowIntensity: number;
+  useBloom: boolean;
+  activeRegionColor: string;
+  inactiveRegionColor: string;
+  excitationColor: string;
+  inhibitionColor: string;
+  connectionOpacity: number;
+  regionOpacity: number;
+}
+
+// Using our ThemeMode type for consistency
+type ThemeType = ThemeMode;
 
 // Define default theme settings for each theme
 const defaultThemeSettings: Record<ThemeType, ThemeSettings> = {
-  "sleek-dark": {
+  light: {
+    bgColor: "#ffffff",
+    glowIntensity: 0.2,
+    useBloom: false,
+    activeRegionColor: "#2196f3",
+    inactiveRegionColor: "#e0e0e0",
+    excitationColor: "#00897b",
+    inhibitionColor: "#e53935",
+    connectionOpacity: 0.8,
+    regionOpacity: 0.95,
+  },
+  dark: {
     bgColor: "#121212",
     glowIntensity: 0.8,
     useBloom: true,
@@ -32,18 +59,19 @@ const defaultThemeSettings: Record<ThemeType, ThemeSettings> = {
     connectionOpacity: 0.5,
     regionOpacity: 0.8,
   },
-  wes: {
-    bgColor: "#F8E9D6",
-    glowIntensity: 0.3,
-    useBloom: false,
-    activeRegionColor: "#E85A50",
-    inactiveRegionColor: "#B5A886",
-    excitationColor: "#619B8A",
-    inhibitionColor: "#7A6C5D",
-    connectionOpacity: 0.9,
-    regionOpacity: 1.0,
-  },
   clinical: {
+    bgColor: "#ffffff",
+    glowIntensity: 0.2,
+    useBloom: false,
+    activeRegionColor: "#2196f3",
+    inactiveRegionColor: "#e0e0e0",
+    excitationColor: "#00897b",
+    inhibitionColor: "#e53935",
+    connectionOpacity: 0.8,
+    regionOpacity: 0.95,
+  },
+  system: {
+    // System will use light or dark based on user's system preference
     bgColor: "#ffffff",
     glowIntensity: 0.2,
     useBloom: false,
@@ -99,7 +127,7 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
     try {
       const savedTheme = localStorage.getItem("theme") as ThemeType;
       return savedTheme &&
-        ["sleek-dark", "retro", "wes", "clinical"].includes(savedTheme)
+        ["light", "dark", "system", "clinical", "retro"].includes(savedTheme)
         ? savedTheme
         : defaultTheme;
     } catch (e) {
@@ -109,11 +137,11 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
   });
 
   // Check if current theme is a dark theme variant
-  const isDarkMode = theme === "sleek-dark" || theme === "retro";
+  const isDarkMode = theme === "dark" || theme === "retro" || (theme === "system" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   // Set theme and save to localStorage
   const setTheme = useCallback((newTheme: ThemeType) => {
-    if (["sleek-dark", "retro", "wes", "clinical"].includes(newTheme)) {
+    if (["light", "dark", "system", "clinical", "retro"].includes(newTheme)) {
       try {
         localStorage.setItem("theme", newTheme);
       } catch (e) {
@@ -126,7 +154,9 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
       document.documentElement.setAttribute("data-theme", newTheme);
 
       // Set dark mode class for Tailwind
-      if (newTheme === "sleek-dark" || newTheme === "retro") {
+      // Set dark mode class based on theme or system preference
+      if (newTheme === "dark" || newTheme === "retro" ||
+          (newTheme === "system" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
         document.documentElement.classList.add("dark");
       } else {
         document.documentElement.classList.remove("dark");
@@ -139,19 +169,18 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
   // Toggle between light and dark mode
   const toggleTheme = useCallback(() => {
     setThemeState((prevTheme) => {
-      if (prevTheme === "clinical") {
-        return "sleek-dark";
+      // Simpler toggle logic with fewer themes
+      if (prevTheme === "light" || prevTheme === "clinical") {
+        return "dark";
       }
-      if (prevTheme === "sleek-dark") {
-        return "clinical";
+      if (prevTheme === "dark" || prevTheme === "retro") {
+        return "light";
       }
-      if (prevTheme === "wes") {
-        return "retro";
+      if (prevTheme === "system") {
+        // If system theme, toggle to explicit light/dark based on current system preference
+        return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark";
       }
-      if (prevTheme === "retro") {
-        return "wes";
-      }
-      return "clinical";
+      return "light"; // Default fallback
     });
   }, []);
 
@@ -162,10 +191,11 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
     // Remove previous theme classes
     root.classList.remove(
+      "theme-light",
+      "theme-dark",
+      "theme-system",
       "theme-clinical",
-      "theme-sleek-dark",
-      "theme-retro",
-      "theme-wes",
+      "theme-retro"
     );
 
     // Add current theme class
@@ -185,7 +215,7 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
         const handleChange = (e: MediaQueryListEvent) => {
           const savedTheme = localStorage.getItem("theme");
           if (!savedTheme) {
-            setTheme(e.matches ? "sleek-dark" : "clinical");
+            setTheme(e.matches ? "dark" : "light");
           }
         };
 
@@ -194,7 +224,7 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
           const handleChange = (e: MediaQueryListEvent) => {
             const savedTheme = localStorage.getItem("theme");
             if (!savedTheme) {
-              setTheme(e.matches ? "sleek-dark" : "clinical");
+              setTheme(e.matches ? "dark" : "light");
             }
           };
 

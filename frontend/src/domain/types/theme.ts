@@ -1,7 +1,7 @@
 /**
  * Possible theme modes for the application
  */
-export type ThemeMode = 'light' | 'dark' | 'system' | 'clinical' | 'sleek-dark' | 'retro' | 'wes';
+export type ThemeMode = 'light' | 'dark' | 'system' | 'clinical' | 'retro';
 
 /**
  * Simplified theme type for component usage (just light/dark)
@@ -14,6 +14,6 @@ export type SimpleTheme = 'light' | 'dark';
 export const isValidTheme = (theme: string | null): theme is ThemeMode => {
   if (!theme) return false;
   
-  const validThemes: ThemeMode[] = ['light', 'dark', 'system', 'clinical', 'sleek-dark', 'retro', 'wes'];
+  const validThemes: ThemeMode[] = ['light', 'dark', 'system', 'clinical', 'retro'];
   return validThemes.includes(theme as ThemeMode);
 };
