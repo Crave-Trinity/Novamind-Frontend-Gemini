@@ -1,268 +1,64 @@
-name: NOVAMIND CI/CD Pipeline
+name: Build and Deploy Novamind Frontend
 
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'API Mode'
+        required: true
+        default: 'mock'
+        type: choice
+        options:
+          - mock
+          - real
 
 jobs:
-  security-scan:
-    name: Security Scan
+  build-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
         with:
-          python-version: '3.10'
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
           
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install bandit safety
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-      
-      - name: Run Bandit security scan
-        run: bandit -r app/ -f json -o bandit-results.json
+        run: cd frontend && npm ci
         
-      - name: Run Safety dependency scan
-        run: safety check --full-report
+      - name: Set environment for mock mode
+        if: github.event.inputs.mode == 'mock' || github.event.inputs.mode == ''
+        run: |
+          cd frontend
+          echo "VITE_API_MODE=mock" > .env.production
+          echo "VITE_USE_MOCK_API=true" >> .env.production
+          echo "VITE_BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> .env.production
+      
+      - name: Set environment for real mode
+        if: github.event.inputs.mode == 'real'
+        run: |
+          cd frontend
+          echo "VITE_API_MODE=real" > .env.production
+          echo "VITE_USE_MOCK_API=false" >> .env.production
+          echo "VITE_BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> .env.production
+      
+      - name: Build the app
+        run: cd frontend && npm run build -- --config vite.config.prod.ts
         
-      - name: Upload security scan results
-        uses: actions/upload-artifact@v3
-        with:
-          name: security-scan-results
-          path: bandit-results.json
-
-  code-quality:
-    name: Code Quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          
-      - name: Install dependencies
+      - name: Create version info
         run: |
-          python -m pip install --upgrade pip
-          pip install flake8 black isort mypy
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          cd frontend
+          VERSION=$(node -e "console.log(require('./package.json').version)")
+          echo "{\"version\":\"$VERSION\",\"environment\":\"${github.event.inputs.mode || 'mock'}\",\"buildTime\":\"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"}" > dist/version.json
       
-      - name: Check code formatting with Black
-        run: black --check app/
-        
-      - name: Check import sorting with isort
-        run: isort --check-only --profile black app/
-        
-      - name: Lint with flake8
-        run: flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        
-      - name: Type check with mypy
-        run: mypy app/
-
-  unit-tests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    needs: [security-scan, code-quality]
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
-          python-version: '3.10'
-          
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-cov
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-      
-      - name: Run unit tests with pytest
-        run: pytest tests/unit/ --cov=app --cov-report=xml
-        
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-report
-          path: coverage.xml
-
-  integration-tests:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    needs: [unit-tests]
-    services:
-      postgres:
-        image: postgres:14
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: novamind_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-      
-      - name: Run integration tests
-        run: pytest tests/integration/
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: novamind_test
-          ENVIRONMENT: test
-
-  build-and-push:
-    name: Build and Push Docker Image
-    runs-on: ubuntu-latest
-    needs: [integration-tests]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
-      - name: Extract branch name
-        shell: bash
-        run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      
-      - name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: |
-            novamind/backend:${{ env.BRANCH_NAME }}
-            novamind/backend:${{ env.BRANCH_NAME }}-${{ github.sha }}
-          cache-from: type=registry,ref=novamind/backend:${{ env.BRANCH_NAME }}
-          cache-to: type=inline
-
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: [build-and-push]
-    if: github.ref == 'refs/heads/develop'
-    environment: staging
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-      
-      - name: Update ECS service
-        run: |
-          aws ecs update-service --cluster novamind-staging --service novamind-backend --force-new-deployment
-      
-      - name: Wait for deployment to complete
-        run: |
-          aws ecs wait services-stable --cluster novamind-staging --services novamind-backend
-      
-      - name: Notify deployment status
-        uses: slackapi/slack-github-action@v1.23.0
-        with:
-          payload: |
-            {
-              "text": "Deployment to Staging completed successfully! 🚀\nBranch: develop\nCommit: ${{ github.sha }}"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-  deploy-production:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: [build-and-push]
-    if: github.ref == 'refs/heads/main'
-    environment: production
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-      
-      - name: Update ECS service
-        run: |
-          aws ecs update-service --cluster novamind-production --service novamind-backend --force-new-deployment
-      
-      - name: Wait for deployment to complete
-        run: |
-          aws ecs wait services-stable --cluster novamind-production --services novamind-backend
-      
-      - name: Notify deployment status
-        uses: slackapi/slack-github-action@v1.23.0
-        with:
-          payload: |
-            {
-              "text": "🚨 PRODUCTION DEPLOYMENT COMPLETED 🚨\nBranch: main\nCommit: ${{ github.sha }}\nPlease verify the deployment status."
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-  hipaa-compliance-check:
-    name: HIPAA Compliance Check
-    runs-on: ubuntu-latest
-    needs: [security-scan]
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
-      
-      - name: Run HIPAA compliance checks
-        run: python scripts/hipaa_compliance_check.py
-        
-      - name: Generate compliance report
-        run: python scripts/generate_compliance_report.py
-        
-      - name: Upload compliance report
-        uses: actions/upload-artifact@v3
-        with:
-          name: hipaa-compliance-report
-          path: hipaa-compliance-report.pdf
+          branch: gh-pages
+          folder: frontend/dist

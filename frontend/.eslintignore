@@ -1,9 +1,0 @@
-# Ignore build scripts and Node.js utility scripts
-scripts/
-build-analysis/
-dist/
-node_modules/
-coverage/
-cypress/
-vite.config.prod.ts
-vite.config.prod.enhanced.ts

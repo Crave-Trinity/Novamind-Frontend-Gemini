@@ -1,118 +1,140 @@
-# NOVAMIND Digital Twin: Concierge Psychiatry Platform
+# Novamind Digital Twin Frontend
 
-A cutting-edge psychiatric platform with Digital Twin technology for personalized treatment planning and visualization.
+A premium frontend implementation for the Novamind Digital Twin project, providing a comprehensive visualization of patient mental health profiles for clinicians in a HIPAA-compliant environment.
 
-## Project Structure
+## Architecture Overview
 
-This project follows a monorepo architecture with clear separation between frontend, backend, and shared resources:
+This frontend follows Clean Architecture principles with the Atomic Design pattern:
 
 ```
-novamind-digitaltwin/
-├── backend/             # All backend code and configuration
-│   ├── app/             # FastAPI application
-│   │   ├── api/         # API endpoints
-│   │   ├── application/ # Application services and use cases
-│   │   ├── core/        # Core utilities and configuration
-│   │   ├── domain/      # Domain models and business logic
-│   │   └── infrastructure/ # External services integration
-│   ├── alembic/         # Database migration scripts
-│   ├── main.py          # FastAPI application entry point
-│   └── requirements.txt # Python dependencies
-│
-├── frontend/            # All frontend code and configuration
-│   ├── src/             # React application source code
-│   │   ├── domain/      # Domain models and interfaces
-│   │   ├── application/ # Application services and state management
-│   │   ├── infrastructure/ # API clients and external services
-│   │   └── presentation/ # React components following atomic design
-│   ├── public/          # Static assets
-│   ├── package.json     # Node.js dependencies
-│   └── tsconfig.json    # TypeScript configuration
-│
-├── shared/              # Shared resources used by both frontend and backend
-│   ├── deployment/      # Deployment scripts and configurations
-│   ├── logs/            # Application logs
-│   ├── reports/         # Generated reports
-│   ├── security-reports/ # Security audit reports
-│   └── tools/           # Shared tools and utilities
-│
-├── docs/                # Documentation for the entire project
-└── README.md            # This file
+frontend/
+├── src/
+│   ├── domain/              # Business logic, interfaces, models
+│   │   ├── models/          # TypeScript interfaces/types
+│   │   ├── entities/        # Domain entities
+│   │   └── services/        # Service interfaces
+│   │
+│   ├── application/         # Use cases, state management
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── contexts/        # React Context providers
+│   │   └── services/        # Application services
+│   │
+│   ├── infrastructure/      # External integrations
+│   │   ├── api/             # API clients
+│   │   ├── storage/         # Local storage
+│   │   └── services/        # External service implementations
+│   │
+│   ├── presentation/        # UI components (React + Tailwind)
+│   │   ├── atoms/           # Basic UI building blocks
+│   │   ├── molecules/       # Combinations of atoms
+│   │   ├── organisms/       # Complex UI sections
+│   │   ├── templates/       # Page layouts
+│   │   └── pages/           # Route components
 ```
 
-## Getting Started
+## Core Visualization Components
 
-### Prerequisites
+### Brain Visualization
 
-- Python 3.10+
-- Node.js 18+
-- npm 9+
+The 3D brain model visualization is a centerpiece of the frontend, allowing clinicians to:
 
-### Backend Setup
+- View brain regions with activity highlighting
+- Identify neural pathways and connections
+- Toggle between different visualization modes (anatomical, functional, connectivity)
+- Interact with specific regions to view detailed information
+
+### Clinical Metrics Dashboard
+
+Comprehensive visualization of patient metrics including:
+
+- Assessment scores with temporal trends
+- Biomarker data with reference ranges
+- Treatment effectiveness and adherence
+- Risk assessment visualization
+
+### XGBoost Integration
+
+Seamless integration with the backend XGBoost service for:
+
+- Risk prediction (relapse, suicide)
+- Treatment response prediction
+- Outcome forecasting
+- Digital twin integration
+
+## Design System
+
+The UI follows a premium, concierge psychiatry experience with:
+
+- Sleek dark theme as the default (with light mode toggle)
+- Clinical precision in data presentation
+- Clear confidence intervals for all predictions
+- HIPAA-compliant data presentation
+
+## Temporal Visualizations
+
+The system provides multi-scale temporal visualizations:
+
+- Daily/weekly/monthly views of patient data
+- State transition visualization between mental health conditions
+- Treatment response trajectories
+- Early warning signals and critical transition points
+
+## Biometric Integrations
+
+Real-time visualization of biometric data:
+
+- Physiological metrics (heart rate, sleep patterns, cortisol levels)
+- Behavioral tracking (activity levels, social interactions)
+- Self-reported data (mood ratings, symptom severity)
+- Environmental context (weather, light exposure)
+
+## Key Features
+
+1. **Digital Twin Dashboard**: Central view of patient's mental health model
+2. **Brain Model Viewer**: Interactive 3D brain visualization
+3. **Treatment Response Predictor**: AI-powered treatment outcome simulation
+4. **Risk Assessment Panel**: Visualization of risk factors and predictions
+5. **Clinical Metrics Tracking**: Temporal visualization of assessment scores
+6. **Biometric Correlation**: Integration of physiological and behavioral data
+
+## Development
+
+### Requirements
+
+- Node.js 16+
+- npm or yarn
+
+### Setup
 
 ```bash
-# Navigate to backend directory
-cd backend
-
-# Create a virtual environment
-python -m venv venv
-
-# Activate the virtual environment
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the FastAPI application
-uvicorn main:app --reload
-```
-
-The backend API will be available at http://localhost:8000.
-
-### Frontend Setup
-
-```bash
-# Navigate to frontend directory
-cd frontend
-
 # Install dependencies
 npm install
 
-# Run the development server
+# Run development server
 npm run dev
+
+# Build for production
+npm run build
 ```
 
-The frontend application will be available at http://localhost:3000.
+### Technologies
 
-
-## Development Guidelines
-
-### Backend
-
-- Follow clean architecture principles
-- Keep domain logic pure and framework-agnostic
-- Use type hints and docstrings
-- Write tests for all new features
-
-### Frontend
-
-- Follow atomic design pattern for components
-- Use TypeScript for all new code
-- Follow the React and Tailwind guidelines in `.windsurfrules`
-- Implement proper error handling and loading states
+- React 18
+- TypeScript
+- Tailwind CSS
+- Three.js for 3D visualization
+- React Query for data fetching
+- D3.js for data visualization
 
 ## HIPAA Compliance
 
-This application handles sensitive patient data and must comply with HIPAA regulations:
+All visualizations follow HIPAA guidelines:
 
-- No PHI in URLs or localStorage
-- Implement proper authentication and authorization
-- Log all data access
-- Encrypt all data in transit and at rest
+- No PHI exposure in UI or logs
+- Secure data transmission
+- Role-based access controls
+- Audit trails for all interactions
 
-## License
+## Project Status
 
-See the [LICENSE](LICENSE) file for details.
+This frontend implementation is ready to connect with the Novamind Digital Twin backend services for a comprehensive psychiatric digital twin platform.
