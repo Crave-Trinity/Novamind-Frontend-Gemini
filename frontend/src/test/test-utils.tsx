@@ -1,88 +1,62 @@
-import React, { PropsWithChildren, ReactElement } from "react";
-import { render, RenderOptions } from "@testing-library/react";
-import ThemeProvider from "@/application/contexts/ThemeProvider"; // Updated path
-import { ThemeOption } from "@/application/contexts/ThemeContext"; // Updated path
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter } from "react-router-dom";
-// Import the mocked Canvas type/component if needed, or rely on global mock
-// Assuming setup.ts handles the global mock for Canvas
-import { Canvas } from "@react-three/fiber"; // Import Canvas for type usage if needed, mock handles implementation
+/**
+ * Test Utilities
+ *
+ * Enhanced rendering utilities with Tailwind and theme support.
+ */
+import React, { ReactElement } from 'react';
+import { render, RenderOptions } from '@testing-library/react';
+import ThemeProvider from '../application/providers/ThemeProvider';
+import { ThemeOption } from '../application/contexts/ThemeContext';
+import { tailwindMock } from './tailwind-mock';
 
 /**
- * Custom renderer that wraps components with necessary providers
+ * Custom render options with theme support
  */
-interface ExtendedRenderOptions extends Omit<RenderOptions, "wrapper"> {
+interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   initialTheme?: ThemeOption;
-  wrapInCanvas?: boolean; // Add option to wrap in Canvas
+  darkMode?: boolean;
 }
 
 /**
- * Render with all providers for testing
- * @param ui - The component to render
- * @param options - Render options including initialTheme
- * @returns The render result
+ * Create a ThemeProvider wrapper with specified options
+ */
+export function createThemeWrapper(initialTheme: ThemeOption = 'clinical', darkMode: boolean = false) {
+  // Apply dark mode if requested
+  if (darkMode) {
+    tailwindMock.enableDarkMode();
+  } else {
+    tailwindMock.disableDarkMode();
+  }
+
+  return ({ children }: { children: React.ReactNode }) => (
+    <ThemeProvider initialTheme={initialTheme}>
+      {children}
+    </ThemeProvider>
+  );
+}
+
+/**
+ * Custom render with ThemeProvider
+ * 
+ * Wraps the rendered component with ThemeProvider and applies dark mode if requested
  */
 export function renderWithProviders(
   ui: ReactElement,
-  { initialTheme = "clinical", wrapInCanvas = false, ...renderOptions }: ExtendedRenderOptions = {},
+  { initialTheme = 'clinical', darkMode = false, ...options }: CustomRenderOptions = {}
 ) {
-  // Create a new QueryClient for each test
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        // Turn off retries for tests
-        retry: false,
-        // Don't cache between tests
-        gcTime: 0,
-        // Don't refetch on window focus
-        refetchOnWindowFocus: false,
-      },
-    },
-  });
-
-  function Wrapper({ children }: PropsWithChildren<object>): ReactElement {
-    return (
-      // Wrap with MemoryRouter for components using react-router hooks
-      <MemoryRouter>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
-            {wrapInCanvas ? <Canvas>{children}</Canvas> : children}
-          </ThemeProvider>
-        </QueryClientProvider>
-      </MemoryRouter>
-    );
-  }
-
-  return render(ui, { wrapper: Wrapper, ...renderOptions });
+  const AllTheProviders = createThemeWrapper(initialTheme, darkMode);
+  
+  return {
+    ...render(ui, { wrapper: AllTheProviders, ...options }),
+    // Return additional utilities
+    isDarkMode: () => tailwindMock.isDarkMode(),
+    enableDarkMode: () => tailwindMock.enableDarkMode(),
+    disableDarkMode: () => tailwindMock.disableDarkMode(),
+  };
 }
 
-/**
- * Custom wrapper for renderHook with ThemeProvider
- * @param initialTheme - Initial theme option
- * @returns A wrapper component with ThemeProvider
- */
-export function createThemeWrapper(initialTheme: ThemeOption = "clinical") {
-  // Create a new QueryClient for each test
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        gcTime: 0,
-        refetchOnWindowFocus: false,
-      },
-    },
-  });
+// Re-export everything from testing-library
+export * from '@testing-library/react';
 
-  const ThemeWrapper: React.FC<{ children: React.ReactNode }> = ({
-    children,
-  }) => (
-    // Also wrap the hook wrapper if needed, though less common
-    <MemoryRouter>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>{children}</ThemeProvider>
-      </QueryClientProvider>
-    </MemoryRouter>
-  );
-
-  return ThemeWrapper;
-}
+// Override render with our custom version
+export { renderWithProviders as render };

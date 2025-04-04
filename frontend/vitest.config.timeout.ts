@@ -22,5 +22,12 @@ export default defineConfig({
         resources: 'usable',
       },
     },
+    // Setup files to run before tests
+    setupFiles: [
+      './src/test/vitest.setup.ts',
+      './src/test/setup.ts'
+    ],
+    // Enable more comprehensive DOM environment
+    environment: 'jsdom',
   },
 });

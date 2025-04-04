@@ -1,73 +1,71 @@
 /**
- * NOVAMIND Testing Framework
- * URL Compatibility Fix for TypeScript Tests
+ * URL Fix for Test Environment
  *
- * This file fixes URL-related issues in the testing environment
- * by ensuring proper URL handling in ESM modules.
+ * This module provides simple URL-related fixes for the test environment.
+ * These are necessary because JSDOM (the browser-like environment used in tests)
+ * may have incomplete or missing implementations of certain browser APIs.
  */
 
-// Import the url module directly to patch it
-import { fileURLToPath } from "url";
-
-// Store the original fileURLToPath function
-const originalFileURLToPath = fileURLToPath;
-
-// Create a patched version that handles edge cases
-function patchedFileURLToPath(url: string | URL): string {
-  try {
-    // Try the original function first
-    return originalFileURLToPath(url);
-  } catch (error: any) {
-    if (error.code === "ERR_INVALID_URL_SCHEME") {
-      // If the URL has an invalid scheme, try to fix it
-      if (typeof url === "string" && !url.startsWith("file:")) {
-        return originalFileURLToPath(`file://${url}`);
-      }
-    }
-    throw error;
-  }
-}
-
-// Apply the patch to the global module
-(global as any).fileURLToPath = patchedFileURLToPath;
-
-// Monkey patch the URL constructor to handle edge cases
-if (typeof URL !== "undefined") {
-  const originalURL = URL;
-
-  class PatchedURL extends originalURL {
-    constructor(url: string | URL, base?: string | URL) {
-      try {
-        // Try the original constructor first
-        super(url, base);
-      } catch (error: any) {
-        if (error.code === "ERR_INVALID_URL_SCHEME") {
-          // If the URL has an invalid scheme, try to fix it
-          if (
-            typeof url === "string" &&
-            !url.startsWith("file:") &&
-            !url.match(/^[a-z]+:\/\//i)
-          ) {
-            // Add the file:// scheme if missing
-            super(`file://${url}`, base);
-          } else {
-            throw error;
+/**
+ * Apply URL fixes to the test environment
+ * Ensures that URL operations work correctly in tests
+ */
+export function applyURLFix(): void {
+  // Only apply if in test environment
+  if (typeof window !== 'undefined') {
+    // Ensure URLSearchParams is available and functioning
+    if (!window.URLSearchParams) {
+      // Simple mock if URLSearchParams is missing
+      (window as any).URLSearchParams = class MockURLSearchParams {
+        private params: Map<string, string>;
+      
+        constructor(init?: string | Record<string, string> | URLSearchParams) {
+          this.params = new Map();
+          
+          if (!init) return;
+          
+          if (typeof init === 'string') {
+            // Parse query string
+            init.split('&').forEach(pair => {
+              const [key, value] = pair.split('=');
+              if (key) this.params.set(key, value || '');
+            });
+          } else if (init && typeof init === 'object') {
+            // Handle object-like inputs
+            Object.entries(init).forEach(([key, value]) => {
+              if (typeof value === 'string') {
+                this.params.set(key, value);
+              }
+            });
           }
-        } else {
-          throw error;
         }
-      }
+      
+        // Basic implementation
+        get(name: string): string | null {
+          return this.params.has(name) ? this.params.get(name) || null : null;
+        }
+      
+        has(name: string): boolean {
+          return this.params.has(name);
+        }
+        
+        set(name: string, value: string): void {
+          this.params.set(name, value);
+        }
+        
+        toString(): string {
+          const pairs: string[] = [];
+          this.params.forEach((value, key) => {
+            pairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+          });
+          return pairs.join('&');
+        }
+      };
     }
-  }
-
-  // Apply the patch
-  (global as any).URL = PatchedURL;
-
-  // Verify the fix works
-  try {
-    const testUrl = new URL("file:///test");
-    console.log("URL fix applied successfully!");
-  } catch (error) {
-    console.error("URL fix failed:", error);
+    
+    console.log('URL fix applied successfully!');
   }
 }
+
+// Auto-apply the fix
+applyURLFix();

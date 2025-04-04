@@ -8,7 +8,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Must mock ThemeContext before importing ThemeProvider
-vi.mock('@contexts/ThemeContext', () => {
+vi.mock('@/application/contexts/ThemeContext', () => {
   // Create mock context
   const mockContext = {
     Provider: ({ children }: any) => <div>{children}</div>,
@@ -20,11 +20,12 @@ vi.mock('@contexts/ThemeContext', () => {
     clinical: { primary: '#123456' },
     dark: { primary: '#654321' },
     sleek: { primary: '#abcdef' },
-    light: { primary: '#fedcba' }
+    retro: { primary: '#fedcba' },
+    wes: { primary: '#fedcba' }
   };
 
   return {
-    default: mockContext,
+    ThemeContext: mockContext,
     themeSettings,
     ThemeContextType: {},
     ThemeOption: {}

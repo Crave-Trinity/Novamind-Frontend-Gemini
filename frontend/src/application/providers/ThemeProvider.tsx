@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
-import ThemeContext, {
+import {
+  ThemeContext,
   ThemeContextType,
   ThemeOption,
-  themeSettings,
-} from "@contexts/ThemeContext";
+  themeSettings
+} from "../contexts/ThemeContext";
 
 /**
  * Theme provider props
@@ -80,7 +81,7 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
   }, []);
 
   // Toggle between dark and light mode
-  const toggleDarkMode = useCallback(() => {
+  const toggleTheme = useCallback(() => {
     setTheme(isDarkMode ? "clinical" : "dark");
   }, [isDarkMode, setTheme]);
 
@@ -136,7 +137,7 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
     isDarkMode,
     settings: themeSettings[theme],
     setTheme,
-    toggleDarkMode,
+    toggleTheme,
   };
 
   return (
