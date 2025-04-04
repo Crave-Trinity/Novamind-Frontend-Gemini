@@ -5,6 +5,42 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-primary-50: oklch(0.97 0.025 250);
+  --color-primary-100: oklch(0.95 0.05 250);
+  --color-primary-200: oklch(0.9 0.075 250);
+  --color-primary-300: oklch(0.85 0.10 250);
+  --color-primary-400: oklch(0.75 0.125 250);
+  --color-primary-500: oklch(0.65 0.15 250);
+  --color-primary-600: oklch(0.6 0.175 250);
+  --color-primary-700: oklch(0.52 0.15 250);
+  --color-primary-800: oklch(0.45 0.125 250);
+  --color-primary-900: oklch(0.4 0.10 250);
+  --color-primary-950: oklch(0.35 0.075 250);
+  
+  --color-neural-50: oklch(0.97 0.025 290);
+  --color-neural-100: oklch(0.95 0.05 290);
+  --color-neural-200: oklch(0.9 0.075 290);
+  --color-neural-300: oklch(0.85 0.10 290);
+  --color-neural-400: oklch(0.75 0.125 290);
+  --color-neural-500: oklch(0.65 0.15 290);
+  --color-neural-600: oklch(0.6 0.175 290);
+  --color-neural-700: oklch(0.52 0.15 290);
+  --color-neural-800: oklch(0.45 0.125 290);
+  --color-neural-900: oklch(0.4 0.10 290);
+  --color-neural-950: oklch(0.35 0.075 290);
+  
+  --color-danger: oklch(0.65 0.18 25);
+  --color-warning: oklch(0.8 0.12 85);
+  --color-success: oklch(0.65 0.15 155);
+  --color-info: oklch(0.65 0.15 250);
+  
+  --color-luxury-gold: oklch(0.85 0.1 85);
+  --color-luxury-silver: oklch(0.85 0.03 250);
+  --color-luxury-platinum: oklch(0.9 0.02 250);
+  --color-luxury-obsidian: oklch(0.15 0.01 250);
+}
+
 /* Base Styles */
 @layer base {
   html {

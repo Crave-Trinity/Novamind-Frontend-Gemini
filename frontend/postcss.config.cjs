@@ -1,16 +1,13 @@
 /**
  * PostCSS Configuration for Novamind Digital Twin
  * 
- * NOTE: This file uses CommonJS syntax as an exception to our TypeScript & ESM rule.
- * This exception is necessary because the PostCSS ecosystem expects CommonJS configuration.
- * See frontend/docs/module-system-guidelines.md for details.
+ * CommonJS configuration for PostCSS with Tailwind CSS v3.4.
+ * Uses .cjs extension to explicitly mark as CommonJS module per project guidelines.
  */
 
 module.exports = {
   plugins: {
-    'postcss-import': {},
-    'tailwindcss': {},
-    'postcss-nesting': {},
-    'autoprefixer': {}
+    "tailwindcss": {},
+    "autoprefixer": {}
   }
 };

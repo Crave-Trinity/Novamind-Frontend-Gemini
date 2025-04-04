@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 /**
  * Dashboard page component
@@ -32,9 +33,9 @@ const Dashboard: React.FC = () => {
             <span className="font-medium">7</span>
           </div>
           <div className="mt-4">
-            <button className="text-blue-600 hover:underline dark:text-blue-400">
+            <Link to="/patients" className="text-blue-600 hover:underline dark:text-blue-400">
               View All Patients
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -47,9 +48,9 @@ const Dashboard: React.FC = () => {
             </span>
           </div>
           <div className="mt-4">
-            <button className="text-blue-600 hover:underline dark:text-blue-400">
+            <Link to="/brain-visualization/demo" className="text-blue-600 hover:underline dark:text-blue-400">
               Access Visualizations
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -70,9 +71,9 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
           <div className="mt-4">
-            <button className="text-blue-600 hover:underline dark:text-blue-400">
+            <Link to="/analytics" className="text-blue-600 hover:underline dark:text-blue-400">
               Full Analytics
-            </button>
+            </Link>
           </div>
         </div>
       </div>

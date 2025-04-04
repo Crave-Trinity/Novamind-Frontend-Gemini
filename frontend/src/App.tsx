@@ -7,10 +7,10 @@ import {
 } from "react-router-dom";
 
 import { ThemeProvider } from "@application/providers/ThemeProvider";
-import LoadingIndicator from "@/components/atoms/LoadingIndicator";
-import SessionWarningModal from "@/components/molecules/SessionWarningModal";
-import ErrorBoundary from "@/components/utils/ErrorBoundary";
-import { auditLogService, AuditEventType } from "@/services/AuditLogService";
+import LoadingIndicator from "@components/atoms/LoadingIndicator";
+import SessionWarningModal from "@components/molecules/SessionWarningModal";
+import ErrorBoundary from "@components/utils/ErrorBoundary";
+import { auditLogService, AuditEventType } from "@services/AuditLogService";
 import { initializeSessionService } from "@/services/SessionService";
 
 // Lazy-loaded components

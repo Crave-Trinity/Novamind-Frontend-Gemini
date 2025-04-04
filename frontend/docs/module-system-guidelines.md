@@ -4,98 +4,123 @@
 
 The Novamind Digital Twin platform follows strict guidelines for code quality and consistency:
 
-1. **Pure TypeScript**: All application code must be written in TypeScript
-2. **ESM Only**: All application code must use ESM (import/export) syntax
-3. **No JavaScript**: JavaScript files are not allowed in application code
-4. **No CommonJS**: CommonJS syntax (require/module.exports) is not allowed in application code
+1. **Pure TypeScript**: All code (both application and configuration) must be written in TypeScript
+2. **ESM Only**: All code must use ESM (import/export) syntax
+3. **No JavaScript**: JavaScript files are not allowed
+4. **No CommonJS**: CommonJS syntax (require/module.exports) is not allowed anywhere
 
-## Configuration Files Exception
+## Tailwind CSS v4: Pure ESM Support
 
-While we maintain strict TypeScript and ESM requirements for application code, we recognize a practical exception for certain configuration files:
+With Tailwind CSS v4, we've eliminated the need for CommonJS configuration files. This is a significant advancement that allows us to maintain:
 
-### Why This Exception Exists
+- **Absolute Consistency**: One module system (ESM) across all files
+- **Complete TypeScript**: All configuration files in TypeScript
+- **No Exceptions**: Zero compromise on our ESM and TypeScript principles
 
-The JavaScript ecosystem is in transition, with older build tools still primarily supporting CommonJS. Specifically:
+### Why This Was Previously an Issue
 
-- **PostCSS**: The PostCSS ecosystem (including Tailwind CSS) expects CommonJS configuration
-- **Tailwind CSS**: Officially recommends using CommonJS for its configuration
-- **Build Tools**: Many build tools still expect CommonJS configuration files
+In the past, the JavaScript ecosystem had limitations that required using CommonJS for certain build tools:
 
-### Acceptable Exception Cases
+- PostCSS expected CommonJS configuration
+- Tailwind CSS officially recommended CommonJS
+- Some build tools only worked with CommonJS configs
 
-The following exceptions are permitted **only** for configuration files:
-
-1. **postcss.config.js**: May use CommonJS syntax due to PostCSS ecosystem limitations
-2. **tailwind.config.js**: May use CommonJS syntax as officially recommended by Tailwind
-3. **Other build tool configs**: Only when the tool explicitly requires CommonJS
-
-### Rules for Exceptions
-
-When using these exceptions:
-
-1. Keep CommonJS files to an absolute minimum
-2. Isolate them to configuration files only
-3. Never use CommonJS in application code
-4. Document why the exception is necessary
-5. Use TypeScript and ESM whenever the tool supports it
+Tailwind CSS v4 solves these issues by fully embracing ESM, allowing us to maintain pure TypeScript and ESM across our entire codebase.
 
 ## Recommended Configuration Structure
 
 ```
-├── vite.config.ts             # ESM/TypeScript (supported by Vite)
-├── postcss.config.cjs         # CommonJS (required by PostCSS ecosystem)
-├── tailwind.config.cjs        # CommonJS (recommended by Tailwind)
+├── vite.config.ts             # ESM/TypeScript
+├── postcss.config.mjs         # ESM (using .mjs extension)
+├── tailwind.config.ts         # ESM/TypeScript
 └── tsconfig.json              # TypeScript configuration
 ```
-
-Note: We use the `.cjs` extension for CommonJS files to explicitly mark them as CommonJS modules, especially in projects that use `"type": "module"` in package.json.
 
 ## Technical Implementation
 
 ### Vite Configuration
 
-Vite supports TypeScript configuration files natively and should always use TypeScript and ESM:
+Vite supports TypeScript configuration files natively with ESM:
 
 ```typescript
 // vite.config.ts
 import { defineConfig } from 'vite';
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    tailwindcss() as any,
+    react()
+  ],
   // ...other configuration
 });
 ```
 
 ### PostCSS Configuration
 
-PostCSS typically requires CommonJS configuration:
+With Tailwind CSS v4, PostCSS now supports ESM configuration:
 
 ```javascript
-// postcss.config.cjs
-module.exports = {
+// postcss.config.mjs
+export default {
   plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
+    "@tailwindcss/postcss": {},
+  }
 };
 ```
 
 ### Tailwind Configuration
 
-Tailwind officially recommends CommonJS configuration:
+Tailwind CSS v4 fully supports TypeScript ESM configuration:
 
-```javascript
-// tailwind.config.cjs
-module.exports = {
-  content: ['./src/**/*.{ts,tsx}'],
+```typescript
+// tailwind.config.ts
+export default {
   theme: {
-    extend: {},
+    extend: {
+      // ...theme configuration
+    },
   },
+  darkMode: 'class',
   plugins: [],
 };
 ```
 
-## Future Direction
+## Import Syntax Best Practices
 
-As the ecosystem evolves toward full ESM support, we will revisit these exceptions and migrate to pure TypeScript and ESM for all files when possible.
+For cleaner and more consistent code:
+
+- Use named imports where possible: `import { something } from 'somewhere'`
+- Avoid default imports except for React components and external libraries
+- Use import aliases for cleaner paths (configured in tsconfig.json and vite.config.ts)
+- Group imports by type (React, components, hooks, utilities, types, etc.)
+
+## Clean Architecture Imports
+
+Follow these patterns for imports between layers:
+
+- Domain layer may not import from other layers
+- Application layer may import from Domain only
+- Infrastructure layer may import from Domain and Application
+- Presentation layer may import from any layer
+
+## Benefits of Pure ESM
+
+Our pure ESM approach provides several benefits:
+
+1. **Better Tree-Shaking**: ESM enables more effective dead code elimination
+2. **Improved Performance**: Modern bundlers optimize ESM imports more efficiently
+3. **Type Safety**: TypeScript with ESM provides comprehensive type checking 
+4. **Future Compatibility**: ESM is the official standard for JavaScript modules
+5. **Consistency**: One module system across all code reduces cognitive load
+6. **Simplified Onboarding**: New developers only need to learn one pattern
+
+## Technical Implementation Details
+
+Our implementation leverages:
+
+1. `"type": "module"` in package.json to mark the project as ESM
+2. TypeScript ESM interoperability features
+3. Vite's native ESM support
+4. Tailwind CSS v4's full ESM compatibility

@@ -1,112 +1,92 @@
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ThemeContext, ThemeMode } from '../contexts/ThemeContext';
-
-const STORAGE_KEY = 'novamind-theme-preference';
+import { isValidTheme } from '../../types/theme';
+import { auditLogService, AuditEventType } from '../../services/AuditLogService';
 
 interface ThemeProviderProps {
-  children: ReactNode;
   defaultTheme?: ThemeMode;
+  children: React.ReactNode;
 }
 
 /**
- * Provides theme context to the application
- * Implements dark mode with Tailwind CSS and system preference detection
+ * ThemeProvider component that manages theme state
+ * 
+ * Provides theme context to the entire application and handles
+ * theme persistence, system preference detection, and theme switching
  */
-export const ThemeProvider = ({ 
-  children, 
-  defaultTheme = 'system' 
-}: ThemeProviderProps): JSX.Element => {
-  const [mode, setMode] = useState<ThemeMode>(() => {
-    // Try to get stored preference from localStorage
-    const storedTheme = localStorage.getItem(STORAGE_KEY);
-    return (storedTheme as ThemeMode) || defaultTheme;
-  });
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({
+  defaultTheme = 'system',
+  children
+}) => {
+  // Get initial theme from localStorage or use default
+  const getInitialTheme = (): ThemeMode => {
+    const savedTheme = localStorage.getItem('theme');
+    return isValidTheme(savedTheme) ? savedTheme : defaultTheme;
+  };
 
-  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() => {
+  const [mode, setMode] = useState<ThemeMode>(getInitialTheme);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+
+  // Detect system preference for dark mode
+  const prefersDarkMode = useMemo(() => {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-
-  // Listen for system preference changes
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    const handleChange = (e: MediaQueryListEvent): void => {
-      setSystemPrefersDark(e.matches);
-    };
-    
-    // Add listener, using addEventListener or deprecated addListener for older browsers
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handleChange);
-    } else {
-      // Support for older browsers with legacy MediaQueryList interface
-      (mediaQuery as MediaQueryList & {
-        addListener: (listener: (e: MediaQueryListEvent) => void) => void
-      }).addListener(handleChange);
-    }
-    
-    return () => {
-      // Cleanup listener
-      if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener('change', handleChange);
-      } else {
-        // Support for older browsers with legacy MediaQueryList interface
-        (mediaQuery as MediaQueryList & {
-          removeListener: (listener: (e: MediaQueryListEvent) => void) => void
-        }).removeListener(handleChange);
-      }
-    };
   }, []);
 
-  // Determine if dark mode is active based on mode and system preference
-  const isDarkMode = useMemo((): boolean => {
-    return mode === 'dark' || (mode === 'system' && systemPrefersDark);
-  }, [mode, systemPrefersDark]);
-  
-  // Apply dark mode class to html element
+  // Apply theme to document
   useEffect(() => {
-    const htmlElement = document.documentElement;
+    // Determine if dark mode should be active
+    const shouldUseDark = 
+      mode === 'dark' || 
+      (mode === 'system' && prefersDarkMode) ||
+      mode === 'sleek-dark';
     
-    if (isDarkMode) {
-      htmlElement.classList.add('dark');
+    setIsDarkMode(shouldUseDark);
+    
+    // Apply theme classes to document
+    const root = document.documentElement;
+    
+    // Clear existing theme classes
+    root.classList.remove('theme-light', 'theme-dark', 'theme-clinical', 'theme-sleek-dark', 'theme-retro', 'theme-wes');
+    
+    // Set dark/light mode
+    if (shouldUseDark) {
+      root.classList.add('dark');
     } else {
-      htmlElement.classList.remove('dark');
+      root.classList.remove('dark');
     }
-  }, [isDarkMode]);
-  
-  // Save preference to localStorage when it changes
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, mode);
-  }, [mode]);
-  
-  // Set theme mode
-  const setTheme = useCallback((newMode: ThemeMode): void => {
-    setMode(newMode);
-  }, []);
-  
-  // Toggle between light and dark modes
-  const toggleTheme = useCallback((): void => {
-    setMode(prevMode => {
-      // If system, toggle to light/dark based on current appearance
-      if (prevMode === 'system') {
-        return systemPrefersDark ? 'light' : 'dark';
-      }
-      // If light, toggle to dark
-      if (prevMode === 'light') {
-        return 'dark';
-      }
-      // If dark, toggle to light
-      return 'light';
+    
+    // Add specific theme class
+    root.classList.add(`theme-${mode}`);
+    
+    // Save theme preference to localStorage
+    localStorage.setItem('theme', mode);
+    
+    // Log theme change for audit purposes
+    auditLogService.log(AuditEventType.SYSTEM_CONFIG_CHANGE, {
+      action: 'THEME_CHANGE',
+      details: `Theme changed to ${mode}`,
+      result: 'success'
     });
-  }, [systemPrefersDark]);
-  
-  // Create memoized context value
+  }, [mode, prefersDarkMode]);
+
+  // Set theme callback
+  const setTheme = useCallback((newTheme: ThemeMode) => {
+    setMode(newTheme);
+  }, []);
+
+  // Toggle between light and dark
+  const toggleTheme = useCallback(() => {
+    setMode(current => (current === 'light' ? 'dark' : 'light'));
+  }, []);
+
+  // Context value with memoization for performance
   const contextValue = useMemo(() => ({
     mode,
     isDarkMode,
     setTheme,
-    toggleTheme,
+    toggleTheme
   }), [mode, isDarkMode, setTheme, toggleTheme]);
-  
+
   return (
     <ThemeContext.Provider value={contextValue}>
       {children}

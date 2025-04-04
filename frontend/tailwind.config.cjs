@@ -1,192 +1,126 @@
 /**
  * Tailwind CSS Configuration for Novamind Digital Twin
- *
- * NOTE: This file uses CommonJS syntax as an exception to our TypeScript & ESM rule.
- * This exception is necessary because Tailwind officially recommends CommonJS configuration.
- * See frontend/docs/module-system-guidelines.md for details.
+ * 
+ * CommonJS configuration for Tailwind CSS v3.4.
+ * Uses .cjs extension to explicitly mark as CommonJS module per project guidelines.
  */
-
-// Defining the luxury enterprise color palette
-const neuralPalette = {
-  primary: {
-    50: '#EFF6FF',
-    100: '#DBEAFE',
-    200: '#A5C4FD',
-    300: '#7EA6F9',
-    400: '#5788F5',
-    500: '#0066F0', // Primary brand color
-    600: '#0057D2',
-    700: '#0042A3',
-    800: '#003380',
-    900: '#00224D',
-  },
-  neural: {
-    50: '#F7F7FB',
-    100: '#EEEEF9',
-    200: '#D8D7EF',
-    300: '#BCBBE2',
-    400: '#9A98D0',
-    500: '#8582C3',
-    600: '#6B68B1',
-    700: '#5D599E',
-    800: '#454281',
-    900: '#332F66',
-  },
-  semantic: {
-    success: '#16A34A',
-    warning: '#F59E0B',
-    danger: '#DC2626',
-    info: '#0891B2',
-  },
-  luxury: {
-    gold: '#D4AF37',
-    silver: '#C0C0C0',
-    platinum: '#E5E4E2',
-    obsidian: '#0D0221',
-  },
-  gray: {
-    50: '#F8FAFC',
-    100: '#F1F5F9',
-    200: '#E2E8F0',
-    300: '#CBD5E1',
-    400: '#94A3B8',
-    500: '#64748B',
-    600: '#475569',
-    700: '#334155',
-    800: '#1E293B',
-    900: '#0F172A',
-    950: '#020617',
-  },
-};
 
 module.exports = {
   content: [
-    './src/**/*.{ts,tsx}',
-    './index.html',
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class', // Use class-based dark mode for more control
   theme: {
     extend: {
-      colors: {
-        // Main color scheme
-        primary: neuralPalette.primary,
-        neural: neuralPalette.neural,
-        gray: neuralPalette.gray,
-        
-        // Semantic colors
-        success: neuralPalette.semantic.success,
-        warning: neuralPalette.semantic.warning,
-        danger: neuralPalette.semantic.danger,
-        info: neuralPalette.semantic.info,
-        
-        // Luxury accents
-        luxury: neuralPalette.luxury,
-      },
       fontFamily: {
-        sans: [
-          'Inter',
-          'system-ui',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          '"Segoe UI"',
-          'Roboto',
-          '"Helvetica Neue"',
-          'Arial',
-          'sans-serif',
-        ],
-        mono: [
-          'JetBrains Mono',
-          'Menlo',
-          'Monaco',
-          'Consolas',
-          '"Liberation Mono"',
-          '"Courier New"',
-          'monospace',
-        ],
+        sans: ["Inter", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
+        display: ["var(--font-display)"],
       },
-      boxShadow: {
-        // Neuromorphic shadows for a modern look
-        neuro: '5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff',
-        'neuro-inset': 'inset 5px 5px 10px #d1d9e6, inset -5px -5px 10px #ffffff',
-        'neuro-dark': '5px 5px 10px #151a25, -5px -5px 10px #2c3549',
-        'luxury': '0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05)',
-        'card': '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)',
-        'clinical': '0 0 0 1px rgba(0, 0, 0, 0.05), 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-      },
-      animation: {
-        'neural-pulse': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'fade-in': 'fadeIn 0.5s ease-out',
-        'slide-up': 'slideUp 0.3s ease-out',
-        'slide-down': 'slideDown 0.3s ease-out',
-      },
-      keyframes: {
-        pulse: {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.5' },
+      colors: {
+        // Primary brand colors
+        primary: {
+          50: "oklch(0.97 0.025 250)",
+          100: "oklch(0.95 0.05 250)",
+          200: "oklch(0.9 0.075 250)",
+          300: "oklch(0.85 0.10 250)",
+          400: "oklch(0.75 0.125 250)",
+          500: "oklch(0.65 0.15 250)",
+          600: "oklch(0.6 0.175 250)",
+          700: "oklch(0.52 0.15 250)",
+          800: "oklch(0.45 0.125 250)",
+          900: "oklch(0.4 0.10 250)",
+          950: "oklch(0.35 0.075 250)",
         },
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
+        
+        // Neural visualization colors
+        neural: {
+          50: "oklch(0.97 0.025 290)",
+          100: "oklch(0.95 0.05 290)",
+          200: "oklch(0.9 0.075 290)",
+          300: "oklch(0.85 0.10 290)",
+          400: "oklch(0.75 0.125 290)",
+          500: "oklch(0.65 0.15 290)",
+          600: "oklch(0.6 0.175 290)",
+          700: "oklch(0.52 0.15 290)",
+          800: "oklch(0.45 0.125 290)",
+          900: "oklch(0.4 0.10 290)",
+          950: "oklch(0.35 0.075 290)",
         },
-        slideUp: {
-          '0%': { transform: 'translateY(10px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
-        },
-        slideDown: {
-          '0%': { transform: 'translateY(-10px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
+        
+        // Clinical status colors
+        danger: "oklch(0.65 0.18 25)",
+        warning: "oklch(0.8 0.12 85)",
+        success: "oklch(0.65 0.15 155)",
+        info: "oklch(0.65 0.15 250)",
+        
+        // Luxury accent colors
+        luxury: {
+          gold: "oklch(0.85 0.1 85)",
+          silver: "oklch(0.85 0.03 250)",
+          platinum: "oklch(0.9 0.02 250)",
+          obsidian: "oklch(0.15 0.01 250)",
         },
       },
+      
       borderRadius: {
+        'xs': '0.125rem',
+        'sm': '0.25rem',
+        'md': '0.375rem',
+        'lg': '0.5rem',
+        'xl': '0.75rem',
+        '2xl': '1rem',
+        '3xl': '1.5rem',
         'clinical': '0.5rem',
         'neuro': '1rem',
       },
-      typography: {
-        DEFAULT: {
-          css: {
-            color: neuralPalette.gray[800],
-            a: {
-              color: neuralPalette.primary[600],
-              '&:hover': {
-                color: neuralPalette.primary[500],
-              },
-            },
-            h1: {
-              fontWeight: 700,
-              color: neuralPalette.gray[900],
-            },
-            h2: {
-              fontWeight: 600,
-              color: neuralPalette.gray[900],
-            },
-            h3: {
-              fontWeight: 600,
-              color: neuralPalette.gray[900],
-            },
-            h4: {
-              fontWeight: 600,
-              color: neuralPalette.gray[900],
-            }
-          },
+      
+      boxShadow: {
+        'xs': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+        'sm': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+        'md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+        'lg': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+        'xl': '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+        '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+        'inner': 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
+        'card': '0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05)',
+        'clinical': '0 2px 8px -2px rgb(0 0 0 / 0.08)',
+        'neuro': '0 4px 20px -2px rgb(0 0 0 / 0.1), 0 0px 5px -3px rgb(var(--color-neural-500) / 0.2)',
+        'luxury': '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 5px 10px -5px rgb(var(--color-luxury-gold) / 0.2)',
+      },
+      
+      blur: {
+        'xs': '2px',
+        'sm': '4px',
+        'md': '8px',
+        'lg': '12px',
+        'xl': '16px',
+        '2xl': '24px',
+        '3xl': '48px',
+      },
+      
+      animation: {
+        'neural-pulse': 'neuralPulse 3s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95)',
+        'neural-glow': 'neuralGlow 6s infinite alternate ease-in-out',
+      },
+      
+      keyframes: {
+        neuralPulse: {
+          '0%, 100%': { transform: 'scale(1)', opacity: '0.8' },
+          '50%': { transform: 'scale(1.1)', opacity: '1' },
+        },
+        neuralGlow: {
+          '0%': { filter: 'brightness(1) blur(0)' },
+          '50%': { filter: 'brightness(1.2) blur(1px)' },
+          '100%': { filter: 'brightness(1) blur(0)' },
         },
       },
     },
-    screens: {
-      'xs': '475px',
-      'sm': '640px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1280px',
-      '2xl': '1536px',
-    },
   },
+  darkMode: 'class',
   plugins: [
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
     require('@tailwindcss/aspect-ratio'),
   ],
-  // Add this line to ensure compatibility with Tailwind v3
-  corePlugins: {
-    preflight: true,
-  },
-};
+}
