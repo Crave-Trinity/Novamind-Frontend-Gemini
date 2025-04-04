@@ -223,3 +223,141 @@ function generateSummaryReport(results: TestResult[]): string {
   let report = `# WebGL Visualization Tests Summary\n\n`;
   report += `Run Date: ${new Date().toISOString()}\n\n`;
   report += `## Overview\n\n`;
+  report += `- Total Tests: ${totalTests}\n`;
+  report += `- Passed: ${passedTests} (${Math.round(passedTests / totalTests * 100)}%)\n`;
+  report += `- Failed: ${failedTests} (${Math.round(failedTests / totalTests * 100)}%)\n`;
+  report += `- Memory Leaks: ${memoryLeaks} (${Math.round(memoryLeaks / totalTests * 100)}%)\n`;
+  report += `- Total Time: ${totalTime}ms\n`;
+  report += `- Average Time: ${avgTime.toFixed(2)}ms\n\n`;
+  
+  report += `## Failed Tests\n\n`;
+  const failedTests = results.filter(r => !r.success);
+  if (failedTests.length === 0) {
+    report += `No failed tests.\n\n`;
+  } else {
+    failedTests.forEach(test => {
+      report += `### ${path.relative(process.cwd(), test.file)}\n`;
+      report += `- Execution Time: ${test.time}ms\n`;
+      if (test.error) {
+        report += `- Error: ${test.error.split('\n')[0]}\n`;
+      }
+      report += `\n`;
+    });
+  }
+  
+  report += `## Memory Leaks\n\n`;
+  const leakyTests = results.filter(r => r.memoryLeak);
+  if (leakyTests.length === 0) {
+    report += `No memory leaks detected.\n\n`;
+  } else {
+    leakyTests.forEach(test => {
+      report += `### ${path.relative(process.cwd(), test.file)}\n`;
+      report += `- Execution Time: ${test.time}ms\n`;
+      if (test.leakedObjects) {
+        report += `- Leaked Objects:\n`;
+        Object.entries(test.leakedObjects).forEach(([type, count]) => {
+          report += `  - ${type}: ${count}\n`;
+        });
+      }
+      report += `\n`;
+    });
+  }
+  
+  return report;
+}
+
+/**
+ * Main function - test discovery and execution
+ */
+async function main() {
+  console.log('WebGL/Three.js Visualization Tests Runner');
+  console.log(`Discovering tests in ${options.dir} with pattern ${options.pattern}...`);
+  
+  // Find visualization tests
+  const testFiles = await findVisualizationTests(options.dir, options.pattern);
+  console.log(`Found ${testFiles.length} visualization tests.`);
+  
+  if (testFiles.length === 0) {
+    console.log('No tests to run.');
+    return;
+  }
+  
+  // Run tests with WebGL mocks
+  console.log('\nRunning tests with WebGL mocks...');
+  const results: TestResult[] = [];
+  
+  // Setup environment for WebGL mocks
+  console.log('Setting up global WebGL mock environment...');
+  fs.writeFileSync(
+    path.join(options.output, 'vitest-setup.js'),
+    `
+    // Auto-inject WebGL mocks for all tests
+    import { setupWebGLMocks } from '@test/webgl';
+    
+    // Configure global beforeEach/afterEach hooks
+    beforeEach(() => {
+      setupWebGLMocks({ monitorMemory: ${options.memory}, debugMode: ${options.verbose} });
+    });
+    
+    // Register with global Vitest hooks
+    if (typeof globalThis.beforeEach === 'function') {
+      globalThis.beforeEach(() => {
+        setupWebGLMocks({ monitorMemory: ${options.memory}, debugMode: ${options.verbose} });
+      });
+    }
+    `
+  );
+  
+  // Run each test
+  for (const testFile of testFiles) {
+    const result = runTestFile(testFile);
+    results.push(result);
+  }
+  
+  // Generate summary statistics
+  const passedTests = results.filter(r => r.success).length;
+  const failedTests = results.length - passedTests;
+  const memoryLeaks = results.filter(r => r.memoryLeak).length;
+  
+  // Write summary report
+  const summaryReport = generateSummaryReport(results);
+  fs.writeFileSync(path.join(options.output, 'summary.md'), summaryReport);
+  
+  // Write JSON results
+  fs.writeFileSync(
+    path.join(options.output, 'results.json'), 
+    JSON.stringify(results, null, 2)
+  );
+  
+  // Print summary
+  console.log('\nTest Summary:');
+  console.log(`- Total Tests: ${results.length}`);
+  console.log(`- Passed: ${passedTests}`);
+  console.log(`- Failed: ${failedTests}`);
+  console.log(`- Memory Leaks: ${memoryLeaks}`);
+  
+  if (options.verbose) {
+    console.log('\nFailed Tests:');
+    results.filter(r => !r.success).forEach(test => {
+      console.log(`- ${path.relative(process.cwd(), test.file)}`);
+    });
+    
+    console.log('\nTests with Memory Leaks:');
+    results.filter(r => r.memoryLeak).forEach(test => {
+      console.log(`- ${path.relative(process.cwd(), test.file)}`);
+    });
+  }
+  
+  console.log(`\nDetailed reports written to ${options.output}`);
+  
+  // Set exit code for CI environments
+  if (failedTests > 0) {
+    process.exitCode = 1;
+  }
+}
+
+// Run the script
+main().catch(error => {
+  console.error('Error running visualization tests:', error);
+  process.exit(1);
+});
