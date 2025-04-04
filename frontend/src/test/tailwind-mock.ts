@@ -7,7 +7,11 @@
 export const cssMock = {
   darkMode: false,
   enableDarkMode: (): void => { cssMock.darkMode = true; applyClassBasedDarkMode(); },
-  disableDarkMode: (): void => { cssMock.darkMode = false; applyClassBasedDarkMode(); }
+  disableDarkMode: (): void => { cssMock.darkMode = false; applyClassBasedDarkMode(); },
+  toggleDarkMode: (): void => {
+    cssMock.darkMode = !cssMock.darkMode;
+    applyClassBasedDarkMode();
+  }
 };
 
 /**
