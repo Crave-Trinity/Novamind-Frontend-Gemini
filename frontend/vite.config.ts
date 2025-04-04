@@ -1,30 +1,57 @@
+/**
+ * Novamind Digital Twin: Clinical Neuroscience Platform
+ * Vite Configuration
+ *
+ * This configuration adheres to Clean Architecture principles with ESM modules,
+ * providing path aliases for the different architectural layers.
+ */
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   
   resolve: {
     alias: {
-      // Core architecture path aliases
+      // Core architecture path alias
       '@': path.resolve(__dirname, './src'),
-      '@application': path.resolve(__dirname, './src/application'),
-      '@components': path.resolve(__dirname, './src/components'),
+      
+      /* Clean Architecture Layers */
       '@domain': path.resolve(__dirname, './src/domain'),
+      '@application': path.resolve(__dirname, './src/application'),
       '@infrastructure': path.resolve(__dirname, './src/infrastructure'),
       '@presentation': path.resolve(__dirname, './src/presentation'),
-      '@services': path.resolve(__dirname, './src/services'),
-      '@utils': path.resolve(__dirname, './src/utils'),
-      '@hooks': path.resolve(__dirname, './src/hooks'),
-      '@interfaces': path.resolve(__dirname, './src/interfaces'),
-      '@assets': path.resolve(__dirname, './src/assets'),
-      '@pages': path.resolve(__dirname, './src/pages'),
+      
+      /* Atomic Design Components */
+      '@atoms': path.resolve(__dirname, './src/presentation/atoms'),
+      '@molecules': path.resolve(__dirname, './src/presentation/molecules'),
+      '@organisms': path.resolve(__dirname, './src/presentation/organisms'),
+      '@templates': path.resolve(__dirname, './src/presentation/templates'),
+      '@pages': path.resolve(__dirname, './src/presentation/pages'),
+      
+      /* Domain-Driven Architecture Shortcuts */
+      '@services': path.resolve(__dirname, './src/infrastructure/services'),
+      '@hooks': path.resolve(__dirname, './src/application/hooks'),
+      '@utils': path.resolve(__dirname, './src/application/utils'),
+      '@contexts': path.resolve(__dirname, './src/application/contexts'),
+      '@types': path.resolve(__dirname, './src/domain/types'),
+      '@models': path.resolve(__dirname, './src/domain/models'),
+      '@assets': path.resolve(__dirname, './src/presentation/assets'),
+      '@shaders': path.resolve(__dirname, './src/presentation/shaders'),
+      '@store': path.resolve(__dirname, './src/application/store'),
+      '@styles': path.resolve(__dirname, './src/presentation/styles'),
+      '@api': path.resolve(__dirname, './src/infrastructure/api'),
+      '@config': path.resolve(__dirname, './src/infrastructure/config'),
+      '@constants': path.resolve(__dirname, './src/domain/constants'),
+      '@validation': path.resolve(__dirname, './src/domain/validation'),
+      '@visualizations': path.resolve(__dirname, './src/presentation/visualizations'),
+      '@test': path.resolve(__dirname, './src/test'),
     }
   },
 
-  // Build configuration
+  // Build configuration optimized for performance
   build: {
     outDir: 'dist',
     sourcemap: true,
@@ -34,7 +61,7 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'ui-vendor': ['@headlessui/react'],
-          'three-vendor': ['three', '@react-three/fiber']
+          'three-vendor': ['three', '@react-three/fiber', '@react-three/postprocessing']
         }
       }
     }
@@ -46,4 +73,9 @@ export default defineConfig({
     strictPort: true,
     host: true,
   },
+  
+  // Optimizations for Three.js and WebGL
+  optimizeDeps: {
+    include: ['three', '@react-three/fiber', '@react-three/postprocessing']
+  }
 });

@@ -1,598 +1,289 @@
-import React, { useState, useEffect } from "react";
-// Import with proper type definitions
-import { useQuery } from "@tanstack/react-query";
+import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { auditLogService, AuditEventType } from "@infrastructure/services/AuditLogService";
+import LoadingIndicator from "@atoms/LoadingIndicator";
 
-// Dashboard-specific patient interface
-interface DashboardPatient {
+interface PatientCard {
   id: string;
   name: string;
-  primaryDiagnosis: string;
-  currentSeverity: string;
+  age: number;
+  status: "normal" | "review" | "critical";
   lastUpdated: string;
+  datasetId?: string;
 }
 
-import { useTheme } from "@contexts/ThemeContext";
-import Button from "@presentation/atoms/Button";
-import DigitalTwinDashboard from "@presentation/organisms/DigitalTwinDashboard";
-
-// Mock API client (would be replaced with actual API calls)
-const fetchPatients = async () => {
-  // This would be an actual API call in production
-  await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate network delay
-
-  return [
-    {
-      id: "patient-123",
-      name: "Patient A",
-      primaryDiagnosis: "depression",
-      currentSeverity: "moderate",
-      lastUpdated: "2025-03-28T14:30:00Z",
-    },
-    {
-      id: "patient-456",
-      name: "Patient B",
-      primaryDiagnosis: "anxiety",
-      currentSeverity: "mild",
-      lastUpdated: "2025-03-27T10:15:00Z",
-    },
-    {
-      id: "patient-789",
-      name: "Patient C",
-      primaryDiagnosis: "bipolar",
-      currentSeverity: "severe",
-      lastUpdated: "2025-03-26T16:45:00Z",
-    },
-  ];
-};
-
-const fetchDigitalTwinProfile = async (patientId: string) => {
-  // This would be an actual API call in production
-  await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-
-  // Return mock data for demo purposes
-  return {
-    id: "profile-123",
-    patientId: patientId,
-    createdAt: "2025-01-15T10:00:00Z",
-    updatedAt: "2025-03-28T14:30:00Z",
-    primaryDiagnosis: "depression",
-    comorbidities: ["anxiety", "insomnia"],
-    currentSeverity: "moderate",
-    assessmentScores: [
-      {
-        id: "assessment-1",
-        type: "PHQ9",
-        score: 14,
-        maxScore: 27,
-        date: "2025-03-25T14:30:00Z",
-        clinicalSignificance: "moderate",
-        change: -2,
-        notes: "Improvement in mood and energy levels",
-      },
-      {
-        id: "assessment-2",
-        type: "GAD7",
-        score: 10,
-        maxScore: 21,
-        date: "2025-03-25T14:30:00Z",
-        clinicalSignificance: "moderate",
-        change: -1,
-        notes: "Some reduction in anxiety symptoms",
-      },
-      {
-        id: "assessment-3",
-        type: "WSAS",
-        score: 18,
-        maxScore: 40,
-        date: "2025-03-25T14:30:00Z",
-        clinicalSignificance: "moderate",
-        change: -3,
-        notes: "Improved functioning at work",
-      },
-    ],
-    medications: [
-      {
-        id: "med-1",
-        name: "Sertraline",
-        dosage: "100mg",
-        frequency: "Once daily",
-        startDate: "2025-01-20T00:00:00Z",
-        adherence: 85,
-        sideEffects: ["nausea", "insomnia"],
-        effectiveness: 70,
-      },
-    ],
-    therapySessions: [
-      {
-        id: "therapy-1",
-        type: "CBT",
-        date: "2025-03-20T15:00:00Z",
-        duration: 50,
-        attendance: true,
-        effectiveness: 75,
-        focusAreas: ["negative thoughts", "behavioral activation"],
-        progress: 65,
-      },
-    ],
-    biomarkers: [
-      {
-        id: "biomarker-1",
-        name: "Cortisol",
-        value: 18.2,
-        unit: "μg/dL",
-        date: "2025-03-15T09:00:00Z",
-        referenceRange: {
-          min: 5,
-          max: 23,
-        },
-        isAbnormal: false,
-        trend: "decreasing",
-        clinicalSignificance: 60,
-      },
-      {
-        id: "biomarker-2",
-        name: "BDNF",
-        value: 22.5,
-        unit: "ng/mL",
-        date: "2025-03-15T09:00:00Z",
-        referenceRange: {
-          min: 18,
-          max: 30,
-        },
-        isAbnormal: false,
-        trend: "increasing",
-        clinicalSignificance: 70,
-      },
-      {
-        id: "biomarker-3",
-        name: "CYP2D6*1/*1",
-        value: 1,
-        unit: "",
-        date: "2025-02-10T09:00:00Z",
-        referenceRange: {
-          min: 0,
-          max: 1,
-        },
-        isAbnormal: false,
-        trend: "stable",
-        clinicalSignificance: 90,
-      },
-    ],
-    sleepData: [
-      {
-        date: "2025-03-27T00:00:00Z",
-        durationHours: 6.5,
-        quality: 65,
-        latencyMinutes: 35,
-        remPercentage: 22,
-        deepSleepPercentage: 18,
-        disturbances: 2,
-      },
-    ],
-    treatmentPlan: {
-      id: "plan-1",
-      startDate: "2025-01-20T00:00:00Z",
-      primaryDiagnosis: "depression",
-      comorbidities: ["anxiety"],
-      treatments: [
-        {
-          type: "medication",
-          details: "Sertraline 100mg daily",
-          targetSymptoms: ["depressed mood", "loss of interest", "anxiety"],
-          expectedOutcomes: ["improved mood", "reduced anxiety"],
-          timeframe: "6-8 weeks",
-        },
-        {
-          type: "therapy",
-          details: "CBT weekly sessions",
-          targetSymptoms: ["negative thoughts", "behavioral avoidance"],
-          expectedOutcomes: ["improved coping skills", "reduced avoidance"],
-          timeframe: "12 weeks",
-        },
-      ],
-      goals: [
-        {
-          description: "Return to full-time work",
-          progress: 60,
-          targetDate: "2025-04-30T00:00:00Z",
-        },
-        {
-          description: "Reduce PHQ-9 score to < 5",
-          progress: 45,
-          targetDate: "2025-05-15T00:00:00Z",
-        },
-      ],
-      adherence: 80,
-      effectiveness: 65,
-    },
-    riskAssessments: [
-      {
-        id: "risk-1",
-        date: "2025-03-25T14:30:00Z",
-        riskFactors: [
-          {
-            category: "relapse",
-            severity: "moderate",
-            trend: "decreasing",
-          },
-          {
-            category: "suicide",
-            severity: "mild",
-            trend: "stable",
-          },
-          {
-            category: "self-harm",
-            severity: "mild",
-            trend: "decreasing",
-          },
-        ],
-        overallRisk: "moderate",
-        recommendedInterventions: [
-          "Continue current treatment plan",
-          "Weekly check-ins",
-          "Safety planning review",
-        ],
-        nextAssessmentDate: "2025-04-08T00:00:00Z",
-        confidenceScore: 85,
-      },
-    ],
-    predictedTrajectory: {
-      timepoints: [
-        "2025-04-01T00:00:00Z",
-        "2025-05-01T00:00:00Z",
-        "2025-06-01T00:00:00Z",
-      ],
-      severityScores: [12, 8, 5],
-      confidenceIntervals: [
-        [10, 14],
-        [6, 10],
-        [3, 7],
-      ],
-    },
-  };
-};
-
 /**
- * Dashboard Page
- *
- * Main dashboard with patient selection and digital twin visualization.
- * This component serves as the entry point to the Digital Twin frontend.
+ * Dashboard Page Component
+ * 
+ * Main entry point for the Novamind Digital Twin platform.
+ * Provides access to patient brain visualizations and clinical data.
  */
 const Dashboard: React.FC = () => {
-  const { isDarkMode, toggleDarkMode } = useTheme();
   const navigate = useNavigate();
-
-  // Selected patient state
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
-    null,
-  );
-
-  // Fetch patients list
-  const {
-    data: patients,
-    isLoading: isPatientsLoading,
-    error: patientsError,
-  } = useQuery({
-    queryKey: ["patients"],
-    queryFn: fetchPatients,
-  });
-
-  // Fetch digital twin profile when patient is selected
-  const {
-    data: digitalTwinProfile,
-    isLoading: isProfileLoading,
-    error: profileError,
-  } = useQuery({
-    queryKey: ["digitalTwinProfile", selectedPatientId],
-    queryFn: () => fetchDigitalTwinProfile(selectedPatientId!),
-    enabled: !!selectedPatientId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  // Select first patient by default when data loads
-  useEffect(() => {
-    if (patients && patients.length > 0 && !selectedPatientId) {
-      // Use optional chaining and nullish coalescing for type safety
-      setSelectedPatientId(patients[0]?.id ?? null);
+  
+  // Mock patient data (in a real app, this would come from an API)
+  const patients: PatientCard[] = useMemo(() => [
+    {
+      id: "demo",
+      name: "Demo Patient",
+      age: 45,
+      status: "normal",
+      lastUpdated: "2025-04-03",
+      datasetId: "fmri-20250315"
+    },
+    {
+      id: "p1001",
+      name: "Alex Thompson",
+      age: 52,
+      status: "review",
+      lastUpdated: "2025-04-01",
+      datasetId: "fmri-20250401"
+    },
+    {
+      id: "p1002",
+      name: "Samantha Wilson",
+      age: 29,
+      status: "normal",
+      lastUpdated: "2025-03-28"
+    },
+    {
+      id: "p1003",
+      name: "Michael Chen",
+      age: 67,
+      status: "critical",
+      lastUpdated: "2025-04-02",
+      datasetId: "fmri-20250402"
+    },
+    {
+      id: "p1004",
+      name: "Jessica Rodriguez",
+      age: 38,
+      status: "normal",
+      lastUpdated: "2025-03-25"
     }
-  }, [patients, selectedPatientId]);
-
-  // Handle patient selection
-  const handlePatientSelect = (patientId: string) => {
-    setSelectedPatientId(patientId);
-  };
-
-  // Handle view patient details
-  const handleViewPatientDetails = () => {
-    if (selectedPatientId) {
-      navigate(`/patients/${selectedPatientId}`);
-    }
-  };
-
-  // Render loading state
-  if (isPatientsLoading) {
+  ], []);
+  
+  // Handle opening a patient's brain visualization
+  const handleViewBrain = useCallback((patientId: string) => {
+    // Log for HIPAA compliance
+    auditLogService.log(AuditEventType.PATIENT_RECORD_VIEW, {
+      action: "navigate_to_brain_visualization",
+      resourceId: patientId,
+      resourceType: "patient",
+      details: "Navigated to brain visualization from dashboard",
+      result: "success",
+    });
+    
+    navigate(`/brain-visualization/${patientId}`);
+  }, [navigate]);
+  
+  // Status badge component
+  const StatusBadge: React.FC<{status: PatientCard["status"]}> = ({ status }) => {
+    const colors = {
+      normal: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+      review: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+      critical: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+    };
+    
+    const labels = {
+      normal: "Normal",
+      review: "Review",
+      critical: "Critical"
+    };
+    
     return (
-      <div className="flex h-screen items-center justify-center bg-background p-6 dark:bg-background">
-        <div className="text-center">
-          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-primary-500"></div>
-          <h3 className="text-xl font-medium text-neutral-800 dark:text-white">
-            Loading Dashboard
-          </h3>
-          <p className="mt-2 text-neutral-600 dark:text-neutral-400">
-            Retrieving patient data...
-          </p>
-        </div>
-      </div>
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status]}`}>
+        {labels[status]}
+      </span>
     );
-  }
-
-  // Render error state
-  if (patientsError) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-background p-6 dark:bg-background">
-        <div className="max-w-lg text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300">
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-          </div>
-          <h3 className="text-xl font-medium text-neutral-800 dark:text-white">
-            Error Loading Dashboard
-          </h3>
-          <p className="mt-2 text-neutral-600 dark:text-neutral-400">
-            {patientsError instanceof Error
-              ? patientsError.message
-              : "Failed to load patient data. Please try again."}
-          </p>
-          <button
-            className="mt-4 rounded bg-primary-500 px-4 py-2 text-white hover:bg-primary-600"
-            onClick={() => window.location.reload()}
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
+  };
+  
   return (
-    <div className="min-h-screen bg-neutral-50 p-6 dark:bg-background">
-      <div className="mx-auto max-w-7xl">
-        {/* Dashboard Header */}
-        <div className="mb-6 flex flex-col items-start justify-between sm:flex-row sm:items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white sm:text-3xl">
-              Digital Twin Dashboard
-            </h1>
-            <p className="mt-1 text-neutral-600 dark:text-neutral-400">
-              View and manage patient digital twin profiles
-            </p>
-          </div>
-
-          <div className="mt-4 flex items-center gap-4 sm:mt-0">
-            {/* Theme Toggle */}
-            <button
-              className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm text-neutral-700 shadow-sm dark:bg-background-card dark:text-neutral-300"
-              onClick={toggleDarkMode}
-            >
-              {isDarkMode ? (
-                <>
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                    />
-                  </svg>
-                  <span>Light Mode</span>
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                    />
-                  </svg>
-                  <span>Dark Mode</span>
-                </>
-              )}
-            </button>
-
-            {/* Action Button */}
-            <Button
-              variant="primary"
-              size="md"
-              icon={
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-              }
-              onClick={() => navigate("/predictions")}
-            >
-              New Prediction
-            </Button>
-          </div>
-        </div>
-
-        {/* Patient Selection */}
-        <div className="mb-6 rounded-xl bg-white p-4 shadow-sm dark:bg-background-card">
-          <h2 className="mb-3 text-lg font-medium text-neutral-800 dark:text-white">
-            Select Patient
-          </h2>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
-            {patients?.map((patient: DashboardPatient) => (
-              <button
-                key={patient.id}
-                className={`rounded-lg border p-4 ${
-                  selectedPatientId === patient.id
-                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                    : "border-neutral-200 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                } text-left transition-colors`}
-                onClick={() => handlePatientSelect(patient.id)}
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-medium text-neutral-900 dark:text-white">
-                      {patient.name}
-                    </h3>
-                    <p className="mt-1 text-sm capitalize text-neutral-500 dark:text-neutral-400">
-                      {patient.primaryDiagnosis} - {patient.currentSeverity}
-                    </p>
-                  </div>
-                  {selectedPatientId === patient.id && (
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-500">
-                      <svg
-                        className="h-3 w-3 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={3}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-                <div className="mt-2 text-xs text-neutral-400 dark:text-neutral-500">
-                  Updated: {new Date(patient.lastUpdated).toLocaleString()}
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {selectedPatientId && (
-            <div className="mt-4 flex justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleViewPatientDetails}
-              >
-                View Patient Details
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Digital Twin Dashboard */}
-        {selectedPatientId && digitalTwinProfile ? (
-          <DigitalTwinDashboard
-            patientId={selectedPatientId}
-            profile={{
-              id: `dt-${selectedPatientId}`,
-              patientId: selectedPatientId || "",
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              primaryDiagnosis: "depression",
-              comorbidities: ["anxiety"],
-              currentSeverity: "moderate",
-              assessmentScores: [],
-              medications: [],
-              therapySessions: [],
-              biomarkers: [],
-              sleepData: [],
-              treatmentPlan: {
-                id: `tp-${selectedPatientId}`,
-                startDate: new Date().toISOString(),
-                primaryDiagnosis: "depression",
-                comorbidities: [],
-                treatments: [],
-                goals: [],
-                adherence: 0,
-                effectiveness: 0,
-              },
-              riskAssessments: [],
-              predictedTrajectory: {
-                timepoints: [],
-                severityScores: [],
-                confidenceIntervals: [],
-              },
-            }}
-          />
-        ) : isProfileLoading ? (
-          <div className="rounded-xl bg-white p-8 text-center shadow-sm dark:bg-background-card">
-            <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-b-2 border-t-2 border-primary-500"></div>
-            <h3 className="text-lg font-medium text-neutral-800 dark:text-white">
-              Loading Digital Twin
-            </h3>
-            <p className="mt-2 text-neutral-600 dark:text-neutral-400">
-              Retrieving profile data...
-            </p>
-          </div>
-        ) : profileError ? (
-          <div className="rounded-xl bg-white p-8 text-center shadow-sm dark:bg-background-card">
-            <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300">
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Novamind Digital Twin Platform
+        </h1>
+        <p className="mt-2 text-gray-600 dark:text-gray-300">
+          Clinical neuroscience visualization and analysis
+        </p>
+      </div>
+      
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/20">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-blue-600 dark:text-blue-400">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-neutral-800 dark:text-white">
-              Error Loading Digital Twin
-            </h3>
-            <p className="mt-2 text-neutral-600 dark:text-neutral-400">
-              {profileError instanceof Error
-                ? profileError.message
-                : "Failed to load digital twin profile. Please try again."}
-            </p>
-            <Button
-              variant="primary"
-              size="sm"
-              className="mt-4"
-              onClick={() => window.location.reload()}
-            >
-              Retry
-            </Button>
+            <div className="ml-4">
+              <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Patients</h2>
+              <div className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">{patients.length}</div>
+            </div>
           </div>
-        ) : null}
+        </div>
+        
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-green-100 dark:bg-green-900/20">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-green-600 dark:text-green-400">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">Normal Status</h2>
+              <div className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+                {patients.filter(p => p.status === "normal").length}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/20">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-yellow-600 dark:text-yellow-400">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">Needs Review</h2>
+              <div className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+                {patients.filter(p => p.status === "review").length}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-red-100 dark:bg-red-900/20">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-red-600 dark:text-red-400">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">Critical Status</h2>
+              <div className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
+                {patients.filter(p => p.status === "critical").length}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Featured Demo */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Demo Brain Visualization
+            </h2>
+            <p className="mt-1 text-gray-600 dark:text-gray-300">
+              Experience our neural visualization technology with sample data
+            </p>
+          </div>
+          <button
+            onClick={() => handleViewBrain("demo")}
+            className="mt-4 md:mt-0 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+          >
+            Open Demo Visualization
+          </button>
+        </div>
+        
+        <div className="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+              </svg>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">
+                Interactive 3D Brain Visualization
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-500">
+                Click "Open Demo Visualization" to explore
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Patient List */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            Patient Visualizations
+          </h2>
+          <p className="mt-1 text-gray-600 dark:text-gray-300">
+            Access brain visualizations for your patients
+          </p>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-900/50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Patient
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Age
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Status
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Last Updated
+                </th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              {patients.map((patient) => (
+                <tr key={patient.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900 dark:text-white">
+                      {patient.name}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      ID: {patient.id}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900 dark:text-white">{patient.age}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <StatusBadge status={patient.status} />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">{patient.lastUpdated}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button
+                      onClick={() => handleViewBrain(patient.id)}
+                      className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
+                      disabled={!patient.datasetId}
+                    >
+                      {patient.datasetId 
+                        ? "View Brain" 
+                        : "No Data Available"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      {/* HIPAA Footer */}
+      <div className="mt-8 text-xs text-center text-gray-500 dark:text-gray-400">
+        <p>Novamind Digital Twin Platform v1.0 | HIPAA Compliant</p>
+        <p className="mt-1">All access to patient data is logged and monitored for compliance purposes.</p>
       </div>
     </div>
   );

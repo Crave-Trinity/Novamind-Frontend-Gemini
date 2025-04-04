@@ -1,62 +1,58 @@
-# React + Tailwind Advanced Guidelines for Novamind Digital Twin
+# React + Tailwind Guidelines: Novamind Brain Visualization
 
-Component Architecture
-Use atomic design pattern: atoms → molecules → organisms → templates → pages
-Apply container/presentation pattern for all data-fetching components
-Every component should follow single responsibility principle
-Components consuming large data should implement windowing (react-window)
-Tailwind Best Practices
-Never use inline styles, always use Tailwind classes
-Avoid arbitrary values like w-[753px] - use standard classes (w-64) or create theme extensions
-For repeated class combinations, use @apply in CSS or extract to components
-Use group and group-hover for complex hover interactions
-For dark mode, use dark: variant consistently with your theme setup
-Use lg:, md:, and sm: breakpoints deliberately, mobile-first
-React Performance Optimizations
-Use React.memo() on expensive render components
-Apply useCallback() for  handlers passed to memoized child components
-Implement useMemo() for expensive calculations
-Add React.lazy() and Suspense for code-splitting heavy visualization components
-Set explicit key props (never use array index) for all lists
-Use useTransition() for non-blocking UI updates with large datasets
-State Management Guidelines
-Store UI state locally within components
-Use React Context only for theme, user auth, and global preferences
-Apply useReducer pattern for complex local state
-Keep state normalized (avoid deep nesting and duplication)
-For form state, use React Hook Form (reduces rerenders)
-Rendering Optimizations
-Prevent layout thrashing by batching DOM reads then writes
-Use CSS transforms instead of top/left for animations
-Implement will-change CSS property for elements that will animate
-Apply content-visibility: auto for off-screen content
-Debounce window resize event handlers
-Throttle scroll event handlers
-Data Visualization Gotchas
-Initialize D3 charts in useEffect with proper cleanup
-For Three.js, dispose of geometries, materials, textures in cleanup function
-When animating with Framer Motion, prefer layout over manual positioning
-With large datasets, implement progressive loading in chart components
-Use WebGL renderer for complex 3D brain models
-Precompute data transformations outside render cycles
-Common React Anti-patterns to Avoid
-Never use useEffect as an event handler
-Don't call hooks inside conditions (if statements)
-Avoid useEffect dependencies arrays with object references
-Never mutate state directly (useState setter or reducer only)
-Don't use Context for everything - it causes full tree re-renders
-Avoid nested ternary operators for conditional rendering
-Brain Visualization Implementation Tips
-Use Three.js instancing for rendering multiple neural nodes
-Implement WebGL shaders for glowing neuron effects
-For complex neural connections, use THREE.Line for better performance
-Apply post-processing effects (bloom) for the "sleek" theme only
-Limit animation frame rate for better performance
-Pre-bake complex geometries when possible
-Development Workflow
-Use Next.js App Router for route-based code splitting
-Set strict TypeScript checks for all components
-Apply ESLint with plugins for React hooks, a11y, and performance
-Configure Prettier with Tailwind plugin for class sorting
-Add Storybook for isolated component development
-Use React DevTools Profiler to identify render bottlenecks
+## Component Architecture
+- **Atomic Design**: atoms → molecules → organisms → templates → pages
+- **Data/UI Separation**: Container components for data, presentation for UI
+- **Single Responsibility**: Each component does one thing exceptionally well
+- **Large Data Handling**: Use react-window for virtualized rendering
+- **Code Splitting**: React.lazy() + Suspense for all visualization components
+
+## Tailwind Implementation
+- **No Inline Styles**: Always use Tailwind classes
+- **Avoid Arbitrary Values**: Use theme extensions instead of w-[753px]
+- **Extract Patterns**: @apply in CSS or create component abstractions
+- **Interactive States**: Use group/group-hover for complex interactions
+- **Dark Mode**: Consistent dark: variant implementation throughout
+- **Responsive Design**: Mobile-first with deliberate breakpoints
+
+## Performance Optimizations
+- **Memoization**: React.memo() for expensive components
+- **Handler References**: useCallback() for memoized child component handlers
+- **Computed Values**: useMemo() for calculations, transformations
+- **Non-Blocking UI**: useTransition() for large dataset updates
+- **List Keys**: Never use array indices as keys
+- **Memory Management**: Clean up subscriptions, timers, resources
+
+## State Management
+- **Component State**: Use local state for component-specific UI
+- **Context Usage**: Limit to theme, auth, global preferences only
+- **Complex Logic**: useReducer with action creators for predictability
+- **Form State**: React Hook Form to minimize rerenders
+- **Normalization**: Flat state structures, avoid nested objects
+
+## Render Optimizations
+- **DOM Operations**: Batch reads then writes to prevent thrashing
+- **Animation Performance**: CSS transforms over top/left positioning
+- **Property Hinting**: will-change for elements that animate
+- **Off-Screen Content**: content-visibility: auto for large pages
+- **Event Handlers**: Debounce resize, throttle scroll events
+
+## Three.js Best Practices
+- **Instance Rendering**: Use instancing for multiple neural nodes
+- **Memory Management**: Dispose geometries, materials, textures
+- **WebGL Optimization**: Custom shaders for neural glow effects
+- **Progressive Loading**: Incremental data visualization for large datasets
+- **Performance Tuning**: Frame rate limiting, precompute geometries
+
+## Common Anti-Patterns
+- **Effect Misuse**: Never use useEffect as event handler
+- **Hook Conditions**: Don't wrap hooks in conditionals
+- **Dependency Arrays**: Avoid object references in dependencies
+- **State Mutations**: Never mutate state directly, use setters
+- **Context Overuse**: Avoid wrapping entire app in multiple contexts
+- **Nested Ternaries**: Use component extraction instead
+
+## Reference Documentation
+- **Implementation Details**: See `/frontend/docs/` for comprehensive guidance
+- **Tailwind Integration**: Check `/frontend/docs/tailwind-module-system-integration.md`
+- **Brain Visualization**: Refer to docs for Three.js integration best practices

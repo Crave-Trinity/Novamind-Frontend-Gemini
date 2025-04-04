@@ -1,112 +1,127 @@
-import React, { Suspense, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-
+import React, { Suspense, useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@application/providers/ThemeProvider";
-import LoadingIndicator from "@components/atoms/LoadingIndicator";
-import SessionWarningModal from "@components/molecules/SessionWarningModal";
-import ErrorBoundary from "@components/utils/ErrorBoundary";
-import { auditLogService, AuditEventType } from "@services/AuditLogService";
-import { initializeSessionService } from "@/services/SessionService";
+import LoadingIndicator from "@presentation/atoms/LoadingIndicator";
+import ErrorBoundary from "@presentation/common/ErrorBoundary";
+import SessionWarningModal from "@presentation/molecules/SessionWarningModal";
 
-// Lazy-loaded components
-const Dashboard = React.lazy(() => import("./pages/Dashboard"));
-const PatientProfile = React.lazy(() => import("./pages/PatientProfile"));
-const Login = React.lazy(() => import("./pages/Login"));
-const BrainVisualizationPage = React.lazy(
-  () => import("./pages/BrainVisualizationPage"),
-);
-const NotFound = React.lazy(() => import("./pages/NotFound"));
+// Lazy-loaded components for code splitting
+const Login = React.lazy(() => import("@presentation/pages/Login"));
+const Dashboard = React.lazy(() => import("@presentation/pages/Dashboard"));
+const PatientProfile = React.lazy(() => import("@presentation/pages/PatientProfile"));
+const BrainVisualizationPage = React.lazy(() => import("@presentation/pages/BrainVisualizationPage"));
+const NotFound = React.lazy(() => import("@presentation/pages/NotFound"));
 
 /**
- * Main App component
- *
- * Handles routing, error boundaries, and global providers
+ * Application Root Component
+ * 
+ * Provides global providers, routing, and error boundaries.
+ * Implements HIPAA-compliant session management and lazy loading.
  */
 const App: React.FC = () => {
-  // Initialize services on app load
+  // Authentication state (in a real app, this would be managed by an auth context)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  
+  // Check for authentication on app load
   useEffect(() => {
-    // Initialize session timeout service
-    initializeSessionService({
-      timeout: 15 * 60 * 1000, // 15 minutes
-      warningTime: 60 * 1000, // 1 minute warning
-      onTimeout: () => {
-        // Redirect to login on timeout
-        window.location.href = "/login?reason=timeout";
-      },
-      onWarning: () => {
-        // Show warning modal (would be triggered via a global state mechanism)
-        console.debug("Session timeout warning triggered");
-      },
-    });
-
-    // Log application init
-    auditLogService.log(AuditEventType.SYSTEM_ERROR, {
-      action: "application_init",
-      details: "Application initialized",
-      result: "success",
-    });
-
-    // Cleanup on unmount
+    // In a real app, this would validate JWT tokens, check sessions, etc.
+    const checkAuth = () => {
+      const hasSession = localStorage.getItem("demo_session");
+      setIsAuthenticated(!!hasSession);
+    };
+    
+    checkAuth();
+    
+    // Listen for auth events from other components
+    const handleAuthEvent = (event: CustomEvent) => {
+      if (event.detail.type === "login") {
+        localStorage.setItem("demo_session", "active");
+        setIsAuthenticated(true);
+      } else if (event.detail.type === "logout") {
+        localStorage.removeItem("demo_session");
+        setIsAuthenticated(false);
+      }
+    };
+    
+    window.addEventListener("auth_event" as any, handleAuthEvent);
+    
     return () => {
-      // Any cleanup needed
+      window.removeEventListener("auth_event" as any, handleAuthEvent);
     };
   }, []);
-
+  
   /**
-   * Global error handler for uncaught errors
+   * Protected route wrapper component
    */
-  const handleError = (error: Error, errorInfo: React.ErrorInfo) => {
-    console.error("Uncaught error:", error, errorInfo);
-
-    // Log to audit service
-    auditLogService.log(AuditEventType.SYSTEM_ERROR, {
-      action: "error",
-      errorCode: error.name,
-      errorMessage: error.message,
-      // Provide a fallback empty string if componentStack is null
-      details: errorInfo.componentStack || "",
-      result: "failure",
-    });
+  const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    if (!isAuthenticated) {
+      return <Navigate to="/login" replace />;
+    }
+    
+    return <>{children}</>;
   };
-
+  
+  // Loading fallback component
+  const LoadingFallback = () => (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <LoadingIndicator size="lg" text="Loading..." />
+    </div>
+  );
+  
   return (
     <ThemeProvider>
-      <ErrorBoundary onError={handleError}>
-        <Router>
-          <Suspense fallback={<LoadingIndicator fullScreen />}>
+      <ErrorBoundary>
+        <BrowserRouter>
+          {/* Session warning modal for HIPAA compliance */}
+          <SessionWarningModal isAuthenticated={isAuthenticated} />
+          
+          <Suspense fallback={<LoadingFallback />}>
             <Routes>
               {/* Public routes */}
-              <Route path="/login" element={<Login />} />
-
-              {/* Protected routes (would have auth check in real app) */}
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/patients/:id" element={<PatientProfile />} />
+              <Route 
+                path="/login" 
+                element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} 
+              />
+              
+              {/* Protected routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/patient/:id"
+                element={
+                  <ProtectedRoute>
+                    <PatientProfile />
+                  </ProtectedRoute>
+                }
+              />
+              
               <Route
                 path="/brain-visualization/:id"
-                element={<BrainVisualizationPage />}
+                element={
+                  <ProtectedRoute>
+                    <BrainVisualizationPage />
+                  </ProtectedRoute>
+                }
               />
-
-              {/* Redirects */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-              {/* 404 route */}
+              
+              {/* Default redirect to dashboard if authenticated, otherwise to login */}
+              <Route
+                path="/"
+                element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />}
+              />
+              
+              {/* 404 Not Found */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
-        </Router>
-
-        {/* Global components */}
-        <SessionWarningModal
-          isVisible={false} // Controlled by global state in a real app
-          timeRemaining={60000}
-          onContinue={() => console.debug("Session continued")}
-          onLogout={() => (window.location.href = "/login?reason=logout")}
-        />
+        </BrowserRouter>
       </ErrorBoundary>
     </ThemeProvider>
   );

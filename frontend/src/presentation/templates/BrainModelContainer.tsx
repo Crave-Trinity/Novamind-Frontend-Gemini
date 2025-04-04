@@ -1,443 +1,456 @@
-/**
- * NOVAMIND Neural-Safe Template Component
- * BrainModelContainer - Quantum-level integration of neural visualization
- * with clinical precision and type-safe state management
- */
+import React, { useCallback, useEffect, useState, useMemo, Suspense } from "react";
+import { Canvas } from "@react-three/fiber";
+// @ts-ignore - Types will be handled by overrides in package.json
+import { OrbitControls, Environment, useGLTF } from "@react-three/drei";
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import { auditLogService, AuditEventType } from "@infrastructure/services/AuditLogService";
+import type { NeuralNode } from "@organisms/BrainModel";
 
-import React, {
-  useMemo,
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-} from "react";
-import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, Environment, Preload, Stats } from "@react-three/drei";
-import { A11yAnnouncer, A11ySection } from "@react-three/a11y";
-import { useResizeObserver } from "@react-aria/utils";
+// Lazy-loaded brain model for code splitting
+const BrainModel = React.lazy(() => import("@organisms/BrainModel"));
 
-// Neural visualization coordinator
-import { useVisualizationCoordinator } from "@application/coordinators/NeuralVisualizationCoordinator";
-
-// Core visualization components
-import SymptomRegionMappingVisualizer from "@presentation/molecules/SymptomRegionMappingVisualizer";
-import NeuralActivityVisualizer from "@presentation/molecules/NeuralActivityVisualizer";
-import TemporalDynamicsVisualizer from "@presentation/molecules/TemporalDynamicsVisualizer";
-import BiometricAlertVisualizer from "@presentation/molecules/BiometricAlertVisualizer";
-import DataStreamVisualizer from "@presentation/molecules/DataStreamVisualizer";
-import TreatmentResponseVisualizer from "@presentation/molecules/TreatmentResponseVisualizer";
-
-// Utility components
-import PerformanceMonitor from "@presentation/common/PerformanceMonitor";
-import VisualizationErrorBoundary from "@presentation/common/VisualizationErrorBoundary";
-import LoadingFallback from "@presentation/common/LoadingFallback";
-import AdaptiveLOD from "@presentation/common/AdaptiveLOD";
-
-// Clinical control components
-import NeuralControlPanel from "@presentation/organisms/NeuralControlPanel";
-import ClinicalMetricsPanel from "@presentation/organisms/ClinicalMetricsPanel";
-import BiometricMonitorPanel from "@presentation/organisms/BiometricMonitorPanel";
-
-// Domain types
-import { BrainRegion, NeuralConnection } from "@domain/types/brain/models";
-import { VisualizationOptions } from "@domain/types/visualization/options";
-
-/**
- * Interface for container props with neural-safe typing
- */
 interface BrainModelContainerProps {
+  /**
+   * Patient identifier
+   */
   patientId: string;
-  initialRenderMode?:
-    | "standard"
-    | "heatmap"
-    | "connectivity"
-    | "activity"
-    | "treatment";
-  initialRegionSelection?: string[];
-  initialTimeScale?: "momentary" | "hourly" | "daily" | "weekly" | "monthly";
-  initialDetailLevel?: "low" | "medium" | "high" | "ultra";
-  width?: string | number;
-  height?: string | number;
+  
+  /**
+   * Dataset identifier (optional)
+   */
+  datasetId?: string;
+  
+  /**
+   * Initially selected brain region (optional)
+   */
+  initialRegion?: string;
+  
+  /**
+   * Whether to display controls (default: true)
+   */
   showControls?: boolean;
-  showMetrics?: boolean;
-  showPerformance?: boolean;
-  allowRegionSelection?: boolean;
-  showBiometricAlerts?: boolean;
-  showTreatmentResponses?: boolean;
-  className?: string;
-  onRegionSelect?: (regionId: string) => void;
-  onError?: (error: Error) => void;
+  
+  /**
+   * Background color (default: transparent)
+   */
+  backgroundColor?: string;
 }
 
 /**
- * Constants for visualization settings with clinical precision
+ * Brain Model Container Component
+ * 
+ * Container component that manages data loading, state, and presentation
+ * for the 3D brain visualization. Handles HIPAA-compliant logging,
+ * data processing, and clinical annotations.
  */
-const CAMERA_SETTINGS = {
-  position: [0, 0, 15] as [number, number, number],
-  fov: 50,
-  near: 0.1,
-  far: 1000,
-};
-
-const ENVIRONMENT_PRESET = "studio";
-
-/**
- * Inner Canvas component wrapped in error boundary
- */
-const VisualizationCanvas: React.FC<{
-  patientId: string;
-  canvasWidth: number;
-  canvasHeight: number;
-  showPerformance: boolean;
-}> = ({ patientId, canvasWidth, canvasHeight, showPerformance }) => {
-  // Access visualization coordinator
-  const { state, selectRegion, deselectRegion } = useVisualizationCoordinator();
-
-  // Destructure state
-  const {
-    brainModel,
-    selectedRegions,
-    activeRegions,
-    neuralActivation,
-    connectionStrengths,
-    symptomMappings,
-    treatmentPredictions,
-    selectedTreatmentId,
-    biometricAlerts,
-    biometricStreams,
-    temporalPatterns,
-    renderMode,
-    detailLevel,
-    isLoading,
-  } = state;
-
-  // Handle region selection
-  const handleRegionClick = useCallback(
-    (regionId: string) => {
-      if (selectedRegions.includes(regionId)) {
-        deselectRegion(regionId);
-      } else {
-        selectRegion(regionId);
-      }
-    },
-    [selectedRegions, selectRegion, deselectRegion],
-  );
-
-  // Calculate quality factor based on detail level
-  const qualityFactor = useMemo(() => {
-    switch (detailLevel) {
-      case "low":
-        return 0.5;
-      case "medium":
-        return 1.0;
-      case "high":
-        return 1.5;
-      case "ultra":
-        return 2.0;
-      default:
-        return 1.0;
-    }
-  }, [detailLevel]);
-
-  // Generate visualization options
-  const visualizationOptions = useMemo<VisualizationOptions>(
-    () => ({
-      renderMode,
-      qualityFactor,
-      showLabels: detailLevel !== "low",
-      showConnections:
-        renderMode === "connectivity" || renderMode === "standard",
-      showActivation: renderMode === "activity" || renderMode === "standard",
-      showSymptomMapping: renderMode === "standard" || renderMode === "heatmap",
-      useHeatmap: renderMode === "heatmap",
-      selectedRegions,
-      activeRegions: new Set(activeRegions),
-      highlightSelected: true,
-      highlightActive: true,
-    }),
-    [renderMode, qualityFactor, detailLevel, selectedRegions, activeRegions],
-  );
-
-  // Convert activation and strength maps to arrays for efficient rendering
-  const activationArray = useMemo(() => {
-    if (!brainModel || !brainModel.regions) return [];
-
-    return brainModel.regions.map((region) => ({
-      regionId: region.id,
-      level: neuralActivation.get(region.id) || "baseline",
-    }));
-  }, [brainModel, neuralActivation]);
-
-  const connectionArray = useMemo(() => {
-    if (!brainModel || !brainModel.connections) return [];
-
-    return brainModel.connections.map((connection) => ({
-      id: connection.id,
-      strength:
-        connectionStrengths.get(
-          `${connection.sourceId}-${connection.targetId}`,
-        ) || connection.strength,
-    }));
-  }, [brainModel, connectionStrengths]);
-
-  // Array of biometric streams
-  const biometricStreamArray = useMemo(() => {
-    return Array.from(biometricStreams.values());
-  }, [biometricStreams]);
-
-  // Setting up region lookup for efficient access
-  const regionLookup = useMemo(() => {
-    if (!brainModel || !brainModel.regions)
-      return new Map<string, BrainRegion>();
-
-    const lookup = new Map<string, BrainRegion>();
-    brainModel.regions.forEach((region) => {
-      lookup.set(region.id, region);
-    });
-
-    return lookup;
-  }, [brainModel]);
-
-  // Show loading state if data is not ready
-  if (isLoading || !brainModel) {
-    return <LoadingFallback message="Initializing neural visualization..." />;
-  }
-
-  return (
-    <>
-      {/* Neural Activity Visualization */}
-      {renderMode === "activity" && (
-        <NeuralActivityVisualizer
-          regions={brainModel.regions}
-          connections={brainModel.connections}
-          activationLevels={activationArray}
-          selectedRegions={selectedRegions}
-          onRegionClick={handleRegionClick}
-          options={visualizationOptions}
-        />
-      )}
-
-      {/* Symptom-Region Mapping */}
-      {(renderMode === "standard" || renderMode === "heatmap") && (
-        <SymptomRegionMappingVisualizer
-          regions={brainModel.regions}
-          connections={brainModel.connections}
-          symptomMappings={symptomMappings}
-          selectedRegions={selectedRegions}
-          activeRegions={new Set(activeRegions)}
-          onRegionClick={handleRegionClick}
-          options={visualizationOptions}
-        />
-      )}
-
-      {/* Treatment Response Visualization */}
-      {renderMode === "treatment" && treatmentPredictions.length > 0 && (
-        <TreatmentResponseVisualizer
-          predictions={treatmentPredictions}
-          regions={brainModel.regions}
-          selectedTreatmentId={selectedTreatmentId || undefined}
-        />
-      )}
-
-      {/* Temporal Dynamics Visualization */}
-      <TemporalDynamicsVisualizer
-        patterns={temporalPatterns}
-        regions={regionLookup}
-        position={[8, 0, 0]}
-        rotation={[0, -Math.PI / 6, 0]}
-        visible={renderMode === "standard" || renderMode === "activity"}
-      />
-
-      {/* Biometric Alert Visualization */}
-      <BiometricAlertVisualizer
-        alerts={biometricAlerts.filter((alert) => !alert.acknowledged)}
-        position={[-8, 0, 0]}
-        rotation={[0, Math.PI / 6, 0]}
-        visible={renderMode === "standard"}
-      />
-
-      {/* Data Stream Visualization */}
-      <DataStreamVisualizer
-        streams={biometricStreamArray}
-        position={[0, -6, 0]}
-        rotation={[Math.PI / 6, 0, 0]}
-        visible={renderMode === "standard"}
-      />
-
-      {/* Adaptive Level of Detail */}
-      <AdaptiveLOD detailLevel={detailLevel} targetFrameRate={60} />
-
-      {/* Performance Monitoring */}
-      {showPerformance && <Stats />}
-    </>
-  );
-};
-
-/**
- * Scene setup for proper camera and lighting
- */
-const SceneSetup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { camera } = useThree();
-
-  useEffect(() => {
-    // Position camera for optimal neural visualization
-    camera.position.set(
-      CAMERA_SETTINGS.position[0],
-      CAMERA_SETTINGS.position[1],
-      CAMERA_SETTINGS.position[2],
-    );
-    camera.near = CAMERA_SETTINGS.near;
-    camera.far = CAMERA_SETTINGS.far;
-    camera.updateProjectionMatrix();
-  }, [camera]);
-
-  return (
-    <>
-      {/* Professional studio lighting for clinical clarity */}
-      <Environment preset={ENVIRONMENT_PRESET} />
-
-      {/* Orbit controls for neural navigation */}
-      <OrbitControls
-        enableDamping
-        dampingFactor={0.25}
-        rotateSpeed={0.8}
-        minDistance={5}
-        maxDistance={30}
-      />
-
-      {/* Scene content */}
-      {children}
-
-      {/* Preload assets for optimal clinical experience */}
-      <Preload all />
-    </>
-  );
-};
-
-/**
- * Main brain model container component
- */
-export const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
+const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
   patientId,
-  initialRenderMode = "standard",
-  initialRegionSelection = [],
-  initialTimeScale = "daily",
-  initialDetailLevel = "medium",
-  width = "100%",
-  height = "600px",
+  datasetId,
+  initialRegion,
   showControls = true,
-  showMetrics = true,
-  showPerformance = false,
-  allowRegionSelection = true,
-  showBiometricAlerts = true,
-  showTreatmentResponses = true,
-  className = "",
-  onRegionSelect,
-  onError,
+  backgroundColor = "transparent",
 }) => {
-  // Container dimensions
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-
-  // Create resize observer for responsive canvas
-  const { width: resizeWidth, height: resizeHeight } = useResizeObserver({
-    ref: containerRef,
-    onResize: () => {
-      if (containerRef.current) {
-        setDimensions({
-          width: containerRef.current.clientWidth,
-          height: containerRef.current.clientHeight,
+  // State for brain data
+  const [nodes, setNodes] = useState<NeuralNode[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // UI state
+  const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>(undefined);
+  const [highlightedRegion, setHighlightedRegion] = useState<string | undefined>(initialRegion);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  
+  // Simulated brain regions (would come from API in real app)
+  const brainRegions = useMemo(() => [
+    { id: "prefrontal", name: "Prefrontal Cortex", color: [0.4, 0.6, 1.0] as [number, number, number] },
+    { id: "temporal", name: "Temporal Lobe", color: [0.2, 0.8, 0.4] as [number, number, number] },
+    { id: "parietal", name: "Parietal Lobe", color: [0.9, 0.3, 0.3] as [number, number, number] },
+    { id: "occipital", name: "Occipital Lobe", color: [0.8, 0.8, 0.2] as [number, number, number] },
+    { id: "limbic", name: "Limbic System", color: [0.8, 0.4, 0.8] as [number, number, number] },
+    { id: "cerebellum", name: "Cerebellum", color: [0.4, 0.4, 0.9] as [number, number, number] },
+    { id: "brainstem", name: "Brainstem", color: [0.6, 0.6, 0.6] as [number, number, number] },
+  ], []);
+  
+  // Load brain data
+  useEffect(() => {
+    const loadBrainData = async () => {
+      try {
+        setLoading(true);
+        
+        // Log data access for HIPAA compliance
+        auditLogService.log(AuditEventType.PATIENT_RECORD_VIEW, {
+          action: "load_brain_model",
+          resourceId: patientId,
+          resourceType: "brain_visualization",
+          details: `Loading brain model for patient ${patientId}${datasetId ? ` dataset ${datasetId}` : ''}`,
+          result: "success",
+        });
+        
+        // Simulate API call - in a real app, this would be a fetch to the backend
+        // with proper authentication and error handling
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Generate demo data (in production this would come from the API)
+        const mockNodes: NeuralNode[] = [];
+        const regionDensity = {
+          prefrontal: 80,
+          temporal: 60,
+          parietal: 50,
+          occipital: 40,
+          limbic: 30,
+          cerebellum: 50,
+          brainstem: 20
+        };
+        
+        // Generate simulated neural nodes for each region
+        Object.entries(regionDensity).forEach(([region, count]) => {
+          const regionInfo = brainRegions.find(r => r.id === region);
+          const color = regionInfo?.color || [0.5, 0.5, 0.5];
+          
+          for (let i = 0; i < count; i++) {
+            // Create pseudorandom positions based on region
+            let x, y, z;
+            
+            // Position nodes according to anatomical regions
+            switch (region) {
+              case "prefrontal":
+                x = Math.random() * 2 - 1 + 2;
+                y = Math.random() * 2 - 0.5 + 1;
+                z = Math.random() * 2 - 1;
+                break;
+              case "temporal":
+                x = Math.random() * 2 - 1 + 1;
+                y = Math.random() * 1 - 1.5;
+                z = Math.random() * 2 - 1 + 1;
+                break;
+              case "parietal":
+                x = Math.random() * 2 - 1 - 0.5;
+                y = Math.random() * 1 + 1;
+                z = Math.random() * 2 - 1 + 0.5;
+                break;
+              case "occipital":
+                x = Math.random() * 2 - 1 - 2;
+                y = Math.random() * 1 + 0;
+                z = Math.random() * 2 - 1;
+                break;
+              case "limbic":
+                x = Math.random() * 2 - 1;
+                y = Math.random() * 1 - 0.5;
+                z = Math.random() * 1;
+                break;
+              case "cerebellum":
+                x = Math.random() * 2 - 1;
+                y = Math.random() * 1 - 2;
+                z = Math.random() * 2 - 1 - 1;
+                break;
+              case "brainstem":
+                x = Math.random() * 1 - 0.5;
+                y = Math.random() * 1 - 2.5;
+                z = Math.random() * 1 - 0.5;
+                break;
+              default:
+                x = Math.random() * 6 - 3;
+                y = Math.random() * 6 - 3;
+                z = Math.random() * 6 - 3;
+            }
+            
+            // Add slight variation to colors for visual diversity
+            const colorVariation = 0.1;
+            const nodeColor: [number, number, number] = [
+              Math.min(1, Math.max(0, color[0] + (Math.random() * colorVariation * 2 - colorVariation))),
+              Math.min(1, Math.max(0, color[1] + (Math.random() * colorVariation * 2 - colorVariation))),
+              Math.min(1, Math.max(0, color[2] + (Math.random() * colorVariation * 2 - colorVariation)))
+            ];
+            
+            // Activation level - in a real app this would be from clinical data
+            const activation = Math.random();
+            
+            // Size variance - smaller nodes for less active regions
+            const sizeBase = activation * 0.5 + 0.2;
+            
+            mockNodes.push({
+              id: `${region}-${i}`,
+              position: [x, y, z],
+              size: sizeBase,
+              color: nodeColor,
+              activation,
+              region,
+              clinicalData: {
+                activityDelta: (Math.random() * 2 - 1) * 0.5,
+                markers: Math.random() > 0.8 ? ["anomaly"] : [],
+              }
+            });
+          }
+        });
+        
+        setNodes(mockNodes);
+        setIsDataLoaded(true);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to load brain data.");
+        setLoading(false);
+        
+        // Log error for HIPAA compliance (without PHI)
+        auditLogService.log(AuditEventType.SYSTEM_ERROR, {
+          action: "load_brain_model_error",
+          errorCode: "DATA_LOAD_FAILURE",
+          errorMessage: err instanceof Error ? err.message : "Unknown error",
+          result: "failure",
         });
       }
-    },
-  });
-
-  // Update dimensions when container size changes
-  useEffect(() => {
-    if (containerRef.current) {
-      setDimensions({
-        width: containerRef.current.clientWidth,
-        height: containerRef.current.clientHeight,
+    };
+    
+    loadBrainData();
+    
+    // Cleanup function
+    return () => {
+      // Log end of visualization session
+      auditLogService.log(AuditEventType.PATIENT_RECORD_VIEW, {
+        action: "close_brain_model",
+        resourceId: patientId,
+        resourceType: "brain_visualization",
+        details: "Closed brain visualization",
+        result: "success",
+      });
+    };
+  }, [patientId, datasetId, brainRegions]);
+  
+  // Handle node selection
+  const handleNodeClick = useCallback((nodeId: string) => {
+    setSelectedNodeId(nodeId);
+    
+    // Find node and region
+    const node = nodes.find(n => n.id === nodeId);
+    
+    // Log for HIPAA compliance
+    if (node) {
+      auditLogService.log(AuditEventType.PATIENT_RECORD_VIEW, {
+        action: "select_neural_node",
+        resourceId: patientId,
+        resourceType: "neural_node",
+        details: `Selected neural node ${node.id} in region ${node.region}`,
+        result: "success",
       });
     }
-  }, [resizeWidth, resizeHeight]);
-
-  // Handle errors
-  const handleError = useCallback(
-    (error: Error) => {
-      console.error("Neural visualization error:", error);
-      if (onError) {
-        onError(error);
-      }
-    },
-    [onError],
-  );
-
-  return (
-    <div
-      ref={containerRef}
-      className={`relative bg-slate-900 rounded-lg overflow-hidden ${className}`}
-      style={{
-        width: typeof width === "number" ? `${width}px` : width,
-        height: typeof height === "number" ? `${height}px` : height,
-      }}
-      data-testid="brain-model-container"
-    >
-      {/* Visualization Canvas */}
-      <VisualizationErrorBoundary onError={handleError}>
-        <A11yAnnouncer />
-        <Canvas
-          camera={{
-            fov: CAMERA_SETTINGS.fov,
-            near: CAMERA_SETTINGS.near,
-            far: CAMERA_SETTINGS.far,
-            position: CAMERA_SETTINGS.position,
-          }}
-          dpr={[1, 2]}
-          gl={{ antialias: true }}
-          className="w-full h-full"
-        >
-          <A11ySection
-            title="Neural Visualization"
-            description="Interactive 3D visualization of neural activity and clinical correlations"
+  }, [nodes, patientId]);
+  
+  // Handle region selection
+  const handleRegionSelect = useCallback((regionId: string) => {
+    setHighlightedRegion(regionId === highlightedRegion ? undefined : regionId);
+    
+    // Log for HIPAA compliance
+    auditLogService.log(AuditEventType.PATIENT_RECORD_VIEW, {
+      action: "highlight_brain_region",
+      resourceId: patientId,
+      resourceType: "brain_region",
+      details: `Highlighted brain region ${regionId}`,
+      result: "success",
+    });
+  }, [highlightedRegion, patientId]);
+  
+  // Render loading state
+  if (loading) {
+    return (
+      <div className="w-full h-full min-h-[400px] flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-700 dark:text-gray-300">Loading brain visualization...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Render error state
+  if (error) {
+    return (
+      <div className="w-full h-full min-h-[400px] flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+          </div>
+          <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">Visualization Error</h3>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">{error}</p>
+          <button 
+            className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            onClick={() => window.location.reload()}
           >
-            <SceneSetup>
-              <VisualizationCanvas
-                patientId={patientId}
-                canvasWidth={dimensions.width}
-                canvasHeight={dimensions.height}
-                showPerformance={showPerformance}
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="w-full relative">
+      {/* Main visualization container */}
+      <div 
+        className="w-full h-[600px] rounded-lg overflow-hidden"
+        style={{ backgroundColor }}
+      >
+        <Canvas camera={{ position: [0, 0, 10], fov: 45 }}>
+          {/* Environment lighting for realistic rendering */}
+          <Environment preset="city" />
+          
+          {/* Ambient light */}
+          <ambientLight intensity={0.5} />
+          
+          {/* Directional key light */}
+          <directionalLight 
+            position={[10, 10, 5]} 
+            intensity={1} 
+            color="#ffffff" 
+          />
+          
+          {/* Fill light */}
+          <directionalLight 
+            position={[-10, 5, -5]} 
+            intensity={0.3} 
+            color="#a0a0ff" 
+          />
+          
+          {/* Camera controls */}
+          {showControls && (
+            <OrbitControls 
+              enableDamping 
+              dampingFactor={0.1} 
+              rotateSpeed={0.5}
+              maxDistance={20}
+              minDistance={3}
+            />
+          )}
+          
+          {/* Brain model with loading fallback */}
+          <Suspense fallback={null}>
+            {isDataLoaded && (
+              <BrainModel
+                nodes={nodes}
+                {...(selectedNodeId ? { selectedNodeId } : {})}
+                {...(highlightedRegion ? { highlightedRegion } : {})}
+                onNodeClick={handleNodeClick}
+                autoRotate={!showControls}
               />
-            </SceneSetup>
-          </A11ySection>
+            )}
+          </Suspense>
+          
+          {/* Post-processing effects for visual enhancements */}
+          <EffectComposer>
+            <Bloom
+              intensity={1.0}
+              luminanceThreshold={0.2}
+              luminanceSmoothing={0.9}
+            />
+          </EffectComposer>
         </Canvas>
-      </VisualizationErrorBoundary>
-
-      {/* Neural Control Panel */}
+      </div>
+      
+      {/* Region selection controls */}
       {showControls && (
-        <div className="absolute top-4 right-4">
-          <NeuralControlPanel />
+        <div className="mt-4 flex flex-wrap gap-2 justify-center">
+          {brainRegions.map(region => (
+            <button
+              key={region.id}
+              onClick={() => handleRegionSelect(region.id)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                highlightedRegion === region.id
+                  ? 'bg-gray-800 text-white dark:bg-gray-100 dark:text-gray-900'
+                  : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+              style={{
+                backgroundColor: highlightedRegion === region.id 
+                  ? `rgb(${region.color[0]*255}, ${region.color[1]*255}, ${region.color[2]*255})` 
+                  : undefined,
+                color: highlightedRegion === region.id ? '#fff' : undefined,
+              }}
+            >
+              {region.name}
+            </button>
+          ))}
         </div>
       )}
-
-      {/* Clinical Metrics Panel */}
-      {showMetrics && (
-        <div className="absolute bottom-4 left-4">
-          <ClinicalMetricsPanel />
-        </div>
-      )}
-
-      {/* Biometric Monitor Panel */}
-      {showBiometricAlerts && (
-        <div className="absolute top-4 left-4">
-          <BiometricMonitorPanel />
-        </div>
-      )}
-
-      {/* Performance Monitor */}
-      {showPerformance && (
-        <div className="absolute bottom-4 right-4">
-          <PerformanceMonitor />
+      
+      {/* Node details panel (shown when a node is selected) */}
+      {selectedNodeId && (
+        <div className="absolute top-4 right-4 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 text-sm pointer-events-auto z-10">
+          <h3 className="font-medium text-gray-900 dark:text-white">Neural Node Detail</h3>
+          
+          {(() => {
+            const node = nodes.find(n => n.id === selectedNodeId);
+            if (!node) return <p>Node not found</p>;
+            
+            // Find region info
+            const regionInfo = brainRegions.find(r => r.id === node.region);
+            
+            return (
+              <div className="mt-2">
+                <div className="mt-2 space-y-2">
+                  <div>
+                    <span className="text-gray-500 dark:text-gray-400">Region: </span>
+                    <span className="font-medium text-gray-900 dark:text-white">{regionInfo?.name || node.region}</span>
+                  </div>
+                  
+                  <div>
+                    <span className="text-gray-500 dark:text-gray-400">Position: </span>
+                    <span className="font-mono text-xs text-gray-900 dark:text-white">
+                      [{node.position.map(p => p.toFixed(2)).join(', ')}]
+                    </span>
+                  </div>
+                  
+                  <div>
+                    <span className="text-gray-500 dark:text-gray-400">Activation: </span>
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {Math.floor(node.activation * 100)}%
+                    </span>
+                  </div>
+                  
+                  {node.clinicalData?.activityDelta !== undefined && (
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Δ from baseline: </span>
+                      <span className={`font-medium ${
+                        node.clinicalData.activityDelta > 0
+                          ? 'text-green-600 dark:text-green-400'
+                          : node.clinicalData.activityDelta < 0
+                            ? 'text-red-600 dark:text-red-400'
+                            : 'text-gray-900 dark:text-white'
+                      }`}>
+                        {node.clinicalData.activityDelta > 0
+                          ? '+'
+                          : node.clinicalData.activityDelta < 0
+                            ? ''
+                            : '±'}
+                        {Math.abs(node.clinicalData.activityDelta * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  )}
+                  
+                  {node.clinicalData?.markers && node.clinicalData.markers.length > 0 && (
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Markers: </span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {node.clinicalData.markers.map(marker => (
+                          <span 
+                            key={marker}
+                            className="px-1.5 py-0.5 rounded-sm text-xs bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100"
+                          >
+                            {marker}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <button
+                  className="mt-4 w-full py-1 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  onClick={() => setSelectedNodeId(undefined)}
+                >
+                  Close
+                </button>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
