@@ -4,22 +4,41 @@
  * with neuropsychiatric integration and clinical precision
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-// Removed incorrect import: import { useRouter } from "next/router";
-// Using useNavigate from react-router-dom instead
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { BrowserRouter, useNavigate } from "react-router-dom";
+import { useTheme } from "next-themes";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 // Domain types
-// Removed incorrect import: import { DetailLevel } from "@domain/types/brain/visualization";
-// Use string literals directly or VisualizationSettings['levelOfDetail']
+import { BrainModel, BrainRegion, NeuralConnection } from "@domain/types/brain/models";
 import {
-  BrainModel,
-  BrainRegion,
-  NeuralConnection,
-} from "@domain/types/brain/models";
-import { ActivationLevel } from "@domain/types/brain/activity";
-import { VisualizationState, NeuralError } from "@domain/types/shared/common"; // Import VisualizationState and NeuralError
-import type { VisualizationSettings } from '@domain/types/brain/visualization'; // Import type for use in component
+  RenderMode,
+  VisualizationSettings,
+  ThemeOption, // Import ThemeOption
+  defaultVisualizationSettings, // Import defaults
+} from "@domain/types/brain/visualization";
+import {
+  SafeArray,
+  Result,
+  success,
+  failure,
+  VisualizationState,
+  NeuralError
+} from "@domain/types/shared/common";
+import { Diagnosis, Symptom, Patient } from "@domain/types/clinical/patient";
+import { TreatmentResponsePrediction, NeuralImpactRating, TreatmentType } from "@domain/types/clinical/treatment"; // Import NeuralImpactRating
+import { RiskAssessment } from "@domain/types/clinical/risk";
+
+// Domain models
+import {
+  calculateNeuralActivation,
+  mapSymptomsToRegions,
+  mapDiagnosesToRegions,
+  calculateTreatmentImpact,
+  SymptomNeuralMapping,
+  DiagnosisNeuralMapping,
+  TreatmentNeuralMapping,
+} from "@domain/models/brain/mapping/brain-mapping";
 
 // Application hooks
 import { useBrainModel } from "@application/hooks/useBrainModel";
@@ -30,34 +49,37 @@ import { useSearchParams } from "@application/hooks/useSearchParams";
 
 // Presentation components
 import BrainModelViewer from "@presentation/organisms/BrainModelViewer";
-import BrainRegionDetails from "@presentation/molecules/BrainRegionDetails";
 import RegionSelectionPanel from "@presentation/molecules/RegionSelectionPanel";
 import VisualizationControls from "@presentation/molecules/VisualizationControls";
 import ClinicalDataOverlay from "@presentation/molecules/ClinicalDataOverlay";
-import BrainRegionLabels from "@presentation/molecules/BrainRegionLabels";
+import BrainRegionDetails from "@presentation/molecules/BrainRegionDetails";
+import LoadingIndicator from "@presentation/atoms/LoadingIndicator";
 
 // Common components
-import AdaptiveLOD from "@presentation/common/AdaptiveLOD";
-import PerformanceMonitor from "@presentation/common/PerformanceMonitor";
+import AdaptiveLOD, { DetailConfig } from "@presentation/common/AdaptiveLOD"; // Import DetailConfig only
+import PerformanceMonitor, { PerformanceMetrics } from "@presentation/common/PerformanceMonitor"; // Import PerformanceMetrics type
 import VisualizationErrorBoundary from "@presentation/common/VisualizationErrorBoundary";
 import LoadingFallback from "@presentation/common/LoadingFallback";
 
-/**
- * Props with neural-safe typing
- */
+
+// Define neural-safe prop interface
 interface BrainVisualizationContainerProps {
-  scanId?: string;
   patientId?: string;
-  initialSelectedRegionId?: string;
-  readOnly?: boolean;
-  showClinicalData?: boolean;
+  scanId?: string;
+  initialRenderMode?: RenderMode;
+  initialSelectedRegions?: string[];
+  initialSelectedRegionId?: string; // Added prop
+  readOnly?: boolean; // Added prop
+  showClinicalData?: boolean; // Added prop
   showControls?: boolean;
   height?: string | number;
   width?: string | number;
-  onRegionSelect?: (region: BrainRegion | null) => void;
+  enableClinicalOverlay?: boolean;
+  enableRegionSelection?: boolean;
+  highPerformanceMode?: boolean;
+  onRegionSelect?: (region: BrainRegion | null) => void; // Updated prop type
   onVisualizationReady?: () => void;
   className?: string;
-  // regionSearchQuery and highlightedRegionIds are managed internally or via hooks now
 }
 
 /**
@@ -74,64 +96,54 @@ export enum DetailMode {
 /**
  * Map detail modes to detail levels
  */
-// Define the mapping using the correct string literal types (matching VisualizationSettings['levelOfDetail'])
 const detailModeMap: Record<DetailMode, "low" | "medium" | "high" | "dynamic"> = {
   [DetailMode.PERFORMANCE]: "low",
   [DetailMode.BALANCED]: "medium",
   [DetailMode.QUALITY]: "high",
-  [DetailMode.CLINICAL]: "high", // Map CLINICAL to 'high' for now
-  [DetailMode.AUTO]: "dynamic", // Map AUTO to 'dynamic'
+  [DetailMode.CLINICAL]: "high",
+  [DetailMode.AUTO]: "dynamic",
 };
 
 /**
  * BrainVisualizationContainer - Organism component for brain visualization
  * Implements neural-safe integration of visualization components with application state
  */
-export const BrainVisualizationContainer: React.FC<
+const BrainVisualizationContainerInternal: React.FC<
   BrainVisualizationContainerProps
 > = ({
   scanId,
   patientId,
   initialSelectedRegionId,
-  readOnly = false,
-  showClinicalData = true,
+  initialRenderMode = RenderMode.ANATOMICAL,
+  initialSelectedRegions = [],
+  readOnly = false, // Use prop
+  showClinicalData = true, // Use prop
   showControls = true,
   height = "100%",
   width = "100%",
   onRegionSelect,
   onVisualizationReady,
   className = "",
+  enableClinicalOverlay = true,
+  enableRegionSelection = true,
+  highPerformanceMode = false,
 }) => {
-  // Router for navigation
-  // Use react-router-dom hook
   const navigate = useNavigate();
+  const { getParam, setParam } = useSearchParams();
+  const { theme } = useTheme();
 
-  // URL parameter management
-  const { getParam, setParam, serializeState } = useSearchParams();
-
-  // Application hooks
-  // Call useBrainModel without arguments and destructure only existing properties
   const {
     brainModel,
     isLoading: isModelLoading,
     error: modelError,
-    // Removed non-existent properties: selectedRegionId, selectRegion, highlightConnections, setRegionActivity, resetRegionActivity
-    // We need to manage selection/highlight state locally or find the correct hook
-    fetchBrainModel, // Keep fetch function if needed
-    updateRegionActivity, // Keep update function
-    toggleRegionActive, // Keep toggle function
-    selectRegions, // Keep selection functions
-    deselectRegions,
-    highlightRegions, // Function to set highlights (state managed internally by hook or needs local state)
-    clearHighlights,
-    reset, // Keep reset function
+    fetchBrainModel,
+    // ... other methods from useBrainModel if needed
   } = useBrainModel();
 
-  // Destructure correct properties from usePatientData
   const {
-    patient: patientData, // Rename patient to patientData for consistency in this component
-    symptoms: activeSymptoms, // Rename symptoms to activeSymptoms
-    diagnoses: activeDiagnoses, // Rename diagnoses to activeDiagnoses
+    patient: patientData,
+    symptoms: activeSymptoms,
+    diagnoses: activeDiagnoses,
     isLoading: isPatientLoading,
     error: patientError,
   } = usePatientData(patientId);
@@ -139,485 +151,349 @@ export const BrainVisualizationContainer: React.FC<
   const {
     symptomMappings,
     diagnosisMappings,
+    treatmentMappings,
     riskAssessment,
-    treatmentPredictions, // Note: This is fetched but not used by ClinicalDataOverlay currently
+    treatmentPredictions,
     isLoading: isClinicalLoading,
     error: clinicalError,
   } = useClinicalContext(patientId);
 
-  // Destructure the active theme settings directly
   const {
     visualizationSettings,
     updateVisualizationSettings,
-    getThemeSettings, // Keep getter if needed elsewhere, but use activeThemeSettings below
-    activeThemeSettings, // Destructure the active settings object
+    activeThemeSettings,
   } = useVisualSettings();
 
-  // Local state
-  const [selectedRegionIdInternal, setSelectedRegionIdInternal] = useState<string | null>(initialSelectedRegionId || null); // Manage selection locally
-  const [isReady, setIsReady] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
+  const [renderMode, setRenderMode] = useState<RenderMode>(
+    (getParam("mode") as RenderMode) || initialRenderMode,
+  );
+  const [selectedRegionIds, setSelectedRegionIds] = useState<string[]>(
+    getParam("regions")?.split(",") ?? initialSelectedRegions,
+  );
+  const [highlightedRegionIdsInternal, setHighlightedRegionIdsInternal] = useState<string[]>([]);
+  const [regionSearchQuery, setRegionSearchQuery] = useState<string>("");
+  const [activeRegionId, setActiveRegionId] = useState<string | null>(initialSelectedRegionId || null);
+  const [showDetails, setShowDetails] = useState<boolean>(!!initialSelectedRegionId);
   const [detailMode, setDetailMode] = useState<DetailMode>(DetailMode.AUTO);
-  // Use the correct string literal type union for the state (matching VisualizationSettings['levelOfDetail'])
   const [forceDetailLevel, setForceDetailLevel] = useState<
-    "low" | "medium" | "high" | "dynamic" | undefined // Add "dynamic" back
+    "low" | "medium" | "high" | "dynamic" | undefined
   >(undefined);
   const [showPerformanceStats, setShowPerformanceStats] = useState(false);
-  const [performanceMetrics, setPerformanceMetrics] = useState<any>(null);
+  const [performanceMetrics, setPerformanceMetrics] = useState<any>(null); // Consider defining a proper type
   const [showRegionLabels, setShowRegionLabels] = useState(true);
   const [errorState, setErrorState] = useState<Error | null>(null);
-  // Add local state for highlighted regions (if not provided by useBrainModel)
-  const [highlightedRegionIdsInternal, setHighlightedRegionIdsInternal] = useState<string[]>([]);
+  const [isReady, setIsReady] = useState(false);
 
-  // Loading state
   const isLoading = isModelLoading || isPatientLoading || isClinicalLoading;
   const loadingProgress = useMemo(() => {
-    // Calculate loading progress based on various data sources
     let progress = 0;
-    const total = 3; // Model, patient, clinical
-
+    const total = 3;
     if (!isModelLoading) progress++;
     if (!isPatientLoading) progress++;
     if (!isClinicalLoading) progress++;
-
     return progress / total;
   }, [isModelLoading, isPatientLoading, isClinicalLoading]);
 
-  // Error handling
   const combinedError = modelError || patientError || clinicalError || errorState;
 
-  // Construct visualizationState based on loading and error status
-  const visualizationState = useMemo((): VisualizationState<BrainModel | null> => { // Allow null BrainModel type
-    if (combinedError && !brainModel) { // Prioritize error if model hasn't loaded
-      // Ensure the error is of type NeuralError or wrap it
+  const visualizationState = useMemo((): VisualizationState<BrainModel | null> => {
+    if (combinedError && !brainModel) {
       const neuralError = combinedError instanceof NeuralError
         ? combinedError
-        : new NeuralError(combinedError?.message || 'Unknown error', { code: 'VIS_CONTAINER_ERR' });
+        : new NeuralError(combinedError?.message || 'Unknown error', { code: 'VIS_CONTAINER_ERR', severity: 'fatal' });
       return { status: 'error', error: neuralError };
     }
-    if (isLoading && !brainModel) { // Loading only if model isn't ready
+    if (isLoading && !brainModel) {
       return { status: 'loading' };
     }
     if (brainModel) {
-      // Use 'success' status and 'data' property as defined in VisualizationState type
-      // Ensure brainModel is not null here before assigning to 'data'
-      return { status: 'success', data: brainModel }; // Use 'data' property
+       try {
+         const enhancedModel = applyClinicialDataToBrainModel(
+           brainModel,
+           activeSymptoms ?? [],
+           activeDiagnoses ?? [],
+           symptomMappings ?? [],
+           diagnosisMappings ?? [],
+           treatmentMappings ?? [],
+           riskAssessment ?? undefined, // Correctly pass undefined
+           treatmentPredictions ?? [],
+           renderMode,
+         );
+         // Ensure enhancedModel is not null before returning success
+         if (enhancedModel) {
+            return { status: 'success', data: enhancedModel };
+         } else {
+             // Handle case where enhancement might fail or return null unexpectedly
+             return { status: 'error', error: new NeuralError('Failed to enhance brain model', { code: 'ENHANCE_FAILED', severity: 'warning' }) };
+         }
+       } catch (error) {
+         const neuralError = new NeuralError(
+           `Failed to process clinical data: ${error instanceof Error ? error.message : String(error)}`,
+           { code: 'CLINICAL_PROCESSING_FAILED', severity: 'warning' }
+         );
+         return { status: 'error', error: neuralError };
+       }
     }
-    return { status: 'idle' }; // Default idle state
-  }, [isLoading, combinedError, brainModel]);
+    return { status: 'idle' };
+  }, [isLoading, combinedError, brainModel, activeSymptoms, activeDiagnoses, symptomMappings, diagnosisMappings, treatmentMappings, riskAssessment, treatmentPredictions, renderMode]);
 
-  // Initialize from URL params
+
   useEffect(() => {
-    // Check for region selection in URL
-    const regionParam = getParam("region");
-    // Use local state for initial selection check
-    if (regionParam && brainModel && !selectedRegionIdInternal) {
-      // selectRegion(regionParam); // selectRegion removed from useBrainModel hook
-      setSelectedRegionIdInternal(regionParam); // Set local state instead
+    if (scanId) {
+      fetchBrainModel(scanId);
     }
+  }, [fetchBrainModel, scanId]);
 
-    // Check for detail mode in URL
-    const detailParam = getParam("detail") as DetailMode | null;
-    if (detailParam && Object.values(DetailMode).includes(detailParam)) {
-      setDetailMode(detailParam);
-
-      if (detailParam !== DetailMode.AUTO) {
-        setForceDetailLevel(detailModeMap[detailParam]);
-      } else {
-        setForceDetailLevel(undefined);
-      }
-    }
-
-    // Check for performance stats toggle
-    const statsParam = getParam("stats");
-    if (statsParam === "true") {
-      setShowPerformanceStats(true);
-    }
-
-    // Check for labels toggle
-    const labelsParam = getParam("labels");
-    if (labelsParam === "false") {
-      setShowRegionLabels(false);
-    }
-  // Update dependencies for useEffect
-  }, [brainModel, getParam, selectedRegionIdInternal]);
-
-  // Update URL when selection changes
   useEffect(() => {
-    // Use local state for URL update check
-    if (selectedRegionIdInternal) {
-      setParam("region", selectedRegionIdInternal); // Use local state
-      setShowDetails(true);
+    if (selectedRegionIds.length > 0) {
+      setParam("regions", selectedRegionIds.join(","));
     } else {
-      setParam("region", null);
-      setShowDetails(false);
+      setParam("regions", null);
     }
-  // Update dependencies for useEffect
-  }, [selectedRegionIdInternal, setParam]);
+  }, [selectedRegionIds, setParam]);
 
-  // Handle initial region selection
   useEffect(() => {
-    // Use local state for initial selection check
-    if (initialSelectedRegionId && brainModel && !selectedRegionIdInternal) {
-      // selectRegion(initialSelectedRegionId); // selectRegion removed from useBrainModel hook
-      setSelectedRegionIdInternal(initialSelectedRegionId); // Set local state instead
+    setParam("mode", renderMode);
+  }, [renderMode, setParam]);
+
+  useEffect(() => {
+    if (visualizationState.status === "success" && onVisualizationReady) {
+      onVisualizationReady();
+      setIsReady(true);
     }
-  // Update dependencies for useEffect
-  }, [initialSelectedRegionId, brainModel, selectedRegionIdInternal]);
+  }, [visualizationState.status, onVisualizationReady]);
 
-  // Selected region data
-  const selectedRegion = useMemo(() => {
-    // Use local state to find selected region
-    if (!brainModel || !selectedRegionIdInternal) return null;
-    return brainModel.regions.find((r) => r.id === selectedRegionIdInternal) || null;
-  // Update dependencies for useMemo
-  }, [brainModel, selectedRegionIdInternal]);
+  // Event Handlers
+  const handleRenderModeChange = useCallback((mode: RenderMode) => {
+    setRenderMode(mode);
+  }, []);
 
-  // Handle region selection
-  const handleRegionSelect = useCallback(
-    // Update local state on selection
-    (regionId: string | null) => {
-      // selectRegion(regionId); // selectRegion removed from useBrainModel hook
-      setSelectedRegionIdInternal(regionId); // Set local state instead
-
-
-      // If external handler provided, call with region data
-      // If external handler provided, call with region data based on local state
-      if (onRegionSelect && brainModel) {
-        const region = regionId
-          ? brainModel.regions.find((r) => r.id === regionId) || null
-          : null;
-        onRegionSelect(region);
+  // Handler for external onRegionSelect (expects BrainRegion | null)
+  const handleRegionSelect = useCallback((region: BrainRegion | null) => {
+      const regionId = region?.id ?? null;
+      setSelectedRegionIds(regionId ? [regionId] : []); // Assuming single selection for external callback? Adjust if multi-select needed.
+      setActiveRegionId(regionId);
+      setShowDetails(!!regionId);
+      if (onRegionSelect) {
+          onRegionSelect(region);
       }
+  }, [onRegionSelect]);
+
+  // Handler for BrainModelViewer's onRegionClick (expects regionId)
+  const handleViewerRegionClick = useCallback((regionId: string) => {
+      if (brainModel) {
+          const region = brainModel.regions.find(r => r.id === regionId) || null;
+          handleRegionSelect(region); // Use the main handler
+      }
+  }, [brainModel, handleRegionSelect]);
+
+  // Handler for BrainModelViewer's onRegionHover (expects regionId | null)
+   const handleViewerRegionHover = useCallback((regionId: string | null) => {
+       setHighlightedRegionIdsInternal(regionId ? [regionId] : []);
+       // Optionally trigger external hover logic if needed
+       // if (onRegionHover && brainModel) { ... }
+   }, [/* dependencies if needed */]);
+
+
+  const handleRegionSearch = useCallback((query: string) => {
+    setRegionSearchQuery(query);
+  }, []);
+
+  // Handler for RegionSelectionPanel's onRegionSelect (expects regionId, selected)
+  const handlePanelRegionSelect = useCallback(
+    (regionId: string, selected: boolean) => {
+      setSelectedRegionIds((prev) => {
+        if (selected && !prev.includes(regionId)) return [...prev, regionId];
+        if (!selected && prev.includes(regionId)) return prev.filter((id) => id !== regionId);
+        return prev;
+      });
+       if (onRegionSelect && brainModel) {
+         const region = brainModel.regions.find(r => r.id === regionId) || null;
+         if (selected) onRegionSelect(region);
+         // else onRegionSelect(null); // Optionally notify deselection
+       }
     },
-    // Update dependencies for useCallback
     [onRegionSelect, brainModel],
   );
 
-  // Handle detail mode change
-  const handleDetailModeChange = useCallback(
-    (mode: DetailMode) => {
-      setDetailMode(mode);
-      setParam("detail", mode);
-
-      if (mode !== DetailMode.AUTO) {
-        setForceDetailLevel(detailModeMap[mode]);
-      } else {
-        setForceDetailLevel(undefined);
+  const handleConnectionClick = useCallback(
+    (connectionId: string) => {
+      if (visualizationState.status === "success" && visualizationState.data) {
+        const connection = new SafeArray(visualizationState.data.connections).find((conn) => conn.id === connectionId);
+        if (connection) {
+          setSelectedRegionIds([connection.sourceId, connection.targetId]);
+          setActiveRegionId(null);
+          setShowDetails(false);
+        }
       }
     },
-    [setParam],
+    [visualizationState],
   );
 
-  // Handle performance metrics update
-  const handlePerformanceUpdate = useCallback((metrics: any) => {
+  const handleSettingsChange = useCallback(
+    (settings: Partial<VisualizationSettings>) => {
+      updateVisualizationSettings(settings);
+    },
+    [updateVisualizationSettings],
+  );
+
+  const handleCloseDetails = useCallback(() => {
+    setShowDetails(false);
+    setActiveRegionId(null);
+  }, []);
+
+  const handlePerformanceUpdate = useCallback((metrics: PerformanceMetrics) => { // Use defined type
     setPerformanceMetrics(metrics);
   }, []);
 
-  // Handle performance warning
   const handlePerformanceWarning = useCallback(
-    (metrics: any, level: "warning" | "critical") => {
+    (metrics: PerformanceMetrics, level: "warning" | "critical") => { // Use defined type
       if (level === "critical" && detailMode === DetailMode.AUTO) {
-        // Auto-switch to performance mode
-        setForceDetailLevel("low"); // Use string literal
+        setForceDetailLevel("low");
       }
     },
     [detailMode],
   );
 
-  // Handle visualization ready state
-  const handleVisualizationReady = useCallback(() => {
-    setIsReady(true);
-
-    if (onVisualizationReady) {
-      onVisualizationReady();
-    }
-  }, [onVisualizationReady]);
-
-  // Handle error in visualization
   const handleVisualizationError = useCallback((error: Error) => {
     setErrorState(error);
-
-    // Log error details
     console.error("NOVAMIND Visualization Error:", error);
   }, []);
 
-  // Handle recovery from error
   const handleErrorRecovery = useCallback(() => {
     setErrorState(null);
-
-    // Switch to performance mode for better recovery chances
     setDetailMode(DetailMode.PERFORMANCE);
-    setForceDetailLevel("low"); // Use string literal
+    setForceDetailLevel("low");
+    if (scanId) fetchBrainModel(scanId);
+    return { success: true, value: true };
+  }, [scanId, fetchBrainModel]);
 
-    return { success: true, data: true };
-  }, []);
+  const currentDetailLevel = useMemo(() => {
+    return forceDetailLevel ?? detailModeMap[detailMode] ?? 'dynamic';
+  }, [forceDetailLevel, detailMode]);
 
-  // Placeholder for search-based highlighting if implemented later
-  const searchHighlightedRegions: string[] = [];
-
-  // Combine explicitly highlighted regions with search results
-  const combinedHighlightedRegions = useMemo(() => {
-    // Use only the local state for highlights for now
-    return highlightedRegionIdsInternal;
-  // Update dependencies
-  }, [highlightedRegionIdsInternal]);
-
-  // Device performance class detection
-  const devicePerformanceClass = useMemo(() => {
-    // Simple performance class detection based on navigator info
-    // This would be more sophisticated in a real implementation
-
-    if (typeof window === "undefined") return "medium";
-
-    const userAgent = navigator.userAgent.toLowerCase();
-
-    // Check for mobile devices which typically have lower performance
-    if (
-      /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-        userAgent,
-      )
-    ) {
-      return "low";
-    }
-
-    // Check for modern GPU support using feature detection
-    const canvas = document.createElement("canvas");
-    const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
-
-    if (!gl) {
-      return "low"; // No WebGL support
-    }
-
-    // Get WebGL info to estimate performance
-    const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
-    if (debugInfo) {
-      const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-
-      // Check for high-end GPUs
-      if (/nvidia|rtx|gtx|radeon rx|quadro/i.test(renderer)) {
-        return "high";
-      }
-
-      // Check for integrated graphics
-      if (/intel|hd graphics|iris|uhd/i.test(renderer)) {
-        return "medium";
-      }
-    }
-
-    // Default to medium for unknown configurations
-    return "medium";
-  }, []);
-
-  // Render loading state
-  if (isLoading && !isReady) {
-    return (
-      <LoadingFallback
-        progress={loadingProgress}
-        message="Loading Neural Model"
-        height={height}
-        theme="dark"
-      />
-    );
-  }
-
-  // Render error state
-  // Use combinedError for check
-  if (combinedError && !brainModel) {
-    return (
-      <div
-        style={{
-          width: typeof width === "number" ? `${width}px` : width,
-          height: typeof height === "number" ? `${height}px` : height,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "#0f172a",
-          color: "#f8fafc",
-          padding: "1rem",
-          borderRadius: "0.5rem",
-        }}
-      >
-        <h3 style={{ color: "#ef4444", marginBottom: "1rem" }}>
-          Visualization Error
-        </h3>
-        <p
-          style={{
-            marginBottom: "1rem",
-            maxWidth: "400px",
-            textAlign: "center",
-          }}
-        >
-          Failed to load neural model visualization. Please try again or contact
-          support.
-        </p>
-        <pre
-          style={{
-            margin: "0.5rem 0",
-            padding: "0.5rem",
-            backgroundColor: "rgba(0, 0, 0, 0.3)",
-            borderRadius: "0.25rem",
-            fontSize: "0.8rem",
-            maxWidth: "100%",
-            overflow: "auto",
-            color: "#94a3b8",
-          }}
-        >
-          {combinedError.message}
-        </pre>
-        <button
-          // Replace router.reload() with a more appropriate action if needed,
-          // or simply remove if retry isn't the desired behavior here.
-          // For now, let's use window location reload as a simple replacement.
-          onClick={() => window.location.reload()}
-          style={{
-            backgroundColor: "#3b82f6",
-            color: "white",
-            border: "none",
-            padding: "0.5rem 1rem",
-            borderRadius: "0.25rem",
-            cursor: "pointer",
-            marginTop: "1rem",
-          }}
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
-
+  // Render
   return (
     <div
-      className={className}
-      style={{
-        position: "relative",
-        width: typeof width === "number" ? `${width}px` : width,
-        height: typeof height === "number" ? `${height}px` : height,
-        overflow: "hidden",
-        borderRadius: "0.5rem",
-        backgroundColor: "#0f172a",
-      }}
+      data-testid="brain-model-container-root"
+      className={`relative rounded-lg overflow-hidden ${className}`}
+      style={{ width, height }}
     >
-      {/* Performance Monitoring */}
-      <PerformanceMonitor
-        visible={showPerformanceStats}
-        position="top-right"
-        onMetricsUpdate={handlePerformanceUpdate}
-        onPerformanceWarning={handlePerformanceWarning}
-        showPanel={false}
-      />
-
-      {/* Error Boundary for visualization components */}
-      <VisualizationErrorBoundary
-        onError={handleVisualizationError}
-        onRecoveryAttempt={handleErrorRecovery}
-      >
-        {/* Adaptive LOD */}
+      <VisualizationErrorBoundary onError={handleVisualizationError}>
         <AdaptiveLOD
-          initialDetailLevel={"medium"} // Use string literal
-          // Pass the correct type for forceDetailLevel
-          // Conditionally pass prop only when defined due to exactOptionalPropertyTypes
-          {...(forceDetailLevel !== undefined && { forceDetailLevel: forceDetailLevel })}
-          adaptiveMode={detailMode === DetailMode.AUTO ? "hybrid" : "manual"}
-          devicePerformanceClass={devicePerformanceClass}
-          regionCount={brainModel?.regions.length || 0}
+            forceDetailLevel={currentDetailLevel}
+            // onWarning={handlePerformanceWarning} // Prop doesn't exist on AdaptiveLODProps
+            // Pass other necessary props based on AdaptiveLODProps definition
+            // initialDetailLevel={...} // If needed
+            // adaptiveMode={...} // If needed
+            // etc.
         >
           {(detailConfig) => (
             <>
-              {/* Brain Visualization */}
-              {/* Conditionally render viewer only on success state with non-null data */}
-              {visualizationState.status === 'success' && visualizationState.data && (
+              {/* Explicitly check for non-null data for type safety */}
+              {visualizationState.status === 'success' && visualizationState.data !== null && ( 
                 <BrainModelViewer
-                  // Pass the correctly typed state and data
-                  visualizationState={visualizationState as VisualizationState<BrainModel>}
-                  brainModel={visualizationState.data} // Use data from state
-                  selectedRegionIds={[selectedRegionIdInternal].filter(Boolean) as string[]}
-                  onRegionClick={handleRegionSelect}
-                  // Pass other relevant props that BrainModelViewer *does* accept (check its definition if needed)
-                  highlightedRegionIds={combinedHighlightedRegions} // Pass combined highlights
-                  renderMode={visualizationSettings.renderMode} // Pass relevant settings
-                  // themeSettings={activeThemeSettings} // Prop does not exist
-                  // Removed props: onReady, settings object, clinical mappings, active clinical data, labels/density
-                />
-              )}
-
-              {/* Region Labels */}
-              {brainModel && showRegionLabels && detailConfig.showLabels && (
-                <BrainRegionLabels
-                  regions={brainModel.regions}
-                  selectedRegionIds={[selectedRegionIdInternal].filter(Boolean) as string[]}
-                  highlightedRegionIds={combinedHighlightedRegions} // Add missing prop
-                  themeSettings={activeThemeSettings} // Add missing prop
-                  // Removed props: density, symptomMappings, activeSymptoms
-                />
-              )}
-
-              {/* Clinical Data Overlay */}
-              {/* Ensure patientData is not null before rendering */}
-              {showClinicalData && patientData && riskAssessment && brainModel && (
-                <ClinicalDataOverlay
-                  patient={patientData} // Use correct prop name 'patient'
-                  riskAssessment={riskAssessment}
-                  // treatmentPredictions={treatmentPredictions} // Prop does not exist
-                  // selectedRegion={selectedRegion} // Prop does not exist, use selectedRegionIds
-                  selectedRegionIds={[selectedRegionIdInternal].filter(Boolean) as string[]} // Pass selected IDs
-                  // position="top-left" // Prop does not exist
-                  brainModel={brainModel}
-                  symptoms={activeSymptoms} // Pass symptoms
-                  diagnoses={activeDiagnoses} // Pass diagnoses
-                />
-              )}
-
-              {/* Visualization Controls */}
-              {showControls && (
-                <VisualizationControls
+                  visualizationState={visualizationState as VisualizationState<BrainModel>} // Assert non-null data
+                  renderMode={renderMode}
+                  theme={theme ?? 'clinical'}
                   visualizationSettings={visualizationSettings}
-                  renderMode={visualizationSettings.renderMode} // Pass renderMode from settings
-                  // Define or pass a handler for render mode changes
-                  onRenderModeChange={(newMode) => updateVisualizationSettings({ renderMode: newMode })}
-                  onSettingsChange={updateVisualizationSettings}
-                  // detailMode={detailMode} // Prop does not exist
-                  // showPerformanceStats={showPerformanceStats} // Prop does not exist
-                  // onTogglePerformanceStats={() => setShowPerformanceStats(!showPerformanceStats)} // Prop does not exist
-                  // showLabels={showRegionLabels} // Prop does not exist
-                  // onToggleLabels={() => setShowRegionLabels(!showRegionLabels)} // Prop does not exist
-                  // position="bottom-right" // Prop does not exist
+                  selectedRegionIds={selectedRegionIds}
+                  highlightedRegionIds={highlightedRegionIdsInternal}
+                  regionSearchQuery={regionSearchQuery}
+                  enableBloom={visualizationSettings?.enableBloom}
+                  highPerformanceMode={highPerformanceMode}
+                  showInactiveRegions={visualizationSettings?.inactiveRegionOpacity > 0}
+                  width="100%"
+                  height="100%"
+                  backgroundColor={activeThemeSettings?.backgroundColor || "#000000"}
+                  onRegionClick={handleViewerRegionClick} // Pass correct handler
+                  onRegionHover={handleViewerRegionHover} // Pass correct handler
+                  onConnectionClick={handleConnectionClick}
+                  // onReady prop doesn't exist on BrainModelViewerProps
+                  // Spread detailConfig if BrainModelViewer accepts these props
+                  // {...detailConfig} 
                 />
               )}
 
-              {/* Region Details Panel */}
-              {/* Ensure selectedRegion and brainModel are not null */}
-              {selectedRegion && showDetails && brainModel && patientData && (
-                <BrainRegionDetails
-                  regionId={selectedRegion.id} // Pass regionId instead of region object
-                  // connections={ // Prop does not exist
-                  //   brainModel?.connections.filter(
-                  //     (c) =>
-                  //       c.sourceId === selectedRegion.id ||
-                  //       c.targetId === selectedRegion.id,
-                  //   ) || []
-                  // }
-                  brainModel={brainModel}
-                  symptomMappings={symptomMappings} // Pass mappings
-                  diagnosisMappings={diagnosisMappings} // Pass mappings
-                  onClose={() => handleRegionSelect(null)} // Use handleRegionSelect to clear selection
-                  // position="right" // Prop does not exist
-                  // width={300} // Prop does not exist
-                  patient={patientData}
-                  // treatmentPredictions={treatmentPredictions} // Prop does not exist
-                />
+              {/* Loading State */}
+              {visualizationState.status === 'loading' && (
+                 <LoadingFallback progress={loadingProgress} message="Loading Neural Model" height={height} theme={theme === 'dark' ? 'dark' : 'clinical'} />
+              )}
+              {/* Error State */}
+              {visualizationState.status === 'error' && (
+                 <div className="absolute inset-0 bg-black/80 z-30 flex items-center justify-center p-4">
+                    <div className="bg-gray-900 p-6 rounded-lg shadow-xl text-center">
+                        <h3 className="text-red-500 text-xl mb-2">Visualization Error</h3>
+                        <p className="text-gray-300 mb-4">{visualizationState.error.message}</p>
+                        <button
+                            onClick={() => { if (scanId) fetchBrainModel(scanId); }}
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                 </div>
               )}
 
-              {/* Region Selection Panel (Fallback when no region selected) */}
-              {brainModel && !selectedRegion && (
-                <RegionSelectionPanel
-                  regions={brainModel.regions}
-                  selectedRegionIds={[selectedRegionIdInternal].filter(Boolean) as string[]} // Pass selected IDs
-                  onRegionSelect={handleRegionSelect}
-                  // position="left" // Prop does not exist
-                  // width={250} // Prop does not exist
-                />
+              {showControls && (
+                <div className="absolute top-4 left-4 z-10">
+                  <VisualizationControls
+                    renderMode={renderMode}
+                    onRenderModeChange={handleRenderModeChange}
+                    visualizationSettings={visualizationSettings}
+                    onSettingsChange={handleSettingsChange}
+                    // Remove non-existent props: detailMode, onDetailModeChange, showPerformanceStats, onTogglePerformanceStats, showLabels, onToggleLabels
+                  />
+                </div>
+              )}
+
+              {enableRegionSelection && visualizationState.status === "success" && visualizationState.data && (
+                <div className="absolute right-4 top-4 z-10 max-h-[calc(100%-2rem)] overflow-auto">
+                  <RegionSelectionPanel
+                    regions={visualizationState.data.regions}
+                    selectedRegionIds={selectedRegionIds}
+                    onRegionSelect={handlePanelRegionSelect}
+                    onRegionSearch={handleRegionSearch}
+                    searchQuery={regionSearchQuery}
+                  />
+                </div>
+              )}
+
+              {enableClinicalOverlay && visualizationState.status === "success" && visualizationState.data && patientData && riskAssessment && (
+                 <div className="absolute bottom-4 left-4 right-4 z-10">
+                   <ClinicalDataOverlay
+                     patient={patientData} 
+                     symptoms={activeSymptoms ?? []}
+                     diagnoses={activeDiagnoses ?? []}
+                     riskAssessment={riskAssessment} 
+                     selectedRegionIds={selectedRegionIds}
+                     brainModel={visualizationState.data}
+                   />
+                 </div>
+               )}
+
+              {showDetails && activeRegionId && visualizationState.status === "success" && visualizationState.data && patientData && (
+                 <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-20 flex items-center justify-center p-4">
+                   <div className="bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[90%] overflow-auto">
+                     <BrainRegionDetails
+                       regionId={activeRegionId}
+                       brainModel={visualizationState.data}
+                       patient={patientData} 
+                       symptoms={activeSymptoms ?? []}
+                       diagnoses={activeDiagnoses ?? []}
+                       treatmentPredictions={treatmentPredictions ?? []}
+                       symptomMappings={symptomMappings ?? []}
+                       diagnosisMappings={diagnosisMappings ?? []}
+                       onClose={handleCloseDetails}
+                     />
+                   </div>
+                 </div>
+               )}
+
+              {showPerformanceStats && (
+                <div className="absolute bottom-4 right-4 z-10">
+                  <PerformanceMonitor /> {/* Remove non-existent onUpdate prop */}
+                </div>
               )}
             </>
           )}
@@ -626,5 +502,95 @@ export const BrainVisualizationContainer: React.FC<
     </div>
   );
 };
+export default BrainVisualizationContainerInternal; // Export the internal component directly
+// Removed incorrect duplicate default export
 
-export default BrainVisualizationContainer;
+/**
+ * Apply clinical data to the brain model
+ * This function enhances the brain model with clinical data for visualization
+ */
+function applyClinicialDataToBrainModel(
+  brainModel: BrainModel,
+  symptoms: Symptom[],
+  diagnoses: Diagnosis[],
+  symptomMappings: SymptomNeuralMapping[],
+  diagnosisMappings: DiagnosisNeuralMapping[],
+  treatmentMappings: TreatmentNeuralMapping[],
+  riskAssessment?: RiskAssessment,
+  treatmentPredictions?: TreatmentResponsePrediction[],
+  renderMode: RenderMode = RenderMode.ANATOMICAL,
+): BrainModel {
+  const enhancedModel: BrainModel = JSON.parse(JSON.stringify(brainModel));
+
+  if (renderMode === RenderMode.ANATOMICAL) {
+    return enhancedModel;
+  }
+
+  const activationResult = calculateNeuralActivation(
+    enhancedModel.regions,
+    symptomMappings,
+    symptoms,
+    diagnosisMappings,
+    diagnoses,
+  );
+
+  if (activationResult.success) {
+    const activationMap = activationResult.value; // Use .value
+
+    enhancedModel.regions = enhancedModel.regions.map((region) => {
+      const activation = activationMap.get(region.id) || 0;
+      return { ...region, activityLevel: activation, isActive: activation > 0.3 };
+    });
+
+    enhancedModel.connections = enhancedModel.connections.map((conn) => {
+      const sourceRegion = enhancedModel.regions.find(r => r.id === conn.sourceId);
+      const targetRegion = enhancedModel.regions.find(r => r.id === conn.targetId);
+      const sourceActivity = sourceRegion?.activityLevel || 0;
+      const targetActivity = targetRegion?.activityLevel || 0;
+      const avgActivity = (sourceActivity + targetActivity) / 2;
+      return { ...conn, activityLevel: avgActivity, isActive: avgActivity > 0.3 };
+    });
+  }
+
+  if (renderMode === RenderMode.CONNECTIVITY && treatmentPredictions && treatmentPredictions.length > 0) {
+    const treatmentIds = treatmentPredictions.map((tp) => tp.treatmentType);
+    // calculateTreatmentImpact expects regions, mappings, ids
+    const impactResult = calculateTreatmentImpact(
+      enhancedModel.regions,
+      // enhancedModel.connections, // Remove incorrect argument
+      treatmentMappings,
+      treatmentIds,
+    );
+
+    if (impactResult.success) {
+      const impact = impactResult.value; // Use .value
+
+      enhancedModel.regions = enhancedModel.regions.map((region) => {
+        const regionImpact = impact.regionImpacts.find(ri => ri.regionId === region.id);
+        // Use 'impact' property, map it to a numerical effect if needed
+        const effectValue = regionImpact?.impact === 'increase' ? 1 : regionImpact?.impact === 'decrease' ? -1 : 0;
+        return { ...region, treatmentEffect: (regionImpact?.magnitude || 0) * effectValue }; 
+      });
+
+      enhancedModel.connections = enhancedModel.connections.map((conn) => {
+        // Find connection impact using sourceId and targetId
+        const connectionImpact = impact.connectionImpacts.find(ci => ci.sourceId === conn.sourceId && ci.targetId === conn.targetId);
+        // Use 'impact' property, map it to a numerical effect if needed
+        const connEffectValue = connectionImpact?.impact === 'increase' ? 1 : connectionImpact?.impact === 'decrease' ? -1 : 0;
+        return { ...conn, treatmentEffect: (connectionImpact?.magnitude || 0) * connEffectValue }; 
+      });
+    }
+  }
+
+  // Apply risk assessment data if available and in risk mode
+  if (riskAssessment && renderMode === RenderMode.RISK) {
+      enhancedModel.regions = enhancedModel.regions.map(region => {
+          // Property regionRiskScores does not exist on RiskAssessment type
+          // const regionRisk = riskAssessment.regionRiskScores?.find(rs => rs.regionId === region.id); 
+          // Property riskScore also doesn't exist
+          return { ...region, riskFactor: 0 }; // Assign default 0
+      });
+  }
+
+  return enhancedModel;
+}

@@ -168,6 +168,6 @@ module.exports = {
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
     require('@tailwindcss/aspect-ratio'),
-      require("tailwindcss-animate")
+      // require("tailwindcss-animate") // Removed due to incompatibility
 ],
 }

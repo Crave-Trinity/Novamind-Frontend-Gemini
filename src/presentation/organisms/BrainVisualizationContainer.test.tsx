@@ -5,7 +5,8 @@
 
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { BrainVisualizationContainer } from './BrainVisualizationContainer';
+// Correct the import to use the default export
+import BrainVisualizationContainerInternal from './BrainVisualizationContainer'; 
 
 // Mock React Three Fiber
 vi.mock('@react-three/fiber', () => ({
@@ -53,6 +54,7 @@ vi.mock('three', () => ({
 // Minimal test to verify component can be imported
 describe('BrainVisualizationContainer (Minimal)', () => {
   it('exists as a module', () => {
-    expect(BrainVisualizationContainer).toBeDefined();
+    // Use the correctly imported name
+    expect(BrainVisualizationContainerInternal).toBeDefined(); 
   });
 });

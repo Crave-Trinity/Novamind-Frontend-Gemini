@@ -449,3 +449,23 @@ export function isTreatmentComparisonResult(
 
 // Added TreatmentEfficacy type definition
 export type TreatmentEfficacy = "high" | "moderate" | "low";
+
+// Define NeuralImpactRating based on usage in brain-mapping.ts
+export interface NeuralImpactRating {
+  regionImpacts: {
+    regionId: string;
+    impact: "increase" | "decrease" | "modulate" | "normalize";
+    magnitude: number; // 0-1 scale
+    confidence: number; // 0-1 scale
+  }[];
+  connectionImpacts: {
+    sourceId: string;
+    targetId: string;
+    impact: "increase" | "decrease" | "modulate" | "normalize";
+    magnitude: number; // 0-1 scale
+    confidence: number; // 0-1 scale
+  }[];
+  overallSeverity: RiskLevel; // Assuming RiskLevel enum is appropriate
+  reversibility: "high" | "moderate" | "low" | "unknown";
+  projectedTimeline: string; // e.g., "weeks", "months"
+}

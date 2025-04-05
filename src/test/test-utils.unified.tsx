@@ -16,19 +16,31 @@ import { tailwindHelper } from './setup.unified';
 import { vi } from 'vitest'; // Import vi
 
 // Mock window.matchMedia directly here for reliability
+// More robust matchMedia mock
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  configurable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: query.includes('dark'), // Default mock behavior
-    media: query,
-    onchange: null,
-    addListener: vi.fn(), // Deprecated
-    removeListener: vi.fn(), // Deprecated
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
+  value: vi.fn().mockImplementation(query => {
+    let listeners: any[] = [];
+    const instance = {
+        matches: false, // Default to light
+        media: query,
+        onchange: null,
+        addListener: vi.fn(cb => { if (!listeners.includes(cb)) listeners.push(cb); }), // Deprecated
+        removeListener: vi.fn(cb => { listeners = listeners.filter(l => l !== cb); }), // Deprecated
+        addEventListener: vi.fn((_, cb) => { if (!listeners.includes(cb)) listeners.push(cb); }),
+        removeEventListener: vi.fn((_, cb) => { listeners = listeners.filter(l => l !== cb); }),
+        dispatchEvent: vi.fn((event: Event) => { listeners.forEach(l => l(event)); return true; }),
+        _triggerChange: (matches: boolean) => { // Helper for tests
+            instance.matches = matches;
+            instance.dispatchEvent(new Event('change'));
+        }
+    };
+    // Allow tests to override initial matches via setup
+    if ((globalThis as any).__vitest_matchMedia_matches) {
+        instance.matches = (globalThis as any).__vitest_matchMedia_matches;
+    }
+    return instance;
+  }),
 });
 
 // Removed ThemeProvider mock to address root cause
