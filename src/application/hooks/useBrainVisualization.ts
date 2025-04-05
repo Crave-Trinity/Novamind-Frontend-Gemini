@@ -4,17 +4,23 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-// Import with proper type definitions
 import { useQuery } from "@tanstack/react-query";
+import { Vector3 } from "@domain/types/shared/common";
+import { BrainRegion, BrainModel, NeuralConnection } from "@domain/types/brain/models";
+import { RenderMode } from "@domain/types/brain/visualization";
+import { apiClient } from "@infrastructure/api/ApiClient";
 
-import {
-  BrainRegion,
-  BrainViewState,
-  NeuralPathway,
-  // RenderMode, // Remove import from outdated location
-} from "@domain/models/brain/BrainModel";
-import { RenderMode } from "@domain/types/brain/visualization"; // Import correct RenderMode
-import { apiClient } from "@api/ApiClient";
+interface BrainViewState {
+  rotationX: number;
+  rotationY: number;
+  rotationZ: number;
+  zoom: number;
+  highlightedRegions: string[];
+  visiblePathways: boolean;
+  renderMode: RenderMode;
+  transparencyLevel: number;
+  focusPoint: Vector3 | null;
+}
 
 interface UseBrainVisualizationOptions {
   patientId?: string;
@@ -25,6 +31,8 @@ interface UseBrainVisualizationOptions {
 }
 
 export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
+  console.log('[DEBUG] useBrainVisualization hook starting with options:', options);
+  
   const defaultOptions: UseBrainVisualizationOptions = {
     patientId: "default",
     autoRotate: false,
@@ -37,14 +45,17 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
 
   // Fetch brain model data
   const {
-    data: brainModel = { regions: [], pathways: [] },
+    data: brainModel,
     isLoading,
     error,
     refetch,
   } = useQuery({
     queryKey: ["brainModel", mergedOptions.patientId],
     queryFn: async () => {
-      return apiClient.getBrainModel(mergedOptions.patientId);
+      console.log('[DEBUG] Fetching brain model for:', mergedOptions.patientId);
+      const data = await apiClient.getBrainModel(mergedOptions.patientId);
+      console.log('[DEBUG] Received brain model:', data);
+      return data;
     },
     enabled: !mergedOptions.disabled,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -70,8 +81,9 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
   // Update active regions when model changes
   useEffect(() => {
     if (brainModel && mergedOptions.highlightActiveRegions) {
+      console.log('[DEBUG] Updating active regions');
       const significantRegions = brainModel.regions
-        .filter((region: BrainRegion) => region.significance > 0.6)
+        .filter((region: BrainRegion) => region.dataConfidence > 0.6)
         .map((region: BrainRegion) => region.id);
 
       setActiveRegions(significantRegions);
@@ -84,6 +96,7 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
       return;
     }
 
+    console.log('[DEBUG] Starting auto-rotation');
     const rotationInterval = setInterval(() => {
       setViewState((prev) => ({
         ...prev,
@@ -91,7 +104,10 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
       }));
     }, 50);
 
-    return () => clearInterval(rotationInterval);
+    return () => {
+      console.log('[DEBUG] Stopping auto-rotation');
+      clearInterval(rotationInterval);
+    };
   }, [mergedOptions.autoRotate]);
 
   // Callback to highlight a specific region
@@ -126,11 +142,7 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
 
       setViewState((prev) => ({
         ...prev,
-        focusPoint: [
-          region.coordinates.x,
-          region.coordinates.y,
-          region.coordinates.z,
-        ],
+        focusPoint: region.position,
         zoom: 2,
         highlightedRegions: [regionId],
       }));
@@ -183,17 +195,17 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
       return true;
     }) || [];
 
-  // Filter pathways based on view state
-  const visiblePathways =
-    brainModel?.pathways.filter((pathway: NeuralPathway) => {
+  // Filter connections based on view state
+  const visibleConnections =
+    brainModel?.connections.filter((connection: NeuralConnection) => {
       if (!viewState.visiblePathways) {
         return false;
       }
 
       if (viewState.highlightedRegions.length > 0) {
         return (
-          viewState.highlightedRegions.includes(pathway.sourceId) ||
-          viewState.highlightedRegions.includes(pathway.targetId)
+          viewState.highlightedRegions.includes(connection.sourceId) ||
+          viewState.highlightedRegions.includes(connection.targetId)
         );
       }
 
@@ -230,7 +242,7 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
     activeRegions,
     setActiveRegions,
     visibleRegions,
-    visiblePathways,
+    visibleConnections,
     highlightRegion,
     clearHighlights,
     focusOnRegion,

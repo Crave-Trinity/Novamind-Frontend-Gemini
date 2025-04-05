@@ -4,19 +4,19 @@
  */
 import { describe, it, expect, vi } from "vitest";
 
-import { screen, fireEvent } from "@testing-library/react"; // render is imported from unified utils
-import React from "react";
+import { screen, fireEvent } from "@testing-library/react";
+// Remove MemoryRouter import, it's provided by renderWithProviders
 import userEvent from "@testing-library/user-event";
-import Dashboard from "@pages/Dashboard"; // Assuming default export
-import { render } from "@test/test-utils.unified"; // Import the unified render
+import Dashboard from "@pages/Dashboard"; // Use correct alias
+import { renderWithProviders } from "@test/test-utils.unified.tsx"; // Use correct unified path
 
 // Mock data with clinical precision
-// Mock data with clinical precision - Dashboard likely doesn't need props
+// Mock data with clinical precision - Assuming no specific props are required for Dashboard page
 const mockProps = {};
 
 describe("Dashboard", () => {
   it("renders with neural precision", () => {
-    render(<Dashboard {...mockProps} />); // Use the unified render
+    renderWithProviders(<Dashboard {...mockProps} />); // Remove MemoryRouter wrapper
 
     // Add assertions for rendered content
     expect(screen).toBeDefined();
@@ -24,7 +24,7 @@ describe("Dashboard", () => {
 
   it("responds to user interaction with quantum precision", async () => {
     const user = userEvent.setup();
-    render(<Dashboard {...mockProps} />); // Use the unified render
+    renderWithProviders(<Dashboard {...mockProps} />); // Remove MemoryRouter wrapper
 
     // Simulate user interactions
     // await user.click(screen.getByText(/example text/i));

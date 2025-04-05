@@ -1,4 +1,17 @@
 /**
+ * Application services exports
+ * 
+ * This module exports services that implement domain interfaces.
+ */
+
+// We'll export specific services from each subdirectory as they're needed
+// For now, we're just ensuring the export path exists
+export * from './clinical';
+export * from './brain';
+export * from './temporal';
+export * from './shared';
+
+/**
  * NOVAMIND Application Services
  *
  * Centralized exports for all application services

@@ -42,7 +42,8 @@ const aliasMapping = {
   '@constants': path.join(srcPath, 'domain/constants'),
   '@validation': path.join(srcPath, 'domain/validation'),
   '@visualizations': path.join(srcPath, 'presentation/visualizations'),
-  '@test': path.join(srcPath, 'test')
+  '@test': path.join(srcPath, 'test'),
+  '@clients': path.join(srcPath, 'infrastructure/clients'),
 };
 
 // Output all path aliases to verify they are correct

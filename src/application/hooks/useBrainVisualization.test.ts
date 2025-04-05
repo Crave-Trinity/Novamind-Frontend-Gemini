@@ -1,95 +1,175 @@
 /**
- * NOVAMIND Neural Test Suite
- * useBrainVisualization testing with quantum precision
+ * NOVAMIND Neural Test Suite - Debug Version
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach, Mock } from "vitest";
-import React, { ReactNode } from 'react';
+/// <reference types="vitest" />
+
+import { describe, it, vi, beforeEach, afterEach } from 'vitest';
+import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, act } from "@testing-library/react";
-import { useBrainVisualization } from "@hooks/useBrainVisualization"; // Import the actual hook
-import { useVisualizationCoordinator } from '@application/controllers/coordinators/NeuralVisualizationCoordinator'; // Import dependency
+import React from 'react';
+import type { BrainModel } from '@domain/types/brain/models';
+import { useBrainVisualization } from './useBrainVisualization';
 
-// Mock the VisualizationCoordinator hook
-vi.mock('@application/controllers/coordinators/NeuralVisualizationCoordinator', () => ({
-  useVisualizationCoordinator: vi.fn()
-}));
+// Mock the apiClient singleton
+vi.mock('@infrastructure/api/ApiClient', () => {
+  const mockBrainModel: BrainModel = {
+    id: 'test-brain-model',
+    patientId: 'test-patient',
+    regions: [
+      {
+        id: 'test-region',
+        name: 'Test Region',
+        position: { x: 0, y: 0, z: 0 },
+        color: '#ff0000',
+        connections: ['other-region'],
+        activityLevel: 0.5,
+        isActive: true,
+        hemisphereLocation: 'left',
+        dataConfidence: 0.8,
+        volumeMl: 100,
+        riskFactor: 0.2,
+        clinicalSignificance: 'normal',
+        tissueType: 'gray'
+      }
+    ],
+    connections: [
+      {
+        id: 'test-connection',
+        sourceId: 'test-region',
+        targetId: 'other-region',
+        strength: 0.7,
+        type: 'structural',
+        directionality: 'bidirectional',
+        activityLevel: 0.6,
+        pathwayLength: 10,
+        dataConfidence: 0.8
+      }
+    ],
+    scan: {
+      id: 'test-scan',
+      patientId: 'test-patient',
+      scanDate: new Date().toISOString(),
+      scanType: 'fMRI',
+      resolution: '2mm',
+      scannerModel: 'Test Scanner',
+      contrastAgent: false,
+      notes: 'Test scan',
+      technician: 'Test Tech',
+      processingMethod: 'standard',
+      dataQualityScore: 0.9
+    },
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    processingLevel: 'analyzed',
+    lastUpdated: new Date().toISOString()
+  };
 
-// Define queryClient globally for the test suite
-const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return {
+    apiClient: {
+      getBrainModel: vi.fn().mockImplementation(async (patientId: string) => {
+        console.log('[MOCK] Getting brain model for:', patientId);
+        return mockBrainModel;
+      })
+    }
+  };
+});
 
-// Define the wrapper component globally
-const QueryWrapper = ({ children }: { children: ReactNode }): JSX.Element => {
-  return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+console.log('[SETUP] Starting test file execution');
+
+// Create test wrapper with fresh QueryClient for each test
+const createTestQueryClient = () => new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+      gcTime: 0,
+      staleTime: 0,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false
+    }
+  },
+  logger: {
+    log: console.log,
+    warn: console.warn,
+    error: console.error,
+  },
+});
+
+const createWrapper = () => {
+  console.log('[SETUP] Creating wrapper function');
+  const testQueryClient = createTestQueryClient();
+  
+  return ({ children }: { children: React.ReactNode }) => {
+    console.log('[WRAPPER] Rendering QueryClientProvider');
+    return React.createElement(
+      QueryClientProvider,
+      { client: testQueryClient },
+      children
+    );
+  };
 };
 
+console.log('[SETUP] Test setup complete');
 
-describe.skip("useBrainVisualization", () => { // Keep skipped for now due to persistent issues
-  // Cast the mocked dependency hook
-  const mockedUseCoordinator = useVisualizationCoordinator as Mock;
-  let mockCoordinatorState: any;
+// Test Suite
+describe('useBrainVisualization Hook', () => {
+  let queryClient: QueryClient;
 
   beforeEach(() => {
-    // Reset mocks
+    console.log('[TEST] beforeEach - clearing mocks');
     vi.clearAllMocks();
-    queryClient.clear(); // Clear query cache
-
-    // Provide default mock implementation for the coordinator hook
-    mockCoordinatorState = {
-      brainModel: { id: 'mock-model', name: 'Mock Brain', regions: [{ id: 'r1', name: 'Region 1', position: { x: 0, y: 0, z: 0 }, color: '#ff0000', connections: [], activityLevel: 0.5 }], pathways: [], settings: {} },
-      selectedRegions: [], activeRegions: ['r1'], neuralActivation: new Map([['r1', 0.5]]),
-      connectionStrengths: new Map(), symptomMappings: [], treatmentPredictions: [],
-      selectedTreatmentId: null, biometricAlerts: [], biometricStreams: new Map(),
-      temporalPatterns: [], currentTimeScale: 'realtime', renderMode: 'anatomical',
-      detailLevel: 'medium', isLoading: false, error: null,
-      performanceMetrics: { frameRate: 60, memoryUsage: 100, dataPointsProcessed: 1000, processingLatency: 10 },
-    };
-
-    mockedUseCoordinator.mockReturnValue({
-      state: mockCoordinatorState,
-      selectRegion: vi.fn(), deselectRegion: vi.fn(), selectTreatment: vi.fn(),
-      setRenderMode: vi.fn(), setDetailLevel: vi.fn(), setTimeScale: vi.fn(),
-      applyNeuralTransforms: vi.fn(), predictTreatmentOutcomes: vi.fn(),
-      acknowledgeAlert: vi.fn(), resetVisualization: vi.fn(),
-      exportVisualizationData: vi.fn(), clearError: vi.fn(),
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+          gcTime: 0,
+          staleTime: 0,
+          refetchOnMount: false,
+          refetchOnWindowFocus: false,
+          refetchOnReconnect: false,
+        },
+      },
     });
   });
 
   afterEach(() => {
-      vi.restoreAllMocks();
+    queryClient.clear();
   });
 
-  it("processes data with mathematical precision", () => {
-    // Render the actual hook with the wrapper
-    const { result } = renderHook(() => useBrainVisualization(), { wrapper: QueryWrapper }); // Pass the wrapper function
+  it('renders without crashing', async () => {
+    console.log('[TEST] Starting basic render test');
 
-    // Assert on the actual return value based on mocked coordinator state
-    expect(result.current.brainModel).toEqual(mockCoordinatorState.brainModel);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBeNull();
-    expect(result.current.visibleRegions).toBeDefined();
-    expect(result.current.visiblePathways).toBeDefined();
-  });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      React.createElement(QueryClientProvider, { client: queryClient }, children)
+    );
 
-  it("handles edge cases with clinical precision", () => {
-     mockCoordinatorState.isLoading = true;
-     mockCoordinatorState.error = new Error("Test Error");
-     mockedUseCoordinator.mockReturnValue({
-         state: mockCoordinatorState,
-         selectRegion: vi.fn(), deselectRegion: vi.fn(), selectTreatment: vi.fn(),
-         setRenderMode: vi.fn(), setDetailLevel: vi.fn(), setTimeScale: vi.fn(),
-         applyNeuralTransforms: vi.fn(), predictTreatmentOutcomes: vi.fn(),
-         acknowledgeAlert: vi.fn(), resetVisualization: vi.fn(),
-         exportVisualizationData: vi.fn(), clearError: vi.fn(),
-     });
+    console.log('[TEST] About to render hook');
+    const { result } = renderHook(
+      () =>
+        useBrainVisualization({
+          patientId: 'test-patient',
+          disabled: false,
+          autoRotate: false,
+          highlightActiveRegions: false,
+        }),
+      { wrapper },
+    );
 
-     const { result } = renderHook(() => useBrainVisualization(), { wrapper: QueryWrapper }); // Pass the wrapper function
+    console.log('[TEST] Current state:', {
+      isLoading: result.current.isLoading,
+      hasData: !!result.current.brainModel,
+      data: result.current.brainModel,
+    });
 
-     expect(result.current.isLoading).toBe(true);
-     expect(result.current.error).toBeInstanceOf(Error);
-     expect(result.current.error?.message).toBe("Test Error");
-     expect(result.current.visibleRegions).toEqual([]);
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.brainModel).toBeDefined();
+      expect(result.current.brainModel).toMatchObject({
+        id: 'test-brain-model',
+        patientId: 'test-patient',
+      });
+    });
   });
 });
