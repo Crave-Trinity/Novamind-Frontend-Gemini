@@ -5,7 +5,7 @@
  * test utilities, which properly handle dark mode toggling and cleanup.
  */
 import React, { useContext, createContext, useState, useEffect } from 'react';
-import { render, screen, act } from '@/test/test-utils.enhanced';
+import { render, screen, act } from '@test/test-utils.unified'; // Use correct alias
 // Create a test-specific mock context and provider to avoid TS errors
 import { setDarkMode } from '@/test/mocks/match-media';
 

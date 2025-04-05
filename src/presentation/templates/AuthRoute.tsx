@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { checkAuthStatus } from "@application/utils/authUtils"; // Import from new utility file
 
 /**
  * Authentication Route Component
@@ -8,7 +9,8 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
  * Redirects to login page if not authenticated.
  */
 const AuthRoute: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true); // Force true for demo
+  // Use the utility function to determine auth status
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(checkAuthStatus());
   const location = useLocation();
 
   // In production, this would check tokens properly

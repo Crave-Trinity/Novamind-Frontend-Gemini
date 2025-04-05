@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react'; // Remove render
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Setup proper mocks for ThemeContext
@@ -76,7 +76,8 @@ beforeEach(() => {
 });
 
 // Import test utilities
-import { render as customRender } from '@test/test-utils';
+// Import the unified render function
+import { renderWithProviders } from '@test/test-utils.unified';
 
 // Minimal test to verify component can be imported
 describe('ThemeProvider (Minimal)', () => {
@@ -85,7 +86,7 @@ describe('ThemeProvider (Minimal)', () => {
   });
   
   it('renders children without crashing', () => {
-    render(
+    renderWithProviders( // Use unified render
       <ThemeProvider>
         <div data-testid="test-child">Test Child</div>
       </ThemeProvider>
@@ -95,7 +96,7 @@ describe('ThemeProvider (Minimal)', () => {
   });
 
   it('accepts a defaultTheme prop', () => {
-    render(
+    renderWithProviders( // Use unified render
       <ThemeProvider defaultTheme="dark">
         <div data-testid="test-child">Test Child</div>
       </ThemeProvider>
@@ -106,7 +107,7 @@ describe('ThemeProvider (Minimal)', () => {
 
   it('calls auditLogService when rendered', () => {
     const mockAuditLog = vi.mocked(auditLogService.log);
-    render(
+    renderWithProviders( // Use unified render
       <ThemeProvider>
         <div>Test</div>
       </ThemeProvider>
@@ -135,7 +136,7 @@ describe('ThemeProvider (Minimal)', () => {
       })),
     });
     
-    render(
+    renderWithProviders( // Use unified render
       <ThemeProvider defaultTheme="system">
         <div data-testid="dark-mode-test">Dark Mode Test</div>
       </ThemeProvider>

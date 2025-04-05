@@ -8,7 +8,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react"; // Added missing React import
 import userEvent from "@testing-library/user-event";
 import TreatmentResponsePredictor from "./TreatmentResponsePredictor"; // Assuming default export
-import { renderWithProviders } from "@test/test-utils.tsx";
+import { renderWithProviders } from "@test/test-utils.unified"; // Correct import path
 import { DigitalTwinProfile, AssessmentScore } from "@domain/models/clinical/digital-twin-profile"; // Import profile and AssessmentScore
 import {
   PatientDemographics,

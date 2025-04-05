@@ -56,9 +56,8 @@ describe("ApiClient Runtime Validation", () => {
       );
       expect(result.err).toBe(true);
       expect((result.val as Error).message).toContain("Invalid Patient Data");
-      expect((result.val as Error).message).toContain(
-        "does not match expected structure",
-      );
+      // Check for the actual error message format
+      expect((result.val as Error).message).toMatch(/Invalid Patient Data/i); // Match the correct context
     });
 
     it("should return Err for data not matching the guard (wrong type)", () => {

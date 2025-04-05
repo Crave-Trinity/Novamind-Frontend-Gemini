@@ -6,70 +6,47 @@
  * test hanging or memory leaks.
  */
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react'; // Remove render
 import { setupWebGLForTest, cleanupWebGLAfterTest, runTestWithWebGL } from '@test/webgl/setup-test';
 import React from 'react';
+// Import only the default export (the component)
+import BrainVisualization from '../BrainVisualization';
+import { renderWithProviders } from '@test/test-utils.unified'; // Import unified render
 
-// Mock component for demonstration (remove this and use the real component in actual tests)
-interface BrainVisualizationProps {
-  patientId: string;
-  onRegionSelect?: (region: string) => void;
-  showControls?: boolean;
-  detailLevel?: string;
-}
+// Remove standalone mock component definition
 
-const MockBrainVisualization: React.FC<BrainVisualizationProps> = ({ 
-  patientId, 
-  onRegionSelect = () => {}, 
-  showControls = true,
-  detailLevel = 'medium' 
-}) => (
-  <div data-testid="brain-container">
-    <div data-testid="brain-canvas">Mock 3D Brain</div>
-    {showControls && (
+// Vitest mock implementation
+// Ensure the path to the actual component is correct for vi.mock
+// Assuming the actual component is in the parent directory:
+vi.mock('../BrainVisualization', () => ({
+  // Define props based on the *actual* component signature
+  default: ({ brainModel, selectedRegion, onRegionSelect = () => {}, className = '', isLoading = false, error = null }: {
+    brainModel?: any | null;
+    selectedRegion?: string | null;
+    onRegionSelect?: (regionId: string) => void;
+    className?: string;
+    isLoading?: boolean;
+    error?: Error | null;
+    // DO NOT include showControls or detailLevel here
+  }) => (
+    <div data-testid="brain-container">
+      <div data-testid="brain-canvas">Mock 3D Brain</div>
+      {/* Mock controls based on internal logic or simplify */}
+      {/* For simplicity, let's always render mock controls in the mock */}
       <div data-testid="controls">
-        <button 
-          data-testid="region-select" 
+        <button
+          data-testid="region-select"
           onClick={() => onRegionSelect('prefrontal-cortex')}
         >
           Select Region
         </button>
-        <select data-testid="detail-level">
-          <option value="low">Low</option>
-          <option value="medium" selected={detailLevel === 'medium'}>Medium</option>
-          <option value="high">High</option>
-        </select>
+        {/* Remove detailLevel select as it's not a prop */}
       </div>
-    )}
-  </div>
-);
-
-// Vitest mock implementation
-vi.mock('../BrainVisualization', () => ({
-  default: ({ patientId, onRegionSelect = () => {}, showControls = true, detailLevel = 'medium' }: BrainVisualizationProps) => (
-    <div data-testid="brain-container">
-      <div data-testid="brain-canvas">Mock 3D Brain</div>
-      {showControls && (
-        <div data-testid="controls">
-          <button 
-            data-testid="region-select" 
-            onClick={() => onRegionSelect('prefrontal-cortex')}
-          >
-            Select Region
-          </button>
-          <select data-testid="detail-level">
-            <option value="low">Low</option>
-            <option value="medium" selected={detailLevel === 'medium'}>Medium</option>
-            <option value="high">High</option>
-          </select>
-        </div>
-      )}
     </div>
   )
 }));
 
-// For our example tests, use the MockBrainVisualization
-const BrainVisualization = MockBrainVisualization;
+// Remove redundant assignment, tests will use the vi.mock implementation
 
 describe('BrainVisualization Component with WebGL Mocks', () => {
   // Method 1: Use beforeAll/afterAll hooks
@@ -87,7 +64,7 @@ describe('BrainVisualization Component with WebGL Mocks', () => {
   });
 
   it('renders the brain visualization', () => {
-    render(<BrainVisualization patientId="patient-123" />);
+    renderWithProviders(<BrainVisualization />); // Remove patientId prop
     
     // Check if the component renders correctly
     expect(screen.getByTestId('brain-container')).toBeInTheDocument();
@@ -97,10 +74,9 @@ describe('BrainVisualization Component with WebGL Mocks', () => {
   it('allows selecting brain regions', () => {
     const onRegionSelect = vi.fn();
     
-    render(
-      <BrainVisualization 
-        patientId="patient-123" 
-        onRegionSelect={onRegionSelect}
+    renderWithProviders( // Use renderWithProviders
+      <BrainVisualization
+        onRegionSelect={onRegionSelect} // Remove patientId prop
       />
     );
     
@@ -110,28 +86,17 @@ describe('BrainVisualization Component with WebGL Mocks', () => {
     // Verify the callback was called with the correct region
     expect(onRegionSelect).toHaveBeenCalledWith('prefrontal-cortex');
   });
-
-  it('can hide controls when specified', () => {
-    render(
-      <BrainVisualization 
-        patientId="patient-123" 
-        showControls={false}
-      />
-    );
-    
-    // Controls should not be visible
-    expect(screen.queryByTestId('controls')).not.toBeInTheDocument();
-  });
+// Removed invalid test case for non-existent 'showControls' prop
 });
+// Remove extra closing brace
 
 // Method 2: Use the runTestWithWebGL utility function
 describe('BrainVisualization with runTestWithWebGL utility', () => {
   it('renders with different detail levels', async () => {
     await runTestWithWebGL(() => {
-      render(
-        <BrainVisualization 
-          patientId="patient-123" 
-          detailLevel="high"
+      renderWithProviders( // Use renderWithProviders
+        <BrainVisualization
+          // Remove detailLevel prop as it doesn't exist
         />
       );
       
@@ -161,7 +126,7 @@ describe('BrainVisualization with Neural Controller Mocks', () => {
 
   it('renders with neural activity data', () => {
     // The neural controller mocks will automatically provide simulated data
-    render(<BrainVisualization patientId="patient-123" />);
+    renderWithProviders(<BrainVisualization />); // Remove patientId prop
     
     expect(screen.getByTestId('brain-container')).toBeInTheDocument();
     
@@ -177,7 +142,7 @@ describe('BrainVisualization with Neural Controller Mocks', () => {
 describe('BrainVisualization Memory Management', () => {
   it('properly disposes resources when unmounted', async () => {
     await runTestWithWebGL(() => {
-      const { unmount } = render(<BrainVisualization patientId="patient-123" />);
+      const { unmount } = renderWithProviders(<BrainVisualization />); // Remove patientId prop
       
       // Unmount to trigger cleanup
       unmount();

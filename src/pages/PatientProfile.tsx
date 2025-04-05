@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-import { auditLogService, AuditEventType } from "@/services/AuditLogService";
+import { auditLogService, AuditEventType } from "@infrastructure/services/AuditLogService"; // Use correct alias
 
 /**
  * Patient profile page component
@@ -15,7 +15,7 @@ const PatientProfile: React.FC = () => {
   // Log PHI view for HIPAA compliance
   useEffect(() => {
     if (id) {
-      auditLogService.log(AuditEventType.PHI_VIEW, {
+      auditLogService.log(AuditEventType.PATIENT_RECORD_VIEW, { // Use correct type
         resourceType: "patient",
         resourceId: id,
         action: "view",
@@ -43,7 +43,7 @@ const PatientProfile: React.FC = () => {
   const handleBrainModelView = () => {
     auditLogService.log(AuditEventType.BRAIN_MODEL_VIEW, {
       resourceType: "brainModel",
-      patientId: id,
+      // patientId: id, // Remove invalid property
       action: "view",
       result: "success",
     });

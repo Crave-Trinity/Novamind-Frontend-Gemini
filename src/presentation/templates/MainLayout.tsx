@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 
-import { useTheme } from "@contexts/ThemeContext";
+import { useTheme } from "@application/hooks/useTheme"; // Correct path to hook
 
 interface MainLayoutProps {
   children?: React.ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const { theme, isDarkMode, toggleDarkMode } = useTheme();
+  const { theme, isDarkMode, toggleTheme } = useTheme(); // Use toggleTheme instead of toggleDarkMode
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
@@ -310,7 +310,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               {/* Theme Toggle */}
               <button
                 className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
-                onClick={toggleDarkMode}
+                onClick={toggleTheme} // Use toggleTheme
                 data-testid="theme-toggle-button" // Add test ID
               >
                 {isDarkMode ? (

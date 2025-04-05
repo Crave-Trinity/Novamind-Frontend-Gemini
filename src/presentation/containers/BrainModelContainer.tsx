@@ -20,7 +20,8 @@ import {
   success,
   failure,
   VisualizationState,
-} from "@domain/types/common";
+  NeuralError // Import NeuralError
+} from "@domain/types/shared/common";
 import { Diagnosis, Symptom, Patient } from "@domain/types/clinical/patient";
 import { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
 import { RiskAssessment } from "@domain/types/clinical/risk";
@@ -34,7 +35,7 @@ import {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
-} from "@domain/models/brainMapping";
+} from "@domain/models/brain/mapping/brain-mapping"; // Correct path
 
 // Application hooks
 import { useBrainModel } from "@application/hooks/useBrainModel";
@@ -49,8 +50,8 @@ import RegionSelectionPanel from "@presentation/molecules/RegionSelectionPanel";
 import VisualizationControls from "@presentation/molecules/VisualizationControls";
 import ClinicalDataOverlay from "@presentation/molecules/ClinicalDataOverlay";
 import BrainRegionDetails from "@presentation/molecules/BrainRegionDetails";
-import LoadingOverlay from "@presentation/atoms/LoadingOverlay";
-import ErrorMessage from "@presentation/atoms/ErrorMessage";
+import LoadingIndicator from "@presentation/atoms/LoadingIndicator"; // Correct component name and path
+// import ErrorMessage from "@presentation/atoms/ErrorMessage"; // Component doesn't exist
 
 // Define neural-safe prop interface
 interface BrainModelContainerProps {
@@ -128,9 +129,7 @@ const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
   );
 
   const [selectedRegionIds, setSelectedRegionIds] = useState<string[]>(
-    getParam("regions")
-      ? getParam("regions").split(",")
-      : initialSelectedRegions,
+    getParam("regions")?.split(",") ?? initialSelectedRegions, // Add null safety
   );
 
   const [highlightedRegionIds, setHighlightedRegionIds] = useState<string[]>(
@@ -147,7 +146,8 @@ const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
     }
 
     if (modelError) {
-      return { status: "error", error: new Error(modelError.message) };
+      // Construct NeuralError (assuming structure)
+      return { status: "error", error: new NeuralError(modelError.message, { code: 'MODEL_FETCH_FAILED', severity: 'fatal' }) }; // Use 'fatal'
     }
 
     if (!brainModel) {
@@ -163,7 +163,7 @@ const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
         symptomMappings,
         diagnosisMappings,
         treatmentMappings,
-        riskAssessment,
+        riskAssessment ?? undefined, // Pass undefined instead of null
         treatmentPredictions,
         renderMode,
       );
@@ -172,9 +172,11 @@ const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
     } catch (error) {
       return {
         status: "error",
-        error: new Error(
+        // Construct NeuralError (assuming structure)
+        error: new NeuralError(
           `Failed to process clinical data: ${error instanceof Error ? error.message : String(error)}`,
-        ),
+          { code: 'CLINICAL_PROCESSING_FAILED', severity: 'warning' }
+        )
       };
     }
   }, [
@@ -322,11 +324,11 @@ const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
         highlightedRegionIds={highlightedRegionIds}
         regionSearchQuery={regionSearchQuery}
         enableBloom={visualizationSettings?.enableBloom}
-        enableDepthOfField={visualizationSettings?.enableDepthOfField}
+        // enableDepthOfField={visualizationSettings?.enableDepthOfField} // Property doesn't exist
         highPerformanceMode={highPerformanceMode}
-        activityThreshold={visualizationSettings?.activityThreshold || 0.2}
-        showInactiveRegions={
-          visualizationSettings?.showInactiveRegions !== false
+        // activityThreshold={visualizationSettings?.activityThreshold || 0.2} // Property doesn't exist
+        showInactiveRegions={ // Use inactiveRegionOpacity to determine visibility
+          visualizationSettings?.inactiveRegionOpacity > 0
         }
         width="100%"
         height="100%"
@@ -384,7 +386,7 @@ const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
               <BrainRegionDetails
                 regionId={activeRegionId}
                 brainModel={visualizationState.data}
-                patient={patient}
+                patient={patient} // Pass patient directly, details component should handle null
                 symptoms={symptoms}
                 diagnoses={diagnoses}
                 treatmentPredictions={treatmentPredictions}

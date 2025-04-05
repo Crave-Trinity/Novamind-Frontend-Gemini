@@ -1,12 +1,17 @@
 /**
  * WebGL Testing System - Core Module
- * 
- * This module provides WebGL mocking capabilities for tests involving
- * Three.js and WebGL components. It helps prevent tests from hanging
- * and provides memory leak detection.
  */
+import { vi } from 'vitest';
 
-// Types for memory monitoring
+// Attempt to import THREE. If it fails, create a dummy object.
+let THREE: any;
+try {
+  THREE = require('three');
+} catch (e) {
+  console.warn('Could not import THREE. Using dummy THREE namespace for mocks.');
+  THREE = {};
+}
+
 export interface MemoryReport {
   leakedObjectCount: number;
   totalAllocatedObjects: number;
@@ -14,7 +19,6 @@ export interface MemoryReport {
   leakedObjectTypes: Record<string, number>;
 }
 
-// Mock WebGL context and renderer
 let mockContext: any = null;
 let memoryMonitoring = {
   enabled: false,
@@ -23,236 +27,201 @@ let memoryMonitoring = {
   debugMode: false,
 };
 
-/**
- * Set up WebGL mocks for testing
- */
 export function setupWebGLMocks(options: {
   monitorMemory?: boolean;
   debugMode?: boolean;
 } = {}): void {
   console.log('WebGL mocks set up');
-  
-  // Create mock WebGL context
   mockContext = createMockWebGLContext();
-  
-  // Configure memory monitoring
   memoryMonitoring.enabled = options.monitorMemory ?? false;
   memoryMonitoring.debugMode = options.debugMode ?? false;
-  
-  // Mock document.createElement to intercept canvas creation
+  memoryMonitoring.allocatedObjects.clear();
+  memoryMonitoring.disposedObjects.clear();
+
   const originalCreateElement = document.createElement;
   document.createElement = function(tagName: string) {
     if (tagName.toLowerCase() === 'canvas') {
       const canvas = originalCreateElement.call(document, tagName) as HTMLCanvasElement;
-      
-      // Mock the getContext method to return our WebGL context
       const originalGetContext = canvas.getContext;
-      canvas.getContext = function(contextType: string) {
+      canvas.getContext = function(contextType: string, contextAttributes?: any) {
         if (contextType === 'webgl' || contextType === 'webgl2' || contextType === 'experimental-webgl') {
           return mockContext;
         }
-        return originalGetContext.apply(this, [contextType]);
+        return originalGetContext.call(this, contextType, contextAttributes);
       };
-      
       return canvas;
     }
     return originalCreateElement.call(document, tagName);
   };
-  
-  // Mock Three.js classes
+
   mockThreeJSClasses();
 }
 
-/**
- * Clean up WebGL mocks and generate memory report
- */
 export function cleanupWebGLMocks(): MemoryReport | null {
   console.log('WebGL mocks cleaned up');
-  
-  // Restore original document.createElement
   // @ts-ignore
   document.createElement = HTMLDocument.prototype.createElement;
-  
-  // Generate memory report
   let report: MemoryReport | null = null;
-  
   if (memoryMonitoring.enabled) {
     report = generateMemoryReport();
   }
-  
-  // Clean up
   mockContext = null;
   memoryMonitoring.allocatedObjects.clear();
   memoryMonitoring.disposedObjects.clear();
-  
+  restoreThreeJSClasses();
   return report;
 }
 
-/**
- * Create a mock WebGL context
- */
 function createMockWebGLContext(): any {
   return {
-    canvas: null,
-    drawingBufferWidth: 800,
-    drawingBufferHeight: 600,
-    
-    // WebGL 1.0 methods
-    createBuffer: () => ({}),
-    bindBuffer: () => {},
-    bufferData: () => {},
-    createShader: () => ({}),
-    shaderSource: () => {},
-    compileShader: () => {},
-    getShaderParameter: () => true,
-    createProgram: () => ({}),
-    attachShader: () => {},
-    linkProgram: () => {},
-    getProgramParameter: () => true,
-    useProgram: () => {},
-    getAttribLocation: () => 0,
-    getUniformLocation: () => ({}),
-    enableVertexAttribArray: () => {},
-    vertexAttribPointer: () => {},
-    uniform1f: () => {},
-    uniform1i: () => {},
-    uniform2fv: () => {},
-    uniform3fv: () => {},
-    uniform4fv: () => {},
-    uniformMatrix4fv: () => {},
-    activeTexture: () => {},
-    createTexture: () => trackAllocation('Texture', {}),
-    bindTexture: () => {},
-    texImage2D: () => {},
-    texParameteri: () => {},
-    clearColor: () => {},
-    enable: () => {},
-    disable: () => {},
-    blendFunc: () => {},
-    depthFunc: () => {},
-    clear: () => {},
-    drawArrays: () => {},
-    drawElements: () => {},
-    
-    // WebGL 2.0 methods
-    createVertexArray: () => ({}),
-    bindVertexArray: () => {},
-    
-    // Extensions
-    getExtension: () => ({
-      drawBuffersWEBGL: () => {},
-      drawArraysInstancedANGLE: () => {},
-      drawElementsInstancedANGLE: () => {},
-      createVertexArrayOES: () => ({}),
-      bindVertexArrayOES: () => {},
-    }),
+    canvas: null, drawingBufferWidth: 800, drawingBufferHeight: 600,
+    getParameter: vi.fn((param) => (param === 37446 ? 8 : null)),
+    getExtension: vi.fn(() => ({
+        drawBuffersWEBGL: vi.fn(), drawArraysInstancedANGLE: vi.fn(),
+        drawElementsInstancedANGLE: vi.fn(), createVertexArrayOES: vi.fn(() => ({})),
+        bindVertexArrayOES: vi.fn(),
+    })),
+    createBuffer: vi.fn(() => ({})), bindBuffer: vi.fn(), bufferData: vi.fn(),
+    createShader: vi.fn(() => ({})), shaderSource: vi.fn(), compileShader: vi.fn(),
+    getShaderParameter: vi.fn(() => true), createProgram: vi.fn(() => ({})),
+    attachShader: vi.fn(), linkProgram: vi.fn(), getProgramParameter: vi.fn(() => true),
+    useProgram: vi.fn(), getAttribLocation: vi.fn(() => 0), getUniformLocation: vi.fn(() => ({})),
+    enableVertexAttribArray: vi.fn(), vertexAttribPointer: vi.fn(),
+    uniform1f: vi.fn(), uniform1i: vi.fn(), uniform2fv: vi.fn(), uniform3fv: vi.fn(),
+    uniform4fv: vi.fn(), uniformMatrix4fv: vi.fn(), activeTexture: vi.fn(),
+    createTexture: vi.fn(() => trackAllocation('Texture', { dispose: vi.fn(function(this: any) { trackDisposal('Texture', this); }) })), // Ensure Texture mock has dispose
+    bindTexture: vi.fn(), texImage2D: vi.fn(), texParameteri: vi.fn(),
+    clearColor: vi.fn(), enable: vi.fn(), disable: vi.fn(), blendFunc: vi.fn(),
+    depthFunc: vi.fn(), clear: vi.fn(), drawArrays: vi.fn(), drawElements: vi.fn(),
+    viewport: vi.fn(), createVertexArray: vi.fn(() => ({})), bindVertexArray: vi.fn(),
   };
 }
 
-/**
- * Mock Three.js classes to prevent actual WebGL usage
- */
+const originalThreeClasses: Record<string, any> = {};
+
 function mockThreeJSClasses(): void {
-  // Mock global WebGLRenderer if it exists
-  if (globalThis.WebGLRenderer) {
-    const originalWebGLRenderer = globalThis.WebGLRenderer;
-    // @ts-ignore
-    globalThis.WebGLRenderer = function(...args: any[]) {
-      const instance = trackAllocation('WebGLRenderer', {
-        domElement: document.createElement('canvas'),
-        render: () => {},
-        setSize: () => {},
-        setClearColor: () => {},
-        clear: () => {},
-        dispose: function() {
-          trackDisposal('WebGLRenderer', this);
-        },
-      });
-      return instance;
-    };
+  const target = THREE || globalThis.THREE || {};
+  if (!globalThis.THREE && target === globalThis.THREE) {
+      console.warn('THREE not found globally. Mocks might be incomplete.');
+      // Avoid assigning {} to prevent TS errors
+  } else if (!THREE && !globalThis.THREE) {
+      console.warn('THREE not found globally or via import. Mocks might fail.');
+      // Avoid assigning {} to prevent TS errors
   }
-  
-  // Mock various Three.js objects that get created during tests
-  // Mocking is done through ES modules, so we just register the mocks for monitoring
-  registerThreeJSMocks();
+
+  const mockClass = (className: string, mockImplementation: (...args: any[]) => any) => {
+    const currentTarget = THREE || globalThis.THREE;
+    if (!currentTarget) {
+        console.error(`Cannot mock THREE.${className}: THREE namespace not found.`);
+        return;
+    }
+    if (currentTarget[className]) {
+      originalThreeClasses[className] = currentTarget[className];
+    }
+    currentTarget[className] = mockImplementation;
+  };
+
+  // Mock WebGLRenderer
+  mockClass('WebGLRenderer', (...args: any[]) => trackAllocation('WebGLRenderer', {
+    domElement: document.createElement('canvas'), render: vi.fn(), setSize: vi.fn(),
+    setClearColor: vi.fn(), clear: vi.fn(),
+    dispose: vi.fn(function(this: any) { trackDisposal('WebGLRenderer', this); }),
+    getContext: () => mockContext, setPixelRatio: vi.fn(), shadowMap: { enabled: false },
+  }));
+
+  // Mock PerspectiveCamera
+  mockClass('PerspectiveCamera', (...args: any[]) => {
+      const position = { x: 0, y: 0, z: 0, set: vi.fn(function(this: any, x: number, y: number, z: number) { this.x = x; this.y = y; this.z = z; }) };
+      return trackAllocation('PerspectiveCamera', {
+        position: position, near: 0.1, far: 1000, fov: 50,
+        updateProjectionMatrix: vi.fn(), isPerspectiveCamera: true,
+      });
+  });
+
+  // Mock BufferGeometry
+  mockClass('BufferGeometry', (...args: any[]) => trackAllocation('BufferGeometry', {
+    attributes: {}, setIndex: vi.fn(), setAttribute: vi.fn(),
+    dispose: vi.fn(function(this: any) { trackDisposal('BufferGeometry', this); }), // Correctly defined dispose
+    computeVertexNormals: vi.fn(), isBufferGeometry: true,
+  }));
+
+  // Mock Material (base)
+  mockClass('Material', (...args: any[]) => trackAllocation('Material', {
+    dispose: vi.fn(function(this: any) { trackDisposal('Material', this); }), // Correctly defined dispose
+    needsUpdate: false, isMaterial: true,
+  }));
+
+  // Mock MeshStandardMaterial
+  mockClass('MeshStandardMaterial', (...args: any[]) => trackAllocation('MeshStandardMaterial', {
+    color: { set: vi.fn(), isColor: true }, emissive: { set: vi.fn(), isColor: true },
+    roughness: 0.5, metalness: 0.5, isMeshStandardMaterial: true,
+    needsUpdate: false, isMaterial: true,
+    dispose: vi.fn(function(this: any) { trackDisposal('MeshStandardMaterial', this); }) // Correctly defined dispose
+  }));
+
+  // Mock MeshBasicMaterial (inherits from Material)
+  mockClass('MeshBasicMaterial', (...args: any[]) => trackAllocation('MeshBasicMaterial', {
+    color: { set: vi.fn(), isColor: true },
+    needsUpdate: false, isMaterial: true, isMeshBasicMaterial: true,
+    dispose: vi.fn(function(this: any) { trackDisposal('MeshBasicMaterial', this); }) // Correctly defined dispose
+  }));
+
+
+  // Mock Scene
+  mockClass('Scene', (...args: any[]) => trackAllocation('Scene', {
+    add: vi.fn(), remove: vi.fn(), children: [], isScene: true, background: null
+  }));
+
+  // Mock Mesh
+  mockClass('Mesh', (...args: any[]) => trackAllocation('Mesh', {
+    position: { x:0, y:0, z:0, set: vi.fn() }, rotation: { x:0, y:0, z:0, set: vi.fn() },
+    scale: { x:1, y:1, z:1, set: vi.fn() },
+    geometry: { dispose: vi.fn(), isBufferGeometry: true }, // Use mock geometry
+    material: { dispose: vi.fn(), isMaterial: true }, // Use mock material
+    isMesh: true
+  }));
 }
 
-/**
- * Register Three.js mocks for monitoring
- */
-function registerThreeJSMocks(): void {
-  // These are registered for memory tracking in real implementations
-  // In our simplified example, we're just setting up the structure
+function restoreThreeJSClasses(): void {
+  const target = THREE || globalThis.THREE;
+  if (!target) return;
+  for (const className in originalThreeClasses) {
+    if (target[className]) target[className] = originalThreeClasses[className];
+  }
+  Object.keys(originalThreeClasses).forEach(key => delete originalThreeClasses[key]);
 }
 
-/**
- * Track allocation of an object for memory leak detection
- */
 function trackAllocation<T>(type: string, obj: T): T {
   if (!memoryMonitoring.enabled) return obj;
-  
-  if (!memoryMonitoring.allocatedObjects.has(type)) {
-    memoryMonitoring.allocatedObjects.set(type, []);
-  }
-  
+  if (!memoryMonitoring.allocatedObjects.has(type)) memoryMonitoring.allocatedObjects.set(type, []);
   memoryMonitoring.allocatedObjects.get(type)!.push(obj);
-  
-  if (memoryMonitoring.debugMode) {
-    console.log(`[WebGL Memory] Allocated ${type}`);
-  }
-  
+  if (memoryMonitoring.debugMode) console.log(`[WebGL Memory] Allocated ${type}`);
   return obj;
 }
 
-/**
- * Track disposal of an object for memory leak detection
- */
 function trackDisposal<T>(type: string, obj: T): void {
   if (!memoryMonitoring.enabled) return;
-  
-  if (!memoryMonitoring.disposedObjects.has(type)) {
-    memoryMonitoring.disposedObjects.set(type, []);
-  }
-  
+  if (!memoryMonitoring.disposedObjects.has(type)) memoryMonitoring.disposedObjects.set(type, []);
   memoryMonitoring.disposedObjects.get(type)!.push(obj);
-  
-  if (memoryMonitoring.debugMode) {
-    console.log(`[WebGL Memory] Disposed ${type}`);
-  }
+  if (memoryMonitoring.debugMode) console.log(`[WebGL Memory] Disposed ${type}`);
 }
 
-/**
- * Generate a memory report for detecting leaks
- */
 function generateMemoryReport(): MemoryReport {
   const leakedObjectTypes: Record<string, number> = {};
-  let totalAllocated = 0;
-  let totalDisposed = 0;
-  
-  // Calculate leaks for each object type
-  for (const [type, allocatedObjects] of memoryMonitoring.allocatedObjects.entries()) {
-    const disposedObjects = memoryMonitoring.disposedObjects.get(type) || [];
-    const leakCount = allocatedObjects.length - disposedObjects.length;
-    
-    totalAllocated += allocatedObjects.length;
-    totalDisposed += disposedObjects.length;
-    
-    if (leakCount > 0) {
-      leakedObjectTypes[type] = leakCount;
-    }
+  let totalAllocated = 0, totalDisposed = 0, overallLeakCount = 0;
+  for (const [type, allocatedList] of memoryMonitoring.allocatedObjects.entries()) {
+    const disposedList = memoryMonitoring.disposedObjects.get(type) || [];
+    const allocatedSet = new Set(allocatedList); const disposedSet = new Set(disposedList);
+    let leakCount = 0;
+    allocatedSet.forEach(obj => { if (!disposedSet.has(obj)) leakCount++; });
+    totalAllocated += allocatedList.length; totalDisposed += disposedList.length;
+    if (leakCount > 0) leakedObjectTypes[type] = leakCount;
   }
-  
-  return {
-    leakedObjectCount: totalAllocated - totalDisposed,
-    totalAllocatedObjects: totalAllocated,
-    totalDisposedObjects: totalDisposed,
-    leakedObjectTypes,
-  };
+  const allAllocated = Array.from(memoryMonitoring.allocatedObjects.values()).flat();
+  const allDisposed = new Set(Array.from(memoryMonitoring.disposedObjects.values()).flat());
+  overallLeakCount = allAllocated.filter(obj => !allDisposed.has(obj)).length;
+
+  return { leakedObjectCount: overallLeakCount, totalAllocatedObjects: totalAllocated, totalDisposedObjects: totalDisposed, leakedObjectTypes };
 }
 
-// Export for testing
-export const __testing = {
-  trackAllocation,
-  trackDisposal,
-  generateMemoryReport,
-};
+export const __testing = { trackAllocation, trackDisposal, generateMemoryReport, mockThreeJSClasses, restoreThreeJSClasses, getMemoryMonitoringState: () => memoryMonitoring };

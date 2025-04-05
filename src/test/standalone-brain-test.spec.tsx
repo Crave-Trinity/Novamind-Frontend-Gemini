@@ -8,7 +8,8 @@
 
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react"; // Import within
+import { renderWithProviders } from '@test/test-utils.unified'; // Import unified render
 
 // Define a standalone component that mimics the structure of BrainModelContainer
 const StandaloneBrainContainer = () => {
@@ -31,12 +32,14 @@ const StandaloneBrainContainer = () => {
 describe("Standalone Brain Container Test", () => {
   it("renders the standalone container with quantum precision", () => {
     // Render the component with clinical precision
-    render(<StandaloneBrainContainer />);
+    renderWithProviders(<StandaloneBrainContainer />); // Use unified render
 
     // Verify that the component renders with mathematical elegance
     expect(screen.getByTestId("brain-container")).toBeInTheDocument();
-    expect(screen.getByTestId("brain-model")).toBeInTheDocument();
-    expect(screen.getByTestId("control-panel")).toBeInTheDocument();
+    // Query within the first container found
+    const container = screen.getAllByTestId("brain-container")[0];
+    expect(within(container).getByTestId("brain-model")).toBeInTheDocument();
+    expect(within(container).getByTestId("control-panel")).toBeInTheDocument();
 
     // Verify text content with neural precision
     expect(

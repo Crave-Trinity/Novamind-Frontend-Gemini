@@ -8,7 +8,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import RiskAssessmentPanel from "./RiskAssessmentPanel"; // Correct to default import
-import { renderWithProviders } from "@test/test-utils";
+import { renderWithProviders } from "@test/test-utils.unified"; // Correct import path
 import { RiskAssessment, RiskLevel } from "@domain/types/clinical/risk"; // Add missing RiskLevel import
 
 // Mock data with clinical precision

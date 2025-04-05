@@ -10,17 +10,18 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 // Domain types
 import { RiskAssessment } from "@domain/types/clinical/risk";
 import { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
-import { Result, success, failure, SafeArray } from "@domain/types/common";
+// Use relative path as alias seems problematic in tests for this file
+import { Result, success, failure, SafeArray } from "../../domain/types/shared/common";
 
 // Domain models
 import {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
-} from "@domain/models/brainMapping";
+} from "@domain/models/brain/mapping/brain-mapping"; // Correct path
 
 // Application services
-import { clinicalService } from "@application/services/clinicalService";
+import { clinicalService } from "@application/services/clinical/clinical.service"; // Corrected path from previous step
 
 /**
  * Hook return type with neural-safe typing
@@ -80,9 +81,9 @@ export function useClinicalContext(
     queryFn: async () => {
       const result = await clinicalService.fetchSymptomMappings();
       if (result.success) {
-        return result.data;
+        return result.value; // Use .value for success case
       } else {
-        throw result.error || new Error("Failed to fetch symptom mappings");
+        throw (result as { success: false; error: Error }).error || new Error("Failed to fetch symptom mappings"); // Use .error for failure case
       }
     },
     staleTime: 24 * 60 * 60 * 1000, // 24 hours - these change infrequently
@@ -102,9 +103,9 @@ export function useClinicalContext(
     queryFn: async () => {
       const result = await clinicalService.fetchDiagnosisMappings();
       if (result.success) {
-        return result.data;
+        return result.value; // Use .value for success case
       } else {
-        throw result.error || new Error("Failed to fetch diagnosis mappings");
+        throw (result as { success: false; error: Error }).error || new Error("Failed to fetch diagnosis mappings"); // Use .error for failure case
       }
     },
     staleTime: 24 * 60 * 60 * 1000, // 24 hours - these change infrequently
@@ -124,9 +125,9 @@ export function useClinicalContext(
     queryFn: async () => {
       const result = await clinicalService.fetchTreatmentMappings();
       if (result.success) {
-        return result.data;
+        return result.value; // Use .value for success case
       } else {
-        throw result.error || new Error("Failed to fetch treatment mappings");
+        throw (result as { success: false; error: Error }).error || new Error("Failed to fetch treatment mappings"); // Use .error for failure case
       }
     },
     staleTime: 24 * 60 * 60 * 1000, // 24 hours - these change infrequently
@@ -152,9 +153,9 @@ export function useClinicalContext(
       }
       const result = await clinicalService.fetchRiskAssessment(patientId);
       if (result.success) {
-        return result.data;
+        return result.value; // Use .value for success case
       } else {
-        throw result.error || new Error("Failed to fetch risk assessment");
+        throw (result as { success: false; error: Error }).error || new Error("Failed to fetch risk assessment"); // Use .error for failure case
       }
     },
     enabled: !!patientId, // Only run query if patientId exists
@@ -180,10 +181,10 @@ export function useClinicalContext(
       }
       const result = await clinicalService.fetchTreatmentPredictions(patientId);
       if (result.success) {
-        return result.data;
+        return result.value; // Use .value for success case
       } else {
         throw (
-          result.error || new Error("Failed to fetch treatment predictions")
+          (result as { success: false; error: Error }).error || new Error("Failed to fetch treatment predictions") // Use .error for failure case
         );
       }
     },
@@ -221,11 +222,11 @@ export function useClinicalContext(
       const result = await clinicalService.fetchSymptomMappings();
 
       if (result.success) {
-        queryClient.setQueryData([symptomMappingsKey], result.data);
-        return success(result.data);
+        queryClient.setQueryData([symptomMappingsKey], result.value); // Use .value
+        return success(result.value); // Use .value
       } else {
         return failure(
-          result.error || new Error("Failed to fetch symptom mappings"),
+          (result as { success: false; error: Error }).error || new Error("Failed to fetch symptom mappings"), // Use .error
         );
       }
     } catch (err) {
@@ -244,11 +245,11 @@ export function useClinicalContext(
       const result = await clinicalService.fetchDiagnosisMappings();
 
       if (result.success) {
-        queryClient.setQueryData([diagnosisMappingsKey], result.data);
-        return success(result.data);
+        queryClient.setQueryData([diagnosisMappingsKey], result.value); // Use .value
+        return success(result.value); // Use .value
       } else {
         return failure(
-          result.error || new Error("Failed to fetch diagnosis mappings"),
+          (result as { success: false; error: Error }).error || new Error("Failed to fetch diagnosis mappings"), // Use .error
         );
       }
     } catch (err) {
@@ -267,11 +268,11 @@ export function useClinicalContext(
       const result = await clinicalService.fetchTreatmentMappings();
 
       if (result.success) {
-        queryClient.setQueryData([treatmentMappingsKey], result.data);
-        return success(result.data);
+        queryClient.setQueryData([treatmentMappingsKey], result.value); // Use .value
+        return success(result.value); // Use .value
       } else {
         return failure(
-          result.error || new Error("Failed to fetch treatment mappings"),
+          (result as { success: false; error: Error }).error || new Error("Failed to fetch treatment mappings"), // Use .error
         );
       }
     } catch (err) {
@@ -289,11 +290,11 @@ export function useClinicalContext(
         const result = await clinicalService.fetchRiskAssessment(patientId);
 
         if (result.success) {
-          queryClient.setQueryData([riskAssessmentKey, patientId], result.data);
-          return success(result.data);
+          queryClient.setQueryData([riskAssessmentKey, patientId], result.value); // Use .value
+          return success(result.value); // Use .value
         } else {
           return failure(
-            result.error || new Error("Failed to fetch risk assessment"),
+            (result as { success: false; error: Error }).error || new Error("Failed to fetch risk assessment"), // Use .error
           );
         }
       } catch (err) {
@@ -318,12 +319,12 @@ export function useClinicalContext(
         if (result.success) {
           queryClient.setQueryData(
             [treatmentPredictionsKey, patientId],
-            result.data,
+            result.value, // Use .value
           );
-          return success(result.data);
+          return success(result.value); // Use .value
         } else {
           return failure(
-            result.error || new Error("Failed to fetch treatment predictions"),
+            (result as { success: false; error: Error }).error || new Error("Failed to fetch treatment predictions"), // Use .error
           );
         }
       } catch (err) {

@@ -2011,3 +2011,6 @@ export class ClinicalTypeVerifier {
     }
   }
 }
+
+// Instantiate the verifier as a singleton
+export const clinicalTypeVerifier = new ClinicalTypeVerifier();

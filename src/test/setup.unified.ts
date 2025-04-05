@@ -141,7 +141,8 @@ export const tailwindHelper = {
   
   isDarkMode: () => {
     if (typeof document !== 'undefined' && document.documentElement) {
-      return document.documentElement.classList.contains('dark');
+      // Directly query the document element within the function
+      return document.querySelector('html')?.classList.contains('dark') ?? false;
     }
     return false;
   }

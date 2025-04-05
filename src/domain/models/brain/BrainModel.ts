@@ -2,19 +2,13 @@
  * Brain Model Domain Types
  * Defines data structures for brain visualization
  */
+import { RenderMode as VisualizationRenderMode } from "@domain/types/brain/visualization"; // Import the correct enum
+import { Result } from "@domain/types/shared/common"; // Add missing Result import if needed by other parts
+import { Vector3 } from "three"; // Assuming Vector3 is needed, keep import
 
-/**
- * Render modes for the brain visualization
+/*
+ * Redundant RenderMode enum removed - using VisualizationRenderMode from types
  */
-export enum RenderMode {
-  ANATOMICAL = "anatomical",
-  FUNCTIONAL = "functional",
-  ACTIVITY = "activity",
-  SIGNIFICANCE = "significance",
-  CONNECTIVITY = "connectivity",
-  ANOMALY = "anomaly",
-  TREATMENT_RESPONSE = "treatment_response",
-}
 
 /**
  * Source of model data
@@ -39,7 +33,7 @@ export interface BrainRegion {
   position: [number, number, number]; // Might be redundant with coordinates
   size: number;
   scale: number;
-  color: string;
+  color: string; // Consider using a more specific color type if available
   volume: number;
   significance: number; // Clinical significance score
   connections: string[]; // IDs of connected regions
@@ -100,7 +94,7 @@ export interface BrainViewState {
   zoom: number;
   highlightedRegions: string[]; // IDs of highlighted regions
   visiblePathways: boolean;
-  renderMode: RenderMode;
+  renderMode: VisualizationRenderMode; // Use the imported enum
   transparencyLevel: number;
   focusPoint: [number, number, number] | null;
 }

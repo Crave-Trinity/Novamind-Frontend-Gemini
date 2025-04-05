@@ -11,8 +11,9 @@ import {
   BrainRegion,
   BrainViewState,
   NeuralPathway,
-  RenderMode,
+  // RenderMode, // Remove import from outdated location
 } from "@domain/models/brain/BrainModel";
+import { RenderMode } from "@domain/types/brain/visualization"; // Import correct RenderMode
 import { apiClient } from "@api/ApiClient";
 
 interface UseBrainVisualizationOptions {

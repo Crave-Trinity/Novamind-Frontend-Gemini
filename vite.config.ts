@@ -1,36 +1,37 @@
-/**
- * Novamind Digital Twin: Clinical Neuroscience Platform
- * Vite Configuration
- *
- * This configuration adheres to Clean Architecture principles with ESM modules,
- * providing path aliases for the different architectural layers.
- */
-
-import { defineConfig } from 'vite';
+/// <reference types="vitest" />
+import { defineConfig, UserConfig } from 'vite';
+import { UserConfig as VitestUserConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import tsconfigPaths from 'vite-tsconfig-paths'; // Import the plugin
 
-export default defineConfig({
-  plugins: [react()],
-  
+// Define a merged configuration type that includes Vitest's 'test' property
+interface MergedConfig extends UserConfig {
+  test: VitestUserConfig['test'];
+}
+
+// Export the configuration using the merged type
+export default defineConfig(({ command, mode }): MergedConfig => ({
+  plugins: [react(), tsconfigPaths()], // Add the plugin
+
   resolve: {
     alias: {
       // Core architecture path alias
       '@': path.resolve(__dirname, './src'),
-      
+
       /* Clean Architecture Layers */
       '@domain': path.resolve(__dirname, './src/domain'),
       '@application': path.resolve(__dirname, './src/application'),
       '@infrastructure': path.resolve(__dirname, './src/infrastructure'),
       '@presentation': path.resolve(__dirname, './src/presentation'),
-      
+
       /* Atomic Design Components */
       '@atoms': path.resolve(__dirname, './src/presentation/atoms'),
       '@molecules': path.resolve(__dirname, './src/presentation/molecules'),
       '@organisms': path.resolve(__dirname, './src/presentation/organisms'),
       '@templates': path.resolve(__dirname, './src/presentation/templates'),
       '@pages': path.resolve(__dirname, './src/presentation/pages'),
-      
+
       /* Domain-Driven Architecture Shortcuts */
       '@services': path.resolve(__dirname, './src/infrastructure/services'),
       '@hooks': path.resolve(__dirname, './src/application/hooks'),
@@ -66,37 +67,52 @@ export default defineConfig({
       }
     }
   },
-  
+
   // Dev server configuration
   server: {
     port: 3000,
     strictPort: true,
     host: true,
   },
-  
-  // Optimizations for Three.js and WebGL (aligned with docs/dependency-management-guidelines.md)
+
+  // Optimizations for Three.js and WebGL
   optimizeDeps: {
     include: [
       'three',
       '@react-three/fiber',
       '@react-three/drei',
       '@react-three/postprocessing',
-      'react', // Added based on docs example
-      'react-dom' // Added based on docs example
+      'react',
+      'react-dom'
     ],
-    exclude: [ // Added based on docs
-      '@react-three/fiber', // Explicitly exclude to manage version conflicts
-      '@react-three/postprocessing', // Explicitly exclude to manage version conflicts
+    exclude: [
+      '@react-three/fiber',
+      '@react-three/postprocessing',
       'zustand',
       'suspend-react',
       'its-fine',
       'scheduler',
       'react-use-measure'
     ],
-    esbuildOptions: { // Added based on docs
+    esbuildOptions: {
       define: {
         global: 'globalThis'
       }
     }
+  },
+
+  // Vitest configuration
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.unified.ts',
+    // Replicate aliases for Vitest
+    // alias: { ... }, // Remove manual alias replication, tsconfigPaths handles it
+    // Optional: Add coverage configuration if needed
+    // coverage: {
+    //   provider: 'v8', // or 'istanbul'
+    //   reporter: ['text', 'json', 'html'],
+    // },
+    testTimeout: 30000, // Increase global timeout to 30s
   }
-});
+}));

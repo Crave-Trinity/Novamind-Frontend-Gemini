@@ -4,10 +4,10 @@
  */
 
 import React from 'react';
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
+import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Remove non-existent imports
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { PredictionAnalytics } from './PredictionAnalytics';
+import PredictionAnalytics from './PredictionAnalytics'; // Use default import
 
 // Mock React Three Fiber
 vi.mock('@react-three/fiber', () => ({

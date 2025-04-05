@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 
-import { useTheme } from "@contexts/ThemeContext";
+import { useTheme } from "@application/hooks/useTheme"; // Correct path
 import { useBrainVisualization } from "@hooks/useBrainVisualization";
 import { BrainRegion } from "@domain/models/brain/brain-model";
-import { RenderMode } from "@domain/types/brain/visualization";
+import { RenderMode } from "@domain/types/brain/visualization"; // Keep this correct import
+// Remove potentially conflicting import if it exists elsewhere
 import Button from "@presentation/atoms/Button";
 
 interface BrainModelViewerProps {

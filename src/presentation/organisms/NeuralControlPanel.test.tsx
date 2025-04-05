@@ -8,7 +8,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react"; // Added missing React import
 import userEvent from "@testing-library/user-event";
 import { NeuralControlPanel } from "./NeuralControlPanel"; // Corrected to named import
-import { renderWithProviders } from "@test/test-utils.tsx";
+import { renderWithProviders } from "@test/test-utils.unified"; // Correct import path
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for NeuralControlPanel
@@ -21,6 +21,24 @@ const mockProps = {
 };
 
 describe("NeuralControlPanel", () => {
+  // Add specific mock for matchMedia before tests run
+  beforeEach(() => {
+    vi.stubGlobal('matchMedia', vi.fn().mockImplementation((query: string) => ({
+      matches: false, // Default to false (light mode)
+      media: query,
+      onchange: null,
+      addListener: vi.fn(), // Deprecated
+      removeListener: vi.fn(), // Deprecated
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals(); // Clean up global stubs
+  });
+
   it("renders with neural precision", () => {
     renderWithProviders(<NeuralControlPanel {...mockProps} />); // Use renderWithProviders
 

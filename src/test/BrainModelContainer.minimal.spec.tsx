@@ -6,9 +6,10 @@
  * component with proper mocking of Three.js and related dependencies.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"; // Import afterEach
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { screen, cleanup } from "@testing-library/react"; // Import cleanup
+import { renderWithProviders } from '@test/test-utils.unified';
 
 // Create a minimal mock for the BrainModelContainer component
 const MockBrainModel = () => (
@@ -38,10 +39,12 @@ describe("BrainModelContainer Minimal Test", () => {
 
   it("renders the container with neural precision", () => {
     // Render the component with clinical precision
-    render(<BrainModelContainer />);
+    renderWithProviders(<BrainModelContainer patientId="test-patient-123" />); // Provide required prop
 
     // Verify that the component renders with mathematical elegance
     expect(screen.getByTestId("brain-model")).toBeDefined();
     expect(screen.getByTestId("control-panel")).toBeDefined();
   });
+  
+  afterEach(cleanup); // Add cleanup
 });

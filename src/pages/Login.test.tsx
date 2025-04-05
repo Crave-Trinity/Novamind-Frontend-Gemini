@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, vi } from "vitest";
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, within, cleanup } from "@testing-library/react"; // Import cleanup
 import userEvent from "@testing-library/user-event";
 
 // Mock dependencies before importing the component
@@ -57,6 +57,7 @@ import Login from "@/pages/Login";
 describe("Login", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    cleanup(); // Add cleanup
   });
 
   it("renders with neural precision", () => {
@@ -76,8 +77,8 @@ describe("Login", () => {
 
     // Instead of actually testing with real interaction, we'll just verify
     // that the page includes expected elements to avoid hangs
-    expect(screen.getByTestId("email")).toBeInTheDocument();
-    expect(screen.getByTestId("password")).toBeInTheDocument();
+    expect(screen.getByLabelText("Email address")).toBeInTheDocument(); // Use getByLabelText
+    expect(screen.getByLabelText("Password")).toBeInTheDocument(); // Use getByLabelText
     
     // Fast-forward timers if needed
     vi.runAllTimers();
@@ -88,7 +89,9 @@ describe("Login", () => {
     render(<Login />);
     
     // Just check that the submit button exists
-    const submitButton = screen.getByText("Sign in");
+    // Query within the form to find the specific submit button
+    const form = screen.getByTestId('login-form'); // Use getByTestId
+    const submitButton = within(form).getByRole('button', { name: /sign in/i });
     expect(submitButton).toBeInTheDocument();
     
     // We don't actually click it to avoid async operations

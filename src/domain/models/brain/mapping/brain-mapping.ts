@@ -8,7 +8,7 @@ import { BrainRegion, NeuralConnection } from "@domain/types/brain/models";
 import { RiskLevel } from "@domain/types/clinical/risk";
 import { Diagnosis, Symptom } from "@domain/types/clinical/patient";
 import { TreatmentType } from "@domain/types/clinical/treatment";
-import { SafeArray, Result, success, failure } from "@domain/types/common";
+import { SafeArray, Result, success, failure } from "@domain/types/shared/common"; // Use correct alias
 
 /**
  * Clinical-to-Neural Mapping Definitions

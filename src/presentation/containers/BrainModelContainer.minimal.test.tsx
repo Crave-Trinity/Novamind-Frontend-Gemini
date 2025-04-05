@@ -6,7 +6,8 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react'; // Import within
+import { renderWithProviders } from '@test/test-utils.unified'; // Import unified render
 
 // Mock next-themes
 vi.mock('next-themes', () => ({
@@ -131,7 +132,7 @@ describe('BrainModelContainer', () => {
   });
 
   it('renders with neural precision', () => {
-    render(<BrainModelContainer />);
+    renderWithProviders(<BrainModelContainer />); // Use renderWithProviders
     
     // Verify the component renders without crashing
     expect(screen.getByTestId("brainmodelcontainer-container")).toBeInTheDocument();
@@ -145,10 +146,12 @@ describe('BrainModelContainer', () => {
       </div>
     ));
     
-    render(<BrainModelContainer />);
+    renderWithProviders(<BrainModelContainer />); // Use renderWithProviders
     
     // Verify interaction element is rendered
-    const interactiveElement = screen.getByTestId('interactive-element');
+    // Query within the specific container rendered by this test's mock
+    const container = screen.getByTestId('brainmodelcontainer-container');
+    const interactiveElement = within(container).getByTestId('interactive-element');
     expect(interactiveElement).toBeInTheDocument();
     expect(interactiveElement.textContent).toBe('Interact');
   });

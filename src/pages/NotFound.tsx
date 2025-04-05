@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
-import { auditLogService, AuditEventType } from "@/services/AuditLogService";
+import { auditLogService, AuditEventType } from "@infrastructure/services/AuditLogService"; // Use correct alias
 
 /**
  * 404 Not Found page

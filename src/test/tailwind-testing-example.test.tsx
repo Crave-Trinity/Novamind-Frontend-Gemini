@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen } from './test-utils';
-import { cssMock } from './tailwind-mock';
+import { screen, act } from '@testing-library/react'; // Import act
+import { renderWithProviders } from '@test/test-utils.unified'; // Use unified setup
 
 /**
  * Example component that uses Tailwind classes with dark mode variants
@@ -14,7 +14,7 @@ const TailwindTestComponent: React.FC = () => {
       <p className="text-gray-700 dark:text-gray-300">
         This component uses Tailwind CSS classes with dark mode variants
       </p>
-      <button 
+      <button
         className="bg-primary-500 text-white p-4 dark:bg-neural-600"
         data-testid="tailwind-button"
       >
@@ -24,61 +24,64 @@ const TailwindTestComponent: React.FC = () => {
   );
 };
 
-describe('Tailwind CSS Testing', () => {
-  beforeEach(() => {
-    // Reset dark mode state before each test
-    cssMock.disableDarkMode();
-  });
+describe('Tailwind CSS Testing with Unified Setup', () => { // Update describe block name
+  // No beforeEach needed for cssMock
 
   it('renders component with correct light mode classes', () => {
-    render(<TailwindTestComponent />);
-    
-    // Verify that the container has the light mode class
+    const { isDarkMode } = renderWithProviders(<TailwindTestComponent />); // Use unified render
+    expect(isDarkMode()).toBe(false); // Use helper
+
     const container = screen.getByTestId('tailwind-test-container');
     expect(container.classList.contains('bg-white')).toBe(true);
-    expect(container.classList.contains('dark:bg-gray-800')).toBe(true);
-    
-    // Verify that dark classes aren't applied in light mode
-    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    expect(container.classList.contains('dark:bg-gray-800')).toBe(true); // Class is present, but not applied
   });
 
   it('renders component with correct dark mode classes when dark mode is enabled', () => {
-    // Render with dark mode enabled
-    render(<TailwindTestComponent />, { initialDarkMode: true });
-    
-    // Verify that the dark mode class is applied to the html element
+    const { isDarkMode } = renderWithProviders(<TailwindTestComponent />, { darkMode: true }); // Use unified render with darkMode option
+    // Check classList directly for initial render with darkMode: true
     expect(document.documentElement.classList.contains('dark')).toBe(true);
-    
-    // Verify that the container has both light and dark mode classes
-    // Even though only dark mode classes will be applied by Tailwind
+
     const container = screen.getByTestId('tailwind-test-container');
     expect(container.classList.contains('bg-white')).toBe(true);
-    expect(container.classList.contains('dark:bg-gray-800')).toBe(true);
+    expect(container.classList.contains('dark:bg-gray-800')).toBe(true); // Class is present and applied
   });
 
-  it('correctly toggles between light and dark mode', () => {
-    render(<TailwindTestComponent />);
-    
+  it('can toggle dark mode during test execution', async () => { // Rename test, make async
+    const { isDarkMode, enableDarkMode, disableDarkMode } = renderWithProviders( // Use helpers from unified render
+        <TailwindTestComponent />
+    );
+
     // Start in light mode
-    expect(document.documentElement.classList.contains('dark')).toBe(false);
-    
+    expect(isDarkMode()).toBe(false);
+
     // Toggle to dark mode
-    cssMock.enableDarkMode();
-    expect(document.documentElement.classList.contains('dark')).toBe(true);
-    
+    act(() => {
+        enableDarkMode();
+    });
+    // Use waitFor to allow potential state updates
+    await act(async () => {
+        await screen.findByTestId('tailwind-test-container'); // Wait for potential re-render
+    });
+    expect(isDarkMode()).toBe(true); // Check state via helper
+
     // Toggle back to light mode
-    cssMock.disableDarkMode();
-    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    act(() => {
+        disableDarkMode();
+    });
+    await act(async () => {
+        await screen.findByTestId('tailwind-test-container'); // Wait for potential re-render
+    });
+    expect(isDarkMode()).toBe(false); // Check state via helper
   });
 
   it('simulates clicking a button with tailwind classes', () => {
-    render(<TailwindTestComponent />);
-    
+    renderWithProviders(<TailwindTestComponent />); // Use unified render
+
     const button = screen.getByTestId('tailwind-button');
     expect(button).toBeInTheDocument();
     expect(button.classList.contains('bg-primary-500')).toBe(true);
     expect(button.classList.contains('text-white')).toBe(true);
-    
+
     // In a real test, you might do something like:
     // fireEvent.click(button);
     // expect(...).toBe(...);

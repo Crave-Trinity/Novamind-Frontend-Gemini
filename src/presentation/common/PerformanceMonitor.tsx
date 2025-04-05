@@ -9,7 +9,8 @@ import { useFrame } from "@react-three/fiber";
 import Stats from "stats.js";
 
 // Domain types
-import { Result, success, failure } from "@domain/types/common";
+// Use relative path as alias seems problematic in tests
+import { Result, success, failure } from "../../domain/types/shared/common";
 
 // Performance threshold constants
 const FRAME_RATE_WARNING = 45; // fps
@@ -79,16 +80,11 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   // Position styling
   const positionStyle = useCallback(() => {
     switch (position) {
-      case "top-left":
-        return { top: "0", left: "0" };
-      case "top-right":
-        return { top: "0", right: "0" };
-      case "bottom-left":
-        return { bottom: "0", left: "0" };
-      case "bottom-right":
-        return { bottom: "0", right: "0" };
-      default:
-        return { top: "0", right: "0" };
+      case "top-left": return { top: "0", left: "0" };
+      case "top-right": return { top: "0", right: "0" };
+      case "bottom-left": return { bottom: "0", left: "0" };
+      case "bottom-right": return { bottom: "0", right: "0" };
+      default: return { top: "0", right: "0" };
     }
   }, [position]);
 
@@ -128,6 +124,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
       ) {
         containerRef.current.removeChild(statsRef.current.dom);
       }
+      // Consider nullifying statsRef.current here if needed
     };
   }, [visible, showPanel, showMemory]);
 
@@ -166,6 +163,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
           frameTime,
           memory,
           lastUpdated: now,
+          // gpuLoad would need specific browser API integration if desired
         };
 
         setMetrics(newMetrics);
@@ -191,7 +189,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   });
 
   /**
-   * Get current performance assessment
+   * Get current performance assessment - Refactored Logic
    */
   const getPerformanceAssessment = (): Result<{
     status: "optimal" | "good" | "warning" | "critical";
@@ -201,56 +199,48 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     try {
       const bottlenecks: string[] = [];
       const recommendations: string[] = [];
-      let status: "optimal" | "good" | "warning" | "critical" = "optimal";
+      let currentStatus: "optimal" | "good" | "warning" | "critical" = "optimal";
 
-      // Check FPS
-      if (metrics.fps <= FRAME_RATE_CRITICAL) {
-        status = "critical";
-        bottlenecks.push("Frame rate critically low");
-        recommendations.push("Reduce number of visible brain regions");
-        recommendations.push("Disable post-processing effects");
-        recommendations.push("Switch to performance mode");
-      } else if (metrics.fps <= FRAME_RATE_WARNING) {
-        status = status === "critical" ? "critical" : "warning";
-        bottlenecks.push("Frame rate below optimal");
-        recommendations.push("Consider reducing visual quality");
-        recommendations.push("Limit number of animated elements");
+      // Determine highest severity level based on thresholds
+      if (metrics.fps <= FRAME_RATE_CRITICAL || metrics.memory >= MEMORY_CRITICAL || (metrics.gpuLoad && metrics.gpuLoad >= GPU_CRITICAL)) {
+        currentStatus = "critical";
+      } else if (metrics.fps <= FRAME_RATE_WARNING || metrics.memory >= MEMORY_WARNING || (metrics.gpuLoad && metrics.gpuLoad >= GPU_WARNING)) {
+        currentStatus = "warning";
+      } else if (metrics.fps < 60) { // Assuming 60 is optimal target
+         currentStatus = "good";
       }
 
-      // Check memory
+      // Add specific bottlenecks and recommendations based on thresholds hit
+      if (metrics.fps <= FRAME_RATE_CRITICAL) {
+        bottlenecks.push("Frame rate critically low");
+        recommendations.push("Reduce number of visible brain regions", "Disable post-processing", "Switch to performance mode");
+      } else if (metrics.fps <= FRAME_RATE_WARNING) {
+        bottlenecks.push("Frame rate below optimal");
+        recommendations.push("Consider reducing visual quality", "Limit animated elements");
+      }
+
       if (metrics.memory >= MEMORY_CRITICAL) {
-        status = "critical";
         bottlenecks.push("Memory usage critically high");
-        recommendations.push("Reduce texture resolution");
-        recommendations.push("Clear unused cached data");
+        recommendations.push("Reduce texture resolution", "Clear unused cached data");
       } else if (metrics.memory >= MEMORY_WARNING) {
-        status = status === "critical" ? "critical" : "warning";
         bottlenecks.push("Memory usage elevated");
         recommendations.push("Monitor for memory leaks");
       }
 
-      // Check GPU if available
       if (metrics.gpuLoad) {
-        if (metrics.gpuLoad >= GPU_CRITICAL) {
-          status = "critical";
-          bottlenecks.push("GPU utilization critically high");
-          recommendations.push("Reduce shader complexity");
-        } else if (metrics.gpuLoad >= GPU_WARNING) {
-          status = status === "critical" ? "critical" : "warning";
-          bottlenecks.push("GPU utilization elevated");
-          recommendations.push("Consider simpler shaders");
-        }
-      }
-
-      // If no bottlenecks but not optimal
-      if (bottlenecks.length === 0 && metrics.fps < 60) {
-        status = "good";
+         if (metrics.gpuLoad >= GPU_CRITICAL) {
+           bottlenecks.push("GPU utilization critically high");
+           recommendations.push("Reduce shader complexity");
+         } else if (metrics.gpuLoad >= GPU_WARNING) {
+           bottlenecks.push("GPU utilization elevated");
+           recommendations.push("Consider simpler shaders");
+         }
       }
 
       return success({
-        status,
-        bottlenecks,
-        recommendations,
+        status: currentStatus,
+        bottlenecks: [...new Set(bottlenecks)], // Remove duplicates
+        recommendations: [...new Set(recommendations)], // Remove duplicates
       });
     } catch (error) {
       return failure(
@@ -260,6 +250,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
       );
     }
   };
+
 
   return (
     <>
