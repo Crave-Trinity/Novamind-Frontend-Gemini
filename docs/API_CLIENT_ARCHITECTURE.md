@@ -1,4 +1,4 @@
-# API Client Architecture
+# API Client Architecture Guidelines
 
 ## Overview
 

@@ -1,4 +1,4 @@
-# Tailwind CSS v3.4 Implementation Guidelines
+# Tailwind CSS Guidelines (v3.4)
 
 ## 1. Overview
 

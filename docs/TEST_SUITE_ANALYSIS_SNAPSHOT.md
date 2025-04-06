@@ -1,4 +1,4 @@
-# Novamind Frontend: Test Infrastructure Analysis (Snapshot: 2025-04-05)
+# Test Suite Analysis Snapshot (2025-04-05)
 
 *Note: This analysis reflects the state as of April 5, 2025. Since then, ESLint issues have been resolved, configuration files cleaned up, and minor dependencies updated. The R3F test failures described below persist and are tracked separately.*
 ## Current Status
