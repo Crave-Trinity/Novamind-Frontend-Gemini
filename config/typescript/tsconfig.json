@@ -55,8 +55,7 @@
     "*.ts",
     "*.tsx",
     "*.d.ts",
-    "vite.config.ts",
-    "vitest.config.ts"
+    // Removed references to deleted root config files
   ],
   "exclude": [
     "node_modules",
