@@ -1,6 +1,6 @@
 /**
  * Enhanced Test Setup
- * 
+ *
  * Provides improved test environment setup with fixes for:
  * - Tailwind CSS class handling
  * - Animation cleanup
@@ -21,10 +21,10 @@ beforeAll(() => {
   const root = document.createElement('div');
   root.id = 'root';
   document.body.appendChild(root);
-  
+
   // Set up document for Tailwind dark mode
   document.documentElement.classList.add('light');
-  
+
   // Add a style element to simulate Tailwind
   const style = document.createElement('style');
   style.innerHTML = `
@@ -69,10 +69,10 @@ afterAll(() => {
   if (root) {
     document.body.removeChild(root);
   }
-  
+
   // Clean up any style elements added
-  document.querySelectorAll('style').forEach(el => el.remove());
-  
+  document.querySelectorAll('style').forEach((el) => el.remove());
+
   // Reset classLists
   document.documentElement.className = '';
 });
@@ -83,17 +83,17 @@ beforeEach(() => {
   if (document.body.firstChild !== document.getElementById('root')) {
     document.body.innerHTML = '<div id="root"></div>';
   }
-  
+
   // Clear mocks
   vi.clearAllMocks();
-  
+
   // Reset localStorage and sessionStorage
   localStorage.clear();
   sessionStorage.clear();
-  
+
   // Reset document class list while preserving the root element
   document.documentElement.className = 'light';
-  
+
   // Clear any lingering timeouts or intervals
   vi.clearAllTimers();
 });
@@ -105,12 +105,12 @@ const originalConsoleLog = console.log;
 
 console.error = (...args: any[]) => {
   // Filter React internal errors during tests
-  const isReactBug = args.some(arg => 
-    typeof arg === 'string' && 
-    (arg.includes('Warning: ReactDOM.render') || 
-     arg.includes('Warning: React.createElement'))
+  const isReactBug = args.some(
+    (arg) =>
+      typeof arg === 'string' &&
+      (arg.includes('Warning: ReactDOM.render') || arg.includes('Warning: React.createElement'))
   );
-  
+
   if (!isReactBug) {
     originalConsoleError(...args);
   }
@@ -118,13 +118,14 @@ console.error = (...args: any[]) => {
 
 console.warn = (...args: any[]) => {
   // Filter common test warnings
-  const isTestingWarning = args.some(arg => 
-    typeof arg === 'string' && 
-    (arg.includes('Warning: ReactDOM.render') || 
-     arg.includes('Warning: React.createElement') ||
-     arg.includes('act(...) is not supported in production builds of React'))
+  const isTestingWarning = args.some(
+    (arg) =>
+      typeof arg === 'string' &&
+      (arg.includes('Warning: ReactDOM.render') ||
+        arg.includes('Warning: React.createElement') ||
+        arg.includes('act(...) is not supported in production builds of React'))
   );
-  
+
   if (!isTestingWarning) {
     originalConsoleWarn(...args);
   }
@@ -136,7 +137,7 @@ afterEach(() => {
   console.error = originalConsoleError;
   console.warn = originalConsoleWarn;
   console.log = originalConsoleLog;
-  
+
   // Restore animation frame mocks if they exist
   try {
     vi.spyOn(window, 'requestAnimationFrame').mockRestore();
@@ -144,9 +145,9 @@ afterEach(() => {
   } catch (e) {
     // Ignore errors if the mocks don't exist
   }
-  
+
   // Clean up any canvas contexts
-  document.querySelectorAll('canvas').forEach(canvas => {
+  document.querySelectorAll('canvas').forEach((canvas) => {
     try {
       const gl = canvas.getContext('webgl') || canvas.getContext('webgl2');
       if (gl && typeof gl.getExtension === 'function') {
@@ -179,7 +180,7 @@ class MockDOMRect {
   right = 0;
   bottom = 0;
   left = 0;
-  
+
   constructor(x = 0, y = 0, width = 0, height = 0) {
     this.x = x;
     this.y = y;
@@ -190,7 +191,7 @@ class MockDOMRect {
     this.bottom = y + height;
     this.left = x;
   }
-  
+
   toJSON() {
     return {
       x: this.x,
@@ -200,7 +201,7 @@ class MockDOMRect {
       top: this.top,
       right: this.right,
       bottom: this.bottom,
-      left: this.left
+      left: this.left,
     };
   }
 

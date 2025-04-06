@@ -1,14 +1,14 @@
-import React, { useState } from "react";
-import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
+import React, { useState } from 'react';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 
-import { useTheme } from "@application/hooks/useTheme"; // Correct path to hook
+import { useTheme } from '@application/hooks/useTheme'; // Correct path to hook
 
 interface MainLayoutProps {
   children?: React.ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const { theme, isDarkMode, toggleTheme } = useTheme(); // Use toggleTheme instead of toggleDarkMode
+  const { isDarkMode, toggleTheme } = useTheme(); // Use toggleTheme instead of toggleDarkMode
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,15 +16,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   // Navigation items
   const navItems = [
     {
-      name: "Dashboard",
-      path: "/dashboard",
+      name: 'Dashboard',
+      path: '/dashboard',
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -35,15 +30,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       ),
     },
     {
-      name: "Patients",
-      path: "/patients",
+      name: 'Patients',
+      path: '/patients',
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -54,15 +44,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       ),
     },
     {
-      name: "Brain Models",
-      path: "/brain-model",
+      name: 'Brain Models',
+      path: '/brain-model',
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -73,15 +58,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       ),
     },
     {
-      name: "Predictions",
-      path: "/predictions",
+      name: 'Predictions',
+      path: '/predictions',
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -92,15 +72,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       ),
     },
     {
-      name: "Settings",
-      path: "/settings",
+      name: 'Settings',
+      path: '/settings',
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -126,14 +101,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   // Handle logout
   const handleLogout = () => {
     // In a real app, add logout logic here
-    navigate("/login");
+    navigate('/login');
   };
 
   // Active nav link style
   const isActiveLink = (path: string) => {
     return location.pathname.startsWith(path)
-      ? "bg-primary-500/10 text-primary-500 dark:text-primary-400"
-      : "text-neutral-600 dark:text-neutral-400";
+      ? 'bg-primary-500/10 text-primary-500 dark:text-primary-400'
+      : 'text-neutral-600 dark:text-neutral-400';
   };
 
   return (
@@ -141,12 +116,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {/* Sidebar */}
       <aside
         className={`${
-          isSidebarOpen ? "w-64" : "w-20"
+          isSidebarOpen ? 'w-64' : 'w-20'
         } z-10 flex flex-col bg-white shadow-md transition-all duration-300 dark:bg-background-card`}
       >
         {/* Logo */}
         <div
-          className={`border-b border-neutral-200 p-4 dark:border-neutral-800 ${isSidebarOpen ? "flex items-center justify-between" : "flex justify-center"}`}
+          className={`border-b border-neutral-200 p-4 dark:border-neutral-800 ${isSidebarOpen ? 'flex items-center justify-between' : 'flex justify-center'}`}
         >
           {isSidebarOpen ? (
             <>
@@ -174,12 +149,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-white"
                 onClick={toggleSidebar}
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -227,9 +197,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               `}
             >
               <span className="text-current">{item.icon}</span>
-              {isSidebarOpen && (
-                <span className="ml-3 font-medium">{item.name}</span>
-              )}
+              {isSidebarOpen && <span className="ml-3 font-medium">{item.name}</span>}
             </NavLink>
           ))}
         </nav>
@@ -259,12 +227,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 className="ml-2 text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-white"
                 onClick={handleLogout}
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -314,12 +277,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 data-testid="theme-toggle-button" // Add test ID
               >
                 {isDarkMode ? (
-                  <svg
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -328,12 +286,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     />
                   </svg>
                 ) : (
-                  <svg
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -346,12 +299,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
               {/* Notifications */}
               <button className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -364,12 +312,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
               {/* Help */}
               <button className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"

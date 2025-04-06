@@ -3,16 +3,16 @@
  * VisualizationControls testing with quantum precision
  */
 import React from 'react'; // Add React import for JSX
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // Removed duplicate WebGL mock imports, keep setup/cleanup if needed, but likely handled globally or by test-utils
 // import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl';
 // Removed beforeEach import
 
-import { render, screen, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import VisualizationControls from "./VisualizationControls";
-import { renderWithProviders } from "@test/test-utils.unified"; // Correct import path
-import { RenderMode } from "@domain/types/brain/visualization"; // Import RenderMode
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import VisualizationControls from './VisualizationControls';
+import { renderWithProviders } from '@test/test-utils.unified'; // Correct import path
+import { RenderMode } from '@domain/types/brain/visualization'; // Import RenderMode
 
 // Mock data with clinical precision including required props
 const mockProps = {
@@ -21,18 +21,19 @@ const mockProps = {
   // Add other optional component props here if needed for specific tests
 };
 
-describe("VisualizationControls", () => { // Unskip the suite
+describe('VisualizationControls', () => {
+  // Unskip the suite
   // Local matchMedia mock removed - relying on global mock in setup.ts
 
-  it("renders with neural precision", () => {
+  it('renders with neural precision', () => {
     // Use renderWithProviders if context is needed, otherwise use render
     renderWithProviders(<VisualizationControls {...mockProps} />);
 
     // Add assertions for rendered content - check for a key element
-    expect(screen.getByText("Visualization Mode")).toBeInTheDocument();
+    expect(screen.getByText('Visualization Mode')).toBeInTheDocument();
   });
 
-  it("responds to user interaction with quantum precision", async () => {
+  it('responds to user interaction with quantum precision', async () => {
     const user = userEvent.setup();
     const specificMockProps = {
       ...mockProps,
@@ -53,7 +54,6 @@ describe("VisualizationControls", () => { // Unskip the suite
     await user.click(settingsButton);
     // Check if settings panel appears (e.g., by looking for a setting label)
     expect(screen.getByText(/activity threshold/i)).toBeInTheDocument();
-
   });
 
   // Add more component-specific tests, e.g., for settings changes

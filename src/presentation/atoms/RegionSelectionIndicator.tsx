@@ -4,10 +4,10 @@
  * with neuropsychiatric precision and aesthetic brilliance
  */
 
-import React, { useRef, useMemo, useEffect } from "react";
-import { useFrame } from "@react-three/fiber";
-import { Vector3, Color, ShaderMaterial, Mesh } from "three";
-import { useSpring, animated } from "@react-spring/three";
+import React, { useRef, useMemo, useEffect } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { Vector3, Color, ShaderMaterial, Mesh } from 'three';
+import { useSpring, animated } from '@react-spring/three';
 
 // Custom shader for neural selection effect with clinical precision
 const selectionShader = {
@@ -79,12 +79,10 @@ interface RegionSelectionIndicatorProps {
  * RegionSelectionIndicator - Atomic component for region selection visualization
  * Implements advanced shader-based selection effects with clinical precision
  */
-export const RegionSelectionIndicator: React.FC<
-  RegionSelectionIndicatorProps
-> = ({
+export const RegionSelectionIndicator: React.FC<RegionSelectionIndicatorProps> = ({
   position,
   scale,
-  color = "#3b82f6", // Default to clinical blue
+  color = '#3b82f6', // Default to clinical blue
   selected,
   rimPower = 3.0,
   rimIntensity = 1.5,
@@ -98,7 +96,7 @@ export const RegionSelectionIndicator: React.FC<
 
   // Calculate derived scale
   const derivedScale = useMemo(() => {
-    if (typeof scale === "number") {
+    if (typeof scale === 'number') {
       return new Vector3(scale, scale, scale);
     }
     return scale;
@@ -153,8 +151,7 @@ export const RegionSelectionIndicator: React.FC<
       materialRef.current.uniforms.time.value = state.clock.getElapsedTime();
 
       // Update selection strength from spring physics
-      materialRef.current.uniforms.selectionStrength.value =
-        selectionStrength.get();
+      materialRef.current.uniforms.selectionStrength.value = selectionStrength.get();
     }
   });
 
@@ -165,11 +162,7 @@ export const RegionSelectionIndicator: React.FC<
       scale={derivedScale.clone().multiplyScalar(1.05)} // Slightly larger than the region
     >
       <sphereGeometry args={[1, 32, 32]} />
-      <shaderMaterial
-        ref={materialRef}
-        args={[shaderMaterial]}
-        attach="material"
-      />
+      <shaderMaterial ref={materialRef} args={[shaderMaterial]} attach="material" />
     </animated.mesh>
   );
 };

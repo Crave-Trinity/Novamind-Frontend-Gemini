@@ -16,23 +16,31 @@ vi.mock('@react-three/fiber', () => ({
     gl: {
       setSize: vi.fn(),
       render: vi.fn(),
-      dispose: vi.fn()
+      dispose: vi.fn(),
     },
     camera: {
       position: { set: vi.fn() },
-      lookAt: vi.fn()
+      lookAt: vi.fn(),
     },
-    scene: {}
+    scene: {},
   }),
-  Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="mock-canvas">{children}</div>, // Simple div mock
+  Canvas: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="mock-canvas">{children}</div>
+  ), // Simple div mock
 }));
 
 // Mock Three.js more carefully
 vi.mock('three', async (importOriginal) => {
-  const actualThree = await importOriginal() as any;
+  const actualThree = (await importOriginal()) as any;
   class MockVector3 {
-    x: number; y: number; z: number;
-    constructor(x = 0, y = 0, z = 0) { this.x = x; this.y = y; this.z = z; }
+    x: number;
+    y: number;
+    z: number;
+    constructor(x = 0, y = 0, z = 0) {
+      this.x = x;
+      this.y = y;
+      this.z = z;
+    }
     set = vi.fn(() => this);
     clone = vi.fn(() => new MockVector3(this.x, this.y, this.z));
     multiplyScalar = vi.fn(() => this);
@@ -49,7 +57,12 @@ vi.mock('three', async (importOriginal) => {
     MeshStandardMaterial: vi.fn(() => ({ dispose: vi.fn() })),
     Scene: vi.fn(() => ({ add: vi.fn(), remove: vi.fn() })), // Mock Scene
     PerspectiveCamera: vi.fn(() => ({ position: { set: vi.fn() }, lookAt: vi.fn() })), // Mock Camera
-    WebGLRenderer: vi.fn(() => ({ setSize: vi.fn(), render: vi.fn(), dispose: vi.fn(), domElement: document.createElement('canvas') })), // Mock Renderer
+    WebGLRenderer: vi.fn(() => ({
+      setSize: vi.fn(),
+      render: vi.fn(),
+      dispose: vi.fn(),
+      domElement: document.createElement('canvas'),
+    })), // Mock Renderer
     DoubleSide: actualThree.DoubleSide ?? 2,
   };
 });
@@ -64,16 +77,23 @@ vi.mock('@react-three/drei', () => ({
 // Mock @react-spring/three (if used by children)
 vi.mock('@react-spring/three', () => ({
   useSpring: vi.fn(() => ({ mockValue: { get: vi.fn(() => 0.5) } })), // Generic spring mock
-  animated: new Proxy({}, {
-    get: (target, prop) => {
-      const MockAnimatedComponent = React.forwardRef(
-        ({ children, ...props }: React.PropsWithChildren<any>, ref: any) =>
-          React.createElement('div', { 'data-testid': `mock-animated-${String(prop)}`, ref, ...props }, children)
-      );
-      MockAnimatedComponent.displayName = `animated.${String(prop)}`;
-      return MockAnimatedComponent;
+  animated: new Proxy(
+    {},
+    {
+      get: (target, prop) => {
+        const MockAnimatedComponent = React.forwardRef(
+          ({ children, ...props }: React.PropsWithChildren<any>, ref: any) =>
+            React.createElement(
+              'div',
+              { 'data-testid': `mock-animated-${String(prop)}`, ref, ...props },
+              children
+            )
+        );
+        MockAnimatedComponent.displayName = `animated.${String(prop)}`;
+        return MockAnimatedComponent;
+      },
     }
-  })
+  ),
 }));
 
 // Mock child components that might render R3F elements directly
@@ -142,7 +162,8 @@ vi.mock('@application/hooks/useSearchParams', () => ({
     setParam: vi.fn(),
   })),
 }));
-vi.mock('next-themes', () => ({ // Mock next-themes
+vi.mock('next-themes', () => ({
+  // Mock next-themes
   useTheme: vi.fn(() => ({ theme: 'clinical' })),
 }));
 

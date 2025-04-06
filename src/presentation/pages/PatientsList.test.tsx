@@ -13,7 +13,7 @@ import * as ReactRouterDom from 'react-router-dom'; // Import for mocking
 
 // Mock react-query's useQuery hook
 vi.mock('@tanstack/react-query', async (importOriginal) => {
-  const actual = await importOriginal() as any;
+  const actual = (await importOriginal()) as any;
   return {
     ...actual,
     useQuery: vi.fn(),
@@ -22,7 +22,7 @@ vi.mock('@tanstack/react-query', async (importOriginal) => {
 
 // Mock react-router-dom's useNavigate hook
 vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = await importOriginal() as any;
+  const actual = (await importOriginal()) as any;
   return {
     ...actual,
     useNavigate: vi.fn(() => vi.fn()), // Mock useNavigate to return a dummy function
@@ -37,28 +37,29 @@ import { PatientModel, createPatientModel } from '@domain/models/clinical/patien
 // Use PatientModel and createPatientModel factory
 const mockPatients: PatientModel[] = [
   createPatientModel({
-    id: "p1",
-    firstName: "Test Patient",
-    lastName: "One",
-    dateOfBirth: new Date("1979-03-15"),
-    demographics: { age: 45, biologicalSex: "female" },
+    id: 'p1',
+    firstName: 'Test Patient',
+    lastName: 'One',
+    dateOfBirth: new Date('1979-03-15'),
+    demographics: { age: 45, biologicalSex: 'female' },
     // dateOfBirth: new Date("1979-03-15"), // Remove duplicate
-    clinicalHistory: { primaryDiagnosis: "MDD" },
-    lastUpdated: new Date("2025-03-15"),
+    clinicalHistory: { primaryDiagnosis: 'MDD' },
+    lastUpdated: new Date('2025-03-15'),
   }),
-   createPatientModel({
-    id: "p2",
-    firstName: "Test Patient",
-    lastName: "Two",
-    dateOfBirth: new Date("1972-08-22"),
-    demographics: { age: 52, biologicalSex: "male" },
+  createPatientModel({
+    id: 'p2',
+    firstName: 'Test Patient',
+    lastName: 'Two',
+    dateOfBirth: new Date('1972-08-22'),
+    demographics: { age: 52, biologicalSex: 'male' },
     // dateOfBirth: new Date("1972-08-22"), // Remove duplicate
-    clinicalHistory: { primaryDiagnosis: "GAD" },
-    lastUpdated: new Date("2025-03-20"),
+    clinicalHistory: { primaryDiagnosis: 'GAD' },
+    lastUpdated: new Date('2025-03-20'),
   }),
 ];
 
-describe('PatientsList Page', () => { // Re-enabled suite
+describe('PatientsList Page', () => {
+  // Re-enabled suite
   const mockedUseQuery = ReactQuery.useQuery as Mock;
   const mockedUseNavigate = ReactRouterDom.useNavigate as Mock;
   const mockNavigate = vi.fn();
@@ -109,7 +110,7 @@ describe('PatientsList Page', () => { // Re-enabled suite
   });
 
   it('displays loading state', () => {
-     mockedUseQuery.mockReturnValue({
+    mockedUseQuery.mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
@@ -119,7 +120,7 @@ describe('PatientsList Page', () => { // Re-enabled suite
   });
 
   it('displays error state', () => {
-     mockedUseQuery.mockReturnValue({
+    mockedUseQuery.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('Failed to fetch'),
@@ -128,5 +129,4 @@ describe('PatientsList Page', () => { // Re-enabled suite
     expect(screen.getByText(/error loading patients/i)).toBeInTheDocument();
     expect(screen.getByText(/failed to fetch/i)).toBeInTheDocument();
   });
-
 });

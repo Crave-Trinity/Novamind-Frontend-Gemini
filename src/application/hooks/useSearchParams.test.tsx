@@ -4,14 +4,18 @@
  */
 
 import React, { type PropsWithChildren } from 'react'; // Already correct
-import { describe, it, expect, vi, type Mock } from "vitest"; // Already correct
+import { describe, it, expect, vi, type Mock } from 'vitest'; // Already correct
 import { renderHook } from '@testing-library/react'; // Keep single import
-import { MemoryRouter, useLocation, useSearchParams as useReactRouterSearchParams } from 'react-router-dom'; // Keep single import
-import { useSearchParams } from "@hooks/useSearchParams"; // Import the custom hook
+import {
+  MemoryRouter,
+  useLocation,
+  useSearchParams as useReactRouterSearchParams,
+} from 'react-router-dom'; // Keep single import
+import { useSearchParams } from '@hooks/useSearchParams'; // Import the custom hook
 
 // Mock react-router-dom hooks
 vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = await importOriginal() as any;
+  const actual = (await importOriginal()) as any;
   return {
     ...actual,
     useLocation: vi.fn(), // Keep useLocation mock if needed, though not directly used by useSearchParams hook itself
@@ -24,20 +28,26 @@ vi.mock('react-router-dom', async (importOriginal) => {
 const mockSetSearchParams = vi.fn(); // Define mock at the top level
 
 // Helper component to render the hook within MemoryRouter
-const HookWrapper: React.FC<PropsWithChildren<{ initialEntries?: string[] }>> = ({ children, initialEntries = ['/'] }) => {
+const HookWrapper: React.FC<PropsWithChildren<{ initialEntries?: string[] }>> = ({
+  children,
+  initialEntries = ['/'],
+}) => {
   // Use explicit return and correct JSX syntax
   return <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>;
 };
 
-
-describe("useSearchParams", () => { // Re-enabled suite
-  it("processes data with mathematical precision", () => {
+describe('useSearchParams', () => {
+  // Re-enabled suite
+  it('processes data with mathematical precision', () => {
     // Arrange test data
     const testData = {};
 
     // Mock the original useSearchParams return value for this test
     // Mock the original useSearchParams return value for this test
-    (useReactRouterSearchParams as Mock).mockReturnValue([new URLSearchParams('?q=test&page=1'), mockSetSearchParams]);
+    (useReactRouterSearchParams as Mock).mockReturnValue([
+      new URLSearchParams('?q=test&page=1'),
+      mockSetSearchParams,
+    ]);
 
     // Act: Render the hook using renderHook with the wrapper
     const { result } = renderHook(() => useSearchParams(), { wrapper: HookWrapper });
@@ -48,12 +58,15 @@ describe("useSearchParams", () => { // Re-enabled suite
     expect(result.current.getParam('nonexistent')).toBeNull();
   });
 
-  it("handles edge cases with clinical precision", () => {
+  it('handles edge cases with clinical precision', () => {
     // Test edge cases
     const edgeCaseData = {};
 
     // Mock the original useSearchParams return value for empty search
-    (useReactRouterSearchParams as Mock).mockReturnValue([new URLSearchParams(''), mockSetSearchParams]);
+    (useReactRouterSearchParams as Mock).mockReturnValue([
+      new URLSearchParams(''),
+      mockSetSearchParams,
+    ]);
 
     // Act
     const { result: resultEmpty } = renderHook(() => useSearchParams(), { wrapper: HookWrapper });
@@ -61,8 +74,11 @@ describe("useSearchParams", () => { // Re-enabled suite
     // Assert
     expect(resultEmpty.current.getParam('q')).toBeNull();
 
-     // Mock the original useSearchParams return value for search without value
-    (useReactRouterSearchParams as Mock).mockReturnValue([new URLSearchParams('?flag'), mockSetSearchParams]);
+    // Mock the original useSearchParams return value for search without value
+    (useReactRouterSearchParams as Mock).mockReturnValue([
+      new URLSearchParams('?flag'),
+      mockSetSearchParams,
+    ]);
 
     // Act
     const { result: resultFlag } = renderHook(() => useSearchParams(), { wrapper: HookWrapper });

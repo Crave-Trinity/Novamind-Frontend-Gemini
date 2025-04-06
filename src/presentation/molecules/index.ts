@@ -6,7 +6,7 @@
  */
 
 // UI Components
-export { default as Header } from "./Header";
-export { Chart } from "./Chart";
+export { default as Header } from './Header';
+export { Chart } from './Chart';
 
 // Add additional molecule exports here as the application grows

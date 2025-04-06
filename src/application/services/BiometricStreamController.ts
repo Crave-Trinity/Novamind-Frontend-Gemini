@@ -4,7 +4,7 @@
  * with mathematically precise clinical correlation and type-safe operations
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // Domain types
 import type {
@@ -16,12 +16,12 @@ import type {
   AlertPriority, // Already type-only
   AlertSource, // Already type-only
   BiometricThreshold, // Already type-only
-} from "@domain/types/biometric/streams";
-import { Result, type Result as ResultType, success, failure } from "@domain/types/shared/common"; // Already correct
+} from '@domain/types/biometric/streams';
+import { Result, type Result as ResultType, success, failure } from '@domain/types/shared/common'; // Already correct
 
 // Services
-import { biometricService } from "@application/services/biometricService"; // Revert to alias
-import { clinicalService } from "@application/services/clinicalService"; // Revert to alias
+import { biometricService } from '@application/services/biometricService'; // Revert to alias
+import { clinicalService } from '@application/services/clinicalService'; // Revert to alias
 
 /**
  * Neural-safe stream configuration with quantum precision
@@ -67,7 +67,7 @@ const defaultStreamConfig: StreamConfig = {
   bufferSize: 86400, // 24 hours of data at 1 sample per second
   alertThresholds: new Map(),
   correlationWindow: 30, // 30 minutes
-  sources: ["wearable", "mobile", "clinical"],
+  sources: ['wearable', 'mobile', 'clinical'],
   streamIds: [],
   normalizeData: true,
   filterOutliers: true,
@@ -100,7 +100,7 @@ const createInitialStreamState = (): BiometricStreamState => ({
  */
 export function useBiometricStreamController(
   patientId: string,
-  initialConfig: Partial<StreamConfig> = {},
+  initialConfig: Partial<StreamConfig> = {}
 ) {
   // Merge provided config with defaults
   const config = useMemo<StreamConfig>(
@@ -108,13 +108,11 @@ export function useBiometricStreamController(
       ...defaultStreamConfig,
       ...initialConfig,
     }),
-    [initialConfig],
+    [initialConfig]
   );
 
   // State with thread-safe operations
-  const [state, setState] = useState<BiometricStreamState>(
-    createInitialStreamState(),
-  );
+  const [state, setState] = useState<BiometricStreamState>(createInitialStreamState());
 
   // WebSocket connection for real-time data (simulated)
   const wsRef = useRef<WebSocket | null>(null);
@@ -124,146 +122,146 @@ export function useBiometricStreamController(
     // Set up default alert thresholds
     const defaultThresholds = new Map<BiometricType, BiometricThreshold[]>([
       [
-        "heartRate",
+        'heartRate',
         [
-          { min: 40, max: 60, label: "Bradycardia", priority: "warning" },
-          { min: 100, max: 120, label: "Tachycardia", priority: "warning" },
-          { min: 0, max: 40, label: "Severe Bradycardia", priority: "urgent" },
+          { min: 40, max: 60, label: 'Bradycardia', priority: 'warning' },
+          { min: 100, max: 120, label: 'Tachycardia', priority: 'warning' },
+          { min: 0, max: 40, label: 'Severe Bradycardia', priority: 'urgent' },
           {
             min: 120,
             max: 999,
-            label: "Severe Tachycardia",
-            priority: "urgent",
+            label: 'Severe Tachycardia',
+            priority: 'urgent',
           },
         ],
       ],
       [
-        "bloodPressureSystolic",
+        'bloodPressureSystolic',
         [
-          { min: 90, max: 120, label: "Normal", priority: "informational" },
-          { min: 120, max: 140, label: "Elevated", priority: "informational" },
+          { min: 90, max: 120, label: 'Normal', priority: 'informational' },
+          { min: 120, max: 140, label: 'Elevated', priority: 'informational' },
           {
             min: 140,
             max: 160,
-            label: "Hypertension Stage 1",
-            priority: "warning",
+            label: 'Hypertension Stage 1',
+            priority: 'warning',
           },
           {
             min: 160,
             max: 180,
-            label: "Hypertension Stage 2",
-            priority: "warning",
+            label: 'Hypertension Stage 2',
+            priority: 'warning',
           },
           {
             min: 180,
             max: 999,
-            label: "Hypertensive Crisis",
-            priority: "urgent",
+            label: 'Hypertensive Crisis',
+            priority: 'urgent',
           },
-          { min: 0, max: 90, label: "Hypotension", priority: "warning" },
+          { min: 0, max: 90, label: 'Hypotension', priority: 'warning' },
         ],
       ],
       [
-        "bloodPressureDiastolic",
+        'bloodPressureDiastolic',
         [
-          { min: 60, max: 80, label: "Normal", priority: "informational" },
-          { min: 80, max: 90, label: "Elevated", priority: "informational" },
+          { min: 60, max: 80, label: 'Normal', priority: 'informational' },
+          { min: 80, max: 90, label: 'Elevated', priority: 'informational' },
           {
             min: 90,
             max: 100,
-            label: "Hypertension Stage 1",
-            priority: "warning",
+            label: 'Hypertension Stage 1',
+            priority: 'warning',
           },
           {
             min: 100,
             max: 110,
-            label: "Hypertension Stage 2",
-            priority: "warning",
+            label: 'Hypertension Stage 2',
+            priority: 'warning',
           },
           {
             min: 110,
             max: 999,
-            label: "Hypertensive Crisis",
-            priority: "urgent",
+            label: 'Hypertensive Crisis',
+            priority: 'urgent',
           },
-          { min: 0, max: 60, label: "Hypotension", priority: "warning" },
+          { min: 0, max: 60, label: 'Hypotension', priority: 'warning' },
         ],
       ],
       [
-        "respiratoryRate",
+        'respiratoryRate',
         [
-          { min: 12, max: 20, label: "Normal", priority: "informational" },
-          { min: 8, max: 12, label: "Low", priority: "warning" },
-          { min: 20, max: 30, label: "Elevated", priority: "warning" },
-          { min: 0, max: 8, label: "Critical Low", priority: "urgent" },
-          { min: 30, max: 999, label: "Critical High", priority: "urgent" },
+          { min: 12, max: 20, label: 'Normal', priority: 'informational' },
+          { min: 8, max: 12, label: 'Low', priority: 'warning' },
+          { min: 20, max: 30, label: 'Elevated', priority: 'warning' },
+          { min: 0, max: 8, label: 'Critical Low', priority: 'urgent' },
+          { min: 30, max: 999, label: 'Critical High', priority: 'urgent' },
         ],
       ],
       [
-        "bodyTemperature",
+        'bodyTemperature',
         [
-          { min: 36.5, max: 37.5, label: "Normal", priority: "informational" },
-          { min: 35.0, max: 36.5, label: "Low", priority: "warning" },
-          { min: 37.5, max: 38.5, label: "Fever", priority: "warning" },
-          { min: 0, max: 35.0, label: "Hypothermia", priority: "urgent" },
-          { min: 38.5, max: 41.5, label: "High Fever", priority: "urgent" },
+          { min: 36.5, max: 37.5, label: 'Normal', priority: 'informational' },
+          { min: 35.0, max: 36.5, label: 'Low', priority: 'warning' },
+          { min: 37.5, max: 38.5, label: 'Fever', priority: 'warning' },
+          { min: 0, max: 35.0, label: 'Hypothermia', priority: 'urgent' },
+          { min: 38.5, max: 41.5, label: 'High Fever', priority: 'urgent' },
           {
             min: 41.5,
             max: 999,
-            label: "Critical Hyperthermia",
-            priority: "urgent",
+            label: 'Critical Hyperthermia',
+            priority: 'urgent',
           },
         ],
       ],
       [
-        "oxygenSaturation",
+        'oxygenSaturation',
         [
-          { min: 95, max: 100, label: "Normal", priority: "informational" },
-          { min: 91, max: 95, label: "Low", priority: "warning" },
-          { min: 85, max: 91, label: "Very Low", priority: "warning" },
-          { min: 0, max: 85, label: "Critical", priority: "urgent" },
+          { min: 95, max: 100, label: 'Normal', priority: 'informational' },
+          { min: 91, max: 95, label: 'Low', priority: 'warning' },
+          { min: 85, max: 91, label: 'Very Low', priority: 'warning' },
+          { min: 0, max: 85, label: 'Critical', priority: 'urgent' },
         ],
       ],
       [
-        "bloodGlucose",
+        'bloodGlucose',
         [
-          { min: 70, max: 140, label: "Normal", priority: "informational" },
-          { min: 140, max: 180, label: "Elevated", priority: "informational" },
-          { min: 40, max: 70, label: "Low", priority: "warning" },
-          { min: 180, max: 250, label: "High", priority: "warning" },
-          { min: 0, max: 40, label: "Critical Low", priority: "urgent" },
-          { min: 250, max: 999, label: "Critical High", priority: "urgent" },
+          { min: 70, max: 140, label: 'Normal', priority: 'informational' },
+          { min: 140, max: 180, label: 'Elevated', priority: 'informational' },
+          { min: 40, max: 70, label: 'Low', priority: 'warning' },
+          { min: 180, max: 250, label: 'High', priority: 'warning' },
+          { min: 0, max: 40, label: 'Critical Low', priority: 'urgent' },
+          { min: 250, max: 999, label: 'Critical High', priority: 'urgent' },
         ],
       ],
       [
-        "cortisol",
+        'cortisol',
         [
-          { min: 5, max: 23, label: "Normal", priority: "informational" },
-          { min: 23, max: 40, label: "Elevated", priority: "warning" },
-          { min: 0, max: 5, label: "Low", priority: "warning" },
-          { min: 40, max: 999, label: "Critically High", priority: "warning" },
+          { min: 5, max: 23, label: 'Normal', priority: 'informational' },
+          { min: 23, max: 40, label: 'Elevated', priority: 'warning' },
+          { min: 0, max: 5, label: 'Low', priority: 'warning' },
+          { min: 40, max: 999, label: 'Critically High', priority: 'warning' },
         ],
       ],
       [
-        "sleepQuality",
+        'sleepQuality',
         [
-          { min: 70, max: 100, label: "Good", priority: "informational" },
-          { min: 50, max: 70, label: "Fair", priority: "informational" },
-          { min: 30, max: 50, label: "Poor", priority: "warning" },
-          { min: 0, max: 30, label: "Very Poor", priority: "warning" },
+          { min: 70, max: 100, label: 'Good', priority: 'informational' },
+          { min: 50, max: 70, label: 'Fair', priority: 'informational' },
+          { min: 30, max: 50, label: 'Poor', priority: 'warning' },
+          { min: 0, max: 30, label: 'Very Poor', priority: 'warning' },
         ],
       ],
       [
-        "eegThetaPower",
+        'eegThetaPower',
         [
-          { min: 0, max: 100, label: "Normal", priority: "informational" },
+          { min: 0, max: 100, label: 'Normal', priority: 'informational' },
           // Custom thresholds would be set by clinical team
         ],
       ],
       [
-        "motionActivity",
+        'motionActivity',
         [
-          { min: 0, max: 100, label: "Normal", priority: "informational" },
+          { min: 0, max: 100, label: 'Normal', priority: 'informational' },
           // Thresholds determined by baseline activity patterns
         ],
       ],
@@ -283,15 +281,15 @@ export function useBiometricStreamController(
 
     // Set normal ranges
     const normalRanges = new Map<BiometricType, [number, number]>([
-      ["heartRate", [60, 100]],
-      ["bloodPressureSystolic", [90, 120]],
-      ["bloodPressureDiastolic", [60, 80]],
-      ["respiratoryRate", [12, 20]],
-      ["bodyTemperature", [36.5, 37.5]],
-      ["oxygenSaturation", [95, 100]],
-      ["bloodGlucose", [70, 140]],
-      ["cortisol", [5, 23]],
-      ["sleepQuality", [70, 100]],
+      ['heartRate', [60, 100]],
+      ['bloodPressureSystolic', [90, 120]],
+      ['bloodPressureDiastolic', [60, 80]],
+      ['respiratoryRate', [12, 20]],
+      ['bodyTemperature', [36.5, 37.5]],
+      ['oxygenSaturation', [95, 100]],
+      ['bloodGlucose', [70, 140]],
+      ['cortisol', [5, 23]],
+      ['sleepQuality', [70, 100]],
       // Other metrics would be set based on patient baseline
     ]);
 
@@ -309,7 +307,7 @@ export function useBiometricStreamController(
         const targetStreamIds = streamIds || config.streamIds;
 
         if (targetStreamIds.length === 0) {
-          return failure(new Error("No stream IDs provided for connection"));
+          return failure(new Error('No stream IDs provided for connection'));
         }
 
         // Start by marking as processing
@@ -320,41 +318,41 @@ export function useBiometricStreamController(
         }));
 
         // Get stream metadata
-        const streamsResult = await biometricService.getStreamMetadata(
-          patientId,
-          targetStreamIds,
-        );
+        const streamsResult = await biometricService.getStreamMetadata(patientId, targetStreamIds);
 
         // Use type guard to check for failure
         if (Result.isFailure(streamsResult)) {
-          const errorMessage = streamsResult.error instanceof Error ? streamsResult.error.message : String(streamsResult.error);
+          const errorMessage =
+            streamsResult.error instanceof Error
+              ? streamsResult.error.message
+              : String(streamsResult.error);
           setState((prevState) => ({
             ...prevState,
             isProcessing: false,
-            errorState: errorMessage || "Failed to load stream metadata",
+            errorState: errorMessage || 'Failed to load stream metadata',
           }));
 
-          return failure(
-            new Error(errorMessage || "Failed to load stream metadata"),
-          );
+          return failure(new Error(errorMessage || 'Failed to load stream metadata'));
         }
-        
+
         // Now TypeScript knows streamsResult is { success: true; value: T }
         const streams = streamsResult.value; // Access the value property
-        if (!streams) { // Add a check for potentially empty value (though unlikely with success)
-            setState((prevState) => ({
-                ...prevState,
-                isProcessing: false,
-                errorState: "Stream metadata loaded successfully but value is empty.",
-            }));
-            return failure(new Error("Stream metadata loaded successfully but value is empty."));
+        if (!streams) {
+          // Add a check for potentially empty value (though unlikely with success)
+          setState((prevState) => ({
+            ...prevState,
+            isProcessing: false,
+            errorState: 'Stream metadata loaded successfully but value is empty.',
+          }));
+          return failure(new Error('Stream metadata loaded successfully but value is empty.'));
         }
 
         // Initialize stream data storage
         const newActiveStreams = new Map<string, BiometricStream>();
         const newStreamData = new Map<string, BiometricDataPoint[]>();
 
-        streams.forEach((stream) => { // Use the extracted 'streams' variable
+        streams.forEach((stream) => {
+          // Use the extracted 'streams' variable
           newActiveStreams.set(stream.id, stream);
           newStreamData.set(stream.id, []);
         });
@@ -380,10 +378,10 @@ export function useBiometricStreamController(
         const simulateWebSocket = () => {
           const simulatedWs = {
             send: (message: string) => {
-              console.log("Sending to biometric WebSocket:", message);
+              console.log('Sending to biometric WebSocket:', message);
             },
             close: () => {
-              console.log("Closing biometric WebSocket connection");
+              console.log('Closing biometric WebSocket connection');
               clearInterval(dataInterval);
             },
           } as unknown as WebSocket;
@@ -395,17 +393,14 @@ export function useBiometricStreamController(
                 // Generate random data for each stream (for demo purposes)
                 newActiveStreams.forEach((stream, streamId) => {
                   // Generate simulated data point
-                  const dataPoint = generateSimulatedDataPoint(
-                    streamId,
-                    stream.type,
-                  );
+                  const dataPoint = generateSimulatedDataPoint(streamId, stream.type);
 
                   // Process the data point
                   processDataPoint(streamId, dataPoint);
                 });
               }
             },
-            (60 * 1000) / config.sampleRate,
+            (60 * 1000) / config.sampleRate
           ); // Convert to milliseconds
 
           return simulatedWs;
@@ -421,22 +416,16 @@ export function useBiometricStreamController(
           isProcessing: false,
           isConnected: false,
           errorState:
-            error instanceof Error
-              ? error.message
-              : "Unknown error connecting to streams",
+            error instanceof Error ? error.message : 'Unknown error connecting to streams',
         }));
 
         return failure(
           // Ensure wrapped in Error
-          new Error(
-            error instanceof Error
-              ? error.message
-              : "Unknown error connecting to streams",
-          ),
+          new Error(error instanceof Error ? error.message : 'Unknown error connecting to streams')
         );
       }
     },
-    [patientId, config.streamIds, config.sampleRate],
+    [patientId, config.streamIds, config.sampleRate]
   );
 
   // Disconnect from biometric streams
@@ -458,11 +447,7 @@ export function useBiometricStreamController(
     } catch (error) {
       return failure(
         // Ensure wrapped in Error
-        new Error(
-          error instanceof Error
-            ? error.message
-            : "Unknown error disconnecting streams",
-        ),
+        new Error(error instanceof Error ? error.message : 'Unknown error disconnecting streams')
       );
     }
   }, []);
@@ -500,11 +485,11 @@ export function useBiometricStreamController(
         timestamp,
         value,
         type,
-        source: "wearable", // Default source for simulation
-        quality: Math.random() < 0.9 ? "high" : "medium", // 90% high quality
+        source: 'wearable', // Default source for simulation
+        quality: Math.random() < 0.9 ? 'high' : 'medium', // 90% high quality
       };
     },
-    [state.normalRanges],
+    [state.normalRanges]
   );
 
   // Process a single biometric data point
@@ -524,14 +509,10 @@ export function useBiometricStreamController(
               .slice(Math.max(0, streamData.length - 10))
               .map((dp) => dp.value);
 
-            const mean =
-              recentValues.reduce((sum, val) => sum + val, 0) /
-              recentValues.length;
+            const mean = recentValues.reduce((sum, val) => sum + val, 0) / recentValues.length;
             const stdDev = Math.sqrt(
-              recentValues.reduce(
-                (sum, val) => sum + Math.pow(val - mean, 2),
-                0,
-              ) / recentValues.length,
+              recentValues.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+                recentValues.length
             );
 
             // If value is more than 3 standard deviations from mean, flag as outlier
@@ -539,8 +520,8 @@ export function useBiometricStreamController(
               // Skip this point or mark as low quality
               dataPoint = {
                 ...dataPoint,
-                quality: "low",
-                flags: ["outlier"],
+                quality: 'low',
+                flags: ['outlier'],
               };
             }
           }
@@ -568,18 +549,15 @@ export function useBiometricStreamController(
 
           // Check each threshold
           for (const threshold of thresholds) {
-            if (
-              dataPoint.value < threshold.min ||
-              dataPoint.value > threshold.max
-            ) {
+            if (dataPoint.value < threshold.min || dataPoint.value > threshold.max) {
               // Skip informational alerts if we're beyond a threshold for the same metric
               if (
-                threshold.priority === "informational" &&
+                threshold.priority === 'informational' &&
                 newAlerts.some(
                   (alert) =>
                     alert.streamId === streamId &&
                     alert.biometricType === dataPoint.type &&
-                    alert.priority !== "informational",
+                    alert.priority !== 'informational'
                 )
               ) {
                 continue;
@@ -596,9 +574,9 @@ export function useBiometricStreamController(
                 biometricType: dataPoint.type,
                 triggeringValue: dataPoint.value,
                 threshold: threshold,
-                message: `${threshold.label}: ${dataPoint.value.toFixed(1)} ${stream.unit || ""}`,
+                message: `${threshold.label}: ${dataPoint.value.toFixed(1)} ${stream.unit || ''}`,
                 priority: threshold.priority,
-                source: "algorithm",
+                source: 'algorithm',
                 acknowledged: false,
               };
 
@@ -622,30 +600,24 @@ export function useBiometricStreamController(
           alerts: newAlerts,
           lastSyncTime: new Date(),
           lastAlertTime:
-            newAlerts.length > prevState.alerts.length
-              ? new Date()
-              : prevState.lastAlertTime,
+            newAlerts.length > prevState.alerts.length ? new Date() : prevState.lastAlertTime,
           metrics: {
             dataPointsProcessed: prevState.metrics.dataPointsProcessed + 1,
             alertsGenerated:
-              prevState.metrics.alertsGenerated +
-              (newAlerts.length - prevState.alerts.length),
-            processingLatency:
-              (prevState.metrics.processingLatency + latency) / 2, // Running average
+              prevState.metrics.alertsGenerated + (newAlerts.length - prevState.alerts.length),
+            processingLatency: (prevState.metrics.processingLatency + latency) / 2, // Running average
           },
         };
       });
     },
-    [config.filterOutliers, config.bufferSize, config.alertThresholds],
+    [config.filterOutliers, config.bufferSize, config.alertThresholds]
   );
 
   // Acknowledge an alert
   const acknowledgeAlert = useCallback((alertId: string): ResultType<void> => {
     try {
       setState((prevState) => {
-        const alertIndex = prevState.alerts.findIndex(
-          (alert) => alert.id === alertId,
-        );
+        const alertIndex = prevState.alerts.findIndex((alert) => alert.id === alertId);
 
         if (alertIndex === -1) {
           return prevState;
@@ -669,11 +641,7 @@ export function useBiometricStreamController(
     } catch (error) {
       return failure(
         // Ensure wrapped in Error
-        new Error(
-          error instanceof Error
-            ? error.message
-            : "Unknown error acknowledging alert",
-        ),
+        new Error(error instanceof Error ? error.message : 'Unknown error acknowledging alert')
       );
     }
   }, []);
@@ -689,7 +657,7 @@ export function useBiometricStreamController(
 
       return streamData.slice(Math.max(0, streamData.length - count));
     },
-    [state.streamData],
+    [state.streamData]
   );
 
   // Get active alerts
@@ -698,20 +666,16 @@ export function useBiometricStreamController(
       let filteredAlerts = [...state.alerts];
 
       if (priority !== undefined) {
-        filteredAlerts = filteredAlerts.filter(
-          (alert) => alert.priority === priority,
-        );
+        filteredAlerts = filteredAlerts.filter((alert) => alert.priority === priority);
       }
 
       if (acknowledged !== undefined) {
-        filteredAlerts = filteredAlerts.filter(
-          (alert) => alert.acknowledged === acknowledged,
-        );
+        filteredAlerts = filteredAlerts.filter((alert) => alert.acknowledged === acknowledged);
       }
 
       return filteredAlerts;
     },
-    [state.alerts],
+    [state.alerts]
   );
 
   // Calculate correlations between biometric streams
@@ -743,12 +707,8 @@ export function useBiometricStreamController(
 
           // Calculate Pearson correlation coefficient
           // (This is a simplified version - real implementation would need time alignment)
-          const valuesA = dataA
-            .slice(Math.max(0, dataA.length - 100))
-            .map((dp) => dp.value);
-          const valuesB = dataB
-            .slice(Math.max(0, dataB.length - 100))
-            .map((dp) => dp.value);
+          const valuesA = dataA.slice(Math.max(0, dataA.length - 100)).map((dp) => dp.value);
+          const valuesB = dataB.slice(Math.max(0, dataB.length - 100)).map((dp) => dp.value);
 
           // Use smallest length
           const n = Math.min(valuesA.length, valuesB.length);
@@ -771,8 +731,7 @@ export function useBiometricStreamController(
             denomB += diffB * diffB;
           }
 
-          const correlation =
-            numerator / (Math.sqrt(denomA) * Math.sqrt(denomB));
+          const correlation = numerator / (Math.sqrt(denomA) * Math.sqrt(denomB));
 
           // Add to correlations
           correlations.set(`${streamIdA}-${streamIdB}`, correlation);
@@ -789,11 +748,7 @@ export function useBiometricStreamController(
     } catch (error) {
       return failure(
         // Ensure wrapped in Error
-        new Error(
-          error instanceof Error
-            ? error.message
-            : "Unknown error calculating correlations",
-        ),
+        new Error(error instanceof Error ? error.message : 'Unknown error calculating correlations')
       );
     }
   }, [state.activeStreams, state.streamData]);
@@ -805,11 +760,9 @@ export function useBiometricStreamController(
       activeStreamCount: state.activeStreams.size,
       lastSyncTime: state.lastSyncTime,
       alertCount: state.alerts.length,
-      unacknowledgedAlertCount: state.alerts.filter(
-        (alert) => !alert.acknowledged,
-      ).length,
+      unacknowledgedAlertCount: state.alerts.filter((alert) => !alert.acknowledged).length,
       urgentAlertCount: state.alerts.filter(
-        (alert) => alert.priority === "urgent" && !alert.acknowledged,
+        (alert) => alert.priority === 'urgent' && !alert.acknowledged
       ).length,
       dataPointsProcessed: state.metrics.dataPointsProcessed,
       processingLatency: state.metrics.processingLatency,

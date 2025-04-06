@@ -11,7 +11,6 @@ import { BrainVisualization } from './BrainVisualization';
 
 // Remove local mocks - rely on global mocks via vitest.config.ts alias
 
-
 // Minimal test to verify component can be imported
 describe('BrainVisualization (Minimal)', () => {
   it('exists as a module', () => {

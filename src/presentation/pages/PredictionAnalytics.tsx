@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { DocumentTitle, Card } from "@presentation/atoms";
-import { Header, Chart } from "@presentation/molecules";
-import MainLayout from "@presentation/templates/MainLayout";
+import { DocumentTitle, Card } from '@presentation/atoms';
+import { Header, Chart } from '@presentation/molecules';
+import MainLayout from '@presentation/templates/MainLayout';
 
 /**
  * PredictionAnalytics page component
@@ -10,70 +10,66 @@ import MainLayout from "@presentation/templates/MainLayout";
  * This page provides analytics and visualization of prediction models and their performance
  */
 const PredictionAnalytics: React.FC = () => {
-  const [timeRange, setTimeRange] = useState<
-    "week" | "month" | "quarter" | "year"
-  >("month");
-  const [modelType, setModelType] = useState<
-    "all" | "relapse" | "suicide" | "treatment"
-  >("all");
+  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
+  const [modelType, setModelType] = useState<'all' | 'relapse' | 'suicide' | 'treatment'>('all');
 
   // Mock data for visualization
   const performanceData = {
     accuracyByModel: {
       labels: [
-        "Relapse Risk",
-        "Suicide Risk",
-        "SSRI Response",
-        "Therapy Response",
-        "Treatment Outcome",
+        'Relapse Risk',
+        'Suicide Risk',
+        'SSRI Response',
+        'Therapy Response',
+        'Treatment Outcome',
       ],
       datasets: [
         {
-          label: "Accuracy",
+          label: 'Accuracy',
           data: [0.82, 0.86, 0.79, 0.77, 0.81],
-          backgroundColor: "rgba(75, 192, 192, 0.2)",
-          borderColor: "rgba(75, 192, 192, 1)",
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 1,
         },
         {
-          label: "AUC-ROC",
+          label: 'AUC-ROC',
           data: [0.88, 0.91, 0.83, 0.81, 0.85],
-          backgroundColor: "rgba(153, 102, 255, 0.2)",
-          borderColor: "rgba(153, 102, 255, 1)",
+          backgroundColor: 'rgba(153, 102, 255, 0.2)',
+          borderColor: 'rgba(153, 102, 255, 1)',
           borderWidth: 1,
         },
       ],
     },
     predictionsOverTime: {
-      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
       datasets: [
         {
-          label: "Total Predictions",
+          label: 'Total Predictions',
           data: [65, 78, 92, 117, 131, 156],
           fill: false,
-          borderColor: "rgba(54, 162, 235, 1)",
+          borderColor: 'rgba(54, 162, 235, 1)',
           tension: 0.1,
         },
       ],
     },
     featureImportance: {
       labels: [
-        "PHQ-9 Score",
-        "Previous Relapses",
-        "Medication Adherence",
-        "Social Support",
-        "Sleep Quality",
+        'PHQ-9 Score',
+        'Previous Relapses',
+        'Medication Adherence',
+        'Social Support',
+        'Sleep Quality',
       ],
       datasets: [
         {
-          label: "Feature Importance",
+          label: 'Feature Importance',
           data: [0.28, 0.22, 0.18, 0.16, 0.14],
           backgroundColor: [
-            "rgba(255, 99, 132, 0.6)",
-            "rgba(54, 162, 235, 0.6)",
-            "rgba(255, 206, 86, 0.6)",
-            "rgba(75, 192, 192, 0.6)",
-            "rgba(153, 102, 255, 0.6)",
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
           ],
           borderWidth: 1,
         },
@@ -85,10 +81,7 @@ const PredictionAnalytics: React.FC = () => {
     <>
       <DocumentTitle title="Prediction Analytics | Novamind Digital Twin" />
       <MainLayout>
-        <Header
-          title="Prediction Analytics"
-          subtitle="Model performance and prediction insights"
-        />
+        <Header title="Prediction Analytics" subtitle="Model performance and prediction insights" />
 
         <div className="mb-6 flex gap-4">
           <div className="flex-1">
@@ -126,11 +119,11 @@ const PredictionAnalytics: React.FC = () => {
                 responsive: true,
                 plugins: {
                   legend: {
-                    position: "top" as const,
+                    position: 'top' as const,
                   },
                   title: {
                     display: true,
-                    text: "Prediction Volume Trends",
+                    text: 'Prediction Volume Trends',
                   },
                 },
               }}
@@ -144,11 +137,11 @@ const PredictionAnalytics: React.FC = () => {
                 responsive: true,
                 plugins: {
                   legend: {
-                    position: "top" as const,
+                    position: 'top' as const,
                   },
                   title: {
                     display: true,
-                    text: "Performance Metrics by Model",
+                    text: 'Performance Metrics by Model',
                   },
                 },
               }}
@@ -165,11 +158,11 @@ const PredictionAnalytics: React.FC = () => {
                 responsive: true,
                 plugins: {
                   legend: {
-                    position: "right" as const,
+                    position: 'right' as const,
                   },
                   title: {
                     display: true,
-                    text: "Top 5 Features by Importance",
+                    text: 'Top 5 Features by Importance',
                   },
                 },
               }}

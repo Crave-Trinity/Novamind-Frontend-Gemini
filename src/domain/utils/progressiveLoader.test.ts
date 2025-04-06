@@ -3,12 +3,12 @@
  * loadRegionsProgressively testing with quantum precision
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi } from 'vitest';
 
-import { loadRegionsProgressively } from "@/utils/progressiveLoader";
+import { loadRegionsProgressively } from '@/utils/progressiveLoader';
 
-describe("loadRegionsProgressively", () => {
-  it("processes data with mathematical precision", () => {
+describe('loadRegionsProgressively', () => {
+  it('processes data with mathematical precision', () => {
     // Arrange test data
     const testData = {};
 
@@ -19,7 +19,7 @@ describe("loadRegionsProgressively", () => {
     expect(result).toBeDefined();
   });
 
-  it("handles edge cases with clinical precision", () => {
+  it('handles edge cases with clinical precision', () => {
     // Test edge cases
     const edgeCaseData = {};
 

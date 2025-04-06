@@ -7,32 +7,27 @@
 export type ID = string;
 
 // Define possible biometric sources
-export type BiometricSource =
-  | "wearable"
-  | "mobile"
-  | "clinical"
-  | "manual_entry"
-  | "simulation";
+export type BiometricSource = 'wearable' | 'mobile' | 'clinical' | 'manual_entry' | 'simulation';
 
 // Define possible biometric types
 export type BiometricType =
-  | "heartRate"
-  | "bloodPressureSystolic"
-  | "bloodPressureDiastolic"
-  | "respiratoryRate"
-  | "bodyTemperature"
-  | "oxygenSaturation"
-  | "bloodGlucose"
-  | "cortisol"
-  | "sleepQuality"
-  | "eegThetaPower" // Example EEG metric
-  | "motionActivity"; // Example motion metric
+  | 'heartRate'
+  | 'bloodPressureSystolic'
+  | 'bloodPressureDiastolic'
+  | 'respiratoryRate'
+  | 'bodyTemperature'
+  | 'oxygenSaturation'
+  | 'bloodGlucose'
+  | 'cortisol'
+  | 'sleepQuality'
+  | 'eegThetaPower' // Example EEG metric
+  | 'motionActivity'; // Example motion metric
 
 // Define alert priorities
-export type AlertPriority = "informational" | "warning" | "urgent";
+export type AlertPriority = 'informational' | 'warning' | 'urgent';
 
 // Define alert sources (if different from BiometricSource)
-export type AlertSource = "system" | "clinician" | "patient" | "algorithm"; // Added "algorithm"
+export type AlertSource = 'system' | 'clinician' | 'patient' | 'algorithm'; // Added "algorithm"
 
 // Define structure for alert thresholds
 export interface BiometricThreshold {
@@ -51,7 +46,7 @@ export interface BiometricDataPoint {
   value: number;
   type: BiometricType;
   source: BiometricSource;
-  quality: "high" | "medium" | "low";
+  quality: 'high' | 'medium' | 'low';
   metadata?: Record<string, unknown>; // Replaced 'any' with 'unknown'
   flags?: string[]; // Added optional flags property based on TS error
 }
@@ -93,28 +88,28 @@ export interface BiometricAlert {
 // Type guards (optional but recommended for type safety)
 export function isBiometricDataPoint(obj: unknown): obj is BiometricDataPoint {
   return (
-    typeof obj === "object" &&
+    typeof obj === 'object' &&
     obj !== null &&
-    "id" in obj &&
-    "streamId" in obj &&
-    "timestamp" in obj &&
-    "value" in obj &&
-    "type" in obj &&
-    "source" in obj &&
-    "quality" in obj
+    'id' in obj &&
+    'streamId' in obj &&
+    'timestamp' in obj &&
+    'value' in obj &&
+    'type' in obj &&
+    'source' in obj &&
+    'quality' in obj
   );
 }
 
 export function isBiometricStream(obj: unknown): obj is BiometricStream {
   return (
-    typeof obj === "object" &&
+    typeof obj === 'object' &&
     obj !== null &&
-    "id" in obj &&
-    "patientId" in obj &&
-    "type" in obj &&
-    "source" in obj &&
-    "name" in obj &&
-    "unit" in obj &&
-    "isActive" in obj
+    'id' in obj &&
+    'patientId' in obj &&
+    'type' in obj &&
+    'source' in obj &&
+    'name' in obj &&
+    'unit' in obj &&
+    'isActive' in obj
   );
 }

@@ -1,6 +1,6 @@
 /**
  * Tailwind CSS mock for testing
- * 
+ *
  * This module provides utilities for testing components that use Tailwind CSS
  * and dark mode functionality, without relying on actual CSS processing in JSDOM.
  */
@@ -18,27 +18,27 @@ interface CSSMockSystem {
  */
 export const cssMock: CSSMockSystem = {
   darkMode: false,
-  
+
   /**
    * Enable dark mode for tests
    * - Adds 'dark' class to document.documentElement
    * - Updates internal darkMode state
    */
-  enableDarkMode: () => { 
+  enableDarkMode: () => {
     cssMock.darkMode = true;
     applyClassBasedDarkMode();
   },
-  
+
   /**
    * Disable dark mode for tests
    * - Removes 'dark' class from document.documentElement
    * - Updates internal darkMode state
    */
-  disableDarkMode: () => { 
+  disableDarkMode: () => {
     cssMock.darkMode = false;
     applyClassBasedDarkMode();
   },
-  
+
   /**
    * Toggle dark mode state
    * - Toggles between dark and light mode
@@ -46,7 +46,7 @@ export const cssMock: CSSMockSystem = {
   toggleDarkMode: () => {
     cssMock.darkMode = !cssMock.darkMode;
     applyClassBasedDarkMode();
-  }
+  },
 };
 
 /**
@@ -70,7 +70,7 @@ export const injectTailwindTestClasses = (): void => {
   if (!document.getElementById('tailwind-test-styles')) {
     const style = document.createElement('style');
     style.id = 'tailwind-test-styles';
-    
+
     // Add basic utility classes for testing
     style.innerHTML = `
       /* Minimal Tailwind-like utilities for testing */
@@ -98,7 +98,7 @@ export const injectTailwindTestClasses = (): void => {
       
       /* Add more classes as needed for tests */
     `;
-    
+
     document.head.appendChild(style);
   }
 };

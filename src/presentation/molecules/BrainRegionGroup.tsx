@@ -4,14 +4,14 @@
  * with neural clustering and spatial organization
  */
 
-import React, { useMemo, useCallback } from "react";
-import { Instance, Instances } from "@react-three/drei";
-import * as THREE from "three";
-import RegionMesh from "@presentation/atoms/RegionMesh";
-import { BrainRegion } from "@domain/types/brain/models";
-import { ThemeSettings, RenderMode } from "@domain/types/brain/visualization";
-import { SafeArray } from "../../domain/types/shared/common"; // Use relative path
-import { Html } from "@react-three/drei"; // Added missing import
+import React, { useMemo, useCallback } from 'react';
+import { Instance, Instances } from '@react-three/drei';
+import * as THREE from 'three';
+import RegionMesh from '@presentation/atoms/RegionMesh';
+import { BrainRegion } from '@domain/types/brain/models';
+import { ThemeSettings, RenderMode } from '@domain/types/brain/visualization';
+import { SafeArray } from '../../domain/types/shared/common'; // Use relative path
+import { Html } from '@react-three/drei'; // Added missing import
 
 // Neural-safe prop definition with explicit typing
 interface BrainRegionGroupProps {
@@ -81,19 +81,12 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
   const filteredRegions = useMemo(() => {
     return safeRegions.filter((region) => {
       // Filter inactive regions if needed
-      if (
-        !showInactiveRegions &&
-        !region.isActive &&
-        region.activityLevel < activityThreshold
-      ) {
+      if (!showInactiveRegions && !region.isActive && region.activityLevel < activityThreshold) {
         return false;
       }
 
       // Additional filtering based on render mode
-      if (
-        renderMode === RenderMode.FUNCTIONAL &&
-        region.activityLevel < activityThreshold
-      ) {
+      if (renderMode === RenderMode.FUNCTIONAL && region.activityLevel < activityThreshold) {
         return false;
       }
 
@@ -104,9 +97,7 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
   // Determine if we should use instanced rendering
   // Instances is more performant for large numbers of similar objects
   const useInstancing = useMemo(() => {
-    return (
-      instancedRendering && filteredRegions.size() > 10 && !highPerformanceMode
-    );
+    return instancedRendering && filteredRegions.size() > 10 && !highPerformanceMode;
   }, [instancedRendering, filteredRegions, highPerformanceMode]);
 
   // Event handlers with type safety
@@ -114,14 +105,14 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
     (regionId: string) => {
       if (onRegionClick) onRegionClick(regionId);
     },
-    [onRegionClick],
+    [onRegionClick]
   );
 
   const handleRegionHover = useCallback(
     (regionId: string | null) => {
       if (onRegionHover) onRegionHover(regionId);
     },
-    [onRegionHover],
+    [onRegionHover]
   );
 
   // Determine the region color based on various states
@@ -141,7 +132,7 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
 
       return baseColor;
     },
-    [groupColor, renderMode, themeSettings, activityThreshold],
+    [groupColor, renderMode, themeSettings, activityThreshold]
   );
 
   // Determine the region size based on various factors
@@ -172,7 +163,7 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
 
       return size;
     },
-    [renderMode, safeSelectedIds, scale],
+    [renderMode, safeSelectedIds, scale]
   );
 
   // For instanced rendering, we need to prepare the matrix transformations
@@ -193,7 +184,7 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
       matrix.compose(
         new THREE.Vector3(x, y, z),
         new THREE.Quaternion(),
-        new THREE.Vector3(size, size, size),
+        new THREE.Vector3(size, size, size)
       );
 
       return {
@@ -218,11 +209,7 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
             <mesh
               key={region.id}
               position={[x, y, z]}
-              scale={[
-                getRegionSize(region),
-                getRegionSize(region),
-                getRegionSize(region),
-              ]}
+              scale={[getRegionSize(region), getRegionSize(region), getRegionSize(region)]}
               onClick={() => handleRegionClick(region.id)}
             >
               <sphereGeometry args={[1, 8, 8]} />
@@ -288,8 +275,8 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
                 <div
                   className={`
                 text-xs font-bold px-1 py-0.5 rounded whitespace-nowrap
-                ${isSelected ? "bg-blue-600 text-white" : "bg-black/40 text-white"}
-                ${isHighlighted ? "ring-2 ring-yellow-400" : ""}
+                ${isSelected ? 'bg-blue-600 text-white' : 'bg-black/40 text-white'}
+                ${isHighlighted ? 'ring-2 ring-yellow-400' : ''}
               `}
                 >
                   {region.name}
@@ -352,8 +339,8 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
               <div
                 className={`
               text-xs font-bold px-1 py-0.5 rounded whitespace-nowrap
-              ${isSelected ? "bg-blue-600 text-white" : "bg-black/40 text-white"}
-              ${isHighlighted ? "ring-2 ring-yellow-400" : ""}
+              ${isSelected ? 'bg-blue-600 text-white' : 'bg-black/40 text-white'}
+              ${isHighlighted ? 'ring-2 ring-yellow-400' : ''}
             `}
               >
                 {region.name}

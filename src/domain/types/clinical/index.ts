@@ -4,10 +4,10 @@
  */
 
 // Export all clinical domain types
-export * from "./patient";
-export * from "./risk";
-export * from "./treatment";
-export * from "./events"; // Add export for events
+export * from './patient';
+export * from './risk';
+export * from './treatment';
+export * from './events'; // Add export for events
 
 // Re-export common types that are directly related to clinical visualization
 export {
@@ -18,4 +18,4 @@ export {
   failure,
   NeuralError,
   VisualizationState,
-} from "../shared/common"; // Corrected path to explicitly point to common.ts
+} from '../shared/common'; // Corrected path to explicitly point to common.ts

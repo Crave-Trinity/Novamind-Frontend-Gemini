@@ -4,7 +4,7 @@
  */
 
 // Represents the scale for temporal analysis - Unified Definition
-export type TimeScale = "hourly" | "daily" | "weekly" | "monthly" | "realtime"; // Changed 'yearly' to 'realtime'
+export type TimeScale = 'hourly' | 'daily' | 'weekly' | 'monthly' | 'realtime'; // Changed 'yearly' to 'realtime'
 
 // Placeholder interface for detected temporal patterns - structure needs refinement
 export interface TemporalPattern {

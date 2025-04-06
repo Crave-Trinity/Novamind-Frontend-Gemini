@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { describe, it, expect, vi } from "vitest"; // Remove beforeEach, afterEach
-import { render, screen } from "@test/test-utils.unified"; // Use unified render
+import { describe, it, expect, vi } from 'vitest'; // Remove beforeEach, afterEach
+import { render, screen } from '@test/test-utils.unified'; // Use unified render
 import { BiometricAlertVisualizer, ClinicalAlert } from './BiometricAlertVisualizer'; // Import type too
 // Remove WebGL mock imports
 // Import Vector3 *after* vi.mock('three', ...)
@@ -14,7 +14,8 @@ import { BiometricAlertVisualizer, ClinicalAlert } from './BiometricAlertVisuali
 // Mock React Three Fiber
 vi.mock('@react-three/fiber', () => ({
   useFrame: vi.fn(), // Keep simple mock
-  useThree: vi.fn(() => ({ // Keep simple mock
+  useThree: vi.fn(() => ({
+    // Keep simple mock
     gl: { setSize: vi.fn(), render: vi.fn(), dispose: vi.fn() },
     camera: { position: { set: vi.fn() }, lookAt: vi.fn() },
     scene: { add: vi.fn(), remove: vi.fn() },
@@ -22,16 +23,24 @@ vi.mock('@react-three/fiber', () => ({
     clock: { getElapsedTime: vi.fn(() => 0) },
   })),
   Html: vi.fn(({ children }) => <div data-testid="mock-fiber-html">{children}</div>), // Mock Html used by component
-  Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="mock-canvas">{children}</div>, // Simple div mock
+  Canvas: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="mock-canvas">{children}</div>
+  ), // Simple div mock
 }));
 
 // Mock Three.js more carefully
 vi.mock('three', async (importOriginal) => {
-  const actualThree = await importOriginal() as any;
+  const actualThree = (await importOriginal()) as any;
   // Define Vector3 as a mock class
   class MockVector3 {
-    x: number; y: number; z: number;
-    constructor(x = 0, y = 0, z = 0) { this.x = x; this.y = y; this.z = z; }
+    x: number;
+    y: number;
+    z: number;
+    constructor(x = 0, y = 0, z = 0) {
+      this.x = x;
+      this.y = y;
+      this.z = z;
+    }
     set = vi.fn(() => this);
     clone = vi.fn(() => new MockVector3(this.x, this.y, this.z));
     multiplyScalar = vi.fn(() => this);
@@ -40,8 +49,11 @@ vi.mock('three', async (importOriginal) => {
   return {
     __esModule: true,
     Vector3: MockVector3,
-    Group: React.forwardRef(({ children, ...props }: React.PropsWithChildren<any>, ref: any) => // Mock Group as component
-      React.createElement('div', { 'data-testid': 'mock-group', ref, ...props }, children)
+    Group: React.forwardRef(
+      (
+        { children, ...props }: React.PropsWithChildren<any>,
+        ref: any // Mock Group as component
+      ) => React.createElement('div', { 'data-testid': 'mock-group', ref, ...props }, children)
     ),
     // Add other mocks if needed
   };
@@ -60,10 +72,58 @@ import { Vector3 } from 'three';
 // Minimal test to verify component can be imported
 // Mock data
 const mockAlerts: ClinicalAlert[] = [
-  { id: 'a1', timestamp: Date.now() - 5000, message: 'HR Elevated', sourceMetric: 'Heart Rate', value: 110, threshold: 100, priority: 'warning', category: 'physiological', confidenceLevel: 0.8, isPatientSpecific: false, isAcknowledged: false },
-  { id: 'a2', timestamp: Date.now() - 65000, message: 'Low Activity', sourceMetric: 'Steps', value: 50, threshold: 100, priority: 'informational', category: 'behavioral', confidenceLevel: 0.7, isPatientSpecific: false, isAcknowledged: false },
-  { id: 'a3', timestamp: Date.now() - 120000, message: 'Panic Attack Reported', sourceMetric: 'Self-Report', value: 1, threshold: 0, priority: 'urgent', category: 'self-reported', confidenceLevel: 0.95, isPatientSpecific: true, isAcknowledged: false },
-  { id: 'a4', timestamp: Date.now() - 300000, message: 'Acknowledged Alert', sourceMetric: 'HRV', value: 30, threshold: 40, priority: 'warning', category: 'physiological', confidenceLevel: 0.75, isPatientSpecific: false, isAcknowledged: true },
+  {
+    id: 'a1',
+    timestamp: Date.now() - 5000,
+    message: 'HR Elevated',
+    sourceMetric: 'Heart Rate',
+    value: 110,
+    threshold: 100,
+    priority: 'warning',
+    category: 'physiological',
+    confidenceLevel: 0.8,
+    isPatientSpecific: false,
+    isAcknowledged: false,
+  },
+  {
+    id: 'a2',
+    timestamp: Date.now() - 65000,
+    message: 'Low Activity',
+    sourceMetric: 'Steps',
+    value: 50,
+    threshold: 100,
+    priority: 'informational',
+    category: 'behavioral',
+    confidenceLevel: 0.7,
+    isPatientSpecific: false,
+    isAcknowledged: false,
+  },
+  {
+    id: 'a3',
+    timestamp: Date.now() - 120000,
+    message: 'Panic Attack Reported',
+    sourceMetric: 'Self-Report',
+    value: 1,
+    threshold: 0,
+    priority: 'urgent',
+    category: 'self-reported',
+    confidenceLevel: 0.95,
+    isPatientSpecific: true,
+    isAcknowledged: false,
+  },
+  {
+    id: 'a4',
+    timestamp: Date.now() - 300000,
+    message: 'Acknowledged Alert',
+    sourceMetric: 'HRV',
+    value: 30,
+    threshold: 40,
+    priority: 'warning',
+    category: 'physiological',
+    confidenceLevel: 0.75,
+    isPatientSpecific: false,
+    isAcknowledged: true,
+  },
 ];
 
 // Correctly typed mockRegions
@@ -78,7 +138,7 @@ const mockRegions: BrainRegion[] = [
     color: '#FF0000', // Added missing property
     isActive: true, // Added missing property
     hemisphereLocation: 'left', // Added missing property
-    dataConfidence: 0.9 // Added missing property
+    dataConfidence: 0.9, // Added missing property
   },
 ];
 
@@ -102,7 +162,7 @@ describe('BiometricAlertVisualizer', () => {
     expect(screen.queryByText('Acknowledged Alert')).not.toBeInTheDocument();
   });
 
-   it('renders acknowledged alerts when showAcknowledged is true', () => {
+  it('renders acknowledged alerts when showAcknowledged is true', () => {
     render(
       <BiometricAlertVisualizer
         alerts={mockAlerts}

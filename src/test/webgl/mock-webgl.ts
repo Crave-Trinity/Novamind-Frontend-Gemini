@@ -1,9 +1,9 @@
 /**
  * WebGL/Three.js Mock for Testing Environment
- * 
+ *
  * This module provides comprehensive mocks for WebGL and Three.js objects
  * to prevent test hangs and memory issues when testing Three.js components.
- * 
+ *
  * It addresses multiple issues:
  * 1. JSDOM doesn't support WebGL - Mock implementation prevents errors
  * 2. Memory management - Proper dispose() methods to prevent memory leaks
@@ -28,11 +28,13 @@ function createMockFunction<T extends (...args: any[]) => any>(
 ): MockFunction<T> {
   const calls: Parameters<T>[][] = [];
   const results: { type: 'return' | 'throw'; value: any }[] = [];
-  
+
   const mockFn = ((...args: Parameters<T>): ReturnType<T> => {
     calls.push([...args]);
     try {
-      const result = implementation ? implementation(...args) : undefined as unknown as ReturnType<T>;
+      const result = implementation
+        ? implementation(...args)
+        : (undefined as unknown as ReturnType<T>);
       results.push({ type: 'return', value: result });
       return result;
     } catch (error) {
@@ -40,24 +42,24 @@ function createMockFunction<T extends (...args: any[]) => any>(
       throw error;
     }
   }) as MockFunction<T>;
-  
+
   mockFn.mock = { calls, results };
-  
+
   mockFn.mockImplementation = (newImplementation: T) => {
     implementation = newImplementation;
     return mockFn;
   };
-  
+
   mockFn.mockReturnValue = (value: ReturnType<T>) => {
     implementation = (() => value) as unknown as T;
     return mockFn;
   };
-  
+
   mockFn.mockReset = () => {
     calls.length = 0;
     results.length = 0;
   };
-  
+
   return mockFn;
 }
 
@@ -69,49 +71,49 @@ class MockWebGLRenderingContext {
   canvas: HTMLCanvasElement;
   drawingBufferWidth: number = 800;
   drawingBufferHeight: number = 600;
-  
+
   // Track resources for proper disposal
   private shaders: any[] = [];
   private programs: any[] = [];
   private buffers: any[] = [];
   private textures: any[] = [];
   private framebuffers: any[] = [];
-  
+
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
   }
-  
+
   // Minimal WebGL API implementation - expand as needed
-  createShader() { 
-    const shader = {}; 
+  createShader() {
+    const shader = {};
     this.shaders.push(shader);
     return shader;
   }
-  
-  createProgram() { 
+
+  createProgram() {
     const program = {};
     this.programs.push(program);
     return program;
   }
-  
-  createBuffer() { 
+
+  createBuffer() {
     const buffer = {};
     this.buffers.push(buffer);
     return buffer;
   }
-  
-  createTexture() { 
+
+  createTexture() {
     const texture = {};
     this.textures.push(texture);
     return texture;
   }
-  
-  createFramebuffer() { 
+
+  createFramebuffer() {
     const framebuffer = {};
     this.framebuffers.push(framebuffer);
     return framebuffer;
   }
-  
+
   // Stub remaining WebGL methods with no-ops
   viewport() {}
   clearColor() {}
@@ -121,11 +123,21 @@ class MockWebGLRenderingContext {
   disable() {}
   blendFunc() {}
   depthFunc() {}
-  getParameter() { return null; }
-  getShaderParameter() { return true; }
-  getProgramParameter() { return true; }
-  getUniformLocation() { return {}; }
-  getAttribLocation() { return 0; }
+  getParameter() {
+    return null;
+  }
+  getShaderParameter() {
+    return true;
+  }
+  getProgramParameter() {
+    return true;
+  }
+  getUniformLocation() {
+    return {};
+  }
+  getAttribLocation() {
+    return 0;
+  }
   useProgram() {}
   bindBuffer() {}
   bindTexture() {}
@@ -140,7 +152,7 @@ class MockWebGLRenderingContext {
   uniform3fv() {}
   drawArrays() {}
   drawElements() {}
-  
+
   // Cleanup method to prevent memory leaks
   dispose() {
     this.shaders = [];
@@ -153,9 +165,13 @@ class MockWebGLRenderingContext {
 
 // Mock WebGL2 context - extends WebGL1 with additional features
 class MockWebGL2RenderingContext extends MockWebGLRenderingContext {
-  createVertexArray() { return {}; }
+  createVertexArray() {
+    return {};
+  }
   bindVertexArray() {}
-  createQuery() { return {}; }
+  createQuery() {
+    return {};
+  }
   beginQuery() {}
   endQuery() {}
 }
@@ -166,7 +182,11 @@ const originalGetContext = HTMLCanvasElement.prototype.getContext;
 // Patch HTMLCanvasElement to return our mock WebGL context
 function patchCanvasGetContext() {
   // Use type assertion to avoid TypeScript errors with explicit this type
-  HTMLCanvasElement.prototype.getContext = function(this: HTMLCanvasElement, contextType: string, ...rest: any[]) {
+  HTMLCanvasElement.prototype.getContext = function (
+    this: HTMLCanvasElement,
+    contextType: string,
+    ...rest: any[]
+  ) {
     if (contextType === 'webgl' || contextType === 'experimental-webgl') {
       return new MockWebGLRenderingContext(this) as unknown as WebGLRenderingContext;
     }
@@ -193,7 +213,7 @@ function patchMatchMedia() {
   if (typeof window.matchMedia !== 'function') {
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
-      value: fn().mockImplementation(query => ({
+      value: fn().mockImplementation((query) => ({
         matches: false,
         media: query,
         onchange: null,
@@ -214,11 +234,11 @@ export class CoreWebGLRenderer {
   outputEncoding = 0;
   toneMapping = 0;
   toneMappingExposure = 1;
-  
+
   constructor() {
     this.domElement = document.createElement('canvas');
   }
-  
+
   setSize() {}
   setPixelRatio() {}
   render() {}
@@ -248,7 +268,7 @@ export function setupWebGLMocks() {
   patchCanvasGetContext();
   patchAnimationFrame();
   patchMatchMedia();
-  
+
   // Return a context for tests that need direct access
   const canvas = document.createElement('canvas');
   return canvas.getContext('webgl');

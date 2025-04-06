@@ -2,18 +2,16 @@
  * NOVAMIND Neural-Safe Service Layer
  * Biometric Service - Handles retrieval and processing of biometric data.
  */
-import { type Result, success, failure } from "@domain/types/shared/common";
-import type { BiometricStream } from "@domain/types/biometric/streams";
+import { type Result, success, failure } from '@domain/types/shared/common';
+import type { BiometricStream } from '@domain/types/biometric/streams';
 
 // Placeholder implementation - replace with actual logic
 
 const getStreamMetadata = async (
   patientId: string,
-  streamIds: string[],
+  streamIds: string[]
 ): Promise<Result<BiometricStream[]>> => {
-  console.log(
-    `Fetching metadata for patient ${patientId}, streams: ${streamIds.join(", ")}`,
-  );
+  console.log(`Fetching metadata for patient ${patientId}, streams: ${streamIds.join(', ')}`);
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -21,10 +19,10 @@ const getStreamMetadata = async (
   const foundStreams: BiometricStream[] = streamIds.map((id) => ({
     id,
     patientId,
-    type: "heartRate", // Default for simulation
-    source: "wearable", // Default for simulation
+    type: 'heartRate', // Default for simulation
+    source: 'wearable', // Default for simulation
     name: `Simulated ${id}`,
-    unit: "bpm", // Default for simulation
+    unit: 'bpm', // Default for simulation
     isActive: true,
     lastDataPointTimestamp: new Date(),
   }));
@@ -32,17 +30,17 @@ const getStreamMetadata = async (
   if (foundStreams.length > 0) {
     return success(foundStreams);
   } else {
-    return failure(new Error("Could not find metadata for specified streams."));
+    return failure(new Error('Could not find metadata for specified streams.'));
   }
 };
 
 const calculateStreamCorrelations = async (
   patientId: string,
   streamIds: string[],
-  timeWindowMinutes: number,
+  timeWindowMinutes: number
 ): Promise<Result<Map<string, number>>> => {
   console.log(
-    `Calculating correlations for patient ${patientId}, streams: ${streamIds.join(", ")}, window: ${timeWindowMinutes} mins`,
+    `Calculating correlations for patient ${patientId}, streams: ${streamIds.join(', ')}, window: ${timeWindowMinutes} mins`
   );
   // Simulate API call or complex calculation
   await new Promise((resolve) => setTimeout(resolve, 300));

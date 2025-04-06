@@ -1,6 +1,6 @@
 /**
  * Type definitions for mock functions and objects
- * 
+ *
  * These types provide consistent interfaces for all mocks in the testing system
  */
 

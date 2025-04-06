@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { checkAuthStatus } from "@application/utils/authUtils"; // Import from new utility file
+import React, { useState, useEffect } from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { checkAuthStatus } from '@application/utils/authUtils'; // Import from new utility file
 
 /**
  * Authentication Route Component
@@ -16,20 +16,13 @@ const AuthRoute: React.FC = () => {
   // In production, this would check tokens properly
   useEffect(() => {
     // Set a demo token to localStorage for persistence
-    if (!localStorage.getItem("auth_token")) {
-      localStorage.setItem(
-        "auth_token",
-        "demo-token-for-novamind-digital-twin",
-      );
+    if (!localStorage.getItem('auth_token')) {
+      localStorage.setItem('auth_token', 'demo-token-for-novamind-digital-twin');
     }
   }, []);
 
   // Render the protected route content
-  return isAuthenticated ? (
-    <Outlet />
-  ) : (
-    <Navigate to="/login" state={{ from: location }} replace />
-  );
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" state={{ from: location }} replace />;
 };
 
 export default AuthRoute;

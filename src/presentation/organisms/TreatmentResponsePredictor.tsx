@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { useTreatmentPrediction } from "@hooks/useTreatmentPrediction";
-import { DigitalTwinProfile } from "@domain/models/clinical/digital-twin-profile";
-import Button from "@presentation/atoms/Button";
+import { useTreatmentPrediction } from '@hooks/useTreatmentPrediction';
+import { DigitalTwinProfile } from '@domain/models/clinical/digital-twin-profile';
+import Button from '@presentation/atoms/Button';
 
 interface TreatmentResponsePredictorProps {
   patientId: string;
@@ -19,21 +19,19 @@ interface TreatmentResponsePredictorProps {
 const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
   patientId,
   profile,
-  className = "",
+  className = '',
 }) => {
   // Local state for clinical data inputs
   const [clinicalData, setClinicalData] = useState({
     severity: profile.currentSeverity,
     diagnosis: profile.primaryDiagnosis,
-    phq9_score:
-      profile.assessmentScores.find((s) => s.type === "PHQ9")?.score || 0,
-    gad7_score:
-      profile.assessmentScores.find((s) => s.type === "GAD7")?.score || 0,
+    phq9_score: profile.assessmentScores.find((s) => s.type === 'PHQ9')?.score || 0,
+    gad7_score: profile.assessmentScores.find((s) => s.type === 'GAD7')?.score || 0,
   });
 
   // Get genetic markers from profile if available
   const geneticData = profile.biomarkers
-    .filter((b) => b.name.includes("genetic") || b.name.includes("CYP"))
+    .filter((b) => b.name.includes('genetic') || b.name.includes('CYP'))
     .map((b) => b.name);
 
   // Use the treatment prediction hook
@@ -49,25 +47,25 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
     resetPrediction,
   } = useTreatmentPrediction({
     patientId,
-    initialTreatmentType: "ssri",
+    initialTreatmentType: 'ssri',
     onPredictionSuccess: (data) => {
-      console.log("Prediction successful:", data);
+      console.log('Prediction successful:', data);
     },
     onPredictionError: (error) => {
-      console.error("Prediction error:", error);
+      console.error('Prediction error:', error);
     },
   });
 
   // Treatment options
   const treatmentOptions = [
-    { value: "ssri", label: "SSRI Medication" },
-    { value: "snri", label: "SNRI Medication" },
-    { value: "tca", label: "TCA Medication" },
-    { value: "maoi", label: "MAOI Medication" },
-    { value: "cbt", label: "Cognitive Behavioral Therapy" },
-    { value: "ect", label: "Electroconvulsive Therapy" },
-    { value: "tms", label: "Transcranial Magnetic Stimulation" },
-    { value: "combination", label: "Combination Therapy" },
+    { value: 'ssri', label: 'SSRI Medication' },
+    { value: 'snri', label: 'SNRI Medication' },
+    { value: 'tca', label: 'TCA Medication' },
+    { value: 'maoi', label: 'MAOI Medication' },
+    { value: 'cbt', label: 'Cognitive Behavioral Therapy' },
+    { value: 'ect', label: 'Electroconvulsive Therapy' },
+    { value: 'tms', label: 'Transcranial Magnetic Stimulation' },
+    { value: 'combination', label: 'Combination Therapy' },
   ];
 
   // Handle treatment type change
@@ -76,9 +74,7 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
   };
 
   // Handle clinical data input changes
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setClinicalData((prev) => ({
       ...prev,
@@ -107,16 +103,16 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
   // Response level colors
   const getResponseLevelColor = (level: string) => {
     switch (level) {
-      case "poor":
-        return "bg-red-500";
-      case "partial":
-        return "bg-orange-500";
-      case "good":
-        return "bg-green-500";
-      case "excellent":
-        return "bg-emerald-500";
+      case 'poor':
+        return 'bg-red-500';
+      case 'partial':
+        return 'bg-orange-500';
+      case 'good':
+        return 'bg-green-500';
+      case 'excellent':
+        return 'bg-emerald-500';
       default:
-        return "bg-gray-500";
+        return 'bg-gray-500';
     }
   };
 
@@ -292,14 +288,9 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
                   <span className="text-3xl font-bold text-primary-600 dark:text-primary-400">
                     {predictionResult.time_to_response.weeks}
                   </span>
-                  <span className="ml-1 text-neutral-500 dark:text-neutral-400">
-                    weeks
-                  </span>
+                  <span className="ml-1 text-neutral-500 dark:text-neutral-400">weeks</span>
                   <span className="ml-3 text-xs text-neutral-500">
-                    (Confidence:{" "}
-                    {Math.round(
-                      predictionResult.time_to_response.confidence * 100,
-                    )}
+                    (Confidence: {Math.round(predictionResult.time_to_response.confidence * 100)}
                     %)
                   </span>
                 </div>
@@ -312,10 +303,7 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
                 </h4>
                 <div className="space-y-2">
                   {predictionResult.factors.slice(0, 4).map((factor, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between"
-                    >
+                    <div key={idx} className="flex items-center justify-between">
                       <span className="text-sm text-neutral-700 dark:text-neutral-300">
                         {factor.name}
                       </span>
@@ -343,27 +331,21 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
                       Alternative Treatment Options
                     </h4>
                     <div className="grid grid-cols-2 gap-2">
-                      {predictionResult.alternative_treatments.map(
-                        (alt, idx) => (
-                          <button
-                            key={idx}
-                            className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-left transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:bg-background-card dark:hover:bg-neutral-800"
-                            onClick={() =>
-                              updateTreatmentConfig({ treatmentType: alt.type })
-                            }
-                          >
-                            <div className="text-sm font-medium">
-                              {treatmentOptions.find(
-                                (opt) => opt.value === alt.type,
-                              )?.label || alt.type}
-                            </div>
-                            <div className="mt-1 text-xs text-neutral-500">
-                              Est. Response:{" "}
-                              {Math.round(alt.estimated_response * 100)}%
-                            </div>
-                          </button>
-                        ),
-                      )}
+                      {predictionResult.alternative_treatments.map((alt, idx) => (
+                        <button
+                          key={idx}
+                          className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-left transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:bg-background-card dark:hover:bg-neutral-800"
+                          onClick={() => updateTreatmentConfig({ treatmentType: alt.type })}
+                        >
+                          <div className="text-sm font-medium">
+                            {treatmentOptions.find((opt) => opt.value === alt.type)?.label ||
+                              alt.type}
+                          </div>
+                          <div className="mt-1 text-xs text-neutral-500">
+                            Est. Response: {Math.round(alt.estimated_response * 100)}%
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -385,7 +367,7 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
               </h3>
               <p className="mb-4 text-neutral-600 dark:text-neutral-400">
                 {predictionError.message ||
-                  "An error occurred while predicting treatment response."}
+                  'An error occurred while predicting treatment response.'}
               </p>
               <Button variant="primary" onClick={handlePredict} size="sm">
                 Try Again
@@ -407,13 +389,12 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
                 Treatment Response Predictor
               </h3>
               <p className="mb-4 text-neutral-600 dark:text-neutral-400">
-                Configure treatment options and click "Predict Response" to
-                generate a personalized treatment response prediction based on
-                the patient's data.
+                Configure treatment options and click "Predict Response" to generate a personalized
+                treatment response prediction based on the patient's data.
               </p>
               <p className="mb-6 text-xs text-neutral-500">
-                Predictions are based on ML models trained on clinical data and
-                consider patient-specific factors.
+                Predictions are based on ML models trained on clinical data and consider
+                patient-specific factors.
               </p>
               <Button variant="primary" onClick={handlePredict} size="md">
                 Generate Prediction
@@ -426,9 +407,7 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
       {/* Feature Importance Panel (shown when available) */}
       {featureImportance && (
         <div className="mt-6 rounded-lg bg-background p-4 dark:bg-background-elevated">
-          <h3 className="mb-4 text-lg font-medium">
-            Feature Importance Analysis
-          </h3>
+          <h3 className="mb-4 text-lg font-medium">Feature Importance Analysis</h3>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Global Importance */}
@@ -444,21 +423,18 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
                       feature: {
                         name: string;
                         importance: number;
-                        direction: "positive" | "negative";
+                        direction: 'positive' | 'negative';
                         category: string;
                       },
-                      idx: number, // Check ok and use val, add specific type
+                      idx: number // Check ok and use val, add specific type
                     ) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between"
-                      >
+                      <div key={idx} className="flex items-center justify-between">
                         <span className="text-sm text-neutral-700 dark:text-neutral-300">
                           {feature.name}
                         </span>
                         <div className="h-2 w-1/2 rounded-full bg-neutral-200 dark:bg-neutral-700">
                           <div
-                            className={`h-2 rounded-full ${feature.direction === "positive" ? "bg-green-500" : "bg-red-500"}`}
+                            className={`h-2 rounded-full ${feature.direction === 'positive' ? 'bg-green-500' : 'bg-red-500'}`}
                             style={{ width: `${feature.importance * 100}%` }}
                           ></div>
                         </div>
@@ -466,7 +442,7 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
                           {(feature.importance * 100).toFixed(1)}%
                         </span>
                       </div>
-                    ),
+                    )
                   )}
               </div>
             </div>
@@ -481,9 +457,9 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
                 <ul className="list-inside list-disc space-y-2 text-sm text-neutral-700 dark:text-neutral-300">
                   {featureImportance.ok &&
                     featureImportance.val.interpretation && // Check ok and use val
-                    featureImportance.val.interpretation.map(
-                      (item: string, idx: number) => <li key={idx}>{item}</li>,
-                    )}
+                    featureImportance.val.interpretation.map((item: string, idx: number) => (
+                      <li key={idx}>{item}</li>
+                    ))}
                 </ul>
               </div>
 
@@ -493,7 +469,7 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
                   size="sm"
                   onClick={() => {
                     // This would typically open a more detailed view or export PDF
-                    alert("Detailed report would be generated here");
+                    alert('Detailed report would be generated here');
                   }}
                   className="text-xs"
                 >

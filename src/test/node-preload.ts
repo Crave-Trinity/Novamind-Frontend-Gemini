@@ -7,7 +7,7 @@
  */
 
 // Import from Node.js util module
-import { TextEncoder as NodeTextEncoder } from "util";
+import { TextEncoder as NodeTextEncoder } from 'util';
 
 // Fix TextEncoder to ensure it passes instanceof Uint8Array checks
 class FixedTextEncoder extends NodeTextEncoder {
@@ -23,7 +23,7 @@ class FixedTextEncoder extends NodeTextEncoder {
 globalThis.TextEncoder = FixedTextEncoder as any;
 
 // Fix URL constructor to handle edge cases
-if (typeof URL !== "undefined") {
+if (typeof URL !== 'undefined') {
   const OriginalURL = URL;
 
   // Create patched URL class
@@ -33,13 +33,9 @@ if (typeof URL !== "undefined") {
         // Try original constructor first
         super(url, base);
       } catch (error: any) {
-        if (error.code === "ERR_INVALID_URL_SCHEME") {
+        if (error.code === 'ERR_INVALID_URL_SCHEME') {
           // If URL has invalid scheme, fix it
-          if (
-            typeof url === "string" &&
-            !url.startsWith("file:") &&
-            !url.match(/^[a-z]+:\/\//i)
-          ) {
+          if (typeof url === 'string' && !url.startsWith('file:') && !url.match(/^[a-z]+:\/\//i)) {
             // Add file:// scheme if missing
             super(`file://${url}`, base);
           } else {
@@ -57,7 +53,7 @@ if (typeof URL !== "undefined") {
 }
 
 // Verify fixes were successful
-const textEncoderResult = new TextEncoder().encode("") instanceof Uint8Array;
-console.log("[node-preload] TextEncoder verification:", textEncoderResult);
+const textEncoderResult = new TextEncoder().encode('') instanceof Uint8Array;
+console.log('[node-preload] TextEncoder verification:', textEncoderResult);
 
 export {};

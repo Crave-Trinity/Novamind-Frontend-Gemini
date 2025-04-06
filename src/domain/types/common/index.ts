@@ -73,7 +73,9 @@ export interface Metadata {
 // Basic Types
 export type ISO8601DateTime = string;
 export type JSONValue = string | number | boolean | null | JSONObject | JSONArray;
-export interface JSONObject { [key: string]: JSONValue }
+export interface JSONObject {
+  [key: string]: JSONValue;
+}
 export interface JSONArray extends Array<JSONValue> {}
 
 // API Response Types
@@ -157,4 +159,4 @@ export class AuthorizationError extends DomainError {
     super(message, 'AUTHORIZATION_ERROR', details);
     this.name = 'AuthorizationError';
   }
-} 
+}

@@ -25,7 +25,7 @@ export class LocalStorageProvider implements StorageProvider {
   getItem<T>(key: string): T | null {
     const item = localStorage.getItem(this.prefix + key);
     if (!item) return null;
-    
+
     try {
       return JSON.parse(item) as T;
     } catch (error) {
@@ -45,8 +45,8 @@ export class LocalStorageProvider implements StorageProvider {
   clear(): void {
     // Only clear keys with our prefix
     Object.keys(localStorage)
-      .filter(key => key.startsWith(this.prefix))
-      .forEach(key => localStorage.removeItem(key));
+      .filter((key) => key.startsWith(this.prefix))
+      .forEach((key) => localStorage.removeItem(key));
   }
 }
 
@@ -63,7 +63,7 @@ export class SessionStorageProvider implements StorageProvider {
   getItem<T>(key: string): T | null {
     const item = sessionStorage.getItem(this.prefix + key);
     if (!item) return null;
-    
+
     try {
       return JSON.parse(item) as T;
     } catch (error) {
@@ -83,7 +83,7 @@ export class SessionStorageProvider implements StorageProvider {
   clear(): void {
     // Only clear keys with our prefix
     Object.keys(sessionStorage)
-      .filter(key => key.startsWith(this.prefix))
-      .forEach(key => sessionStorage.removeItem(key));
+      .filter((key) => key.startsWith(this.prefix))
+      .forEach((key) => sessionStorage.removeItem(key));
   }
-} 
+}

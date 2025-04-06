@@ -38,15 +38,15 @@ describe('Basic Test', () => {
 
   it('verifies TextEncoder works properly', () => {
     const encoder = new TextEncoder();
-    const uint8Array = encoder.encode("");
-    
+    const uint8Array = encoder.encode('');
+
     // Instead of instanceof check, verify it has Uint8Array properties
     expect(uint8Array).toBeDefined();
     expect(Array.isArray(uint8Array)).toBe(false);
     expect(typeof uint8Array.byteLength).toBe('number');
-    
+
     // Check that it correctly encodes a string
-    const testArray = encoder.encode("test");
+    const testArray = encoder.encode('test');
     expect(testArray.length).toBe(4);
     expect(testArray[0]).toBe(116); // 't'
     expect(testArray[1]).toBe(101); // 'e'

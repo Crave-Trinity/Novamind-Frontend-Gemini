@@ -18,15 +18,15 @@ export function applyURLFix(): void {
       // Simple mock if URLSearchParams is missing
       (window as any).URLSearchParams = class MockURLSearchParams {
         private params: Map<string, string>;
-      
+
         constructor(init?: string | Record<string, string> | URLSearchParams) {
           this.params = new Map();
-          
+
           if (!init) return;
-          
+
           if (typeof init === 'string') {
             // Parse query string
-            init.split('&').forEach(pair => {
+            init.split('&').forEach((pair) => {
               const [key, value] = pair.split('=');
               if (key) this.params.set(key, value || '');
             });
@@ -39,20 +39,20 @@ export function applyURLFix(): void {
             });
           }
         }
-      
+
         // Basic implementation
         get(name: string): string | null {
           return this.params.has(name) ? this.params.get(name) || null : null;
         }
-      
+
         has(name: string): boolean {
           return this.params.has(name);
         }
-        
+
         set(name: string, value: string): void {
           this.params.set(name, value);
         }
-        
+
         toString(): string {
           const pairs: string[] = [];
           this.params.forEach((value, key) => {
@@ -62,7 +62,7 @@ export function applyURLFix(): void {
         }
       };
     }
-    
+
     console.log('URL fix applied successfully!');
   }
 }

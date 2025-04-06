@@ -4,17 +4,12 @@
  * with clinical precision and mathematical integrity
  */
 
-import axios from "axios";
-import type {
-  BrainModel,
-  BrainRegion,
-  NeuralConnection,
-} from "@domain/types/brain/models";
-import { type Result, success, failure } from "@/domain/types/shared/common"; // Corrected path alias and location
+import axios from 'axios';
+import type { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+import { type Result, success, failure } from '@/domain/types/shared/common'; // Corrected path alias and location
 
 // API endpoints
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.novamind.io";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.novamind.io';
 const BRAIN_MODEL_ENDPOINT = `${API_BASE_URL}/v1/brain-models`;
 
 /**
@@ -28,16 +23,13 @@ export const brainModelService = {
   fetchBrainModel: async (scanId: string): Promise<Result<BrainModel>> => {
     try {
       // API request with timeout and error handling
-      const response = await axios.get<BrainModel>(
-        `${BRAIN_MODEL_ENDPOINT}/${scanId}`,
-        {
-          timeout: 15000, // 15 seconds timeout for large models
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
+      const response = await axios.get<BrainModel>(`${BRAIN_MODEL_ENDPOINT}/${scanId}`, {
+        timeout: 15000, // 15 seconds timeout for large models
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
         },
-      );
+      });
 
       // Successful response
       return success(response.data);
@@ -51,26 +43,18 @@ export const brainModelService = {
 
           switch (status) {
             case 404:
-              return failure(
-                new Error(`Brain scan with ID ${scanId} not found`),
-              );
+              return failure(new Error(`Brain scan with ID ${scanId} not found`));
             case 403:
-              return failure(
-                new Error("Insufficient permissions to access this brain scan"),
-              );
+              return failure(new Error('Insufficient permissions to access this brain scan'));
             case 500:
-              return failure(
-                new Error("Server error while retrieving brain model"),
-              );
+              return failure(new Error('Server error while retrieving brain model'));
             default:
               return failure(new Error(data.message || `API error: ${status}`));
           }
         } else if (error.request) {
           // Request was made but no response received
           return failure(
-            new Error(
-              "No response received from server. Please check your network connection.",
-            ),
+            new Error('No response received from server. Please check your network connection.')
           );
         } else {
           // Error setting up the request
@@ -81,8 +65,8 @@ export const brainModelService = {
       // Generic error handling
       return failure(
         new Error(
-          `Failed to fetch brain model: ${error instanceof Error ? error.message : String(error)}`,
-        ),
+          `Failed to fetch brain model: ${error instanceof Error ? error.message : String(error)}`
+        )
       );
     }
   },
@@ -95,7 +79,7 @@ export const brainModelService = {
     dateRange?: { from: string; to: string },
     scanType?: string,
     limit: number = 10,
-    offset: number = 0,
+    offset: number = 0
   ): Promise<Result<{ models: BrainModel[]; total: number }>> => {
     try {
       // Build query parameters
@@ -114,10 +98,10 @@ export const brainModelService = {
           params,
           timeout: 20000, // 20 seconds timeout for search operations
           headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
           },
-        },
+        }
       );
 
       // Successful response
@@ -134,23 +118,17 @@ export const brainModelService = {
 
           switch (status) {
             case 400:
-              return failure(
-                new Error(`Invalid search parameters: ${data.message}`),
-              );
+              return failure(new Error(`Invalid search parameters: ${data.message}`));
             case 403:
-              return failure(
-                new Error("Insufficient permissions to search brain models"),
-              );
+              return failure(new Error('Insufficient permissions to search brain models'));
             case 500:
-              return failure(new Error("Server error during search operation"));
+              return failure(new Error('Server error during search operation'));
             default:
               return failure(new Error(data.message || `API error: ${status}`));
           }
         } else if (error.request) {
           return failure(
-            new Error(
-              "No response received from server. Please check your network connection.",
-            ),
+            new Error('No response received from server. Please check your network connection.')
           );
         } else {
           return failure(new Error(`Request setup error: ${error.message}`));
@@ -160,8 +138,8 @@ export const brainModelService = {
       // Generic error handling
       return failure(
         new Error(
-          `Failed to search brain models: ${error instanceof Error ? error.message : String(error)}`,
-        ),
+          `Failed to search brain models: ${error instanceof Error ? error.message : String(error)}`
+        )
       );
     }
   },
@@ -172,7 +150,7 @@ export const brainModelService = {
   updateRegion: async (
     scanId: string,
     regionId: string,
-    updates: Partial<BrainRegion>,
+    updates: Partial<BrainRegion>
   ): Promise<Result<BrainRegion>> => {
     try {
       // API request
@@ -182,10 +160,10 @@ export const brainModelService = {
         {
           timeout: 10000,
           headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
           },
-        },
+        }
       );
 
       // Successful response
@@ -201,25 +179,17 @@ export const brainModelService = {
             case 404:
               return failure(new Error(`Brain scan or region not found`));
             case 400:
-              return failure(
-                new Error(`Invalid region update: ${data.message}`),
-              );
+              return failure(new Error(`Invalid region update: ${data.message}`));
             case 403:
-              return failure(
-                new Error("Insufficient permissions to update this brain scan"),
-              );
+              return failure(new Error('Insufficient permissions to update this brain scan'));
             case 500:
-              return failure(
-                new Error("Server error while updating brain region"),
-              );
+              return failure(new Error('Server error while updating brain region'));
             default:
               return failure(new Error(data.message || `API error: ${status}`));
           }
         } else if (error.request) {
           return failure(
-            new Error(
-              "No response received from server. Please check your network connection.",
-            ),
+            new Error('No response received from server. Please check your network connection.')
           );
         } else {
           return failure(new Error(`Request setup error: ${error.message}`));
@@ -229,8 +199,8 @@ export const brainModelService = {
       // Generic error handling
       return failure(
         new Error(
-          `Failed to update brain region: ${error instanceof Error ? error.message : String(error)}`,
-        ),
+          `Failed to update brain region: ${error instanceof Error ? error.message : String(error)}`
+        )
       );
     }
   },
@@ -241,7 +211,7 @@ export const brainModelService = {
   updateConnection: async (
     scanId: string,
     connectionId: string,
-    updates: Partial<NeuralConnection>,
+    updates: Partial<NeuralConnection>
   ): Promise<Result<NeuralConnection>> => {
     try {
       // API request
@@ -251,10 +221,10 @@ export const brainModelService = {
         {
           timeout: 10000,
           headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
           },
-        },
+        }
       );
 
       // Successful response
@@ -270,25 +240,17 @@ export const brainModelService = {
             case 404:
               return failure(new Error(`Brain scan or connection not found`));
             case 400:
-              return failure(
-                new Error(`Invalid connection update: ${data.message}`),
-              );
+              return failure(new Error(`Invalid connection update: ${data.message}`));
             case 403:
-              return failure(
-                new Error("Insufficient permissions to update this brain scan"),
-              );
+              return failure(new Error('Insufficient permissions to update this brain scan'));
             case 500:
-              return failure(
-                new Error("Server error while updating neural connection"),
-              );
+              return failure(new Error('Server error while updating neural connection'));
             default:
               return failure(new Error(data.message || `API error: ${status}`));
           }
         } else if (error.request) {
           return failure(
-            new Error(
-              "No response received from server. Please check your network connection.",
-            ),
+            new Error('No response received from server. Please check your network connection.')
           );
         } else {
           return failure(new Error(`Request setup error: ${error.message}`));
@@ -298,8 +260,8 @@ export const brainModelService = {
       // Generic error handling
       return failure(
         new Error(
-          `Failed to update neural connection: ${error instanceof Error ? error.message : String(error)}`,
-        ),
+          `Failed to update neural connection: ${error instanceof Error ? error.message : String(error)}`
+        )
       );
     }
   },
@@ -314,9 +276,9 @@ export const brainModelService = {
       connectionIds?: string[];
       text: string;
       author: string;
-      category: "clinical" | "research" | "technical";
-      visibility: "private" | "team" | "organization";
-    },
+      category: 'clinical' | 'research' | 'technical';
+      visibility: 'private' | 'team' | 'organization';
+    }
   ): Promise<Result<{ id: string; createdAt: string }>> => {
     try {
       // API request
@@ -326,10 +288,10 @@ export const brainModelService = {
         {
           timeout: 10000,
           headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
           },
-        },
+        }
       );
 
       // Successful response
@@ -345,27 +307,17 @@ export const brainModelService = {
             case 404:
               return failure(new Error(`Brain scan not found`));
             case 400:
-              return failure(
-                new Error(`Invalid annotation data: ${data.message}`),
-              );
+              return failure(new Error(`Invalid annotation data: ${data.message}`));
             case 403:
-              return failure(
-                new Error(
-                  "Insufficient permissions to annotate this brain scan",
-                ),
-              );
+              return failure(new Error('Insufficient permissions to annotate this brain scan'));
             case 500:
-              return failure(
-                new Error("Server error while creating annotation"),
-              );
+              return failure(new Error('Server error while creating annotation'));
             default:
               return failure(new Error(data.message || `API error: ${status}`));
           }
         } else if (error.request) {
           return failure(
-            new Error(
-              "No response received from server. Please check your network connection.",
-            ),
+            new Error('No response received from server. Please check your network connection.')
           );
         } else {
           return failure(new Error(`Request setup error: ${error.message}`));
@@ -375,8 +327,8 @@ export const brainModelService = {
       // Generic error handling
       return failure(
         new Error(
-          `Failed to create annotation: ${error instanceof Error ? error.message : String(error)}`,
-        ),
+          `Failed to create annotation: ${error instanceof Error ? error.message : String(error)}`
+        )
       );
     }
   },
@@ -385,9 +337,7 @@ export const brainModelService = {
    * Generate a brain model from clinical data (mock implementation)
    * In a real system, this would call a server-side AI model
    */
-  generateModel: async (
-    patientId: string,
-  ): Promise<Result<{ scanId: string; status: string }>> => {
+  generateModel: async (patientId: string): Promise<Result<{ scanId: string; status: string }>> => {
     try {
       // API request
       const response = await axios.post<{ scanId: string; status: string }>(
@@ -396,10 +346,10 @@ export const brainModelService = {
         {
           timeout: 30000, // 30 seconds timeout for generation request
           headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
           },
-        },
+        }
       );
 
       // Successful response
@@ -413,27 +363,19 @@ export const brainModelService = {
 
           switch (status) {
             case 404:
-              return failure(
-                new Error(`Patient with ID ${patientId} not found`),
-              );
+              return failure(new Error(`Patient with ID ${patientId} not found`));
             case 400:
-              return failure(
-                new Error(`Invalid generation request: ${data.message}`),
-              );
+              return failure(new Error(`Invalid generation request: ${data.message}`));
             case 403:
-              return failure(
-                new Error("Insufficient permissions to generate brain models"),
-              );
+              return failure(new Error('Insufficient permissions to generate brain models'));
             case 500:
-              return failure(new Error("Server error during model generation"));
+              return failure(new Error('Server error during model generation'));
             default:
               return failure(new Error(data.message || `API error: ${status}`));
           }
         } else if (error.request) {
           return failure(
-            new Error(
-              "No response received from server. Please check your network connection.",
-            ),
+            new Error('No response received from server. Please check your network connection.')
           );
         } else {
           return failure(new Error(`Request setup error: ${error.message}`));
@@ -443,8 +385,8 @@ export const brainModelService = {
       // Generic error handling
       return failure(
         new Error(
-          `Failed to generate brain model: ${error instanceof Error ? error.message : String(error)}`,
-        ),
+          `Failed to generate brain model: ${error instanceof Error ? error.message : String(error)}`
+        )
       );
     }
   },
@@ -453,7 +395,7 @@ export const brainModelService = {
    * Check model generation status
    */
   checkGenerationStatus: async (
-    generationId: string,
+    generationId: string
   ): Promise<
     Result<{
       status: string;
@@ -472,8 +414,8 @@ export const brainModelService = {
       }>(`${BRAIN_MODEL_ENDPOINT}/generation/${generationId}`, {
         timeout: 10000,
         headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
         },
       });
 
@@ -490,23 +432,15 @@ export const brainModelService = {
             case 404:
               return failure(new Error(`Generation process not found`));
             case 403:
-              return failure(
-                new Error(
-                  "Insufficient permissions to check generation status",
-                ),
-              );
+              return failure(new Error('Insufficient permissions to check generation status'));
             case 500:
-              return failure(
-                new Error("Server error while checking generation status"),
-              );
+              return failure(new Error('Server error while checking generation status'));
             default:
               return failure(new Error(data.message || `API error: ${status}`));
           }
         } else if (error.request) {
           return failure(
-            new Error(
-              "No response received from server. Please check your network connection.",
-            ),
+            new Error('No response received from server. Please check your network connection.')
           );
         } else {
           return failure(new Error(`Request setup error: ${error.message}`));
@@ -516,8 +450,8 @@ export const brainModelService = {
       // Generic error handling
       return failure(
         new Error(
-          `Failed to check generation status: ${error instanceof Error ? error.message : String(error)}`,
-        ),
+          `Failed to check generation status: ${error instanceof Error ? error.message : String(error)}`
+        )
       );
     }
   },
@@ -525,28 +459,29 @@ export const brainModelService = {
   /**
    * Fetch baseline neural activity for a patient
    */
-  getBaselineActivity: async (patientId: string): Promise<Result<any>> => { // Using 'any' for baseline type for now
+  getBaselineActivity: async (patientId: string): Promise<Result<any>> => {
+    // Using 'any' for baseline type for now
     try {
       // Define the correct endpoint for baseline activity
       const BASELINE_ENDPOINT = `${API_BASE_URL}/v1/patients/${patientId}/baseline-activity`;
       const response = await axios.get<any>(BASELINE_ENDPOINT, {
         timeout: 15000,
-        headers: { Accept: "application/json" },
+        headers: { Accept: 'application/json' },
       });
       // Assuming the response data structure matches what the hook expects
       // (e.g., { regionActivations: [], connectionStrengths: [] })
       return success(response.data);
     } catch (error) {
       // Simplified error handling for now, reuse patterns from other methods if needed
-       if (axios.isAxiosError(error)) {
-         if (error.response?.status === 404) {
-           return failure(new Error(`Baseline activity not found for patient ${patientId}`));
-         }
-       }
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          return failure(new Error(`Baseline activity not found for patient ${patientId}`));
+        }
+      }
       return failure(
         new Error(
-          `Failed to fetch baseline activity: ${error instanceof Error ? error.message : String(error)}`,
-        ),
+          `Failed to fetch baseline activity: ${error instanceof Error ? error.message : String(error)}`
+        )
       );
     }
   },

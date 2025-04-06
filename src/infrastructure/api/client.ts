@@ -5,7 +5,10 @@ export class ApiClient {
   private client: AxiosInstance;
   private auditLogs: AuditLog[] = [];
 
-  constructor(baseURL: string, private apiKey: string) {
+  constructor(
+    baseURL: string,
+    private apiKey: string
+  ) {
     this.client = axios.create({
       baseURL,
       headers: {
@@ -20,7 +23,7 @@ export class ApiClient {
         // Add HIPAA required headers
         config.headers['X-Request-ID'] = crypto.randomUUID();
         config.headers['X-Timestamp'] = new Date().toISOString();
-        
+
         // Log the request for audit
         this.logAudit({
           action: this.getActionFromMethod(config.method || 'get'),
@@ -130,4 +133,4 @@ export class ApiClient {
   clearAuditLogs(): void {
     this.auditLogs = [];
   }
-} 
+}

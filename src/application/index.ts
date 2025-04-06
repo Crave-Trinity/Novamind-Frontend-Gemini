@@ -1,6 +1,6 @@
 /**
  * Application layer exports
- * 
+ *
  * This layer contains application-specific business logic, orchestrating the
  * domain objects and infrastructure services to fulfill user requirements.
  */
@@ -15,4 +15,4 @@ export * from './services';
 export * from './stores';
 
 // Export utility functions
-export * from './utils'; 
+export * from './utils';

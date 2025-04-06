@@ -1,6 +1,6 @@
 /**
  * Tests for the WebGL/Three.js mock system
- * 
+ *
  * This test verifies that our WebGL mocking system works correctly
  * and prevents test hangs in Three.js components.
  */
@@ -9,9 +9,9 @@ import {
   setupWebGLMocks,
   cleanupWebGLMocks,
   CoreWebGLRenderer, // Import the mock class
-  MockWebGLTexture,  // Import the mock class
+  MockWebGLTexture, // Import the mock class
   MockWebGLGeometry, // Import the mock class
-  MockWebGLMaterial  // Import the mock class
+  MockWebGLMaterial, // Import the mock class
 } from './mock-webgl'; // Keep setup/cleanup imports
 
 // Mock for 'three' moved to global setup (src/test/setup.ts)
@@ -23,13 +23,14 @@ import {
   BufferGeometry,
   MeshBasicMaterial,
   Scene,
-  PerspectiveCamera
+  PerspectiveCamera,
 } from 'three';
-describe.skip('WebGL Mocking', () => { // Re-skip due to persistent mock issues
+describe.skip('WebGL Mocking', () => {
+  // Re-skip due to persistent mock issues
   beforeEach(() => {
     // Set up WebGL mocks before each test
     setupWebGLMocks();
-    
+
     // Set up fake timers for animation frame testing
     vi.useFakeTimers();
   });
@@ -37,7 +38,7 @@ describe.skip('WebGL Mocking', () => { // Re-skip due to persistent mock issues
   afterEach(() => {
     // Clean up after each test to avoid polluting other tests
     cleanupWebGLMocks();
-    
+
     // Reset timers
     vi.restoreAllMocks();
     vi.useRealTimers();
@@ -46,10 +47,10 @@ describe.skip('WebGL Mocking', () => { // Re-skip due to persistent mock issues
   it('should mock WebGL context successfully', () => {
     // Create a canvas element
     const canvas = document.createElement('canvas');
-    
+
     // Get WebGL context - this should return our mock version
     const gl = canvas.getContext('webgl');
-    
+
     // Verify the mock is created and has the correct properties
     expect(gl).toBeDefined();
     expect(gl?.drawingBufferWidth).toBe(800);
@@ -64,9 +65,9 @@ describe.skip('WebGL Mocking', () => { // Re-skip due to persistent mock issues
   it('should mock WebGL2 context successfully', () => {
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl2');
-    
+
     expect(gl).toBeDefined();
-    
+
     // Test WebGL2 specific methods
     expect(typeof gl?.createVertexArray).toBe('function');
     expect(typeof gl?.bindVertexArray).toBe('function');
@@ -75,20 +76,22 @@ describe.skip('WebGL Mocking', () => { // Re-skip due to persistent mock issues
   it('should mock animation frame APIs', () => {
     // Check that requestAnimationFrame is mocked
     expect(typeof window.requestAnimationFrame).toBe('function');
-    
+
     // It should be a function
     expect(typeof window.requestAnimationFrame).toBe('function');
-    
+
     // Test that requestAnimationFrame works by setting up a callback
     let called = false;
-    const callback = () => { called = true; };
-    
+    const callback = () => {
+      called = true;
+    };
+
     // Request animation frame should call our callback
     window.requestAnimationFrame(callback);
-    
+
     // Advance timers to trigger callback
     vi.advanceTimersByTime(20); // Use 20ms to ensure it triggers after 16ms default
-    
+
     expect(called).toBe(true);
   });
 
@@ -100,11 +103,11 @@ describe.skip('WebGL Mocking', () => { // Re-skip due to persistent mock issues
     const texture = new Texture();
     const geometry = new BufferGeometry(); // Use standard name
     const material = new MeshBasicMaterial(); // Use standard name
-    
+
     // Check that the renderer has expected properties
     expect(renderer.domElement).toBeInstanceOf(HTMLCanvasElement);
     expect(renderer.shadowMap).toBeDefined();
-    
+
     // Check that disposal methods exist
     expect(typeof renderer.dispose).toBe('function');
     expect(typeof texture.dispose).toBe('function');
@@ -117,7 +120,7 @@ describe.skip('WebGL Mocking', () => { // Re-skip due to persistent mock issues
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       configurable: true,
-      value: vi.fn().mockImplementation(query => ({
+      value: vi.fn().mockImplementation((query) => ({
         matches: false,
         media: query,
         onchange: null,
@@ -126,12 +129,12 @@ describe.skip('WebGL Mocking', () => { // Re-skip due to persistent mock issues
         addEventListener: vi.fn(),
         removeEventListener: vi.fn(),
         dispatchEvent: vi.fn(),
-      }))
+      })),
     });
-    
+
     // Check that matchMedia is mocked
     expect(typeof window.matchMedia).toBe('function');
-    
+
     // Test matchMedia mock
     const mediaQuery = window.matchMedia('(max-width: 600px)');
     expect(mediaQuery).toBeDefined();
@@ -161,24 +164,28 @@ describe('Three.js Component Integration', () => {
     // Need mock scene and camera for the render call
     const scene = new Scene();
     const camera = new PerspectiveCamera();
-    
+
     // Simulate a render loop - this would normally hang tests
     for (let i = 0; i < 10; i++) {
       // Simulate animation frame
       // Pass mock scene and camera to render call
       renderer.render(scene, camera);
     }
-    
+
     // Create and dispose many geometries and materials - this would normally cause memory leaks
     // Instantiate using standard names - alias provides mocks
-    const geometries = Array(100).fill(0).map(() => new BufferGeometry());
-    const materials = Array(100).fill(0).map(() => new MeshBasicMaterial());
-    
+    const geometries = Array(100)
+      .fill(0)
+      .map(() => new BufferGeometry());
+    const materials = Array(100)
+      .fill(0)
+      .map(() => new MeshBasicMaterial());
+
     // Dispose everything
-    geometries.forEach(g => g.dispose());
-    materials.forEach(m => m.dispose());
+    geometries.forEach((g) => g.dispose());
+    materials.forEach((m) => m.dispose());
     renderer.dispose();
-    
+
     // If we got here without hanging, the test passes
     expect(true).toBe(true);
   });

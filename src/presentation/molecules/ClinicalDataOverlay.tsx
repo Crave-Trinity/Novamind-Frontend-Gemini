@@ -4,15 +4,11 @@
  * with HIPAA-compliant data presentation and quantum-level precision
  */
 
-import React, { useState, useMemo, useCallback } from "react";
-import { BrainModel, BrainRegion } from "@domain/types/brain/models";
-import { Patient, Symptom, Diagnosis } from "@domain/types/clinical/patient";
-import {
-  RiskAssessment,
-  RiskLevel,
-  RiskAssessmentOps,
-} from "@domain/types/clinical/risk";
-import { SafeArray } from "@domain/types/shared/common";
+import React, { useState, useMemo, useCallback } from 'react';
+import { BrainModel, BrainRegion } from '@domain/types/brain/models';
+import { Patient, Symptom, Diagnosis } from '@domain/types/clinical/patient';
+import { RiskAssessment, RiskLevel, RiskAssessmentOps } from '@domain/types/clinical/risk';
+import { SafeArray } from '@domain/types/shared/common';
 
 // Neural-safe prop definition with explicit typing
 interface ClinicalDataOverlayProps {
@@ -51,12 +47,12 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
   maxDiagnoses = 3,
   showRiskMetrics = true,
   showPatientInfo = true,
-  className = "",
+  className = '',
 }) => {
   // Local state
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "symptoms" | "regions" | "risk"
-  >("overview");
+  const [activeTab, setActiveTab] = useState<'overview' | 'symptoms' | 'regions' | 'risk'>(
+    'overview'
+  );
   const [expanded, setExpanded] = useState<boolean>(false);
 
   // Safe array wrappers for null safety
@@ -67,54 +63,50 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
 
   // Get selected regions with type safety
   const selectedRegions = useMemo(() => {
-    return safeRegions
-      .filter((region) => safeSelectedIds.includes(region.id))
-      .toArray();
+    return safeRegions.filter((region) => safeSelectedIds.includes(region.id)).toArray();
   }, [safeRegions, safeSelectedIds]);
 
   // Get active regions (with significant activity)
   const activeRegions = useMemo(() => {
-    return safeRegions
-      .filter((region) => region.isActive || region.activityLevel > 0.3)
-      .toArray();
+    return safeRegions.filter((region) => region.isActive || region.activityLevel > 0.3).toArray();
   }, [safeRegions]);
 
   // Filter symptoms by severity and recentness
   const prioritizedSymptoms = useMemo(() => {
     // Convert to array before sorting
-    return safeSymptoms.toArray()
+    return safeSymptoms
+      .toArray()
       .sort((a, b) => b.severity - a.severity) // Sort by severity (high to low)
-      .slice(0, expanded ? undefined : maxSymptoms) // Limit if not expanded
-      // Removed redundant .toArray()
+      .slice(0, expanded ? undefined : maxSymptoms); // Limit if not expanded
+    // Removed redundant .toArray()
   }, [safeSymptoms, maxSymptoms, expanded]);
 
   // Filter diagnoses for display
   const prioritizedDiagnoses = useMemo(() => {
     // Convert to array before sorting and slicing
-    return safeDiagnoses.toArray()
+    return safeDiagnoses
+      .toArray()
       .sort((a, b) => {
         // "active" status gets priority
-        if (a.status === "active" && b.status !== "active") return -1;
-        if (a.status !== "active" && b.status === "active") return 1;
+        if (a.status === 'active' && b.status !== 'active') return -1;
+        if (a.status !== 'active' && b.status === 'active') return 1;
 
         // Then by severity (severe > moderate > mild)
         const severityScore = (severity: string): number => {
-          if (severity === "severe") return 3;
-          if (severity === "moderate") return 2;
-          if (severity === "mild") return 1;
+          if (severity === 'severe') return 3;
+          if (severity === 'moderate') return 2;
+          if (severity === 'mild') return 1;
           return 0;
         };
         return severityScore(b.severity) - severityScore(a.severity);
       })
-      .slice(0, expanded ? undefined : maxDiagnoses) // Limit if not expanded
-      // Removed redundant .toArray()
+      .slice(0, expanded ? undefined : maxDiagnoses); // Limit if not expanded
+    // Removed redundant .toArray()
   }, [safeDiagnoses, maxDiagnoses, expanded]);
 
   // Get risk level with null safety
   const overallRiskLevel = useMemo(() => {
-    return riskAssessment
-      ? RiskAssessmentOps.getRiskLevel(riskAssessment)
-      : RiskLevel.UNKNOWN;
+    return riskAssessment ? RiskAssessmentOps.getRiskLevel(riskAssessment) : RiskLevel.UNKNOWN;
   }, [riskAssessment]);
 
   // Risk domain to focus on - prioritize high risk domains
@@ -122,35 +114,31 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
     if (!riskAssessment) return null;
 
     // Convert to array before sorting
-    const sortedDomains = new SafeArray(riskAssessment.domainRisks).toArray().sort(
-      (a, b) => {
-        // Sort by risk level (severe > high > moderate > low)
-        const riskScore = (level: RiskLevel): number => {
-          switch (level) {
-            case RiskLevel.SEVERE:
-              return 4;
-            case RiskLevel.HIGH:
-              return 3;
-            case RiskLevel.MODERATE:
-              return 2;
-            case RiskLevel.LOW:
-              return 1;
-            default:
-              return 0;
-          }
-        };
-        return riskScore(b.riskLevel) - riskScore(a.riskLevel);
-      },
-    );
+    const sortedDomains = new SafeArray(riskAssessment.domainRisks).toArray().sort((a, b) => {
+      // Sort by risk level (severe > high > moderate > low)
+      const riskScore = (level: RiskLevel): number => {
+        switch (level) {
+          case RiskLevel.SEVERE:
+            return 4;
+          case RiskLevel.HIGH:
+            return 3;
+          case RiskLevel.MODERATE:
+            return 2;
+          case RiskLevel.LOW:
+            return 1;
+          default:
+            return 0;
+        }
+      };
+      return riskScore(b.riskLevel) - riskScore(a.riskLevel);
+    });
 
     // Access the sorted array directly
     return sortedDomains.length > 0 ? sortedDomains[0] : null;
   }, [riskAssessment]);
 
   // Event handlers
-  const handleTabChange = (
-    tab: "overview" | "symptoms" | "regions" | "risk",
-  ) => {
+  const handleTabChange = (tab: 'overview' | 'symptoms' | 'regions' | 'risk') => {
     setActiveTab(tab);
   };
 
@@ -161,21 +149,21 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
   // Render risk level badge with appropriate color
   const renderRiskBadge = (level: RiskLevel) => {
     const colorMap: Record<RiskLevel, string> = {
-      [RiskLevel.NONE]: "bg-green-500",
-      [RiskLevel.LOW]: "bg-blue-500",
-      [RiskLevel.MODERATE]: "bg-yellow-500",
-      [RiskLevel.HIGH]: "bg-orange-500",
-      [RiskLevel.SEVERE]: "bg-red-500",
-      [RiskLevel.UNKNOWN]: "bg-gray-500",
+      [RiskLevel.NONE]: 'bg-green-500',
+      [RiskLevel.LOW]: 'bg-blue-500',
+      [RiskLevel.MODERATE]: 'bg-yellow-500',
+      [RiskLevel.HIGH]: 'bg-orange-500',
+      [RiskLevel.SEVERE]: 'bg-red-500',
+      [RiskLevel.UNKNOWN]: 'bg-gray-500',
     };
 
     const textMap: Record<RiskLevel, string> = {
-      [RiskLevel.NONE]: "No Risk",
-      [RiskLevel.LOW]: "Low Risk",
-      [RiskLevel.MODERATE]: "Moderate Risk",
-      [RiskLevel.HIGH]: "High Risk",
-      [RiskLevel.SEVERE]: "Severe Risk",
-      [RiskLevel.UNKNOWN]: "Unknown Risk",
+      [RiskLevel.NONE]: 'No Risk',
+      [RiskLevel.LOW]: 'Low Risk',
+      [RiskLevel.MODERATE]: 'Moderate Risk',
+      [RiskLevel.HIGH]: 'High Risk',
+      [RiskLevel.SEVERE]: 'Severe Risk',
+      [RiskLevel.UNKNOWN]: 'Unknown Risk',
     };
 
     return (
@@ -189,12 +177,12 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
 
   // Render symptom severity indicator
   const renderSeverityIndicator = (severity: number) => {
-    let color = "bg-gray-400";
-    if (severity >= 8) color = "bg-red-500";
-    else if (severity >= 6) color = "bg-orange-500";
-    else if (severity >= 4) color = "bg-yellow-500";
-    else if (severity >= 2) color = "bg-blue-500";
-    else if (severity > 0) color = "bg-green-500";
+    let color = 'bg-gray-400';
+    if (severity >= 8) color = 'bg-red-500';
+    else if (severity >= 6) color = 'bg-orange-500';
+    else if (severity >= 4) color = 'bg-yellow-500';
+    else if (severity >= 2) color = 'bg-blue-500';
+    else if (severity > 0) color = 'bg-green-500';
 
     return (
       <div className="flex items-center">
@@ -208,11 +196,11 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
   const renderActivityIndicator = (activityLevel: number) => {
     const width = `${Math.max(1, Math.round(activityLevel * 100))}%`;
 
-    let color = "bg-gray-600";
-    if (activityLevel > 0.8) color = "bg-red-500";
-    else if (activityLevel > 0.6) color = "bg-orange-500";
-    else if (activityLevel > 0.4) color = "bg-yellow-500";
-    else if (activityLevel > 0.2) color = "bg-blue-500";
+    let color = 'bg-gray-600';
+    if (activityLevel > 0.8) color = 'bg-red-500';
+    else if (activityLevel > 0.6) color = 'bg-orange-500';
+    else if (activityLevel > 0.4) color = 'bg-yellow-500';
+    else if (activityLevel > 0.2) color = 'bg-blue-500';
 
     return (
       <div className="w-full bg-gray-900 rounded-full h-1 overflow-hidden">
@@ -224,9 +212,7 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
   // Compact view for minimal display
   if (compact) {
     return (
-      <div
-        className={`bg-black/40 backdrop-blur-sm rounded-lg px-3 py-2 ${className}`}
-      >
+      <div className={`bg-black/40 backdrop-blur-sm rounded-lg px-3 py-2 ${className}`}>
         <div className="flex items-center gap-3 text-white text-xs">
           {/* Diagnosis count */}
           {safeDiagnoses.size() > 0 && (
@@ -254,9 +240,7 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
 
           {/* Risk level */}
           {showRiskMetrics && riskAssessment && (
-            <div className="flex items-center ml-auto">
-              {renderRiskBadge(overallRiskLevel)}
-            </div>
+            <div className="flex items-center ml-auto">{renderRiskBadge(overallRiskLevel)}</div>
           )}
         </div>
       </div>
@@ -265,48 +249,46 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
 
   // Full view with tabs
   return (
-    <div
-      className={`bg-black/40 backdrop-blur-sm rounded-lg overflow-hidden ${className}`}
-    >
+    <div className={`bg-black/40 backdrop-blur-sm rounded-lg overflow-hidden ${className}`}>
       {/* Tabs */}
       <div className="flex items-center border-b border-gray-800">
         <button
-          onClick={() => handleTabChange("overview")}
+          onClick={() => handleTabChange('overview')}
           className={`px-4 py-2 text-xs font-medium transition-colors ${
-            activeTab === "overview"
-              ? "text-white bg-blue-600"
-              : "text-gray-300 hover:text-white hover:bg-gray-800"
+            activeTab === 'overview'
+              ? 'text-white bg-blue-600'
+              : 'text-gray-300 hover:text-white hover:bg-gray-800'
           }`}
         >
           Overview
         </button>
         <button
-          onClick={() => handleTabChange("symptoms")}
+          onClick={() => handleTabChange('symptoms')}
           className={`px-4 py-2 text-xs font-medium transition-colors ${
-            activeTab === "symptoms"
-              ? "text-white bg-blue-600"
-              : "text-gray-300 hover:text-white hover:bg-gray-800"
+            activeTab === 'symptoms'
+              ? 'text-white bg-blue-600'
+              : 'text-gray-300 hover:text-white hover:bg-gray-800'
           }`}
         >
           Symptoms
         </button>
         <button
-          onClick={() => handleTabChange("regions")}
+          onClick={() => handleTabChange('regions')}
           className={`px-4 py-2 text-xs font-medium transition-colors ${
-            activeTab === "regions"
-              ? "text-white bg-blue-600"
-              : "text-gray-300 hover:text-white hover:bg-gray-800"
+            activeTab === 'regions'
+              ? 'text-white bg-blue-600'
+              : 'text-gray-300 hover:text-white hover:bg-gray-800'
           }`}
         >
           Regions
         </button>
         {showRiskMetrics && (
           <button
-            onClick={() => handleTabChange("risk")}
+            onClick={() => handleTabChange('risk')}
             className={`px-4 py-2 text-xs font-medium transition-colors ${
-              activeTab === "risk"
-                ? "text-white bg-blue-600"
-                : "text-gray-300 hover:text-white hover:bg-gray-800"
+              activeTab === 'risk'
+                ? 'text-white bg-blue-600'
+                : 'text-gray-300 hover:text-white hover:bg-gray-800'
             }`}
           >
             Risk
@@ -317,23 +299,21 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
         <button
           onClick={toggleExpanded}
           className="ml-auto px-3 py-2 text-gray-300 hover:text-white"
-          title={expanded ? "Collapse" : "Expand"}
+          title={expanded ? 'Collapse' : 'Expand'}
         >
-          {expanded ? "▼" : "▲"}
+          {expanded ? '▼' : '▲'}
         </button>
       </div>
 
       {/* Tab content */}
       <div className="p-3">
         {/* Overview tab */}
-        {activeTab === "overview" && (
+        {activeTab === 'overview' && (
           <div className="text-white">
             {/* Patient info */}
             {showPatientInfo && patient && (
               <div className="mb-3">
-                <h4 className="text-xs font-medium text-gray-300 mb-1">
-                  Patient Information
-                </h4>
+                <h4 className="text-xs font-medium text-gray-300 mb-1">Patient Information</h4>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                   <div className="flex items-center">
                     <span className="text-gray-400 mr-2">Age:</span>
@@ -364,15 +344,10 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
             {/* Primary diagnoses */}
             {safeDiagnoses.size() > 0 && (
               <div className="mb-3">
-                <h4 className="text-xs font-medium text-gray-300 mb-1">
-                  Primary Diagnoses
-                </h4>
+                <h4 className="text-xs font-medium text-gray-300 mb-1">Primary Diagnoses</h4>
                 <div className="space-y-1">
                   {prioritizedDiagnoses.map((diagnosis) => (
-                    <div
-                      key={diagnosis.id}
-                      className="bg-black/20 rounded p-2 text-xs"
-                    >
+                    <div key={diagnosis.id} className="bg-black/20 rounded p-2 text-xs">
                       <div className="flex justify-between items-center">
                         <span className="font-medium">{diagnosis.name}</span>
                         <span className="text-2xs text-gray-400">
@@ -401,15 +376,10 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
             {/* Top symptoms */}
             {safeSymptoms.size() > 0 && (
               <div>
-                <h4 className="text-xs font-medium text-gray-300 mb-1">
-                  Active Symptoms
-                </h4>
+                <h4 className="text-xs font-medium text-gray-300 mb-1">Active Symptoms</h4>
                 <div className="space-y-1">
                   {prioritizedSymptoms.map((symptom) => (
-                    <div
-                      key={symptom.id}
-                      className="bg-black/20 rounded p-2 text-xs"
-                    >
+                    <div key={symptom.id} className="bg-black/20 rounded p-2 text-xs">
                       <div className="flex justify-between items-center">
                         <span className="font-medium">{symptom.name}</span>
                         {renderSeverityIndicator(symptom.severity)}
@@ -436,55 +406,44 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
         )}
 
         {/* Symptoms tab */}
-        {activeTab === "symptoms" && (
+        {activeTab === 'symptoms' && (
           <div className="text-white">
             <div className="flex items-center justify-between mb-2">
-              <h4 className="text-xs font-medium text-gray-300">
-                Symptom Details
-              </h4>
-              <span className="text-xs text-gray-400">
-                {safeSymptoms.size()} Total
-              </span>
+              <h4 className="text-xs font-medium text-gray-300">Symptom Details</h4>
+              <span className="text-xs text-gray-400">{safeSymptoms.size()} Total</span>
             </div>
 
             {safeSymptoms.size() > 0 ? (
               <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
                 {(expanded ? safeSymptoms.toArray() : safeSymptoms.toArray().slice(0, 10)).map(
                   (symptom) => (
-                    <div
-                      key={symptom.id}
-                      className="bg-black/30 rounded p-2 text-xs"
-                    >
+                    <div key={symptom.id} className="bg-black/30 rounded p-2 text-xs">
                       <div className="flex justify-between items-center">
                         <span className="font-medium">{symptom.name}</span>
                         {renderSeverityIndicator(symptom.severity)}
                       </div>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1 text-2xs text-gray-300">
                         <div>
-                          <span className="text-gray-400">Category:</span>{" "}
-                          {symptom.category}
+                          <span className="text-gray-400">Category:</span> {symptom.category}
                         </div>
                         <div>
-                          <span className="text-gray-400">Frequency:</span>{" "}
-                          {symptom.frequency}
+                          <span className="text-gray-400">Frequency:</span> {symptom.frequency}
                         </div>
                         <div>
-                          <span className="text-gray-400">Impact:</span>{" "}
-                          {symptom.impact}
+                          <span className="text-gray-400">Impact:</span> {symptom.impact}
                         </div>
                         <div>
-                          <span className="text-gray-400">Progression:</span>{" "}
-                          {symptom.progression}
+                          <span className="text-gray-400">Progression:</span> {symptom.progression}
                         </div>
                       </div>
                       {symptom.triggers && symptom.triggers.length > 0 && (
                         <div className="mt-1 text-2xs">
-                          <span className="text-gray-400">Triggers:</span>{" "}
-                          {symptom.triggers.join(", ")}
+                          <span className="text-gray-400">Triggers:</span>{' '}
+                          {symptom.triggers.join(', ')}
                         </div>
                       )}
                     </div>
-                  ),
+                  )
                 )}
 
                 {!expanded && safeSymptoms.size() > 10 && (
@@ -505,34 +464,25 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
         )}
 
         {/* Regions tab */}
-        {activeTab === "regions" && (
+        {activeTab === 'regions' && (
           <div className="text-white">
             {/* Selected regions */}
             {selectedRegions.length > 0 && (
               <div className="mb-3">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-xs font-medium text-gray-300">
-                    Selected Regions
-                  </h4>
-                  <span className="text-xs text-gray-400">
-                    {selectedRegions.length} Selected
-                  </span>
+                  <h4 className="text-xs font-medium text-gray-300">Selected Regions</h4>
+                  <span className="text-xs text-gray-400">{selectedRegions.length} Selected</span>
                 </div>
                 <div className="space-y-1 max-h-32 overflow-y-auto pr-1">
                   {selectedRegions.map((region) => (
-                    <div
-                      key={region.id}
-                      className="bg-blue-600/30 rounded p-2 text-xs"
-                    >
+                    <div key={region.id} className="bg-blue-600/30 rounded p-2 text-xs">
                       <div className="flex justify-between items-center">
                         <span className="font-medium">{region.name}</span>
                         <span className="text-2xs">
                           {(region.activityLevel * 100).toFixed(0)}% Activity
                         </span>
                       </div>
-                      <div className="mt-1">
-                        {renderActivityIndicator(region.activityLevel)}
-                      </div>
+                      <div className="mt-1">{renderActivityIndicator(region.activityLevel)}</div>
                       {region.connections && region.connections.length > 0 && (
                         <div className="mt-1 text-2xs text-gray-300">
                           <span>{region.connections.length} connections</span>
@@ -547,12 +497,8 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
             {/* Active regions */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-xs font-medium text-gray-300">
-                  Most Active Regions
-                </h4>
-                <span className="text-xs text-gray-400">
-                  {activeRegions.length} Active
-                </span>
+                <h4 className="text-xs font-medium text-gray-300">Most Active Regions</h4>
+                <span className="text-xs text-gray-400">{activeRegions.length} Active</span>
               </div>
 
               {activeRegions.length > 0 ? (
@@ -564,9 +510,7 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
                       <div
                         key={region.id}
                         className={`bg-black/30 rounded p-2 text-xs ${
-                          safeSelectedIds.includes(region.id)
-                            ? "ring-1 ring-blue-500"
-                            : ""
+                          safeSelectedIds.includes(region.id) ? 'ring-1 ring-blue-500' : ''
                         }`}
                       >
                         <div className="flex justify-between items-center">
@@ -575,9 +519,7 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
                             {(region.activityLevel * 100).toFixed(0)}% Activity
                           </span>
                         </div>
-                        <div className="mt-1">
-                          {renderActivityIndicator(region.activityLevel)}
-                        </div>
+                        <div className="mt-1">{renderActivityIndicator(region.activityLevel)}</div>
                       </div>
                     ))}
 
@@ -600,13 +542,11 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
         )}
 
         {/* Risk tab */}
-        {activeTab === "risk" && showRiskMetrics && (
+        {activeTab === 'risk' && showRiskMetrics && (
           <div className="text-white">
             {/* Overall risk */}
             <div className="mb-3">
-              <h4 className="text-xs font-medium text-gray-300 mb-1">
-                Overall Risk Assessment
-              </h4>
+              <h4 className="text-xs font-medium text-gray-300 mb-1">Overall Risk Assessment</h4>
 
               {riskAssessment ? (
                 <div className="bg-black/30 rounded p-3 text-xs">
@@ -617,9 +557,7 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
 
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     <div>
-                      <div className="text-gray-400 mb-0.5">
-                        Confidence Level
-                      </div>
+                      <div className="text-gray-400 mb-0.5">Confidence Level</div>
                       <div className="bg-black/20 rounded px-2 py-1">
                         {(riskAssessment.confidenceScore * 100).toFixed(0)}%
                       </div>
@@ -631,9 +569,7 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
                       </div>
                     </div>
                     <div>
-                      <div className="text-gray-400 mb-0.5">
-                        Assessment Type
-                      </div>
+                      <div className="text-gray-400 mb-0.5">Assessment Type</div>
                       <div className="bg-black/20 rounded px-2 py-1">
                         {riskAssessment.assessmentType}
                       </div>
@@ -641,9 +577,7 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
                     <div>
                       <div className="text-gray-400 mb-0.5">Last Updated</div>
                       <div className="bg-black/20 rounded px-2 py-1">
-                        {new Date(
-                          riskAssessment.timestamp,
-                        ).toLocaleDateString()}
+                        {new Date(riskAssessment.timestamp).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
@@ -658,9 +592,7 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
             {/* Domain risks */}
             {riskAssessment && riskAssessment.domainRisks && (
               <div>
-                <h4 className="text-xs font-medium text-gray-300 mb-1">
-                  Domain-Specific Risks
-                </h4>
+                <h4 className="text-xs font-medium text-gray-300 mb-1">Domain-Specific Risks</h4>
 
                 <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
                   {riskAssessment.domainRisks
@@ -684,35 +616,27 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
                     })
                     .slice(0, expanded ? undefined : 3)
                     .map((domain) => (
-                      <div
-                        key={domain.domain}
-                        className="bg-black/30 rounded p-2 text-xs"
-                      >
+                      <div key={domain.domain} className="bg-black/30 rounded p-2 text-xs">
                         <div className="flex justify-between items-center">
                           <span className="font-medium">
                             {domain.domain
-                              .split("_")
-                              .map(
-                                (w) => w.charAt(0).toUpperCase() + w.slice(1),
-                              )
-                              .join(" ")}
+                              .split('_')
+                              .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                              .join(' ')}
                           </span>
                           {renderRiskBadge(domain.riskLevel)}
                         </div>
 
                         <div className="mt-2 flex justify-between items-center text-2xs text-gray-300">
-                          <span>
-                            Confidence:{" "}
-                            {(domain.confidenceScore * 100).toFixed(0)}%
-                          </span>
+                          <span>Confidence: {(domain.confidenceScore * 100).toFixed(0)}%</span>
                           <span>Urgency: {domain.urgency}</span>
                         </div>
 
                         {domain.evidence && domain.evidence.length > 0 && (
                           <div className="mt-1 text-2xs text-gray-300">
-                            <span className="text-gray-400">Evidence:</span>{" "}
-                            {domain.evidence.slice(0, 2).join(", ")}
-                            {domain.evidence.length > 2 && "..."}
+                            <span className="text-gray-400">Evidence:</span>{' '}
+                            {domain.evidence.slice(0, 2).join(', ')}
+                            {domain.evidence.length > 2 && '...'}
                           </div>
                         )}
                       </div>
@@ -723,8 +647,7 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
                       className="text-center text-xs text-blue-400 py-1 cursor-pointer hover:underline"
                       onClick={toggleExpanded}
                     >
-                      Show {riskAssessment.domainRisks.length - 3} more risk
-                      domains
+                      Show {riskAssessment.domainRisks.length - 3} more risk domains
                     </div>
                   )}
                 </div>

@@ -2,7 +2,7 @@
  * NOVAMIND Neural Architecture
  * Placeholder component for strategic testing
  */
-import React from "react";
+import React from 'react';
 
 export interface TherapeuticTimelineVisualizerProps {
   width?: number;
@@ -12,9 +12,7 @@ export interface TherapeuticTimelineVisualizerProps {
   [key: string]: any;
 }
 
-const TherapeuticTimelineVisualizer: React.FC<
-  TherapeuticTimelineVisualizerProps
-> = ({
+const TherapeuticTimelineVisualizer: React.FC<TherapeuticTimelineVisualizerProps> = ({
   width = 500,
   height = 300,
   position = [0, 0, 0],
@@ -24,13 +22,10 @@ const TherapeuticTimelineVisualizer: React.FC<
   return (
     <div
       data-testid="therapeutictimelinevisualizer"
-      style={{ width, height, position: "relative" }}
+      style={{ width, height, position: 'relative' }}
       {...props}
     >
-      <div
-        className="placeholder-content"
-        data-position={JSON.stringify(position)}
-      >
+      <div className="placeholder-content" data-position={JSON.stringify(position)}>
         TherapeuticTimelineVisualizer Placeholder
       </div>
     </div>

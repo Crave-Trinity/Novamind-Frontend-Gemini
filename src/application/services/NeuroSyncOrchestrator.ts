@@ -4,35 +4,25 @@
  * with mathematically precise data propagation
  */
 
-import { useCallback, useEffect, useMemo, useReducer } from "react"; // Import useReducer
+import { useCallback, useEffect, useMemo, useReducer } from 'react'; // Import useReducer
 
 // Domain types
-import type {
-  BrainRegion,
-  NeuralConnection,
-  BrainModel,
-} from "@/domain/types/brain/models";
-import {
-  ActivationLevel,
-  type NeuralActivityState,
-} from "@/domain/types/brain/activity";
+import type { BrainRegion, NeuralConnection, BrainModel } from '@/domain/types/brain/models';
+import { ActivationLevel, type NeuralActivityState } from '@/domain/types/brain/activity';
 import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
-} from "@/domain/models/brain/mapping/brain-mapping"; // Use @/ alias (already correct)
-import type { TreatmentResponsePrediction } from "@/domain/types/clinical/treatment";
-import type {
-  BiometricAlert,
-  BiometricStream,
-} from "@/domain/types/biometric/streams";
-import type { TemporalDynamics } from "@/domain/types/temporal/dynamics"; // Revert to specific file, maybe index isn't picked up
-import { type Result, success, failure } from "@/domain/types/shared/common"; // Use @/ alias (already correct)
+} from '@/domain/models/brain/mapping/brain-mapping'; // Use @/ alias (already correct)
+import type { TreatmentResponsePrediction } from '@/domain/types/clinical/treatment';
+import type { BiometricAlert, BiometricStream } from '@/domain/types/biometric/streams';
+import type { TemporalDynamics } from '@/domain/types/temporal/dynamics'; // Revert to specific file, maybe index isn't picked up
+import { type Result, success, failure } from '@/domain/types/shared/common'; // Use @/ alias (already correct)
 
 // Services
-import { brainModelService } from "@/application/services/brain/brain-model.service"; // Corrected path and added extension
-import { clinicalService } from "@application/services/clinical/clinical.service"; // Corrected path
-import { biometricService } from "@/application/services/biometricService";
-import { temporalService } from "@/application/services/temporal/temporal.service"; // Revert to specific file
+import { brainModelService } from '@/application/services/brain/brain-model.service'; // Corrected path and added extension
+import { clinicalService } from '@application/services/clinical/clinical.service'; // Corrected path
+import { biometricService } from '@/application/services/biometricService';
+import { temporalService } from '@/application/services/temporal/temporal.service'; // Revert to specific file
 
 // Types for the orchestration state
 export interface NeuroSyncState {
@@ -53,50 +43,45 @@ export interface NeuroSyncState {
 
   // Temporal dynamics
   temporalDynamics: TemporalDynamics | null;
-  timeScale: "realtime" | "hourly" | "daily" | "weekly" | "monthly";
+  timeScale: 'realtime' | 'hourly' | 'daily' | 'weekly' | 'monthly';
 
   // Visualization state
-  renderMode:
-    | "standard"
-    | "heatmap"
-    | "connectivity"
-    | "activity"
-    | "treatment";
-  detailLevel: "low" | "medium" | "high" | "ultra";
+  renderMode: 'standard' | 'heatmap' | 'connectivity' | 'activity' | 'treatment';
+  detailLevel: 'low' | 'medium' | 'high' | 'ultra';
 
   // Performance metrics
   frameRate: number;
   memoryUsage: number;
-  loadingState: "idle" | "loading" | "loaded" | "error";
+  loadingState: 'idle' | 'loading' | 'loaded' | 'error';
   errorMessage: string | null;
 }
 
 // Action types with discriminated unions for type safety
 type NeuroSyncAction =
-  | { type: "SET_BRAIN_MODEL"; payload: BrainModel }
-  | { type: "SELECT_REGION"; payload: string }
-  | { type: "DESELECT_REGION"; payload: string }
-  | { type: "SET_ACTIVE_REGIONS"; payload: string[] }
-  | { type: "SET_SYMPTOM_MAPPINGS"; payload: SymptomNeuralMapping[] }
-  | { type: "SET_DIAGNOSIS_MAPPINGS"; payload: DiagnosisNeuralMapping[] }
+  | { type: 'SET_BRAIN_MODEL'; payload: BrainModel }
+  | { type: 'SELECT_REGION'; payload: string }
+  | { type: 'DESELECT_REGION'; payload: string }
+  | { type: 'SET_ACTIVE_REGIONS'; payload: string[] }
+  | { type: 'SET_SYMPTOM_MAPPINGS'; payload: SymptomNeuralMapping[] }
+  | { type: 'SET_DIAGNOSIS_MAPPINGS'; payload: DiagnosisNeuralMapping[] }
   | {
-      type: "SET_TREATMENT_PREDICTIONS";
+      type: 'SET_TREATMENT_PREDICTIONS';
       payload: TreatmentResponsePrediction[];
     }
-  | { type: "SELECT_TREATMENT"; payload: string }
-  | { type: "SET_BIOMETRIC_ALERTS"; payload: BiometricAlert[] }
-  | { type: "SET_BIOMETRIC_STREAMS"; payload: BiometricStream[] }
-  | { type: "SET_TEMPORAL_DYNAMICS"; payload: TemporalDynamics }
-  | { type: "SET_TIME_SCALE"; payload: NeuroSyncState["timeScale"] }
-  | { type: "SET_RENDER_MODE"; payload: NeuroSyncState["renderMode"] }
-  | { type: "SET_DETAIL_LEVEL"; payload: NeuroSyncState["detailLevel"] }
+  | { type: 'SELECT_TREATMENT'; payload: string }
+  | { type: 'SET_BIOMETRIC_ALERTS'; payload: BiometricAlert[] }
+  | { type: 'SET_BIOMETRIC_STREAMS'; payload: BiometricStream[] }
+  | { type: 'SET_TEMPORAL_DYNAMICS'; payload: TemporalDynamics }
+  | { type: 'SET_TIME_SCALE'; payload: NeuroSyncState['timeScale'] }
+  | { type: 'SET_RENDER_MODE'; payload: NeuroSyncState['renderMode'] }
+  | { type: 'SET_DETAIL_LEVEL'; payload: NeuroSyncState['detailLevel'] }
   | {
-      type: "UPDATE_PERFORMANCE";
+      type: 'UPDATE_PERFORMANCE';
       payload: { frameRate: number; memoryUsage: number };
     }
-  | { type: "SET_LOADING_STATE"; payload: NeuroSyncState["loadingState"] }
-  | { type: "SET_ERROR"; payload: string }
-  | { type: "CLEAR_ERROR" };
+  | { type: 'SET_LOADING_STATE'; payload: NeuroSyncState['loadingState'] }
+  | { type: 'SET_ERROR'; payload: string }
+  | { type: 'CLEAR_ERROR' };
 
 // Initial state with neural-safe default values
 const initialNeuroSyncState: NeuroSyncState = {
@@ -110,27 +95,24 @@ const initialNeuroSyncState: NeuroSyncState = {
   biometricAlerts: [],
   biometricStreams: [],
   temporalDynamics: null,
-  timeScale: "realtime",
-  renderMode: "standard",
-  detailLevel: "medium",
+  timeScale: 'realtime',
+  renderMode: 'standard',
+  detailLevel: 'medium',
   frameRate: 60,
   memoryUsage: 0,
-  loadingState: "idle",
+  loadingState: 'idle',
   errorMessage: null,
 };
 
 /**
  * Neural-safe reducer for state transitions with guaranteed type integrity
  */
-function neuroSyncReducer(
-  state: NeuroSyncState,
-  action: NeuroSyncAction,
-): NeuroSyncState {
+function neuroSyncReducer(state: NeuroSyncState, action: NeuroSyncAction): NeuroSyncState {
   switch (action.type) {
-    case "SET_BRAIN_MODEL":
+    case 'SET_BRAIN_MODEL':
       return { ...state, brainModel: action.payload };
 
-    case "SELECT_REGION":
+    case 'SELECT_REGION':
       return {
         ...state,
         selectedRegions: state.selectedRegions.includes(action.payload)
@@ -138,61 +120,59 @@ function neuroSyncReducer(
           : [...state.selectedRegions, action.payload],
       };
 
-    case "DESELECT_REGION":
+    case 'DESELECT_REGION':
       return {
         ...state,
-        selectedRegions: state.selectedRegions.filter(
-          (id) => id !== action.payload,
-        ),
+        selectedRegions: state.selectedRegions.filter((id) => id !== action.payload),
       };
 
-    case "SET_ACTIVE_REGIONS":
+    case 'SET_ACTIVE_REGIONS':
       return { ...state, activeRegions: action.payload };
 
-    case "SET_SYMPTOM_MAPPINGS":
+    case 'SET_SYMPTOM_MAPPINGS':
       return { ...state, symptomMappings: action.payload };
 
-    case "SET_DIAGNOSIS_MAPPINGS":
+    case 'SET_DIAGNOSIS_MAPPINGS':
       return { ...state, diagnosisMappings: action.payload };
 
-    case "SET_TREATMENT_PREDICTIONS":
+    case 'SET_TREATMENT_PREDICTIONS':
       return { ...state, treatmentPredictions: action.payload };
 
-    case "SELECT_TREATMENT":
+    case 'SELECT_TREATMENT':
       return { ...state, selectedTreatmentId: action.payload };
 
-    case "SET_BIOMETRIC_ALERTS":
+    case 'SET_BIOMETRIC_ALERTS':
       return { ...state, biometricAlerts: action.payload };
 
-    case "SET_BIOMETRIC_STREAMS":
+    case 'SET_BIOMETRIC_STREAMS':
       return { ...state, biometricStreams: action.payload };
 
-    case "SET_TEMPORAL_DYNAMICS":
+    case 'SET_TEMPORAL_DYNAMICS':
       return { ...state, temporalDynamics: action.payload };
 
-    case "SET_TIME_SCALE":
+    case 'SET_TIME_SCALE':
       return { ...state, timeScale: action.payload };
 
-    case "SET_RENDER_MODE":
+    case 'SET_RENDER_MODE':
       return { ...state, renderMode: action.payload };
 
-    case "SET_DETAIL_LEVEL":
+    case 'SET_DETAIL_LEVEL':
       return { ...state, detailLevel: action.payload };
 
-    case "UPDATE_PERFORMANCE":
+    case 'UPDATE_PERFORMANCE':
       return {
         ...state,
         frameRate: action.payload.frameRate,
         memoryUsage: action.payload.memoryUsage,
       };
 
-    case "SET_LOADING_STATE":
+    case 'SET_LOADING_STATE':
       return { ...state, loadingState: action.payload };
 
-    case "SET_ERROR":
-      return { ...state, errorMessage: action.payload, loadingState: "error" };
+    case 'SET_ERROR':
+      return { ...state, errorMessage: action.payload, loadingState: 'error' };
 
-    case "CLEAR_ERROR":
+    case 'CLEAR_ERROR':
       return { ...state, errorMessage: null };
 
     default:
@@ -227,7 +207,7 @@ const defaultTimingConfig: SyncTimingConfig = {
  */
 export function useNeuroSyncOrchestrator(
   patientId: string,
-  timingConfig: SyncTimingConfig = defaultTimingConfig,
+  timingConfig: SyncTimingConfig = defaultTimingConfig
 ) {
   // State using useReducer pattern internally
   const [state, dispatch] = useReducer(neuroSyncReducer, initialNeuroSyncState); // Use useReducer
@@ -235,33 +215,36 @@ export function useNeuroSyncOrchestrator(
   // Fetch brain model with error handling
   const fetchBrainModel = useCallback(async () => {
     try {
-      dispatch({ type: "SET_LOADING_STATE", payload: "loading" });
+      dispatch({ type: 'SET_LOADING_STATE', payload: 'loading' });
 
       const result = await brainModelService.fetchBrainModel(patientId);
 
-      if (result.success) { // Check success first
-        if (result.value) { // Then check value
-          dispatch({ type: "SET_BRAIN_MODEL", payload: result.value });
-          dispatch({ type: "SET_LOADING_STATE", payload: "loaded" });
+      if (result.success) {
+        // Check success first
+        if (result.value) {
+          // Then check value
+          dispatch({ type: 'SET_BRAIN_MODEL', payload: result.value });
+          dispatch({ type: 'SET_LOADING_STATE', payload: 'loaded' });
         } else {
           // Handle success but missing value case
-          dispatch({ type: "SET_ERROR", payload: "Brain model data missing despite successful fetch." });
+          dispatch({
+            type: 'SET_ERROR',
+            payload: 'Brain model data missing despite successful fetch.',
+          });
         }
       } else {
         // Handle failure case using the custom Result type properties
-        const errorMessage = result.error instanceof Error ? result.error.message : String(result.error);
+        const errorMessage =
+          result.error instanceof Error ? result.error.message : String(result.error);
         dispatch({
-          type: "SET_ERROR",
-          payload: errorMessage || "Failed to load brain model",
+          type: 'SET_ERROR',
+          payload: errorMessage || 'Failed to load brain model',
         });
       }
     } catch (error) {
       dispatch({
-        type: "SET_ERROR",
-        payload:
-          error instanceof Error
-            ? error.message
-            : "Unknown error loading brain model",
+        type: 'SET_ERROR',
+        payload: error instanceof Error ? error.message : 'Unknown error loading brain model',
       });
     }
   }, [patientId]);
@@ -271,39 +254,37 @@ export function useNeuroSyncOrchestrator(
     try {
       // Fetch symptom mappings
       const symptomResult = await clinicalService.fetchSymptomMappings();
-      if (symptomResult.success && symptomResult.value) { // Check .value
+      if (symptomResult.success && symptomResult.value) {
+        // Check .value
         dispatch({
-          type: "SET_SYMPTOM_MAPPINGS",
+          type: 'SET_SYMPTOM_MAPPINGS',
           payload: symptomResult.value,
         });
       }
 
       // Fetch diagnosis mappings
-      const diagnosisResult =
-        await clinicalService.fetchDiagnosisMappings();
-      if (diagnosisResult.success && diagnosisResult.value) { // Check .value
+      const diagnosisResult = await clinicalService.fetchDiagnosisMappings();
+      if (diagnosisResult.success && diagnosisResult.value) {
+        // Check .value
         dispatch({
-          type: "SET_DIAGNOSIS_MAPPINGS",
+          type: 'SET_DIAGNOSIS_MAPPINGS',
           payload: diagnosisResult.value,
         });
       }
 
       // Fetch treatment predictions
-      const treatmentResult =
-        await clinicalService.fetchTreatmentPredictions(patientId);
-      if (treatmentResult.success && treatmentResult.value) { // Check .value
+      const treatmentResult = await clinicalService.fetchTreatmentPredictions(patientId);
+      if (treatmentResult.success && treatmentResult.value) {
+        // Check .value
         dispatch({
-          type: "SET_TREATMENT_PREDICTIONS",
+          type: 'SET_TREATMENT_PREDICTIONS',
           payload: treatmentResult.value,
         });
       }
     } catch (error) {
       dispatch({
-        type: "SET_ERROR",
-        payload:
-          error instanceof Error
-            ? error.message
-            : "Unknown error loading clinical data",
+        type: 'SET_ERROR',
+        payload: error instanceof Error ? error.message : 'Unknown error loading clinical data',
       });
     }
   }, [patientId]);
@@ -317,7 +298,6 @@ export function useNeuroSyncOrchestrator(
       // if (alertsResult.success && alertsResult.value) { // Check .value
       //   dispatch({ type: "SET_BIOMETRIC_ALERTS", payload: alertsResult.value });
       // }
-
       // Fetch biometric streams
       // const streamsResult =
       //   await biometricService.getBiometricStreams(patientId);
@@ -329,25 +309,22 @@ export function useNeuroSyncOrchestrator(
       // }
     } catch (error) {
       // Non-blocking error for biometric data - log but don't disrupt visualization
-      console.error("Error loading biometric data:", error);
+      console.error('Error loading biometric data:', error);
     }
   }, [patientId]);
 
   // Fetch temporal dynamics
   const fetchTemporalDynamics = useCallback(async () => {
     try {
-      const result = await temporalService.getTemporalDynamics(
-        patientId,
-        state.timeScale,
-      );
+      const result = await temporalService.getTemporalDynamics(patientId, state.timeScale);
 
       if (result.success && result.value) {
         // Check result.value
-        dispatch({ type: "SET_TEMPORAL_DYNAMICS", payload: result.value }); // Use .value for success case
+        dispatch({ type: 'SET_TEMPORAL_DYNAMICS', payload: result.value }); // Use .value for success case
       }
     } catch (error) {
       // Non-blocking error for temporal data
-      console.error("Error loading temporal dynamics:", error);
+      console.error('Error loading temporal dynamics:', error);
     }
   }, [patientId, state.timeScale]);
 
@@ -368,18 +345,17 @@ export function useNeuroSyncOrchestrator(
         .filter((mapping) => activeSymptomIds.includes(mapping.symptomId))
         .flatMap(
           (
-            mapping, // flatMap over mappings
-          ) =>
-            mapping.activationPatterns.flatMap((pattern) => pattern.regionIds), // Corrected flattening logic
+            mapping // flatMap over mappings
+          ) => mapping.activationPatterns.flatMap((pattern) => pattern.regionIds) // Corrected flattening logic
         );
 
       // Set active regions in state
       dispatch({
-        type: "SET_ACTIVE_REGIONS",
+        type: 'SET_ACTIVE_REGIONS',
         payload: [...new Set(activatedRegions)],
       });
     } catch (error) {
-      console.error("Error calculating neural activation:", error);
+      console.error('Error calculating neural activation:', error);
     }
   }, [state.brainModel, state.symptomMappings]);
 
@@ -391,7 +367,7 @@ export function useNeuroSyncOrchestrator(
     const memoryUsage = 100 + Math.random() * 100;
 
     dispatch({
-      type: "UPDATE_PERFORMANCE",
+      type: 'UPDATE_PERFORMANCE',
       payload: { frameRate, memoryUsage },
     });
   }, []);
@@ -405,25 +381,22 @@ export function useNeuroSyncOrchestrator(
     fetchTemporalDynamics();
 
     // Set up refresh intervals
-    const brainModelInterval = setInterval(
-      fetchBrainModel,
-      timingConfig.brainModelRefreshInterval,
-    );
+    const brainModelInterval = setInterval(fetchBrainModel, timingConfig.brainModelRefreshInterval);
     const biometricInterval = setInterval(
       fetchBiometricData,
-      timingConfig.biometricRefreshInterval,
+      timingConfig.biometricRefreshInterval
     );
     const temporalInterval = setInterval(
       fetchTemporalDynamics,
-      timingConfig.temporalRefreshInterval,
+      timingConfig.temporalRefreshInterval
     );
     const performanceInterval = setInterval(
       monitorPerformance,
-      timingConfig.performanceMonitorInterval,
+      timingConfig.performanceMonitorInterval
     );
     const correlationInterval = setInterval(
       calculateNeuralActivation,
-      timingConfig.dataCorrelationInterval,
+      timingConfig.dataCorrelationInterval
     );
 
     // Clean up intervals on unmount
@@ -448,34 +421,34 @@ export function useNeuroSyncOrchestrator(
   const actions = useMemo(
     () => ({
       selectRegion: (regionId: string) => {
-        dispatch({ type: "SELECT_REGION", payload: regionId });
+        dispatch({ type: 'SELECT_REGION', payload: regionId });
       },
 
       deselectRegion: (regionId: string) => {
-        dispatch({ type: "DESELECT_REGION", payload: regionId });
+        dispatch({ type: 'DESELECT_REGION', payload: regionId });
       },
 
       selectTreatment: (treatmentId: string) => {
-        dispatch({ type: "SELECT_TREATMENT", payload: treatmentId });
+        dispatch({ type: 'SELECT_TREATMENT', payload: treatmentId });
       },
 
-      setRenderMode: (mode: NeuroSyncState["renderMode"]) => {
-        dispatch({ type: "SET_RENDER_MODE", payload: mode });
+      setRenderMode: (mode: NeuroSyncState['renderMode']) => {
+        dispatch({ type: 'SET_RENDER_MODE', payload: mode });
       },
 
-      setDetailLevel: (level: NeuroSyncState["detailLevel"]) => {
-        dispatch({ type: "SET_DETAIL_LEVEL", payload: level });
+      setDetailLevel: (level: NeuroSyncState['detailLevel']) => {
+        dispatch({ type: 'SET_DETAIL_LEVEL', payload: level });
       },
 
-      setTimeScale: (scale: NeuroSyncState["timeScale"]) => {
-        dispatch({ type: "SET_TIME_SCALE", payload: scale });
+      setTimeScale: (scale: NeuroSyncState['timeScale']) => {
+        dispatch({ type: 'SET_TIME_SCALE', payload: scale });
       },
 
       clearError: () => {
-        dispatch({ type: "CLEAR_ERROR" });
+        dispatch({ type: 'CLEAR_ERROR' });
       },
     }),
-    [],
+    []
   );
 
   // Return state and actions for component consumption

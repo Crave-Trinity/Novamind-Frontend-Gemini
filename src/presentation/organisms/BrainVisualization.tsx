@@ -2,18 +2,13 @@
  * NOVAMIND Neural Visualization Component
  * Renders a 3D brain model with clinical-grade precision
  */
-import React, { useRef, useEffect, useMemo } from "react";
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls, PerspectiveCamera, useGLTF } from "@react-three/drei";
-import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import React, { useRef, useEffect, useMemo } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 
-import type {
-  BrainModel,
-  BrainRegion,
-  RenderMode,
-  SafeArray,
-} from "@domain/types/brain";
-import { isBrainModel } from "@domain/types/brain";
+import type { BrainModel, BrainRegion, RenderMode, SafeArray } from '@domain/types/brain';
+import { isBrainModel } from '@domain/types/brain';
 
 interface BrainVisualizationProps {
   brainModel?: BrainModel | null;
@@ -27,11 +22,11 @@ interface BrainVisualizationProps {
 const DEFAULT_SETTINGS = {
   showLabels: true,
   rotationSpeed: 0.5,
-  highlightColor: "#0066F0",
-  backgroundColor: "#121212",
+  highlightColor: '#0066F0',
+  backgroundColor: '#121212',
   connectionOpacity: 0.6,
   nodeSize: 1,
-  renderMode: "normal" as RenderMode,
+  renderMode: 'normal' as RenderMode,
   enableBloom: true,
   synapticPulse: true,
 };
@@ -40,7 +35,7 @@ export const BrainVisualization: React.FC<BrainVisualizationProps> = ({
   brainModel,
   selectedRegion,
   onRegionSelect,
-  className = "",
+  className = '',
   isLoading = false,
   error = null,
 }) => {
@@ -63,9 +58,7 @@ export const BrainVisualization: React.FC<BrainVisualizationProps> = ({
       <div className="flex h-64 w-full items-center justify-center rounded-lg bg-background-card p-4 shadow-md">
         <div className="flex flex-col items-center space-y-4">
           <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-primary-500"></div>
-          <p className="text-sm text-neutral-400">
-            Initializing neural visualization...
-          </p>
+          <p className="text-sm text-neutral-400">Initializing neural visualization...</p>
         </div>
       </div>
     );
@@ -89,9 +82,7 @@ export const BrainVisualization: React.FC<BrainVisualizationProps> = ({
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
             />
           </svg>
-          <p className="text-sm font-medium text-danger-500">
-            Neural visualization error
-          </p>
+          <p className="text-sm font-medium text-danger-500">Neural visualization error</p>
           <p className="text-xs text-neutral-400">{error.message}</p>
         </div>
       </div>
@@ -126,14 +117,9 @@ export const BrainVisualization: React.FC<BrainVisualizationProps> = ({
   }
 
   return (
-    <div
-      className={`relative w-full h-64 md:h-[500px] rounded-lg overflow-hidden ${className}`}
-    >
+    <div className={`relative w-full h-64 md:h-[500px] rounded-lg overflow-hidden ${className}`}>
       <Canvas dpr={[1, 2]} gl={{ antialias: true }}>
-        <color
-          attach="background"
-          args={[settings?.backgroundColor || "#121212"]}
-        />
+        <color attach="background" args={[settings?.backgroundColor || '#121212']} />
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={0.8} />
         <PerspectiveCamera makeDefault position={[0, 0, 15]} fov={50} />
@@ -161,11 +147,9 @@ export const BrainVisualization: React.FC<BrainVisualizationProps> = ({
                   key={`${region.id}-${targetId}`}
                   start={region.position}
                   end={targetRegion.position}
-                  color={settings?.highlightColor || "#0066F0"}
+                  color={settings?.highlightColor || '#0066F0'}
                   opacity={settings?.connectionOpacity || 0.6}
-                  selected={
-                    region.id === selectedRegion || targetId === selectedRegion
-                  }
+                  selected={region.id === selectedRegion || targetId === selectedRegion}
                   pulse={settings?.synapticPulse}
                 />
               );
@@ -177,19 +161,13 @@ export const BrainVisualization: React.FC<BrainVisualizationProps> = ({
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
-          autoRotate={
-            settings?.rotationSpeed ? settings.rotationSpeed > 0 : false
-          }
+          autoRotate={settings?.rotationSpeed ? settings.rotationSpeed > 0 : false}
           autoRotateSpeed={settings?.rotationSpeed || 0.5}
         />
 
         {settings?.enableBloom && (
           <EffectComposer>
-            <Bloom
-              luminanceThreshold={0.2}
-              luminanceSmoothing={0.9}
-              intensity={1.5}
-            />
+            <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.9} intensity={1.5} />
           </EffectComposer>
         )}
       </Canvas>
@@ -225,38 +203,33 @@ interface RegionNodeProps {
   onClick?: () => void;
 }
 
-const RegionNode: React.FC<RegionNodeProps> = ({
-  region,
-  isSelected,
-  settings,
-  onClick,
-}) => {
+const RegionNode: React.FC<RegionNodeProps> = ({ region, isSelected, settings, onClick }) => {
   const mesh = useRef<THREE.Mesh>(null);
 
   // Neural-safe activity color mapping with clinical precision
   const color = useMemo(() => {
-    if (isSelected) return settings?.highlightColor || "#0066F0";
+    if (isSelected) return settings?.highlightColor || '#0066F0';
 
     // Neural activity color mapping
-    if (settings?.renderMode === "activity") {
+    if (settings?.renderMode === 'activity') {
       const activityLevel = region.activityLevel || 0;
-      if (activityLevel > 0.8) return "#F41A13"; // Critical
-      if (activityLevel > 0.6) return "#FF8C00"; // High
-      if (activityLevel > 0.4) return "#FFCC33"; // Moderate
-      if (activityLevel > 0.2) return "#99C2F9"; // Low
-      return "#868E96"; // Minimal
+      if (activityLevel > 0.8) return '#F41A13'; // Critical
+      if (activityLevel > 0.6) return '#FF8C00'; // High
+      if (activityLevel > 0.4) return '#FFCC33'; // Moderate
+      if (activityLevel > 0.2) return '#99C2F9'; // Low
+      return '#868E96'; // Minimal
     }
 
     // Risk color mapping
-    if (settings?.renderMode === "risk" && region.riskFactor !== undefined) {
-      if (region.riskFactor > 0.8) return "#F41A13"; // Severe
-      if (region.riskFactor > 0.6) return "#FF8C00"; // High
-      if (region.riskFactor > 0.4) return "#FFCC33"; // Moderate
-      if (region.riskFactor > 0.2) return "#99C2F9"; // Low
-      return "#82C7FF"; // Minimal
+    if (settings?.renderMode === 'risk' && region.riskFactor !== undefined) {
+      if (region.riskFactor > 0.8) return '#F41A13'; // Severe
+      if (region.riskFactor > 0.6) return '#FF8C00'; // High
+      if (region.riskFactor > 0.4) return '#FFCC33'; // Moderate
+      if (region.riskFactor > 0.2) return '#99C2F9'; // Low
+      return '#82C7FF'; // Minimal
     }
 
-    return region.color || "#82C7FF";
+    return region.color || '#82C7FF';
   }, [region, isSelected, settings]);
 
   // Neural pulse animation with quantum precision
@@ -269,11 +242,7 @@ const RegionNode: React.FC<RegionNodeProps> = ({
 
   // Neural-safe position with clinical precision
   const position = useMemo(() => {
-    return [
-      region.position.x || 0,
-      region.position.y || 0,
-      region.position.z || 0,
-    ];
+    return [region.position.x || 0, region.position.y || 0, region.position.z || 0];
   }, [region.position]);
 
   return (
@@ -285,9 +254,7 @@ const RegionNode: React.FC<RegionNodeProps> = ({
         onClick?.();
       }}
     >
-      <sphereGeometry
-        args={[(settings?.nodeSize || 1) * (isSelected ? 1.2 : 1), 32, 32]}
-      />
+      <sphereGeometry args={[(settings?.nodeSize || 1) * (isSelected ? 1.2 : 1), 32, 32]} />
       <meshStandardMaterial
         color={color}
         emissive={isSelected ? color : undefined}
@@ -309,14 +276,7 @@ interface ConnectionProps {
   pulse?: boolean;
 }
 
-const Connection: React.FC<ConnectionProps> = ({
-  start,
-  end,
-  color,
-  opacity,
-  selected,
-  pulse,
-}) => {
+const Connection: React.FC<ConnectionProps> = ({ start, end, color, opacity, selected, pulse }) => {
   const ref = useRef<THREE.Line>(null);
 
   // Neural-safe points array with clinical precision

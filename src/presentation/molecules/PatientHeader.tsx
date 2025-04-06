@@ -4,32 +4,25 @@
  * with HIPAA-compliant data presentation and type-safe operations
  */
 
-import React, { useMemo } from "react";
-import { motion } from "framer-motion";
+import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
 
 // UI components
-import Avatar from "@presentation/atoms/Avatar"; // Corrected to default import
-import { Badge } from "@presentation/atoms/Badge";
-import Button from "@presentation/atoms/Button"; // Corrected to default import
+import Avatar from '@presentation/atoms/Avatar'; // Corrected to default import
+import { Badge } from '@presentation/atoms/Badge';
+import Button from '@presentation/atoms/Button'; // Corrected to default import
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@presentation/atoms/Tooltip";
+} from '@presentation/atoms/Tooltip';
 
 // Icons
-import {
-  AlertTriangle,
-  User,
-  Calendar,
-  Clock,
-  FileText,
-  Activity,
-} from "lucide-react";
+import { AlertTriangle, User, Calendar, Clock, FileText, Activity } from 'lucide-react';
 
 // Domain types
-import { Patient } from "@domain/types/clinical/patient"; // Corrected path
+import { Patient } from '@domain/types/clinical/patient'; // Corrected path
 
 /**
  * Props with neural-safe typing
@@ -57,9 +50,9 @@ interface PatientHeaderProps {
  */
 const formatDate = (date: Date): string => {
   return new Date(date).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
 };
 
@@ -72,7 +65,7 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({
   compact = false,
   showRiskLevel = true,
   showLastUpdate = true,
-  className = "",
+  className = '',
 }) => {
   // Access age directly from demographicData
   const age = patient.demographicData.age;
@@ -148,7 +141,9 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({
                 </span>
 
                 {patient.demographicData.biologicalSex && ( // Use biologicalSex from demographicData
-                  <span className="text-sm text-slate-600 capitalize"> {/* Added capitalize */}
+                  <span className="text-sm text-slate-600 capitalize">
+                    {' '}
+                    {/* Added capitalize */}
                     {patient.demographicData.biologicalSex}
                   </span>
                 )}
@@ -180,9 +175,7 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({
                     )}
                   </div>
                 ) : (
-                  <span className="text-sm text-slate-500">
-                    No diagnoses recorded
-                  </span>
+                  <span className="text-sm text-slate-500">No diagnoses recorded</span>
                 )}
               </div>
             </div>

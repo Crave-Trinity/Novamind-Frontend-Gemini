@@ -1,6 +1,6 @@
 /**
  * Neural Controller Mocks
- * 
+ *
  * This file provides mock implementations of all neural visualization controllers.
  * These mocks are used during testing to prevent the actual controllers from
  * trying to interact with WebGL/Three.js, which would cause test hanging.
@@ -15,7 +15,7 @@ import { vi } from 'vitest';
 function createMockForController(controllerPath: string): Record<string, any> {
   // Extract controller name from path
   const controllerName = controllerPath.split('/').pop() || '';
-  
+
   // Generic mock implementation for any neural controller
   const mockImplementation = () => {
     return {
@@ -24,18 +24,18 @@ function createMockForController(controllerPath: string): Record<string, any> {
       neuralActivity: getMockNeuralActivity(),
       isLoading: false,
       error: null,
-      
+
       // Regions and selections
       selectedRegion: 'prefrontal-cortex',
       availableRegions: ['prefrontal-cortex', 'amygdala', 'hippocampus', 'cerebellum', 'thalamus'],
-      
+
       // Actions
       selectRegion: vi.fn((region: string) => console.log(`Mock selecting region: ${region}`)),
       loadData: vi.fn(() => Promise.resolve(getMockBrainData())),
       updateVisualization: vi.fn(),
       dispose: vi.fn(),
       reset: vi.fn(),
-      
+
       // Rendering and WebGL-related properties
       renderer: {
         render: vi.fn(),
@@ -53,13 +53,13 @@ function createMockForController(controllerPath: string): Record<string, any> {
         lookAt: vi.fn(),
         updateProjectionMatrix: vi.fn(),
       },
-      
+
       // Lifecycle flags
       isInitialized: true,
       isDisposed: false,
     };
   };
-  
+
   // Return the mock for the specific controller
   // Assuming all controllers are default exports based on usage pattern
   return {
@@ -72,14 +72,30 @@ function createMockForController(controllerPath: string): Record<string, any> {
 
 console.log('[neural-controllers-mock.ts] Applying static mocks...');
 
-vi.mock('@application/controllers/neural/useNeuroSyncOrchestrator', () => createMockForController('@application/controllers/neural/useNeuroSyncOrchestrator'));
-vi.mock('@application/controllers/neural/useNeuralActivityController', () => createMockForController('@application/controllers/neural/useNeuralActivityController'));
-vi.mock('@application/controllers/neural/useClinicalPredictionController', () => createMockForController('@application/controllers/neural/useClinicalPredictionController'));
-vi.mock('@application/controllers/neural/useBiometricStreamController', () => createMockForController('@application/controllers/neural/useBiometricStreamController'));
-vi.mock('@application/controllers/neural/useTemporalDynamicsController', () => createMockForController('@application/controllers/neural/useTemporalDynamicsController'));
-vi.mock('@application/controllers/neural/useNeuralConnectivityController', () => createMockForController('@application/controllers/neural/useNeuralConnectivityController'));
-vi.mock('@application/controllers/neural/useBrainRegionSelectionController', () => createMockForController('@application/controllers/neural/useBrainRegionSelectionController'));
-vi.mock('@application/controllers/neural/useNeuralVisualizationController', () => createMockForController('@application/controllers/neural/useNeuralVisualizationController'));
+vi.mock('@application/controllers/neural/useNeuroSyncOrchestrator', () =>
+  createMockForController('@application/controllers/neural/useNeuroSyncOrchestrator')
+);
+vi.mock('@application/controllers/neural/useNeuralActivityController', () =>
+  createMockForController('@application/controllers/neural/useNeuralActivityController')
+);
+vi.mock('@application/controllers/neural/useClinicalPredictionController', () =>
+  createMockForController('@application/controllers/neural/useClinicalPredictionController')
+);
+vi.mock('@application/controllers/neural/useBiometricStreamController', () =>
+  createMockForController('@application/controllers/neural/useBiometricStreamController')
+);
+vi.mock('@application/controllers/neural/useTemporalDynamicsController', () =>
+  createMockForController('@application/controllers/neural/useTemporalDynamicsController')
+);
+vi.mock('@application/controllers/neural/useNeuralConnectivityController', () =>
+  createMockForController('@application/controllers/neural/useNeuralConnectivityController')
+);
+vi.mock('@application/controllers/neural/useBrainRegionSelectionController', () =>
+  createMockForController('@application/controllers/neural/useBrainRegionSelectionController')
+);
+vi.mock('@application/controllers/neural/useNeuralVisualizationController', () =>
+  createMockForController('@application/controllers/neural/useNeuralVisualizationController')
+);
 
 console.log('[neural-controllers-mock.ts] Static mocks applied.');
 
@@ -123,18 +139,18 @@ function getMockNeuralActivity() {
       timestamp: Date.now() - (99 - i) * 1000,
       regions: {
         'prefrontal-cortex': Math.sin(i / 10) * 0.5 + 0.5,
-        'amygdala': Math.cos(i / 12) * 0.5 + 0.5,
-        'hippocampus': Math.sin((i + 30) / 15) * 0.5 + 0.5,
-        'cerebellum': Math.cos((i + 10) / 8) * 0.5 + 0.5,
-        'thalamus': Math.sin((i + 20) / 20) * 0.5 + 0.5,
+        amygdala: Math.cos(i / 12) * 0.5 + 0.5,
+        hippocampus: Math.sin((i + 30) / 15) * 0.5 + 0.5,
+        cerebellum: Math.cos((i + 10) / 8) * 0.5 + 0.5,
+        thalamus: Math.sin((i + 20) / 20) * 0.5 + 0.5,
       },
     })),
     aggregatedData: {
       'prefrontal-cortex': 0.8,
-      'amygdala': 0.6,
-      'hippocampus': 0.4,
-      'cerebellum': 0.3,
-      'thalamus': 0.7,
+      amygdala: 0.6,
+      hippocampus: 0.4,
+      cerebellum: 0.3,
+      thalamus: 0.7,
     },
   };
 }

@@ -61,12 +61,10 @@ export function toHaveBeenCalledOnceWith(
   received: ReturnType<typeof vi.fn>,
   ...expected: unknown[]
 ) {
-  const pass = 
+  const pass =
     received.mock.calls.length === 1 &&
     received.mock.calls[0].length === expected.length &&
-    received.mock.calls[0].every((arg, i) => 
-      JSON.stringify(arg) === JSON.stringify(expected[i])
-    );
+    received.mock.calls[0].every((arg, i) => JSON.stringify(arg) === JSON.stringify(expected[i]));
 
   return {
     pass,
@@ -84,14 +82,16 @@ export function toHaveBeenCalledAfter(
   if (received.mock.calls.length === 0) {
     return {
       pass: false,
-      message: () => `expected function to have been called after other function, but it was never called`,
+      message: () =>
+        `expected function to have been called after other function, but it was never called`,
     };
   }
 
   if (other.mock.calls.length === 0) {
     return {
       pass: false,
-      message: () => `expected function to have been called after other function, but other function was never called`,
+      message: () =>
+        `expected function to have been called after other function, but other function was never called`,
     };
   }
 
@@ -110,13 +110,7 @@ export function toHaveBeenCalledAfter(
 }
 
 // Test data generators based on our domain types
-import type { 
-  BrainModel, 
-  BrainRegion, 
-  BrainScan, 
-  NeuralConnection, 
-  Patient 
-} from '@domain/types';
+import type { BrainModel, BrainRegion, BrainScan, NeuralConnection, Patient } from '@domain/types';
 
 export const createTestPatient = (): Patient => ({
   id: 'test-patient',
@@ -131,12 +125,12 @@ export const createTestPatient = (): Patient => ({
     street: '123 Main St',
     city: 'Boston',
     state: 'MA',
-    zip: '02108'
+    zip: '02108',
   },
   insurance: {
     provider: 'TestInsurance',
-    policyNumber: '12345'
-  }
+    policyNumber: '12345',
+  },
 });
 
 export const createTestBrainScan = (): BrainScan => ({
@@ -153,6 +147,6 @@ export const createTestBrainScan = (): BrainScan => ({
   machine: {
     id: 'scanner-01',
     type: 'Siemens Magnetom',
-    calibrationDate: '2024-01-01'
-  }
-}); 
+    calibrationDate: '2024-01-01',
+  },
+});

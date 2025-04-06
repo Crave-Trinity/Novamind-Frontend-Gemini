@@ -3,15 +3,15 @@
  * Custom hook for managing and fetching treatment response predictions
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 // Import with proper type definitions
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import {
   xgboostService,
   type TreatmentResponseRequest,
   type TreatmentResponseResponse,
-} from "@api/XGBoostService";
+} from '@api/XGBoostService';
 
 interface UseTreatmentPredictionOptions {
   patientId: string;
@@ -22,7 +22,7 @@ interface UseTreatmentPredictionOptions {
 
 export function useTreatmentPrediction({
   patientId,
-  initialTreatmentType = "ssri",
+  initialTreatmentType = 'ssri',
   onPredictionSuccess,
   onPredictionError,
 }: UseTreatmentPredictionOptions) {
@@ -36,9 +36,7 @@ export function useTreatmentPrediction({
   const queryClient = useQueryClient();
 
   // Track active prediction ID for fetching related data
-  const [activePredictionId, setActivePredictionId] = useState<string | null>(
-    null,
-  );
+  const [activePredictionId, setActivePredictionId] = useState<string | null>(null);
 
   // Mutation for treatment response prediction
   const {
@@ -59,7 +57,8 @@ export function useTreatmentPrediction({
         [key: string]: unknown;
       };
       geneticData?: string[];
-    }): Promise<TreatmentResponseResponse> => { // Ensure return type matches useMutation expectation
+    }): Promise<TreatmentResponseResponse> => {
+      // Ensure return type matches useMutation expectation
       const request: TreatmentResponseRequest = {
         patient_id: patientId,
         treatment_type: treatmentConfig.treatmentType,
@@ -81,7 +80,7 @@ export function useTreatmentPrediction({
         return responseData; // Return unwrapped data on success
       } else {
         // Throw error on failure, as expected by useMutation
-        throw result.err || new Error("Prediction failed"); // Use .err
+        throw result.err || new Error('Prediction failed'); // Use .err
       }
     },
     onSuccess: (data: TreatmentResponseResponse) => {
@@ -89,7 +88,7 @@ export function useTreatmentPrediction({
 
       // Invalidate related queries that depend on this prediction
       queryClient.invalidateQueries({
-        queryKey: ["featureImportance", patientId],
+        queryKey: ['featureImportance', patientId],
       });
     },
     onError: (error: Error) => {
@@ -103,7 +102,7 @@ export function useTreatmentPrediction({
     isLoading: isLoadingFeatures,
     error: featureError,
   } = useQuery({
-    queryKey: ["featureImportance", patientId, activePredictionId],
+    queryKey: ['featureImportance', patientId, activePredictionId],
     queryFn: () =>
       xgboostService.getFeatureImportance({
         patient_id: patientId,
@@ -123,7 +122,7 @@ export function useTreatmentPrediction({
   } = useMutation({
     mutationFn: async (profileId: string) => {
       if (!activePredictionId) {
-        throw new Error("No active prediction to integrate");
+        throw new Error('No active prediction to integrate');
       }
 
       return xgboostService.integrateWithDigitalTwin({
@@ -151,7 +150,7 @@ export function useTreatmentPrediction({
         setActivePredictionId(null);
       }
     },
-    [treatmentConfig.treatmentType, resetPrediction],
+    [treatmentConfig.treatmentType, resetPrediction]
   );
 
   return {

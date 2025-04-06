@@ -3,7 +3,7 @@
  * Common type verification utilities with quantum-level precision
  */
 
-import { Result, NeuralError } from "@domain/types/shared/common"; // Corrected path
+import { Result, NeuralError } from '@domain/types/shared/common'; // Corrected path
 
 /**
  * Type Verification Error with clinical precision
@@ -13,14 +13,14 @@ export class TypeVerificationError extends NeuralError {
     message: string,
     public expectedType: string,
     public receivedType: string,
-    public field?: string,
+    public field?: string
   ) {
     super(message, {
-      code: "TYPE_VERIFICATION_ERROR",
-      severity: "error",
-      component: "TypeVerifier",
+      code: 'TYPE_VERIFICATION_ERROR',
+      severity: 'error',
+      component: 'TypeVerifier',
     });
-    this.name = "TypeVerificationError";
+    this.name = 'TypeVerificationError';
   }
 }
 
@@ -32,18 +32,18 @@ export class TypeVerifier {
    * Safely converts a value to a number
    */
   safelyParseNumber(value: unknown, fallback: number = 0): number {
-    if (typeof value === "number" && !Number.isNaN(value)) {
+    if (typeof value === 'number' && !Number.isNaN(value)) {
       return value;
     }
 
-    if (typeof value === "string") {
+    if (typeof value === 'string') {
       const parsed = parseFloat(value);
       if (!Number.isNaN(parsed)) {
         return parsed;
       }
     }
 
-    if (typeof value === "boolean") {
+    if (typeof value === 'boolean') {
       return value ? 1 : 0;
     }
 
@@ -54,22 +54,22 @@ export class TypeVerifier {
    * Safely converts a value to a boolean
    */
   safelyParseBoolean(value: unknown, fallback: boolean = false): boolean {
-    if (typeof value === "boolean") {
+    if (typeof value === 'boolean') {
       return value;
     }
 
-    if (typeof value === "string") {
+    if (typeof value === 'string') {
       const lowerValue = value.toLowerCase();
-      if (lowerValue === "true" || lowerValue === "yes" || lowerValue === "1") {
+      if (lowerValue === 'true' || lowerValue === 'yes' || lowerValue === '1') {
         return true;
       }
 
-      if (lowerValue === "false" || lowerValue === "no" || lowerValue === "0") {
+      if (lowerValue === 'false' || lowerValue === 'no' || lowerValue === '0') {
         return false;
       }
     }
 
-    if (typeof value === "number") {
+    if (typeof value === 'number') {
       if (value === 1) return true;
       if (value === 0) return false;
     }
@@ -80,7 +80,7 @@ export class TypeVerifier {
   /**
    * Safely converts a value to a string
    */
-  safelyParseString(value: unknown, fallback: string = ""): string {
+  safelyParseString(value: unknown, fallback: string = ''): string {
     if (value === null || value === undefined) {
       return fallback;
     }
@@ -95,7 +95,7 @@ export class TypeVerifier {
     value: unknown,
     typeName: string,
     typeCheck: (val: unknown) => boolean,
-    field?: string,
+    field?: string
   ): Result<T> {
     if (typeCheck(value)) {
       return {
@@ -109,14 +109,14 @@ export class TypeVerifier {
       error: new TypeVerificationError(
         `Invalid type`,
         typeName,
-        typeof value === "object"
+        typeof value === 'object'
           ? value === null
-            ? "null"
+            ? 'null'
             : Array.isArray(value)
-              ? "array"
-              : "object"
+              ? 'array'
+              : 'object'
           : typeof value,
-        field,
+        field
       ),
     };
   }
@@ -127,19 +127,16 @@ export class TypeVerifier {
   verifyString(value: unknown, field?: string): Result<string> {
     return this.verifyType<string>(
       value,
-      "string",
-      (val): val is string => typeof val === "string",
-      field,
+      'string',
+      (val): val is string => typeof val === 'string',
+      field
     );
   }
 
   /**
    * Verify that a value is a string or undefined/null
    */
-  verifyOptionalString(
-    value: unknown,
-    field?: string,
-  ): Result<string | undefined> {
+  verifyOptionalString(value: unknown, field?: string): Result<string | undefined> {
     if (value === undefined || value === null) {
       return { success: true, value: undefined };
     }
@@ -154,9 +151,9 @@ export class TypeVerifier {
   verifyNumber(value: unknown, field?: string): Result<number> {
     return this.verifyType<number>(
       value,
-      "number",
-      (val): val is number => typeof val === "number" && !Number.isNaN(val),
-      field,
+      'number',
+      (val): val is number => typeof val === 'number' && !Number.isNaN(val),
+      field
     );
   }
 
@@ -166,9 +163,9 @@ export class TypeVerifier {
   verifyBoolean(value: unknown, field?: string): Result<boolean> {
     return this.verifyType<boolean>(
       value,
-      "boolean",
-      (val): val is boolean => typeof val === "boolean",
-      field,
+      'boolean',
+      (val): val is boolean => typeof val === 'boolean',
+      field
     );
   }
 
@@ -178,15 +175,10 @@ export class TypeVerifier {
   verifyArray<T = unknown>(
     value: unknown,
     itemVerifier?: (item: unknown, index: number) => Result<T>,
-    field?: string,
+    field?: string
   ): Result<T[]> {
     // First check if it's an array
-    const arrayResult = this.verifyType<unknown[]>(
-      value,
-      "array",
-      Array.isArray,
-      field,
-    );
+    const arrayResult = this.verifyType<unknown[]>(value, 'array', Array.isArray, field);
 
     if (!arrayResult.success) {
       return arrayResult as Result<T[]>;
@@ -209,16 +201,16 @@ export class TypeVerifier {
         errors.push(
           new TypeVerificationError(
             `Invalid item in array at index ${index}`,
-            "valid item",
-            typeof item === "object"
+            'valid item',
+            typeof item === 'object'
               ? item === null
-                ? "null"
+                ? 'null'
                 : Array.isArray(item)
-                  ? "array"
-                  : "object"
+                  ? 'array'
+                  : 'object'
               : typeof item,
-            field ? `${field}[${index}]` : `[${index}]`,
-          ),
+            field ? `${field}[${index}]` : `[${index}]`
+          )
         );
       }
     });
@@ -241,14 +233,14 @@ export class TypeVerifier {
    */
   verifyObject<T extends Record<string, unknown> = Record<string, unknown>>(
     value: unknown,
-    field?: string,
+    field?: string
   ): Result<T> {
     return this.verifyType<T>(
       value,
-      "object",
+      'object',
       (val): val is Record<string, unknown> =>
-        typeof val === "object" && val !== null && !Array.isArray(val),
-      field,
+        typeof val === 'object' && val !== null && !Array.isArray(val),
+      field
     );
   }
 
@@ -258,7 +250,7 @@ export class TypeVerifier {
   verifyEnum<T extends string>(
     value: unknown,
     allowedValues: readonly T[],
-    field?: string,
+    field?: string
   ): Result<T> {
     const stringResult = this.verifyString(value, field);
     if (!stringResult.success) {
@@ -275,9 +267,9 @@ export class TypeVerifier {
       success: false,
       error: new TypeVerificationError(
         `Invalid enum value`,
-        `one of [${allowedValues.join(", ")}]`,
+        `one of [${allowedValues.join(', ')}]`,
         `'${stringValue}'`,
-        field,
+        field
       ),
     };
   }
@@ -289,20 +281,20 @@ export class TypeVerifier {
     value: unknown,
     typeName: string,
     typeCheck: (val: unknown) => boolean,
-    field?: string,
+    field?: string
   ): asserts value is T {
     if (!typeCheck(value)) {
       throw new TypeVerificationError(
         `Invalid type`,
         typeName,
-        typeof value === "object"
+        typeof value === 'object'
           ? value === null
-            ? "null"
+            ? 'null'
             : Array.isArray(value)
-              ? "array"
-              : "object"
+              ? 'array'
+              : 'object'
           : typeof value,
-        field,
+        field
       );
     }
   }
@@ -313,9 +305,9 @@ export class TypeVerifier {
   assertString(value: unknown, field?: string): asserts value is string {
     this.assertType<string>(
       value,
-      "string",
-      (val): val is string => typeof val === "string",
-      field,
+      'string',
+      (val): val is string => typeof val === 'string',
+      field
     );
   }
 
@@ -325,9 +317,9 @@ export class TypeVerifier {
   assertNumber(value: unknown, field?: string): asserts value is number {
     this.assertType<number>(
       value,
-      "number",
-      (val): val is number => typeof val === "number" && !Number.isNaN(val),
-      field,
+      'number',
+      (val): val is number => typeof val === 'number' && !Number.isNaN(val),
+      field
     );
   }
 
@@ -337,20 +329,17 @@ export class TypeVerifier {
   assertBoolean(value: unknown, field?: string): asserts value is boolean {
     this.assertType<boolean>(
       value,
-      "boolean",
-      (val): val is boolean => typeof val === "boolean",
-      field,
+      'boolean',
+      (val): val is boolean => typeof val === 'boolean',
+      field
     );
   }
 
   /**
    * Assert that a value is an array
    */
-  assertArray<T = unknown>(
-    value: unknown,
-    field?: string,
-  ): asserts value is T[] {
-    this.assertType<T[]>(value, "array", Array.isArray, field);
+  assertArray<T = unknown>(value: unknown, field?: string): asserts value is T[] {
+    this.assertType<T[]>(value, 'array', Array.isArray, field);
   }
 
   /**
@@ -358,14 +347,14 @@ export class TypeVerifier {
    */
   assertObject<T extends Record<string, unknown> = Record<string, unknown>>(
     value: unknown,
-    field?: string,
+    field?: string
   ): asserts value is T {
     this.assertType<T>(
       value,
-      "object",
+      'object',
       (val): val is Record<string, unknown> =>
-        typeof val === "object" && val !== null && !Array.isArray(val),
-      field,
+        typeof val === 'object' && val !== null && !Array.isArray(val),
+      field
     );
   }
 }

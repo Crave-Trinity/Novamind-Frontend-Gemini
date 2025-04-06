@@ -3,4 +3,4 @@
  * Re-exports core temporal types.
  */
 
-export * from "./dynamics";
+export * from './dynamics';

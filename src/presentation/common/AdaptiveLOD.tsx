@@ -4,9 +4,9 @@
  * with performance-optimized neural rendering
  */
 
-import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { useThree, useFrame } from "@react-three/fiber";
-import { Vector3 } from "three";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
+import { useThree, useFrame } from '@react-three/fiber';
+import { Vector3 } from 'three';
 
 // Performance thresholds
 const FPS_THRESHOLD_HIGH = 55; // Maintain high detail above this FPS
@@ -48,8 +48,8 @@ export interface DetailConfig {
 // Use string literal type for keys and level property, remove ultra/minimal
 const defaultDetailConfigs: Record<DetailLevelString, DetailConfig> = {
   // Removed "ultra" config
-  "high": {
-    level: "high",
+  high: {
+    level: 'high',
     segmentDetail: 64,
     maxVisibleRegions: Infinity,
     useInstancedMesh: true,
@@ -66,8 +66,8 @@ const defaultDetailConfigs: Record<DetailLevelString, DetailConfig> = {
     labelDensity: 1.0,
     physicsFidelity: 1.0,
   },
-  "medium": {
-    level: "medium",
+  medium: {
+    level: 'medium',
     segmentDetail: 32,
     maxVisibleRegions: 1000,
     useInstancedMesh: true,
@@ -84,8 +84,8 @@ const defaultDetailConfigs: Record<DetailLevelString, DetailConfig> = {
     labelDensity: 0.8,
     physicsFidelity: 0.8,
   },
-  "low": {
-    level: "low",
+  low: {
+    level: 'low',
     segmentDetail: 24,
     maxVisibleRegions: 500,
     useInstancedMesh: true,
@@ -102,8 +102,9 @@ const defaultDetailConfigs: Record<DetailLevelString, DetailConfig> = {
     labelDensity: 0.5,
     physicsFidelity: 0.6,
   },
-  "dynamic": { // Add dynamic config - using 'high' as a base for now
-    level: "dynamic",
+  dynamic: {
+    // Add dynamic config - using 'high' as a base for now
+    level: 'dynamic',
     segmentDetail: 32,
     maxVisibleRegions: 1000,
     useInstancedMesh: true,
@@ -119,7 +120,7 @@ const defaultDetailConfigs: Record<DetailLevelString, DetailConfig> = {
     showLabels: true,
     labelDensity: 0.8,
     physicsFidelity: 0.8,
-  }
+  },
   // Removed "minimal" and "ultra" config blocks
 };
 
@@ -129,7 +130,7 @@ const defaultDetailConfigs: Record<DetailLevelString, DetailConfig> = {
 interface AdaptiveLODProps {
   initialDetailLevel?: DetailLevelString;
   detailConfigs?: Partial<Record<DetailLevelString, Partial<DetailConfig>>>;
-  adaptiveMode?: "auto" | "manual" | "hybrid";
+  adaptiveMode?: 'auto' | 'manual' | 'hybrid';
   onDetailLevelChange?: (newLevel: DetailLevelString, config: DetailConfig) => void;
   children: (detailConfig: DetailConfig) => React.ReactNode;
   forceDetailLevel?: DetailLevelString;
@@ -137,7 +138,7 @@ interface AdaptiveLODProps {
   cameraPositionInfluence?: number;
   regionCount?: number;
   regionDensityInfluence?: number;
-  devicePerformanceClass?: "high" | "medium" | "low";
+  devicePerformanceClass?: 'high' | 'medium' | 'low';
 }
 
 /**
@@ -145,9 +146,9 @@ interface AdaptiveLODProps {
  * Implements clinically-precise performance optimization for neural visualization
  */
 export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
-  initialDetailLevel = "high",
+  initialDetailLevel = 'high',
   detailConfigs,
-  adaptiveMode = "hybrid",
+  adaptiveMode = 'hybrid',
   onDetailLevelChange,
   children,
   forceDetailLevel,
@@ -155,7 +156,7 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
   cameraPositionInfluence = 0.5,
   regionCount = 0,
   regionDensityInfluence = 0.3,
-  devicePerformanceClass = "medium",
+  devicePerformanceClass = 'medium',
 }) => {
   // Get THREE.js camera
   const { camera, gl, scene } = useThree();
@@ -193,17 +194,14 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
     }
 
     // Apply device performance class adjustments
-    if (devicePerformanceClass === "high") {
+    if (devicePerformanceClass === 'high') {
       // High-end devices can use higher detail
-      configs["high"].maxVisibleRegions += 200;
-      configs["medium"].maxVisibleRegions += 100;
-    } else if (devicePerformanceClass === "low") {
+      configs['high'].maxVisibleRegions += 200;
+      configs['medium'].maxVisibleRegions += 100;
+    } else if (devicePerformanceClass === 'low') {
       // Low-end devices need more aggressive optimization
       Object.values(configs).forEach((config) => {
-        config.segmentDetail = Math.max(
-          8,
-          Math.floor(config.segmentDetail * 0.7),
-        );
+        config.segmentDetail = Math.max(8, Math.floor(config.segmentDetail * 0.7));
         config.maxVisibleRegions = Math.floor(config.maxVisibleRegions * 0.6);
         config.connectionsVisible = Math.floor(config.connectionsVisible * 0.6);
         config.useBloom = false;
@@ -236,10 +234,7 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
       1.0 -
       Math.min(
         1.0,
-        Math.max(
-          0,
-          (distanceToCenter - closeDistance) / (farDistance - closeDistance),
-        ),
+        Math.max(0, (distanceToCenter - closeDistance) / (farDistance - closeDistance))
       );
 
     // Scale by the camera position influence
@@ -257,10 +252,7 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
     // Normalize region count between 0 and 1
     const densityFactor = Math.min(
       1.0,
-      Math.max(
-        0,
-        (regionCount - lowRegionCount) / (highRegionCount - lowRegionCount),
-      ),
+      Math.max(0, (regionCount - lowRegionCount) / (highRegionCount - lowRegionCount))
     );
 
     // Scale by the region density influence
@@ -290,57 +282,50 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
       lastFPSUpdateTime.current = now;
 
       // Only allow detail increases after recovery delay
-      if (
-        !canIncreaseDetail.current &&
-        now - lastDetailChangeTime.current > FPS_RECOVERY_DELAY
-      ) {
+      if (!canIncreaseDetail.current && now - lastDetailChangeTime.current > FPS_RECOVERY_DELAY) {
         canIncreaseDetail.current = true;
       }
     }
 
     // Check for detail level changes in auto or hybrid modes
-    if (
-      (adaptiveMode === "auto" || adaptiveMode === "hybrid") &&
-      !forceDetailLevel
-    ) {
+    if ((adaptiveMode === 'auto' || adaptiveMode === 'hybrid') && !forceDetailLevel) {
       let newLevel: DetailLevelString = detailLevel; // Use string literal type
 
       // Check if performance is too low for current detail level
       if (averageFPS.current < FPS_THRESHOLD_MEDIUM) {
         // Step down detail aggressively
         // Adjust logic to exclude ultra/minimal
-        if (detailLevel === "high") newLevel = "medium";
-        else if (detailLevel === "medium") newLevel = "low";
+        if (detailLevel === 'high') newLevel = 'medium';
+        else if (detailLevel === 'medium') newLevel = 'low';
         // Cannot go lower than "low" in adaptive mode based on FPS
 
         canIncreaseDetail.current = false;
       }
       // Check if performance is extremely good and we can increase detail
-      else if (
-        averageFPS.current > FPS_THRESHOLD_HIGH &&
-        canIncreaseDetail.current
-      ) {
+      else if (averageFPS.current > FPS_THRESHOLD_HIGH && canIncreaseDetail.current) {
         // Step up detail conservatively
         // Adjust logic to exclude ultra/minimal
-        if (detailLevel === "low") newLevel = "medium";
-        else if (detailLevel === "medium") newLevel = "high";
+        if (detailLevel === 'low') newLevel = 'medium';
+        else if (detailLevel === 'medium') newLevel = 'high';
         // Cannot go higher than "high" in adaptive mode based on FPS
       }
 
       // Apply additional LOD factors in hybrid mode
-      if (adaptiveMode === "hybrid") {
+      if (adaptiveMode === 'hybrid') {
         const distanceFactor = calculateCameraDistanceFactor();
         const densityFactor = calculateRegionDensityFactor();
         const combinedFactor = Math.max(distanceFactor, densityFactor);
 
         // Use combined factor to potentially adjust level more aggressively
-        if (combinedFactor > 0.8 && detailLevel !== "low") { // Check against new lowest level 'low'
+        if (combinedFactor > 0.8 && detailLevel !== 'low') {
+          // Check against new lowest level 'low'
           // Potentially reduce detail one more level when combined factors are high
           if (newLevel !== detailLevel) {
             // Already changing levels, consider more aggressive reduction
-            const levels: DetailLevelString[] = ["high", "medium", "low"]; // Use adjusted levels
+            const levels: DetailLevelString[] = ['high', 'medium', 'low']; // Use adjusted levels
             const currentIndex = levels.indexOf(newLevel);
-            if (currentIndex < levels.length - 1) { // Ensure we don't go below 'low'
+            if (currentIndex < levels.length - 1) {
+              // Ensure we don't go below 'low'
               newLevel = levels[currentIndex + 1];
             }
           }
@@ -396,12 +381,12 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
     if (!forceDetailLevel) {
       let initialLOD = initialDetailLevel;
 
-      if (devicePerformanceClass === "high") {
-        initialLOD = "high";
-      } else if (devicePerformanceClass === "medium") {
-        initialLOD = "medium";
-      } else if (devicePerformanceClass === "low") {
-        initialLOD = "low";
+      if (devicePerformanceClass === 'high') {
+        initialLOD = 'high';
+      } else if (devicePerformanceClass === 'medium') {
+        initialLOD = 'medium';
+      } else if (devicePerformanceClass === 'low') {
+        initialLOD = 'low';
       }
 
       setDetailLevel(initialLOD);

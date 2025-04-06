@@ -8,9 +8,7 @@ import { renderWithProviders } from '@test/test-utils.unified'; // Use unified s
 const TailwindTestComponent: React.FC = () => {
   return (
     <div data-testid="tailwind-test-container" className="p-4 bg-white dark:bg-gray-800">
-      <h1 className="text-primary-500 dark:text-white">
-        Testing with Tailwind
-      </h1>
+      <h1 className="text-primary-500 dark:text-white">Testing with Tailwind</h1>
       <p className="text-gray-700 dark:text-gray-300">
         This component uses Tailwind CSS classes with dark mode variants
       </p>
@@ -24,7 +22,8 @@ const TailwindTestComponent: React.FC = () => {
   );
 };
 
-describe('Tailwind CSS Testing with Unified Setup', () => { // Update describe block name
+describe('Tailwind CSS Testing with Unified Setup', () => {
+  // Update describe block name
   // No beforeEach needed for cssMock
 
   it('renders component with correct light mode classes', () => {
@@ -36,7 +35,8 @@ describe('Tailwind CSS Testing with Unified Setup', () => { // Update describe b
     expect(container.classList.contains('dark:bg-gray-800')).toBe(true); // Class is present, but not applied
   });
 
-  it('renders component with correct dark mode classes when dark mode is enabled', async () => { // Re-enabled and made async
+  it('renders component with correct dark mode classes when dark mode is enabled', async () => {
+    // Re-enabled and made async
     const { isDarkMode, enableDarkMode } = renderWithProviders(<TailwindTestComponent />); // Render light first
     // Check classList directly for initial render with darkMode: true
     // Explicitly enable dark mode within act
@@ -51,9 +51,11 @@ describe('Tailwind CSS Testing with Unified Setup', () => { // Update describe b
     expect(container.classList.contains('dark:bg-gray-800')).toBe(true); // Class is present and applied
   });
 
-  it('can toggle dark mode during test execution', async () => { // Rename test, make async
-    const { isDarkMode, enableDarkMode, disableDarkMode } = renderWithProviders( // Use helpers from unified render
-        <TailwindTestComponent />
+  it('can toggle dark mode during test execution', async () => {
+    // Rename test, make async
+    const { isDarkMode, enableDarkMode, disableDarkMode } = renderWithProviders(
+      // Use helpers from unified render
+      <TailwindTestComponent />
     );
 
     // Start in light mode
@@ -61,20 +63,20 @@ describe('Tailwind CSS Testing with Unified Setup', () => { // Update describe b
 
     // Toggle to dark mode
     act(() => {
-        enableDarkMode();
+      enableDarkMode();
     });
     // Use waitFor to allow potential state updates
     await act(async () => {
-        await screen.findByTestId('tailwind-test-container'); // Wait for potential re-render
+      await screen.findByTestId('tailwind-test-container'); // Wait for potential re-render
     });
     expect(isDarkMode()).toBe(true); // Check state via helper
 
     // Toggle back to light mode
     act(() => {
-        disableDarkMode();
+      disableDarkMode();
     });
     await act(async () => {
-        await screen.findByTestId('tailwind-test-container'); // Wait for potential re-render
+      await screen.findByTestId('tailwind-test-container'); // Wait for potential re-render
     });
     expect(isDarkMode()).toBe(false); // Check state via helper
   });

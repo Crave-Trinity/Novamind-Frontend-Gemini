@@ -4,18 +4,18 @@
  * with neuropsychiatric precision and clinical intelligence
  */
 
-import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { useSpring, animated } from "@react-spring/three";
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { useSpring, animated } from '@react-spring/three';
 // Removed Html and Line imports from drei as they are not exported
-import { Vector3 as ThreeVector3, Color, QuadraticBezierCurve3 } from "three"; // Import Vector3 with alias
+import { Vector3 as ThreeVector3, Color, QuadraticBezierCurve3 } from 'three'; // Import Vector3 with alias
 // Domain types
 import {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
-} from "@domain/models/brain/mapping/brain-mapping"; // Corrected import path
-import { BrainRegion } from "@domain/types/brain/models";
-import { Symptom, Diagnosis } from "@domain/types/clinical/patient";
-import { ActivationLevel } from "@domain/types/brain/activity";
+} from '@domain/models/brain/mapping/brain-mapping'; // Corrected import path
+import { BrainRegion } from '@domain/types/brain/models';
+import { Symptom, Diagnosis } from '@domain/types/clinical/patient';
+import { ActivationLevel } from '@domain/types/brain/activity';
 
 /**
  * Props with neural-safe typing
@@ -74,11 +74,11 @@ function calculateMappingConnections(
   selectedDiagnosisId?: string,
   selectedRegionId?: string,
   colorMap = {
-    primary: "#ef4444",
-    secondary: "#3b82f6",
-    inactive: "#94a3b8",
-    highlight: "#f97316",
-  },
+    primary: '#ef4444',
+    secondary: '#3b82f6',
+    inactive: '#94a3b8',
+    highlight: '#f97316',
+  }
 ): MappingConnection[] {
   const connections: MappingConnection[] = [];
 
@@ -105,7 +105,7 @@ function calculateMappingConnections(
     const symptomPosition = new ThreeVector3( // Use aliased constructor
       r * Math.sin(phi) * Math.cos(theta),
       r * Math.sin(phi) * Math.sin(theta),
-      -r * Math.cos(phi),
+      -r * Math.cos(phi)
     );
 
     // Process each activation pattern
@@ -135,12 +135,13 @@ function calculateMappingConnections(
           const midPoint = new ThreeVector3() // Use aliased constructor
             .addVectors(symptomPosition, region.position)
             .multiplyScalar(0.5);
-          const controlPoint = new ThreeVector3().copy(midPoint).add( // Use aliased constructor
+          const controlPoint = new ThreeVector3().copy(midPoint).add(
+            // Use aliased constructor
             new ThreeVector3( // Use aliased constructor
               (Math.random() - 0.5) * 3,
               (Math.random() - 0.5) * 3 + 2, // Bias upward for better arcs
-              (Math.random() - 0.5) * 3,
-            ),
+              (Math.random() - 0.5) * 3
+            )
           );
 
           // Create the connection
@@ -155,7 +156,10 @@ function calculateMappingConnections(
             isPrimary: pattern.intensity > 0.7, // Use intensity proxy again
             isDiagnosis: false,
             // Create new ThreeVector3 instances for the points array
-            points: [symptomPosition, new ThreeVector3(region.position.x, region.position.y, region.position.z)], // Corrected assignment
+            points: [
+              symptomPosition,
+              new ThreeVector3(region.position.x, region.position.y, region.position.z),
+            ], // Corrected assignment
             color,
             controlPoint,
           });
@@ -177,7 +181,7 @@ function calculateMappingConnections(
     const diagnosisPosition = new ThreeVector3( // Use aliased constructor
       r * Math.sin(phi) * Math.cos(theta),
       r * Math.sin(phi) * Math.sin(theta),
-      -r * Math.cos(phi),
+      -r * Math.cos(phi)
     );
 
     // Process each activation pattern
@@ -207,12 +211,13 @@ function calculateMappingConnections(
           const midPoint = new ThreeVector3() // Use aliased constructor
             .addVectors(diagnosisPosition, region.position)
             .multiplyScalar(0.5);
-          const controlPoint = new ThreeVector3().copy(midPoint).add( // Use aliased constructor
+          const controlPoint = new ThreeVector3().copy(midPoint).add(
+            // Use aliased constructor
             new ThreeVector3( // Use aliased constructor
               (Math.random() - 0.5) * 3,
               (Math.random() - 0.5) * 3 - 2, // Bias downward for better arcs
-              (Math.random() - 0.5) * 3,
-            ),
+              (Math.random() - 0.5) * 3
+            )
           );
 
           // Create the connection
@@ -227,7 +232,10 @@ function calculateMappingConnections(
             isPrimary: pattern.intensity > 0.7, // Use intensity proxy again
             isDiagnosis: true,
             // Create new ThreeVector3 instances for the points array
-            points: [diagnosisPosition, new ThreeVector3(region.position.x, region.position.y, region.position.z)], // Corrected assignment
+            points: [
+              diagnosisPosition,
+              new ThreeVector3(region.position.x, region.position.y, region.position.z),
+            ], // Corrected assignment
             color,
             controlPoint,
           });
@@ -246,8 +254,9 @@ function createCurvePoints(
   start: ThreeVector3, // Use aliased type
   end: ThreeVector3, // Use aliased type
   control: ThreeVector3, // Use aliased type
-  segments: number = 20,
-): ThreeVector3[] { // Use aliased type
+  segments: number = 20
+): ThreeVector3[] {
+  // Use aliased type
   const curve = new QuadraticBezierCurve3(start, control, end);
   return curve.getPoints(segments);
 }
@@ -256,9 +265,7 @@ function createCurvePoints(
  * SymptomRegionMappingVisualizer - Molecular component for mapping symptoms to brain regions
  * Implements clinical precision neural pathway visualization
  */
-export const SymptomRegionMappingVisualizer: React.FC<
-  SymptomRegionMappingVisualizerProps
-> = ({
+export const SymptomRegionMappingVisualizer: React.FC<SymptomRegionMappingVisualizerProps> = ({
   regions,
   symptomMappings,
   activeSymptoms,
@@ -273,10 +280,10 @@ export const SymptomRegionMappingVisualizer: React.FC<
   lineWidth = 2,
   enableAnimation = true,
   colorMap = {
-    primary: "#ef4444",
-    secondary: "#3b82f6",
-    inactive: "#94a3b8",
-    highlight: "#f97316",
+    primary: '#ef4444',
+    secondary: '#3b82f6',
+    inactive: '#94a3b8',
+    highlight: '#f97316',
   },
   onSymptomSelect,
   onRegionSelect,
@@ -292,7 +299,7 @@ export const SymptomRegionMappingVisualizer: React.FC<
       selectedSymptomId,
       selectedDiagnosisId,
       selectedRegionId,
-      colorMap,
+      colorMap
     );
   }, [
     regions,
@@ -322,17 +329,15 @@ export const SymptomRegionMappingVisualizer: React.FC<
           conn.symptomId === selectedSymptomId ||
           conn.symptomId === selectedDiagnosisId ||
           // Show selected region connections
-          conn.regionId === selectedRegionId,
+          conn.regionId === selectedRegionId
       );
     }
 
     // Sort by relevance
     filteredConnections.sort((a, b) => {
       // Prioritize selected elements
-      if (a.symptomId === selectedSymptomId || a.regionId === selectedRegionId)
-        return -1;
-      if (b.symptomId === selectedSymptomId || b.regionId === selectedRegionId)
-        return 1;
+      if (a.symptomId === selectedSymptomId || a.regionId === selectedRegionId) return -1;
+      if (b.symptomId === selectedSymptomId || b.regionId === selectedRegionId) return 1;
 
       // Then prioritize active elements
       const aActive =
@@ -404,7 +409,7 @@ export const SymptomRegionMappingVisualizer: React.FC<
         onSymptomSelect(symptomId === selectedSymptomId ? null : symptomId);
       }
     },
-    [onSymptomSelect, selectedSymptomId],
+    [onSymptomSelect, selectedSymptomId]
   );
 
   // Render the connections
@@ -420,10 +425,7 @@ export const SymptomRegionMappingVisualizer: React.FC<
         // Line thickness based on connection strength and selection state
         const thickness = // Simplified thickness logic without isPrimary
           lineWidth *
-          (conn.symptomId === selectedSymptomId ||
-          conn.regionId === selectedRegionId
-            ? 1.5
-            : 1.0);
+          (conn.symptomId === selectedSymptomId || conn.regionId === selectedRegionId ? 1.5 : 1.0);
 
         // Animation settings
         const dashArray = enableAnimation
@@ -434,7 +436,7 @@ export const SymptomRegionMappingVisualizer: React.FC<
         const dashAnimateTo = enableAnimation ? 1 : undefined;
 
         // Use explicit return null;
-        return null; 
+        return null;
       })}
 
       {/* Render symptom/diagnosis labels */}
@@ -448,15 +450,14 @@ export const SymptomRegionMappingVisualizer: React.FC<
           const opacity = isSelected ? 0.95 : 0.7;
 
           // Find a primary connection for determining color
-          const primaryConn =
-            group.connections.find((c) => c.isPrimary) || group.connections[0];
+          const primaryConn = group.connections.find((c) => c.isPrimary) || group.connections[0];
           const isActive =
             primaryConn &&
             (activeSymptoms.some((s) => s.id === primaryConn.symptomId) ||
               activeDiagnoses.some((d) => d.id === primaryConn.symptomId));
 
           // Use explicit return null;
-          return null; 
+          return null;
         })}
     </group>
   );

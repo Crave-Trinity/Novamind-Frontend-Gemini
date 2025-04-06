@@ -18,15 +18,12 @@ import {
   asNumber,
   asBoolean,
   asDate,
-} from "@models/shared/type-verification";
+} from '@models/shared/type-verification';
 
 /**
  * Validates a potentially undefined value is defined
  */
-export function validateDefined<T>(
-  value: T | undefined,
-  propertyPath?: string,
-): boolean {
+export function validateDefined<T>(value: T | undefined, propertyPath?: string): boolean {
   try {
     assertDefined(value, propertyPath);
     return true;
@@ -38,10 +35,7 @@ export function validateDefined<T>(
 /**
  * Validates a potentially null or undefined value is present
  */
-export function validatePresent<T>(
-  value: T | null | undefined,
-  propertyPath?: string,
-): boolean {
+export function validatePresent<T>(value: T | null | undefined, propertyPath?: string): boolean {
   try {
     assertPresent(value, propertyPath);
     return true;
@@ -77,10 +71,7 @@ export function validateNumber(value: unknown, propertyPath?: string): boolean {
 /**
  * Validates a value is a boolean
  */
-export function validateBoolean(
-  value: unknown,
-  propertyPath?: string,
-): boolean {
+export function validateBoolean(value: unknown, propertyPath?: string): boolean {
   try {
     assertBoolean(value, propertyPath);
     return true;
@@ -107,7 +98,7 @@ export function validateArray(value: unknown, propertyPath?: string): boolean {
 export function validateArrayOf<T>(
   value: unknown,
   elementValidator: (item: unknown) => boolean,
-  propertyPath?: string,
+  propertyPath?: string
 ): boolean {
   if (!validateArray(value, propertyPath)) return false;
 
@@ -117,11 +108,11 @@ export function validateArrayOf<T>(
         elementValidator(item) ||
         (() => {
           throw new TypeVerificationError(
-            "valid array element",
+            'valid array element',
             item,
-            propertyPath ? `${propertyPath}[${index}]` : `[${index}]`,
+            propertyPath ? `${propertyPath}[${index}]` : `[${index}]`
           );
-        })(),
+        })()
     );
   } catch (error) {
     return false;
@@ -159,7 +150,7 @@ export function validateType<T>(
   value: unknown,
   typeGuard: (v: unknown) => v is T,
   typeName: string,
-  propertyPath?: string,
+  propertyPath?: string
 ): boolean {
   try {
     assertType(value, typeGuard, typeName, propertyPath);
@@ -176,7 +167,7 @@ export function validateProperty(
   obj: unknown,
   property: string,
   validator: (value: unknown) => boolean,
-  propertyPath?: string,
+  propertyPath?: string
 ): boolean {
   if (!validateObject(obj, propertyPath)) return false;
 
@@ -193,7 +184,7 @@ export function validateProperty(
  * Creates a validator that checks if a value is one of a set of literals
  */
 export function validateOneOf<T extends string | number>(
-  allowedValues: readonly T[],
+  allowedValues: readonly T[]
 ): (value: unknown) => value is T {
   return (value: unknown): value is T => {
     return allowedValues.includes(value as T);
@@ -203,9 +194,7 @@ export function validateOneOf<T extends string | number>(
 /**
  * Creates a validator for an object type with required properties
  */
-export function createObjectValidator<
-  T extends Record<string, unknown>,
->(propertyValidators: {
+export function createObjectValidator<T extends Record<string, unknown>>(propertyValidators: {
   [K in keyof T]: (value: unknown) => boolean;
 }): (value: unknown) => value is T {
   return (value: unknown): value is T => {

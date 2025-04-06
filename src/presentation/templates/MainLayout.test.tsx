@@ -2,21 +2,22 @@
  * NOVAMIND Neural Test Suite
  * MainLayout testing with quantum precision
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"; // Import hooks
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'; // Import hooks
 
-import { screen, fireEvent } from "@testing-library/react"; // render is imported from unified utils
-import React from "react";
-import userEvent from "@testing-library/user-event";
-import MainLayout from "./MainLayout"; // Assuming default export
-import { render } from "@test/test-utils.unified"; // Import the unified render
+import { screen } from '@testing-library/react'; // render is imported from unified utils
+import React from 'react';
+import userEvent from '@testing-library/user-event';
+import MainLayout from './MainLayout'; // Assuming default export
+import { render } from '@test/test-utils.unified'; // Import the unified render
 
 // Mock data with clinical precision
 // Mock data with clinical precision - MainLayout requires children
 const mockProps = {
-  children: React.createElement("div", null, "Test Child Content"),
+  children: React.createElement('div', null, 'Test Child Content'),
 };
 
-describe("MainLayout", () => { // Re-enabled suite
+describe('MainLayout', () => {
+  // Re-enabled suite
   // Store original matchMedia
   let originalMatchMedia: typeof window.matchMedia;
 
@@ -27,7 +28,7 @@ describe("MainLayout", () => { // Re-enabled suite
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       configurable: true, // Ensure it can be restored
-      value: vi.fn().mockImplementation(query => {
+      value: vi.fn().mockImplementation((query) => {
         console.log(`[TEST] matchMedia called with query: ${query}`); // Diagnostic log
         const isLightQuery = query === '(prefers-color-scheme: light)';
         const isDarkQuery = query === '(prefers-color-scheme: dark)';
@@ -61,7 +62,7 @@ describe("MainLayout", () => { // Re-enabled suite
       writable: true,
       configurable: true,
     });
-     vi.restoreAllMocks(); // Restore any other mocks
+    vi.restoreAllMocks(); // Restore any other mocks
   });
 
   // Optional: Restore if needed, though less critical if beforeEach redefines
@@ -69,17 +70,17 @@ describe("MainLayout", () => { // Re-enabled suite
   //   vi.restoreAllMocks();
   // });
 
-  it("renders with neural precision", () => {
+  it('renders with neural precision', () => {
     render(<MainLayout {...mockProps} />); // Use the unified render
 
     // Add assertions for rendered content
     // Check if the child content is rendered
-    expect(screen.getByText("Test Child Content")).toBeInTheDocument();
+    expect(screen.getByText('Test Child Content')).toBeInTheDocument();
     // Check for a key element, e.g., the Novamind title/logo
-    expect(screen.getByText("Novamind")).toBeInTheDocument();
+    expect(screen.getByText('Novamind')).toBeInTheDocument();
   });
 
-  it("responds to user interaction with quantum precision", async () => {
+  it('responds to user interaction with quantum precision', async () => {
     const user = userEvent.setup();
     render(<MainLayout {...mockProps} />); // Use the unified render
 

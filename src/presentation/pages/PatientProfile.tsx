@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
-import { auditLogService, AuditEventType } from "@infrastructure/clients/auditLogClient"; // Use correct alias
+import { auditLogService, AuditEventType } from '@infrastructure/clients/auditLogClient'; // Use correct alias
 
 /**
  * Patient profile page component
@@ -15,37 +15,38 @@ const PatientProfile: React.FC = () => {
   // Log PHI view for HIPAA compliance
   useEffect(() => {
     if (id) {
-      auditLogService.log(AuditEventType.PATIENT_RECORD_VIEW, { // Use correct type
-        resourceType: "patient",
+      auditLogService.log(AuditEventType.PATIENT_RECORD_VIEW, {
+        // Use correct type
+        resourceType: 'patient',
         resourceId: id,
-        action: "view",
-        result: "success",
+        action: 'view',
+        result: 'success',
       });
     }
   }, [id]);
 
   // Patient data would be fetched from API in a real implementation
   const patientData = {
-    id: id || "12345",
-    name: "Jane Doe",
+    id: id || '12345',
+    name: 'Jane Doe',
     age: 32,
     contactInfo: {
-      email: "jane.doe@example.com",
-      phone: "(555) 123-4567",
+      email: 'jane.doe@example.com',
+      phone: '(555) 123-4567',
     },
-    diagnosis: "Generalized Anxiety Disorder, Major Depressive Disorder",
-    treatmentPlan: "CBT + SSRI medication",
-    lastVisit: "2025-03-15",
-    upcomingAppointment: "2025-04-05",
+    diagnosis: 'Generalized Anxiety Disorder, Major Depressive Disorder',
+    treatmentPlan: 'CBT + SSRI medication',
+    lastVisit: '2025-03-15',
+    upcomingAppointment: '2025-04-05',
   };
 
   // Log brain model access when viewing that tab
   const handleBrainModelView = () => {
     auditLogService.log(AuditEventType.BRAIN_MODEL_VIEW, {
-      resourceType: "brainModel",
+      resourceType: 'brainModel',
       // patientId: id, // Remove invalid property
-      action: "view",
-      result: "success",
+      action: 'view',
+      result: 'success',
     });
   };
 
@@ -83,44 +84,32 @@ const PatientProfile: React.FC = () => {
         <div className="p-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
-              <h2 className="mb-4 text-lg font-semibold">
-                Personal Information
-              </h2>
+              <h2 className="mb-4 text-lg font-semibold">Personal Information</h2>
               <div className="space-y-3">
                 <div>
                   <span className="text-gray-600 dark:text-gray-400">Age:</span>
                   <span className="ml-2">{patientData.age}</span>
                 </div>
                 <div>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Email:
-                  </span>
+                  <span className="text-gray-600 dark:text-gray-400">Email:</span>
                   <span className="ml-2">{patientData.contactInfo.email}</span>
                 </div>
                 <div>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Phone:
-                  </span>
+                  <span className="text-gray-600 dark:text-gray-400">Phone:</span>
                   <span className="ml-2">{patientData.contactInfo.phone}</span>
                 </div>
               </div>
             </div>
 
             <div>
-              <h2 className="mb-4 text-lg font-semibold">
-                Medical Information
-              </h2>
+              <h2 className="mb-4 text-lg font-semibold">Medical Information</h2>
               <div className="space-y-3">
                 <div>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Diagnosis:
-                  </span>
+                  <span className="text-gray-600 dark:text-gray-400">Diagnosis:</span>
                   <div className="mt-1">{patientData.diagnosis}</div>
                 </div>
                 <div>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Treatment Plan:
-                  </span>
+                  <span className="text-gray-600 dark:text-gray-400">Treatment Plan:</span>
                   <div className="mt-1">{patientData.treatmentPlan}</div>
                 </div>
               </div>
@@ -134,9 +123,7 @@ const PatientProfile: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">Last Visit</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {patientData.lastVisit}
-                  </p>
+                  <p className="text-gray-600 dark:text-gray-400">{patientData.lastVisit}</p>
                 </div>
                 <div>
                   <h3 className="font-medium">Upcoming Appointment</h3>

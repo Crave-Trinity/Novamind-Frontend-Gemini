@@ -2,15 +2,15 @@
  * NOVAMIND Neural Test Suite
  * BrainModelViewer testing with quantum precision
  */
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi } from 'vitest';
 
-import { render, screen, fireEvent } from "@testing-library/react";
-import React from "react"; // Added missing React import
-import userEvent from "@testing-library/user-event";
-import BrainModelViewer from "@pages/BrainModelViewer"; // Assuming default export
-import { renderWithProviders } from "@test/test-utils.unified";
-import { RenderMode } from "@domain/types/brain/visualization"; // Import for mock
-import { BrainRegion } from "@domain/models/brain/brain-model"; // Import for mock
+import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react'; // Added missing React import
+import userEvent from '@testing-library/user-event';
+import BrainModelViewer from '@pages/BrainModelViewer'; // Assuming default export
+import { renderWithProviders } from '@test/test-utils.unified';
+import { RenderMode } from '@domain/types/brain/visualization'; // Import for mock
+import { BrainRegion } from '@domain/models/brain/brain-model'; // Import for mock
 
 // Mock hooks used by the component
 vi.mock('@application/hooks/useTheme', () => ({
@@ -22,12 +22,29 @@ vi.mock('@application/hooks/useTheme', () => ({
 
 vi.mock('@application/hooks/useBrainVisualization', () => ({
   useBrainVisualization: vi.fn(() => ({
-    brainModel: { // Provide minimal mock data
+    brainModel: {
+      // Provide minimal mock data
       id: 'test-model',
       name: 'Test Brain',
-      regions: [{ id: 'r1', name: 'Region 1', position: [0,0,0], scale: 1, data: { activity: 0.5 }, significance: 0.5, connections: [], description: '', color: '', coordinates: [0,0,0], functions: [], size: 1, volume: 1 }],
+      regions: [
+        {
+          id: 'r1',
+          name: 'Region 1',
+          position: [0, 0, 0],
+          scale: 1,
+          data: { activity: 0.5 },
+          significance: 0.5,
+          connections: [],
+          description: '',
+          color: '',
+          coordinates: [0, 0, 0],
+          functions: [],
+          size: 1,
+          volume: 1,
+        },
+      ],
       pathways: [],
-      metadata: { modelVersion: '1.0' }
+      metadata: { modelVersion: '1.0' },
     },
     isLoading: false,
     error: null,
@@ -49,15 +66,16 @@ const mockProps = {
   // Example: Assuming it takes a patientId from route params or context
 };
 
-describe("BrainModelViewer", () => { // Unskip tests
-  it("renders with neural precision", () => {
+describe('BrainModelViewer', () => {
+  // Unskip tests
+  it('renders with neural precision', () => {
     renderWithProviders(<BrainModelViewer {...mockProps} />); // Use renderWithProviders
 
     // Add assertions for rendered content
     expect(screen).toBeDefined();
   });
 
-  it("responds to user interaction with quantum precision", async () => {
+  it('responds to user interaction with quantum precision', async () => {
     const user = userEvent.setup();
     renderWithProviders(<BrainModelViewer {...mockProps} />); // Use renderWithProviders
 

@@ -4,7 +4,7 @@
  */
 
 // Export brain models
-export * from "./brain/brain-model";
+export * from './brain/brain-model';
 
 // Export brain mapping types and functions
 export type {
@@ -13,7 +13,7 @@ export type {
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
   NeuralImpactRating,
-} from "./brain/mapping/brain-mapping";
+} from './brain/mapping/brain-mapping';
 
 // Export brain mapping functions
 export {
@@ -21,14 +21,14 @@ export {
   mapSymptomsToRegions,
   mapDiagnosesToRegions,
   calculateTreatmentImpact,
-} from "./brain/mapping/brain-mapping";
+} from './brain/mapping/brain-mapping';
 
 // Export clinical models
-export * from "./clinical/patient-model";
+export * from './clinical/patient-model';
 
 // Export shared utilities
-export * from "./shared/type-verification";
-export * from "./shared/type-verification.runtime";
+export * from './shared/type-verification';
+export * from './shared/type-verification.runtime';
 
 // Note: Legacy models are available in their respective subdirectories
 // but are not exported from this main index to encourage usage of

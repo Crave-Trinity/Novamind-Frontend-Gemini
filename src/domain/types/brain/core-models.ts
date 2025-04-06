@@ -53,28 +53,28 @@ export interface Coordinate {
 
 // Type guard for brain regions
 export function isBrainRegion(obj: unknown): obj is BrainRegion {
-  if (!obj || typeof obj !== "object") return false;
+  if (!obj || typeof obj !== 'object') return false;
 
   const region = obj as Partial<BrainRegion>;
 
   return (
-    typeof region.id === "string" &&
-    typeof region.name === "string" &&
-    typeof region.activityLevel === "number" &&
-    typeof region.isActive === "boolean" &&
+    typeof region.id === 'string' &&
+    typeof region.name === 'string' &&
+    typeof region.activityLevel === 'number' &&
+    typeof region.isActive === 'boolean' &&
     Array.isArray(region.connections)
   );
 }
 
 // Type guard for brain model
 export function isBrainModel(obj: unknown): obj is BrainModel {
-  if (!obj || typeof obj !== "object") return false;
+  if (!obj || typeof obj !== 'object') return false;
 
   const model = obj as Partial<BrainModel>;
 
   return (
-    typeof model.id === "string" &&
-    typeof model.name === "string" &&
+    typeof model.id === 'string' &&
+    typeof model.name === 'string' &&
     Array.isArray(model.regions) &&
     Array.isArray(model.connections)
   );
@@ -143,12 +143,9 @@ export class SafeArray<T> {
 }
 
 // Custom implementation of NeuralVisualizationError class
-export class NeuralVisualizationError
-  extends Error
-  implements NeuralVisualizationErrorInterface
-{
+export class NeuralVisualizationError extends Error implements NeuralVisualizationErrorInterface {
   code: string;
-  severity: "warning" | "error" | "fatal";
+  severity: 'warning' | 'error' | 'fatal';
   component?: string;
   timestamp: number;
 
@@ -156,15 +153,15 @@ export class NeuralVisualizationError
     message: string,
     options: {
       code: string;
-      severity?: "warning" | "error" | "fatal";
+      severity?: 'warning' | 'error' | 'fatal';
       component?: string;
-    } = { code: "VISUALIZATION_ERROR" },
+    } = { code: 'VISUALIZATION_ERROR' }
   ) {
     super(message);
-    this.name = "NeuralVisualizationError";
+    this.name = 'NeuralVisualizationError';
     this.message = message;
     this.code = options.code;
-    this.severity = options.severity || "error";
+    this.severity = options.severity || 'error';
     this.component = options.component;
     this.timestamp = Date.now();
   }
@@ -180,9 +177,9 @@ export const BrainRegion = {
     // Neural-safe properties with strict null handling
     const region: BrainRegion = {
       id: data.id || `region-${Math.random().toString(36).substring(2, 9)}`,
-      name: data.name || "Unnamed Region",
+      name: data.name || 'Unnamed Region',
       position: data.position || { x: 0, y: 0, z: 0 },
-      color: data.color || "#CCCCCC",
+      color: data.color || '#CCCCCC',
       connections: data.connections || [],
       activityLevel: data.activityLevel ?? 0,
       isActive: data.isActive ?? false,
@@ -215,9 +212,9 @@ export const BrainScan = {
   create(data: Partial<BrainScan> = {}): BrainScan {
     // Neural-safe properties with strict null handling
     const scan: BrainScan = {
-      patientId: data.patientId || "unknown",
+      patientId: data.patientId || 'unknown',
       scanDate: data.scanDate || new Date().toISOString(),
-      scanType: data.scanType || "MRI",
+      scanType: data.scanType || 'MRI',
     };
 
     // Handle optional properties with type safety
@@ -236,8 +233,8 @@ export const VisualizationSettings = {
     return {
       showLabels: data.showLabels ?? true,
       rotationSpeed: data.rotationSpeed ?? 0.5,
-      highlightColor: data.highlightColor || "#FF5733",
-      backgroundColor: data.backgroundColor || "#121212",
+      highlightColor: data.highlightColor || '#FF5733',
+      backgroundColor: data.backgroundColor || '#121212',
       connectionOpacity: data.connectionOpacity ?? 0.7,
       nodeSize: data.nodeSize ?? 1,
       renderMode: data.renderMode ?? RenderMode.NORMAL,
@@ -256,7 +253,7 @@ export const PatientMetadata = {
     const metadata: PatientMetadata = {
       id: data.id || `patient-${Math.random().toString(36).substring(2, 9)}`,
       age: data.age ?? 35,
-      biologicalSex: data.biologicalSex || "other",
+      biologicalSex: data.biologicalSex || 'other',
     };
 
     // Handle optional properties with type safety
@@ -275,9 +272,9 @@ export const Medication = {
   create(data: Partial<Medication> = {}): Medication {
     // Neural-safe properties with strict null handling
     const medication: Medication = {
-      name: data.name || "Unknown Medication",
-      dosage: data.dosage || "0mg",
-      frequency: data.frequency || "daily",
+      name: data.name || 'Unknown Medication',
+      dosage: data.dosage || '0mg',
+      frequency: data.frequency || 'daily',
       startDate: data.startDate || new Date().toISOString(),
     };
 
@@ -296,10 +293,8 @@ export const TreatmentResponse = {
   create(data: Partial<TreatmentResponse> = {}): TreatmentResponse {
     // Neural-safe properties with strict null handling
     const response: TreatmentResponse = {
-      treatmentId:
-        data.treatmentId ||
-        `treatment-${Math.random().toString(36).substring(2, 9)}`,
-      treatmentName: data.treatmentName || "Unknown Treatment",
+      treatmentId: data.treatmentId || `treatment-${Math.random().toString(36).substring(2, 9)}`,
+      treatmentName: data.treatmentName || 'Unknown Treatment',
       responseProbability: data.responseProbability ?? 0.75,
       timeToEffect: data.timeToEffect ?? 14,
       sideEffectRisk: data.sideEffectRisk ?? 0.15,
@@ -321,7 +316,7 @@ export const TreatmentResponse = {
 export const ActivityTimeSeries = {
   create(data: Partial<ActivityTimeSeries> = {}): ActivityTimeSeries {
     return {
-      regionId: data.regionId || "unknown",
+      regionId: data.regionId || 'unknown',
       timestamps: data.timestamps || [Date.now()],
       values: data.values || [0],
     };
@@ -338,8 +333,8 @@ export const BrainModel = (data: any = {}): BrainModelData => {
     settings: {
       showLabels: true,
       rotationSpeed: 0.5,
-      highlightColor: "#FF5733",
-      backgroundColor: "#121212",
+      highlightColor: '#FF5733',
+      backgroundColor: '#121212',
       connectionOpacity: 0.7,
       nodeSize: 1,
       renderMode: RenderMode.NORMAL,

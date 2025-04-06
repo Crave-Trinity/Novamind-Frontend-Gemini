@@ -4,17 +4,14 @@
  * with neuropsychiatric precision and temporal dynamics
  */
 
-import React, { useRef, useMemo, useState, useCallback } from "react";
-import { useThree, useFrame } from "@react-three/fiber";
-import { Line, Html, Text, Billboard } from "@react-three/drei";
-import { Vector3, Group, Color, MathUtils } from "three";
+import React, { useRef, useMemo, useState, useCallback } from 'react';
+import { useThree, useFrame } from '@react-three/fiber';
+import { Line, Html, Text, Billboard } from '@react-three/drei';
+import { Vector3, Group, Color, MathUtils } from 'three';
 
 // Domain types
-import {
-  TreatmentResponsePrediction,
-  TreatmentEfficacy,
-} from "@domain/types/clinical/treatment";
-import { BrainRegion } from "@domain/types/brain/models";
+import { TreatmentResponsePrediction, TreatmentEfficacy } from '@domain/types/clinical/treatment';
+import { BrainRegion } from '@domain/types/brain/models';
 
 /**
  * Neural-safe projection point type
@@ -62,14 +59,14 @@ interface TreatmentResponseVisualizerProps {
  */
 const getEfficacyColor = (
   efficacy: TreatmentEfficacy,
-  colorMap: Record<string, string>,
+  colorMap: Record<string, string>
 ): string => {
   switch (efficacy) {
-    case "high":
+    case 'high':
       return colorMap.efficacyHigh;
-    case "moderate":
+    case 'moderate':
       return colorMap.efficacyModerate;
-    case "low":
+    case 'low':
       return colorMap.efficacyLow;
     default:
       return colorMap.efficacyLow;
@@ -80,9 +77,7 @@ const getEfficacyColor = (
  * TreatmentResponseVisualizer - Molecular component for treatment response projection
  * Implements clinical precision visualization of treatment efficacy with confidence intervals
  */
-export const TreatmentResponseVisualizer: React.FC<
-  TreatmentResponseVisualizerProps
-> = ({
+export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerProps> = ({
   predictions,
   temporalProjections,
   regions = [],
@@ -96,14 +91,14 @@ export const TreatmentResponseVisualizer: React.FC<
   onTreatmentSelect,
   selectedTreatmentId,
   colorMap = {
-    efficacyHigh: "#10b981", // Green
-    efficacyModerate: "#f59e0b", // Amber
-    efficacyLow: "#ef4444", // Red
-    confidenceInterval: "#6366f1", // Indigo
-    grid: "#475569", // Slate
-    background: "#0f172a88", // Semi-transparent dark blue
-    text: "#f8fafc", // Light slate
-    baseline: "#64748b", // Slate
+    efficacyHigh: '#10b981', // Green
+    efficacyModerate: '#f59e0b', // Amber
+    efficacyLow: '#ef4444', // Red
+    confidenceInterval: '#6366f1', // Indigo
+    grid: '#475569', // Slate
+    background: '#0f172a88', // Semi-transparent dark blue
+    text: '#f8fafc', // Light slate
+    baseline: '#64748b', // Slate
   },
 }) => {
   // Refs
@@ -147,19 +142,19 @@ export const TreatmentResponseVisualizer: React.FC<
         let responseLevel: number;
 
         switch (prediction.responseTrajectory) {
-          case "rapid":
+          case 'rapid':
             // Rapid initial improvement that plateaus
             responseLevel = 1 - Math.exp(-3 * t);
             break;
-          case "gradual":
+          case 'gradual':
             // Linear improvement
             responseLevel = t;
             break;
-          case "delayed":
+          case 'delayed':
             // Slow start with acceleration
             responseLevel = Math.pow(t, 2);
             break;
-          case "fluctuating":
+          case 'fluctuating':
             // Up and down pattern with overall improvement
             responseLevel = t + 0.1 * Math.sin(t * 10);
             break;
@@ -170,11 +165,7 @@ export const TreatmentResponseVisualizer: React.FC<
 
         // Scale response by efficacy
         const efficacyFactor =
-          prediction.efficacy === "high"
-            ? 0.8
-            : prediction.efficacy === "moderate"
-              ? 0.5
-              : 0.3;
+          prediction.efficacy === 'high' ? 0.8 : prediction.efficacy === 'moderate' ? 0.5 : 0.3;
 
         const scaledResponse = responseLevel * efficacyFactor;
 
@@ -191,7 +182,7 @@ export const TreatmentResponseVisualizer: React.FC<
 
           confidenceAreaPoints.push(
             new Vector3(x, y + interval, 0),
-            new Vector3(x, y - interval, 0),
+            new Vector3(x, y - interval, 0)
           );
         }
       }
@@ -251,12 +242,10 @@ export const TreatmentResponseVisualizer: React.FC<
           0,
           Math.min(
             maxDaysToProject,
-            temporalProjections.timeSeries[
-              temporalProjections.timeSeries.length - 1
-            ].dayOffset,
+            temporalProjections.timeSeries[temporalProjections.timeSeries.length - 1].dayOffset
           ),
           -width / 2,
-          width / 2,
+          width / 2
         );
 
         // Get metric value
@@ -268,31 +257,23 @@ export const TreatmentResponseVisualizer: React.FC<
         points.push(new Vector3(x, y, 0));
 
         // Get confidence interval
-        if (
-          showConfidenceIntervals &&
-          point.confidenceIntervals?.[metricName]
-        ) {
+        if (showConfidenceIntervals && point.confidenceIntervals?.[metricName]) {
           const [lower, upper] = point.confidenceIntervals[metricName];
 
           const lowerY = MathUtils.mapLinear(lower, 0, 1, 0, height / 2);
 
           const upperY = MathUtils.mapLinear(upper, 0, 1, 0, height / 2);
 
-          confidencePoints.push([
-            new Vector3(x, lowerY, 0),
-            new Vector3(x, upperY, 0),
-          ]);
+          confidencePoints.push([new Vector3(x, lowerY, 0), new Vector3(x, upperY, 0)]);
         }
       });
 
       // Assign a color based on the metric name
       const color = new Color()
         .setHSL(
-          Math.abs(
-            metricName.split("").reduce((a, b) => a + b.charCodeAt(0), 0) % 360,
-          ) / 360,
+          Math.abs(metricName.split('').reduce((a, b) => a + b.charCodeAt(0), 0) % 360) / 360,
           0.7,
-          0.5,
+          0.5
         )
         .getStyle();
 
@@ -303,13 +284,7 @@ export const TreatmentResponseVisualizer: React.FC<
         color,
       };
     });
-  }, [
-    temporalProjections,
-    maxDaysToProject,
-    width,
-    height,
-    showConfidenceIntervals,
-  ]);
+  }, [temporalProjections, maxDaysToProject, width, height, showConfidenceIntervals]);
 
   // Generate grid lines
   const gridLines = useMemo(() => {
@@ -333,13 +308,7 @@ export const TreatmentResponseVisualizer: React.FC<
 
     for (let i = 0; i <= monthMarkers; i++) {
       const day = i * 30;
-      const x = MathUtils.mapLinear(
-        day,
-        0,
-        maxDaysToProject,
-        -width / 2,
-        width / 2,
-      );
+      const x = MathUtils.mapLinear(day, 0, maxDaysToProject, -width / 2, width / 2);
 
       lines.push({
         points: [new Vector3(x, -height / 2, 0), new Vector3(x, height / 2, 0)],
@@ -373,25 +342,22 @@ export const TreatmentResponseVisualizer: React.FC<
         onTreatmentSelect(treatmentId);
       }
     },
-    [onTreatmentSelect],
+    [onTreatmentSelect]
   );
 
   // Format response percentage
-  const formatResponsePercentage = useCallback(
-    (efficacy: TreatmentEfficacy): string => {
-      switch (efficacy) {
-        case "high":
-          return "70-90%";
-        case "moderate":
-          return "40-60%";
-        case "low":
-          return "10-30%";
-        default:
-          return "0%";
-      }
-    },
-    [],
-  );
+  const formatResponsePercentage = useCallback((efficacy: TreatmentEfficacy): string => {
+    switch (efficacy) {
+      case 'high':
+        return '70-90%';
+      case 'moderate':
+        return '40-60%';
+      case 'low':
+        return '10-30%';
+      default:
+        return '0%';
+    }
+  }, []);
 
   return (
     <group
@@ -402,11 +368,7 @@ export const TreatmentResponseVisualizer: React.FC<
       {/* Background plane */}
       <mesh position={[0, 0, -0.1]}>
         <planeGeometry args={[width, height]} />
-        <meshBasicMaterial
-          color={colorMap.background}
-          transparent
-          opacity={0.7}
-        />
+        <meshBasicMaterial color={colorMap.background} transparent opacity={0.7} />
       </mesh>
 
       {/* Grid lines */}
@@ -445,13 +407,7 @@ export const TreatmentResponseVisualizer: React.FC<
 
       {/* Month markers */}
       {[0, 1, 2, 3].map((month) => {
-        const x = MathUtils.mapLinear(
-          month * 30,
-          0,
-          maxDaysToProject,
-          -width / 2,
-          width / 2,
-        );
+        const x = MathUtils.mapLinear(month * 30, 0, maxDaysToProject, -width / 2, width / 2);
 
         return (
           <Text
@@ -462,7 +418,7 @@ export const TreatmentResponseVisualizer: React.FC<
             anchorX="center"
             anchorY="top"
           >
-            {month === 0 ? "Start" : `${month}M`}
+            {month === 0 ? 'Start' : `${month}M`}
           </Text>
         );
       })}
@@ -486,12 +442,7 @@ export const TreatmentResponseVisualizer: React.FC<
                 ))}
 
               {/* Metric line */}
-              <Line
-                points={metric.points}
-                color={metric.color}
-                lineWidth={2}
-                opacity={0.8}
-              />
+              <Line points={metric.points} color={metric.color} lineWidth={2} opacity={0.8} />
 
               {/* Metric label */}
               <Billboard
@@ -506,12 +457,12 @@ export const TreatmentResponseVisualizer: React.FC<
                   <div
                     style={{
                       backgroundColor: metric.color,
-                      color: "white",
-                      padding: "0.125rem 0.375rem",
-                      borderRadius: "0.25rem",
-                      fontSize: "0.75rem",
-                      whiteSpace: "nowrap",
-                      fontWeight: "bold",
+                      color: 'white',
+                      padding: '0.125rem 0.375rem',
+                      borderRadius: '0.25rem',
+                      fontSize: '0.75rem',
+                      whiteSpace: 'nowrap',
+                      fontWeight: 'bold',
                     }}
                   >
                     {metric.name}
@@ -526,11 +477,7 @@ export const TreatmentResponseVisualizer: React.FC<
       {/* Render treatment predictions */}
       {processedPredictions.map((prediction, i) => {
         // Line opacity based on selection state
-        const opacity = prediction.isSelected
-          ? 1
-          : selectedTreatmentId
-            ? 0.4
-            : 0.8;
+        const opacity = prediction.isSelected ? 1 : selectedTreatmentId ? 0.4 : 0.8;
 
         // Line width based on selection state
         const lineWidth = prediction.isSelected ? 3 : 2;
@@ -538,17 +485,16 @@ export const TreatmentResponseVisualizer: React.FC<
         return (
           <group key={prediction.treatmentId}>
             {/* Confidence interval area */}
-            {showConfidenceIntervals &&
-              prediction.confidenceAreaPoints.length > 0 && (
-                <Line
-                  points={prediction.confidenceAreaPoints}
-                  color={prediction.color}
-                  lineWidth={1}
-                  opacity={opacity * 0.3}
-                  transparent
-                  segments
-                />
-              )}
+            {showConfidenceIntervals && prediction.confidenceAreaPoints.length > 0 && (
+              <Line
+                points={prediction.confidenceAreaPoints}
+                color={prediction.color}
+                lineWidth={1}
+                opacity={opacity * 0.3}
+                transparent
+                segments
+              />
+            )}
 
             {/* Treatment response line */}
             <Line
@@ -562,10 +508,8 @@ export const TreatmentResponseVisualizer: React.FC<
             {/* Treatment label */}
             <Billboard
               position={[
-                prediction.timelinePoints[prediction.timelinePoints.length - 1]
-                  .x + 0.2,
-                prediction.timelinePoints[prediction.timelinePoints.length - 1]
-                  .y,
+                prediction.timelinePoints[prediction.timelinePoints.length - 1].x + 0.2,
+                prediction.timelinePoints[prediction.timelinePoints.length - 1].y,
                 0,
               ]}
               follow={true}
@@ -574,22 +518,20 @@ export const TreatmentResponseVisualizer: React.FC<
                 center
                 sprite
                 onClick={() => handleTreatmentSelect(prediction.treatmentId)}
-                style={{ cursor: "pointer" }}
+                style={{ cursor: 'pointer' }}
               >
                 <div
                   style={{
                     backgroundColor: `${prediction.color}cc`,
-                    color: "white",
-                    padding: "0.25rem 0.5rem",
-                    borderRadius: "0.375rem",
-                    fontSize: "0.8rem",
-                    whiteSpace: "nowrap",
-                    fontWeight: "bold",
-                    boxShadow: prediction.isSelected
-                      ? "0 0 10px rgba(255, 255, 255, 0.5)"
-                      : "none",
+                    color: 'white',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '0.375rem',
+                    fontSize: '0.8rem',
+                    whiteSpace: 'nowrap',
+                    fontWeight: 'bold',
+                    boxShadow: prediction.isSelected ? '0 0 10px rgba(255, 255, 255, 0.5)' : 'none',
                     transform: `scale(${prediction.isSelected ? 1.1 : 1})`,
-                    transition: "transform 0.2s, box-shadow 0.2s",
+                    transition: 'transform 0.2s, box-shadow 0.2s',
                   }}
                 >
                   {prediction.treatmentName}
@@ -607,11 +549,9 @@ export const TreatmentResponseVisualizer: React.FC<
                       0,
                       maxDaysToProject,
                       -width / 2,
-                      width / 2,
+                      width / 2
                     ),
-                    prediction.timelinePoints[
-                      prediction.timelinePoints.length - 1
-                    ].y / 2,
+                    prediction.timelinePoints[prediction.timelinePoints.length - 1].y / 2,
                     0,
                   ]}
                   scale={0.1}
@@ -627,13 +567,9 @@ export const TreatmentResponseVisualizer: React.FC<
                       0,
                       maxDaysToProject,
                       -width / 2,
-                      width / 2,
+                      width / 2
                     ),
-                    prediction.timelinePoints[
-                      prediction.timelinePoints.length - 1
-                    ].y /
-                      2 +
-                      0.3,
+                    prediction.timelinePoints[prediction.timelinePoints.length - 1].y / 2 + 0.3,
                     0,
                   ]}
                   fontSize={0.3}
@@ -671,8 +607,7 @@ export const TreatmentResponseVisualizer: React.FC<
                       anchorX="right"
                       anchorY="middle"
                     >
-                      {impact.region.name}:{" "}
-                      {Math.round(impact.impactLevel * 100)}%
+                      {impact.region.name}: {Math.round(impact.impactLevel * 100)}%
                     </Text>
                   </group>
                 );
@@ -683,62 +618,54 @@ export const TreatmentResponseVisualizer: React.FC<
               <Html position={[0, -height / 2 - 1.2, 0]} center>
                 <div
                   style={{
-                    backgroundColor: `${colorMap.background.replace("88", "ee")}`,
-                    padding: "0.75rem 1rem",
-                    borderRadius: "0.5rem",
+                    backgroundColor: `${colorMap.background.replace('88', 'ee')}`,
+                    padding: '0.75rem 1rem',
+                    borderRadius: '0.5rem',
                     borderLeft: `4px solid ${prediction.color}`,
                     color: colorMap.text,
-                    width: "300px",
-                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
-                    backdropFilter: "blur(10px)",
-                    fontFamily: "system-ui, -apple-system, sans-serif",
+                    width: '300px',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)',
+                    backdropFilter: 'blur(10px)',
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
                   }}
                 >
-                  <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1rem" }}>
+                  <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem' }}>
                     {prediction.treatmentName}
                   </h3>
 
                   <div
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: "0.75rem",
-                      fontSize: "0.875rem",
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginBottom: '0.75rem',
+                      fontSize: '0.875rem',
                     }}
                   >
                     <div>
-                      <div style={{ opacity: 0.8, marginBottom: "0.25rem" }}>
-                        Expected Response
-                      </div>
-                      <div
-                        style={{ fontWeight: "bold", color: prediction.color }}
-                      >
+                      <div style={{ opacity: 0.8, marginBottom: '0.25rem' }}>Expected Response</div>
+                      <div style={{ fontWeight: 'bold', color: prediction.color }}>
                         {formatResponsePercentage(prediction.efficacy)}
                       </div>
                     </div>
 
                     <div>
-                      <div style={{ opacity: 0.8, marginBottom: "0.25rem" }}>
-                        Onset
-                      </div>
-                      <div style={{ fontWeight: "bold" }}>
-                        {prediction.responseTrajectory === "rapid"
-                          ? "Rapid"
-                          : prediction.responseTrajectory === "gradual"
-                            ? "Gradual"
-                            : prediction.responseTrajectory === "delayed"
-                              ? "Delayed"
-                              : prediction.responseTrajectory === "fluctuating"
-                                ? "Fluctuating"
-                                : "Unknown"}
+                      <div style={{ opacity: 0.8, marginBottom: '0.25rem' }}>Onset</div>
+                      <div style={{ fontWeight: 'bold' }}>
+                        {prediction.responseTrajectory === 'rapid'
+                          ? 'Rapid'
+                          : prediction.responseTrajectory === 'gradual'
+                            ? 'Gradual'
+                            : prediction.responseTrajectory === 'delayed'
+                              ? 'Delayed'
+                              : prediction.responseTrajectory === 'fluctuating'
+                                ? 'Fluctuating'
+                                : 'Unknown'}
                       </div>
                     </div>
 
                     <div>
-                      <div style={{ opacity: 0.8, marginBottom: "0.25rem" }}>
-                        Confidence
-                      </div>
-                      <div style={{ fontWeight: "bold" }}>
+                      <div style={{ opacity: 0.8, marginBottom: '0.25rem' }}>Confidence</div>
+                      <div style={{ fontWeight: 'bold' }}>
                         {Math.round(prediction.confidenceLevel * 100)}%
                       </div>
                     </div>
@@ -747,14 +674,12 @@ export const TreatmentResponseVisualizer: React.FC<
                   {prediction.sideEffects && (
                     <div
                       style={{
-                        fontSize: "0.8rem",
+                        fontSize: '0.8rem',
                         opacity: 0.9,
-                        marginTop: "0.5rem",
+                        marginTop: '0.5rem',
                       }}
                     >
-                      <span style={{ opacity: 0.7 }}>
-                        Potential side effects:
-                      </span>{" "}
+                      <span style={{ opacity: 0.7 }}>Potential side effects:</span>{' '}
                       {prediction.sideEffects}
                     </div>
                   )}
@@ -762,12 +687,12 @@ export const TreatmentResponseVisualizer: React.FC<
                   {prediction.contraindications && (
                     <div
                       style={{
-                        fontSize: "0.8rem",
+                        fontSize: '0.8rem',
                         opacity: 0.9,
-                        marginTop: "0.5rem",
+                        marginTop: '0.5rem',
                       }}
                     >
-                      <span style={{ opacity: 0.7 }}>Contraindications:</span>{" "}
+                      <span style={{ opacity: 0.7 }}>Contraindications:</span>{' '}
                       {prediction.contraindications}
                     </div>
                   )}

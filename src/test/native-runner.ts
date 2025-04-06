@@ -6,9 +6,9 @@
  * the problematic transformation pipeline that's causing TextEncoder issues.
  */
 
-import { spawnSync } from "child_process";
-import * as path from "path";
-import * as fs from "fs";
+import { spawnSync } from 'child_process';
+import * as path from 'path';
+import * as fs from 'fs';
 
 // Define TypeScript interfaces for our test runner
 interface TestRunnerOptions {
@@ -24,8 +24,8 @@ interface TestRunnerOptions {
 function runTests(options: TestRunnerOptions): void {
   const { testPattern, tsconfig, verbose } = options;
 
-  console.log("🧠 NOVAMIND Native TypeScript Test Runner");
-  console.log("------------------------------------------");
+  console.log('🧠 NOVAMIND Native TypeScript Test Runner');
+  console.log('------------------------------------------');
   console.log(`Running tests matching pattern: ${testPattern}`);
 
   // Find test files
@@ -46,19 +46,19 @@ function runTests(options: TestRunnerOptions): void {
     console.log(`\nRunning test: ${path.relative(process.cwd(), testFile)}`);
 
     const result = spawnSync(
-      "npx",
+      'npx',
       [
-        "ts-node",
-        "--project",
+        'ts-node',
+        '--project',
         tsconfig,
-        "--require",
-        path.resolve(__dirname, "native-test-setup.ts"),
+        '--require',
+        path.resolve(__dirname, 'native-test-setup.ts'),
         testFile,
       ],
       {
-        stdio: verbose ? "inherit" : "pipe",
-        encoding: "utf-8",
-      },
+        stdio: verbose ? 'inherit' : 'pipe',
+        encoding: 'utf-8',
+      }
     );
 
     if (result.status === 0) {
@@ -73,7 +73,7 @@ function runTests(options: TestRunnerOptions): void {
     }
   }
 
-  console.log("\n------------------------------------------");
+  console.log('\n------------------------------------------');
   console.log(`Test Results: ${passedCount} passed, ${failedCount} failed`);
 
   if (failedCount > 0) {
@@ -90,7 +90,7 @@ function findTestFiles(pattern: string): string[] {
 
   // Convert glob pattern to regex
   const regexPattern = new RegExp(
-    pattern.replace(/\./g, "\\.").replace(/\*/g, ".*").replace(/\?/g, "."),
+    pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.')
   );
 
   function searchDirectory(dir: string): void {
@@ -101,12 +101,12 @@ function findTestFiles(pattern: string): string[] {
 
       if (entry.isDirectory()) {
         // Skip node_modules and hidden directories
-        if (entry.name !== "node_modules" && !entry.name.startsWith(".")) {
+        if (entry.name !== 'node_modules' && !entry.name.startsWith('.')) {
           searchDirectory(fullPath);
         }
       } else if (
         entry.isFile() &&
-        (entry.name.endsWith(".test.ts") || entry.name.endsWith(".test.tsx")) &&
+        (entry.name.endsWith('.test.ts') || entry.name.endsWith('.test.tsx')) &&
         regexPattern.test(fullPath)
       ) {
         files.push(fullPath);
@@ -121,9 +121,9 @@ function findTestFiles(pattern: string): string[] {
 // Run the tests if this script is executed directly
 if (require.main === module) {
   const args = process.argv.slice(2);
-  const testPattern = args[0] || "src/**/*.test.{ts,tsx}";
-  const tsconfig = args[1] || "./tsconfig.json";
-  const verbose = args.includes("--verbose");
+  const testPattern = args[0] || 'src/**/*.test.{ts,tsx}';
+  const tsconfig = args[1] || './tsconfig.json';
+  const verbose = args.includes('--verbose');
 
   runTests({
     testPattern,

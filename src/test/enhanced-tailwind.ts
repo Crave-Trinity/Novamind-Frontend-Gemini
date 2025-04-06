@@ -1,10 +1,10 @@
 /**
  * Enhanced Tailwind CSS Testing Support
- * 
+ *
  * A comprehensive implementation of Tailwind CSS mocking for tests
  * that ensures proper class handling, dark mode support, and theme compatibility.
  */
-import { vi } from 'vitest';
+// Removed unused import: vi from 'vitest';
 
 // Global state for dark mode that persists between tests
 let darkMode = false;
@@ -15,39 +15,39 @@ let darkMode = false;
 export const enhancedTailwindHelper = {
   // Dark mode state
   isDarkMode: () => darkMode,
-  
+
   // Enable dark mode in tests and return true to confirm operation
   enableDarkMode: () => {
     darkMode = true;
     applyDarkModeClass();
     return true;
   },
-  
+
   // Disable dark mode in tests and return false to confirm operation
   disableDarkMode: () => {
     darkMode = false;
     applyDarkModeClass();
     return false;
   },
-  
+
   // Toggle dark mode and return new state
   toggleDarkMode: () => {
     darkMode = !darkMode;
     applyDarkModeClass();
     return darkMode;
   },
-  
+
   // Initialize Tailwind mock in test environment
   initialize: () => {
     injectTailwindStyles();
     applyDarkModeClass();
   },
-  
+
   // Reset all Tailwind test state
   reset: () => {
     darkMode = false;
     applyDarkModeClass();
-  }
+  },
 };
 
 /**
@@ -59,7 +59,7 @@ function applyDarkModeClass() {
     // Always ensure we remove first to avoid duplicates
     document.documentElement.classList.remove('dark');
     document.documentElement.classList.remove('light');
-    
+
     // Add the appropriate class
     if (darkMode) {
       document.documentElement.classList.add('dark');

@@ -3,10 +3,7 @@
  * Core domain entities for brain visualization with quantum-level type safety
  */
 
-import {
-  Vector3 as ImportedVector3,
-  SafeArray,
-} from "@domain/types/shared/common"; // Import Vector3 with alias
+import { Vector3 as ImportedVector3, SafeArray } from '@domain/types/shared/common'; // Import Vector3 with alias
 import type { Vector3 } from '@domain/types/common';
 
 // Define Vector3 locally if needed, or ensure it's correctly imported and used
@@ -27,8 +24,8 @@ export interface BrainRegion {
   isActive: boolean;
   riskFactor?: number;
   clinicalSignificance?: string;
-  hemisphereLocation: "left" | "right" | "central";
-  tissueType?: "gray" | "white";
+  hemisphereLocation: 'left' | 'right' | 'central';
+  tissueType?: 'gray' | 'white';
   dataConfidence: number; // 0-1 representing confidence level of data
   volume: number;
   activity: number;
@@ -41,7 +38,7 @@ export interface NeuralConnection {
   targetId: string;
   strength: number; // 0-1 connection strength
   type: 'excitatory' | 'inhibitory';
-  directionality: "unidirectional" | "bidirectional";
+  directionality: 'unidirectional' | 'bidirectional';
   activityLevel: number;
   pathwayLength?: number; // mm
   dataConfidence: number; // 0-1 representing confidence level of data
@@ -73,7 +70,7 @@ export interface BrainModel {
   timestamp: string;
   version: string;
   algorithmVersion?: string;
-  processingLevel: "raw" | "filtered" | "normalized" | "analyzed";
+  processingLevel: 'raw' | 'filtered' | 'normalized' | 'analyzed';
   lastUpdated: string;
 }
 
@@ -83,14 +80,14 @@ export interface NeuralActivity {
   timestamp: string;
   value: number;
   relativeChange?: number; // percent change from baseline
-  dataSource: "measured" | "interpolated" | "predicted";
+  dataSource: 'measured' | 'interpolated' | 'predicted';
   confidence: number; // 0-1 confidence score
 }
 
 // Neural activity time series with type safety
 export interface ActivityTimeSeries {
   regionId: string;
-  timeUnit: "ms" | "s" | "min" | "hour" | "day";
+  timeUnit: 'ms' | 's' | 'min' | 'hour' | 'day';
   startTime: string;
   endTime: string;
   timestamps: number[];
@@ -114,38 +111,37 @@ export interface RegionClinicalData {
 // Type guard for brain regions
 export function isBrainRegion(obj: unknown): obj is BrainRegion {
   return (
-    typeof obj === "object" &&
+    typeof obj === 'object' &&
     obj !== null &&
-    "id" in obj &&
-    "name" in obj &&
-    "position" in obj &&
-    "activityLevel" in obj
+    'id' in obj &&
+    'name' in obj &&
+    'position' in obj &&
+    'activityLevel' in obj
   );
 }
 
 // Type guard for neural connections (refined for stricter validation)
 export function isNeuralConnection(obj: unknown): obj is NeuralConnection {
-  if (typeof obj !== "object" || obj === null) return false;
+  if (typeof obj !== 'object' || obj === null) return false;
   const conn = obj as Partial<NeuralConnection>; // Cast for property access
 
   const isValidType =
-    typeof conn.type === "string" &&
-    ["excitatory", "inhibitory"].includes(conn.type);
+    typeof conn.type === 'string' && ['excitatory', 'inhibitory'].includes(conn.type);
   const isValidDirectionality =
-    typeof conn.directionality === "string" &&
-    ["unidirectional", "bidirectional"].includes(conn.directionality);
+    typeof conn.directionality === 'string' &&
+    ['unidirectional', 'bidirectional'].includes(conn.directionality);
 
   return (
-    typeof conn.id === "string" &&
-    typeof conn.sourceId === "string" &&
-    typeof conn.targetId === "string" &&
-    typeof conn.strength === "number" &&
+    typeof conn.id === 'string' &&
+    typeof conn.sourceId === 'string' &&
+    typeof conn.targetId === 'string' &&
+    typeof conn.strength === 'number' &&
     conn.strength >= 0 &&
     conn.strength <= 1 && // Check range
     isValidType &&
     isValidDirectionality &&
-    typeof conn.activityLevel === "number" &&
-    typeof conn.dataConfidence === "number" &&
+    typeof conn.activityLevel === 'number' &&
+    typeof conn.dataConfidence === 'number' &&
     conn.dataConfidence >= 0 &&
     conn.dataConfidence <= 1 // Check range
     // Optional: pathwayLength check if needed: (conn.pathwayLength === undefined || typeof conn.pathwayLength === 'number')
@@ -155,16 +151,16 @@ export function isNeuralConnection(obj: unknown): obj is NeuralConnection {
 // Type guard for brain model (refined for array content validation)
 export function isBrainModel(obj: unknown): obj is BrainModel {
   if (
-    typeof obj !== "object" ||
+    typeof obj !== 'object' ||
     obj === null ||
-    !("regions" in obj) ||
-    !("connections" in obj) ||
-    !("patientId" in obj) || // Added check for patientId as per interface
-    !("scan" in obj) || // Added check for scan as per interface
-    !("timestamp" in obj) || // Added check for timestamp
-    !("version" in obj) || // Added check for version
-    !("processingLevel" in obj) || // Added check for processingLevel
-    !("lastUpdated" in obj) // Added check for lastUpdated
+    !('regions' in obj) ||
+    !('connections' in obj) ||
+    !('patientId' in obj) || // Added check for patientId as per interface
+    !('scan' in obj) || // Added check for scan as per interface
+    !('timestamp' in obj) || // Added check for timestamp
+    !('version' in obj) || // Added check for version
+    !('processingLevel' in obj) || // Added check for processingLevel
+    !('lastUpdated' in obj) // Added check for lastUpdated
   ) {
     return false;
   }
@@ -174,20 +170,17 @@ export function isBrainModel(obj: unknown): obj is BrainModel {
   if (!Array.isArray(model.regions) || !model.regions.every(isBrainRegion)) {
     return false;
   }
-  if (
-    !Array.isArray(model.connections) ||
-    !model.connections.every(isNeuralConnection)
-  ) {
+  if (!Array.isArray(model.connections) || !model.connections.every(isNeuralConnection)) {
     return false;
   }
 
   // Add basic checks for other required fields if needed (e.g., string types)
-  if (typeof model.patientId !== "string") return false;
+  if (typeof model.patientId !== 'string') return false;
   // Add check for scan object structure if needed (isBrainScan guard)
-  if (typeof model.timestamp !== "string") return false;
-  if (typeof model.version !== "string") return false;
+  if (typeof model.timestamp !== 'string') return false;
+  if (typeof model.version !== 'string') return false;
   // Add check for processingLevel enum if needed
-  if (typeof model.lastUpdated !== "string") return false;
+  if (typeof model.lastUpdated !== 'string') return false;
 
   return true; // All checks passed
 }
@@ -196,31 +189,25 @@ export function isBrainModel(obj: unknown): obj is BrainModel {
 export const BrainModelOps = {
   // Get region by ID with null safety
   getRegion: (model: BrainModel, regionId: string): BrainRegion | undefined => {
-    return new SafeArray(model.regions).find(
-      (region) => region.id === regionId,
-    );
+    return new SafeArray(model.regions).find((region) => region.id === regionId);
   },
 
   // Get connection by source and target with null safety
   getConnection: (
     model: BrainModel,
     sourceId: string,
-    targetId: string,
+    targetId: string
   ): NeuralConnection | undefined => {
     return new SafeArray(model.connections).find(
-      (conn) => conn.sourceId === sourceId && conn.targetId === targetId,
+      (conn) => conn.sourceId === sourceId && conn.targetId === targetId
     );
   },
 
   // Get connected regions for a specific region with null safety
   getConnectedRegions: (model: BrainModel, regionId: string): BrainRegion[] => {
     const connectedIds = new SafeArray(model.connections)
-      .filter(
-        (conn) => conn.sourceId === regionId || conn.targetId === regionId,
-      )
-      .map((conn) =>
-        conn.sourceId === regionId ? conn.targetId : conn.sourceId,
-      );
+      .filter((conn) => conn.sourceId === regionId || conn.targetId === regionId)
+      .map((conn) => (conn.sourceId === regionId ? conn.targetId : conn.sourceId));
 
     return new SafeArray(model.regions)
       .filter((region) => connectedIds.includes(region.id)) // Use array directly
@@ -238,8 +225,6 @@ export const BrainModelOps = {
 
   // Get regions by activity threshold with type safety
   getActiveRegions: (model: BrainModel, threshold: number): BrainRegion[] => {
-    return new SafeArray(model.regions)
-      .filter((region) => region.activityLevel >= threshold)
-      .get();
+    return new SafeArray(model.regions).filter((region) => region.activityLevel >= threshold).get();
   },
 };

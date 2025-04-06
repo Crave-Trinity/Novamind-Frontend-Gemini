@@ -5,7 +5,7 @@
  * with additional clinical-grade optimizations for large psychiatric data processing.
  */
 
-import { useTransition, useState, useCallback, useMemo } from "react";
+import { useTransition, useState, useCallback, useMemo } from 'react';
 
 /**
  * Custom hook that implements useTransition pattern for non-blocking UI updates
@@ -32,7 +32,7 @@ export function useBlockingTransition<T>(initialState: T) {
         setStateDirectly(newState);
       });
     },
-    [startTransition],
+    [startTransition]
   );
 
   return {
@@ -40,7 +40,7 @@ export function useBlockingTransition<T>(initialState: T) {
     setState,
     isPending,
     // Add direct setter for emergency/critical updates that must happen immediately
-    setStateImmediate: setStateDirectly
+    setStateImmediate: setStateDirectly,
   };
 }
 
@@ -74,7 +74,7 @@ export function useFilteredListTransition<T>(initialItems: T[]) {
         setFilteredItems(newItems);
       });
     },
-    [startTransition],
+    [startTransition]
   );
 
   /**
@@ -87,7 +87,7 @@ export function useFilteredListTransition<T>(initialItems: T[]) {
         setFilteredItems(items.filter(filterFn));
       });
     },
-    [items, startTransition],
+    [items, startTransition]
   );
 
   /**
@@ -100,14 +100,17 @@ export function useFilteredListTransition<T>(initialItems: T[]) {
   }, [items, startTransition]);
 
   // Memoize the return value to prevent unnecessary re-renders
-  const api = useMemo(() => ({
-    items,
-    filteredItems,
-    updateItems,
-    filterItems,
-    resetFilters,
-    isPending,
-  }), [items, filteredItems, updateItems, filterItems, resetFilters, isPending]);
+  const api = useMemo(
+    () => ({
+      items,
+      filteredItems,
+      updateItems,
+      filterItems,
+      resetFilters,
+      isPending,
+    }),
+    [items, filteredItems, updateItems, filterItems, resetFilters, isPending]
+  );
 
   return api;
 }
@@ -120,9 +123,7 @@ export function useFilteredListTransition<T>(initialItems: T[]) {
  * @param initialState - Initial state object
  * @returns Functions for queuing and applying batched updates
  */
-export function useBatchedUpdates<T extends Record<string, any>>(
-  initialState: T,
-) {
+export function useBatchedUpdates<T extends Record<string, any>>(initialState: T) {
   const [state, setState] = useState<T>(initialState);
   const [pendingUpdates, setPendingUpdates] = useState<Partial<T>>({});
   const [isPending, startTransition] = useTransition();
@@ -161,23 +162,26 @@ export function useBatchedUpdates<T extends Record<string, any>>(
    * Use only for critical updates that can't wait
    */
   const applyImmediate = useCallback((key: keyof T, value: any) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   }, []);
 
   // Memoize the return value to prevent unnecessary re-renders
-  const api = useMemo(() => ({
-    state,
-    queueUpdate,
-    applyUpdates,
-    applyImmediate,
-    pendingUpdates,
-    isPending,
-    // Helper to check if specific keys have pending updates
-    hasPendingUpdate: (key: keyof T) => key in pendingUpdates,
-  }), [state, queueUpdate, applyUpdates, applyImmediate, pendingUpdates, isPending]);
+  const api = useMemo(
+    () => ({
+      state,
+      queueUpdate,
+      applyUpdates,
+      applyImmediate,
+      pendingUpdates,
+      isPending,
+      // Helper to check if specific keys have pending updates
+      hasPendingUpdate: (key: keyof T) => key in pendingUpdates,
+    }),
+    [state, queueUpdate, applyUpdates, applyImmediate, pendingUpdates, isPending]
+  );
 
   return api;
 }

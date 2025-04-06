@@ -4,10 +4,10 @@
  * with clinical precision error recovery
  */
 
-import React, { Component, ErrorInfo, ReactNode } from "react";
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 // Domain types
-import { Result, success, failure } from "@domain/types/common";
+import { Result, success, failure } from '@domain/types/common';
 
 /**
  * Error state with neural-safe typing
@@ -25,14 +25,8 @@ interface ErrorState {
  */
 interface VisualizationErrorBoundaryProps {
   children: ReactNode;
-  fallback?:
-    | ReactNode
-    | ((error: Error, errorInfo: ErrorInfo, reset: () => void) => ReactNode);
-  onError?: (
-    error: Error,
-    errorInfo: ErrorInfo,
-    componentStack: string,
-  ) => void;
+  fallback?: ReactNode | ((error: Error, errorInfo: ErrorInfo, reset: () => void) => ReactNode);
+  onError?: (error: Error, errorInfo: ErrorInfo, componentStack: string) => void;
   onRecoveryAttempt?: () => Result<boolean>;
   logErrors?: boolean;
   maxErrorDepth?: number;
@@ -78,7 +72,7 @@ export class VisualizationErrorBoundary extends Component<
   // Error handling with detailed information capture
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Extract component stack
-    const componentStack = errorInfo.componentStack || "";
+    const componentStack = errorInfo.componentStack || '';
 
     // Update state with error details
     this.setState({
@@ -88,7 +82,7 @@ export class VisualizationErrorBoundary extends Component<
 
     // Log error if enabled
     if (this.props.logErrors) {
-      console.error("NOVAMIND Visualization Error:", {
+      console.error('NOVAMIND Visualization Error:', {
         error,
         componentStack,
         message: error.message,
@@ -102,7 +96,7 @@ export class VisualizationErrorBoundary extends Component<
     }
 
     // Send to error tracking service in production
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === 'production') {
       // This would integrate with an error tracking service like Sentry
       // Example: Sentry.captureException(error);
     }
@@ -117,9 +111,7 @@ export class VisualizationErrorBoundary extends Component<
 
     // Check if we've exceeded maximum recovery depth
     if (this.recoveryAttempts > (this.props.maxErrorDepth || 3)) {
-      console.warn(
-        "NOVAMIND Visualization: Maximum recovery attempts exceeded",
-      );
+      console.warn('NOVAMIND Visualization: Maximum recovery attempts exceeded');
       return;
     }
 
@@ -162,7 +154,7 @@ export class VisualizationErrorBoundary extends Component<
   getFormattedErrorDetails = (): string => {
     const { error, componentStack } = this.state;
 
-    let details = "Visualization Error\n\n";
+    let details = 'Visualization Error\n\n';
 
     if (error) {
       details += `${error.name}: ${error.message}\n\n`;
@@ -182,46 +174,46 @@ export class VisualizationErrorBoundary extends Component<
   /**
    * Get error type classification
    */
-  getErrorType = (): "rendering" | "resource" | "webgl" | "unknown" => {
+  getErrorType = (): 'rendering' | 'resource' | 'webgl' | 'unknown' => {
     const { error } = this.state;
 
-    if (!error) return "unknown";
+    if (!error) return 'unknown';
 
     const errorMessage = error.message.toLowerCase();
     const errorName = error.name.toLowerCase();
 
     // WebGL errors
     if (
-      errorMessage.includes("webgl") ||
-      errorMessage.includes("context") ||
-      errorMessage.includes("gpu") ||
-      errorMessage.includes("shader") ||
-      errorMessage.includes("three")
+      errorMessage.includes('webgl') ||
+      errorMessage.includes('context') ||
+      errorMessage.includes('gpu') ||
+      errorMessage.includes('shader') ||
+      errorMessage.includes('three')
     ) {
-      return "webgl";
+      return 'webgl';
     }
 
     // Resource errors
     if (
-      errorMessage.includes("load") ||
-      errorMessage.includes("fetch") ||
-      errorMessage.includes("resource") ||
-      errorMessage.includes("network")
+      errorMessage.includes('load') ||
+      errorMessage.includes('fetch') ||
+      errorMessage.includes('resource') ||
+      errorMessage.includes('network')
     ) {
-      return "resource";
+      return 'resource';
     }
 
     // Rendering errors
     if (
-      errorName.includes("render") ||
-      errorMessage.includes("render") ||
-      errorMessage.includes("element") ||
-      errorMessage.includes("component")
+      errorName.includes('render') ||
+      errorMessage.includes('render') ||
+      errorMessage.includes('element') ||
+      errorMessage.includes('component')
     ) {
-      return "rendering";
+      return 'rendering';
     }
 
-    return "unknown";
+    return 'unknown';
   };
 
   render(): ReactNode {
@@ -236,7 +228,7 @@ export class VisualizationErrorBoundary extends Component<
     // Otherwise, render fallback UI
     if (error && errorInfo) {
       // If fallback is a function, call it with error details and reset function
-      if (typeof fallback === "function") {
+      if (typeof fallback === 'function') {
         return fallback(error, errorInfo, this.resetErrorState);
       }
 
@@ -249,22 +241,22 @@ export class VisualizationErrorBoundary extends Component<
       return (
         <div
           style={{
-            position: "relative",
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
-            color: "#f8fafc",
-            padding: "1rem",
-            borderRadius: "0.5rem",
-            textAlign: "center",
-            fontFamily: "system-ui, -apple-system, sans-serif",
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            color: '#f8fafc',
+            padding: '1rem',
+            borderRadius: '0.5rem',
+            textAlign: 'center',
+            fontFamily: 'system-ui, -apple-system, sans-serif',
           }}
         >
-          <div style={{ marginBottom: "1rem" }}>
+          <div style={{ marginBottom: '1rem' }}>
             <svg
               width="48"
               height="48"
@@ -281,39 +273,35 @@ export class VisualizationErrorBoundary extends Component<
             </svg>
           </div>
 
-          <h3 style={{ margin: "0 0 1rem 0", color: "#ef4444" }}>
-            Visualization Error
-          </h3>
+          <h3 style={{ margin: '0 0 1rem 0', color: '#ef4444' }}>Visualization Error</h3>
 
-          <p style={{ margin: "0 0 1rem 0", maxWidth: "400px" }}>
-            {this.getErrorType() === "webgl"
-              ? "There was an error with the WebGL visualization. This may be due to GPU limitations or compatibility issues."
-              : this.getErrorType() === "resource"
-                ? "Failed to load required resources for the visualization."
-                : "An error occurred while rendering the visualization."}
+          <p style={{ margin: '0 0 1rem 0', maxWidth: '400px' }}>
+            {this.getErrorType() === 'webgl'
+              ? 'There was an error with the WebGL visualization. This may be due to GPU limitations or compatibility issues.'
+              : this.getErrorType() === 'resource'
+                ? 'Failed to load required resources for the visualization.'
+                : 'An error occurred while rendering the visualization.'}
           </p>
 
           <details
             style={{
-              marginBottom: "1rem",
-              textAlign: "left",
-              fontSize: "0.8rem",
+              marginBottom: '1rem',
+              textAlign: 'left',
+              fontSize: '0.8rem',
             }}
           >
-            <summary style={{ cursor: "pointer", color: "#94a3b8" }}>
-              Technical Details
-            </summary>
+            <summary style={{ cursor: 'pointer', color: '#94a3b8' }}>Technical Details</summary>
             <pre
               style={{
-                margin: "0.5rem 0 0 0",
-                padding: "0.5rem",
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
-                borderRadius: "0.25rem",
-                overflow: "auto",
-                maxHeight: "200px",
-                whiteSpace: "pre-wrap",
-                fontSize: "0.7rem",
-                color: "#cbd5e1",
+                margin: '0.5rem 0 0 0',
+                padding: '0.5rem',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                borderRadius: '0.25rem',
+                overflow: 'auto',
+                maxHeight: '200px',
+                whiteSpace: 'pre-wrap',
+                fontSize: '0.7rem',
+                color: '#cbd5e1',
               }}
             >
               {error.toString()}
@@ -325,14 +313,14 @@ export class VisualizationErrorBoundary extends Component<
             <button
               onClick={this.resetErrorState}
               style={{
-                backgroundColor: "#3b82f6",
-                color: "white",
-                border: "none",
-                padding: "0.5rem 1rem",
-                borderRadius: "0.25rem",
-                cursor: "pointer",
-                marginRight: "0.5rem",
-                fontSize: "0.9rem",
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.25rem',
+                cursor: 'pointer',
+                marginRight: '0.5rem',
+                fontSize: '0.9rem',
               }}
             >
               Try Again
@@ -343,16 +331,16 @@ export class VisualizationErrorBoundary extends Component<
                 // Reload visualization with fallback mode
                 this.resetErrorState();
                 // This would be implemented with a context or state to enable fallback mode
-                window.location.search += "&fallbackMode=true";
+                window.location.search += '&fallbackMode=true';
               }}
               style={{
-                backgroundColor: "transparent",
-                color: "#94a3b8",
-                border: "1px solid #94a3b8",
-                padding: "0.5rem 1rem",
-                borderRadius: "0.25rem",
-                cursor: "pointer",
-                fontSize: "0.9rem",
+                backgroundColor: 'transparent',
+                color: '#94a3b8',
+                border: '1px solid #94a3b8',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.25rem',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
               }}
             >
               Use Simple Visualization

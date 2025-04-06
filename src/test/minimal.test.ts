@@ -35,14 +35,14 @@ describe('Minimal TypeScript Test', () => {
 
   it('verifies that TextEncoder works correctly', () => {
     const encoder = new TextEncoder();
-    const uint8Array = encoder.encode("test");
-    
+    const uint8Array = encoder.encode('test');
+
     // Instead of instanceof check which may fail in the test environment,
     // verify it has the expected properties and behaviors of a Uint8Array
     expect(uint8Array).toBeDefined();
     expect(Array.isArray(uint8Array)).toBe(false);
     expect(typeof uint8Array.byteLength).toBe('number');
-    
+
     // Verify the proper encoding happens
     expect(uint8Array.length).toBe(4);
     expect(uint8Array[0]).toBe(116); // ASCII code for 't'

@@ -6,8 +6,8 @@ import { vi } from 'vitest';
 expect.extend({
   toHaveNoViolations: () => ({
     pass: true,
-    message: () => ''
-  })
+    message: () => '',
+  }),
 });
 
 // Mock IntersectionObserver
@@ -35,25 +35,25 @@ const mockWebGLContext = {
     createShader: () => ({}),
     createProgram: () => ({}),
     // Add other WebGL methods as needed
-  })
+  }),
 };
 
 // Setup global mocks
 Object.defineProperty(window, 'IntersectionObserver', {
   writable: true,
   configurable: true,
-  value: MockIntersectionObserver
+  value: MockIntersectionObserver,
 });
 
 Object.defineProperty(window, 'ResizeObserver', {
   writable: true,
   configurable: true,
-  value: MockResizeObserver
+  value: MockResizeObserver,
 });
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -62,7 +62,7 @@ Object.defineProperty(window, 'matchMedia', {
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
-  }))
+  })),
 });
 
 // Mock WebGL for Three.js
@@ -75,7 +75,7 @@ vi.mock('three', async () => {
       setSize: vi.fn(),
       render: vi.fn(),
       dispose: vi.fn(),
-    }))
+    })),
   };
 });
 
@@ -104,4 +104,4 @@ console.error = (...args: any[]) => {
 console.warn = (...args: any[]) => {
   originalWarn(...args);
   throw new Error('Console warn was called - fix this first');
-}; 
+};

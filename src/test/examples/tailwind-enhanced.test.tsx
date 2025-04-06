@@ -15,32 +15,19 @@ interface CardProps {
   className?: string;
 }
 
-const Card: React.FC<CardProps> = ({
-  title,
-  description,
-  variant = 'primary',
-  className = ''
-}) => {
-  const baseClasses = "rounded-lg shadow p-4 transition-colors";
-  const variantClasses = variant === 'primary'
-    ? "bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
-    : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300";
+const Card: React.FC<CardProps> = ({ title, description, variant = 'primary', className = '' }) => {
+  const baseClasses = 'rounded-lg shadow p-4 transition-colors';
+  const variantClasses =
+    variant === 'primary'
+      ? 'bg-white dark:bg-gray-800 text-gray-800 dark:text-white'
+      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300';
 
   return (
-    <div
-      data-testid="card"
-      className={`${baseClasses} ${variantClasses} ${className}`}
-    >
-      <h2
-        data-testid="card-title"
-        className="text-lg font-bold mb-2"
-      >
+    <div data-testid="card" className={`${baseClasses} ${variantClasses} ${className}`}>
+      <h2 data-testid="card-title" className="text-lg font-bold mb-2">
         {title}
       </h2>
-      <p
-        data-testid="card-description"
-        className="text-sm"
-      >
+      <p data-testid="card-description" className="text-sm">
         {description}
       </p>
     </div>
@@ -50,32 +37,26 @@ const Card: React.FC<CardProps> = ({
 // Mock useTheme to control it
 const mockSetTheme = vi.fn();
 vi.mock('@application/hooks/useTheme', () => ({
-  useTheme: vi.fn() // Mock the hook directly
+  useTheme: vi.fn(), // Mock the hook directly
 }));
-
 
 describe('Card Component with Tailwind CSS', () => {
   // Cast the mocked hook
   const mockedUseTheme = useTheme as Mock;
 
   beforeEach(() => {
-      // Reset mocks and set initial return value for useTheme
-      vi.clearAllMocks();
-      mockedUseTheme.mockReturnValue({
-          theme: 'light',
-          setTheme: mockSetTheme,
-          resolvedTheme: 'light',
-          themes: ['light', 'dark'],
-      });
+    // Reset mocks and set initial return value for useTheme
+    vi.clearAllMocks();
+    mockedUseTheme.mockReturnValue({
+      theme: 'light',
+      setTheme: mockSetTheme,
+      resolvedTheme: 'light',
+      themes: ['light', 'dark'],
+    });
   });
 
   it('renders with correct base classes in light mode', () => {
-    renderWithProviders(
-      <Card
-        title="Test Card"
-        description="This is a test card"
-      />
-    );
+    renderWithProviders(<Card title="Test Card" description="This is a test card" />);
 
     const card = screen.getByTestId('card');
     expect(card).toHaveClass('bg-white');
@@ -86,14 +67,16 @@ describe('Card Component with Tailwind CSS', () => {
   it('renders with dark mode classes when dark mode is enabled', () => {
     // Set mock to return dark theme initially for this test
     mockedUseTheme.mockReturnValue({
-        theme: 'dark', setTheme: mockSetTheme, resolvedTheme: 'dark', themes: ['light', 'dark']
+      theme: 'dark',
+      setTheme: mockSetTheme,
+      resolvedTheme: 'dark',
+      themes: ['light', 'dark'],
     });
 
-    const { enableDarkMode } = renderWithProviders( // Still use renderWithProviders for context setup
-      <Card
-        title="Dark Mode Card"
-        description="This is a dark mode test card"
-      />, { darkMode: true } // Optionally tell provider to start in dark mode if needed
+    const { enableDarkMode } = renderWithProviders(
+      // Still use renderWithProviders for context setup
+      <Card title="Dark Mode Card" description="This is a dark mode test card" />,
+      { darkMode: true } // Optionally tell provider to start in dark mode if needed
     );
 
     const card = screen.getByTestId('card');
@@ -132,10 +115,7 @@ describe('Card Component with Tailwind CSS', () => {
 
   it('toggles between light and dark mode', () => {
     renderWithProviders(
-      <Card
-        title="Toggle Card"
-        description="This card will toggle between modes"
-      />
+      <Card title="Toggle Card" description="This card will toggle between modes" />
     );
 
     // Get the mocked setTheme function via useTheme
@@ -150,7 +130,10 @@ describe('Card Component with Tailwind CSS', () => {
     });
     // Re-mock the return value to reflect the change for the next assertion
     mockedUseTheme.mockReturnValue({
-        theme: 'dark', setTheme: mockSetTheme, resolvedTheme: 'dark', themes: ['light', 'dark']
+      theme: 'dark',
+      setTheme: mockSetTheme,
+      resolvedTheme: 'dark',
+      themes: ['light', 'dark'],
     });
     const { theme: themeAfterDark } = useTheme(); // Get updated theme
     expect(themeAfterDark).toBe('dark');
@@ -160,7 +143,10 @@ describe('Card Component with Tailwind CSS', () => {
       setTheme('light');
     });
     mockedUseTheme.mockReturnValue({
-        theme: 'light', setTheme: mockSetTheme, resolvedTheme: 'light', themes: ['light', 'dark']
+      theme: 'light',
+      setTheme: mockSetTheme,
+      resolvedTheme: 'light',
+      themes: ['light', 'dark'],
     });
     const { theme: themeAfterLight } = useTheme(); // Get updated theme
     expect(themeAfterLight).toBe('light');

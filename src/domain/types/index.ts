@@ -123,4 +123,4 @@ export type BrainModel = {
 
 // Include environment and third-party type declarations
 export * from './react-three-fiber.d';
-export * from './vite-env.d'; 
+export * from './vite-env.d';

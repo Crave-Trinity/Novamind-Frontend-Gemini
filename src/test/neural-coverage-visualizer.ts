@@ -6,8 +6,8 @@
  * for neural visualization components with clinical precision.
  */
 
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
 
 // Neural-safe coverage rendering with quantum precision
 interface NeuralCoverageMetrics {
@@ -22,14 +22,14 @@ interface ComponentCoverage {
   name: string;
   path: string;
   type:
-    | "atom"
-    | "molecule"
-    | "organism"
-    | "template"
-    | "page"
-    | "service"
-    | "coordinator"
-    | "model";
+    | 'atom'
+    | 'molecule'
+    | 'organism'
+    | 'template'
+    | 'page'
+    | 'service'
+    | 'coordinator'
+    | 'model';
   metrics: NeuralCoverageMetrics;
 }
 
@@ -38,7 +38,7 @@ interface ComponentCoverage {
  */
 export function generateCoverageVisualization(
   coverageData: Record<string, any>,
-  outputPath: string,
+  outputPath: string
 ): void {
   // Extract component metrics with clinical precision
   const components: ComponentCoverage[] = [];
@@ -46,40 +46,40 @@ export function generateCoverageVisualization(
   // Process each file in coverage data with mathematical elegance
   Object.entries(coverageData).forEach(([filePath, metrics]) => {
     // Skip non-source files and total metrics
-    if (filePath === "total" || !filePath.startsWith("src/")) {
+    if (filePath === 'total' || !filePath.startsWith('src/')) {
       return;
     }
 
     // Skip test and utility files
-    if (filePath.includes(".test.") || filePath.includes("/test/")) {
+    if (filePath.includes('.test.') || filePath.includes('/test/')) {
       return;
     }
 
     // Determine component type with neural precision
-    let type: ComponentCoverage["type"] = "service";
+    let type: ComponentCoverage['type'] = 'service';
 
-    if (filePath.includes("/presentation/atoms/")) {
-      type = "atom";
-    } else if (filePath.includes("/presentation/molecules/")) {
-      type = "molecule";
-    } else if (filePath.includes("/presentation/organisms/")) {
-      type = "organism";
-    } else if (filePath.includes("/presentation/templates/")) {
-      type = "template";
-    } else if (filePath.includes("/presentation/pages/")) {
-      type = "page";
-    } else if (filePath.includes("/application/coordinators/")) {
-      type = "coordinator";
-    } else if (filePath.includes("/application/services/")) {
-      type = "service";
-    } else if (filePath.includes("/domain/models/")) {
-      type = "model";
+    if (filePath.includes('/presentation/atoms/')) {
+      type = 'atom';
+    } else if (filePath.includes('/presentation/molecules/')) {
+      type = 'molecule';
+    } else if (filePath.includes('/presentation/organisms/')) {
+      type = 'organism';
+    } else if (filePath.includes('/presentation/templates/')) {
+      type = 'template';
+    } else if (filePath.includes('/presentation/pages/')) {
+      type = 'page';
+    } else if (filePath.includes('/application/coordinators/')) {
+      type = 'coordinator';
+    } else if (filePath.includes('/application/services/')) {
+      type = 'service';
+    } else if (filePath.includes('/domain/models/')) {
+      type = 'model';
     }
 
     // Extract component name with quantum precision
-    const pathParts = filePath.split("/");
+    const pathParts = filePath.split('/');
     const fileName = pathParts[pathParts.length - 1];
-    const componentName = fileName.replace(/\.(ts|tsx)$/, "");
+    const componentName = fileName.replace(/\.(ts|tsx)$/, '');
 
     // Calculate component metrics with clinical precision
     const fileMetrics = metrics as any;
@@ -135,10 +135,7 @@ export function generateCoverageVisualization(
 /**
  * Generate HTML report with quantum precision
  */
-function generateHtmlReport(
-  components: ComponentCoverage[],
-  totalMetrics: any,
-): string {
+function generateHtmlReport(components: ComponentCoverage[], totalMetrics: any): string {
   // Calculate total coverage with clinical precision
   const totalCoverage: NeuralCoverageMetrics = {
     statements: totalMetrics.statements.pct,
@@ -432,9 +429,9 @@ function generateHtmlReport(
             <div class="chart-bar-label">${typeStat.type}</div>
             <div class="chart-bar-value">${typeStat.metrics.averageCoverage.toFixed(1)}%</div>
           </div>
-        `,
+        `
           )
-          .join("")}
+          .join('')}
       </div>
     </div>
   </div>
@@ -551,14 +548,14 @@ function generateComponentTypeHtml(components: ComponentCoverage[]): string {
                   <div>Lines: ${component.metrics.lines.toFixed(1)}%</div>
                 </div>
               </div>
-            `,
+            `
               )
-              .join("")}
+              .join('')}
           </div>
         </div>
       `;
     })
-    .join("");
+    .join('');
 }
 
 /**
@@ -612,20 +609,18 @@ function generateTypeStats(components: ComponentCoverage[]): Array<{
 /**
  * Neural-safe command-line execution with quantum precision
  */
-if (
-  import.meta.url === import.meta.resolve("./neural-coverage-visualizer.ts")
-) {
+if (import.meta.url === import.meta.resolve('./neural-coverage-visualizer.ts')) {
   // Process command-line arguments with quantum precision
   const args = process.argv.slice(2);
-  let coverageFile = "";
-  let outputFile = "";
+  let coverageFile = '';
+  let outputFile = '';
 
   // Parse arguments with clinical precision
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--coverage" && i + 1 < args.length) {
+    if (args[i] === '--coverage' && i + 1 < args.length) {
       coverageFile = args[i + 1];
       i++;
-    } else if (args[i] === "--output" && i + 1 < args.length) {
+    } else if (args[i] === '--output' && i + 1 < args.length) {
       outputFile = args[i + 1];
       i++;
     }
@@ -633,16 +628,12 @@ if (
 
   // Ensure paths are provided with quantum precision
   if (!coverageFile) {
-    console.error(
-      "🧠 Neural Error: Coverage file path must be specified using --coverage",
-    );
+    console.error('🧠 Neural Error: Coverage file path must be specified using --coverage');
     process.exit(1);
   }
 
   if (!outputFile) {
-    console.error(
-      "🧠 Neural Error: Output file path must be specified using --output",
-    );
+    console.error('🧠 Neural Error: Output file path must be specified using --output');
     process.exit(1);
   }
 
@@ -652,14 +643,12 @@ if (
 
   try {
     // Read coverage data with clinical precision
-    const coverageData = JSON.parse(fs.readFileSync(coverageFile, "utf8"));
+    const coverageData = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
 
     // Generate visualization with quantum precision
     generateCoverageVisualization(coverageData, outputFile);
 
-    console.log(
-      `🧠 Neural Coverage Visualization: Successfully generated at ${outputFile}`,
-    );
+    console.log(`🧠 Neural Coverage Visualization: Successfully generated at ${outputFile}`);
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error(`🧠 Neural Error: ${errorMessage}`);

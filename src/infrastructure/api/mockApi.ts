@@ -1,6 +1,6 @@
-import { BrainModel } from "@models/BrainModel";
+import { BrainModel } from '@models/BrainModel';
 
-import { mockApiClient } from "@api/MockApiClient";
+import { mockApiClient } from '@api/MockApiClient';
 
 // Define treatment response type for type safety
 interface TreatmentResponse {
@@ -22,31 +22,31 @@ export const mockApi = {
   getPatients: async (): Promise<any[]> => {
     return [
       {
-        id: "demo-patient",
-        name: "Alex Johnson",
+        id: 'demo-patient',
+        name: 'Alex Johnson',
         age: 42,
-        gender: "Male",
-        condition: "Major Depressive Disorder",
-        riskLevel: "Medium",
-        lastVisit: "2025-03-20",
+        gender: 'Male',
+        condition: 'Major Depressive Disorder',
+        riskLevel: 'Medium',
+        lastVisit: '2025-03-20',
       },
       {
-        id: "patient-002",
-        name: "Emily Williams",
+        id: 'patient-002',
+        name: 'Emily Williams',
         age: 35,
-        gender: "Female",
-        condition: "Generalized Anxiety Disorder",
-        riskLevel: "Low",
-        lastVisit: "2025-03-15",
+        gender: 'Female',
+        condition: 'Generalized Anxiety Disorder',
+        riskLevel: 'Low',
+        lastVisit: '2025-03-15',
       },
       {
-        id: "patient-003",
-        name: "Michael Davis",
+        id: 'patient-003',
+        name: 'Michael Davis',
         age: 29,
-        gender: "Male",
-        condition: "Bipolar Disorder",
-        riskLevel: "High",
-        lastVisit: "2025-03-25",
+        gender: 'Male',
+        condition: 'Bipolar Disorder',
+        riskLevel: 'High',
+        lastVisit: '2025-03-25',
       },
     ];
   },
@@ -65,12 +65,11 @@ export const mockApi = {
     return {
       ...patient,
       details: {
-        medicalHistory: "Patient has a history of depression and anxiety",
-        medications: ["Sertraline 50mg", "Lorazepam 0.5mg as needed"],
-        allergies: ["Penicillin"],
-        primaryConcern: "Worsening depressive symptoms",
-        treatmentGoals:
-          "Reduce depressive symptoms and improve daily functioning",
+        medicalHistory: 'Patient has a history of depression and anxiety',
+        medications: ['Sertraline 50mg', 'Lorazepam 0.5mg as needed'],
+        allergies: ['Penicillin'],
+        primaryConcern: 'Worsening depressive symptoms',
+        treatmentGoals: 'Reduce depressive symptoms and improve daily functioning',
       },
     };
   },
@@ -88,36 +87,36 @@ export const mockApi = {
    */
   predictTreatmentResponse: async (
     patientId: string,
-    treatment: string,
+    treatment: string
   ): Promise<TreatmentResponse> => {
     // Define outcomes with explicit types
     const outcomes: Record<string, TreatmentResponse> = {
       cbt: {
         responseRate: 0.75,
-        timeToResponse: "4-6 weeks",
-        sideEffects: ["Initial anxiety increase", "Emotional discomfort"],
-        recommendation: "Highly recommended based on patient profile",
+        timeToResponse: '4-6 weeks',
+        sideEffects: ['Initial anxiety increase', 'Emotional discomfort'],
+        recommendation: 'Highly recommended based on patient profile',
         confidenceScore: 0.82,
       },
       ssri: {
         responseRate: 0.68,
-        timeToResponse: "2-4 weeks",
-        sideEffects: ["Nausea", "Insomnia", "Sexual dysfunction"],
-        recommendation: "Recommended with monitoring",
+        timeToResponse: '2-4 weeks',
+        sideEffects: ['Nausea', 'Insomnia', 'Sexual dysfunction'],
+        recommendation: 'Recommended with monitoring',
         confidenceScore: 0.76,
       },
       tms: {
         responseRate: 0.55,
-        timeToResponse: "4-6 weeks",
-        sideEffects: ["Headache", "Scalp discomfort"],
-        recommendation: "Consider if other treatments fail",
+        timeToResponse: '4-6 weeks',
+        sideEffects: ['Headache', 'Scalp discomfort'],
+        recommendation: 'Consider if other treatments fail',
         confidenceScore: 0.65,
       },
       default: {
         responseRate: 0.5,
-        timeToResponse: "Unknown",
-        sideEffects: ["Unknown"],
-        recommendation: "Insufficient data for strong recommendation",
+        timeToResponse: 'Unknown',
+        sideEffects: ['Unknown'],
+        recommendation: 'Insufficient data for strong recommendation',
         confidenceScore: 0.5,
       },
     };
@@ -128,7 +127,7 @@ export const mockApi = {
       return outcomes[treatment] as TreatmentResponse;
     }
     // Asserting type as TreatmentResponse since 'default' always exists
-    return outcomes["default"] as TreatmentResponse;
+    return outcomes['default'] as TreatmentResponse;
   },
 
   /**
@@ -139,27 +138,27 @@ export const mockApi = {
       overallRisk: 0.65,
       components: [
         {
-          name: "Suicide Risk",
+          name: 'Suicide Risk',
           score: 0.35,
-          interpretation: "Low to moderate risk",
+          interpretation: 'Low to moderate risk',
         },
         {
-          name: "Self-harm Risk",
+          name: 'Self-harm Risk',
           score: 0.42,
-          interpretation: "Moderate risk",
+          interpretation: 'Moderate risk',
         },
-        { name: "Crisis Risk", score: 0.28, interpretation: "Low risk" },
+        { name: 'Crisis Risk', score: 0.28, interpretation: 'Low risk' },
         {
-          name: "Treatment Non-adherence",
+          name: 'Treatment Non-adherence',
           score: 0.55,
-          interpretation: "Moderate risk",
+          interpretation: 'Moderate risk',
         },
       ],
       recommendations: [
-        "Regular check-ins via telehealth",
-        "Family support engagement",
-        "Medication adherence monitoring",
-        "Crisis plan review",
+        'Regular check-ins via telehealth',
+        'Family support engagement',
+        'Medication adherence monitoring',
+        'Crisis plan review',
       ],
       lastUpdated: new Date().toISOString(),
     };

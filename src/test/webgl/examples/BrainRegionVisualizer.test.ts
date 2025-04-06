@@ -1,6 +1,6 @@
 /**
  * Example Test: Brain Region Visualizer
- * 
+ *
  * This test demonstrates how to properly test Three.js visualization components
  * using the WebGL mock system. It shows how to avoid common test hangs and
  * memory issues when testing complex 3D visualizations.
@@ -10,10 +10,11 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Explicitly mock the 'three' module for this test file ONLY
 vi.mock('three', async (importOriginal) => {
-  const actualThree = await importOriginal() as any; // Get actual exports if needed
+  const actualThree = (await importOriginal()) as any; // Get actual exports if needed
   // Import mock classes using vi.importActual AFTER the mock setup
-  const { CoreWebGLRenderer, MockWebGLTexture, MockWebGLGeometry, MockWebGLMaterial } = await vi.importActual('../mock-webgl');
-  
+  const { CoreWebGLRenderer, MockWebGLTexture, MockWebGLGeometry, MockWebGLMaterial } =
+    await vi.importActual('../mock-webgl');
+
   return {
     ...actualThree, // Spread actual exports first
     __esModule: true, // Ensure ES module compatibility
@@ -32,12 +33,13 @@ vi.mock('three', async (importOriginal) => {
       aspect: 1,
       updateProjectionMatrix: vi.fn(),
     })),
-    Mesh: vi.fn().mockImplementation((geometry, material) => ({ // Mock Mesh constructor
-        geometry,
-        material,
-        position: { x: 0, y: 0, z: 0, set: vi.fn() },
-        userData: {},
-        dispose: vi.fn() // Add dispose mock
+    Mesh: vi.fn().mockImplementation((geometry, material) => ({
+      // Mock Mesh constructor
+      geometry,
+      material,
+      position: { x: 0, y: 0, z: 0, set: vi.fn() },
+      userData: {},
+      dispose: vi.fn(), // Add dispose mock
     })),
     // Add other necessary mocks as needed by the application
   };
@@ -50,7 +52,7 @@ import {
   WebGLRenderer,
   SphereGeometry,
   MeshStandardMaterial,
-  Mesh
+  Mesh,
 } from 'three';
 
 /**
@@ -64,7 +66,7 @@ class BrainRegionVisualizer {
   private renderer: WebGLRenderer;
   private regions: Map<string, Mesh> = new Map();
   private disposed = false;
-  
+
   constructor(container: HTMLElement, regions: string[] = []) {
     // Initialize Three.js scene using standard constructors
     this.scene = new Scene();
@@ -75,25 +77,29 @@ class BrainRegionVisualizer {
     this.camera.near = 0.1;
     this.camera.far = 1000;
     this.camera.position.z = 5;
-    
+
     // Initialize renderer using standard constructor
     this.renderer = new WebGLRenderer({ antialias: true });
     this.renderer.setSize(900, 600);
     container.appendChild(this.renderer.domElement);
-    
+
     // Add brain regions
-    this.addRegions(regions.length > 0 ? regions : [
-      'prefrontal_cortex', 
-      'motor_cortex', 
-      'parietal_lobe', 
-      'temporal_lobe',
-      'occipital_lobe',
-      'hippocampus',
-      'amygdala',
-      'thalamus'
-    ]);
+    this.addRegions(
+      regions.length > 0
+        ? regions
+        : [
+            'prefrontal_cortex',
+            'motor_cortex',
+            'parietal_lobe',
+            'temporal_lobe',
+            'occipital_lobe',
+            'hippocampus',
+            'amygdala',
+            'thalamus',
+          ]
+    );
   }
-  
+
   /**
    * Add brain regions to the scene
    */
@@ -102,69 +108,69 @@ class BrainRegionVisualizer {
       // Create region mesh using standard constructors
       const geometry = new SphereGeometry();
       const material = new MeshStandardMaterial();
-      
+
       // Set position based on index
       const mesh = new Mesh(geometry, material);
-      mesh.position.x = Math.cos(index * Math.PI / 4) * 3;
-      mesh.position.y = Math.sin(index * Math.PI / 4) * 3;
+      mesh.position.x = Math.cos((index * Math.PI) / 4) * 3;
+      mesh.position.y = Math.sin((index * Math.PI) / 4) * 3;
       mesh.position.z = 0;
-      
+
       // Store region metadata
       mesh.userData.regionName = name;
       mesh.userData.active = false;
-      
+
       // Add to scene and tracking
       this.scene.add(mesh);
       this.regions.set(name, mesh);
     });
   }
-  
+
   /**
    * Get all region names
    */
   getRegionNames(): string[] {
     return Array.from(this.regions.keys());
   }
-  
+
   /**
    * Highlight a specific region
    */
   highlightRegion(regionName: string): boolean {
     const region = this.regions.get(regionName);
     if (!region) return false;
-    
+
     // Reset all regions
-    this.regions.forEach(mesh => {
+    this.regions.forEach((mesh) => {
       (mesh.material as any).color = { r: 0.5, g: 0.5, b: 0.8, set: vi.fn() };
       mesh.userData.active = false;
     });
-    
+
     // Highlight selected region
     (region.material as any).color = { r: 1.0, g: 0.2, b: 0.2, set: vi.fn() };
     region.userData.active = true;
-    
+
     return true;
   }
-  
+
   /**
    * Main render method
    */
   render(): void {
     if (this.disposed) return;
-    
+
     // Render scene with camera
     this.renderer.render(this.scene, this.camera);
   }
-  
+
   /**
    * Clean up all resources to prevent memory leaks
    */
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
-    
+
     // Clean up all meshes
-    this.regions.forEach(mesh => {
+    this.regions.forEach((mesh) => {
       this.scene.remove(mesh);
       // Assuming the Mesh mock has a dispose method (as per three.ts mock)
       if (typeof (mesh as any).dispose === 'function') {
@@ -174,104 +180,102 @@ class BrainRegionVisualizer {
       if (typeof (mesh.geometry as any).dispose === 'function') {
         (mesh.geometry as any).dispose();
       }
-       if (typeof (mesh.material as any).dispose === 'function') {
+      if (typeof (mesh.material as any).dispose === 'function') {
         (mesh.material as any).dispose();
       }
     });
-    
+
     // Clear region map
     this.regions.clear();
-    
+
     // Clean up renderer
     this.renderer.dispose();
   }
 }
 
-describe.skip('BrainRegionVisualizer', () => { // Re-skip due to persistent mock issues
+describe.skip('BrainRegionVisualizer', () => {
+  // Re-skip due to persistent mock issues
   let container: HTMLDivElement;
   let visualizer: BrainRegionVisualizer;
-  
+
   beforeEach(() => {
     // Set up WebGL mocks for all tests
     setupWebGLMocks();
-    
+
     // Create container element
     container = document.createElement('div');
     document.body.appendChild(container);
-    
+
     // Create visualizer
     visualizer = new BrainRegionVisualizer(container);
   });
-  
+
   afterEach(() => {
     // Clean up visualizer
     visualizer.dispose();
-    
+
     // Remove container
     if (container.parentNode) {
       container.parentNode.removeChild(container);
     }
-    
+
     // Clean up WebGL mocks
     cleanupWebGLMocks();
   });
-  
+
   it('should create all brain regions', () => {
     // Get all region names
     const regions = visualizer.getRegionNames();
-    
+
     // Verify regions were created
     expect(regions.length).toBe(8);
     expect(regions).toContain('prefrontal_cortex');
     expect(regions).toContain('hippocampus');
   });
-  
+
   it('should highlight a brain region', () => {
     // Highlight a region
     const success = visualizer.highlightRegion('amygdala');
-    
+
     // Verify highlight was successful
     expect(success).toBe(true);
-    
+
     // Verify region is active in internal state
     const scene = (visualizer as any).scene;
     const highlightedRegion = Array.from(scene.children).find(
       (child: any) => child.userData.regionName === 'amygdala'
     ) as any; // Type assertion to avoid TS errors
-    
+
     expect(highlightedRegion).toBeDefined();
     expect(highlightedRegion.userData.active).toBe(true);
   });
-  
+
   it('should render without errors', () => {
     // Set up spy on renderer
     const renderer = (visualizer as any).renderer;
     const renderSpy = vi.spyOn(renderer, 'render');
-    
+
     // Call render method
     visualizer.render();
-    
+
     // Verify render was called
     expect(renderSpy).toHaveBeenCalledTimes(1);
-    expect(renderSpy).toHaveBeenCalledWith(
-      (visualizer as any).scene,
-      (visualizer as any).camera
-    );
+    expect(renderSpy).toHaveBeenCalledWith((visualizer as any).scene, (visualizer as any).camera);
   });
-  
+
   it('should properly clean up resources when disposed', () => {
     // Set up spy on renderer dispose
     const renderer = (visualizer as any).renderer;
     const disposeSpy = vi.spyOn(renderer, 'dispose');
-    
+
     // Dispose visualizer
     visualizer.dispose();
-    
+
     // Verify resources were cleaned up
     expect(disposeSpy).toHaveBeenCalledTimes(1);
     expect((visualizer as any).regions.size).toBe(0);
     expect((visualizer as any).disposed).toBe(true);
-    
+
     // Verify that render is a no-op after disposal
     const renderSpy = vi.spyOn(renderer, 'render');
     visualizer.render();

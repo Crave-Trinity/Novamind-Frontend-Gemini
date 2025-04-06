@@ -3,62 +3,62 @@
  * ClinicalMetricsPanel component testing with quantum precision
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { ClinicalMetricsPanel } from "./ClinicalMetricsPanel";
-import { renderWithProviders } from "@test/test-utils.unified"; // Import the correct render function
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { ClinicalMetricsPanel } from './ClinicalMetricsPanel';
+import { renderWithProviders } from '@test/test-utils.unified'; // Import the correct render function
 
 // Remove local mocks - rely on actual components and global setup
 
 // Mock data with clinical precision
 const mockMetrics = {
   clinicalRiskScore: 72,
-  anxietyLevel: "moderate",
-  depressionLevel: "mild",
-  sleepQuality: "poor",
+  anxietyLevel: 'moderate',
+  depressionLevel: 'mild',
+  sleepQuality: 'poor',
   medication: {
     adherence: 0.85,
     effectivenessScore: 68,
     currentMedications: [
-      { name: "Sertraline", dosage: "100mg", schedule: "Daily morning" },
-      { name: "Lorazepam", dosage: "0.5mg", schedule: "As needed" },
+      { name: 'Sertraline', dosage: '100mg', schedule: 'Daily morning' },
+      { name: 'Lorazepam', dosage: '0.5mg', schedule: 'As needed' },
     ],
   },
   vitalSigns: {
-    heartRate: { value: 82, trend: "stable" },
-    bloodPressure: { systolic: 128, diastolic: 82, trend: "elevated" },
-    respiratoryRate: { value: 16, trend: "normal" },
-    temperature: { value: 98.6, trend: "normal" },
+    heartRate: { value: 82, trend: 'stable' },
+    bloodPressure: { systolic: 128, diastolic: 82, trend: 'elevated' },
+    respiratoryRate: { value: 16, trend: 'normal' },
+    temperature: { value: 98.6, trend: 'normal' },
   },
   temporalPatterns: {
-    diurnalVariation: "significant",
-    cyclicalPatterns: ["weekly mood fluctuations", "monthly hormonal pattern"],
+    diurnalVariation: 'significant',
+    cyclicalPatterns: ['weekly mood fluctuations', 'monthly hormonal pattern'],
     significantTimepoints: [
-      { date: "2025-03-05", event: "Medication change", impact: "positive" },
-      { date: "2025-03-15", event: "Stress exposure", impact: "negative" },
+      { date: '2025-03-05', event: 'Medication change', impact: 'positive' },
+      { date: '2025-03-15', event: 'Stress exposure', impact: 'negative' },
     ],
   },
   brainActivity: {
     regions: [
       {
-        name: "Amygdala",
-        activation: "high",
-        clinicalSignificance: "anxiety correlation",
+        name: 'Amygdala',
+        activation: 'high',
+        clinicalSignificance: 'anxiety correlation',
       },
       {
-        name: "Prefrontal Cortex",
-        activation: "reduced",
-        clinicalSignificance: "executive function deficit",
+        name: 'Prefrontal Cortex',
+        activation: 'reduced',
+        clinicalSignificance: 'executive function deficit',
       },
       {
-        name: "Hippocampus",
-        activation: "normal",
-        clinicalSignificance: "memory intact",
+        name: 'Hippocampus',
+        activation: 'normal',
+        clinicalSignificance: 'memory intact',
       },
     ],
-    overallPattern: "dysregulated",
-    treatmentResponse: "partial",
+    overallPattern: 'dysregulated',
+    treatmentResponse: 'partial',
   },
 };
 
@@ -69,21 +69,22 @@ const mockToggleTimeframe = vi.fn();
 
 // Mock props
 const mockProps = {
-  patientId: "patient-123",
+  patientId: 'patient-123',
   metrics: mockMetrics,
   loading: false,
   error: null,
   onExportData: mockExportData,
   onTimeframeChange: mockToggleTimeframe,
-  className: "custom-panel-class",
+  className: 'custom-panel-class',
 };
 
-describe("ClinicalMetricsPanel", () => { // Re-enabled suite
+describe('ClinicalMetricsPanel', () => {
+  // Re-enabled suite
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("renders metrics tabs and activity content when data is provided", () => {
+  it('renders metrics tabs and activity content when data is provided', () => {
     renderWithProviders(<ClinicalMetricsPanel {...mockProps} />);
 
     // Check for Tabs
@@ -103,12 +104,12 @@ describe("ClinicalMetricsPanel", () => { // Re-enabled suite
   });
 
   // it("displays loading state..." ) // Removed loading state test - relies on internal state/props
-  
-  it("applies custom class name with mathematical precision", () => {
+
+  it('applies custom class name with mathematical precision', () => {
     const { container } = renderWithProviders(<ClinicalMetricsPanel {...mockProps} />);
 
     // The first child div of the container should have the class (motion.div)
-    expect(container.firstChild).toHaveClass("custom-panel-class");
+    expect(container.firstChild).toHaveClass('custom-panel-class');
   });
 
   // it("handles error states...") // Removed error state test - relies on internal state/props

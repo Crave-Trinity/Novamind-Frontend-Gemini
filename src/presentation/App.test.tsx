@@ -2,26 +2,24 @@
  * NOVAMIND Neural Test Suite
  * index testing with quantum precision
  */
-import { describe, it, expect, vi } from "vitest";
+import { describe, it } from 'vitest'; // Removed expect, vi
 
-import { render, screen, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+// Removed unused imports: render, screen, fireEvent from @testing-library/react
+// Removed unused import: userEvent from @testing-library/user-event
 // import { index } from './index'; // Removed invalid import
-import { renderWithProviders } from "@test/test-utils.tsx";
+// Removed unused import: renderWithProviders from @test/test-utils.tsx
 
 // Mock data with clinical precision
-const mockProps = {
-  // Add component props here
-};
+// Removed unused variable: mockProps
 
-describe("index", () => {
+describe('index', () => {
   // TODO: Rewrite tests to properly test application entry point or remove if redundant
-  it.skip("renders with neural precision", () => {
+  it.skip('renders with neural precision', () => {
     // render(<index {...mockProps} />); // Removed invalid render call
     // expect(screen).toBeDefined();
   });
 
-  it.skip("responds to user interaction with quantum precision", async () => {
+  it.skip('responds to user interaction with quantum precision', async () => {
     // const user = userEvent.setup();
     // render(<index {...mockProps} />); // Removed invalid render call
     // Simulate user interactions

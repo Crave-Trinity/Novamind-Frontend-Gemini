@@ -1,11 +1,11 @@
-import React, { useState } from "react"; // Removed unused useEffect
+import React, { useState } from 'react'; // Removed unused useEffect
 
 // Import components from index files for better organization following clean architecture
-import { useTheme } from "@hooks/useTheme"; // Correct hook path
-import { ThemeOption } from "@/types/theme"; // Revert to original correct alias
-import { DocumentTitle, Card, Button } from "@presentation/atoms";
-import { Header } from "@presentation/molecules";
-import MainLayout from "@presentation/templates/MainLayout";
+import { useTheme } from '@hooks/useTheme'; // Correct hook path
+import { ThemeOption } from '@/types/theme'; // Revert to original correct alias
+import { DocumentTitle, Card, Button } from '@presentation/atoms';
+import { Header } from '@presentation/molecules';
+import MainLayout from '@presentation/templates/MainLayout';
 
 /**
  * Settings page component
@@ -26,12 +26,12 @@ const Settings: React.FC = () => {
   const [dataPrivacySettings, setDataPrivacySettings] = useState({
     anonymizeData: true,
     shareForResearch: false,
-    dataRetentionPeriod: "1-year",
+    dataRetentionPeriod: '1-year',
   });
   const [visualizationSettings, setVisualizationSettings] = useState({
     showConfidenceIntervals: true,
-    defaultModelView: "3d",
-    colorMode: "clinical",
+    defaultModelView: '3d',
+    colorMode: 'clinical',
   });
 
   // Theme toggle handler
@@ -50,12 +50,9 @@ const Settings: React.FC = () => {
   };
 
   // Data privacy settings handler
-  const handleDataPrivacyChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleDataPrivacyChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    const newValue =
-      type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
+    const newValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
 
     setDataPrivacySettings((prev) => ({
       ...prev,
@@ -65,11 +62,10 @@ const Settings: React.FC = () => {
 
   // Visualization settings handler
   const handleVisualizationChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
-    const newValue =
-      type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
+    const newValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
 
     setVisualizationSettings((prev) => ({
       ...prev,
@@ -80,7 +76,7 @@ const Settings: React.FC = () => {
   // Save all settings
   const handleSaveSettings = () => {
     // In a real app, we would call the API to save user settings
-    console.log("Saving settings...");
+    console.log('Saving settings...');
     console.log({
       theme,
       notificationSettings,
@@ -89,7 +85,7 @@ const Settings: React.FC = () => {
     });
 
     // Show success message
-    alert("Settings saved successfully!");
+    alert('Settings saved successfully!');
   };
 
   return (
@@ -128,10 +124,7 @@ const Settings: React.FC = () => {
                   onChange={handleNotificationChange}
                   className="h-4 w-4 rounded text-blue-600"
                 />
-                <label
-                  htmlFor="emailAlerts"
-                  className="ml-2 block text-sm text-gray-300"
-                >
+                <label htmlFor="emailAlerts" className="ml-2 block text-sm text-gray-300">
                   Email Alerts
                 </label>
               </div>
@@ -145,10 +138,7 @@ const Settings: React.FC = () => {
                   onChange={handleNotificationChange}
                   className="h-4 w-4 rounded text-blue-600"
                 />
-                <label
-                  htmlFor="smsAlerts"
-                  className="ml-2 block text-sm text-gray-300"
-                >
+                <label htmlFor="smsAlerts" className="ml-2 block text-sm text-gray-300">
                   SMS Alerts
                 </label>
               </div>
@@ -162,10 +152,7 @@ const Settings: React.FC = () => {
                   onChange={handleNotificationChange}
                   className="h-4 w-4 rounded text-blue-600"
                 />
-                <label
-                  htmlFor="riskAlerts"
-                  className="ml-2 block text-sm text-gray-300"
-                >
+                <label htmlFor="riskAlerts" className="ml-2 block text-sm text-gray-300">
                   Risk Assessment Alerts
                 </label>
               </div>
@@ -179,10 +166,7 @@ const Settings: React.FC = () => {
                   onChange={handleNotificationChange}
                   className="h-4 w-4 rounded text-blue-600"
                 />
-                <label
-                  htmlFor="treatmentAlerts"
-                  className="ml-2 block text-sm text-gray-300"
-                >
+                <label htmlFor="treatmentAlerts" className="ml-2 block text-sm text-gray-300">
                   Treatment Response Alerts
                 </label>
               </div>
@@ -196,10 +180,7 @@ const Settings: React.FC = () => {
                   onChange={handleNotificationChange}
                   className="h-4 w-4 rounded text-blue-600"
                 />
-                <label
-                  htmlFor="outcomeAlerts"
-                  className="ml-2 block text-sm text-gray-300"
-                >
+                <label htmlFor="outcomeAlerts" className="ml-2 block text-sm text-gray-300">
                   Outcome Prediction Alerts
                 </label>
               </div>
@@ -217,10 +198,7 @@ const Settings: React.FC = () => {
                   onChange={handleDataPrivacyChange}
                   className="h-4 w-4 rounded text-blue-600"
                 />
-                <label
-                  htmlFor="anonymizeData"
-                  className="ml-2 block text-sm text-gray-300"
-                >
+                <label htmlFor="anonymizeData" className="ml-2 block text-sm text-gray-300">
                   Anonymize Data for Research
                 </label>
               </div>
@@ -234,10 +212,7 @@ const Settings: React.FC = () => {
                   onChange={handleDataPrivacyChange}
                   className="h-4 w-4 rounded text-blue-600"
                 />
-                <label
-                  htmlFor="shareForResearch"
-                  className="ml-2 block text-sm text-gray-300"
-                >
+                <label htmlFor="shareForResearch" className="ml-2 block text-sm text-gray-300">
                   Allow Anonymized Data Sharing
                 </label>
               </div>
@@ -298,9 +273,7 @@ const Settings: React.FC = () => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-gray-300">
-                  Color Mode
-                </label>
+                <label className="mb-2 block text-sm font-medium text-gray-300">Color Mode</label>
                 <select
                   className="w-full rounded-md border border-gray-700 bg-gray-800 p-2 text-white"
                   name="colorMode"

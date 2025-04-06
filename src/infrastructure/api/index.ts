@@ -19,10 +19,7 @@ export class ApiClient {
     };
   }
 
-  protected async fetch<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  protected async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const response = await fetch(url, {
       ...options,
@@ -72,4 +69,4 @@ export class BrainModelApiClient extends ApiClient {
   async getBrainModel(patientId: string, modelId: string): Promise<BrainModel> {
     return this.fetch<BrainModel>(`/patients/${patientId}/brain-models/${modelId}`);
   }
-} 
+}

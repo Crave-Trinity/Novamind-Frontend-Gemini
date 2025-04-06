@@ -1,9 +1,9 @@
-import React, { useRef, useEffect, useMemo, useState } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import React, { useRef, useEffect, useMemo, useState } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
 // @ts-ignore - Types will be handled by overrides in package.json
-import { Instance, Instances } from "@react-three/drei";
-import * as THREE from "three";
-import { createNeuralGlowUniforms, updateTimeUniform, setActiveState } from "@shaders/neuralGlow";
+import { Instance, Instances } from '@react-three/drei';
+import * as THREE from 'three';
+import { createNeuralGlowUniforms, updateTimeUniform, setActiveState } from '@shaders/neuralGlow';
 
 /**
  * Neural node data structure with 3D location and clinical metadata
@@ -11,22 +11,22 @@ import { createNeuralGlowUniforms, updateTimeUniform, setActiveState } from "@sh
 export interface NeuralNode {
   /** Unique identifier for the node */
   id: string;
-  
+
   /** 3D position in brain space */
   position: [number, number, number];
-  
+
   /** Node size (radius) */
   size: number;
-  
+
   /** Base color [r,g,b] with values from 0-1 */
   color: [number, number, number];
-  
+
   /** Node activation strength (0-1) */
   activation: number;
-  
+
   /** Region this node belongs to */
   region: string;
-  
+
   /** Clinical data attached to this node */
   clinicalData?: {
     /** Activity level from baseline */
@@ -44,19 +44,19 @@ export interface NeuralNode {
 export interface BrainModelProps {
   /** Array of neural nodes to render */
   nodes: NeuralNode[];
-  
+
   /** Currently selected node ID */
   selectedNodeId?: string;
-  
+
   /** Currently highlighted region */
   highlightedRegion?: string;
-  
+
   /** Callback when a node is clicked */
   onNodeClick?: (nodeId: string) => void;
-  
+
   /** Model rotation speed (0 for no rotation) */
   rotationSpeed?: number;
-  
+
   /** Auto-rotation enabled */
   autoRotate?: boolean;
 }
@@ -71,17 +71,14 @@ const NeuralNodeInstance: React.FC<{
   onClick: () => void;
 }> = ({ node, isSelected, isHighlighted, onClick }) => {
   // Scale the node size based on its importance and selection state
-  const scale = isSelected ? node.size * 1.3 : 
-                isHighlighted ? node.size * 1.15 : 
-                node.size;
-                
+  const scale = isSelected ? node.size * 1.3 : isHighlighted ? node.size * 1.15 : node.size;
+
   // Memoize to prevent unnecessary re-renders
-  const scaleFactor = useMemo(() => [scale, scale, scale] as [number, number, number], 
-    [scale]);
-  
+  const scaleFactor = useMemo(() => [scale, scale, scale] as [number, number, number], [scale]);
+
   return (
-    <Instance 
-      position={node.position} 
+    <Instance
+      position={node.position}
       scale={scaleFactor}
       color={new THREE.Color(...node.color)}
       onClick={onClick}
@@ -91,7 +88,7 @@ const NeuralNodeInstance: React.FC<{
 
 /**
  * Brain Model Component with optimized 3D rendering
- * 
+ *
  * Implements best practices for Three.js performance:
  * - Instance rendering for neural nodes
  * - Proper resource disposal
@@ -108,30 +105,28 @@ const BrainModel: React.FC<BrainModelProps> = ({
 }) => {
   // Reference to the entire brain model for rotations
   const brainRef = useRef<THREE.Group>(null);
-  
+
   // References for shader materials
   const shaderMaterialRef = useRef<THREE.ShaderMaterial>(null);
-  
+
   // Shader clock
   const clockRef = useRef<THREE.Clock>(new THREE.Clock());
-  
+
   // Access Three.js scene
   const { scene } = useThree();
-  
+
   // State to track loaded nodes for progressive loading
   const [loadedNodeCount, setLoadedNodeCount] = useState(0);
   const maxNodesPerFrame = 50; // Limit nodes added per frame for smooth loading
-  
+
   // Optimization: Precompute which nodes are highlighted
   const highlightedNodeIds = useMemo(() => {
     if (!highlightedRegion) return new Set<string>();
     return new Set(
-      nodes
-        .filter(node => node.region === highlightedRegion)
-        .map(node => node.id)
+      nodes.filter((node) => node.region === highlightedRegion).map((node) => node.id)
     );
   }, [nodes, highlightedRegion]);
-  
+
   // Create custom shader material with neural glow effect
   const shaderMaterial = useMemo(() => {
     // Neural glow shader with pulsing effect
@@ -146,7 +141,7 @@ const BrainModel: React.FC<BrainModelProps> = ({
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
     `;
-    
+
     const fragmentShader = `
       uniform vec3 color;
       uniform float time;
@@ -176,14 +171,14 @@ const BrainModel: React.FC<BrainModelProps> = ({
         gl_FragColor = vec4(glowColor, fresnel * intensity);
       }
     `;
-    
+
     // Create default uniforms
     const uniforms = createNeuralGlowUniforms(
       [0.4, 0.6, 1.0], // Default blue color
-      0.8,  // Default intensity
+      0.8, // Default intensity
       false // Not active by default
     );
-    
+
     return new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
@@ -193,28 +188,25 @@ const BrainModel: React.FC<BrainModelProps> = ({
       depthWrite: false,
     });
   }, []);
-  
+
   // Handle animation frame updates
   useFrame(() => {
     // Auto-rotation of the brain model
     if (brainRef.current && autoRotate) {
       brainRef.current.rotation.y += rotationSpeed;
     }
-    
+
     // Update shader uniforms
     if (shaderMaterialRef.current) {
       updateTimeUniform(shaderMaterialRef.current.uniforms, clockRef.current.getElapsedTime());
     }
-    
+
     // Progressive loading of nodes
     if (loadedNodeCount < nodes.length) {
-      setLoadedNodeCount(Math.min(
-        loadedNodeCount + maxNodesPerFrame, 
-        nodes.length
-      ));
+      setLoadedNodeCount(Math.min(loadedNodeCount + maxNodesPerFrame, nodes.length));
     }
   });
-  
+
   // Clean up resources on unmount
   useEffect(() => {
     return () => {
@@ -222,31 +214,31 @@ const BrainModel: React.FC<BrainModelProps> = ({
       if (shaderMaterialRef.current) {
         shaderMaterialRef.current.dispose();
       }
-      
+
       // Clear any remaining resources
       clockRef.current.stop();
     };
   }, []);
-  
+
   // Only render nodes that have been progressively loaded
   const visibleNodes = useMemo(() => {
     return nodes.slice(0, loadedNodeCount);
   }, [nodes, loadedNodeCount]);
-  
+
   return (
     <group ref={brainRef}>
       <Instances limit={nodes.length}>
         {/* Base geometry for all instances - a perfect sphere */}
         <sphereGeometry args={[1, 32, 32]} />
-        
+
         {/* Shared material with neural glow effect */}
         <primitive object={shaderMaterial} ref={shaderMaterialRef} />
-        
+
         {/* Render neural nodes as instances for performance */}
         {visibleNodes.map((node) => {
           const isSelected = node.id === selectedNodeId;
           const isHighlighted = highlightedNodeIds.has(node.id);
-          
+
           return (
             <NeuralNodeInstance
               key={node.id}

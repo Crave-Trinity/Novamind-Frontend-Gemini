@@ -83,4 +83,4 @@ export const isBrainModel = (value: unknown): value is BrainModel => {
     typeof model.metadata.resolution === 'number' &&
     typeof model.metadata.notes === 'string'
   );
-}; 
+};

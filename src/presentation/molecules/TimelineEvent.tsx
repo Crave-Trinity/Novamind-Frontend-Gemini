@@ -4,29 +4,23 @@
  * with HIPAA-compliant data presentation
  */
 
-import React, { useMemo } from "react";
-import { motion } from "framer-motion";
+import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
 
 // UI components
-import { Badge } from "@presentation/atoms/Badge";
-import Button from "@presentation/atoms/Button"; // Corrected to default import
+import { Badge } from '@presentation/atoms/Badge';
+import Button from '@presentation/atoms/Button'; // Corrected to default import
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@presentation/atoms/Tooltip";
+} from '@presentation/atoms/Tooltip';
 // Collapsible import removed as component doesn't exist at this path
-import Card from "@presentation/atoms/Card"; // Corrected to default import
+import Card from '@presentation/atoms/Card'; // Corrected to default import
 
 // Icons
-import {
-  ChevronDown,
-  ChevronRight,
-  Clock,
-  Brain,
-  Activity,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Clock, Brain, Activity } from 'lucide-react';
 
 // Domain types
 // Corrected path for clinical event types
@@ -37,7 +31,7 @@ import {
   SymptomEvent,
   DiagnosisEvent,
   AssessmentEvent,
-} from "@domain/types/clinical/events";
+} from '@domain/types/clinical/events';
 
 /**
  * Props with neural-safe typing
@@ -58,8 +52,8 @@ interface TimelineEventProps {
  */
 const formatTime = (date: Date): string => {
   return new Date(date).toLocaleTimeString(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
+    hour: '2-digit',
+    minute: '2-digit',
   });
 };
 
@@ -73,21 +67,21 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
   onClick,
   showTime = true,
   showNeuralCorrelation = true,
-  colorClass = "border-slate-400 bg-slate-50",
+  colorClass = 'border-slate-400 bg-slate-50',
   icon = null,
-  className = "",
+  className = '',
 }) => {
   // Generate severity badge for symptoms
   const severityBadge = useMemo(() => {
-    if (event.type === "symptom") {
+    if (event.type === 'symptom') {
       const symptomEvent = event as SymptomEvent;
 
       const severityColor =
-        symptomEvent.severity === "severe"
-          ? "bg-red-100 text-red-800 border-red-300"
-          : symptomEvent.severity === "moderate"
-            ? "bg-amber-100 text-amber-800 border-amber-300"
-            : "bg-blue-100 text-blue-800 border-blue-300";
+        symptomEvent.severity === 'severe'
+          ? 'bg-red-100 text-red-800 border-red-300'
+          : symptomEvent.severity === 'moderate'
+            ? 'bg-amber-100 text-amber-800 border-amber-300'
+            : 'bg-blue-100 text-blue-800 border-blue-300';
 
       return (
         <Badge variant="outline" className={`text-xs ${severityColor}`}>
@@ -96,15 +90,12 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
       );
     }
 
-    if (event.type === "medication") {
+    if (event.type === 'medication') {
       const medicationEvent = event as TreatmentEvent;
 
       return (
-        <Badge
-          variant="outline"
-          className="text-xs bg-blue-100 text-blue-800 border-blue-300"
-        >
-          {medicationEvent.dosage || "Standard Dose"}
+        <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-300">
+          {medicationEvent.dosage || 'Standard Dose'}
         </Badge>
       );
     }
@@ -118,10 +109,10 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
 
     const strengthColor =
       event.neuralCorrelation.strength > 0.7
-        ? "text-green-600"
+        ? 'text-green-600'
         : event.neuralCorrelation.strength > 0.4
-          ? "text-amber-600"
-          : "text-slate-600";
+          ? 'text-amber-600'
+          : 'text-slate-600';
 
     return (
       <TooltipProvider>
@@ -145,31 +136,25 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
   // Generate detailed content based on event type
   const eventDetails = useMemo(() => {
     switch (event.type) {
-      case "symptom": {
+      case 'symptom': {
         const symptomEvent = event as SymptomEvent;
         return (
           <div className="space-y-2 mt-2">
             <div className="flex justify-between items-center">
               <span className="text-xs text-slate-500">Severity</span>
-              <span className="text-xs font-medium">
-                {symptomEvent.severity}
-              </span>
+              <span className="text-xs font-medium">{symptomEvent.severity}</span>
             </div>
 
             {symptomEvent.duration && (
               <div className="flex justify-between items-center">
                 <span className="text-xs text-slate-500">Duration</span>
-                <span className="text-xs font-medium">
-                  {symptomEvent.duration}
-                </span>
+                <span className="text-xs font-medium">{symptomEvent.duration}</span>
               </div>
             )}
 
             {symptomEvent.triggers && symptomEvent.triggers.length > 0 && (
               <div>
-                <span className="text-xs text-slate-500 block mb-1">
-                  Triggers
-                </span>
+                <span className="text-xs text-slate-500 block mb-1">Triggers</span>
                 <div className="flex flex-wrap gap-1">
                   {symptomEvent.triggers.map((trigger, i) => (
                     <Badge key={i} variant="outline" className="text-xs py-0">
@@ -182,9 +167,7 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
 
             {symptomEvent.regions && symptomEvent.regions.length > 0 && (
               <div>
-                <span className="text-xs text-slate-500 block mb-1">
-                  Neural Regions
-                </span>
+                <span className="text-xs text-slate-500 block mb-1">Neural Regions</span>
                 <div className="flex flex-wrap gap-1">
                   {symptomEvent.regions.map((region, i) => (
                     <Badge
@@ -202,151 +185,127 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
         );
       }
 
-      case "medication": {
+      case 'medication': {
         const medicationEvent = event as TreatmentEvent;
         return (
           <div className="space-y-2 mt-2">
             <div className="flex justify-between items-center">
               <span className="text-xs text-slate-500">Dosage</span>
-              <span className="text-xs font-medium">
-                {medicationEvent.dosage || "Standard"}
-              </span>
+              <span className="text-xs font-medium">{medicationEvent.dosage || 'Standard'}</span>
             </div>
 
             {medicationEvent.frequency && (
               <div className="flex justify-between items-center">
                 <span className="text-xs text-slate-500">Frequency</span>
-                <span className="text-xs font-medium">
-                  {medicationEvent.frequency}
-                </span>
+                <span className="text-xs font-medium">{medicationEvent.frequency}</span>
               </div>
             )}
 
-            {medicationEvent.targetSymptoms &&
-              medicationEvent.targetSymptoms.length > 0 && (
-                <div>
-                  <span className="text-xs text-slate-500 block mb-1">
-                    Target Symptoms
-                  </span>
-                  <div className="flex flex-wrap gap-1">
-                    {medicationEvent.targetSymptoms.map((symptom, i) => (
-                      <Badge
-                        key={i}
-                        variant="outline"
-                        className="text-xs py-0 bg-amber-50 border-amber-300"
-                      >
-                        {symptom}
-                      </Badge>
-                    ))}
-                  </div>
+            {medicationEvent.targetSymptoms && medicationEvent.targetSymptoms.length > 0 && (
+              <div>
+                <span className="text-xs text-slate-500 block mb-1">Target Symptoms</span>
+                <div className="flex flex-wrap gap-1">
+                  {medicationEvent.targetSymptoms.map((symptom, i) => (
+                    <Badge
+                      key={i}
+                      variant="outline"
+                      className="text-xs py-0 bg-amber-50 border-amber-300"
+                    >
+                      {symptom}
+                    </Badge>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
-            {medicationEvent.sideEffects &&
-              medicationEvent.sideEffects.length > 0 && (
-                <div>
-                  <span className="text-xs text-slate-500 block mb-1">
-                    Side Effects
-                  </span>
-                  <div className="flex flex-wrap gap-1">
-                    {medicationEvent.sideEffects.map((effect, i) => (
-                      <Badge
-                        key={i}
-                        variant="outline"
-                        className="text-xs py-0 bg-red-50 border-red-300"
-                      >
-                        {effect}
-                      </Badge>
-                    ))}
-                  </div>
+            {medicationEvent.sideEffects && medicationEvent.sideEffects.length > 0 && (
+              <div>
+                <span className="text-xs text-slate-500 block mb-1">Side Effects</span>
+                <div className="flex flex-wrap gap-1">
+                  {medicationEvent.sideEffects.map((effect, i) => (
+                    <Badge
+                      key={i}
+                      variant="outline"
+                      className="text-xs py-0 bg-red-50 border-red-300"
+                    >
+                      {effect}
+                    </Badge>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
           </div>
         );
       }
 
-      case "diagnosis": {
+      case 'diagnosis': {
         const diagnosisEvent = event as DiagnosisEvent;
         return (
           <div className="space-y-2 mt-2">
             {diagnosisEvent.code && (
               <div className="flex justify-between items-center">
                 <span className="text-xs text-slate-500">Code</span>
-                <span className="text-xs font-medium">
-                  {diagnosisEvent.code}
-                </span>
+                <span className="text-xs font-medium">{diagnosisEvent.code}</span>
               </div>
             )}
 
             {diagnosisEvent.clinician && (
               <div className="flex justify-between items-center">
                 <span className="text-xs text-slate-500">Clinician</span>
-                <span className="text-xs font-medium">
-                  {diagnosisEvent.clinician}
-                </span>
+                <span className="text-xs font-medium">{diagnosisEvent.clinician}</span>
               </div>
             )}
 
-            {diagnosisEvent.relatedSymptoms &&
-              diagnosisEvent.relatedSymptoms.length > 0 && (
-                <div>
-                  <span className="text-xs text-slate-500 block mb-1">
-                    Related Symptoms
-                  </span>
-                  <div className="flex flex-wrap gap-1">
-                    {diagnosisEvent.relatedSymptoms.map((symptom, i) => (
-                      <Badge
-                        key={i}
-                        variant="outline"
-                        className="text-xs py-0 bg-amber-50 border-amber-300"
-                      >
-                        {symptom}
-                      </Badge>
-                    ))}
-                  </div>
+            {diagnosisEvent.relatedSymptoms && diagnosisEvent.relatedSymptoms.length > 0 && (
+              <div>
+                <span className="text-xs text-slate-500 block mb-1">Related Symptoms</span>
+                <div className="flex flex-wrap gap-1">
+                  {diagnosisEvent.relatedSymptoms.map((symptom, i) => (
+                    <Badge
+                      key={i}
+                      variant="outline"
+                      className="text-xs py-0 bg-amber-50 border-amber-300"
+                    >
+                      {symptom}
+                    </Badge>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
           </div>
         );
       }
 
-      case "assessment": {
+      case 'assessment': {
         const assessmentEvent = event as AssessmentEvent;
         return (
           <div className="space-y-2 mt-2">
             {assessmentEvent.score !== undefined && (
               <div className="flex justify-between items-center">
                 <span className="text-xs text-slate-500">Score</span>
-                <span className="text-xs font-medium">
-                  {assessmentEvent.score}
-                </span>
+                <span className="text-xs font-medium">{assessmentEvent.score}</span>
               </div>
             )}
 
             {assessmentEvent.clinician && (
               <div className="flex justify-between items-center">
                 <span className="text-xs text-slate-500">Clinician</span>
-                <span className="text-xs font-medium">
-                  {assessmentEvent.clinician}
-                </span>
+                <span className="text-xs font-medium">{assessmentEvent.clinician}</span>
               </div>
             )}
 
-            {assessmentEvent.findings &&
-              assessmentEvent.findings.length > 0 && (
-                <div>
-                  <span className="text-xs text-slate-500 block mb-1">
-                    Key Findings
-                  </span>
-                  <ul className="text-xs space-y-1 pl-3">
-                    {assessmentEvent.findings.map((finding, i) => (
-                      <li key={i} className="list-disc">
-                        {finding}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            {assessmentEvent.findings && assessmentEvent.findings.length > 0 && (
+              <div>
+                <span className="text-xs text-slate-500 block mb-1">Key Findings</span>
+                <ul className="text-xs space-y-1 pl-3">
+                  {assessmentEvent.findings.map((finding, i) => (
+                    <li key={i} className="list-disc">
+                      {finding}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         );
       }
@@ -354,9 +313,7 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
       default:
         return (
           <div className="space-y-2 mt-2">
-            {event.details && (
-              <p className="text-xs text-slate-600">{event.details}</p>
-            )}
+            {event.details && <p className="text-xs text-slate-600">{event.details}</p>}
           </div>
         );
     }
@@ -372,9 +329,7 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
       <button
         onClick={onClick}
         className={`w-full text-left px-3 py-2 rounded-md border ${colorClass} transition-all duration-200 ${
-          isSelected
-            ? "ring-2 ring-indigo-500 ring-opacity-50"
-            : "hover:bg-opacity-80"
+          isSelected ? 'ring-2 ring-indigo-500 ring-opacity-50' : 'hover:bg-opacity-80'
         }`}
       >
         <div className="flex items-center justify-between">
@@ -386,9 +341,7 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
               {showTime && (
                 <div className="flex items-center mt-0.5">
                   <Clock className="h-3 w-3 text-slate-500 mr-1" />
-                  <span className="text-xs text-slate-500">
-                    {formatTime(new Date(event.date))}
-                  </span>
+                  <span className="text-xs text-slate-500">{formatTime(new Date(event.date))}</span>
                 </div>
               )}
             </div>
@@ -399,16 +352,14 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
             {neuralCorrelation}
             <ChevronDown
               className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${
-                isSelected ? "transform rotate-180" : ""
+                isSelected ? 'transform rotate-180' : ''
               }`}
             />
           </div>
         </div>
 
         {event.details && !isSelected && (
-          <p className="text-xs text-slate-600 mt-1 line-clamp-1">
-            {event.details}
-          </p>
+          <p className="text-xs text-slate-600 mt-1 line-clamp-1">{event.details}</p>
         )}
       </button>
 
@@ -420,9 +371,7 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
             <div className="mt-3 pt-2 border-t border-slate-200">
               <div className="flex items-center mb-1">
                 <Brain className="h-4 w-4 text-indigo-600 mr-1" />
-                <span className="text-xs font-medium text-indigo-700">
-                  Neural Correlation
-                </span>
+                <span className="text-xs font-medium text-indigo-700">Neural Correlation</span>
               </div>
 
               <div className="flex flex-wrap gap-1">
@@ -438,9 +387,7 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
               </div>
 
               {event.neuralCorrelation.description && (
-                <p className="text-xs text-slate-600 mt-1">
-                  {event.neuralCorrelation.description}
-                </p>
+                <p className="text-xs text-slate-600 mt-1">{event.neuralCorrelation.description}</p>
               )}
             </div>
           )}
@@ -449,12 +396,7 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
             <div className="mt-3 pt-2 border-t border-slate-200">
               <div className="flex justify-end space-x-2">
                 {event.actions.map((action, i) => (
-                  <Button
-                    key={i}
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs"
-                  >
+                  <Button key={i} variant="outline" size="sm" className="h-7 text-xs">
                     {action}
                   </Button>
                 ))}

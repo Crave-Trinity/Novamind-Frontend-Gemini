@@ -30,10 +30,12 @@ let memoryMonitoring = {
   debugMode: false,
 };
 
-export function setupWebGLMocks(options: {
-  monitorMemory?: boolean;
-  debugMode?: boolean;
-} = {}): void {
+export function setupWebGLMocks(
+  options: {
+    monitorMemory?: boolean;
+    debugMode?: boolean;
+  } = {}
+): void {
   console.log('WebGL mocks set up');
   mockContext = createMockWebGLContext();
   memoryMonitoring.enabled = options.monitorMemory ?? false;
@@ -42,12 +44,16 @@ export function setupWebGLMocks(options: {
   memoryMonitoring.disposedObjects.clear();
 
   const originalCreateElement = document.createElement;
-  document.createElement = function(tagName: string) {
+  document.createElement = function (tagName: string) {
     if (tagName.toLowerCase() === 'canvas') {
       const canvas = originalCreateElement.call(document, tagName) as HTMLCanvasElement;
       const originalGetContext = canvas.getContext;
-      canvas.getContext = function(contextType: string, contextAttributes?: any) {
-        if (contextType === 'webgl' || contextType === 'webgl2' || contextType === 'experimental-webgl') {
+      canvas.getContext = function (contextType: string, contextAttributes?: any) {
+        if (
+          contextType === 'webgl' ||
+          contextType === 'webgl2' ||
+          contextType === 'experimental-webgl'
+        ) {
           return mockContext;
         }
         return originalGetContext.call(this, contextType, contextAttributes);
@@ -77,26 +83,61 @@ export function cleanupWebGLMocks(): MemoryReport | null {
 
 function createMockWebGLContext(): any {
   return {
-    canvas: null, drawingBufferWidth: 800, drawingBufferHeight: 600,
+    canvas: null,
+    drawingBufferWidth: 800,
+    drawingBufferHeight: 600,
     getParameter: vi.fn((param) => (param === 37446 ? 8 : null)),
     getExtension: vi.fn(() => ({
-        drawBuffersWEBGL: vi.fn(), drawArraysInstancedANGLE: vi.fn(),
-        drawElementsInstancedANGLE: vi.fn(), createVertexArrayOES: vi.fn(() => ({})),
-        bindVertexArrayOES: vi.fn(),
+      drawBuffersWEBGL: vi.fn(),
+      drawArraysInstancedANGLE: vi.fn(),
+      drawElementsInstancedANGLE: vi.fn(),
+      createVertexArrayOES: vi.fn(() => ({})),
+      bindVertexArrayOES: vi.fn(),
     })),
-    createBuffer: vi.fn(() => ({})), bindBuffer: vi.fn(), bufferData: vi.fn(),
-    createShader: vi.fn(() => ({})), shaderSource: vi.fn(), compileShader: vi.fn(),
-    getShaderParameter: vi.fn(() => true), createProgram: vi.fn(() => ({})),
-    attachShader: vi.fn(), linkProgram: vi.fn(), getProgramParameter: vi.fn(() => true),
-    useProgram: vi.fn(), getAttribLocation: vi.fn(() => 0), getUniformLocation: vi.fn(() => ({})),
-    enableVertexAttribArray: vi.fn(), vertexAttribPointer: vi.fn(),
-    uniform1f: vi.fn(), uniform1i: vi.fn(), uniform2fv: vi.fn(), uniform3fv: vi.fn(),
-    uniform4fv: vi.fn(), uniformMatrix4fv: vi.fn(), activeTexture: vi.fn(),
-    createTexture: vi.fn(() => trackAllocation('Texture', { dispose: vi.fn(function(this: any) { trackDisposal('Texture', this); }) })), // Ensure Texture mock has dispose
-    bindTexture: vi.fn(), texImage2D: vi.fn(), texParameteri: vi.fn(),
-    clearColor: vi.fn(), enable: vi.fn(), disable: vi.fn(), blendFunc: vi.fn(),
-    depthFunc: vi.fn(), clear: vi.fn(), drawArrays: vi.fn(), drawElements: vi.fn(),
-    viewport: vi.fn(), createVertexArray: vi.fn(() => ({})), bindVertexArray: vi.fn(),
+    createBuffer: vi.fn(() => ({})),
+    bindBuffer: vi.fn(),
+    bufferData: vi.fn(),
+    createShader: vi.fn(() => ({})),
+    shaderSource: vi.fn(),
+    compileShader: vi.fn(),
+    getShaderParameter: vi.fn(() => true),
+    createProgram: vi.fn(() => ({})),
+    attachShader: vi.fn(),
+    linkProgram: vi.fn(),
+    getProgramParameter: vi.fn(() => true),
+    useProgram: vi.fn(),
+    getAttribLocation: vi.fn(() => 0),
+    getUniformLocation: vi.fn(() => ({})),
+    enableVertexAttribArray: vi.fn(),
+    vertexAttribPointer: vi.fn(),
+    uniform1f: vi.fn(),
+    uniform1i: vi.fn(),
+    uniform2fv: vi.fn(),
+    uniform3fv: vi.fn(),
+    uniform4fv: vi.fn(),
+    uniformMatrix4fv: vi.fn(),
+    activeTexture: vi.fn(),
+    createTexture: vi.fn(() =>
+      trackAllocation('Texture', {
+        dispose: vi.fn(function (this: any) {
+          trackDisposal('Texture', this);
+        }),
+      })
+    ), // Ensure Texture mock has dispose
+    bindTexture: vi.fn(),
+    texImage2D: vi.fn(),
+    texParameteri: vi.fn(),
+    clearColor: vi.fn(),
+    enable: vi.fn(),
+    disable: vi.fn(),
+    blendFunc: vi.fn(),
+    depthFunc: vi.fn(),
+    clear: vi.fn(),
+    drawArrays: vi.fn(),
+    drawElements: vi.fn(),
+    viewport: vi.fn(),
+    createVertexArray: vi.fn(() => ({})),
+    bindVertexArray: vi.fn(),
   };
 }
 
@@ -105,18 +146,18 @@ const originalThreeClasses: Record<string, any> = {};
 function mockThreeJSClasses(): void {
   const target = THREE || globalThis.THREE || {};
   if (!globalThis.THREE && target === globalThis.THREE) {
-      console.warn('THREE not found globally. Mocks might be incomplete.');
-      // Avoid assigning {} to prevent TS errors
+    console.warn('THREE not found globally. Mocks might be incomplete.');
+    // Avoid assigning {} to prevent TS errors
   } else if (!THREE && !globalThis.THREE) {
-      console.warn('THREE not found globally or via import. Mocks might fail.');
-      // Avoid assigning {} to prevent TS errors
+    console.warn('THREE not found globally or via import. Mocks might fail.');
+    // Avoid assigning {} to prevent TS errors
   }
 
   const mockClass = (className: string, mockImplementation: (...args: any[]) => any) => {
     const currentTarget = THREE || globalThis.THREE;
     if (!currentTarget) {
-        console.error(`Cannot mock THREE.${className}: THREE namespace not found.`);
-        return;
+      console.error(`Cannot mock THREE.${className}: THREE namespace not found.`);
+      return;
     }
     if (currentTarget[className]) {
       originalThreeClasses[className] = currentTarget[className];
@@ -125,64 +166,120 @@ function mockThreeJSClasses(): void {
   };
 
   // Mock WebGLRenderer
-  mockClass('WebGLRenderer', (...args: any[]) => trackAllocation('WebGLRenderer', {
-    domElement: document.createElement('canvas'), render: vi.fn(), setSize: vi.fn(),
-    setClearColor: vi.fn(), clear: vi.fn(),
-    dispose: vi.fn(function(this: any) { trackDisposal('WebGLRenderer', this); }),
-    getContext: () => mockContext, setPixelRatio: vi.fn(), shadowMap: { enabled: false },
-  }));
+  mockClass('WebGLRenderer', (...args: any[]) =>
+    trackAllocation('WebGLRenderer', {
+      domElement: document.createElement('canvas'),
+      render: vi.fn(),
+      setSize: vi.fn(),
+      setClearColor: vi.fn(),
+      clear: vi.fn(),
+      dispose: vi.fn(function (this: any) {
+        trackDisposal('WebGLRenderer', this);
+      }),
+      getContext: () => mockContext,
+      setPixelRatio: vi.fn(),
+      shadowMap: { enabled: false },
+    })
+  );
 
   // Mock PerspectiveCamera
   mockClass('PerspectiveCamera', (...args: any[]) => {
-      const position = { x: 0, y: 0, z: 0, set: vi.fn(function(this: any, x: number, y: number, z: number) { this.x = x; this.y = y; this.z = z; }) };
-      return trackAllocation('PerspectiveCamera', {
-        position: position, near: 0.1, far: 1000, fov: 50,
-        updateProjectionMatrix: vi.fn(), isPerspectiveCamera: true,
-      });
+    const position = {
+      x: 0,
+      y: 0,
+      z: 0,
+      set: vi.fn(function (this: any, x: number, y: number, z: number) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+      }),
+    };
+    return trackAllocation('PerspectiveCamera', {
+      position: position,
+      near: 0.1,
+      far: 1000,
+      fov: 50,
+      updateProjectionMatrix: vi.fn(),
+      isPerspectiveCamera: true,
+    });
   });
 
   // Mock BufferGeometry
-  mockClass('BufferGeometry', (...args: any[]) => trackAllocation('BufferGeometry', {
-    attributes: {}, setIndex: vi.fn(), setAttribute: vi.fn(),
-    dispose: vi.fn(function(this: any) { trackDisposal('BufferGeometry', this); }), // Correctly defined dispose
-    computeVertexNormals: vi.fn(), isBufferGeometry: true,
-  }));
+  mockClass('BufferGeometry', (...args: any[]) =>
+    trackAllocation('BufferGeometry', {
+      attributes: {},
+      setIndex: vi.fn(),
+      setAttribute: vi.fn(),
+      dispose: vi.fn(function (this: any) {
+        trackDisposal('BufferGeometry', this);
+      }), // Correctly defined dispose
+      computeVertexNormals: vi.fn(),
+      isBufferGeometry: true,
+    })
+  );
 
   // Mock Material (base)
-  mockClass('Material', (...args: any[]) => trackAllocation('Material', {
-    dispose: vi.fn(function(this: any) { trackDisposal('Material', this); }), // Correctly defined dispose
-    needsUpdate: false, isMaterial: true,
-  }));
+  mockClass('Material', (...args: any[]) =>
+    trackAllocation('Material', {
+      dispose: vi.fn(function (this: any) {
+        trackDisposal('Material', this);
+      }), // Correctly defined dispose
+      needsUpdate: false,
+      isMaterial: true,
+    })
+  );
 
   // Mock MeshStandardMaterial
-  mockClass('MeshStandardMaterial', (...args: any[]) => trackAllocation('MeshStandardMaterial', {
-    color: { set: vi.fn(), isColor: true }, emissive: { set: vi.fn(), isColor: true },
-    roughness: 0.5, metalness: 0.5, isMeshStandardMaterial: true,
-    needsUpdate: false, isMaterial: true,
-    dispose: vi.fn(function(this: any) { trackDisposal('MeshStandardMaterial', this); }) // Correctly defined dispose
-  }));
+  mockClass('MeshStandardMaterial', (...args: any[]) =>
+    trackAllocation('MeshStandardMaterial', {
+      color: { set: vi.fn(), isColor: true },
+      emissive: { set: vi.fn(), isColor: true },
+      roughness: 0.5,
+      metalness: 0.5,
+      isMeshStandardMaterial: true,
+      needsUpdate: false,
+      isMaterial: true,
+      dispose: vi.fn(function (this: any) {
+        trackDisposal('MeshStandardMaterial', this);
+      }), // Correctly defined dispose
+    })
+  );
 
   // Mock MeshBasicMaterial (inherits from Material)
-  mockClass('MeshBasicMaterial', (...args: any[]) => trackAllocation('MeshBasicMaterial', {
-    color: { set: vi.fn(), isColor: true },
-    needsUpdate: false, isMaterial: true, isMeshBasicMaterial: true,
-    dispose: vi.fn(function(this: any) { trackDisposal('MeshBasicMaterial', this); }) // Correctly defined dispose
-  }));
-
+  mockClass('MeshBasicMaterial', (...args: any[]) =>
+    trackAllocation('MeshBasicMaterial', {
+      color: { set: vi.fn(), isColor: true },
+      needsUpdate: false,
+      isMaterial: true,
+      isMeshBasicMaterial: true,
+      dispose: vi.fn(function (this: any) {
+        trackDisposal('MeshBasicMaterial', this);
+      }), // Correctly defined dispose
+    })
+  );
 
   // Mock Scene
-  mockClass('Scene', (...args: any[]) => trackAllocation('Scene', {
-    add: vi.fn(), remove: vi.fn(), children: [], isScene: true, background: null
-  }));
+  mockClass('Scene', (...args: any[]) =>
+    trackAllocation('Scene', {
+      add: vi.fn(),
+      remove: vi.fn(),
+      children: [],
+      isScene: true,
+      background: null,
+    })
+  );
 
   // Mock Mesh
-  mockClass('Mesh', (...args: any[]) => trackAllocation('Mesh', {
-    position: { x:0, y:0, z:0, set: vi.fn() }, rotation: { x:0, y:0, z:0, set: vi.fn() },
-    scale: { x:1, y:1, z:1, set: vi.fn() },
-    geometry: { dispose: vi.fn(), isBufferGeometry: true }, // Use mock geometry
-    material: { dispose: vi.fn(), isMaterial: true }, // Use mock material
-    isMesh: true
-  }));
+  mockClass('Mesh', (...args: any[]) =>
+    trackAllocation('Mesh', {
+      position: { x: 0, y: 0, z: 0, set: vi.fn() },
+      rotation: { x: 0, y: 0, z: 0, set: vi.fn() },
+      scale: { x: 1, y: 1, z: 1, set: vi.fn() },
+      geometry: { dispose: vi.fn(), isBufferGeometry: true }, // Use mock geometry
+      material: { dispose: vi.fn(), isMaterial: true }, // Use mock material
+      isMesh: true,
+    })
+  );
 }
 
 function restoreThreeJSClasses(): void {
@@ -191,7 +288,7 @@ function restoreThreeJSClasses(): void {
   for (const className in originalThreeClasses) {
     if (target[className]) target[className] = originalThreeClasses[className];
   }
-  Object.keys(originalThreeClasses).forEach(key => delete originalThreeClasses[key]);
+  Object.keys(originalThreeClasses).forEach((key) => delete originalThreeClasses[key]);
 }
 
 function trackAllocation<T>(type: string, obj: T): T {
@@ -211,20 +308,38 @@ function trackDisposal<T>(type: string, obj: T): void {
 
 function generateMemoryReport(): MemoryReport {
   const leakedObjectTypes: Record<string, number> = {};
-  let totalAllocated = 0, totalDisposed = 0, overallLeakCount = 0;
+  let totalAllocated = 0,
+    totalDisposed = 0,
+    overallLeakCount = 0;
   for (const [type, allocatedList] of memoryMonitoring.allocatedObjects.entries()) {
     const disposedList = memoryMonitoring.disposedObjects.get(type) || [];
-    const allocatedSet = new Set(allocatedList); const disposedSet = new Set(disposedList);
+    const allocatedSet = new Set(allocatedList);
+    const disposedSet = new Set(disposedList);
     let leakCount = 0;
-    allocatedSet.forEach(obj => { if (!disposedSet.has(obj)) leakCount++; });
-    totalAllocated += allocatedList.length; totalDisposed += disposedList.length;
+    allocatedSet.forEach((obj) => {
+      if (!disposedSet.has(obj)) leakCount++;
+    });
+    totalAllocated += allocatedList.length;
+    totalDisposed += disposedList.length;
     if (leakCount > 0) leakedObjectTypes[type] = leakCount;
   }
   const allAllocated = Array.from(memoryMonitoring.allocatedObjects.values()).flat();
   const allDisposed = new Set(Array.from(memoryMonitoring.disposedObjects.values()).flat());
-  overallLeakCount = allAllocated.filter(obj => !allDisposed.has(obj)).length;
+  overallLeakCount = allAllocated.filter((obj) => !allDisposed.has(obj)).length;
 
-  return { leakedObjectCount: overallLeakCount, totalAllocatedObjects: totalAllocated, totalDisposedObjects: totalDisposed, leakedObjectTypes };
+  return {
+    leakedObjectCount: overallLeakCount,
+    totalAllocatedObjects: totalAllocated,
+    totalDisposedObjects: totalDisposed,
+    leakedObjectTypes,
+  };
 }
 
-export const __testing = { trackAllocation, trackDisposal, generateMemoryReport, mockThreeJSClasses, restoreThreeJSClasses, getMemoryMonitoringState: () => memoryMonitoring };
+export const __testing = {
+  trackAllocation,
+  trackDisposal,
+  generateMemoryReport,
+  mockThreeJSClasses,
+  restoreThreeJSClasses,
+  getMemoryMonitoringState: () => memoryMonitoring,
+};

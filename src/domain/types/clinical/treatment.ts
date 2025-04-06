@@ -2,17 +2,17 @@
  * NOVAMIND Neural-Safe Treatment Prediction Types
  * Treatment response prediction with quantum-level type safety
  */
-import { RiskLevel } from "@domain/types/clinical/risk";
-import { SafeArray, Result } from "@domain/types/shared/common";
+import { RiskLevel } from '@domain/types/clinical/risk';
+import { SafeArray, Result } from '@domain/types/shared/common';
 
 // Treatment prediction types with clinical precision
 export type TreatmentType =
-  | "pharmacological"
-  | "psychotherapy"
-  | "neuromodulation"
-  | "neurofeedback"
-  | "lifestyle_intervention"
-  | "combination";
+  | 'pharmacological'
+  | 'psychotherapy'
+  | 'neuromodulation'
+  | 'neurofeedback'
+  | 'lifestyle_intervention'
+  | 'combination';
 
 // Treatment response prediction request
 export interface TreatmentResponseRequest {
@@ -39,24 +39,17 @@ export interface TreatmentDetails {
 
   // Psychotherapy treatment
   psychotherapy?: {
-    type:
-      | "cbt"
-      | "dbt"
-      | "psychodynamic"
-      | "interpersonal"
-      | "emdr"
-      | "act"
-      | "other";
+    type: 'cbt' | 'dbt' | 'psychodynamic' | 'interpersonal' | 'emdr' | 'act' | 'other';
     frequency: string;
     duration: string;
-    modality: "individual" | "group" | "family" | "couples";
+    modality: 'individual' | 'group' | 'family' | 'couples';
     specificProtocol?: string;
     previousExposure: boolean;
   };
 
   // Neuromodulation treatment
   neuromodulation?: {
-    type: "tms" | "ect" | "tdcs" | "dbs" | "vns" | "other";
+    type: 'tms' | 'ect' | 'tdcs' | 'dbs' | 'vns' | 'other';
     targetRegions: string[];
     parameters: {
       frequency?: number;
@@ -79,15 +72,9 @@ export interface TreatmentDetails {
 
   // Lifestyle intervention
   lifestyle?: {
-    type:
-      | "exercise"
-      | "nutrition"
-      | "sleep"
-      | "stress_management"
-      | "social"
-      | "combined";
+    type: 'exercise' | 'nutrition' | 'sleep' | 'stress_management' | 'social' | 'combined';
     specificProtocol: string;
-    intensity: "low" | "moderate" | "high";
+    intensity: 'low' | 'moderate' | 'high';
     frequency: string;
     duration: string;
     previousExposure: boolean;
@@ -98,7 +85,7 @@ export interface TreatmentDetails {
     components: string[];
     primaryFocus: string;
     integrationProtocol?: string;
-    sequencing?: "concurrent" | "sequential";
+    sequencing?: 'concurrent' | 'sequential';
   };
 }
 
@@ -109,16 +96,11 @@ export interface ClinicalPredictionData {
   illnessDuration: number; // in months
   previousTreatmentResponses: {
     treatmentType: string;
-    response:
-      | "remission"
-      | "response"
-      | "partial"
-      | "nonresponse"
-      | "worsening";
+    response: 'remission' | 'response' | 'partial' | 'nonresponse' | 'worsening';
   }[];
   comorbidities: string[];
   currentMedications: string[];
-  functionalImpairment: "none" | "mild" | "moderate" | "severe";
+  functionalImpairment: 'none' | 'mild' | 'moderate' | 'severe';
   suicidalIdeation: boolean;
   substanceUse: boolean;
 }
@@ -126,10 +108,10 @@ export interface ClinicalPredictionData {
 // Genetic prediction data
 export interface GeneticPredictionData {
   metabolizerStatus?: {
-    cyp2d6?: "poor" | "intermediate" | "normal" | "rapid" | "ultrarapid";
-    cyp2c19?: "poor" | "intermediate" | "normal" | "rapid" | "ultrarapid";
-    cyp3a4?: "poor" | "intermediate" | "normal" | "rapid" | "ultrarapid";
-    cyp1a2?: "poor" | "intermediate" | "normal" | "rapid" | "ultrarapid";
+    cyp2d6?: 'poor' | 'intermediate' | 'normal' | 'rapid' | 'ultrarapid';
+    cyp2c19?: 'poor' | 'intermediate' | 'normal' | 'rapid' | 'ultrarapid';
+    cyp3a4?: 'poor' | 'intermediate' | 'normal' | 'rapid' | 'ultrarapid';
+    cyp1a2?: 'poor' | 'intermediate' | 'normal' | 'rapid' | 'ultrarapid';
   };
   pharmacodynamicMarkers?: Record<string, string>;
   riskVariants?: string[];
@@ -174,12 +156,7 @@ export interface TreatmentResponsePrediction {
     confidence: number; // 0-1 representing algorithm confidence
   };
   prediction: {
-    responseType:
-      | "remission"
-      | "response"
-      | "partial_response"
-      | "non_response"
-      | "worsening";
+    responseType: 'remission' | 'response' | 'partial_response' | 'non_response' | 'worsening';
     responseProbability: number; // 0-1 probability of predicted response
     confidenceInterval: [number, number]; // [lower, upper] bounds of 95% CI
     timeToEffect: {
@@ -199,26 +176,26 @@ export interface TreatmentResponsePrediction {
   sideEffectRisks: {
     effect: string;
     probability: number; // 0-1 probability
-    severity: "mild" | "moderate" | "severe";
-    timeline: "acute" | "subacute" | "chronic";
+    severity: 'mild' | 'moderate' | 'severe';
+    timeline: 'acute' | 'subacute' | 'chronic';
     mitigationPossible: boolean;
   }[];
   neurobiologicalMechanisms: {
     pathwayName: string;
     impactDescription: string;
-    confidenceLevel: "established" | "probable" | "theoretical";
+    confidenceLevel: 'established' | 'probable' | 'theoretical';
     relevantRegions: string[];
   }[];
   comparativeEffectiveness?: {
     comparedTo: string;
-    relativeEfficacy: "superior" | "non-inferior" | "inferior" | "unknown";
+    relativeEfficacy: 'superior' | 'non-inferior' | 'inferior' | 'unknown';
     numberNeededToTreat?: number;
   }[];
   personalizationFactors: {
     factor: string;
-    impact: "positive" | "negative" | "neutral";
-    strength: "strong" | "moderate" | "weak";
-    evidenceQuality: "high" | "moderate" | "low";
+    impact: 'positive' | 'negative' | 'neutral';
+    strength: 'strong' | 'moderate' | 'weak';
+    evidenceQuality: 'high' | 'moderate' | 'low';
   }[];
   limitations: string[];
   alternatives: {
@@ -228,20 +205,20 @@ export interface TreatmentResponsePrediction {
     rationale: string;
   }[];
   dataQualityAssessment: {
-    overallQuality: "high" | "moderate" | "low";
-    missingDataImpact: "minimal" | "moderate" | "significant";
-    biasRiskLevel: "low" | "moderate" | "high";
+    overallQuality: 'high' | 'moderate' | 'low';
+    missingDataImpact: 'minimal' | 'moderate' | 'significant';
+    biasRiskLevel: 'low' | 'moderate' | 'high';
   };
   // Optional fields added in test mock - ensure they are optional here too
   treatmentName?: string;
   efficacy?: TreatmentEfficacy;
   confidenceLevel?: number;
-  responseTrajectory?: "rapid" | "gradual" | "delayed" | "fluctuating";
+  responseTrajectory?: 'rapid' | 'gradual' | 'delayed' | 'fluctuating';
   daysToEffect?: number;
   impactedRegions?: {
-      regionId: string;
-      impactStrength: number;
-      impactType: string;
+    regionId: string;
+    impactStrength: number;
+    impactType: string;
   }[];
 }
 
@@ -301,7 +278,7 @@ export interface TreatmentComparisonResult {
   }[];
   costComparison?: {
     treatmentIndex: number;
-    relativeCost: "low" | "moderate" | "high" | "very_high";
+    relativeCost: 'low' | 'moderate' | 'high' | 'very_high';
     costEffectivenessRatio?: number;
     rank: number;
   }[];
@@ -313,14 +290,14 @@ export interface TreatmentComparisonResult {
   }[];
   implementationConsiderations: {
     treatmentIndex: number;
-    accessibilityLevel: "easy" | "moderate" | "difficult";
-    complexityLevel: "low" | "moderate" | "high";
-    monitoringRequirements: "minimal" | "moderate" | "intensive";
+    accessibilityLevel: 'easy' | 'moderate' | 'difficult';
+    complexityLevel: 'low' | 'moderate' | 'high';
+    monitoringRequirements: 'minimal' | 'moderate' | 'intensive';
   }[];
   recommendationSummary: {
     primaryRecommendation: number; // index of recommended treatment
     rationale: string;
-    confidenceLevel: "high" | "moderate" | "low";
+    confidenceLevel: 'high' | 'moderate' | 'low';
     alternativeOptions: number[]; // indices of alternative treatments
   };
 }
@@ -333,87 +310,80 @@ export interface TreatmentPredictionVisualizationSettings {
     nonResponse: string;
     worsening: string;
   };
-  confidenceIntervalDisplay: "always" | "on_hover" | "on_click" | "never";
-  timeScale: "days" | "weeks" | "months";
+  confidenceIntervalDisplay: 'always' | 'on_hover' | 'on_click' | 'never';
+  timeScale: 'days' | 'weeks' | 'months';
   symptomDisplayLimit: number;
   sideEffectDisplayLimit: number;
   mechanismDisplayLimit: number;
-  comparativeDisplay: "table" | "chart" | "grid";
+  comparativeDisplay: 'table' | 'chart' | 'grid';
   personalizedFactorVisualization: boolean;
   alternativesDisplay: boolean;
-  neurologicalImpactVisualization: "simplified" | "detailed" | "none";
+  neurologicalImpactVisualization: 'simplified' | 'detailed' | 'none';
 }
 
 // Default treatment visualization color scale
 export const defaultTreatmentColorScale = {
-  response: "#2ECC71", // Green
-  partialResponse: "#F1C40F", // Yellow
-  nonResponse: "#E67E22", // Orange
-  worsening: "#E74C3C", // Red
+  response: '#2ECC71', // Green
+  partialResponse: '#F1C40F', // Yellow
+  nonResponse: '#E67E22', // Orange
+  worsening: '#E74C3C', // Red
 };
 
 // Treatment prediction state with discriminated union for type safety
 export type TreatmentPredictionState =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "error"; error: Error }
-  | { status: "success"; prediction: TreatmentResponsePrediction };
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'error'; error: Error }
+  | { status: 'success'; prediction: TreatmentResponsePrediction };
 
 // Treatment comparison state with discriminated union for type safety
 export type TreatmentComparisonState =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "error"; error: Error }
-  | { status: "success"; comparison: TreatmentComparisonResult };
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'error'; error: Error }
+  | { status: 'success'; comparison: TreatmentComparisonResult };
 
 // Safe treatment prediction operations
 export const TreatmentPredictionOps = {
   // Get response probability with null safety
-  getResponseProbability: (
-    prediction: TreatmentResponsePrediction | null | undefined,
-  ): number => {
+  getResponseProbability: (prediction: TreatmentResponsePrediction | null | undefined): number => {
     return prediction?.prediction?.responseProbability || 0;
   },
 
   // Get side effect risk with null safety
   getSideEffectRisk: (
     prediction: TreatmentResponsePrediction | null | undefined,
-    effect: string,
+    effect: string
   ): number => {
     if (!prediction) return 0;
-    const sideEffect = new SafeArray(prediction.sideEffectRisks).find(
-      (se) => se.effect === effect,
-    );
+    const sideEffect = new SafeArray(prediction.sideEffectRisks).find((se) => se.effect === effect);
     return sideEffect?.probability || 0;
   },
 
   // Get symptom improvement prediction with null safety
   getSymptomImprovement: (
     prediction: TreatmentResponsePrediction | null | undefined,
-    symptom: string,
+    symptom: string
   ): number => {
     if (!prediction) return 0;
-    const symptomPrediction = new SafeArray(
-      prediction.symptomSpecificPredictions,
-    ).find((sp) => sp.symptom === symptom);
+    const symptomPrediction = new SafeArray(prediction.symptomSpecificPredictions).find(
+      (sp) => sp.symptom === symptom
+    );
     return symptomPrediction?.expectedImprovement || 0;
   },
 
   // Convert response probability to descriptive category
   getResponseCategory: (
-    probability: number,
-  ): "remission" | "response" | "partial_response" | "non_response" => {
-    if (probability >= 0.8) return "remission";
-    if (probability >= 0.6) return "response";
-    if (probability >= 0.3) return "partial_response";
-    return "non_response";
+    probability: number
+  ): 'remission' | 'response' | 'partial_response' | 'non_response' => {
+    if (probability >= 0.8) return 'remission';
+    if (probability >= 0.6) return 'response';
+    if (probability >= 0.3) return 'partial_response';
+    return 'non_response';
   },
 
   // Get color for treatment response visualization
-  getResponseColor: (
-    probability: number,
-    colorScale = defaultTreatmentColorScale,
-  ): string => {
+  getResponseColor: (probability: number, colorScale = defaultTreatmentColorScale): string => {
     if (probability >= 0.6) return colorScale.response;
     if (probability >= 0.3) return colorScale.partialResponse;
     if (probability >= 0.1) return colorScale.nonResponse;
@@ -422,50 +392,46 @@ export const TreatmentPredictionOps = {
 };
 
 // Type guard for treatment response prediction
-export function isTreatmentResponsePrediction(
-  obj: unknown,
-): obj is TreatmentResponsePrediction {
+export function isTreatmentResponsePrediction(obj: unknown): obj is TreatmentResponsePrediction {
   return (
-    typeof obj === "object" &&
+    typeof obj === 'object' &&
     obj !== null &&
-    "patientId" in obj &&
-    "treatmentType" in obj &&
-    "prediction" in obj
+    'patientId' in obj &&
+    'treatmentType' in obj &&
+    'prediction' in obj
   );
 }
 
 // Type guard for treatment comparison result
-export function isTreatmentComparisonResult(
-  obj: unknown,
-): obj is TreatmentComparisonResult {
+export function isTreatmentComparisonResult(obj: unknown): obj is TreatmentComparisonResult {
   return (
-    typeof obj === "object" &&
+    typeof obj === 'object' &&
     obj !== null &&
-    "patientId" in obj &&
-    "comparedTreatments" in obj &&
-    "efficacyComparison" in obj
+    'patientId' in obj &&
+    'comparedTreatments' in obj &&
+    'efficacyComparison' in obj
   );
 }
 
 // Added TreatmentEfficacy type definition
-export type TreatmentEfficacy = "high" | "moderate" | "low";
+export type TreatmentEfficacy = 'high' | 'moderate' | 'low';
 
 // Define NeuralImpactRating based on usage in brain-mapping.ts
 export interface NeuralImpactRating {
   regionImpacts: {
     regionId: string;
-    impact: "increase" | "decrease" | "modulate" | "normalize";
+    impact: 'increase' | 'decrease' | 'modulate' | 'normalize';
     magnitude: number; // 0-1 scale
     confidence: number; // 0-1 scale
   }[];
   connectionImpacts: {
     sourceId: string;
     targetId: string;
-    impact: "increase" | "decrease" | "modulate" | "normalize";
+    impact: 'increase' | 'decrease' | 'modulate' | 'normalize';
     magnitude: number; // 0-1 scale
     confidence: number; // 0-1 scale
   }[];
   overallSeverity: RiskLevel; // Assuming RiskLevel enum is appropriate
-  reversibility: "high" | "moderate" | "low" | "unknown";
+  reversibility: 'high' | 'moderate' | 'low' | 'unknown';
   projectedTimeline: string; // e.g., "weeks", "months"
 }

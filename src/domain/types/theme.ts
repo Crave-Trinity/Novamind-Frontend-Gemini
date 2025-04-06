@@ -13,7 +13,7 @@ export type SimpleTheme = 'light' | 'dark';
  */
 export const isValidTheme = (theme: string | null): theme is ThemeMode => {
   if (!theme) return false;
-  
+
   const validThemes: ThemeMode[] = ['light', 'dark', 'system', 'clinical', 'retro'];
   return validThemes.includes(theme as ThemeMode);
 };

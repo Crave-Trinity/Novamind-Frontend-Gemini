@@ -3,18 +3,18 @@
  * Risk runtime validators testing with quantum precision
  */
 
-import { describe, it, expect } from "vitest";
-import { RiskLevel } from "@domain/types/clinical/risk";
+import { describe, it, expect } from 'vitest';
+import { RiskLevel } from '@domain/types/clinical/risk';
 import {
   RiskLevelValidator,
   RiskAssessmentValidator,
   DomainRiskValidator,
   ContributingFactorValidator,
   ProtectiveFactorValidator,
-} from "@domain/types/clinical/risk.runtime";
+} from '@domain/types/clinical/risk.runtime';
 
-describe("Risk runtime validators", () => {
-  it("RiskLevelValidator validates correct RiskLevel values", () => {
+describe('Risk runtime validators', () => {
+  it('RiskLevelValidator validates correct RiskLevel values', () => {
     // Valid risk levels
     expect(RiskLevelValidator.isValid(RiskLevel.NONE)).toBe(true);
     expect(RiskLevelValidator.isValid(RiskLevel.LOW)).toBe(true);
@@ -24,55 +24,55 @@ describe("Risk runtime validators", () => {
     expect(RiskLevelValidator.isValid(RiskLevel.UNKNOWN)).toBe(true);
 
     // Invalid risk levels
-    expect(RiskLevelValidator.isValid("invalid_level")).toBe(false);
+    expect(RiskLevelValidator.isValid('invalid_level')).toBe(false);
     expect(RiskLevelValidator.isValid(123)).toBe(false);
     expect(RiskLevelValidator.isValid(null)).toBe(false);
     expect(RiskLevelValidator.isValid(undefined)).toBe(false);
   });
 
-  it("RiskAssessmentValidator validates correct RiskAssessment objects", () => {
+  it('RiskAssessmentValidator validates correct RiskAssessment objects', () => {
     const validRiskAssessment = {
-      id: "risk-123",
-      patientId: "patient-456",
-      timestamp: "2025-03-31T14:00:00Z",
-      assessmentType: "hybrid",
+      id: 'risk-123',
+      patientId: 'patient-456',
+      timestamp: '2025-03-31T14:00:00Z',
+      assessmentType: 'hybrid',
       overallRisk: RiskLevel.MODERATE,
       confidenceScore: 0.85,
       domainRisks: [
         {
-          domain: "suicide",
+          domain: 'suicide',
           riskLevel: RiskLevel.LOW,
           confidenceScore: 0.9,
-          evidence: ["No current suicidal ideation"],
-          urgency: "routine",
+          evidence: ['No current suicidal ideation'],
+          urgency: 'routine',
         },
       ],
-      temporalTrend: "stable",
+      temporalTrend: 'stable',
       contributingFactors: [
         {
-          id: "factor-1",
-          name: "Recent job loss",
-          category: "social",
+          id: 'factor-1',
+          name: 'Recent job loss',
+          category: 'social',
           impactWeight: 0.7,
-          modifiability: "partially-modifiable",
-          temporalRelevance: "short-term",
+          modifiability: 'partially-modifiable',
+          temporalRelevance: 'short-term',
         },
       ],
       protectiveFactors: [
         {
-          id: "protective-1",
-          name: "Strong social support",
-          category: "social",
-          strengthLevel: "strong",
-          temporalStability: "stable",
+          id: 'protective-1',
+          name: 'Strong social support',
+          category: 'social',
+          strengthLevel: 'strong',
+          temporalStability: 'stable',
         },
       ],
       neuralCorrelates: [],
     };
 
     const invalidRiskAssessment = {
-      id: "risk-123",
-      patientId: "patient-456",
+      id: 'risk-123',
+      patientId: 'patient-456',
       // Missing required fields
     };
 
@@ -82,13 +82,13 @@ describe("Risk runtime validators", () => {
     expect(RiskAssessmentValidator.isValid({})).toBe(false);
   });
 
-  it("DomainRiskValidator validates correct DomainRisk objects", () => {
+  it('DomainRiskValidator validates correct DomainRisk objects', () => {
     const validDomainRisk = {
-      domain: "suicide",
+      domain: 'suicide',
       riskLevel: RiskLevel.LOW,
       confidenceScore: 0.9,
-      evidence: ["No current suicidal ideation"],
-      urgency: "routine",
+      evidence: ['No current suicidal ideation'],
+      urgency: 'routine',
       temporalDynamics: {
         shortTermRisk: RiskLevel.LOW,
         mediumTermRisk: RiskLevel.LOW,
@@ -97,11 +97,11 @@ describe("Risk runtime validators", () => {
     };
 
     const invalidDomainRisk = {
-      domain: "invalid_domain", // Invalid domain
+      domain: 'invalid_domain', // Invalid domain
       riskLevel: RiskLevel.LOW,
       confidenceScore: 0.9,
-      evidence: ["Some evidence"],
-      urgency: "routine",
+      evidence: ['Some evidence'],
+      urgency: 'routine',
     };
 
     expect(DomainRiskValidator.isValid(validDomainRisk)).toBe(true);
@@ -110,58 +110,52 @@ describe("Risk runtime validators", () => {
     expect(DomainRiskValidator.isValid({})).toBe(false);
   });
 
-  it("ContributingFactorValidator validates correct ContributingFactor objects", () => {
+  it('ContributingFactorValidator validates correct ContributingFactor objects', () => {
     const validContributingFactor = {
-      id: "factor-1",
-      name: "Recent job loss",
-      category: "social",
+      id: 'factor-1',
+      name: 'Recent job loss',
+      category: 'social',
       impactWeight: 0.7,
-      modifiability: "partially-modifiable",
-      temporalRelevance: "short-term",
-      description: "Patient lost job 2 weeks ago",
+      modifiability: 'partially-modifiable',
+      temporalRelevance: 'short-term',
+      description: 'Patient lost job 2 weeks ago',
     };
 
     const invalidContributingFactor = {
-      id: "factor-1",
-      name: "Recent job loss",
-      category: "invalid_category", // Invalid category
+      id: 'factor-1',
+      name: 'Recent job loss',
+      category: 'invalid_category', // Invalid category
       impactWeight: 0.7,
-      modifiability: "partially-modifiable",
-      temporalRelevance: "short-term",
+      modifiability: 'partially-modifiable',
+      temporalRelevance: 'short-term',
     };
 
-    expect(ContributingFactorValidator.isValid(validContributingFactor)).toBe(
-      true,
-    );
-    expect(ContributingFactorValidator.isValid(invalidContributingFactor)).toBe(
-      false,
-    );
+    expect(ContributingFactorValidator.isValid(validContributingFactor)).toBe(true);
+    expect(ContributingFactorValidator.isValid(invalidContributingFactor)).toBe(false);
     expect(ContributingFactorValidator.isValid(null)).toBe(false);
     expect(ContributingFactorValidator.isValid({})).toBe(false);
   });
 
-  it("ProtectiveFactorValidator validates correct ProtectiveFactor objects", () => {
+  it('ProtectiveFactorValidator validates correct ProtectiveFactor objects', () => {
     const validProtectiveFactor = {
-      id: "protective-1",
-      name: "Strong social support",
-      category: "social",
-      strengthLevel: "strong",
-      temporalStability: "stable",
-      enhancementStrategies: ["Weekly group therapy"],
+      id: 'protective-1',
+      name: 'Strong social support',
+      category: 'social',
+      strengthLevel: 'strong',
+      temporalStability: 'stable',
+      enhancementStrategies: ['Weekly group therapy'],
     };
 
     const invalidProtectiveFactor = {
-      id: "protective-1",
-      name: "Strong social support",
-      category: "social",
-      strengthLevel: "invalid_level", // Invalid strength level
-      temporalStability: "stable",
+      id: 'protective-1',
+      name: 'Strong social support',
+      category: 'social',
+      strengthLevel: 'invalid_level', // Invalid strength level
+      temporalStability: 'stable',
     };
 
     expect(ProtectiveFactorValidator.isValid(validProtectiveFactor)).toBe(true);
-    expect(ProtectiveFactorValidator.isValid(invalidProtectiveFactor)).toBe(
-      false,
-    );
+    expect(ProtectiveFactorValidator.isValid(invalidProtectiveFactor)).toBe(false);
     expect(ProtectiveFactorValidator.isValid(null)).toBe(false);
     expect(ProtectiveFactorValidator.isValid({})).toBe(false);
   });

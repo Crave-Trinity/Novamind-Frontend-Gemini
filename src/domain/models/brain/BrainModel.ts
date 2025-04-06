@@ -2,9 +2,9 @@
  * Brain Model Domain Types
  * Defines data structures for brain visualization
  */
-import { RenderMode as VisualizationRenderMode } from "@domain/types/brain/visualization"; // Import the correct enum
-import { Result } from "@domain/types/shared/common"; // Add missing Result import if needed by other parts
-import { Vector3 } from "three"; // Assuming Vector3 is needed, keep import
+import { RenderMode as VisualizationRenderMode } from '@domain/types/brain/visualization'; // Import the correct enum
+import { Result } from '@domain/types/shared/common'; // Add missing Result import if needed by other parts
+import { Vector3 } from 'three'; // Assuming Vector3 is needed, keep import
 
 /*
  * Redundant RenderMode enum removed - using VisualizationRenderMode from types
@@ -14,12 +14,12 @@ import { Vector3 } from "three"; // Assuming Vector3 is needed, keep import
  * Source of model data
  */
 export enum ModelSource {
-  MRI = "mri",
-  FMRI = "fmri",
-  DTI = "dti",
-  EEG = "eeg",
-  SIMULATION = "simulation",
-  AGGREGATE = "aggregate",
+  MRI = 'mri',
+  FMRI = 'fmri',
+  DTI = 'dti',
+  EEG = 'eeg',
+  SIMULATION = 'simulation',
+  AGGREGATE = 'aggregate',
 }
 
 /**
@@ -57,7 +57,7 @@ export interface NeuralPathway {
   sourceId: string;
   targetId: string;
   strength: number;
-  type: "excitatory" | "inhibitory";
+  type: 'excitatory' | 'inhibitory';
   significance: number;
   isActive: boolean;
 }
@@ -107,12 +107,12 @@ export const BrainModel = (data: any = {}): BrainModelData => {
   // Generate a default processed model with clinical precision
   const defaultModel: BrainModelData = {
     id: data.id || `model-${Date.now()}`,
-    patientId: data.patientId || "unknown",
+    patientId: data.patientId || 'unknown',
     regions: data.regions || [],
     pathways: data.pathways || [],
     timestamp: data.timestamp || new Date().toISOString(),
     metadata: {
-      modelVersion: data.metadata?.modelVersion || "1.0.0",
+      modelVersion: data.metadata?.modelVersion || '1.0.0',
       confidenceScore: data.metadata?.confidenceScore || 0.95,
       dataQuality: data.metadata?.dataQuality || 0.9,
       source: data.metadata?.source || ModelSource.AGGREGATE,
@@ -134,22 +134,20 @@ export const BrainModel = (data: any = {}): BrainModelData => {
     // Ensure all regions have required fields
     model.regions = model.regions.map((region) => ({
       id: region.id || `region-${Math.random().toString(36).substr(2, 9)}`,
-      name: region.name || "Unnamed Region",
-      description: region.description || "",
+      name: region.name || 'Unnamed Region',
+      description: region.description || '',
       coordinates: region.coordinates || [0, 0, 0],
       position: region.position || region.coordinates || [0, 0, 0],
       size: region.size || 1,
       scale: region.scale || 1,
-      color: region.color || "#CCCCCC",
+      color: region.color || '#CCCCCC',
       volume: region.volume || 0,
       significance: region.significance || 0,
       connections: Array.isArray(region.connections) ? region.connections : [],
       functions: Array.isArray(region.functions) ? region.functions : [],
       data: {
         activity: region.data?.activity || 0,
-        anomalies: Array.isArray(region.data?.anomalies)
-          ? region.data.anomalies
-          : [],
+        anomalies: Array.isArray(region.data?.anomalies) ? region.data.anomalies : [],
         volumes: {
           current: region.data?.volumes?.current || 0,
           expected: region.data?.volumes?.expected || 0,

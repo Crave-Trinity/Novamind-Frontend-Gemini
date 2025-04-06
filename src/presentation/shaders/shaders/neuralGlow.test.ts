@@ -3,12 +3,12 @@
  * createNeuralGlowUniforms testing with quantum precision
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi } from 'vitest';
 
-import { createNeuralGlowUniforms } from "@presentation/shaders/neuralGlow";
+import { createNeuralGlowUniforms } from '@presentation/shaders/neuralGlow';
 
-describe("createNeuralGlowUniforms", () => {
-  it("processes data with mathematical precision", () => {
+describe('createNeuralGlowUniforms', () => {
+  it('processes data with mathematical precision', () => {
     // Arrange test data - proper parameters for the function
     const color: [number, number, number] = [0.5, 0.7, 0.9];
     const intensity = 1.2;
@@ -25,7 +25,7 @@ describe("createNeuralGlowUniforms", () => {
     expect(result.time.value).toEqual(0.0);
   });
 
-  it("handles edge cases with clinical precision", () => {
+  it('handles edge cases with clinical precision', () => {
     // Test edge cases - zero intensity
     const color: [number, number, number] = [0, 0, 0];
     const intensity = 0;

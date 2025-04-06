@@ -1,14 +1,14 @@
 // NOVAMIND Neural Test Suite
 // useBrainModel testing with quantum precision
 
-import * as React from "react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
-import { useBrainModel } from "@hooks/useBrainModel";
-import { createMockBrainRegions } from "@test/three-test-utils"; // Correct import path
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { BrainModel, BrainRegion } from "@domain/types/brain/models"; // Already type-only
-import { brainModelService } from "@application/services/brain/brain-model.service"; // Import the actual service
+import * as React from 'react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { useBrainModel } from '@hooks/useBrainModel';
+import { createMockBrainRegions } from '@test/three-test-utils'; // Correct import path
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { BrainModel, BrainRegion } from '@domain/types/brain/models'; // Already type-only
+import { brainModelService } from '@application/services/brain/brain-model.service'; // Import the actual service
 
 // Create a quantum-precise mock API client
 const mockGetBrainModel = vi.fn();
@@ -18,17 +18,26 @@ const mockPredictTreatmentResponse = vi.fn();
 // Removed module-level mock for brainModelService
 
 // Neural-safe mock data with clinical precision
-const mockPatientId = "patient-456";
-const mockScanId = "scan-789";
-const mockBrainModelData: BrainModel = { // Use BrainModel type
-  id: "model-test-123",
+const mockPatientId = 'patient-456';
+const mockScanId = 'scan-789';
+const mockBrainModelData: BrainModel = {
+  // Use BrainModel type
+  id: 'model-test-123',
   patientId: mockPatientId,
   regions: createMockBrainRegions(3),
   connections: [], // Add missing property
-  scan: { id: 'scan-1', patientId: mockPatientId, scanDate: new Date().toISOString(), scanType: 'fMRI', dataQualityScore: 0.9, resolution: { x: 1, y: 1, z: 1 }, metadata: {} }, // Corrected resolution type
+  scan: {
+    id: 'scan-1',
+    patientId: mockPatientId,
+    scanDate: new Date().toISOString(),
+    scanType: 'fMRI',
+    dataQualityScore: 0.9,
+    resolution: { x: 1, y: 1, z: 1 },
+    metadata: {},
+  }, // Corrected resolution type
   timestamp: new Date().toISOString(), // Use ISO string
-  version: "1.0.0", // Add missing property
-  processingLevel: "analyzed", // Add missing property
+  version: '1.0.0', // Add missing property
+  processingLevel: 'analyzed', // Add missing property
   lastUpdated: new Date().toISOString(), // Add missing property
 };
 
@@ -41,35 +50,41 @@ const createTestQueryClient = () =>
 // Neural-safe wrapper for hook testing
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
   const queryClient = createTestQueryClient();
-  return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };
 
 // Skip this entire suite for now due to persistent async/state/mocking issues
-describe("useBrainModel", () => { // Re-enabled suite
+describe('useBrainModel', () => {
+  // Re-enabled suite
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset mocks before each test
     // Spy on the actual service method and provide mock implementation
-    vi.spyOn(brainModelService, 'fetchBrainModel').mockResolvedValue({ // Use fetchBrainModel as per hook code
+    vi.spyOn(brainModelService, 'fetchBrainModel').mockResolvedValue({
+      // Use fetchBrainModel as per hook code
       success: true,
       value: JSON.parse(JSON.stringify(mockBrainModelData)), // Return a deep copy
     });
     mockUpdateBrainModel.mockResolvedValue({
       success: true,
-      value: { ...JSON.parse(JSON.stringify(mockBrainModelData)), version: "1.0.1" }, // Simulate update
+      value: { ...JSON.parse(JSON.stringify(mockBrainModelData)), version: '1.0.1' }, // Simulate update
     });
     mockPredictTreatmentResponse.mockResolvedValue({
       success: true,
-      value: { predictionId: "pred-123", predictedResponse: 0.78, confidenceInterval: [0.65, 0.91], treatmentId: "treatment-abc", patientId: "patient-456" },
+      value: {
+        predictionId: 'pred-123',
+        predictedResponse: 0.78,
+        confidenceInterval: [0.65, 0.91],
+        treatmentId: 'treatment-abc',
+        patientId: 'patient-456',
+      },
     });
   });
 
-  it("returns cached brain model data if available", () => {
+  it('returns cached brain model data if available', () => {
     // Arrange: Create client and pre-populate cache
     const queryClient = createTestQueryClient();
-    const brainModelQueryKey = ["brainModel"]; // Use array key consistent with hook
+    const brainModelQueryKey = ['brainModel']; // Use array key consistent with hook
     queryClient.setQueryData(brainModelQueryKey, mockBrainModelData);
 
     // Custom wrapper providing this specific client
@@ -91,11 +106,11 @@ describe("useBrainModel", () => { // Re-enabled suite
     // Need to wait briefly for RQ state propagation even from cache
     // waitFor is still useful here
     waitFor(() => {
-        expect(result.current.isLoading).toBe(false); // Should not be loading from cache
-        expect(result.current.isError).toBe(false);
-        expect(result.current.brainModel).toBeDefined();
-        expect(result.current.brainModel?.id).toBe("model-test-123");
-        expect(result.current.brainModel?.patientId).toBe(mockPatientId);
+      expect(result.current.isLoading).toBe(false); // Should not be loading from cache
+      expect(result.current.isError).toBe(false);
+      expect(result.current.brainModel).toBeDefined();
+      expect(result.current.brainModel?.id).toBe('model-test-123');
+      expect(result.current.brainModel?.patientId).toBe(mockPatientId);
     });
     // We don't expect fetchBrainModel to be called in this scenario
     expect(brainModelService.fetchBrainModel).not.toHaveBeenCalled();

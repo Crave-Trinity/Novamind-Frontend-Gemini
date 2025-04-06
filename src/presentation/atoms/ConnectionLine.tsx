@@ -3,11 +3,20 @@
  * ConnectionLine Atomic Component - renders neural connections with clinical precision
  */
 
-import React, { useRef, useMemo, useEffect } from "react";
-import { useFrame, extend } from "@react-three/fiber"; // Ensure fiber is imported
-import * as THREE from "three";
-import { Vector3, Line, BufferGeometry, NormalBufferAttributes, Material, Object3DEventMap, LineBasicMaterial, LineDashedMaterial } from "three"; // Import Vector3 from three
-import { ThemeSettings } from "@domain/types/brain/visualization";
+import React, { useRef, useMemo, useEffect } from 'react';
+import { useFrame, extend } from '@react-three/fiber'; // Ensure fiber is imported
+import * as THREE from 'three';
+import {
+  Vector3,
+  Line,
+  BufferGeometry,
+  NormalBufferAttributes,
+  Material,
+  Object3DEventMap,
+  LineBasicMaterial,
+  LineDashedMaterial,
+} from 'three'; // Import Vector3 from three
+import { ThemeSettings } from '@domain/types/brain/visualization';
 // Neural-safe prop definition with explicit typing
 interface ConnectionLineProps {
   // Connection endpoints
@@ -33,7 +42,7 @@ interface ConnectionLineProps {
   // Animation
   animated?: boolean;
   animationSpeed?: number;
-  flowDirection?: "forward" | "backward" | "bidirectional";
+  flowDirection?: 'forward' | 'backward' | 'bidirectional';
 
   // Interaction states
   isActive?: boolean;
@@ -66,7 +75,7 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
   activityLevel = 0.5,
   animated = true,
   animationSpeed = 1,
-  flowDirection = "forward",
+  flowDirection = 'forward',
   isActive = false,
   isHighlighted = false,
   themeSettings,
@@ -78,7 +87,7 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
   // Use separate refs for each material type to avoid type conflicts
   const dashedMaterialRef = useRef<THREE.LineDashedMaterial>(null);
   const basicMaterialRef = useRef<THREE.LineBasicMaterial>(null);
-  
+
   // Helper function to get the current material ref based on dashed state
   const getCurrentMaterialRef = () =>
     dashed ? dashedMaterialRef.current : basicMaterialRef.current;
@@ -152,8 +161,7 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
 
     // Active state enhancement
     if (isActive) {
-      lineColor =
-        themeSettings.activeConnectionColor || themeSettings.accentColor;
+      lineColor = themeSettings.activeConnectionColor || themeSettings.accentColor;
       lineOpacity = Math.min(1, lineOpacity * 1.3);
     }
 
@@ -168,15 +176,7 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
       thickness: lineThickness,
       opacity: lineOpacity,
     };
-  }, [
-    color,
-    thickness,
-    opacity,
-    strength,
-    isActive,
-    isHighlighted,
-    themeSettings,
-  ]);
+  }, [color, thickness, opacity, strength, isActive, isHighlighted, themeSettings]);
 
   // Update material when visual parameters change
   useEffect(() => {
@@ -208,20 +208,14 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
 
       // For dashed materials, animate dash offset for flow direction
       if (dashed && dashedMaterialRef.current) {
-        let speed =
-          time * (dashSize + dashGap) * animationSpeed * activityLevel;
+        let speed = time * (dashSize + dashGap) * animationSpeed * activityLevel;
 
         // Apply flow direction
-        if (flowDirection === "backward") {
+        if (flowDirection === 'backward') {
           speed = -speed;
-        } else if (flowDirection === "bidirectional") {
+        } else if (flowDirection === 'bidirectional') {
           // Use sine wave for bidirectional flow
-          speed =
-            Math.sin(time) *
-            (dashSize + dashGap) *
-            2 *
-            animationSpeed *
-            activityLevel;
+          speed = Math.sin(time) * (dashSize + dashGap) * 2 * animationSpeed * activityLevel;
         }
 
         dashedMaterialRef.current.dashOffset = speed;
@@ -232,12 +226,12 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
   // Event handlers
   const handlePointerOver = () => {
     if (onHover) onHover(id);
-    document.body.style.cursor = "pointer";
+    document.body.style.cursor = 'pointer';
   };
 
   const handlePointerOut = () => {
     if (onHover) onHover(null);
-    document.body.style.cursor = "auto";
+    document.body.style.cursor = 'auto';
   };
 
   const handleClick = () => {

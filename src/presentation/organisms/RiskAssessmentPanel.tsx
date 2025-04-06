@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import React, { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
-import { RiskAssessment } from "@domain/types/clinical/risk";
-import { xgboostService, RiskPredictionRequest } from "@api/XGBoostService";
-import Button from "@presentation/atoms/Button";
+import { RiskAssessment } from '@domain/types/clinical/risk';
+import { xgboostService, RiskPredictionRequest } from '@api/XGBoostService';
+import Button from '@presentation/atoms/Button';
 
 interface RiskAssessmentPanelProps {
   patientId: string;
@@ -22,26 +22,24 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
   patientId,
   riskAssessments,
   compact = false,
-  className = "",
+  className = '',
 }) => {
   // Sort risk assessments by date (newest first)
   const sortedRiskAssessments = [...riskAssessments].sort(
     (a, b) =>
       new Date(b.timestamp || new Date().toISOString()).getTime() - // Use timestamp
-      new Date(a.timestamp || new Date().toISOString()).getTime(), // Use timestamp
+      new Date(a.timestamp || new Date().toISOString()).getTime() // Use timestamp
   );
 
   // Active risk type selection
-  const [activeRiskType, setActiveRiskType] = useState<"relapse" | "suicide">(
-    "relapse",
-  );
+  const [activeRiskType, setActiveRiskType] = useState<'relapse' | 'suicide'>('relapse');
 
   // Clinical data for new prediction
   const [clinicalData, setClinicalData] = useState({
     phq9_score: 0,
     gad7_score: 0,
-    severity: "moderate",
-    diagnosis: "depression",
+    severity: 'moderate',
+    diagnosis: 'depression',
   });
 
   // Mutation for making risk predictions
@@ -72,51 +70,49 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
   });
 
   // Handle risk type change
-  const handleRiskTypeChange = (type: "relapse" | "suicide") => {
+  const handleRiskTypeChange = (type: 'relapse' | 'suicide') => {
     setActiveRiskType(type);
     resetPrediction();
   };
 
   // Handle input change
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e?.target;
     setClinicalData((prev) => ({
       ...prev,
-      [name]: name.includes("score") ? parseInt(value, 10) : value,
+      [name]: name.includes('score') ? parseInt(value, 10) : value,
     }));
   };
 
   // Get severity color class
   const getSeverityColorClass = (severity: string) => {
     switch (severity) {
-      case "none":
-        return "bg-green-500";
-      case "mild":
-        return "bg-yellow-500";
-      case "moderate":
-        return "bg-orange-500";
-      case "severe":
-        return "bg-red-500";
+      case 'none':
+        return 'bg-green-500';
+      case 'mild':
+        return 'bg-yellow-500';
+      case 'moderate':
+        return 'bg-orange-500';
+      case 'severe':
+        return 'bg-red-500';
       default:
-        return "bg-neutral-500";
+        return 'bg-neutral-500';
     }
   };
 
   // Get severity text color class for both Severity and RiskLevel values
   const getSeverityTextClass = (severity: string) => {
     switch (severity) {
-      case "none":
-        return "text-green-700 bg-green-100 dark:text-green-200 dark:bg-green-900";
-      case "mild":
-        return "text-yellow-700 bg-yellow-100 dark:text-yellow-200 dark:bg-yellow-900";
-      case "moderate":
-        return "text-orange-700 bg-orange-100 dark:text-orange-200 dark:bg-orange-900";
-      case "severe":
-        return "text-red-700 bg-red-100 dark:text-red-200 dark:bg-red-900";
+      case 'none':
+        return 'text-green-700 bg-green-100 dark:text-green-200 dark:bg-green-900';
+      case 'mild':
+        return 'text-yellow-700 bg-yellow-100 dark:text-yellow-200 dark:bg-yellow-900';
+      case 'moderate':
+        return 'text-orange-700 bg-orange-100 dark:text-orange-200 dark:bg-orange-900';
+      case 'severe':
+        return 'text-red-700 bg-red-100 dark:text-red-200 dark:bg-red-900';
       default:
-        return "text-neutral-700 bg-neutral-100 dark:text-neutral-200 dark:bg-neutral-800";
+        return 'text-neutral-700 bg-neutral-100 dark:text-neutral-200 dark:bg-neutral-800';
     }
   };
 
@@ -133,8 +129,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
         <div className="mb-4 flex items-start justify-between">
           <h3 className="text-lg font-medium">Latest Risk Assessment</h3>
           <div className="text-xs text-neutral-500">
-            {new Date(latest?.timestamp || new Date()).toLocaleDateString()}{" "}
-            {/* Use timestamp */}
+            {new Date(latest?.timestamp || new Date()).toLocaleDateString()} {/* Use timestamp */}
           </div>
         </div>
 
@@ -142,20 +137,11 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
           {latest?.contributingFactors.map((factor, idx) => {
             // Map impactWeight (0-1) to a pseudo-severity for styling
             const pseudoSeverity =
-              factor.impactWeight < 0.3
-                ? "low"
-                : factor.impactWeight < 0.7
-                  ? "moderate"
-                  : "high";
+              factor.impactWeight < 0.3 ? 'low' : factor.impactWeight < 0.7 ? 'moderate' : 'high';
             return (
-              <div
-                key={idx}
-                className="rounded-lg bg-background p-3 dark:bg-background-card"
-              >
+              <div key={idx} className="rounded-lg bg-background p-3 dark:bg-background-card">
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm font-medium capitalize">
-                    {factor.category}
-                  </span>
+                  <span className="text-sm font-medium capitalize">{factor.category}</span>
                   <span
                     // Use pseudoSeverity for styling, display impactWeight
                     className={`rounded-full px-2 py-1 text-xs ${getSeverityTextClass(pseudoSeverity)}`}
@@ -186,18 +172,17 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
         <div className="mt-4 flex items-center justify-between">
           <div className="flex items-center">
             <div
-              className={`h-4 w-4 rounded-full ${getSeverityColorClass(latest?.overallRisk || "low")} mr-2`}
+              className={`h-4 w-4 rounded-full ${getSeverityColorClass(latest?.overallRisk || 'low')} mr-2`}
             ></div>
             <span className="font-medium">
-              Overall Risk:{" "}
-              <span className="capitalize">{latest?.overallRisk}</span>
+              Overall Risk: <span className="capitalize">{latest?.overallRisk}</span>
             </span>
           </div>
 
           <div className="text-xs text-neutral-500">
-            Next Assessment:{" "}
+            Next Assessment:{' '}
             {new Date(
-              latest?.nextAssessmentDue || new Date(), // Use nextAssessmentDue
+              latest?.nextAssessmentDue || new Date() // Use nextAssessmentDue
             ).toLocaleDateString()}
           </div>
         </div>
@@ -215,21 +200,21 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
           <div className="flex">
             <button
               className={`rounded-l-md px-3 py-1 text-xs ${
-                activeRiskType === "relapse"
-                  ? "bg-primary-600 text-white"
-                  : "bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300"
+                activeRiskType === 'relapse'
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300'
               }`}
-              onClick={() => handleRiskTypeChange("relapse")}
+              onClick={() => handleRiskTypeChange('relapse')}
             >
               Relapse
             </button>
             <button
               className={`rounded-r-md px-3 py-1 text-xs ${
-                activeRiskType === "suicide"
-                  ? "bg-primary-600 text-white"
-                  : "bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300"
+                activeRiskType === 'suicide'
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300'
               }`}
-              onClick={() => handleRiskTypeChange("suicide")}
+              onClick={() => handleRiskTypeChange('suicide')}
             >
               Suicide
             </button>
@@ -243,8 +228,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
           onClick={() => predictRisk()}
           fullWidth
         >
-          Run {activeRiskType.charAt(0).toUpperCase() + activeRiskType.slice(1)}{" "}
-          Risk Assessment
+          Run {activeRiskType.charAt(0).toUpperCase() + activeRiskType.slice(1)} Risk Assessment
         </Button>
       </div>
     );
@@ -265,21 +249,21 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
             <div className="flex">
               <button
                 className={`flex-1 rounded-l-md px-4 py-2 text-sm font-medium ${
-                  activeRiskType === "relapse"
-                    ? "bg-primary-600 text-white"
-                    : "bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300"
+                  activeRiskType === 'relapse'
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300'
                 }`}
-                onClick={() => handleRiskTypeChange("relapse")}
+                onClick={() => handleRiskTypeChange('relapse')}
               >
                 Relapse Risk
               </button>
               <button
                 className={`flex-1 rounded-r-md px-4 py-2 text-sm font-medium ${
-                  activeRiskType === "suicide"
-                    ? "bg-primary-600 text-white"
-                    : "bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300"
+                  activeRiskType === 'suicide'
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300'
                 }`}
-                onClick={() => handleRiskTypeChange("suicide")}
+                onClick={() => handleRiskTypeChange('suicide')}
               >
                 Suicide Risk
               </button>
@@ -373,18 +357,10 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
         </div>
 
         <div className="flex justify-end gap-3">
-          <Button
-            variant="outline"
-            onClick={resetPrediction}
-            disabled={!predictionResult}
-          >
+          <Button variant="outline" onClick={resetPrediction} disabled={!predictionResult}>
             Reset
           </Button>
-          <Button
-            variant="primary"
-            isLoading={isPredicting}
-            onClick={() => predictRisk()}
-          >
+          <Button variant="primary" isLoading={isPredicting} onClick={() => predictRisk()}>
             Generate Risk Assessment
           </Button>
         </div>
@@ -398,11 +374,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
     if (!predictionResult || !predictionResult.ok) {
       // Optionally render an error state if predictionResult.err exists
       if (predictionResult && predictionResult.err) {
-        return (
-          <div className="mt-4 text-red-600">
-            Error: {predictionResult.val.message}
-          </div>
-        );
+        return <div className="mt-4 text-red-600">Error: {predictionResult.val.message}</div>;
       }
       return null;
     }
@@ -416,7 +388,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
             className={`rounded-full px-2 py-1 text-xs font-medium ${getSeverityTextClass(predictionResult.val.risk_level)}`}
           >
             {predictionResult.val.risk_level.charAt(0).toUpperCase() +
-              predictionResult.val.risk_level.slice(1)}{" "}
+              predictionResult.val.risk_level.slice(1)}{' '}
             Risk
           </span>
         </div>
@@ -438,9 +410,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
           </div>
           <div className="mt-1 flex justify-between text-xs text-neutral-500">
             <span>Low Risk</span>
-            <span>
-              Confidence: {Math.round(predictionResult.val.confidence * 100)}%
-            </span>
+            <span>Confidence: {Math.round(predictionResult.val.confidence * 100)}%</span>
             <span>High Risk</span>
           </div>
         </div>
@@ -456,9 +426,9 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
                   factor: {
                     name: string;
                     contribution: number;
-                    direction: "positive" | "negative";
+                    direction: 'positive' | 'negative';
                   },
-                  idx: number,
+                  idx: number
                 ) => (
                   <div key={idx} className="flex items-center justify-between">
                     <span className="text-sm text-neutral-700 dark:text-neutral-300">
@@ -466,7 +436,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
                     </span>
                     <div className="h-2 w-1/2 rounded-full bg-neutral-200 dark:bg-neutral-700">
                       <div
-                        className={`h-2 rounded-full ${factor.direction === "positive" ? "bg-red-500" : "bg-blue-500"}`}
+                        className={`h-2 rounded-full ${factor.direction === 'positive' ? 'bg-red-500' : 'bg-blue-500'}`}
                         style={{
                           width: `${Math.abs(factor.contribution) * 100}%`,
                         }}
@@ -476,7 +446,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
                       {(factor.contribution * 100).toFixed(1)}%
                     </span>
                   </div>
-                ),
+                )
               )}
             </div>
           </div>
@@ -489,11 +459,9 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
                 Recommendations
               </h4>
               <ul className="list-inside list-disc space-y-1 pl-2 text-sm text-neutral-700 dark:text-neutral-300">
-                {predictionResult.val.recommendations.map(
-                  (recommendation: string, idx: number) => (
-                    <li key={idx}>{recommendation}</li>
-                  ),
-                )}
+                {predictionResult.val.recommendations.map((recommendation: string, idx: number) => (
+                  <li key={idx}>{recommendation}</li>
+                ))}
               </ul>
             </div>
           )}
@@ -509,9 +477,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
 
     return (
       <div className="mt-6 rounded-lg bg-background-card p-4 dark:bg-background-elevated">
-        <h3 className="mb-4 text-lg font-medium">
-          Historical Risk Assessments
-        </h3>
+        <h3 className="mb-4 text-lg font-medium">Historical Risk Assessments</h3>
 
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-800">
@@ -536,7 +502,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
                 <tr key={idx}>
                   <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-neutral-800 dark:text-neutral-200">
                     {new Date(
-                      assessment?.timestamp || new Date(), // Use timestamp
+                      assessment?.timestamp || new Date() // Use timestamp
                     ).toLocaleDateString()}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">
@@ -554,18 +520,17 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
                         // Map impactWeight (0-1) to a pseudo-severity for styling
                         const pseudoSeverity =
                           factor.impactWeight < 0.3
-                            ? "low"
+                            ? 'low'
                             : factor.impactWeight < 0.7
-                              ? "moderate"
-                              : "high";
+                              ? 'moderate'
+                              : 'high';
                         return (
                           <span
                             key={fidx}
                             // Use pseudoSeverity for styling, display category and impact
                             className={`inline-block rounded px-2 py-1 text-xs ${getSeverityTextClass(pseudoSeverity)}`}
                           >
-                            {factor.category} (
-                            {(factor.impactWeight * 100).toFixed(0)}%)
+                            {factor.category} ({(factor.impactWeight * 100).toFixed(0)}%)
                           </span>
                         );
                       })}
@@ -574,18 +539,15 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
                   <td className="px-4 py-3 text-sm text-neutral-700 dark:text-neutral-300">
                     <div className="flex flex-wrap gap-1">
                       {
-                        assessment?.recommendations &&
-                        Array.isArray(assessment.recommendations) // Ensure it's an array
-                          ? assessment.recommendations
-                              .slice(0, 2)
-                              .map((intervention, iidx) => (
-                                <span
-                                  key={iidx}
-                                  className="inline-block rounded bg-blue-100 px-2 py-1 text-xs text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                                >
-                                  {intervention}
-                                </span>
-                              ))
+                        assessment?.recommendations && Array.isArray(assessment.recommendations) // Ensure it's an array
+                          ? assessment.recommendations.slice(0, 2).map((intervention, iidx) => (
+                              <span
+                                key={iidx}
+                                className="inline-block rounded bg-blue-100 px-2 py-1 text-xs text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                              >
+                                {intervention}
+                              </span>
+                            ))
                           : null /* Or render placeholder */
                       }
                       {assessment?.recommendations &&

@@ -110,7 +110,7 @@ export class AuthService {
    */
   async initializeAuth(): Promise<AuthState> {
     const tokens = this.getStoredTokens();
-    
+
     if (!tokens) {
       return {
         user: null,
@@ -126,7 +126,7 @@ export class AuthService {
         const newTokens = await this.client.refreshToken(tokens.refreshToken);
         this.storeTokens(newTokens);
         const user = await this.client.getCurrentUser();
-        
+
         return {
           user,
           tokens: newTokens,
@@ -175,7 +175,7 @@ export class AuthService {
       const tokens = await this.client.login(email, password);
       this.storeTokens(tokens);
       const user = await this.client.getCurrentUser();
-      
+
       return {
         user,
         tokens,
@@ -212,4 +212,4 @@ export class AuthService {
       error: null,
     };
   }
-} 
+}

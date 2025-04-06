@@ -3,12 +3,12 @@
  * index testing with quantum precision
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi } from 'vitest';
 
-import { index } from "./index";
+import { index } from './index';
 
-describe("index", () => {
-  it("processes data with mathematical precision", () => {
+describe('index', () => {
+  it('processes data with mathematical precision', () => {
     // Arrange test data
     const testData = {};
 
@@ -24,7 +24,7 @@ describe("index", () => {
     // Add more specific assertions for this particular test case
   });
 
-  it("handles edge cases with clinical precision", () => {
+  it('handles edge cases with clinical precision', () => {
     // Test edge cases
     const edgeCaseData = {};
 

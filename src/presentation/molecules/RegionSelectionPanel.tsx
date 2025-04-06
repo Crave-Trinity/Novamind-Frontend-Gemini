@@ -4,9 +4,9 @@
  * with clinical precision and anatomical organization
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
-import { BrainRegion } from "@domain/types/brain/models";
-import { SafeArray } from "@domain/types/shared/common";
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { BrainRegion } from '@domain/types/brain/models';
+import { SafeArray } from '@domain/types/shared/common';
 
 // Define neural-safe props
 interface RegionSelectionPanelProps {
@@ -24,29 +24,29 @@ interface RegionSelectionPanelProps {
 
 // Anatomical grouping categories
 type AnatomicalGroup =
-  | "frontal"
-  | "parietal"
-  | "temporal"
-  | "occipital"
-  | "subcortical"
-  | "cerebellum"
-  | "brainstem"
-  | "other";
+  | 'frontal'
+  | 'parietal'
+  | 'temporal'
+  | 'occipital'
+  | 'subcortical'
+  | 'cerebellum'
+  | 'brainstem'
+  | 'other';
 
 // Functional grouping categories
 type FunctionalGroup =
-  | "motor"
-  | "sensory"
-  | "vision"
-  | "language"
-  | "memory"
-  | "emotion"
-  | "executive"
-  | "default_mode"
-  | "salience"
-  | "attention"
-  | "reward"
-  | "other";
+  | 'motor'
+  | 'sensory'
+  | 'vision'
+  | 'language'
+  | 'memory'
+  | 'emotion'
+  | 'executive'
+  | 'default_mode'
+  | 'salience'
+  | 'attention'
+  | 'reward'
+  | 'other';
 
 /**
  * RegionSelectionPanel - Molecular component for region selection interface
@@ -57,19 +57,17 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
   selectedRegionIds,
   onRegionSelect,
   onRegionSearch,
-  searchQuery = "",
+  searchQuery = '',
   anatomicalGrouping = true,
   functionalGrouping = false,
-  maxHeight = "600px",
+  maxHeight = '600px',
   showActivity = true,
-  className = "",
+  className = '',
 }) => {
   // Local state with type safety
   const [localSearchQuery, setLocalSearchQuery] = useState<string>(searchQuery);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
-    {},
-  );
-  const [sortBy, setSortBy] = useState<"name" | "activity">("name");
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const [sortBy, setSortBy] = useState<'name' | 'activity'>('name');
 
   // Safe array wrapper for null safety
   const safeRegions = new SafeArray(regions);
@@ -86,9 +84,7 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
     let filtered = safeRegions;
     if (localSearchQuery) {
       const query = localSearchQuery.toLowerCase();
-      filtered = filtered.filter((region) =>
-        region.name.toLowerCase().includes(query),
-      );
+      filtered = filtered.filter((region) => region.name.toLowerCase().includes(query));
     }
 
     // Define the grouping function
@@ -97,68 +93,50 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
         // In a real implementation, we would use region.functionalSystem
         // For now, use a simplified approach based on name
         const name = region.name.toLowerCase();
-        if (name.includes("motor")) return "motor";
-        if (name.includes("sensory") || name.includes("somato"))
-          return "sensory";
-        if (name.includes("visual") || name.includes("occipit"))
-          return "vision";
+        if (name.includes('motor')) return 'motor';
+        if (name.includes('sensory') || name.includes('somato')) return 'sensory';
+        if (name.includes('visual') || name.includes('occipit')) return 'vision';
+        if (name.includes('language') || name.includes('broca') || name.includes('wernicke'))
+          return 'language';
+        if (name.includes('memory') || name.includes('hippocamp')) return 'memory';
+        if (name.includes('emotion') || name.includes('amygdala') || name.includes('limbic'))
+          return 'emotion';
+        if (name.includes('frontal') || name.includes('executive')) return 'executive';
+        if (name.includes('default') || name.includes('dmpfc')) return 'default_mode';
         if (
-          name.includes("language") ||
-          name.includes("broca") ||
-          name.includes("wernicke")
+          name.includes('salience') ||
+          name.includes('insula') ||
+          name.includes('anterior cingulate')
         )
-          return "language";
-        if (name.includes("memory") || name.includes("hippocamp"))
-          return "memory";
+          return 'salience';
+        if (name.includes('attention') || name.includes('parietal')) return 'attention';
         if (
-          name.includes("emotion") ||
-          name.includes("amygdala") ||
-          name.includes("limbic")
+          name.includes('reward') ||
+          name.includes('nucleus accumbens') ||
+          name.includes('striatum')
         )
-          return "emotion";
-        if (name.includes("frontal") || name.includes("executive"))
-          return "executive";
-        if (name.includes("default") || name.includes("dmpfc"))
-          return "default_mode";
-        if (
-          name.includes("salience") ||
-          name.includes("insula") ||
-          name.includes("anterior cingulate")
-        )
-          return "salience";
-        if (name.includes("attention") || name.includes("parietal"))
-          return "attention";
-        if (
-          name.includes("reward") ||
-          name.includes("nucleus accumbens") ||
-          name.includes("striatum")
-        )
-          return "reward";
-        return "other";
+          return 'reward';
+        return 'other';
       } else {
         // Default to anatomical grouping
         // In a real implementation, we would use region.anatomicalLocation
         // For now, use a simplified approach based on name
         const name = region.name.toLowerCase();
-        if (name.includes("frontal")) return "frontal";
-        if (name.includes("parietal")) return "parietal";
-        if (name.includes("temporal")) return "temporal";
-        if (name.includes("occipit")) return "occipital";
+        if (name.includes('frontal')) return 'frontal';
+        if (name.includes('parietal')) return 'parietal';
+        if (name.includes('temporal')) return 'temporal';
+        if (name.includes('occipit')) return 'occipital';
         if (
-          name.includes("thalamus") ||
-          name.includes("basal") ||
-          name.includes("caudate") ||
-          name.includes("putamen")
+          name.includes('thalamus') ||
+          name.includes('basal') ||
+          name.includes('caudate') ||
+          name.includes('putamen')
         )
-          return "subcortical";
-        if (name.includes("cerebell")) return "cerebellum";
-        if (
-          name.includes("brainstem") ||
-          name.includes("pons") ||
-          name.includes("medulla")
-        )
-          return "brainstem";
-        return "other";
+          return 'subcortical';
+        if (name.includes('cerebell')) return 'cerebellum';
+        if (name.includes('brainstem') || name.includes('pons') || name.includes('medulla'))
+          return 'brainstem';
+        return 'other';
       }
     };
 
@@ -175,7 +153,7 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
     // Sort each group
     Object.keys(grouped).forEach((key) => {
       grouped[key].sort((a, b) => {
-        if (sortBy === "activity") {
+        if (sortBy === 'activity') {
           return b.activityLevel - a.activityLevel;
         } else {
           return a.name.localeCompare(b.name);
@@ -188,21 +166,14 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
     const totalCount = safeRegions.size();
 
     return { groupedRegions: grouped, filteredCount, totalCount };
-  }, [
-    safeRegions,
-    localSearchQuery,
-    anatomicalGrouping,
-    functionalGrouping,
-    sortBy,
-  ]);
+  }, [safeRegions, localSearchQuery, anatomicalGrouping, functionalGrouping, sortBy]);
 
   // Initialize expanded groups on first render
   useEffect(() => {
     const initialExpandedState: Record<string, boolean> = {};
     Object.keys(groupedRegions).forEach((group) => {
       // Default to expanded for search results or if there are only a few groups
-      initialExpandedState[group] =
-        !!localSearchQuery || Object.keys(groupedRegions).length <= 3;
+      initialExpandedState[group] = !!localSearchQuery || Object.keys(groupedRegions).length <= 3;
     });
     setExpandedGroups(initialExpandedState);
   }, [functionalGrouping, anatomicalGrouping]);
@@ -217,9 +188,9 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
   };
 
   const handleClearSearch = () => {
-    setLocalSearchQuery("");
+    setLocalSearchQuery('');
     if (onRegionSearch) {
-      onRegionSearch("");
+      onRegionSearch('');
     }
   };
 
@@ -256,22 +227,22 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
   };
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortBy(e.target.value as "name" | "activity");
+    setSortBy(e.target.value as 'name' | 'activity');
   };
 
   // Panel header title based on grouping
   const getPanelTitle = () => {
-    if (functionalGrouping) return "Functional Systems";
-    return "Brain Regions";
+    if (functionalGrouping) return 'Functional Systems';
+    return 'Brain Regions';
   };
 
   // Render activity indicator with color scale
   const renderActivityIndicator = (activityLevel: number) => {
-    let bgColor = "bg-gray-300";
-    if (activityLevel > 0.8) bgColor = "bg-red-500";
-    else if (activityLevel > 0.6) bgColor = "bg-orange-500";
-    else if (activityLevel > 0.4) bgColor = "bg-yellow-500";
-    else if (activityLevel > 0.2) bgColor = "bg-green-500";
+    let bgColor = 'bg-gray-300';
+    if (activityLevel > 0.8) bgColor = 'bg-red-500';
+    else if (activityLevel > 0.6) bgColor = 'bg-orange-500';
+    else if (activityLevel > 0.4) bgColor = 'bg-yellow-500';
+    else if (activityLevel > 0.2) bgColor = 'bg-green-500';
 
     return (
       <div
@@ -287,39 +258,39 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
   // Render group name with proper formatting
   const formatGroupName = (groupKey: string): string => {
     return groupKey
-      .split("_")
+      .split('_')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+      .join(' ');
   };
 
   // Get group icon based on group key
   const getGroupIcon = (groupKey: string): string => {
     const iconMap: Record<string, string> = {
       // Anatomical
-      frontal: "🧠",
-      parietal: "🧠",
-      temporal: "🧠",
-      occipital: "🧠",
-      subcortical: "🧠",
-      cerebellum: "🧠",
-      brainstem: "🧠",
+      frontal: '🧠',
+      parietal: '🧠',
+      temporal: '🧠',
+      occipital: '🧠',
+      subcortical: '🧠',
+      cerebellum: '🧠',
+      brainstem: '🧠',
       // Functional
-      motor: "👋",
-      sensory: "👁️",
-      vision: "👁️",
-      language: "💬",
-      memory: "💾",
-      emotion: "😊",
-      executive: "⚙️",
-      default_mode: "💭",
-      salience: "❗",
-      attention: "👀",
-      reward: "🎯",
+      motor: '👋',
+      sensory: '👁️',
+      vision: '👁️',
+      language: '💬',
+      memory: '💾',
+      emotion: '😊',
+      executive: '⚙️',
+      default_mode: '💭',
+      salience: '❗',
+      attention: '👀',
+      reward: '🎯',
       // Default
-      other: "📍",
+      other: '📍',
     };
 
-    return iconMap[groupKey] || "📍";
+    return iconMap[groupKey] || '📍';
   };
 
   return (
@@ -328,9 +299,7 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
       style={{ maxHeight }}
     >
       <div className="mb-3">
-        <h3 className="text-white text-sm font-medium mb-2">
-          {getPanelTitle()}
-        </h3>
+        <h3 className="text-white text-sm font-medium mb-2">{getPanelTitle()}</h3>
 
         {/* Search input */}
         <div className="relative">
@@ -383,7 +352,7 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
             <div
               className={`
                 flex items-center justify-between p-2 rounded cursor-pointer
-                ${expandedGroups[groupKey] ? "rounded-b-none" : ""}
+                ${expandedGroups[groupKey] ? 'rounded-b-none' : ''}
                 hover:bg-black/40
               `}
               onClick={() => handleGroupExpand(groupKey)}
@@ -413,9 +382,7 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
                 >
                   None
                 </button>
-                <span className="text-gray-500">
-                  {expandedGroups[groupKey] ? "▼" : "►"}
-                </span>
+                <span className="text-gray-500">{expandedGroups[groupKey] ? '▼' : '►'}</span>
               </div>
             </div>
 
@@ -427,7 +394,7 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
                     key={region.id}
                     className={`
                       flex items-center px-3 py-1 text-xs cursor-pointer hover:bg-black/30
-                      ${safeSelectedIds.includes(region.id) ? "bg-blue-500/30" : ""}
+                      ${safeSelectedIds.includes(region.id) ? 'bg-blue-500/30' : ''}
                     `}
                     onClick={() => handleRegionToggle(region.id)}
                   >
@@ -438,8 +405,7 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
                       className="mr-2"
                     />
                     <div className="flex items-center flex-1 min-w-0">
-                      {showActivity &&
-                        renderActivityIndicator(region.activityLevel)}
+                      {showActivity && renderActivityIndicator(region.activityLevel)}
                       <span className="truncate">{region.name}</span>
                     </div>
                     {showActivity && (
@@ -457,9 +423,7 @@ const RegionSelectionPanel: React.FC<RegionSelectionPanelProps> = ({
         {/* Empty state */}
         {Object.keys(groupedRegions).length === 0 && (
           <div className="text-center py-4">
-            <p className="text-gray-400 text-xs">
-              No regions matching your criteria
-            </p>
+            <p className="text-gray-400 text-xs">No regions matching your criteria</p>
           </div>
         )}
       </div>

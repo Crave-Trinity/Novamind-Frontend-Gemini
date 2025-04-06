@@ -1,6 +1,6 @@
 /**
  * Global test setup for the Novamind Digital Twin frontend application
- * 
+ *
  * This file is loaded automatically before any test files are run.
  * It sets up the testing environment with necessary mocks and configurations.
  */
@@ -12,8 +12,7 @@ import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers'
 
 // Keep Vitest Assertion extension
 declare module 'vitest' {
-  interface Assertion<T = any>
-    extends TestingLibraryMatchers<T, void> {}
+  interface Assertion<T = any> extends TestingLibraryMatchers<T, void> {}
 }
 
 // Keep Mock extension
@@ -31,7 +30,7 @@ mockIntersectionObserver.mockReturnValue({
   unobserve: () => null,
   disconnect: () => null,
   // Add takeRecords to satisfy the interface
-  takeRecords: () => [], 
+  takeRecords: () => [],
 });
 window.IntersectionObserver = mockIntersectionObserver;
 
@@ -144,7 +143,11 @@ const createMockWebGLContext = () => ({
 
 const originalGetContext = HTMLCanvasElement.prototype.getContext;
 // Assign the mock function directly, casting the function expression itself to 'any'
-HTMLCanvasElement.prototype.getContext = (function(this: HTMLCanvasElement, contextId: string, options?: any): RenderingContext | null {
+HTMLCanvasElement.prototype.getContext = function (
+  this: HTMLCanvasElement,
+  contextId: string,
+  options?: any
+): RenderingContext | null {
   if (contextId === 'webgl' || contextId === 'webgl2' || contextId === 'experimental-webgl') {
     // Cast the return type of createMockWebGLContext if necessary,
     // or ensure it returns a type compatible with RenderingContext | null
@@ -152,15 +155,14 @@ HTMLCanvasElement.prototype.getContext = (function(this: HTMLCanvasElement, cont
   } else if (contextId === '2d') {
     return null;
   }
-  
+
   // Ensure originalGetContext is callable for other types
   if (typeof originalGetContext === 'function') {
     // Use Function.prototype.call for type safety with 'this'
     return Function.prototype.call.call(originalGetContext, this, contextId, options);
   }
   return null; // Fallback if original context is somehow unavailable
-}) as any; // Apply cast correctly to the function expression
-
+} as any; // Apply cast correctly to the function expression
 
 // Cleanup after each test
 afterEach(() => {
@@ -188,22 +190,25 @@ beforeAll(() => {
 
 // Mock framer-motion (from HEAD)
 vi.mock('framer-motion', async (importOriginal) => {
-  const actual = await importOriginal() as any;
-  
-  const motionProxy = new Proxy({}, {
-    get: (target, prop) => {
-      const Component = ({ children, ...props }: React.PropsWithChildren<any>) => 
-        React.createElement(prop as string, props, children);
-      Component.displayName = `motion.${String(prop)}`;
-      return Component;
+  const actual = (await importOriginal()) as any;
+
+  const motionProxy = new Proxy(
+    {},
+    {
+      get: (target, prop) => {
+        const Component = ({ children, ...props }: React.PropsWithChildren<any>) =>
+          React.createElement(prop as string, props, children);
+        Component.displayName = `motion.${String(prop)}`;
+        return Component;
+      },
     }
-  });
+  );
 
   return {
     __esModule: true,
     ...actual,
     motion: motionProxy,
-    AnimatePresence: ({ children }: React.PropsWithChildren<{}>) => 
+    AnimatePresence: ({ children }: React.PropsWithChildren<{}>) =>
       React.createElement(React.Fragment, null, children),
     useReducedMotion: () => false,
     useScroll: () => ({ scrollYProgress: { onChange: vi.fn(), current: 0 } }),

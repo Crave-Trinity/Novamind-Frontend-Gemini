@@ -6,8 +6,10 @@
  * instead of vi.mock(), ensuring accurate metrics while maintaining mock functionality.
  */
 
-import { vi, Mock, SpyInstance } from "vitest";
-import React, { ReactNode } from "react";
+import type { SpyInstance } from 'vitest';
+import { vi, Mock } from 'vitest';
+import type React from 'react';
+import { ReactNode } from 'react';
 
 // Type for creating neural-safe mock functions with quantum precision
 type MockFunctionFactory<T> = (original?: T) => T;
@@ -19,7 +21,7 @@ type ExtractableKey<T> = Extract<keyof T, string | number>;
  */
 export async function createNeuralSafeMock<T extends Record<string, any>>(
   modulePath: string,
-  mockImplementations: Partial<Record<keyof T, any>> = {},
+  mockImplementations: Partial<Record<keyof T, any>> = {}
 ): Promise<T> {
   try {
     // Import the actual module to preserve instrumentation path
@@ -32,10 +34,8 @@ export async function createNeuralSafeMock<T extends Record<string, any>>(
         if (typedKey in mockImplementations) {
           // Apply custom mock implementation with quantum precision
           // @ts-ignore - Type safety sacrificed for neural coverage with mathematical elegance
-          vi.spyOn(actualModule, typedKey).mockImplementation(
-            mockImplementations[typedKey],
-          );
-        } else if (typeof actualModule[key] === "function") {
+          vi.spyOn(actualModule, typedKey).mockImplementation(mockImplementations[typedKey]);
+        } else if (typeof actualModule[key] === 'function') {
           // Default mock for functions with clinical precision
           // @ts-ignore - Type safety sacrificed for neural coverage with mathematical elegance
           vi.spyOn(actualModule, typedKey).mockImplementation(() => null);
@@ -50,10 +50,10 @@ export async function createNeuralSafeMock<T extends Record<string, any>>(
     return new Proxy({} as T, {
       get: (target, prop) => {
         // Return a no-op function for any method call
-        if (typeof prop === "string" && prop in mockImplementations) {
+        if (typeof prop === 'string' && prop in mockImplementations) {
           return mockImplementations[prop as keyof T];
         }
-        return typeof prop === "string" ? vi.fn() : undefined;
+        return typeof prop === 'string' ? vi.fn() : undefined;
       },
     });
   }
@@ -65,10 +65,10 @@ export async function createNeuralSafeMock<T extends Record<string, any>>(
  */
 export function createNeuralComponentMock(
   displayName: string,
-  implementation: React.FC<any> = () => null,
+  implementation: React.FC<any> = () => null
 ): React.FC<any> {
   const componentMock = vi.fn(implementation) as unknown as React.FC<any>;
-  Object.defineProperty(componentMock, "displayName", {
+  Object.defineProperty(componentMock, 'displayName', {
     value: displayName,
     configurable: true,
   });
@@ -81,11 +81,11 @@ export function createNeuralComponentMock(
  */
 export function createNeuralServiceMock<T extends Record<string, any>>(
   serviceName: string,
-  mockMethods: Partial<T> = {},
+  mockMethods: Partial<T> = {}
 ): T {
   return new Proxy({} as T, {
     get: (target, prop) => {
-      if (typeof prop === "string" && prop in mockMethods) {
+      if (typeof prop === 'string' && prop in mockMethods) {
         return mockMethods[prop as keyof T];
       }
       return vi.fn().mockName(`${serviceName}.${String(prop)}`);
@@ -100,7 +100,7 @@ export function createNeuralServiceMock<T extends Record<string, any>>(
 export function neuralSafeSpy<T extends Record<string, any>, K extends keyof T>(
   module: T,
   method: K,
-  implementation: any,
+  implementation: any
 ): SpyInstance {
   // @ts-ignore - Neural-safe implementation with specialized type constraints
   return vi.spyOn(module, method).mockImplementation(implementation);
@@ -112,7 +112,7 @@ export function neuralSafeSpy<T extends Record<string, any>, K extends keyof T>(
  */
 export async function spyOnModule<T extends Record<string, any>>(
   module: T,
-  mocks: Partial<Record<keyof T, any>> = {},
+  mocks: Partial<Record<keyof T, any>> = {}
 ): Promise<void> {
   for (const key in module) {
     if (Object.prototype.hasOwnProperty.call(module, key)) {
@@ -120,7 +120,7 @@ export async function spyOnModule<T extends Record<string, any>>(
       if (typedKey in mocks) {
         // Apply custom mock with clinical precision
         neuralSafeSpy(module, typedKey, mocks[typedKey]);
-      } else if (typeof module[key] === "function") {
+      } else if (typeof module[key] === 'function') {
         // Default mock with quantum precision
         neuralSafeSpy(module, typedKey, () => null);
       }

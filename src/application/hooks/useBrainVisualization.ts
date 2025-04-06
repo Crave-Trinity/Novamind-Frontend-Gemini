@@ -3,12 +3,12 @@
  * Provides state management and data fetching for 3D brain visualization
  */
 
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import type { Vector3 } from "@domain/types/shared/common"; // Use type import
-import type { BrainRegion, BrainModel, NeuralConnection } from "@domain/types/brain/models"; // Use type import
-import type { RenderMode } from "@domain/types/brain/visualization"; // Use type import
-import { apiClient } from "@infrastructure/api/ApiClient"; // Use remote path
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import type { Vector3 } from '@domain/types/shared/common'; // Use type import
+import type { BrainRegion, BrainModel, NeuralConnection } from '@domain/types/brain/models'; // Use type import
+import type { RenderMode } from '@domain/types/brain/visualization'; // Use type import
+import { apiClient } from '@infrastructure/api/ApiClient'; // Use remote path
 
 // Keep local definition from remote
 interface BrainViewState {
@@ -23,7 +23,6 @@ interface BrainViewState {
   focusPoint: Vector3 | null;
 }
 
-
 interface UseBrainVisualizationOptions {
   patientId?: string;
   initialViewState?: Partial<BrainViewState>;
@@ -34,9 +33,9 @@ interface UseBrainVisualizationOptions {
 
 export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
   console.log('[DEBUG] useBrainVisualization hook starting with options:', options);
-  
+
   const defaultOptions: UseBrainVisualizationOptions = {
-    patientId: "default",
+    patientId: 'default',
     autoRotate: false,
     highlightActiveRegions: true,
     disabled: false,
@@ -52,11 +51,11 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["brainModel", mergedOptions.patientId],
+    queryKey: ['brainModel', mergedOptions.patientId],
     queryFn: async () => {
       console.log('[DEBUG] Fetching brain model for:', mergedOptions.patientId);
       // Assuming apiClient returns the correct BrainModel type or needs validation/mapping
-      const data = await apiClient.getBrainModel(mergedOptions.patientId); 
+      const data = await apiClient.getBrainModel(mergedOptions.patientId);
       console.log('[DEBUG] Received brain model:', data);
       // TODO: Add runtime validation if apiClient doesn't guarantee BrainModel structure
       return data as BrainModel; // Cast needed if getBrainModel has generic return
@@ -73,7 +72,7 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
     zoom: 1,
     highlightedRegions: [],
     visiblePathways: true, // Keep name consistent with interface for now
-    renderMode: "anatomical" as RenderMode,
+    renderMode: 'anatomical' as RenderMode,
     transparencyLevel: 0.8,
     focusPoint: null,
     ...mergedOptions.initialViewState,
@@ -87,8 +86,8 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
     if (brainModel && mergedOptions.highlightActiveRegions) {
       console.log('[DEBUG] Updating active regions');
       // Use dataConfidence as per domain type
-      const significantRegions = brainModel.regions 
-        .filter((region: BrainRegion) => region.dataConfidence > 0.6) 
+      const significantRegions = brainModel.regions
+        .filter((region: BrainRegion) => region.dataConfidence > 0.6)
         .map((region: BrainRegion) => region.id);
 
       setActiveRegions(significantRegions);
@@ -138,9 +137,7 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
         return;
       }
 
-      const region = brainModel.regions.find(
-        (r: BrainRegion) => r.id === regionId,
-      );
+      const region = brainModel.regions.find((r: BrainRegion) => r.id === regionId);
       if (!region) {
         return;
       }
@@ -152,7 +149,7 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
         highlightedRegions: [regionId],
       }));
     },
-    [brainModel],
+    [brainModel]
   );
 
   // Callback to reset view to default
@@ -164,7 +161,7 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
       zoom: 1,
       highlightedRegions: [],
       visiblePathways: true,
-      renderMode: "anatomical" as RenderMode,
+      renderMode: 'anatomical' as RenderMode,
       transparencyLevel: 0.8,
       focusPoint: null,
     });
@@ -184,11 +181,9 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
       if (!brainModel) {
         return null;
       }
-      return (
-        brainModel.regions.find((r: BrainRegion) => r.id === regionId) || null
-      );
+      return brainModel.regions.find((r: BrainRegion) => r.id === regionId) || null;
     },
-    [brainModel],
+    [brainModel]
   );
 
   // Filter regions based on view state
@@ -201,9 +196,10 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
     }) || [];
 
   // Filter connections based on view state (Use NeuralConnection type)
-  const visibleConnections = 
+  const visibleConnections =
     brainModel?.connections.filter((connection: NeuralConnection) => {
-      if (!viewState.visiblePathways) { // Use state variable name
+      if (!viewState.visiblePathways) {
+        // Use state variable name
         return false;
       }
 
@@ -223,7 +219,7 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
       // In a real app, this would update the query parameters
       refetch();
     },
-    [refetch],
+    [refetch]
   );
 
   // Reset entire visualization

@@ -4,54 +4,35 @@
  * for neural architecture with clinical precision
  */
 
-import React, {
-  useState,
-  useCallback,
-  useRef,
-  useMemo,
-  useEffect,
-} from "react";
-import { Canvas, useThree, useFrame } from "@react-three/fiber";
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import {
   OrbitControls,
   ContactShadows,
   Environment,
   BakeShadows,
   useContextBridge,
-} from "@react-three/drei";
-import * as THREE from "three";
-import {
-  EffectComposer,
-  Bloom,
-  SelectiveBloom,
-  DepthOfField,
-} from "@react-three/postprocessing";
-import { KernelSize } from "postprocessing";
+} from '@react-three/drei';
+import * as THREE from 'three';
+import { EffectComposer, Bloom, SelectiveBloom, DepthOfField } from '@react-three/postprocessing';
+import { KernelSize } from 'postprocessing';
 // Use relative path to ensure the correct context instance is imported
-import { ThemeContext } from "../../application/contexts/ThemeProvider";
+import { ThemeContext } from '../../application/contexts/ThemeProvider';
 
 // Import molecular components
-import BrainRegionGroup from "@presentation/molecules/BrainRegionGroup";
-import NeuralConnections from "@presentation/molecules/NeuralConnections";
+import BrainRegionGroup from '@presentation/molecules/BrainRegionGroup';
+import NeuralConnections from '@presentation/molecules/NeuralConnections';
 
 // Import domain types
-import {
-  BrainModel,
-  BrainRegion,
-  NeuralConnection,
-} from "@domain/types/brain/models";
+import { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
 import {
   RenderMode,
   ThemeSettings,
   VisualizationSettings,
   defaultVisualizationSettings, // Import defaults
-} from "@domain/types/brain/visualization";
+} from '@domain/types/brain/visualization';
 // Use relative path for common types
-import {
-  SafeArray,
-  Result,
-  VisualizationState,
-} from "@domain/types/shared/common"; // Correct alias for common types
+import { SafeArray, Result, VisualizationState } from '@domain/types/shared/common'; // Correct alias for common types
 
 // Neural-safe prop definition with explicit typing
 interface BrainModelViewerProps {
@@ -91,10 +72,7 @@ interface BrainModelViewerProps {
   onRegionHover?: (regionId: string | null) => void;
   onConnectionClick?: (connectionId: string) => void;
   onConnectionHover?: (connectionId: string | null) => void;
-  onCameraMove?: (
-    position: [number, number, number],
-    target: [number, number, number],
-  ) => void;
+  onCameraMove?: (position: [number, number, number], target: [number, number, number]) => void;
   onLoadComplete?: () => void;
   onError?: (error: Error) => void;
 }
@@ -103,17 +81,10 @@ interface BrainModelViewerProps {
  * CameraController - Internal component for camera handling
  */
 const CameraController: React.FC<{
-  onCameraMove?: (
-    position: [number, number, number],
-    target: [number, number, number],
-  ) => void;
+  onCameraMove?: (position: [number, number, number], target: [number, number, number]) => void;
   initialPosition?: [number, number, number];
   initialTarget?: [number, number, number];
-}> = ({
-  onCameraMove,
-  initialPosition = [0, 0, 10],
-  initialTarget = [0, 0, 0],
-}) => {
+}> = ({ onCameraMove, initialPosition = [0, 0, 10], initialTarget = [0, 0, 0] }) => {
   const { camera } = useThree();
   const controlsRef = useRef<any>(null);
 
@@ -282,9 +253,7 @@ const Brain3DScene: React.FC<{
        )} */}
 
       {/* Performance optimization for shadows */}
-      {!highPerformanceMode && visualizationSettings.enableShadows && (
-        <BakeShadows />
-      )}
+      {!highPerformanceMode && visualizationSettings.enableShadows && <BakeShadows />}
     </group>
   );
 };
@@ -309,8 +278,8 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
   highPerformanceMode = false,
   activityThreshold = 0.2,
   showInactiveRegions = true,
-  width = "100%",
-  height = "100%",
+  width = '100%',
+  height = '100%',
   backgroundColor, // Use theme/settings instead?
   cameraPosition = [0, 0, 20], // Default camera position
   cameraFov = 50,
@@ -361,13 +330,13 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
 
   // --- State-based Effects ---
   useEffect(() => {
-    if (visualizationState.status === "error" && onError) {
+    if (visualizationState.status === 'error' && onError) {
       onError(visualizationState.error);
     }
   }, [visualizationState, onError]);
 
   useEffect(() => {
-    if (visualizationState.status === "success" && onLoadComplete) {
+    if (visualizationState.status === 'success' && onLoadComplete) {
       onLoadComplete();
     }
   }, [visualizationState.status, onLoadComplete]);
@@ -389,13 +358,8 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
   const renderErrorState = (error: Error) => (
     <div className="w-full h-full flex items-center justify-center bg-gray-900">
       <div className="text-center max-w-md px-4">
-        <div className="text-red-500 mb-2 text-2xl">
-          {" "}
-          {/* Icon placeholder */}{" "}
-        </div>
-        <h3 className="text-white text-lg font-medium mb-2">
-          Neural Visualization Error
-        </h3>
+        <div className="text-red-500 mb-2 text-2xl"> {/* Icon placeholder */} </div>
+        <h3 className="text-white text-lg font-medium mb-2">Neural Visualization Error</h3>
         <p className="text-gray-300 text-sm mb-4">{error.message}</p>
         <button
           className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-sm"
@@ -410,12 +374,8 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
   const renderEmptyState = () => (
     <div className="w-full h-full flex items-center justify-center bg-gray-900">
       <div className="text-center max-w-md px-4">
-        <h3 className="text-white text-lg font-medium mb-2">
-          No Neural Data Available
-        </h3>
-        <p className="text-gray-300 text-sm">
-          Please select a neural model to visualize.
-        </p>
+        <h3 className="text-white text-lg font-medium mb-2">No Neural Data Available</h3>
+        <p className="text-gray-300 text-sm">Please select a neural model to visualize.</p>
       </div>
     </div>
   );
@@ -465,11 +425,10 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
         />
 
         {/* Post-processing effects - Use settings and direct props */}
-        {!highPerformanceMode &&
-        (settings.enableBloom || enableDepthOfFieldProp) ? (
+        {!highPerformanceMode && (settings.enableBloom || enableDepthOfFieldProp) ? (
           <EffectComposer>
             <>
-              {" "}
+              {' '}
               {/* Wrap conditional elements in Fragment */}
               {settings.enableBloom ? (
                 <Bloom
@@ -481,7 +440,7 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
               ) : null}
             </>
             <>
-              {" "}
+              {' '}
               {/* Wrap conditional elements in Fragment */}
               {enableDepthOfFieldProp ? ( // Use direct prop
                 <DepthOfField
@@ -500,11 +459,11 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
   // Handle state-based rendering
   const renderContent = () => {
     switch (visualizationState.status) {
-      case "loading":
+      case 'loading':
         return renderLoadingState();
-      case "error":
+      case 'error':
         return renderErrorState(visualizationState.error);
-      case "success":
+      case 'success':
         return renderVisualization(visualizationState.data);
       default:
         return renderEmptyState();
@@ -517,9 +476,9 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
       style={{
         width: width,
         height: height,
-        position: "relative",
-        overflow: "hidden",
-        borderRadius: "0.5rem", // Example styling
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: '0.5rem', // Example styling
       }}
     >
       {renderContent()}
@@ -528,13 +487,12 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
       {/* Region count display removed */}
 
       {/* Legend for current render mode */}
-      {visualizationState.status === "success" && showLegend && (
+      {visualizationState.status === 'success' && showLegend && (
         <div className="absolute top-4 right-4 bg-black/50 text-white text-xs p-2 rounded shadow-lg">
           <div className="font-medium mb-1">
-            {settings.renderMode === RenderMode.ANATOMICAL && "Anatomical View"}
-            {settings.renderMode === RenderMode.FUNCTIONAL && "Functional View"}
-            {settings.renderMode === RenderMode.CONNECTIVITY &&
-              "Connectivity View"}
+            {settings.renderMode === RenderMode.ANATOMICAL && 'Anatomical View'}
+            {settings.renderMode === RenderMode.FUNCTIONAL && 'Functional View'}
+            {settings.renderMode === RenderMode.CONNECTIVITY && 'Connectivity View'}
             {/* Add other render modes as needed */}
           </div>
           {settings.renderMode === RenderMode.FUNCTIONAL && (
@@ -543,8 +501,7 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                 <div
                   className="w-3 h-3 rounded-full mr-1"
                   style={{
-                    backgroundColor:
-                      settings.activityColorScale?.[4] || "#E74C3C", // Safe access
+                    backgroundColor: settings.activityColorScale?.[4] || '#E74C3C', // Safe access
                   }}
                 ></div>
                 <span>High</span>
@@ -553,8 +510,7 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                 <div
                   className="w-3 h-3 rounded-full mr-1"
                   style={{
-                    backgroundColor:
-                      settings.activityColorScale?.[2] || "#F1C40F", // Safe access
+                    backgroundColor: settings.activityColorScale?.[2] || '#F1C40F', // Safe access
                   }}
                 ></div>
                 <span>Medium</span>
@@ -563,8 +519,7 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                 <div
                   className="w-3 h-3 rounded-full mr-1"
                   style={{
-                    backgroundColor:
-                      settings.activityColorScale?.[0] || "#3498DB", // Safe access
+                    backgroundColor: settings.activityColorScale?.[0] || '#3498DB', // Safe access
                   }}
                 ></div>
                 <span>Low</span>

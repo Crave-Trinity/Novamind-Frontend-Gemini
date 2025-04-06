@@ -5,8 +5,8 @@
  * for the Novamind Digital Twin application
  */
 
-import { auditLogClient, AuditEventType } from "@infrastructure/clients/auditLogClient";
-import { initializeSessionClient } from "@infrastructure/clients/sessionClient";
+import { auditLogClient, AuditEventType } from '@infrastructure/clients/auditLogClient';
+import { initializeSessionClient } from '@infrastructure/clients/sessionClient';
 
 /**
  * Initialize application
@@ -18,11 +18,11 @@ export function initializeApp(): void {
     warningTime: 60 * 1000, // 1 minute warning
     onTimeout: () => {
       // Redirect to login on timeout
-      window.location.href = "/login?reason=timeout";
+      window.location.href = '/login?reason=timeout';
     },
     onWarning: () => {
       // Show warning modal (would be triggered via a global state mechanism in a real app)
-      console.debug("Session timeout warning triggered");
+      console.debug('Session timeout warning triggered');
       // This would typically dispatch to a global state manager to show the modal
     },
   });
@@ -32,23 +32,16 @@ export function initializeApp(): void {
   window.onerror = (message, source, lineno, colno, error) => {
     // Log to audit service
     auditLogClient.log(AuditEventType.SYSTEM_ERROR, {
-      action: "global_error",
-      errorCode: error?.name || "Error",
+      action: 'global_error',
+      errorCode: error?.name || 'Error',
       errorMessage: String(message),
       details: `${source}:${lineno}:${colno}`,
-      result: "failure",
+      result: 'failure',
     });
 
     // Call original handler if it exists
-    if (typeof originalOnError === "function") {
-      return originalOnError.call(
-        window,
-        message,
-        source,
-        lineno,
-        colno,
-        error,
-      );
+    if (typeof originalOnError === 'function') {
+      return originalOnError.call(window, message, source, lineno, colno, error);
     }
 
     // We don't prevent default handling
@@ -60,15 +53,15 @@ export function initializeApp(): void {
   window.onunhandledrejection = (event: PromiseRejectionEvent) => {
     // Log to audit service
     auditLogClient.log(AuditEventType.SYSTEM_ERROR, {
-      action: "unhandled_rejection",
-      errorCode: "Promise Rejection",
+      action: 'unhandled_rejection',
+      errorCode: 'Promise Rejection',
       errorMessage: String(event.reason),
-      details: event.reason?.stack || "No stack trace available",
-      result: "failure",
+      details: event.reason?.stack || 'No stack trace available',
+      result: 'failure',
     });
 
     // Call original handler if it exists
-    if (typeof originalUnhandledRejection === "function") {
+    if (typeof originalUnhandledRejection === 'function') {
       return originalUnhandledRejection.call(window, event);
     }
 
@@ -78,9 +71,9 @@ export function initializeApp(): void {
 
   // Configure security headers via CSP
   // In a real app, this would be done server-side, but we set a base policy here
-  if (typeof document !== "undefined") {
-    const meta = document.createElement("meta");
-    meta.httpEquiv = "Content-Security-Policy";
+  if (typeof document !== 'undefined') {
+    const meta = document.createElement('meta');
+    meta.httpEquiv = 'Content-Security-Policy';
     meta.content = [
       // Limit where resources can be loaded from
       "default-src 'self'",
@@ -97,29 +90,29 @@ export function initializeApp(): void {
       // No embedding in frames from other origins
       "frame-ancestors 'self'",
       // Force HTTPS
-      "upgrade-insecure-requests",
-    ].join("; ");
+      'upgrade-insecure-requests',
+    ].join('; ');
     document.head.appendChild(meta);
   }
 
   // Configure security headers via Feature-Policy
-  if (typeof document !== "undefined") {
-    const meta = document.createElement("meta");
-    meta.httpEquiv = "Feature-Policy";
+  if (typeof document !== 'undefined') {
+    const meta = document.createElement('meta');
+    meta.httpEquiv = 'Feature-Policy';
     meta.content = [
       "camera 'none'",
       "microphone 'none'",
       "geolocation 'none'",
       "autoplay 'self'",
-    ].join("; ");
+    ].join('; ');
     document.head.appendChild(meta);
   }
 
   // Log application initialization
   auditLogClient.log(AuditEventType.SYSTEM_ERROR, {
-    action: "application_init",
+    action: 'application_init',
     details: `Novamind Frontend initialized at ${new Date().toISOString()}`,
-    result: "success",
+    result: 'success',
   });
 }
 

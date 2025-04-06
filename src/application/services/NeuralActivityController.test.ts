@@ -4,7 +4,7 @@
  * Full tests are disabled until animation and async issues are resolved.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks } from '@test/webgl'; // Removed memoryMonitor
 
 import * as Controller from '@/application/controllers/NeuralActivityController';
@@ -29,7 +29,9 @@ describe('NeuralActivityController (Minimal)', () => {
   afterEach(() => {
     const memoryReport = cleanupWebGLMocks();
     if (memoryReport && memoryReport.leakedObjectCount > 0) {
-      console.warn(`Memory leak detected in "NeuralActivityController (Minimal)": ${memoryReport.leakedObjectCount} objects not properly disposed`);
+      console.warn(
+        `Memory leak detected in "NeuralActivityController (Minimal)": ${memoryReport.leakedObjectCount} objects not properly disposed`
+      );
       console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
     }
   });

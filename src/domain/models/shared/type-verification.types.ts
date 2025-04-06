@@ -21,7 +21,7 @@ import {
   asNumber,
   asBoolean,
   asDate,
-} from "@models/shared/type-verification";
+} from '@models/shared/type-verification';
 
 // Test that TypeScript properly infers the assertion types
 // This file doesn't export any actual tests - it's a compile-time
@@ -29,7 +29,7 @@ import {
 
 // ========== assertDefined ==========
 () => {
-  const maybeStr: string | undefined = "test";
+  const maybeStr: string | undefined = 'test';
 
   // Before assertion: TypeScript treats as possibly undefined
   // @ts-expect-error - This line demonstrates a compile-time error before assertion
@@ -42,7 +42,7 @@ import {
 
 // ========== assertPresent ==========
 () => {
-  const maybeStr: string | null | undefined = "test";
+  const maybeStr: string | null | undefined = 'test';
 
   // Before assertion: TypeScript treats as possibly null or undefined
   // @ts-expect-error - This line demonstrates a compile-time error before assertion
@@ -55,7 +55,7 @@ import {
 
 // ========== assertString ==========
 () => {
-  const value: unknown = "test";
+  const value: unknown = 'test';
 
   // Before assertion: TypeScript treats as unknown
   // @ts-expect-error - This line demonstrates a compile-time error before assertion
@@ -107,7 +107,7 @@ import {
 
 // ========== assertObject ==========
 () => {
-  const value: unknown = { name: "test" };
+  const value: unknown = { name: 'test' };
 
   // Before assertion: TypeScript treats as unknown
   // @ts-expect-error - This line demonstrates a compile-time error before assertion
@@ -139,29 +139,29 @@ import {
   }
   const isPerson = (v: unknown): v is Person => {
     return (
-      typeof v === "object" &&
+      typeof v === 'object' &&
       v !== null &&
-      "name" in v &&
-      typeof (v as any).name === "string" &&
-      "age" in v &&
-      typeof (v as any).age === "number"
+      'name' in v &&
+      typeof (v as any).name === 'string' &&
+      'age' in v &&
+      typeof (v as any).age === 'number'
     );
   };
 
-  const value: unknown = { name: "Alice", age: 30 };
+  const value: unknown = { name: 'Alice', age: 30 };
 
   // Before assertion: TypeScript treats as unknown
   // @ts-expect-error - This line demonstrates a compile-time error before assertion
   const beforePerson: Person = value;
 
   // After assertion: TypeScript narrows type to Person
-  assertType(value, isPerson, "Person");
+  assertType(value, isPerson, 'Person');
   const afterPerson: Person = value; // No type error
 };
 
 // ========== Safe type conversion functions ==========
 () => {
-  const unknownValue: unknown = "hello";
+  const unknownValue: unknown = 'hello';
 
   // Type transformation with safe fallbacks
   const strResult = asString(unknownValue);

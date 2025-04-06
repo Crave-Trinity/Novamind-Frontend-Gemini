@@ -3,17 +3,17 @@
  * TemporalService - Placeholder for temporal data operations
  */
 
-import { Result, success } from "@/domain/types/shared/common";
-import { TemporalDynamics } from "@/domain/types/temporal/dynamics";
+import { Result, success } from '@/domain/types/shared/common';
+import { TemporalDynamics } from '@/domain/types/temporal/dynamics';
 
 // Placeholder implementation
 export const temporalService = {
   getTemporalDynamics: async (
     patientId: string,
-    timeScale: string,
+    timeScale: string
   ): Promise<Result<TemporalDynamics>> => {
     console.warn(
-      `TemporalService.getTemporalDynamics called for ${patientId} with scale ${timeScale}, returning mock data.`,
+      `TemporalService.getTemporalDynamics called for ${patientId} with scale ${timeScale}, returning mock data.`
     );
     // Return mock success data matching the TemporalDynamics interface
     return success({

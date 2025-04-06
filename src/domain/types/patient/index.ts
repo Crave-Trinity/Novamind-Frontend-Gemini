@@ -24,4 +24,4 @@ export interface PatientStats {
   lastScanDate: string | null;
   activeDiagnoses: number;
   treatmentProgress: number;
-} 
+}

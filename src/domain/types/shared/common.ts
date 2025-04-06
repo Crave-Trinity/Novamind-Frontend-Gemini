@@ -27,7 +27,7 @@ export interface VersionedEntity {
 }
 
 // Sort direction type
-export type SortOrder = "asc" | "desc";
+export type SortOrder = 'asc' | 'desc';
 
 // Numeric range type
 export interface Range {
@@ -60,9 +60,7 @@ export interface Dimensions {
 }
 
 // Result pattern for neural-safe error handling
-export type Result<T, E = Error> =
-  | { success: true; value: T }
-  | { success: false; error: E };
+export type Result<T, E = Error> = { success: true; value: T } | { success: false; error: E };
 
 // Helper functions for Result pattern
 export const success = <T>(value: T): Result<T> => ({
@@ -162,7 +160,7 @@ export function isNonNullable<T>(value: T): value is NonNullable<T> {
 // Neural-safe error type with severity levels
 export class NeuralError extends Error {
   code: string;
-  severity: "warning" | "error" | "fatal";
+  severity: 'warning' | 'error' | 'fatal';
   component?: string | undefined; // Allow undefined for exactOptionalPropertyTypes
   timestamp: number;
 
@@ -170,14 +168,14 @@ export class NeuralError extends Error {
     message: string,
     options: {
       code: string;
-      severity?: "warning" | "error" | "fatal";
+      severity?: 'warning' | 'error' | 'fatal';
       component?: string;
-    } = { code: "UNKNOWN_ERROR" },
+    } = { code: 'UNKNOWN_ERROR' }
   ) {
     super(message);
-    this.name = "NeuralError";
+    this.name = 'NeuralError';
     this.code = options.code;
-    this.severity = options.severity || "error";
+    this.severity = options.severity || 'error';
     this.component = options.component;
     this.timestamp = Date.now();
   }
@@ -242,53 +240,49 @@ export const Vector3 = {
 
 // Data visualization state with discriminated union for type safety
 export type VisualizationState<T> =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "success"; data: T }
-  | { status: "error"; error: NeuralError };
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: T }
+  | { status: 'error'; error: NeuralError };
 
 // Neural-safe visualization state factory functions
 export const VisualizationState = {
   idle<T>(): VisualizationState<T> {
-    return { status: "idle" };
+    return { status: 'idle' };
   },
 
   loading<T>(): VisualizationState<T> {
-    return { status: "loading" };
+    return { status: 'loading' };
   },
 
   success<T>(data: T): VisualizationState<T> {
     return {
-      status: "success",
+      status: 'success',
       data,
     };
   },
 
   error<T>(error: NeuralError): VisualizationState<T> {
     return {
-      status: "error",
+      status: 'error',
       error,
     };
   },
 
-  isIdle<T>(state: VisualizationState<T>): state is { status: "idle" } {
-    return state.status === "idle";
+  isIdle<T>(state: VisualizationState<T>): state is { status: 'idle' } {
+    return state.status === 'idle';
   },
 
-  isLoading<T>(state: VisualizationState<T>): state is { status: "loading" } {
-    return state.status === "loading";
+  isLoading<T>(state: VisualizationState<T>): state is { status: 'loading' } {
+    return state.status === 'loading';
   },
 
-  isSuccess<T>(
-    state: VisualizationState<T>,
-  ): state is { status: "success"; data: T } {
-    return state.status === "success";
+  isSuccess<T>(state: VisualizationState<T>): state is { status: 'success'; data: T } {
+    return state.status === 'success';
   },
 
-  isError<T>(
-    state: VisualizationState<T>,
-  ): state is { status: "error"; error: NeuralError } {
-    return state.status === "error";
+  isError<T>(state: VisualizationState<T>): state is { status: 'error'; error: NeuralError } {
+    return state.status === 'error';
   },
 };
 
@@ -301,25 +295,16 @@ export const Result = {
     return result.success === true;
   },
 
-  isFailure<T, E>(
-    result: Result<T, E>,
-  ): result is { success: false; error: E } {
+  isFailure<T, E>(result: Result<T, E>): result is { success: false; error: E } {
     return result.success === false;
   },
 
   map<T, U, E>(result: Result<T, E>, fn: (value: T) => U): Result<U, E> {
-    return result.success
-      ? success(fn(result.value))
-      : result; // Return the original failure result, preserving the error type E
+    return result.success ? success(fn(result.value)) : result; // Return the original failure result, preserving the error type E
   },
 
-  flatMap<T, U, E>(
-    result: Result<T, E>,
-    fn: (value: T) => Result<U, E>,
-  ): Result<U, E> {
-    return result.success
-      ? fn(result.value)
-      : (result as unknown as Result<U, E>);
+  flatMap<T, U, E>(result: Result<T, E>, fn: (value: T) => Result<U, E>): Result<U, E> {
+    return result.success ? fn(result.value) : (result as unknown as Result<U, E>);
   },
 
   getOrElse<T, E>(result: Result<T, E>, defaultValue: T): T {

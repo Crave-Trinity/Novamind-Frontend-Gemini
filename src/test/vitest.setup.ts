@@ -20,7 +20,7 @@ if (typeof document !== 'undefined' && document.documentElement) {
   // Initialize with light mode as default
   document.documentElement.classList.add('light');
   document.documentElement.classList.remove('dark');
-  
+
   // Add a style element to document head for Tailwind classes
   const style = document.createElement('style');
   style.innerHTML = `

@@ -4,8 +4,8 @@
  * with theme-aware clinical precision
  */
 
-import { useState, useCallback, useEffect, useMemo } from "react"; // Add useMemo
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useCallback, useEffect, useMemo } from 'react'; // Add useMemo
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 // Import local useTheme hook derived from ThemeContext
 import { useTheme } from '@application/hooks/useTheme';
 
@@ -14,27 +14,27 @@ import type {
   VisualizationSettings,
   ThemeSettings,
   RenderMode,
-} from "@domain/types/brain/visualization";
+} from '@domain/types/brain/visualization';
 // Assuming the path alias is correct, ensure the file exists and exports these
-import type { Result } from "@domain/types/shared/common"; // Removed unused success, failure
+import type { Result } from '@domain/types/shared/common'; // Removed unused success, failure
 
 // Default theme settings
 const DEFAULT_THEME_SETTINGS: Record<string, ThemeSettings> = {
   // Clinical theme - precise, medical, focused on accuracy
   clinical: {
-    name: "clinical", // Added missing prop
-    backgroundColor: "#FFFFFF", // Added missing prop
-    primaryColor: "#2C3E50", // Added missing prop
-    secondaryColor: "#3498DB", // Added missing prop
-    accentColor: "#8b5cf6",
-    textColor: "#2C3E50", // Added missing prop
-    regionBaseColor: "#ffffff",
-    activeRegionColor: "#f87171",
-    connectionBaseColor: "#94a3b8",
-    activeConnectionColor: "#f97316",
-    uiBackgroundColor: "#F8F9FA", // Added missing prop
-    uiTextColor: "#2C3E50", // Added missing prop
-    fontFamily: "Inter, system-ui, sans-serif", // Added missing prop
+    name: 'clinical', // Added missing prop
+    backgroundColor: '#FFFFFF', // Added missing prop
+    primaryColor: '#2C3E50', // Added missing prop
+    secondaryColor: '#3498DB', // Added missing prop
+    accentColor: '#8b5cf6',
+    textColor: '#2C3E50', // Added missing prop
+    regionBaseColor: '#ffffff',
+    activeRegionColor: '#f87171',
+    connectionBaseColor: '#94a3b8',
+    activeConnectionColor: '#f97316',
+    uiBackgroundColor: '#F8F9FA', // Added missing prop
+    uiTextColor: '#2C3E50', // Added missing prop
+    fontFamily: 'Inter, system-ui, sans-serif', // Added missing prop
     glowIntensity: 0.1,
     useBloom: false, // Added missing prop
     // Removed invalid props: selectionColor, excitatoryColor, inhibitoryColor, shadowColor, directionalLightColor, ambientLightIntensity, directionalLightIntensity, bloomThreshold, bloomIntensity, environmentPreset, activityColorScale, showLabels, showFloor, curvedConnections, useDashedConnections, useEnvironmentLighting
@@ -42,53 +42,52 @@ const DEFAULT_THEME_SETTINGS: Record<string, ThemeSettings> = {
 
   // Dark theme - sleek, modern, high contrast
   dark: {
-    name: "dark", // Added missing prop
-    backgroundColor: "#121212", // Added missing prop
-    primaryColor: "#6E64F0", // Added missing prop
-    secondaryColor: "#3CCFCF", // Added missing prop
-    accentColor: "#8b5cf6",
-    textColor: "#FFFFFF", // Added missing prop
-    regionBaseColor: "#1e293b",
-    activeRegionColor: "#f87171",
-    connectionBaseColor: "#475569",
-    activeConnectionColor: "#f97316",
-    uiBackgroundColor: "#1E1E1E", // Added missing prop
-    uiTextColor: "#FFFFFF", // Added missing prop
-    fontFamily: "Inter, system-ui, sans-serif", // Added missing prop
+    name: 'dark', // Added missing prop
+    backgroundColor: '#121212', // Added missing prop
+    primaryColor: '#6E64F0', // Added missing prop
+    secondaryColor: '#3CCFCF', // Added missing prop
+    accentColor: '#8b5cf6',
+    textColor: '#FFFFFF', // Added missing prop
+    regionBaseColor: '#1e293b',
+    activeRegionColor: '#f87171',
+    connectionBaseColor: '#475569',
+    activeConnectionColor: '#f97316',
+    uiBackgroundColor: '#1E1E1E', // Added missing prop
+    uiTextColor: '#FFFFFF', // Added missing prop
+    fontFamily: 'Inter, system-ui, sans-serif', // Added missing prop
     glowIntensity: 0.3,
     useBloom: true, // Added missing prop
-     // Removed invalid props...
+    // Removed invalid props...
   },
 
   // Removed "modern" theme as it's not a valid ThemeOption
 
   // High contrast theme - accessible, clear, distinct
   highContrast: {
-    name: "high-contrast", // Added missing prop
-    backgroundColor: "#000000", // Added missing prop
-    primaryColor: "#FFFFFF", // Added missing prop
-    secondaryColor: "#FFFF00", // Added missing prop
-    accentColor: "#7e22ce",
-    textColor: "#FFFFFF", // Added missing prop
-    regionBaseColor: "#ffffff",
-    activeRegionColor: "#ef4444",
-    connectionBaseColor: "#000000",
-    activeConnectionColor: "#ea580c",
-    uiBackgroundColor: "#000000", // Added missing prop
-    uiTextColor: "#FFFFFF", // Added missing prop
-    fontFamily: "Inter, system-ui, sans-serif", // Added missing prop
+    name: 'high-contrast', // Added missing prop
+    backgroundColor: '#000000', // Added missing prop
+    primaryColor: '#FFFFFF', // Added missing prop
+    secondaryColor: '#FFFF00', // Added missing prop
+    accentColor: '#7e22ce',
+    textColor: '#FFFFFF', // Added missing prop
+    regionBaseColor: '#ffffff',
+    activeRegionColor: '#ef4444',
+    connectionBaseColor: '#000000',
+    activeConnectionColor: '#ea580c',
+    uiBackgroundColor: '#000000', // Added missing prop
+    uiTextColor: '#FFFFFF', // Added missing prop
+    fontFamily: 'Inter, system-ui, sans-serif', // Added missing prop
     glowIntensity: 0.1,
     useBloom: true, // Added missing prop (Note: was true in original high-contrast example)
-     // Removed invalid props...
+    // Removed invalid props...
   },
 };
 
 // Default visualization settings
 // Use the actual default defined in the domain types
-import { defaultVisualizationSettings } from "@domain/types/brain/visualization";
+import { defaultVisualizationSettings } from '@domain/types/brain/visualization';
 
-const DEFAULT_VISUALIZATION_SETTINGS: VisualizationSettings =
-  defaultVisualizationSettings;
+const DEFAULT_VISUALIZATION_SETTINGS: VisualizationSettings = defaultVisualizationSettings;
 // Remove properties not present in the domain type:
 // activityThreshold, showInactiveRegions, enableDepthOfField, showRegionCount, performanceMode, themeSettings
 // These should be added to the domain type if they are truly part of the core settings.
@@ -107,9 +106,7 @@ interface UseVisualSettingsReturn {
   activeThemeSettings: ThemeSettings; // Add the currently active theme settings
 
   // Methods
-  updateVisualizationSettings: (
-    settings: Partial<VisualizationSettings>,
-  ) => void;
+  updateVisualizationSettings: (settings: Partial<VisualizationSettings>) => void;
   getThemeSettings: (themeName: string) => ThemeSettings; // Keep getter for specific themes
   resetSettings: () => void;
   createCustomTheme: (name: string, settings: ThemeSettings) => void;
@@ -118,8 +115,8 @@ interface UseVisualSettingsReturn {
 /**
  * Get settings key for localStorage
  */
-const SETTINGS_STORAGE_KEY = "novamind_visualization_settings";
-const THEME_SETTINGS_STORAGE_KEY = "novamind_theme_settings";
+const SETTINGS_STORAGE_KEY = 'novamind_visualization_settings';
+const THEME_SETTINGS_STORAGE_KEY = 'novamind_theme_settings';
 
 /**
  * useVisualSettings - Application hook for neural visualization settings
@@ -133,17 +130,16 @@ export function useVisualSettings(): UseVisualSettingsReturn {
   const queryClient = useQueryClient();
 
   // Settings query key
-  const settingsQueryKey = "visualizationSettings";
+  const settingsQueryKey = 'visualizationSettings';
 
   // Local state for settings
   const [localSettings, setLocalSettings] = useState<VisualizationSettings>(
-    DEFAULT_VISUALIZATION_SETTINGS,
+    DEFAULT_VISUALIZATION_SETTINGS
   );
 
   // Local state for theme settings
-  const [localThemeSettings, setLocalThemeSettings] = useState<
-    Record<string, ThemeSettings>
-  >(DEFAULT_THEME_SETTINGS);
+  const [localThemeSettings, setLocalThemeSettings] =
+    useState<Record<string, ThemeSettings>>(DEFAULT_THEME_SETTINGS);
 
   // Initialize from localStorage if available
   useEffect(() => {
@@ -151,16 +147,12 @@ export function useVisualSettings(): UseVisualSettingsReturn {
       // Load visualization settings
       const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
       if (storedSettings) {
-        const parsedSettings = JSON.parse(
-          storedSettings,
-        ) as VisualizationSettings;
+        const parsedSettings = JSON.parse(storedSettings) as VisualizationSettings;
         setLocalSettings(parsedSettings);
       }
 
       // Load theme settings
-      const storedThemeSettings = localStorage.getItem(
-        THEME_SETTINGS_STORAGE_KEY,
-      );
+      const storedThemeSettings = localStorage.getItem(THEME_SETTINGS_STORAGE_KEY);
       if (storedThemeSettings) {
         const parsedThemeSettings = JSON.parse(storedThemeSettings) as Record<
           string,
@@ -172,7 +164,7 @@ export function useVisualSettings(): UseVisualSettingsReturn {
         });
       }
     } catch (error) {
-      console.error("Failed to load settings from localStorage", error);
+      console.error('Failed to load settings from localStorage', error);
     }
   }, []);
 
@@ -185,12 +177,9 @@ export function useVisualSettings(): UseVisualSettingsReturn {
         // Removed logic related to nested themeSettings as it's not part of VisualizationSettings type
         // Save to localStorage
         try {
-          localStorage.setItem(
-            SETTINGS_STORAGE_KEY,
-            JSON.stringify(updatedSettings),
-          );
+          localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(updatedSettings));
         } catch (error) {
-          console.error("Failed to save settings to localStorage", error);
+          console.error('Failed to save settings to localStorage', error);
         }
 
         // Update query cache
@@ -199,7 +188,7 @@ export function useVisualSettings(): UseVisualSettingsReturn {
         return updatedSettings;
       });
     },
-    [theme, queryClient],
+    [theme, queryClient]
   );
 
   // Get theme settings by name
@@ -207,7 +196,7 @@ export function useVisualSettings(): UseVisualSettingsReturn {
     (themeName: string): ThemeSettings => {
       return localThemeSettings[themeName] || DEFAULT_THEME_SETTINGS.clinical;
     },
-    [localThemeSettings],
+    [localThemeSettings]
   );
 
   // Reset to default settings
@@ -216,42 +205,30 @@ export function useVisualSettings(): UseVisualSettingsReturn {
 
     // Save default to localStorage
     try {
-      localStorage.setItem(
-        SETTINGS_STORAGE_KEY,
-        JSON.stringify(DEFAULT_VISUALIZATION_SETTINGS),
-      );
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(DEFAULT_VISUALIZATION_SETTINGS));
     } catch (error) {
-      console.error("Failed to save settings to localStorage", error);
+      console.error('Failed to save settings to localStorage', error);
     }
 
     // Update query cache
-    queryClient.setQueryData(
-      [settingsQueryKey],
-      DEFAULT_VISUALIZATION_SETTINGS,
-    );
+    queryClient.setQueryData([settingsQueryKey], DEFAULT_VISUALIZATION_SETTINGS);
   }, [queryClient]);
 
   // Create a custom theme
-  const createCustomTheme = useCallback(
-    (name: string, settings: ThemeSettings) => {
-      setLocalThemeSettings((prev) => {
-        const updatedThemes = { ...prev, [name]: settings };
+  const createCustomTheme = useCallback((name: string, settings: ThemeSettings) => {
+    setLocalThemeSettings((prev) => {
+      const updatedThemes = { ...prev, [name]: settings };
 
-        // Save to localStorage
-        try {
-          localStorage.setItem(
-            THEME_SETTINGS_STORAGE_KEY,
-            JSON.stringify(updatedThemes),
-          );
-        } catch (error) {
-          console.error("Failed to save theme settings to localStorage", error);
-        }
+      // Save to localStorage
+      try {
+        localStorage.setItem(THEME_SETTINGS_STORAGE_KEY, JSON.stringify(updatedThemes));
+      } catch (error) {
+        console.error('Failed to save theme settings to localStorage', error);
+      }
 
-        return updatedThemes;
-      });
-    },
-    [],
-  );
+      return updatedThemes;
+    });
+  }, []);
 
   // When theme changes, update relevant visualization settings based on the theme
   useEffect(() => {

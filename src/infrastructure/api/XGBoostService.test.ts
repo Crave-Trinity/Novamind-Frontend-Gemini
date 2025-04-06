@@ -3,12 +3,12 @@
  * XGBoostService testing with quantum precision
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi } from 'vitest';
 
-import { XGBoostService } from "@api/XGBoostService";
+import { XGBoostService } from '@api/XGBoostService';
 
-describe("XGBoostService", () => {
-  it("processes data with mathematical precision", () => {
+describe('XGBoostService', () => {
+  it('processes data with mathematical precision', () => {
     // Arrange test data
     const testData = {};
 
@@ -24,7 +24,7 @@ describe("XGBoostService", () => {
     // Add more specific assertions for this particular test case
   });
 
-  it("handles edge cases with clinical precision", () => {
+  it('handles edge cases with clinical precision', () => {
     // Test edge cases
     const edgeCaseData = {};
 

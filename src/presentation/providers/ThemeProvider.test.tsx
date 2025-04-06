@@ -25,7 +25,7 @@ describe('ThemeProvider', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     document.documentElement.classList.remove('light', 'dark');
-    
+
     // Setup localStorage mock for each test
     Object.defineProperty(window, 'localStorage', {
       value: {
@@ -127,4 +127,4 @@ describe('ThemeProvider', () => {
 
     consoleError.mockRestore();
   });
-}); 
+});

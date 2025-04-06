@@ -94,7 +94,7 @@ declare module '@react-three/drei' {
 declare module '@react-three/postprocessing' {
   import { FC, ReactNode } from 'react';
   import { Object3D } from 'three';
-  
+
   interface OutlineProps {
     selection: Object3D[];
     visibleEdgeColor?: number;
@@ -104,14 +104,14 @@ declare module '@react-three/postprocessing' {
     pulse?: number;
     xRay?: boolean;
   }
-  
+
   interface BloomProps {
     intensity?: number;
     luminanceThreshold?: number;
     luminanceSmoothing?: number;
     kernelSize?: number;
   }
-  
+
   interface EffectComposerProps {
     enabled?: boolean;
     children?: ReactNode;
@@ -123,7 +123,7 @@ declare module '@react-three/postprocessing' {
     anisotropy?: number;
     debug?: boolean;
   }
-  
+
   export const EffectComposer: FC<EffectComposerProps>;
   export const Bloom: FC<BloomProps>;
   export const Outline: FC<OutlineProps>;

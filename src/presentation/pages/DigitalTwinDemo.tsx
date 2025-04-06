@@ -1,21 +1,18 @@
-import React, { useCallback, useState, Suspense } from "react";
+import React, { useCallback, useState, Suspense } from 'react';
 
-import { useBrainVisualization } from "@hooks/useBrainVisualization";
-import { RenderMode } from "@domain/types/brain/visualization";
-import Card from "@presentation/atoms/Card";
-import BrainVisualizationControls from "@presentation/molecules/BrainVisualizationControls";
-import BrainVisualization from "@presentation/organisms/BrainVisualization";
+import { useBrainVisualization } from '@hooks/useBrainVisualization';
+import { RenderMode } from '@domain/types/brain/visualization';
+import Card from '@presentation/atoms/Card';
+import BrainVisualizationControls from '@presentation/molecules/BrainVisualizationControls';
+import BrainVisualization from '@presentation/organisms/BrainVisualization';
 
 /**
  * DigitalTwin Demo Page
  * Demonstrates the brain visualization component with controls
  */
 const DigitalTwinDemo: React.FC = () => {
-  const [currentPatientId, setCurrentPatientId] =
-    useState<string>("demo-patient");
-  const [renderMode, setRenderMode] = useState<RenderMode>(
-    RenderMode.ANATOMICAL,
-  );
+  const [currentPatientId, setCurrentPatientId] = useState<string>('demo-patient');
+  const [renderMode, setRenderMode] = useState<RenderMode>(RenderMode.ANATOMICAL);
 
   const {
     brainModel,
@@ -42,7 +39,7 @@ const DigitalTwinDemo: React.FC = () => {
         }
       });
     },
-    [setActiveRegions],
+    [setActiveRegions]
   );
 
   // Handler for changing render mode
@@ -51,7 +48,7 @@ const DigitalTwinDemo: React.FC = () => {
       setRenderMode(mode);
       setVisualizationRenderMode(mode);
     },
-    [setVisualizationRenderMode],
+    [setVisualizationRenderMode]
   );
 
   return (
@@ -92,31 +89,25 @@ const DigitalTwinDemo: React.FC = () => {
               <div className="rounded-lg bg-red-50 p-3 text-red-700">
                 <h3 className="font-medium">Error Loading Data</h3>
                 <p className="text-sm">
-                  {error instanceof Error ? error.message : "Unknown error"}
+                  {error instanceof Error ? error.message : 'Unknown error'}
                 </p>
               </div>
             ) : (
               <div className="space-y-3">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">
-                    Patient ID
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-500">Patient ID</h3>
                   <p className="font-mono">{currentPatientId}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">
-                    Model Version
-                  </h3>
-                  <p>{brainModel?.metadata?.modelVersion || "N/A"}</p>
+                  <h3 className="text-sm font-medium text-gray-500">Model Version</h3>
+                  <p>{brainModel?.metadata?.modelVersion || 'N/A'}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Regions</h3>
                   <p>{brainModel?.regions?.length || 0} regions available</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">
-                    Neural Pathways
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-500">Neural Pathways</h3>
                   <p>{brainModel?.pathways?.length || 0} pathways mapped</p>
                 </div>
               </div>

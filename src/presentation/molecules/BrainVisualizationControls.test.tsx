@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { describe, it, expect, vi } from "vitest"; // Remove beforeEach, afterEach
-import { render, screen } from "@test/test-utils.unified"; // Use unified render
+import { describe, it, expect, vi } from 'vitest'; // Remove beforeEach, afterEach
+import { render, screen } from '@test/test-utils.unified'; // Use unified render
 import BrainVisualizationControls from './BrainVisualizationControls'; // Use default import
 // Remove WebGL mock imports
 
@@ -14,7 +14,7 @@ import BrainVisualizationControls from './BrainVisualizationControls'; // Use de
 // Minimal test to verify component can be imported
 // Mock props
 const mockProps = {
-  viewMode: "normal" as const,
+  viewMode: 'normal' as const,
   rotationSpeed: 1,
   rotationEnabled: true,
   onViewModeChange: vi.fn(),

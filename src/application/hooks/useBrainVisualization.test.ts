@@ -30,8 +30,8 @@ vi.mock('@infrastructure/api/ApiClient', () => {
         volumeMl: 100,
         riskFactor: 0.2,
         clinicalSignificance: 'normal',
-        tissueType: 'gray'
-      }
+        tissueType: 'gray',
+      },
     ],
     connections: [
       {
@@ -43,8 +43,8 @@ vi.mock('@infrastructure/api/ApiClient', () => {
         directionality: 'bidirectional',
         activityLevel: 0.6,
         pathwayLength: 10,
-        dataConfidence: 0.8
-      }
+        dataConfidence: 0.8,
+      },
     ],
     scan: {
       id: 'test-scan',
@@ -57,12 +57,12 @@ vi.mock('@infrastructure/api/ApiClient', () => {
       notes: 'Test scan',
       technician: 'Test Tech',
       processingMethod: 'standard',
-      dataQualityScore: 0.9
+      dataQualityScore: 0.9,
     },
     version: '1.0.0',
     timestamp: new Date().toISOString(),
     processingLevel: 'analyzed',
-    lastUpdated: new Date().toISOString()
+    lastUpdated: new Date().toISOString(),
   };
 
   return {
@@ -70,44 +70,41 @@ vi.mock('@infrastructure/api/ApiClient', () => {
       getBrainModel: vi.fn().mockImplementation(async (patientId: string) => {
         console.log('[MOCK] Getting brain model for:', patientId);
         return mockBrainModel;
-      })
-    }
+      }),
+    },
   };
 });
 
 console.log('[SETUP] Starting test file execution');
 
 // Create test wrapper with fresh QueryClient for each test
-const createTestQueryClient = () => new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      cacheTime: 0,
-      gcTime: 0,
-      staleTime: 0,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false
-    }
-  },
-  logger: {
-    log: console.log,
-    warn: console.warn,
-    error: console.error,
-  },
-});
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        cacheTime: 0,
+        gcTime: 0,
+        staleTime: 0,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+      },
+    },
+    logger: {
+      log: console.log,
+      warn: console.warn,
+      error: console.error,
+    },
+  });
 
 const createWrapper = () => {
   console.log('[SETUP] Creating wrapper function');
   const testQueryClient = createTestQueryClient();
-  
+
   return ({ children }: { children: React.ReactNode }) => {
     console.log('[WRAPPER] Rendering QueryClientProvider');
-    return React.createElement(
-      QueryClientProvider,
-      { client: testQueryClient },
-      children
-    );
+    return React.createElement(QueryClientProvider, { client: testQueryClient }, children);
   };
 };
 
@@ -141,9 +138,8 @@ describe('useBrainVisualization Hook', () => {
   it('renders without crashing', async () => {
     console.log('[TEST] Starting basic render test');
 
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      React.createElement(QueryClientProvider, { client: queryClient }, children)
-    );
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
 
     console.log('[TEST] About to render hook');
     const { result } = renderHook(
@@ -154,7 +150,7 @@ describe('useBrainVisualization Hook', () => {
           autoRotate: false,
           highlightActiveRegions: false,
         }),
-      { wrapper },
+      { wrapper }
     );
 
     console.log('[TEST] Current state:', {

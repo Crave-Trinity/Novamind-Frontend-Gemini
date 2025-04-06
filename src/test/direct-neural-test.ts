@@ -7,15 +7,13 @@
  */
 
 // Import core testing libraries with quantum precision
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from 'vitest';
 
 // Clinical precision test
-describe("NOVAMIND Quantum Test Verification", () => {
-  it("validates neural-safe testing environment with clinical precision", () => {
+describe('NOVAMIND Quantum Test Verification', () => {
+  it('validates neural-safe testing environment with clinical precision', () => {
     // Assert neural-safe environment with quantum precision
     expect(true).toBe(true);
-    console.log(
-      "✅ Neural-safe testing environment verified with quantum precision",
-    );
+    console.log('✅ Neural-safe testing environment verified with quantum precision');
   });
 });

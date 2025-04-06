@@ -1,6 +1,6 @@
 /**
  * Unified Test Environment Setup
- * 
+ *
  * This is the single source of truth for all test environment configuration.
  * It properly initializes JSDOM, sets up mocks, and configures the testing library.
  */
@@ -19,7 +19,7 @@ beforeAll(() => {
     // Mock matchMedia for responsive testing
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
-      value: vi.fn().mockImplementation(query => ({
+      value: vi.fn().mockImplementation((query) => ({
         matches: false,
         media: query,
         onchange: null,
@@ -30,14 +30,14 @@ beforeAll(() => {
         dispatchEvent: vi.fn(),
       })),
     });
-    
+
     // Mock IntersectionObserver
     window.IntersectionObserver = vi.fn().mockImplementation(() => ({
       observe: vi.fn(),
       unobserve: vi.fn(),
       disconnect: vi.fn(),
     }));
-    
+
     // Mock ResizeObserver
     // Mock ResizeObserver: Provide expected methods and potentially call callback
     window.ResizeObserver = vi.fn().mockImplementation((callback) => {
@@ -46,7 +46,7 @@ beforeAll(() => {
           // Immediately invoke callback with mock data if a callback is provided
           // This might be necessary for hooks like react-use-measure
           if (callback) {
-             // Define a default mock rect, adjust if needed
+            // Define a default mock rect, adjust if needed
             const mockRect = { width: 100, height: 100, top: 0, left: 0, bottom: 100, right: 100 };
             callback([{ target: element, contentRect: mockRect }], observer);
           }
@@ -65,7 +65,7 @@ beforeAll(() => {
     // Initialize with light theme
     document.documentElement.classList.add('light');
     document.documentElement.classList.remove('dark');
-    
+
     // Manual Tailwind class injection removed - Vitest CSS processing handles this now
     console.log('[setup.unified.ts] DOM structure initialized');
   }
@@ -91,7 +91,7 @@ export const tailwindHelper = {
     }
     return false;
   },
-  
+
   disableDarkMode: () => {
     if (typeof document !== 'undefined' && document.documentElement) {
       document.documentElement.classList.remove('dark');
@@ -100,14 +100,14 @@ export const tailwindHelper = {
     }
     return false;
   },
-  
+
   isDarkMode: () => {
     if (typeof document !== 'undefined' && document.documentElement) {
       // Directly query the document element within the function
       return document.querySelector('html')?.classList.contains('dark') ?? false;
     }
     return false;
-  }
+  },
 };
 
 console.log('[setup.unified.ts] Setup complete');

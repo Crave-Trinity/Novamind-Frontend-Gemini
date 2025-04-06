@@ -4,8 +4,12 @@
  * Uses react-router-dom v6+ hooks
  */
 
-import { useCallback, useMemo } from "react";
-import { useSearchParams as useReactRouterSearchParams, useNavigate, useLocation } from "react-router-dom";
+import { useCallback, useMemo } from 'react';
+import {
+  useSearchParams as useReactRouterSearchParams,
+  useNavigate,
+  useLocation,
+} from 'react-router-dom';
 
 // Define the structure for the state object if needed (example)
 interface SearchState {
@@ -88,26 +92,28 @@ export function useSearchParams(): UseSearchParamsReturn {
   }, [searchParams]);
 
   // Example deserialization - adjust based on actual state structure needed
-  const deserializeState = useCallback((defaultState: Partial<SearchState> = {}): SearchState => {
-    const state: SearchState = { ...defaultState };
-    searchParams.forEach((value, key) => {
-      if (key in state) {
-        // Basic type coercion - might need more robust parsing
-        if (typeof (state as any)[key] === 'boolean') {
-          (state as any)[key] = value === 'true';
-        } else if (typeof (state as any)[key] === 'number') {
-          (state as any)[key] = parseFloat(value);
+  const deserializeState = useCallback(
+    (defaultState: Partial<SearchState> = {}): SearchState => {
+      const state: SearchState = { ...defaultState };
+      searchParams.forEach((value, key) => {
+        if (key in state) {
+          // Basic type coercion - might need more robust parsing
+          if (typeof (state as any)[key] === 'boolean') {
+            (state as any)[key] = value === 'true';
+          } else if (typeof (state as any)[key] === 'number') {
+            (state as any)[key] = parseFloat(value);
+          } else {
+            (state as any)[key] = value;
+          }
         } else {
+          // Handle unexpected params if necessary
           (state as any)[key] = value;
         }
-      } else {
-         // Handle unexpected params if necessary
-         (state as any)[key] = value;
-      }
-    });
-    return state;
-  }, [searchParams]);
-
+      });
+      return state;
+    },
+    [searchParams]
+  );
 
   return {
     getParam,

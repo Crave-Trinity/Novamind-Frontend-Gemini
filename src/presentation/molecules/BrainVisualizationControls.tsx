@@ -1,17 +1,17 @@
-import React, { useCallback } from "react";
+import React, { useCallback } from 'react';
 
 export interface BrainVisualizationControlsProps {
-  viewMode: "normal" | "activity" | "connections";
+  viewMode: 'normal' | 'activity' | 'connections';
   rotationSpeed: number;
   rotationEnabled: boolean;
-  onViewModeChange: (mode: "normal" | "activity" | "connections") => void;
+  onViewModeChange: (mode: 'normal' | 'activity' | 'connections') => void;
   onRotationSpeedChange: (speed: number) => void;
   onRotationToggle: () => void;
 }
 
 /**
  * Brain Visualization Controls
- * 
+ *
  * Control panel for the 3D brain visualization with various
  * visualization modes and rotation controls.
  */
@@ -21,19 +21,25 @@ const BrainVisualizationControls: React.FC<BrainVisualizationControlsProps> = ({
   rotationEnabled,
   onViewModeChange,
   onRotationSpeedChange,
-  onRotationToggle
+  onRotationToggle,
 }) => {
   // Handle view mode button click
-  const handleViewModeClick = useCallback((mode: "normal" | "activity" | "connections") => {
-    onViewModeChange(mode);
-  }, [onViewModeChange]);
-  
+  const handleViewModeClick = useCallback(
+    (mode: 'normal' | 'activity' | 'connections') => {
+      onViewModeChange(mode);
+    },
+    [onViewModeChange]
+  );
+
   // Handle rotation speed change
-  const handleRotationSpeedChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    onRotationSpeedChange(value);
-  }, [onRotationSpeedChange]);
-  
+  const handleRotationSpeedChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = parseFloat(e.target.value);
+      onRotationSpeedChange(value);
+    },
+    [onRotationSpeedChange]
+  );
+
   return (
     <div className="flex flex-col sm:flex-row items-center gap-3">
       {/* View mode controls */}
@@ -43,53 +49,53 @@ const BrainVisualizationControls: React.FC<BrainVisualizationControlsProps> = ({
           <button
             type="button"
             className={`px-3 py-1 text-xs font-medium rounded-l-md border ${
-              viewMode === "normal"
-                ? "bg-primary-500 text-white border-primary-600"
-                : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600"
+              viewMode === 'normal'
+                ? 'bg-primary-500 text-white border-primary-600'
+                : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
             }`}
-            onClick={() => handleViewModeClick("normal")}
+            onClick={() => handleViewModeClick('normal')}
           >
             Normal
           </button>
           <button
             type="button"
             className={`px-3 py-1 text-xs font-medium border-t border-b ${
-              viewMode === "activity"
-                ? "bg-primary-500 text-white border-primary-600"
-                : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600"
+              viewMode === 'activity'
+                ? 'bg-primary-500 text-white border-primary-600'
+                : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
             }`}
-            onClick={() => handleViewModeClick("activity")}
+            onClick={() => handleViewModeClick('activity')}
           >
             Activity
           </button>
           <button
             type="button"
             className={`px-3 py-1 text-xs font-medium rounded-r-md border ${
-              viewMode === "connections"
-                ? "bg-primary-500 text-white border-primary-600"
-                : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600"
+              viewMode === 'connections'
+                ? 'bg-primary-500 text-white border-primary-600'
+                : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
             }`}
-            onClick={() => handleViewModeClick("connections")}
+            onClick={() => handleViewModeClick('connections')}
           >
             Connections
           </button>
         </div>
       </div>
-      
+
       {/* Rotation controls */}
       <div className="flex items-center space-x-2">
         <button
           type="button"
           className={`px-3 py-1 text-xs font-medium rounded-md ${
             rotationEnabled
-              ? "bg-primary-500 text-white"
-              : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600"
+              ? 'bg-primary-500 text-white'
+              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600'
           }`}
           onClick={onRotationToggle}
         >
-          {rotationEnabled ? "Rotation: On" : "Rotation: Off"}
+          {rotationEnabled ? 'Rotation: On' : 'Rotation: Off'}
         </button>
-        
+
         {rotationEnabled && (
           <div className="flex items-center space-x-1">
             <span className="text-xs text-gray-600 dark:text-gray-300">Speed:</span>

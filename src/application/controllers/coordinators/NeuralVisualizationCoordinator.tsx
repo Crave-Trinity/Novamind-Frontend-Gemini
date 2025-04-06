@@ -11,33 +11,26 @@ import React, {
   useMemo,
   useEffect,
   type ReactNode,
-} from "react";
+} from 'react';
 
 // Import controllers
-import { useNeuroSyncOrchestrator } from "@application/services/NeuroSyncOrchestrator"; // Corrected path
-import { useNeuralActivityController } from "@application/services/NeuralActivityController"; // Corrected path
-import { useClinicalPredictionController } from "@application/services/ClinicalPredictionController"; // Corrected path
-import { useBiometricStreamController } from "@application/services/BiometricStreamController"; // Corrected path
-import { useTemporalDynamicsController } from "@application/services/TemporalDynamicsController"; // Corrected path
+import { useNeuroSyncOrchestrator } from '@application/services/NeuroSyncOrchestrator'; // Corrected path
+import { useNeuralActivityController } from '@application/services/NeuralActivityController'; // Corrected path
+import { useClinicalPredictionController } from '@application/services/ClinicalPredictionController'; // Corrected path
+import { useBiometricStreamController } from '@application/services/BiometricStreamController'; // Corrected path
+import { useTemporalDynamicsController } from '@application/services/TemporalDynamicsController'; // Corrected path
 
 // Domain types
-import type {
-  BrainRegion,
-  NeuralConnection,
-  BrainModel,
-} from "@domain/types/brain/models";
+import type { BrainRegion, NeuralConnection, BrainModel } from '@domain/types/brain/models';
 import {
   ActivationLevel, // Corrected import name
   type NeuralActivityState,
-} from "@domain/types/brain/activity";
-import type { SymptomNeuralMapping } from "@domain/models/brain/mapping/brain-mapping"; // Corrected path
-import type { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
-import type {
-  BiometricAlert,
-  BiometricStream,
-} from "@domain/types/biometric/streams";
-import type { TemporalPattern, TimeScale } from "@domain/types/temporal/dynamics";
-import type { NeuralTransform } from "@domain/types/neural/transforms";
+} from '@domain/types/brain/activity';
+import type { SymptomNeuralMapping } from '@domain/models/brain/mapping/brain-mapping'; // Corrected path
+import type { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
+import type { BiometricAlert, BiometricStream } from '@domain/types/biometric/streams';
+import type { TemporalPattern, TimeScale } from '@domain/types/temporal/dynamics';
+import type { NeuralTransform } from '@domain/types/neural/transforms';
 
 /**
  * Unified visualization state with neural-safe typing
@@ -66,13 +59,8 @@ interface VisualizationState {
   currentTimeScale: TimeScale;
 
   // Visualization state
-  renderMode:
-    | "standard"
-    | "heatmap"
-    | "connectivity"
-    | "activity"
-    | "treatment";
-  detailLevel: "low" | "medium" | "high" | "ultra";
+  renderMode: 'standard' | 'heatmap' | 'connectivity' | 'activity' | 'treatment';
+  detailLevel: 'low' | 'medium' | 'high' | 'ultra';
 
   // System state
   isLoading: boolean;
@@ -99,8 +87,8 @@ interface VisualizationCoordinatorContext {
   selectTreatment: (treatmentId: string) => void;
 
   // Render configuration
-  setRenderMode: (mode: VisualizationState["renderMode"]) => void;
-  setDetailLevel: (level: VisualizationState["detailLevel"]) => void;
+  setRenderMode: (mode: VisualizationState['renderMode']) => void;
+  setDetailLevel: (level: VisualizationState['detailLevel']) => void;
   setTimeScale: (scale: TimeScale) => void;
 
   // Neural modifications
@@ -134,9 +122,9 @@ const defaultContext: VisualizationCoordinatorContext = {
     biometricAlerts: [],
     biometricStreams: new Map(),
     temporalPatterns: [],
-    currentTimeScale: "daily", // Keep 'daily' as a valid default
-    renderMode: "standard",
-    detailLevel: "medium",
+    currentTimeScale: 'daily', // Keep 'daily' as a valid default
+    renderMode: 'standard',
+    detailLevel: 'medium',
     isLoading: false,
     error: null,
     performanceMetrics: {
@@ -162,8 +150,7 @@ const defaultContext: VisualizationCoordinatorContext = {
 };
 
 // Create the context
-const VisualizationContext =
-  createContext<VisualizationCoordinatorContext>(defaultContext);
+const VisualizationContext = createContext<VisualizationCoordinatorContext>(defaultContext);
 
 /**
  * Props for the visualization coordinator provider
@@ -177,9 +164,10 @@ interface VisualizationCoordinatorProviderProps {
  * Visualization Coordinator Provider component
  * Serves as the central integration point for all neural controllers
  */
-export const VisualizationCoordinatorProvider: React.FC<
-  VisualizationCoordinatorProviderProps
-> = ({ patientId, children }) => {
+export const VisualizationCoordinatorProvider: React.FC<VisualizationCoordinatorProviderProps> = ({
+  patientId,
+  children,
+}) => {
   // Initialize controllers
   const neuroSync = useNeuroSyncOrchestrator(patientId);
   const neuralActivity = useNeuralActivityController(patientId);
@@ -221,8 +209,7 @@ export const VisualizationCoordinatorProvider: React.FC<
     const currentTimeScale = temporalDynamics.currentTimeScale;
 
     // Determine if system is loading
-    const isLoading =
-      loadingState === "loading" || temporalDynamics.isProcessing;
+    const isLoading = loadingState === 'loading' || temporalDynamics.isProcessing;
 
     // Combine error messages
     const error = errorMessage || temporalDynamics.errorState || null;
@@ -261,7 +248,7 @@ export const VisualizationCoordinatorProvider: React.FC<
     (regionId: string) => {
       neuroSync.actions.selectRegion(regionId);
     },
-    [neuroSync.actions],
+    [neuroSync.actions]
   );
 
   // Deselect a brain region
@@ -269,7 +256,7 @@ export const VisualizationCoordinatorProvider: React.FC<
     (regionId: string) => {
       neuroSync.actions.deselectRegion(regionId);
     },
-    [neuroSync.actions],
+    [neuroSync.actions]
   );
 
   // Select a treatment for visualization
@@ -277,35 +264,36 @@ export const VisualizationCoordinatorProvider: React.FC<
     (treatmentId: string) => {
       neuroSync.actions.selectTreatment(treatmentId);
     },
-    [neuroSync.actions],
+    [neuroSync.actions]
   );
 
   // Set the render mode
   const setRenderMode = useCallback(
-    (mode: VisualizationState["renderMode"]) => {
+    (mode: VisualizationState['renderMode']) => {
       neuroSync.actions.setRenderMode(mode);
     },
-    [neuroSync.actions],
+    [neuroSync.actions]
   );
 
   // Set the detail level
   const setDetailLevel = useCallback(
-    (level: VisualizationState["detailLevel"]) => {
+    (level: VisualizationState['detailLevel']) => {
       neuroSync.actions.setDetailLevel(level);
     },
-    [neuroSync.actions],
+    [neuroSync.actions]
   );
 
   // Set the time scale by reloading data for that scale
   const setTimeScale = useCallback(
     (scale: TimeScale) => {
       neuroSync.actions.setTimeScale(scale); // Update UI/sync state
-      temporalDynamics.loadTemporalDynamics(scale).catch(error => { // Load data for the new scale
+      temporalDynamics.loadTemporalDynamics(scale).catch((error) => {
+        // Load data for the new scale
         console.error(`Failed to load temporal dynamics for scale ${scale}:`, error);
         // Optionally update an error state here
       });
     },
-    [neuroSync.actions, temporalDynamics],
+    [neuroSync.actions, temporalDynamics]
   );
 
   // Apply neural transforms
@@ -314,17 +302,16 @@ export const VisualizationCoordinatorProvider: React.FC<
       const result = await neuralActivity.applyNeuralTransforms(transforms);
       return result.success;
     },
-    [neuralActivity],
+    [neuralActivity]
   );
 
   // Predict treatment outcomes
   const predictTreatmentOutcomes = useCallback(
     async (treatmentIds: string[]): Promise<boolean> => {
-      const result =
-        await clinicalPrediction.predictTreatmentOutcomes(treatmentIds);
+      const result = await clinicalPrediction.predictTreatmentOutcomes(treatmentIds);
       return result.success;
     },
-    [clinicalPrediction],
+    [clinicalPrediction]
   );
 
   // Acknowledge a biometric alert
@@ -333,7 +320,7 @@ export const VisualizationCoordinatorProvider: React.FC<
       const result = await biometricStream.acknowledgeAlert(alertId);
       return result.success;
     },
-    [biometricStream],
+    [biometricStream]
   );
 
   // Reset visualization to baseline
@@ -343,37 +330,27 @@ export const VisualizationCoordinatorProvider: React.FC<
       const neuralReset = await neuralActivity.resetToBaseline();
 
       if (!neuralReset.success) {
-        console.error("Failed to reset neural activity:", neuralReset.error);
+        console.error('Failed to reset neural activity:', neuralReset.error);
         return false;
       }
 
       // Reset temporal dynamics by reloading
-      const temporalReset = await temporalDynamics.loadTemporalDynamics(
-        state.currentTimeScale,
-      );
+      const temporalReset = await temporalDynamics.loadTemporalDynamics(state.currentTimeScale);
 
       if (!temporalReset.success) {
-        console.error(
-          "Failed to reset temporal dynamics:",
-          temporalReset.error,
-        );
+        console.error('Failed to reset temporal dynamics:', temporalReset.error);
         return false;
       }
 
       // Clear selected regions and treatments
-      neuroSync.actions.selectTreatment("");
+      neuroSync.actions.selectTreatment('');
 
       return true;
     } catch (error) {
-      console.error("Error resetting visualization:", error);
+      console.error('Error resetting visualization:', error);
       return false;
     }
-  }, [
-    neuralActivity,
-    temporalDynamics,
-    neuroSync.actions,
-    state.currentTimeScale,
-  ]);
+  }, [neuralActivity, temporalDynamics, neuroSync.actions, state.currentTimeScale]);
 
   // Export visualization data
   const exportVisualizationData = useCallback((): Record<string, any> => {
@@ -400,7 +377,7 @@ export const VisualizationCoordinatorProvider: React.FC<
   // Initialize biometric streams when component mounts
   useEffect(() => {
     biometricStream.connectStreams().catch((error) => {
-      console.error("Failed to connect biometric streams:", error);
+      console.error('Failed to connect biometric streams:', error);
     });
 
     // Clean up on unmount
@@ -440,13 +417,11 @@ export const VisualizationCoordinatorProvider: React.FC<
       resetVisualization,
       exportVisualizationData,
       clearError,
-    ],
+    ]
   );
 
   return (
-    <VisualizationContext.Provider value={contextValue}>
-      {children}
-    </VisualizationContext.Provider>
+    <VisualizationContext.Provider value={contextValue}>{children}</VisualizationContext.Provider>
   );
 };
 
@@ -454,17 +429,16 @@ export const VisualizationCoordinatorProvider: React.FC<
  * Hook to access the visualization coordinator context
  * with neural-safe typing
  */
-export const useVisualizationCoordinator =
-  (): VisualizationCoordinatorContext => {
-    const context = useContext(VisualizationContext);
+export const useVisualizationCoordinator = (): VisualizationCoordinatorContext => {
+  const context = useContext(VisualizationContext);
 
-    if (context === undefined) {
-      throw new Error(
-        "useVisualizationCoordinator must be used within a VisualizationCoordinatorProvider",
-      );
-    }
+  if (context === undefined) {
+    throw new Error(
+      'useVisualizationCoordinator must be used within a VisualizationCoordinatorProvider'
+    );
+  }
 
-    return context;
-  };
+  return context;
+};
 
 export default useVisualizationCoordinator;

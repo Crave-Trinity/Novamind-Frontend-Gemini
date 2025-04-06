@@ -1,19 +1,19 @@
 /**
  * Authentication Service
- * 
+ *
  * Implements the infrastructure layer for authentication operations
  * with HIPAA-compliant security practices.
  */
 
-import { 
+import {
   AuthResult,
   LoginCredentials,
   User,
-  UserRole, 
+  UserRole,
   Permission,
-  SessionVerification
-} from "@domain/types/auth/auth";
-import { auditLogClient, AuditEventType } from "./auditLogClient";
+  SessionVerification,
+} from '@domain/types/auth/auth';
+import { auditLogClient, AuditEventType } from './auditLogClient';
 
 /**
  * Storage keys for secure session management
@@ -29,21 +29,21 @@ const STORAGE_KEYS = {
 class AuthClient {
   /**
    * Login with credentials
-   * 
+   *
    * In a production environment, this would communicate with a secure backend API
    * For now, we're simulating with demo credentials and localStorage
    */
   async login(credentials: LoginCredentials): Promise<AuthResult> {
     try {
       // Simulate API request delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
       // For demo purposes, check against hardcoded demo credentials
-      if (credentials.email === "demo@novamind.com" && credentials.password === "demo123") {
+      if (credentials.email === 'demo@novamind.com' && credentials.password === 'demo123') {
         const user: User = {
-          id: "demo-user-id",
+          id: 'demo-user-id',
           email: credentials.email,
-          name: "Demo User",
+          name: 'Demo User',
           role: UserRole.DEMO,
           permissions: [
             Permission.VIEW_PATIENTS,
@@ -55,8 +55,8 @@ class AuthClient {
 
         // Create token that expires in 30 minutes
         const token = {
-          token: "demo-token-" + Math.random().toString(36).substring(2),
-          expiresAt: Date.now() + (30 * 60 * 1000), // 30 minutes
+          token: 'demo-token-' + Math.random().toString(36).substring(2),
+          expiresAt: Date.now() + 30 * 60 * 1000, // 30 minutes
         };
 
         // Store auth data in localStorage if rememberMe is true
@@ -70,7 +70,7 @@ class AuthClient {
           userId: user.id,
           email: user.email,
           timestamp: Date.now(),
-          details: "User login successful",
+          details: 'User login successful',
         });
 
         return {
@@ -84,24 +84,24 @@ class AuthClient {
       auditLogClient.log(AuditEventType.UNAUTHORIZED_ACCESS_ATTEMPT, {
         email: credentials.email,
         timestamp: Date.now(),
-        details: "Login failed: Invalid credentials",
+        details: 'Login failed: Invalid credentials',
       });
 
       return {
         success: false,
-        error: "Invalid email or password",
+        error: 'Invalid email or password',
       };
     } catch (error) {
       // Log error
       auditLogClient.log(AuditEventType.SYSTEM_ERROR, {
-        errorCode: "LoginError",
+        errorCode: 'LoginError',
         errorMessage: error.message,
-        details: "Exception during login attempt",
+        details: 'Exception during login attempt',
       });
 
       return {
         success: false,
-        error: "Authentication service unavailable. Please try again later.",
+        error: 'Authentication service unavailable. Please try again later.',
       };
     }
   }
@@ -114,7 +114,7 @@ class AuthClient {
     auditLogClient.log(AuditEventType.USER_LOGOUT, {
       userId: this.currentUser?.id,
       timestamp: Date.now(),
-      details: "User logged out",
+      details: 'User logged out',
     });
 
     // Remove auth data from storage
@@ -141,9 +141,9 @@ class AuthClient {
     }
 
     // Try to get user from both storage options
-    const userStr = localStorage.getItem(STORAGE_KEYS.USER) || 
-                 sessionStorage.getItem(STORAGE_KEYS.USER);
-    
+    const userStr =
+      localStorage.getItem(STORAGE_KEYS.USER) || sessionStorage.getItem(STORAGE_KEYS.USER);
+
     if (!userStr) {
       return null;
     }
@@ -160,9 +160,10 @@ class AuthClient {
    */
   verifySession(): SessionVerification {
     // Try to get token from both storage options
-    const tokenStr = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || 
-                  sessionStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-    
+    const tokenStr =
+      localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) ||
+      sessionStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+
     if (!tokenStr) {
       return { valid: false };
     }
@@ -170,14 +171,14 @@ class AuthClient {
     try {
       const token = JSON.parse(tokenStr);
       const now = Date.now();
-      
+
       if (now >= token.expiresAt) {
         return { valid: false };
       }
 
-      return { 
+      return {
         valid: true,
-        remainingTime: token.expiresAt - now
+        remainingTime: token.expiresAt - now,
       };
     } catch (e) {
       return { valid: false };
@@ -204,20 +205,20 @@ class AuthClient {
 
     // Create new token that expires in 30 minutes
     const token = {
-      token: "demo-token-" + Math.random().toString(36).substring(2),
-      expiresAt: Date.now() + (30 * 60 * 1000), // 30 minutes
+      token: 'demo-token-' + Math.random().toString(36).substring(2),
+      expiresAt: Date.now() + 30 * 60 * 1000, // 30 minutes
     };
 
     // Determine which storage the token is in
     const inLocalStorage = localStorage.getItem(STORAGE_KEYS.USER) !== null;
     const storage = inLocalStorage ? localStorage : sessionStorage;
-    
+
     // Store new token
     storage.setItem(STORAGE_KEYS.AUTH_TOKEN, JSON.stringify(token));
 
     return {
       valid: true,
-      remainingTime: 30 * 60 * 1000 // 30 minutes in milliseconds
+      remainingTime: 30 * 60 * 1000, // 30 minutes in milliseconds
     };
   }
 }

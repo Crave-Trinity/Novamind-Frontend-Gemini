@@ -23,7 +23,7 @@ const localStorageMock = {
 
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
-  writable: true
+  writable: true,
 });
 
 // Mock sessionStorage
@@ -38,7 +38,7 @@ const sessionStorageMock = {
 
 Object.defineProperty(window, 'sessionStorage', {
   value: sessionStorageMock,
-  writable: true
+  writable: true,
 });
 
 // Mock IndexedDB
@@ -49,7 +49,7 @@ const indexedDB = {
 
 Object.defineProperty(window, 'indexedDB', {
   value: indexedDB,
-  writable: true
+  writable: true,
 });
 
 // Mock WebSocket
@@ -87,17 +87,17 @@ class MockWebSocket {
 
 Object.defineProperty(window, 'WebSocket', {
   value: MockWebSocket,
-  writable: true
+  writable: true,
 });
 
 // Mock requestAnimationFrame and cancelAnimationFrame
-global.requestAnimationFrame = vi.fn(callback => setTimeout(callback, 0));
-global.cancelAnimationFrame = vi.fn(id => clearTimeout(id));
+global.requestAnimationFrame = vi.fn((callback) => setTimeout(callback, 0));
+global.cancelAnimationFrame = vi.fn((id) => clearTimeout(id));
 
 // Mock performance.now()
 Object.defineProperty(window.performance, 'now', {
   value: vi.fn(() => Date.now()),
-  writable: true
+  writable: true,
 });
 
 // Cleanup mocks after each test
@@ -106,4 +106,4 @@ afterEach(() => {
   cleanup();
   localStorageMock.clear();
   sessionStorageMock.clear();
-}); 
+});

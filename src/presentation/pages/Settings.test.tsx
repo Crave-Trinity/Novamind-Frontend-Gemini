@@ -14,10 +14,10 @@ vi.mock('../../application/contexts/SettingsContext', () => ({
     settings: {
       theme: 'light',
       visualizationQuality: 'high',
-      notifications: true
+      notifications: true,
     },
-    updateSettings: vi.fn()
-  })
+    updateSettings: vi.fn(),
+  }),
 }));
 
 // Factory function that creates dynamic mock implementations
@@ -44,7 +44,7 @@ const mockSettingsImplementation = vi.fn(() => (
 
 // This mocks the Settings component implementation directly
 vi.mock('../pages/Settings', () => ({
-  default: () => mockSettingsImplementation()
+  default: () => mockSettingsImplementation(),
 }));
 
 // Now import the mocked component
@@ -84,7 +84,7 @@ describe('Settings', () => {
 
   it('renders with neural precision', () => {
     render(<Settings />);
-    
+
     // Basic rendering test
     expect(screen.getByTestId('settings-page')).toBeInTheDocument();
     expect(screen.getByTestId('theme-setting')).toBeInTheDocument();
@@ -101,9 +101,9 @@ describe('Settings', () => {
         <button data-testid="interactive-element">Save Settings</button>
       </div>
     ));
-    
+
     render(<Settings />);
-    
+
     // Verify interaction element is rendered
     const interactiveElement = screen.getByTestId('interactive-element');
     expect(interactiveElement).toBeInTheDocument();

@@ -6,7 +6,7 @@
  * TextEncoder instanceof Uint8Array issue with esbuild.
  */
 
-import { TextEncoder as NodeTextEncoder } from "util";
+import { TextEncoder as NodeTextEncoder } from 'util';
 
 /**
  * Fixed TextEncoder implementation that ensures encode() returns
@@ -23,8 +23,8 @@ class FixedTextEncoder extends NodeTextEncoder {
 
 // Apply the fix globally
 if (
-  typeof globalThis.TextEncoder === "undefined" ||
-  !(new globalThis.TextEncoder().encode("") instanceof Uint8Array)
+  typeof globalThis.TextEncoder === 'undefined' ||
+  !(new globalThis.TextEncoder().encode('') instanceof Uint8Array)
 ) {
   globalThis.TextEncoder = FixedTextEncoder as any;
 }

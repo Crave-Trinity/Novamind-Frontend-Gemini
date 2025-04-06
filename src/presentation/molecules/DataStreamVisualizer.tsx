@@ -4,19 +4,13 @@
  * with HIPAA-compliant multi-dimensional correlation analysis
  */
 
-import React, {
-  useRef,
-  useMemo,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
-import { useThree, useFrame } from "@react-three/fiber";
-import { Line, Html, Text, Billboard } from "@react-three/drei";
-import { Vector3, Group, Color, MathUtils } from "three";
+import React, { useRef, useMemo, useState, useEffect, useCallback } from 'react';
+import { useThree, useFrame } from '@react-three/fiber';
+import { Line, Html, Text, Billboard } from '@react-three/drei';
+import { Vector3, Group, Color, MathUtils } from 'three';
 
 // Domain types
-import { BrainRegion, NeuralConnection } from "@domain/types/brain/models";
+import { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
 
 /**
  * Neural-safe data point type
@@ -27,7 +21,7 @@ export interface DataPoint {
   label?: string;
   confidence?: number; // 0.0-1.0
   anomaly?: boolean;
-  trend?: "increasing" | "decreasing" | "stable";
+  trend?: 'increasing' | 'decreasing' | 'stable';
 }
 
 /**
@@ -36,12 +30,7 @@ export interface DataPoint {
 export interface DataStream {
   id: string;
   name: string;
-  category:
-    | "physiological"
-    | "behavioral"
-    | "self-reported"
-    | "environmental"
-    | "treatment";
+  category: 'physiological' | 'behavioral' | 'self-reported' | 'environmental' | 'treatment';
   unit?: string;
   data: DataPoint[];
   normalRange?: [number, number];
@@ -69,18 +58,18 @@ interface DataStreamVisualizerProps {
   height?: number;
   position?: [number, number, number];
   rotation?: [number, number, number];
-  displayMode?: "stacked" | "overlay" | "correlated";
+  displayMode?: 'stacked' | 'overlay' | 'correlated';
   maxStreams?: number;
   showLabels?: boolean;
   showGrid?: boolean;
   showCorrelations?: boolean;
   correlationThreshold?: number; // Minimum correlation to display
   categoryFilter?: (
-    | "physiological"
-    | "behavioral"
-    | "self-reported"
-    | "environmental"
-    | "treatment"
+    | 'physiological'
+    | 'behavioral'
+    | 'self-reported'
+    | 'environmental'
+    | 'treatment'
   )[];
   interactable?: boolean;
   onStreamSelect?: (streamId: string) => void;
@@ -88,7 +77,7 @@ interface DataStreamVisualizerProps {
   colorMap?: {
     physiological: string;
     behavioral: string;
-    "self-reported": string;
+    'self-reported': string;
     environmental: string;
     treatment: string;
     grid: string;
@@ -104,29 +93,29 @@ interface DataStreamVisualizerProps {
  */
 const CATEGORY_CONFIG = {
   physiological: {
-    icon: "❤️",
-    label: "Physiological",
-    defaultColor: "#ef4444", // Red
+    icon: '❤️',
+    label: 'Physiological',
+    defaultColor: '#ef4444', // Red
   },
   behavioral: {
-    icon: "🚶",
-    label: "Behavioral",
-    defaultColor: "#3b82f6", // Blue
+    icon: '🚶',
+    label: 'Behavioral',
+    defaultColor: '#3b82f6', // Blue
   },
-  "self-reported": {
-    icon: "💬",
-    label: "Self-Reported",
-    defaultColor: "#8b5cf6", // Purple
+  'self-reported': {
+    icon: '💬',
+    label: 'Self-Reported',
+    defaultColor: '#8b5cf6', // Purple
   },
   environmental: {
-    icon: "🌤️",
-    label: "Environmental",
-    defaultColor: "#10b981", // Green
+    icon: '🌤️',
+    label: 'Environmental',
+    defaultColor: '#10b981', // Green
   },
   treatment: {
-    icon: "💊",
-    label: "Treatment",
-    defaultColor: "#f59e0b", // Amber
+    icon: '💊',
+    label: 'Treatment',
+    defaultColor: '#f59e0b', // Amber
   },
 };
 
@@ -142,7 +131,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
   height = 6,
   position = [0, 0, 0],
   rotation = [0, 0, 0],
-  displayMode = "stacked",
+  displayMode = 'stacked',
   maxStreams = 5,
   showLabels = true,
   showGrid = true,
@@ -153,16 +142,16 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
   onStreamSelect,
   onTimeRangeChange,
   colorMap = {
-    physiological: "#ef4444", // Red
-    behavioral: "#3b82f6", // Blue
-    "self-reported": "#8b5cf6", // Purple
-    environmental: "#10b981", // Green
-    treatment: "#f59e0b", // Amber
-    grid: "#475569", // Slate
-    background: "#0f172a88", // Semi-transparent dark blue
-    text: "#f8fafc", // Light slate
-    correlation: "#64748b", // Slate
-    anomaly: "#fb7185", // Pink
+    physiological: '#ef4444', // Red
+    behavioral: '#3b82f6', // Blue
+    'self-reported': '#8b5cf6', // Purple
+    environmental: '#10b981', // Green
+    treatment: '#f59e0b', // Amber
+    grid: '#475569', // Slate
+    background: '#0f172a88', // Semi-transparent dark blue
+    text: '#f8fafc', // Light slate
+    correlation: '#64748b', // Slate
+    anomaly: '#fb7185', // Pink
   },
 }) => {
   // Refs
@@ -190,9 +179,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
 
     // Apply category filter
     if (categoryFilter && categoryFilter.length > 0) {
-      filtered = filtered.filter((stream) =>
-        categoryFilter.includes(stream.category),
-      );
+      filtered = filtered.filter((stream) => categoryFilter.includes(stream.category));
     }
 
     // Sort by clinical significance
@@ -264,7 +251,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
         effectiveTimeRange.start,
         effectiveTimeRange.end,
         -width / 2,
-        width / 2,
+        width / 2
       );
 
       // Vertical line
@@ -277,21 +264,14 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
     }
 
     // Generate horizontal value grid lines
-    const valueGridCount =
-      displayMode === "stacked" ? processedStreams.length : 5;
+    const valueGridCount = displayMode === 'stacked' ? processedStreams.length : 5;
 
     for (let i = 0; i <= valueGridCount; i++) {
       let y: number;
 
-      if (displayMode === "stacked") {
+      if (displayMode === 'stacked') {
         // For stacked mode, draw lines between streams
-        y = MathUtils.mapLinear(
-          i,
-          0,
-          processedStreams.length,
-          -height / 2,
-          height / 2,
-        );
+        y = MathUtils.mapLinear(i, 0, processedStreams.length, -height / 2, height / 2);
       } else {
         // For overlay mode, draw evenly spaced grid lines
         y = MathUtils.mapLinear(i, 0, valueGridCount, -height / 2, height / 2);
@@ -307,15 +287,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
     }
 
     return lines;
-  }, [
-    showGrid,
-    processedStreams,
-    effectiveTimeRange,
-    displayMode,
-    width,
-    height,
-    colorMap,
-  ]);
+  }, [showGrid, processedStreams, effectiveTimeRange, displayMode, width, height, colorMap]);
 
   // Process data streams for visualization
   const visualizationData = useMemo(() => {
@@ -324,7 +296,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
       const points: Vector3[] = [];
       const annotationPoints: {
         position: Vector3;
-        type: "anomaly" | "label";
+        type: 'anomaly' | 'label';
         value: number;
         label?: string;
       }[] = [];
@@ -357,13 +329,13 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
           effectiveTimeRange.start,
           effectiveTimeRange.end,
           -width / 2,
-          width / 2,
+          width / 2
         );
 
         // Map y position (value)
         let y: number;
 
-        if (displayMode === "stacked") {
+        if (displayMode === 'stacked') {
           // For stacked mode, position streams in separate rows
           const rowHeight = height / processedStreams.length;
           const baseY = MathUtils.mapLinear(
@@ -371,7 +343,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
             0,
             processedStreams.length,
             -height / 2,
-            height / 2,
+            height / 2
           );
 
           // Map value to a portion of the row height
@@ -380,19 +352,13 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
             minValue,
             maxValue,
             -rowHeight * 0.4,
-            rowHeight * 0.4,
+            rowHeight * 0.4
           );
 
           y = baseY + valueY;
         } else {
           // For overlay mode, map to full height
-          y = MathUtils.mapLinear(
-            point.value,
-            minValue,
-            maxValue,
-            -height / 2,
-            height / 2,
-          );
+          y = MathUtils.mapLinear(point.value, minValue, maxValue, -height / 2, height / 2);
         }
 
         // Add point to line
@@ -402,17 +368,17 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
         if (point.anomaly) {
           annotationPoints.push({
             position: new Vector3(x, y, 0),
-            type: "anomaly",
+            type: 'anomaly',
             value: point.value,
             label: point.label,
           });
         }
 
         // Add labels for significant points
-        if (point.label && (streamIndex === 0 || displayMode === "stacked")) {
+        if (point.label && (streamIndex === 0 || displayMode === 'stacked')) {
           annotationPoints.push({
             position: new Vector3(x, y, 0),
-            type: "label",
+            type: 'label',
             value: point.value,
             label: point.label,
           });
@@ -432,8 +398,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
       const correlations = Object.entries(stream.correlationStrength || {})
         .filter(
           ([targetId, strength]) =>
-            strength >= correlationThreshold &&
-            processedStreams.some((s) => s.id === targetId),
+            strength >= correlationThreshold && processedStreams.some((s) => s.id === targetId)
         )
         .map(([targetId, strength]) => ({
           targetId,
@@ -484,14 +449,14 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
         0,
         processedStreams.length,
         -height / 2,
-        height / 2,
+        height / 2
       );
 
       streamPositions.set(stream.id, y);
     });
 
     // Add correlation lines
-    if (displayMode === "stacked") {
+    if (displayMode === 'stacked') {
       visualizationData.forEach((stream) => {
         const sourceY = streamPositions.get(stream.id) || 0;
 
@@ -499,13 +464,10 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
           const targetY = streamPositions.get(correlation.targetId) || 0;
 
           // Skip if target is before source (to avoid duplicates)
-          const targetStream = visualizationData.find(
-            (s) => s.id === correlation.targetId,
-          );
+          const targetStream = visualizationData.find((s) => s.id === correlation.targetId);
           if (
             !targetStream ||
-            visualizationData.indexOf(targetStream) <
-              visualizationData.indexOf(stream)
+            visualizationData.indexOf(targetStream) < visualizationData.indexOf(stream)
           ) {
             return;
           }
@@ -522,10 +484,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
             const t = i / steps;
 
             // Quadratic Bezier curve
-            const x =
-              (1 - t) * (1 - t) * sourceX +
-              2 * (1 - t) * t * controlX +
-              t * t * targetX;
+            const x = (1 - t) * (1 - t) * sourceX + 2 * (1 - t) * t * controlX + t * t * targetX;
             const y =
               (1 - t) * (1 - t) * sourceY +
               2 * (1 - t) * t * ((sourceY + targetY) / 2) +
@@ -549,15 +508,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
     }
 
     return lines;
-  }, [
-    showCorrelations,
-    visualizationData,
-    processedStreams,
-    displayMode,
-    height,
-    width,
-    colorMap,
-  ]);
+  }, [showCorrelations, visualizationData, processedStreams, displayMode, height, width, colorMap]);
 
   // Handle stream selection
   const handleStreamSelect = useCallback(
@@ -568,7 +519,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
         onStreamSelect(streamId);
       }
     },
-    [selectedStreamId, onStreamSelect],
+    [selectedStreamId, onStreamSelect]
   );
 
   // Format timestamp for labels
@@ -583,30 +534,30 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
       if (timespan <= 86400000) {
         // For ranges <= 1 day, show time only
         return date.toLocaleTimeString(undefined, {
-          hour: "2-digit",
-          minute: "2-digit",
+          hour: '2-digit',
+          minute: '2-digit',
         });
       } else if (timespan <= 86400000 * 7) {
         // For ranges <= 1 week, show day and time
         return (
           date.toLocaleDateString(undefined, {
-            weekday: "short",
+            weekday: 'short',
           }) +
-          " " +
+          ' ' +
           date.toLocaleTimeString(undefined, {
-            hour: "2-digit",
-            minute: "2-digit",
+            hour: '2-digit',
+            minute: '2-digit',
           })
         );
       } else {
         // For longer ranges, show date only
         return date.toLocaleDateString(undefined, {
-          month: "short",
-          day: "numeric",
+          month: 'short',
+          day: 'numeric',
         });
       }
     },
-    [effectiveTimeRange],
+    [effectiveTimeRange]
   );
 
   // Handle interaction
@@ -615,10 +566,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
       if (!interactable) return;
 
       // Update zoom level
-      const newZoom = Math.max(
-        0.5,
-        Math.min(5, zoomLevel + event.deltaY * -0.001),
-      );
+      const newZoom = Math.max(0.5, Math.min(5, zoomLevel + event.deltaY * -0.001));
       setZoomLevel(newZoom);
 
       // Notify of time range change if enabled
@@ -634,7 +582,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
         });
       }
     },
-    [interactable, zoomLevel, effectiveTimeRange, onTimeRangeChange],
+    [interactable, zoomLevel, effectiveTimeRange, onTimeRangeChange]
   );
 
   const handlePointerDown = useCallback(
@@ -644,7 +592,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
       setIsDragging(true);
       setDragStart({ x: event.clientX, y: event.clientY });
     },
-    [interactable],
+    [interactable]
   );
 
   const handlePointerMove = useCallback(
@@ -675,14 +623,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
         });
       }
     },
-    [
-      interactable,
-      isDragging,
-      dragStart,
-      width,
-      effectiveTimeRange,
-      onTimeRangeChange,
-    ],
+    [interactable, isDragging, dragStart, width, effectiveTimeRange, onTimeRangeChange]
   );
 
   const handlePointerUp = useCallback(() => {
@@ -706,20 +647,14 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
         onPointerLeave={handlePointerUp}
       >
         <planeGeometry args={[width, height]} />
-        <meshBasicMaterial
-          color={colorMap.background}
-          transparent
-          opacity={0.7}
-        />
+        <meshBasicMaterial color={colorMap.background} transparent opacity={0.7} />
       </mesh>
 
       {/* Grid lines */}
       {gridLines.map((line, i) => (
         <Line
           key={`grid-${i}`}
-          points={line.points.map((p) =>
-            p.clone().add(new Vector3(viewOffset.x, viewOffset.y, 0)),
-          )}
+          points={line.points.map((p) => p.clone().add(new Vector3(viewOffset.x, viewOffset.y, 0)))}
           color={line.color}
           lineWidth={line.lineWidth}
           opacity={line.opacity}
@@ -731,9 +666,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
       {correlationLines.map((line, i) => (
         <Line
           key={`correlation-${i}`}
-          points={line.points.map((p) =>
-            p.clone().add(new Vector3(viewOffset.x, viewOffset.y, 0)),
-          )}
+          points={line.points.map((p) => p.clone().add(new Vector3(viewOffset.x, viewOffset.y, 0)))}
           color={line.color}
           lineWidth={line.lineWidth}
           opacity={line.opacity}
@@ -747,11 +680,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
           {/* Time axis labels */}
           {[...Array(5)].map((_, i) => {
             const t = i / 4;
-            const timestamp = MathUtils.lerp(
-              effectiveTimeRange.start,
-              effectiveTimeRange.end,
-              t,
-            );
+            const timestamp = MathUtils.lerp(effectiveTimeRange.start, effectiveTimeRange.end, t);
             const x = MathUtils.lerp(-width / 2, width / 2, t);
 
             return (
@@ -769,39 +698,32 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
           })}
 
           {/* Stream labels for stacked mode */}
-          {displayMode === "stacked" &&
+          {displayMode === 'stacked' &&
             visualizationData.map((stream, i) => {
               const y = MathUtils.mapLinear(
                 i + 0.5,
                 0,
                 visualizationData.length,
                 -height / 2,
-                height / 2,
+                height / 2
               );
 
               return (
-                <Html
-                  key={`stream-${stream.id}`}
-                  position={[-width / 2 - 0.5, y, 0]}
-                  center
-                  sprite
-                >
+                <Html key={`stream-${stream.id}`} position={[-width / 2 - 0.5, y, 0]} center sprite>
                   <div
                     style={{
                       backgroundColor: `${stream.color}cc`,
-                      color: "white",
-                      padding: "0.25rem 0.5rem",
-                      borderRadius: "0.25rem",
-                      fontSize: "0.75rem",
-                      whiteSpace: "nowrap",
-                      fontWeight: "bold",
-                      cursor: "pointer",
+                      color: 'white',
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '0.25rem',
+                      fontSize: '0.75rem',
+                      whiteSpace: 'nowrap',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
                       opacity: stream.isSelected ? 1 : 0.7,
                       transform: `scale(${stream.isSelected ? 1.05 : 1})`,
-                      transition: "transform 0.2s, opacity 0.2s",
-                      boxShadow: stream.isSelected
-                        ? "0 0 5px rgba(255, 255, 255, 0.5)"
-                        : "none",
+                      transition: 'transform 0.2s, opacity 0.2s',
+                      boxShadow: stream.isSelected ? '0 0 5px rgba(255, 255, 255, 0.5)' : 'none',
                     }}
                     onClick={() => handleStreamSelect(stream.id)}
                   >
@@ -841,14 +763,10 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
               />
 
               {/* Normal range indicator */}
-              {stream.normalRange && displayMode !== "stacked" && (
+              {stream.normalRange && displayMode !== 'stacked' && (
                 <mesh>
                   <planeGeometry args={[width, 0.2]} />
-                  <meshBasicMaterial
-                    color={stream.color}
-                    transparent
-                    opacity={0.1}
-                  />
+                  <meshBasicMaterial color={stream.color} transparent opacity={0.1} />
                 </mesh>
               )}
 
@@ -863,7 +781,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
 
               {/* Annotation points */}
               {stream.annotationPoints.map((annotation, i) => {
-                if (annotation.type === "anomaly") {
+                if (annotation.type === 'anomaly') {
                   return (
                     <group key={`anomaly-${i}`} position={annotation.position}>
                       <mesh scale={0.15}>
@@ -876,14 +794,14 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
                           <div
                             style={{
                               backgroundColor: `${colorMap.anomaly}dd`,
-                              color: "white",
-                              padding: "0.25rem 0.5rem",
-                              borderRadius: "0.25rem",
-                              fontSize: "0.75rem",
-                              whiteSpace: "nowrap",
-                              maxWidth: "150px",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
+                              color: 'white',
+                              padding: '0.25rem 0.5rem',
+                              borderRadius: '0.25rem',
+                              fontSize: '0.75rem',
+                              whiteSpace: 'nowrap',
+                              maxWidth: '150px',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
                             }}
                           >
                             {annotation.label}
@@ -892,25 +810,21 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
                       )}
                     </group>
                   );
-                } else if (annotation.type === "label") {
+                } else if (annotation.type === 'label') {
                   return (
-                    <Billboard
-                      key={`label-${i}`}
-                      position={annotation.position}
-                      follow={true}
-                    >
+                    <Billboard key={`label-${i}`} position={annotation.position} follow={true}>
                       <Html center sprite>
                         <div
                           style={{
                             backgroundColor: `${stream.color}99`,
-                            color: "white",
-                            padding: "0.125rem 0.375rem",
-                            borderRadius: "0.25rem",
-                            fontSize: "0.7rem",
-                            whiteSpace: "nowrap",
-                            maxWidth: "120px",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
+                            color: 'white',
+                            padding: '0.125rem 0.375rem',
+                            borderRadius: '0.25rem',
+                            fontSize: '0.7rem',
+                            whiteSpace: 'nowrap',
+                            maxWidth: '120px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
                           }}
                         >
                           {annotation.label}

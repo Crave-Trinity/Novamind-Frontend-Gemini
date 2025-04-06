@@ -4,30 +4,34 @@
  * with neuropsychiatric integration and clinical precision
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from "react";
-import { BrowserRouter, useNavigate } from "react-router-dom";
-import { useTheme } from "next-themes";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
+import { useTheme } from 'next-themes';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
 // Domain types
-import { BrainModel, BrainRegion, NeuralConnection } from "@domain/types/brain/models";
+import { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
 import {
   RenderMode,
   VisualizationSettings,
   ThemeOption, // Import ThemeOption
   defaultVisualizationSettings, // Import defaults
-} from "@domain/types/brain/visualization";
+} from '@domain/types/brain/visualization';
 import {
   SafeArray,
   Result,
   success,
   failure,
   VisualizationState,
-  NeuralError
-} from "@domain/types/shared/common";
-import { Diagnosis, Symptom, Patient } from "@domain/types/clinical/patient";
-import { TreatmentResponsePrediction, NeuralImpactRating, TreatmentType } from "@domain/types/clinical/treatment"; // Import NeuralImpactRating
-import { RiskAssessment } from "@domain/types/clinical/risk";
+  NeuralError,
+} from '@domain/types/shared/common';
+import { Diagnosis, Symptom, Patient } from '@domain/types/clinical/patient';
+import {
+  TreatmentResponsePrediction,
+  NeuralImpactRating,
+  TreatmentType,
+} from '@domain/types/clinical/treatment'; // Import NeuralImpactRating
+import { RiskAssessment } from '@domain/types/clinical/risk';
 
 // Domain models
 import {
@@ -38,29 +42,28 @@ import {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
-} from "@domain/models/brain/mapping/brain-mapping";
+} from '@domain/models/brain/mapping/brain-mapping';
 
 // Application hooks
-import { useBrainModel } from "@application/hooks/useBrainModel";
-import { usePatientData } from "@application/hooks/usePatientData";
-import { useClinicalContext } from "@application/hooks/useClinicalContext";
-import { useVisualSettings } from "@application/hooks/useVisualSettings";
-import { useSearchParams } from "@application/hooks/useSearchParams";
+import { useBrainModel } from '@application/hooks/useBrainModel';
+import { usePatientData } from '@application/hooks/usePatientData';
+import { useClinicalContext } from '@application/hooks/useClinicalContext';
+import { useVisualSettings } from '@application/hooks/useVisualSettings';
+import { useSearchParams } from '@application/hooks/useSearchParams';
 
 // Presentation components
-import BrainModelViewer from "@presentation/organisms/BrainModelViewer";
-import RegionSelectionPanel from "@presentation/molecules/RegionSelectionPanel";
-import VisualizationControls from "@presentation/molecules/VisualizationControls";
-import ClinicalDataOverlay from "@presentation/molecules/ClinicalDataOverlay";
-import BrainRegionDetails from "@presentation/molecules/BrainRegionDetails";
-import LoadingIndicator from "@presentation/atoms/LoadingIndicator";
+import BrainModelViewer from '@presentation/organisms/BrainModelViewer';
+import RegionSelectionPanel from '@presentation/molecules/RegionSelectionPanel';
+import VisualizationControls from '@presentation/molecules/VisualizationControls';
+import ClinicalDataOverlay from '@presentation/molecules/ClinicalDataOverlay';
+import BrainRegionDetails from '@presentation/molecules/BrainRegionDetails';
+import LoadingIndicator from '@presentation/atoms/LoadingIndicator';
 
 // Common components
-import AdaptiveLOD, { DetailConfig } from "@presentation/common/AdaptiveLOD"; // Import DetailConfig only
-import PerformanceMonitor, { PerformanceMetrics } from "@presentation/common/PerformanceMonitor"; // Import PerformanceMetrics type
-import VisualizationErrorBoundary from "@presentation/common/VisualizationErrorBoundary";
-import LoadingFallback from "@presentation/common/LoadingFallback";
-
+import AdaptiveLOD, { DetailConfig } from '@presentation/common/AdaptiveLOD'; // Import DetailConfig only
+import PerformanceMonitor, { PerformanceMetrics } from '@presentation/common/PerformanceMonitor'; // Import PerformanceMetrics type
+import VisualizationErrorBoundary from '@presentation/common/VisualizationErrorBoundary';
+import LoadingFallback from '@presentation/common/LoadingFallback';
 
 // Define neural-safe prop interface
 interface BrainVisualizationContainerProps {
@@ -86,31 +89,29 @@ interface BrainVisualizationContainerProps {
  * Selectable detail modes for visualization
  */
 export enum DetailMode {
-  PERFORMANCE = "performance",
-  BALANCED = "balanced",
-  QUALITY = "quality",
-  CLINICAL = "clinical",
-  AUTO = "auto",
+  PERFORMANCE = 'performance',
+  BALANCED = 'balanced',
+  QUALITY = 'quality',
+  CLINICAL = 'clinical',
+  AUTO = 'auto',
 }
 
 /**
  * Map detail modes to detail levels
  */
-const detailModeMap: Record<DetailMode, "low" | "medium" | "high" | "dynamic"> = {
-  [DetailMode.PERFORMANCE]: "low",
-  [DetailMode.BALANCED]: "medium",
-  [DetailMode.QUALITY]: "high",
-  [DetailMode.CLINICAL]: "high",
-  [DetailMode.AUTO]: "dynamic",
+const detailModeMap: Record<DetailMode, 'low' | 'medium' | 'high' | 'dynamic'> = {
+  [DetailMode.PERFORMANCE]: 'low',
+  [DetailMode.BALANCED]: 'medium',
+  [DetailMode.QUALITY]: 'high',
+  [DetailMode.CLINICAL]: 'high',
+  [DetailMode.AUTO]: 'dynamic',
 };
 
 /**
  * BrainVisualizationContainer - Organism component for brain visualization
  * Implements neural-safe integration of visualization components with application state
  */
-const BrainVisualizationContainerInternal: React.FC<
-  BrainVisualizationContainerProps
-> = ({
+const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerProps> = ({
   scanId,
   patientId,
   initialSelectedRegionId,
@@ -119,11 +120,11 @@ const BrainVisualizationContainerInternal: React.FC<
   readOnly = false, // Use prop
   showClinicalData = true, // Use prop
   showControls = true,
-  height = "100%",
-  width = "100%",
+  height = '100%',
+  width = '100%',
   onRegionSelect,
   onVisualizationReady,
-  className = "",
+  className = '',
   enableClinicalOverlay = true,
   enableRegionSelection = true,
   highPerformanceMode = false,
@@ -158,25 +159,24 @@ const BrainVisualizationContainerInternal: React.FC<
     error: clinicalError,
   } = useClinicalContext(patientId);
 
-  const {
-    visualizationSettings,
-    updateVisualizationSettings,
-    activeThemeSettings,
-  } = useVisualSettings();
+  const { visualizationSettings, updateVisualizationSettings, activeThemeSettings } =
+    useVisualSettings();
 
   const [renderMode, setRenderMode] = useState<RenderMode>(
-    (getParam("mode") as RenderMode) || initialRenderMode,
+    (getParam('mode') as RenderMode) || initialRenderMode
   );
   const [selectedRegionIds, setSelectedRegionIds] = useState<string[]>(
-    getParam("regions")?.split(",") ?? initialSelectedRegions,
+    getParam('regions')?.split(',') ?? initialSelectedRegions
   );
   const [highlightedRegionIdsInternal, setHighlightedRegionIdsInternal] = useState<string[]>([]);
-  const [regionSearchQuery, setRegionSearchQuery] = useState<string>("");
-  const [activeRegionId, setActiveRegionId] = useState<string | null>(initialSelectedRegionId || null);
+  const [regionSearchQuery, setRegionSearchQuery] = useState<string>('');
+  const [activeRegionId, setActiveRegionId] = useState<string | null>(
+    initialSelectedRegionId || null
+  );
   const [showDetails, setShowDetails] = useState<boolean>(!!initialSelectedRegionId);
   const [detailMode, setDetailMode] = useState<DetailMode>(DetailMode.AUTO);
   const [forceDetailLevel, setForceDetailLevel] = useState<
-    "low" | "medium" | "high" | "dynamic" | undefined
+    'low' | 'medium' | 'high' | 'dynamic' | undefined
   >(undefined);
   const [showPerformanceStats, setShowPerformanceStats] = useState(false);
   const [performanceMetrics, setPerformanceMetrics] = useState<any>(null); // Consider defining a proper type
@@ -198,45 +198,66 @@ const BrainVisualizationContainerInternal: React.FC<
 
   const visualizationState = useMemo((): VisualizationState<BrainModel | null> => {
     if (combinedError && !brainModel) {
-      const neuralError = combinedError instanceof NeuralError
-        ? combinedError
-        : new NeuralError(combinedError?.message || 'Unknown error', { code: 'VIS_CONTAINER_ERR', severity: 'fatal' });
+      const neuralError =
+        combinedError instanceof NeuralError
+          ? combinedError
+          : new NeuralError(combinedError?.message || 'Unknown error', {
+              code: 'VIS_CONTAINER_ERR',
+              severity: 'fatal',
+            });
       return { status: 'error', error: neuralError };
     }
     if (isLoading && !brainModel) {
       return { status: 'loading' };
     }
     if (brainModel) {
-       try {
-         const enhancedModel = applyClinicialDataToBrainModel(
-           brainModel,
-           activeSymptoms ?? [],
-           activeDiagnoses ?? [],
-           symptomMappings ?? [],
-           diagnosisMappings ?? [],
-           treatmentMappings ?? [],
-           riskAssessment ?? undefined, // Correctly pass undefined
-           treatmentPredictions ?? [],
-           renderMode,
-         );
-         // Ensure enhancedModel is not null before returning success
-         if (enhancedModel) {
-            return { status: 'success', data: enhancedModel };
-         } else {
-             // Handle case where enhancement might fail or return null unexpectedly
-             return { status: 'error', error: new NeuralError('Failed to enhance brain model', { code: 'ENHANCE_FAILED', severity: 'warning' }) };
-         }
-       } catch (error) {
-         const neuralError = new NeuralError(
-           `Failed to process clinical data: ${error instanceof Error ? error.message : String(error)}`,
-           { code: 'CLINICAL_PROCESSING_FAILED', severity: 'warning' }
-         );
-         return { status: 'error', error: neuralError };
-       }
+      try {
+        const enhancedModel = applyClinicialDataToBrainModel(
+          brainModel,
+          activeSymptoms ?? [],
+          activeDiagnoses ?? [],
+          symptomMappings ?? [],
+          diagnosisMappings ?? [],
+          treatmentMappings ?? [],
+          riskAssessment ?? undefined, // Correctly pass undefined
+          treatmentPredictions ?? [],
+          renderMode
+        );
+        // Ensure enhancedModel is not null before returning success
+        if (enhancedModel) {
+          return { status: 'success', data: enhancedModel };
+        } else {
+          // Handle case where enhancement might fail or return null unexpectedly
+          return {
+            status: 'error',
+            error: new NeuralError('Failed to enhance brain model', {
+              code: 'ENHANCE_FAILED',
+              severity: 'warning',
+            }),
+          };
+        }
+      } catch (error) {
+        const neuralError = new NeuralError(
+          `Failed to process clinical data: ${error instanceof Error ? error.message : String(error)}`,
+          { code: 'CLINICAL_PROCESSING_FAILED', severity: 'warning' }
+        );
+        return { status: 'error', error: neuralError };
+      }
     }
     return { status: 'idle' };
-  }, [isLoading, combinedError, brainModel, activeSymptoms, activeDiagnoses, symptomMappings, diagnosisMappings, treatmentMappings, riskAssessment, treatmentPredictions, renderMode]);
-
+  }, [
+    isLoading,
+    combinedError,
+    brainModel,
+    activeSymptoms,
+    activeDiagnoses,
+    symptomMappings,
+    diagnosisMappings,
+    treatmentMappings,
+    riskAssessment,
+    treatmentPredictions,
+    renderMode,
+  ]);
 
   useEffect(() => {
     if (scanId) {
@@ -246,18 +267,18 @@ const BrainVisualizationContainerInternal: React.FC<
 
   useEffect(() => {
     if (selectedRegionIds.length > 0) {
-      setParam("regions", selectedRegionIds.join(","));
+      setParam('regions', selectedRegionIds.join(','));
     } else {
-      setParam("regions", null);
+      setParam('regions', null);
     }
   }, [selectedRegionIds, setParam]);
 
   useEffect(() => {
-    setParam("mode", renderMode);
+    setParam('mode', renderMode);
   }, [renderMode, setParam]);
 
   useEffect(() => {
-    if (visualizationState.status === "success" && onVisualizationReady) {
+    if (visualizationState.status === 'success' && onVisualizationReady) {
       onVisualizationReady();
       setIsReady(true);
     }
@@ -269,31 +290,41 @@ const BrainVisualizationContainerInternal: React.FC<
   }, []);
 
   // Handler for external onRegionSelect (expects BrainRegion | null)
-  const handleRegionSelect = useCallback((region: BrainRegion | null) => {
+  const handleRegionSelect = useCallback(
+    (region: BrainRegion | null) => {
       const regionId = region?.id ?? null;
       setSelectedRegionIds(regionId ? [regionId] : []); // Assuming single selection for external callback? Adjust if multi-select needed.
       setActiveRegionId(regionId);
       setShowDetails(!!regionId);
       if (onRegionSelect) {
-          onRegionSelect(region);
+        onRegionSelect(region);
       }
-  }, [onRegionSelect]);
+    },
+    [onRegionSelect]
+  );
 
   // Handler for BrainModelViewer's onRegionClick (expects regionId)
-  const handleViewerRegionClick = useCallback((regionId: string) => {
+  const handleViewerRegionClick = useCallback(
+    (regionId: string) => {
       if (brainModel) {
-          const region = brainModel.regions.find(r => r.id === regionId) || null;
-          handleRegionSelect(region); // Use the main handler
+        const region = brainModel.regions.find((r) => r.id === regionId) || null;
+        handleRegionSelect(region); // Use the main handler
       }
-  }, [brainModel, handleRegionSelect]);
+    },
+    [brainModel, handleRegionSelect]
+  );
 
   // Handler for BrainModelViewer's onRegionHover (expects regionId | null)
-   const handleViewerRegionHover = useCallback((regionId: string | null) => {
-       setHighlightedRegionIdsInternal(regionId ? [regionId] : []);
-       // Optionally trigger external hover logic if needed
-       // if (onRegionHover && brainModel) { ... }
-   }, [/* dependencies if needed */]);
-
+  const handleViewerRegionHover = useCallback(
+    (regionId: string | null) => {
+      setHighlightedRegionIdsInternal(regionId ? [regionId] : []);
+      // Optionally trigger external hover logic if needed
+      // if (onRegionHover && brainModel) { ... }
+    },
+    [
+      /* dependencies if needed */
+    ]
+  );
 
   const handleRegionSearch = useCallback((query: string) => {
     setRegionSearchQuery(query);
@@ -307,19 +338,21 @@ const BrainVisualizationContainerInternal: React.FC<
         if (!selected && prev.includes(regionId)) return prev.filter((id) => id !== regionId);
         return prev;
       });
-       if (onRegionSelect && brainModel) {
-         const region = brainModel.regions.find(r => r.id === regionId) || null;
-         if (selected) onRegionSelect(region);
-         // else onRegionSelect(null); // Optionally notify deselection
-       }
+      if (onRegionSelect && brainModel) {
+        const region = brainModel.regions.find((r) => r.id === regionId) || null;
+        if (selected) onRegionSelect(region);
+        // else onRegionSelect(null); // Optionally notify deselection
+      }
     },
-    [onRegionSelect, brainModel],
+    [onRegionSelect, brainModel]
   );
 
   const handleConnectionClick = useCallback(
     (connectionId: string) => {
-      if (visualizationState.status === "success" && visualizationState.data) {
-        const connection = new SafeArray(visualizationState.data.connections).find((conn) => conn.id === connectionId);
+      if (visualizationState.status === 'success' && visualizationState.data) {
+        const connection = new SafeArray(visualizationState.data.connections).find(
+          (conn) => conn.id === connectionId
+        );
         if (connection) {
           setSelectedRegionIds([connection.sourceId, connection.targetId]);
           setActiveRegionId(null);
@@ -327,14 +360,14 @@ const BrainVisualizationContainerInternal: React.FC<
         }
       }
     },
-    [visualizationState],
+    [visualizationState]
   );
 
   const handleSettingsChange = useCallback(
     (settings: Partial<VisualizationSettings>) => {
       updateVisualizationSettings(settings);
     },
-    [updateVisualizationSettings],
+    [updateVisualizationSettings]
   );
 
   const handleCloseDetails = useCallback(() => {
@@ -342,28 +375,30 @@ const BrainVisualizationContainerInternal: React.FC<
     setActiveRegionId(null);
   }, []);
 
-  const handlePerformanceUpdate = useCallback((metrics: PerformanceMetrics) => { // Use defined type
+  const handlePerformanceUpdate = useCallback((metrics: PerformanceMetrics) => {
+    // Use defined type
     setPerformanceMetrics(metrics);
   }, []);
 
   const handlePerformanceWarning = useCallback(
-    (metrics: PerformanceMetrics, level: "warning" | "critical") => { // Use defined type
-      if (level === "critical" && detailMode === DetailMode.AUTO) {
-        setForceDetailLevel("low");
+    (metrics: PerformanceMetrics, level: 'warning' | 'critical') => {
+      // Use defined type
+      if (level === 'critical' && detailMode === DetailMode.AUTO) {
+        setForceDetailLevel('low');
       }
     },
-    [detailMode],
+    [detailMode]
   );
 
   const handleVisualizationError = useCallback((error: Error) => {
     setErrorState(error);
-    console.error("NOVAMIND Visualization Error:", error);
+    console.error('NOVAMIND Visualization Error:', error);
   }, []);
 
   const handleErrorRecovery = useCallback(() => {
     setErrorState(null);
     setDetailMode(DetailMode.PERFORMANCE);
-    setForceDetailLevel("low");
+    setForceDetailLevel('low');
     if (scanId) fetchBrainModel(scanId);
     return { success: true, value: true };
   }, [scanId, fetchBrainModel]);
@@ -381,17 +416,17 @@ const BrainVisualizationContainerInternal: React.FC<
     >
       <VisualizationErrorBoundary onError={handleVisualizationError}>
         <AdaptiveLOD
-            forceDetailLevel={currentDetailLevel}
-            // onWarning={handlePerformanceWarning} // Prop doesn't exist on AdaptiveLODProps
-            // Pass other necessary props based on AdaptiveLODProps definition
-            // initialDetailLevel={...} // If needed
-            // adaptiveMode={...} // If needed
-            // etc.
+          forceDetailLevel={currentDetailLevel}
+          // onWarning={handlePerformanceWarning} // Prop doesn't exist on AdaptiveLODProps
+          // Pass other necessary props based on AdaptiveLODProps definition
+          // initialDetailLevel={...} // If needed
+          // adaptiveMode={...} // If needed
+          // etc.
         >
           {(detailConfig) => (
             <>
               {/* Explicitly check for non-null data for type safety */}
-              {visualizationState.status === 'success' && visualizationState.data !== null && ( 
+              {visualizationState.status === 'success' && visualizationState.data !== null && (
                 <BrainModelViewer
                   visualizationState={visualizationState as VisualizationState<BrainModel>} // Assert non-null data
                   renderMode={renderMode}
@@ -405,34 +440,41 @@ const BrainVisualizationContainerInternal: React.FC<
                   showInactiveRegions={visualizationSettings?.inactiveRegionOpacity > 0}
                   width="100%"
                   height="100%"
-                  backgroundColor={activeThemeSettings?.backgroundColor || "#000000"}
+                  backgroundColor={activeThemeSettings?.backgroundColor || '#000000'}
                   onRegionClick={handleViewerRegionClick} // Pass correct handler
                   onRegionHover={handleViewerRegionHover} // Pass correct handler
                   onConnectionClick={handleConnectionClick}
                   // onReady prop doesn't exist on BrainModelViewerProps
                   // Spread detailConfig if BrainModelViewer accepts these props
-                  // {...detailConfig} 
+                  // {...detailConfig}
                 />
               )}
 
               {/* Loading State */}
               {visualizationState.status === 'loading' && (
-                 <LoadingFallback progress={loadingProgress} message="Loading Neural Model" height={height} theme={theme === 'dark' ? 'dark' : 'clinical'} />
+                <LoadingFallback
+                  progress={loadingProgress}
+                  message="Loading Neural Model"
+                  height={height}
+                  theme={theme === 'dark' ? 'dark' : 'clinical'}
+                />
               )}
               {/* Error State */}
               {visualizationState.status === 'error' && (
-                 <div className="absolute inset-0 bg-black/80 z-30 flex items-center justify-center p-4">
-                    <div className="bg-gray-900 p-6 rounded-lg shadow-xl text-center">
-                        <h3 className="text-red-500 text-xl mb-2">Visualization Error</h3>
-                        <p className="text-gray-300 mb-4">{visualizationState.error.message}</p>
-                        <button
-                            onClick={() => { if (scanId) fetchBrainModel(scanId); }}
-                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                        >
-                            Retry
-                        </button>
-                    </div>
-                 </div>
+                <div className="absolute inset-0 bg-black/80 z-30 flex items-center justify-center p-4">
+                  <div className="bg-gray-900 p-6 rounded-lg shadow-xl text-center">
+                    <h3 className="text-red-500 text-xl mb-2">Visualization Error</h3>
+                    <p className="text-gray-300 mb-4">{visualizationState.error.message}</p>
+                    <button
+                      onClick={() => {
+                        if (scanId) fetchBrainModel(scanId);
+                      }}
+                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                </div>
               )}
 
               {showControls && (
@@ -447,48 +489,58 @@ const BrainVisualizationContainerInternal: React.FC<
                 </div>
               )}
 
-              {enableRegionSelection && visualizationState.status === "success" && visualizationState.data && (
-                <div className="absolute right-4 top-4 z-10 max-h-[calc(100%-2rem)] overflow-auto">
-                  <RegionSelectionPanel
-                    regions={visualizationState.data.regions}
-                    selectedRegionIds={selectedRegionIds}
-                    onRegionSelect={handlePanelRegionSelect}
-                    onRegionSearch={handleRegionSearch}
-                    searchQuery={regionSearchQuery}
-                  />
-                </div>
-              )}
+              {enableRegionSelection &&
+                visualizationState.status === 'success' &&
+                visualizationState.data && (
+                  <div className="absolute right-4 top-4 z-10 max-h-[calc(100%-2rem)] overflow-auto">
+                    <RegionSelectionPanel
+                      regions={visualizationState.data.regions}
+                      selectedRegionIds={selectedRegionIds}
+                      onRegionSelect={handlePanelRegionSelect}
+                      onRegionSearch={handleRegionSearch}
+                      searchQuery={regionSearchQuery}
+                    />
+                  </div>
+                )}
 
-              {enableClinicalOverlay && visualizationState.status === "success" && visualizationState.data && patientData && riskAssessment && (
-                 <div className="absolute bottom-4 left-4 right-4 z-10">
-                   <ClinicalDataOverlay
-                     patient={patientData} 
-                     symptoms={activeSymptoms ?? []}
-                     diagnoses={activeDiagnoses ?? []}
-                     riskAssessment={riskAssessment} 
-                     selectedRegionIds={selectedRegionIds}
-                     brainModel={visualizationState.data}
-                   />
-                 </div>
-               )}
+              {enableClinicalOverlay &&
+                visualizationState.status === 'success' &&
+                visualizationState.data &&
+                patientData &&
+                riskAssessment && (
+                  <div className="absolute bottom-4 left-4 right-4 z-10">
+                    <ClinicalDataOverlay
+                      patient={patientData}
+                      symptoms={activeSymptoms ?? []}
+                      diagnoses={activeDiagnoses ?? []}
+                      riskAssessment={riskAssessment}
+                      selectedRegionIds={selectedRegionIds}
+                      brainModel={visualizationState.data}
+                    />
+                  </div>
+                )}
 
-              {showDetails && activeRegionId && visualizationState.status === "success" && visualizationState.data && patientData && (
-                 <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-20 flex items-center justify-center p-4">
-                   <div className="bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[90%] overflow-auto">
-                     <BrainRegionDetails
-                       regionId={activeRegionId}
-                       brainModel={visualizationState.data}
-                       patient={patientData} 
-                       symptoms={activeSymptoms ?? []}
-                       diagnoses={activeDiagnoses ?? []}
-                       treatmentPredictions={treatmentPredictions ?? []}
-                       symptomMappings={symptomMappings ?? []}
-                       diagnosisMappings={diagnosisMappings ?? []}
-                       onClose={handleCloseDetails}
-                     />
-                   </div>
-                 </div>
-               )}
+              {showDetails &&
+                activeRegionId &&
+                visualizationState.status === 'success' &&
+                visualizationState.data &&
+                patientData && (
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-20 flex items-center justify-center p-4">
+                    <div className="bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[90%] overflow-auto">
+                      <BrainRegionDetails
+                        regionId={activeRegionId}
+                        brainModel={visualizationState.data}
+                        patient={patientData}
+                        symptoms={activeSymptoms ?? []}
+                        diagnoses={activeDiagnoses ?? []}
+                        treatmentPredictions={treatmentPredictions ?? []}
+                        symptomMappings={symptomMappings ?? []}
+                        diagnosisMappings={diagnosisMappings ?? []}
+                        onClose={handleCloseDetails}
+                      />
+                    </div>
+                  </div>
+                )}
 
               {showPerformanceStats && (
                 <div className="absolute bottom-4 right-4 z-10">
@@ -518,7 +570,7 @@ function applyClinicialDataToBrainModel(
   treatmentMappings: TreatmentNeuralMapping[],
   riskAssessment?: RiskAssessment,
   treatmentPredictions?: TreatmentResponsePrediction[],
-  renderMode: RenderMode = RenderMode.ANATOMICAL,
+  renderMode: RenderMode = RenderMode.ANATOMICAL
 ): BrainModel {
   const enhancedModel: BrainModel = JSON.parse(JSON.stringify(brainModel));
 
@@ -531,7 +583,7 @@ function applyClinicialDataToBrainModel(
     symptomMappings,
     symptoms,
     diagnosisMappings,
-    diagnoses,
+    diagnoses
   );
 
   if (activationResult.success) {
@@ -543,8 +595,8 @@ function applyClinicialDataToBrainModel(
     });
 
     enhancedModel.connections = enhancedModel.connections.map((conn) => {
-      const sourceRegion = enhancedModel.regions.find(r => r.id === conn.sourceId);
-      const targetRegion = enhancedModel.regions.find(r => r.id === conn.targetId);
+      const sourceRegion = enhancedModel.regions.find((r) => r.id === conn.sourceId);
+      const targetRegion = enhancedModel.regions.find((r) => r.id === conn.targetId);
       const sourceActivity = sourceRegion?.activityLevel || 0;
       const targetActivity = targetRegion?.activityLevel || 0;
       const avgActivity = (sourceActivity + targetActivity) / 2;
@@ -552,44 +604,56 @@ function applyClinicialDataToBrainModel(
     });
   }
 
-  if (renderMode === RenderMode.CONNECTIVITY && treatmentPredictions && treatmentPredictions.length > 0) {
+  if (
+    renderMode === RenderMode.CONNECTIVITY &&
+    treatmentPredictions &&
+    treatmentPredictions.length > 0
+  ) {
     const treatmentIds = treatmentPredictions.map((tp) => tp.treatmentType);
     // calculateTreatmentImpact expects regions, mappings, ids
     const impactResult = calculateTreatmentImpact(
       enhancedModel.regions,
       // enhancedModel.connections, // Remove incorrect argument
       treatmentMappings,
-      treatmentIds,
+      treatmentIds
     );
 
     if (impactResult.success) {
       const impact = impactResult.value; // Use .value
 
       enhancedModel.regions = enhancedModel.regions.map((region) => {
-        const regionImpact = impact.regionImpacts.find(ri => ri.regionId === region.id);
+        const regionImpact = impact.regionImpacts.find((ri) => ri.regionId === region.id);
         // Use 'impact' property, map it to a numerical effect if needed
-        const effectValue = regionImpact?.impact === 'increase' ? 1 : regionImpact?.impact === 'decrease' ? -1 : 0;
-        return { ...region, treatmentEffect: (regionImpact?.magnitude || 0) * effectValue }; 
+        const effectValue =
+          regionImpact?.impact === 'increase' ? 1 : regionImpact?.impact === 'decrease' ? -1 : 0;
+        return { ...region, treatmentEffect: (regionImpact?.magnitude || 0) * effectValue };
       });
 
       enhancedModel.connections = enhancedModel.connections.map((conn) => {
         // Find connection impact using sourceId and targetId
-        const connectionImpact = impact.connectionImpacts.find(ci => ci.sourceId === conn.sourceId && ci.targetId === conn.targetId);
+        const connectionImpact = impact.connectionImpacts.find(
+          (ci) => ci.sourceId === conn.sourceId && ci.targetId === conn.targetId
+        );
         // Use 'impact' property, map it to a numerical effect if needed
-        const connEffectValue = connectionImpact?.impact === 'increase' ? 1 : connectionImpact?.impact === 'decrease' ? -1 : 0;
-        return { ...conn, treatmentEffect: (connectionImpact?.magnitude || 0) * connEffectValue }; 
+        const connEffectValue =
+          connectionImpact?.impact === 'increase'
+            ? 1
+            : connectionImpact?.impact === 'decrease'
+              ? -1
+              : 0;
+        return { ...conn, treatmentEffect: (connectionImpact?.magnitude || 0) * connEffectValue };
       });
     }
   }
 
   // Apply risk assessment data if available and in risk mode
   if (riskAssessment && renderMode === RenderMode.RISK) {
-      enhancedModel.regions = enhancedModel.regions.map(region => {
-          // Property regionRiskScores does not exist on RiskAssessment type
-          // const regionRisk = riskAssessment.regionRiskScores?.find(rs => rs.regionId === region.id); 
-          // Property riskScore also doesn't exist
-          return { ...region, riskFactor: 0 }; // Assign default 0
-      });
+    enhancedModel.regions = enhancedModel.regions.map((region) => {
+      // Property regionRiskScores does not exist on RiskAssessment type
+      // const regionRisk = riskAssessment.regionRiskScores?.find(rs => rs.regionId === region.id);
+      // Property riskScore also doesn't exist
+      return { ...region, riskFactor: 0 }; // Assign default 0
+    });
   }
 
   return enhancedModel;

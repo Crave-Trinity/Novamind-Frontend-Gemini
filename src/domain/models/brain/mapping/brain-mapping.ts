@@ -4,11 +4,11 @@
  * with mathematical precision and quantum-level type safety
  */
 
-import { BrainRegion, NeuralConnection } from "@domain/types/brain/models";
-import { RiskLevel } from "@domain/types/clinical/risk";
-import { Diagnosis, Symptom } from "@domain/types/clinical/patient";
-import { TreatmentType } from "@domain/types/clinical/treatment";
-import { SafeArray, Result, success, failure } from "@domain/types/shared/common"; // Use correct alias
+import { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+import { RiskLevel } from '@domain/types/clinical/risk';
+import { Diagnosis, Symptom } from '@domain/types/clinical/patient';
+import { TreatmentType } from '@domain/types/clinical/treatment';
+import { SafeArray, Result, success, failure } from '@domain/types/shared/common'; // Use correct alias
 
 /**
  * Clinical-to-Neural Mapping Definitions
@@ -22,7 +22,7 @@ export interface NeuralActivationPattern {
     increasedPathways: [string, string][]; // [sourceId, targetId]
     decreasedPathways: [string, string][]; // [sourceId, targetId]
   };
-  timeScale: "acute" | "subacute" | "chronic"; // Temporal characteristics
+  timeScale: 'acute' | 'subacute' | 'chronic'; // Temporal characteristics
   confidence: number; // 0-1 representing confidence in this mapping
 }
 
@@ -33,7 +33,7 @@ export interface SymptomNeuralMapping {
   category: string;
   activationPatterns: NeuralActivationPattern[];
   contributingFactors: string[];
-  evidenceQuality: "established" | "probable" | "theoretical";
+  evidenceQuality: 'established' | 'probable' | 'theoretical';
   citations?: string[];
 }
 
@@ -51,7 +51,7 @@ export interface DiagnosisNeuralMapping {
     subtype: string;
     patterns: NeuralActivationPattern[];
   }[];
-  evidenceQuality: "established" | "probable" | "theoretical";
+  evidenceQuality: 'established' | 'probable' | 'theoretical';
   citations?: string[];
 }
 
@@ -72,7 +72,7 @@ export interface TreatmentNeuralMapping {
     decreasedActivity: string[];
     normalizedConnectivity: [string, string][]; // [sourceId, targetId]
   };
-  evidenceQuality: "established" | "probable" | "theoretical";
+  evidenceQuality: 'established' | 'probable' | 'theoretical';
   citations?: string[];
 }
 
@@ -80,19 +80,19 @@ export interface TreatmentNeuralMapping {
 export interface NeuralImpactRating {
   regionImpacts: {
     regionId: string;
-    impact: "increase" | "decrease" | "modulate" | "normalize";
+    impact: 'increase' | 'decrease' | 'modulate' | 'normalize';
     magnitude: number; // 0-1 representing impact magnitude
     confidence: number; // 0-1 representing confidence level
   }[];
   connectionImpacts: {
     sourceId: string;
     targetId: string;
-    impact: "increase" | "decrease" | "modulate" | "normalize";
+    impact: 'increase' | 'decrease' | 'modulate' | 'normalize';
     magnitude: number; // 0-1 representing impact magnitude
     confidence: number; // 0-1 representing confidence level
   }[];
   overallSeverity: RiskLevel;
-  reversibility: "reversible" | "partial" | "irreversible" | "unknown";
+  reversibility: 'reversible' | 'partial' | 'irreversible' | 'unknown';
   projectedTimeline: string;
 }
 
@@ -106,7 +106,7 @@ export function calculateNeuralActivation(
   symptomMappings: SymptomNeuralMapping[],
   activeSymptoms: Symptom[],
   diagnosisMappings?: DiagnosisNeuralMapping[],
-  activeDiagnoses?: Diagnosis[],
+  activeDiagnoses?: Diagnosis[]
 ): Result<Map<string, number>> {
   try {
     // Create a safe wrapper for our inputs
@@ -126,7 +126,7 @@ export function calculateNeuralActivation(
     safeActiveSymptoms.forEach((symptom) => {
       // Find relevant mapping
       const mapping = safeSymptomMappings.find(
-        (m) => m.symptomId === symptom.id || m.symptomName === symptom.name,
+        (m) => m.symptomId === symptom.id || m.symptomName === symptom.name
       );
 
       if (!mapping) return;
@@ -134,15 +134,14 @@ export function calculateNeuralActivation(
       // Process each activation pattern
       new SafeArray(mapping.activationPatterns).forEach((pattern) => {
         // Scale activation by symptom severity and pattern confidence
-        const activationStrength =
-          (symptom.severity / 10) * pattern.intensity * pattern.confidence;
+        const activationStrength = (symptom.severity / 10) * pattern.intensity * pattern.confidence;
 
         // Apply activation to each region
         new SafeArray(pattern.regionIds).forEach((regionId) => {
           const currentActivation = activationMap.get(regionId) || 0;
           // Use quadratic combination for more realistic neural summation
           const combinedActivation = Math.sqrt(
-            Math.pow(currentActivation, 2) + Math.pow(activationStrength, 2),
+            Math.pow(currentActivation, 2) + Math.pow(activationStrength, 2)
           );
           activationMap.set(regionId, Math.min(1, combinedActivation));
         });
@@ -153,8 +152,7 @@ export function calculateNeuralActivation(
     safeActiveDiagnoses.forEach((diagnosis) => {
       // Find relevant mapping
       const mapping = safeDiagnosisMappings.find(
-        (m) =>
-          m.diagnosisId === diagnosis.id || m.diagnosisName === diagnosis.name,
+        (m) => m.diagnosisId === diagnosis.id || m.diagnosisName === diagnosis.name
       );
 
       if (!mapping) return;
@@ -166,20 +164,19 @@ export function calculateNeuralActivation(
           mild: 0.3,
           moderate: 0.6,
           severe: 0.9,
-          "in remission": 0.15,
+          'in remission': 0.15,
           unspecified: 0.5,
         };
 
         const severityFactor = severityScale[diagnosis.severity] || 0.5;
-        const activationStrength =
-          severityFactor * pattern.intensity * pattern.confidence;
+        const activationStrength = severityFactor * pattern.intensity * pattern.confidence;
 
         // Apply activation to each region
         new SafeArray(pattern.regionIds).forEach((regionId) => {
           const currentActivation = activationMap.get(regionId) || 0;
           // Use quadratic combination for more realistic neural summation
           const combinedActivation = Math.sqrt(
-            Math.pow(currentActivation, 2) + Math.pow(activationStrength, 2),
+            Math.pow(currentActivation, 2) + Math.pow(activationStrength, 2)
           );
           activationMap.set(regionId, Math.min(1, combinedActivation));
         });
@@ -188,16 +185,14 @@ export function calculateNeuralActivation(
 
     return success(activationMap);
   } catch (error) {
-    return failure(
-      new Error(`Failed to calculate neural activation: ${error}`),
-    );
+    return failure(new Error(`Failed to calculate neural activation: ${error}`));
   }
 }
 
 // Map symptoms to affected brain regions
 export function mapSymptomsToRegions(
   symptomMappings: SymptomNeuralMapping[],
-  activeSymptoms: Symptom[],
+  activeSymptoms: Symptom[]
 ): Result<Map<string, Symptom[]>> {
   try {
     const safeSymptomMappings = new SafeArray(symptomMappings);
@@ -210,7 +205,7 @@ export function mapSymptomsToRegions(
     safeActiveSymptoms.forEach((symptom) => {
       // Find mapping for this symptom
       const mapping = safeSymptomMappings.find(
-        (m) => m.symptomId === symptom.id || m.symptomName === symptom.name,
+        (m) => m.symptomId === symptom.id || m.symptomName === symptom.name
       );
 
       if (!mapping) return;
@@ -239,7 +234,7 @@ export function mapSymptomsToRegions(
 // Map diagnoses to affected brain regions
 export function mapDiagnosesToRegions(
   diagnosisMappings: DiagnosisNeuralMapping[],
-  activeDiagnoses: Diagnosis[],
+  activeDiagnoses: Diagnosis[]
 ): Result<Map<string, Diagnosis[]>> {
   try {
     const safeDiagnosisMappings = new SafeArray(diagnosisMappings);
@@ -252,8 +247,7 @@ export function mapDiagnosesToRegions(
     safeActiveDiagnoses.forEach((diagnosis) => {
       // Find mapping for this diagnosis
       const mapping = safeDiagnosisMappings.find(
-        (m) =>
-          m.diagnosisId === diagnosis.id || m.diagnosisName === diagnosis.name,
+        (m) => m.diagnosisId === diagnosis.id || m.diagnosisName === diagnosis.name
       );
 
       if (!mapping) return;
@@ -283,7 +277,7 @@ export function mapDiagnosesToRegions(
 export function calculateTreatmentImpact(
   regions: BrainRegion[],
   treatmentMappings: TreatmentNeuralMapping[],
-  treatmentIds: string[],
+  treatmentIds: string[]
 ): Result<NeuralImpactRating> {
   try {
     const safeRegions = new SafeArray(regions);
@@ -295,42 +289,24 @@ export function calculateTreatmentImpact(
       regionImpacts: [],
       connectionImpacts: [],
       overallSeverity: RiskLevel.NONE,
-      reversibility: "unknown",
-      projectedTimeline: "",
+      reversibility: 'unknown',
+      projectedTimeline: '',
     };
 
     // Process each treatment
     safeTreatmentIds.forEach((treatmentId) => {
       // Find mapping for this treatment
-      const mapping = safeTreatmentMappings.find(
-        (m) => m.treatmentId === treatmentId,
-      );
+      const mapping = safeTreatmentMappings.find((m) => m.treatmentId === treatmentId);
       if (!mapping) return;
 
       // Process region impacts
-      new SafeArray(mapping.effectPatterns.increasedActivity).forEach(
-        (regionId) => {
-          addOrUpdateRegionImpact(
-            impact.regionImpacts,
-            regionId,
-            "increase",
-            0.7,
-            0.8,
-          );
-        },
-      );
+      new SafeArray(mapping.effectPatterns.increasedActivity).forEach((regionId) => {
+        addOrUpdateRegionImpact(impact.regionImpacts, regionId, 'increase', 0.7, 0.8);
+      });
 
-      new SafeArray(mapping.effectPatterns.decreasedActivity).forEach(
-        (regionId) => {
-          addOrUpdateRegionImpact(
-            impact.regionImpacts,
-            regionId,
-            "decrease",
-            0.7,
-            0.8,
-          );
-        },
-      );
+      new SafeArray(mapping.effectPatterns.decreasedActivity).forEach((regionId) => {
+        addOrUpdateRegionImpact(impact.regionImpacts, regionId, 'decrease', 0.7, 0.8);
+      });
 
       // Process connection impacts
       new SafeArray(mapping.effectPatterns.normalizedConnectivity).forEach(
@@ -339,11 +315,11 @@ export function calculateTreatmentImpact(
             impact.connectionImpacts,
             sourceId,
             targetId,
-            "normalize",
+            'normalize',
             0.6,
-            0.7,
+            0.7
           );
-        },
+        }
       );
 
       // Additional processing for treatment mechanism of action
@@ -352,9 +328,9 @@ export function calculateTreatmentImpact(
           addOrUpdateRegionImpact(
             impact.regionImpacts,
             regionId,
-            "modulate",
+            'modulate',
             0.8,
-            mechanism.confidenceLevel,
+            mechanism.confidenceLevel
           );
         });
       });
@@ -377,7 +353,7 @@ export function calculateTreatmentImpact(
     }
 
     // Set projected timeline based on most significant mechanism
-    impact.projectedTimeline = "2-4 weeks"; // Default timeline
+    impact.projectedTimeline = '2-4 weeks'; // Default timeline
 
     return success(impact);
   } catch (error) {
@@ -387,22 +363,18 @@ export function calculateTreatmentImpact(
 
 // Helper function for adding or updating region impacts
 function addOrUpdateRegionImpact(
-  impacts: NeuralImpactRating["regionImpacts"],
+  impacts: NeuralImpactRating['regionImpacts'],
   regionId: string,
-  impact: "increase" | "decrease" | "modulate" | "normalize",
+  impact: 'increase' | 'decrease' | 'modulate' | 'normalize',
   magnitude: number,
-  confidence: number,
+  confidence: number
 ): void {
-  const existingIndex = impacts.findIndex(
-    (ri) => ri.regionId === regionId && ri.impact === impact,
-  );
+  const existingIndex = impacts.findIndex((ri) => ri.regionId === regionId && ri.impact === impact);
 
   if (existingIndex >= 0) {
     // Combine with existing impact using quadratic summation for magnitudes
     const existing = impacts[existingIndex];
-    const newMagnitude = Math.sqrt(
-      Math.pow(existing.magnitude, 2) + Math.pow(magnitude, 2),
-    );
+    const newMagnitude = Math.sqrt(Math.pow(existing.magnitude, 2) + Math.pow(magnitude, 2));
     // Average the confidence values
     const newConfidence = (existing.confidence + confidence) / 2;
 
@@ -424,26 +396,21 @@ function addOrUpdateRegionImpact(
 
 // Helper function for adding or updating connection impacts
 function addOrUpdateConnectionImpact(
-  impacts: NeuralImpactRating["connectionImpacts"],
+  impacts: NeuralImpactRating['connectionImpacts'],
   sourceId: string,
   targetId: string,
-  impact: "increase" | "decrease" | "modulate" | "normalize",
+  impact: 'increase' | 'decrease' | 'modulate' | 'normalize',
   magnitude: number,
-  confidence: number,
+  confidence: number
 ): void {
   const existingIndex = impacts.findIndex(
-    (ci) =>
-      ci.sourceId === sourceId &&
-      ci.targetId === targetId &&
-      ci.impact === impact,
+    (ci) => ci.sourceId === sourceId && ci.targetId === targetId && ci.impact === impact
   );
 
   if (existingIndex >= 0) {
     // Combine with existing impact using quadratic summation for magnitudes
     const existing = impacts[existingIndex];
-    const newMagnitude = Math.sqrt(
-      Math.pow(existing.magnitude, 2) + Math.pow(magnitude, 2),
-    );
+    const newMagnitude = Math.sqrt(Math.pow(existing.magnitude, 2) + Math.pow(magnitude, 2));
     // Average the confidence values
     const newConfidence = (existing.confidence + confidence) / 2;
 

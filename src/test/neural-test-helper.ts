@@ -3,7 +3,7 @@
  * Provides neural-safe mocking utilities with quantum precision
  */
 
-import { vi } from "vitest";
+import { vi } from 'vitest';
 
 /**
  * Creates a neural-safe spy that preserves coverage instrumentation
@@ -15,7 +15,7 @@ import { vi } from "vitest";
 export function createNeuralSafeSpy<T extends object, K extends keyof T>(
   object: T,
   method: K,
-  implementation?: (...args: any[]) => any,
+  implementation?: (...args: any[]) => any
 ) {
   // Preserve original method for coverage instrumentation
   const originalMethod = object[method];
@@ -30,13 +30,11 @@ export function createNeuralSafeSpy<T extends object, K extends keyof T>(
     // Use mockImplementation to ensure proper type safety
     spy.mockImplementation((...args: any[]) => {
       // If original is a function, preserve its behavior for coverage
-      if (typeof originalMethod === "function") {
+      if (typeof originalMethod === 'function') {
         try {
           return originalMethod.apply(object, args);
         } catch (error) {
-          console.warn(
-            `Neural-safe warning: Original method threw an error, using fallback mock`,
-          );
+          console.warn(`Neural-safe warning: Original method threw an error, using fallback mock`);
           return undefined;
         }
       }
@@ -55,7 +53,7 @@ export function createNeuralSafeSpy<T extends object, K extends keyof T>(
  */
 export function createNeuralServiceMock(
   serviceName: string,
-  methods: Record<string, (...args: any[]) => any> = {},
+  methods: Record<string, (...args: any[]) => any> = {}
 ) {
   console.log(`🧠 Creating neural-safe service mock: ${serviceName}`);
 
@@ -78,7 +76,7 @@ export function createNeuralServiceMock(
  */
 export function createNeuralComponentMock(
   componentName: string,
-  implementation?: (props: any) => any,
+  implementation?: (props: any) => any
 ) {
   console.log(`🧠 Creating neural-safe component mock: ${componentName}`);
 
@@ -124,10 +122,10 @@ export function createThreeJsMocks() {
       setPixelRatio: vi.fn(),
       render: vi.fn(),
       setClearColor: vi.fn(),
-      domElement: document.createElement("canvas"),
+      domElement: document.createElement('canvas'),
       shadowMap: {
         enabled: false,
-        type: "PCFSoftShadowMap",
+        type: 'PCFSoftShadowMap',
       },
       dispose: vi.fn(),
     })),
@@ -230,44 +228,37 @@ export function createThreeJsMocks() {
     })),
 
     // Add common constants
-    PCFSoftShadowMap: "PCFSoftShadowMap",
-    sRGBEncoding: "sRGBEncoding",
-    LinearEncoding: "LinearEncoding",
+    PCFSoftShadowMap: 'PCFSoftShadowMap',
+    sRGBEncoding: 'sRGBEncoding',
+    LinearEncoding: 'LinearEncoding',
 
     // Add math utilities
     MathUtils: {
       degToRad: vi.fn((degrees: number) => degrees * (Math.PI / 180)),
       radToDeg: vi.fn((radians: number) => radians * (180 / Math.PI)),
       clamp: vi.fn((value: number, min: number, max: number) =>
-        Math.max(min, Math.min(max, value)),
+        Math.max(min, Math.min(max, value))
       ),
-      lerp: vi.fn(
-        (start: number, end: number, alpha: number) =>
-          start + (end - start) * alpha,
-      ),
-      randFloat: vi.fn(
-        (min: number, max: number) => min + Math.random() * (max - min),
-      ),
+      lerp: vi.fn((start: number, end: number, alpha: number) => start + (end - start) * alpha),
+      randFloat: vi.fn((min: number, max: number) => min + Math.random() * (max - min)),
       randInt: vi.fn((min: number, max: number) =>
-        Math.floor(min + Math.random() * (max - min + 1)),
+        Math.floor(min + Math.random() * (max - min + 1))
       ),
     },
   };
 
   // Mock React Three Fiber hooks and components with quantum precision
   const mockReactThreeFiber = {
-    Canvas: vi
-      .fn()
-      .mockImplementation(({ children }: { children: React.ReactNode }) => {
-        return {
-          type: "div",
-          props: {
-            "data-testid": "r3f-canvas",
-            className: "r3f-canvas-mock",
-            children,
-          },
-        };
-      }),
+    Canvas: vi.fn().mockImplementation(({ children }: { children: React.ReactNode }) => {
+      return {
+        type: 'div',
+        props: {
+          'data-testid': 'r3f-canvas',
+          className: 'r3f-canvas-mock',
+          children,
+        },
+      };
+    }),
 
     useThree: vi.fn().mockReturnValue({
       scene: new mockThree.Scene(),
@@ -280,22 +271,20 @@ export function createThreeJsMocks() {
       clock: new mockThree.Clock(),
     }),
 
-    useFrame: vi
-      .fn()
-      .mockImplementation((callback: (state: any, delta: number) => void) => {
-        // Call the callback once to simulate a frame
-        if (callback) {
-          const state = {
-            clock: new mockThree.Clock(),
-            camera: new mockThree.PerspectiveCamera(),
-            scene: new mockThree.Scene(),
-            gl: new mockThree.WebGLRenderer(),
-            delta: 0.016,
-          };
-          callback(state, 0.016);
-        }
-        return undefined;
-      }),
+    useFrame: vi.fn().mockImplementation((callback: (state: any, delta: number) => void) => {
+      // Call the callback once to simulate a frame
+      if (callback) {
+        const state = {
+          clock: new mockThree.Clock(),
+          camera: new mockThree.PerspectiveCamera(),
+          scene: new mockThree.Scene(),
+          gl: new mockThree.WebGLRenderer(),
+          delta: 0.016,
+        };
+        callback(state, 0.016);
+      }
+      return undefined;
+    }),
 
     extend: vi.fn(),
 
@@ -322,17 +311,11 @@ export function createThreeJsMocks() {
     PerspectiveCamera: vi.fn().mockImplementation(() => null),
     TransformControls: vi.fn().mockImplementation(() => null),
     useHelper: vi.fn(),
-    Html: vi
-      .fn()
-      .mockImplementation(
-        ({ children }: { children: React.ReactNode }) => children,
-      ),
-    Text: vi
-      .fn()
-      .mockImplementation(({ children }: { children: React.ReactNode }) => ({
-        type: "div",
-        props: { children },
-      })),
+    Html: vi.fn().mockImplementation(({ children }: { children: React.ReactNode }) => children),
+    Text: vi.fn().mockImplementation(({ children }: { children: React.ReactNode }) => ({
+      type: 'div',
+      props: { children },
+    })),
     useGLTF: vi.fn().mockReturnValue({
       scene: new mockThree.Group(),
       nodes: {},
@@ -342,16 +325,8 @@ export function createThreeJsMocks() {
     Sky: vi.fn().mockImplementation(() => null),
     Environment: vi.fn().mockImplementation(() => null),
     Stats: vi.fn().mockImplementation(() => null),
-    Bounds: vi
-      .fn()
-      .mockImplementation(
-        ({ children }: { children: React.ReactNode }) => children,
-      ),
-    Center: vi
-      .fn()
-      .mockImplementation(
-        ({ children }: { children: React.ReactNode }) => children,
-      ),
+    Bounds: vi.fn().mockImplementation(({ children }: { children: React.ReactNode }) => children),
+    Center: vi.fn().mockImplementation(({ children }: { children: React.ReactNode }) => children),
     useBounds: vi.fn().mockReturnValue({
       refresh: vi.fn(),
       clip: vi.fn(),
@@ -361,11 +336,7 @@ export function createThreeJsMocks() {
 
   // Mock React Three A11y components with quantum precision
   const mockReactThreeA11y = {
-    A11y: vi
-      .fn()
-      .mockImplementation(
-        ({ children }: { children: React.ReactNode }) => children,
-      ),
+    A11y: vi.fn().mockImplementation(({ children }: { children: React.ReactNode }) => children),
     useA11y: vi.fn().mockReturnValue({
       focus: vi.fn(),
       hover: vi.fn(),
@@ -394,19 +365,19 @@ export function createThreeJsMocks() {
  * Registers all necessary mocks for neural-safe testing with quantum precision
  */
 export function registerNeuralMocks() {
-  console.log("🧠 Registering neural-safe mocks with quantum precision");
+  console.log('🧠 Registering neural-safe mocks with quantum precision');
 
   // Create Three.js and React Three Fiber mocks
   const mocks = createThreeJsMocks();
 
   // Mock modules with clinical precision
-  vi.mock("three", () => mocks.three);
-  vi.mock("@react-three/fiber", () => mocks.reactThreeFiber);
-  vi.mock("@react-three/drei", () => mocks.reactThreeDrei);
-  vi.mock("@react-three/a11y", () => mocks.reactThreeA11y);
+  vi.mock('three', () => mocks.three);
+  vi.mock('@react-three/fiber', () => mocks.reactThreeFiber);
+  vi.mock('@react-three/drei', () => mocks.reactThreeDrei);
+  vi.mock('@react-three/a11y', () => mocks.reactThreeA11y);
 
   // Mock browser APIs with quantum precision
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     // Skip mocking canvas context to avoid TypeScript errors
     // The actual tests will use the real canvas context or mock it directly
 
@@ -437,10 +408,7 @@ export function registerNeuralMocks() {
         private callback: IntersectionObserverCallback;
         private options: IntersectionObserverInit | undefined;
 
-        constructor(
-          callback: IntersectionObserverCallback,
-          options?: IntersectionObserverInit,
-        ) {
+        constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
           this.callback = callback;
           this.options = options;
         }
@@ -481,13 +449,13 @@ export function registerNeuralMocks() {
     }
   }
 
-  console.log("🧠 Neural-safe mocks registered with quantum precision");
+  console.log('🧠 Neural-safe mocks registered with quantum precision');
 
   return mocks;
 }
 
 // Initialize the neural-safe test environment with quantum precision
-console.log("🧠 Neural-safe test helper initialized with quantum precision");
+console.log('🧠 Neural-safe test helper initialized with quantum precision');
 
 // Export neural-safe testing utilities with quantum precision
 export default {

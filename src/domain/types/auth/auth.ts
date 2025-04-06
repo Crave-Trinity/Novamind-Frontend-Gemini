@@ -1,6 +1,6 @@
 /**
  * Domain types for authentication
- * 
+ *
  * These types define the core authentication entities and interfaces
  * that are used throughout the application.
  */

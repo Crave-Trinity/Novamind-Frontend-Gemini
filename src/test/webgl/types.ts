@@ -14,13 +14,13 @@ export interface SetupOptions {
    * @default true
    */
   monitorMemory?: boolean;
-  
+
   /**
    * Whether to print debugging information during tests
    * @default false
    */
   debugMode?: boolean;
-  
+
   /**
    * Whether to use neural controller mocks
    * @default false

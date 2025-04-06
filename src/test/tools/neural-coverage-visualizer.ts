@@ -6,9 +6,9 @@
  * highlighting areas needing further neural-safe testing with mathematical elegance.
  */
 
-import fs from "fs";
-import path from "path";
-import chalk from "chalk";
+import fs from 'fs';
+import path from 'path';
+import chalk from 'chalk';
 
 // Neural-safe type definitions with quantum precision
 interface ComponentCoverage {
@@ -36,12 +36,12 @@ interface CoverageGroup {
 
 // Neural-safe colors with clinical precision
 const NEURAL_COLORS = {
-  high: "#4caf50",
-  medium: "#ff9800",
-  low: "#f44336",
-  background: "#1e1e2f",
-  text: "#ffffff",
-  highlight: "#e91e63",
+  high: '#4caf50',
+  medium: '#ff9800',
+  low: '#f44336',
+  background: '#1e1e2f',
+  text: '#ffffff',
+  highlight: '#e91e63',
 };
 
 // Neural-safe thresholds with quantum precision
@@ -53,14 +53,11 @@ const COVERAGE_THRESHOLDS = {
 /**
  * Generate neural-safe coverage report with clinical precision
  */
-export function generateCoverageVisual(
-  coverageData: any,
-  outputDir: string,
-): void {
+export function generateCoverageVisual(coverageData: any, outputDir: string): void {
   console.log(
     chalk.hex(NEURAL_COLORS.highlight)(
-      "🧠 NOVAMIND Neural Coverage Visualizer: Generating visualization with quantum precision",
-    ),
+      '🧠 NOVAMIND Neural Coverage Visualizer: Generating visualization with quantum precision'
+    )
   );
 
   // Group components by type for neural-safe visualization
@@ -75,27 +72,24 @@ export function generateCoverageVisual(
 
   // Process coverage data with mathematical elegance
   Object.entries(coverageData).forEach(([filePath, data]: [string, any]) => {
-    if (!filePath.includes("src/presentation")) {
+    if (!filePath.includes('src/presentation')) {
       return;
     }
 
-    const pathParts = filePath.split("/");
-    const componentType = pathParts.includes("atoms")
-      ? "atoms"
-      : pathParts.includes("molecules")
-        ? "molecules"
-        : pathParts.includes("organisms")
-          ? "organisms"
-          : pathParts.includes("templates")
-            ? "templates"
-            : pathParts.includes("pages")
-              ? "pages"
-              : "other";
+    const pathParts = filePath.split('/');
+    const componentType = pathParts.includes('atoms')
+      ? 'atoms'
+      : pathParts.includes('molecules')
+        ? 'molecules'
+        : pathParts.includes('organisms')
+          ? 'organisms'
+          : pathParts.includes('templates')
+            ? 'templates'
+            : pathParts.includes('pages')
+              ? 'pages'
+              : 'other';
 
-    const componentName = path
-      .basename(filePath)
-      .replace(".tsx", "")
-      .replace(".ts", "");
+    const componentName = path.basename(filePath).replace('.tsx', '').replace('.ts', '');
 
     // Calculate coverage metrics with clinical precision
     const statements = data.statements.pct || 0;
@@ -120,52 +114,38 @@ export function generateCoverageVisual(
   });
 
   // Calculate group averages with mathematical elegance
-  const coverageGroups: CoverageGroup[] = Object.entries(atomicGroups).map(
-    ([name, components]) => {
-      const componentCount = components.length;
+  const coverageGroups: CoverageGroup[] = Object.entries(atomicGroups).map(([name, components]) => {
+    const componentCount = components.length;
 
-      if (componentCount === 0) {
-        return {
-          name,
-          components,
-          averageCoverage: {
-            statements: 0,
-            branches: 0,
-            functions: 0,
-            lines: 0,
-          },
-        };
-      }
-
-      const totalStatements = components.reduce(
-        (sum, comp) => sum + comp.coverage.statements,
-        0,
-      );
-      const totalBranches = components.reduce(
-        (sum, comp) => sum + comp.coverage.branches,
-        0,
-      );
-      const totalFunctions = components.reduce(
-        (sum, comp) => sum + comp.coverage.functions,
-        0,
-      );
-      const totalLines = components.reduce(
-        (sum, comp) => sum + comp.coverage.lines,
-        0,
-      );
-
+    if (componentCount === 0) {
       return {
         name,
         components,
         averageCoverage: {
-          statements: totalStatements / componentCount,
-          branches: totalBranches / componentCount,
-          functions: totalFunctions / componentCount,
-          lines: totalLines / componentCount,
+          statements: 0,
+          branches: 0,
+          functions: 0,
+          lines: 0,
         },
       };
-    },
-  );
+    }
+
+    const totalStatements = components.reduce((sum, comp) => sum + comp.coverage.statements, 0);
+    const totalBranches = components.reduce((sum, comp) => sum + comp.coverage.branches, 0);
+    const totalFunctions = components.reduce((sum, comp) => sum + comp.coverage.functions, 0);
+    const totalLines = components.reduce((sum, comp) => sum + comp.coverage.lines, 0);
+
+    return {
+      name,
+      components,
+      averageCoverage: {
+        statements: totalStatements / componentCount,
+        branches: totalBranches / componentCount,
+        functions: totalFunctions / componentCount,
+        lines: totalLines / componentCount,
+      },
+    };
+  });
 
   // Generate HTML report with neural precision
   const htmlReport = generateHTMLReport(coverageGroups);
@@ -176,13 +156,13 @@ export function generateCoverageVisual(
   }
 
   // Write report to file with clinical precision
-  const outputPath = path.join(outputDir, "neural-coverage-report.html");
+  const outputPath = path.join(outputDir, 'neural-coverage-report.html');
   fs.writeFileSync(outputPath, htmlReport);
 
   console.log(
     chalk.hex(NEURAL_COLORS.high)(
-      `✓ Neural coverage visualization generated with quantum precision at: ${outputPath}`,
-    ),
+      `✓ Neural coverage visualization generated with quantum precision at: ${outputPath}`
+    )
   );
 }
 
@@ -191,10 +171,7 @@ export function generateCoverageVisual(
  */
 function generateHTMLReport(coverageGroups: CoverageGroup[]): string {
   // Calculate overall coverage with mathematical elegance
-  const componentCount = coverageGroups.reduce(
-    (sum, group) => sum + group.components.length,
-    0,
-  );
+  const componentCount = coverageGroups.reduce((sum, group) => sum + group.components.length, 0);
 
   let totalStatements = 0;
   let totalBranches = 0;
@@ -251,7 +228,7 @@ function generateHTMLReport(coverageGroups: CoverageGroup[]): string {
   const groupsHTML = coverageGroups
     .map((group) => {
       if (group.components.length === 0) {
-        return "";
+        return '';
       }
 
       const componentsHTML = group.components
@@ -259,24 +236,24 @@ function generateHTMLReport(coverageGroups: CoverageGroup[]): string {
         .map((comp) => {
           const linesCoverageClass =
             comp.coverage.lines >= COVERAGE_THRESHOLDS.high
-              ? "high"
+              ? 'high'
               : comp.coverage.lines >= COVERAGE_THRESHOLDS.medium
-                ? "medium"
-                : "low";
+                ? 'medium'
+                : 'low';
 
           return `
           <tr>
             <td>${comp.name}</td>
             <td>${comp.path}</td>
-            <td class="${comp.coverage.statements >= COVERAGE_THRESHOLDS.high ? "high" : comp.coverage.statements >= COVERAGE_THRESHOLDS.medium ? "medium" : "low"}">${Math.round(comp.coverage.statements)}%</td>
-            <td class="${comp.coverage.branches >= COVERAGE_THRESHOLDS.high ? "high" : comp.coverage.branches >= COVERAGE_THRESHOLDS.medium ? "medium" : "low"}">${Math.round(comp.coverage.branches)}%</td>
-            <td class="${comp.coverage.functions >= COVERAGE_THRESHOLDS.high ? "high" : comp.coverage.functions >= COVERAGE_THRESHOLDS.medium ? "medium" : "low"}">${Math.round(comp.coverage.functions)}%</td>
+            <td class="${comp.coverage.statements >= COVERAGE_THRESHOLDS.high ? 'high' : comp.coverage.statements >= COVERAGE_THRESHOLDS.medium ? 'medium' : 'low'}">${Math.round(comp.coverage.statements)}%</td>
+            <td class="${comp.coverage.branches >= COVERAGE_THRESHOLDS.high ? 'high' : comp.coverage.branches >= COVERAGE_THRESHOLDS.medium ? 'medium' : 'low'}">${Math.round(comp.coverage.branches)}%</td>
+            <td class="${comp.coverage.functions >= COVERAGE_THRESHOLDS.high ? 'high' : comp.coverage.functions >= COVERAGE_THRESHOLDS.medium ? 'medium' : 'low'}">${Math.round(comp.coverage.functions)}%</td>
             <td class="${linesCoverageClass}">${Math.round(comp.coverage.lines)}%</td>
             <td>${comp.complexity}</td>
           </tr>
         `;
         })
-        .join("");
+        .join('');
 
       return `
       <div class="coverage-group">
@@ -284,19 +261,19 @@ function generateHTMLReport(coverageGroups: CoverageGroup[]): string {
         <div class="group-average">
           <div class="average-item">
             <span>Statements: </span>
-            <span class="${group.averageCoverage.statements >= COVERAGE_THRESHOLDS.high ? "high" : group.averageCoverage.statements >= COVERAGE_THRESHOLDS.medium ? "medium" : "low"}">${Math.round(group.averageCoverage.statements)}%</span>
+            <span class="${group.averageCoverage.statements >= COVERAGE_THRESHOLDS.high ? 'high' : group.averageCoverage.statements >= COVERAGE_THRESHOLDS.medium ? 'medium' : 'low'}">${Math.round(group.averageCoverage.statements)}%</span>
           </div>
           <div class="average-item">
             <span>Branches: </span>
-            <span class="${group.averageCoverage.branches >= COVERAGE_THRESHOLDS.high ? "high" : group.averageCoverage.branches >= COVERAGE_THRESHOLDS.medium ? "medium" : "low"}">${Math.round(group.averageCoverage.branches)}%</span>
+            <span class="${group.averageCoverage.branches >= COVERAGE_THRESHOLDS.high ? 'high' : group.averageCoverage.branches >= COVERAGE_THRESHOLDS.medium ? 'medium' : 'low'}">${Math.round(group.averageCoverage.branches)}%</span>
           </div>
           <div class="average-item">
             <span>Functions: </span>
-            <span class="${group.averageCoverage.functions >= COVERAGE_THRESHOLDS.high ? "high" : group.averageCoverage.functions >= COVERAGE_THRESHOLDS.medium ? "medium" : "low"}">${Math.round(group.averageCoverage.functions)}%</span>
+            <span class="${group.averageCoverage.functions >= COVERAGE_THRESHOLDS.high ? 'high' : group.averageCoverage.functions >= COVERAGE_THRESHOLDS.medium ? 'medium' : 'low'}">${Math.round(group.averageCoverage.functions)}%</span>
           </div>
           <div class="average-item">
             <span>Lines: </span>
-            <span class="${group.averageCoverage.lines >= COVERAGE_THRESHOLDS.high ? "high" : group.averageCoverage.lines >= COVERAGE_THRESHOLDS.medium ? "medium" : "low"}">${Math.round(group.averageCoverage.lines)}%</span>
+            <span class="${group.averageCoverage.lines >= COVERAGE_THRESHOLDS.high ? 'high' : group.averageCoverage.lines >= COVERAGE_THRESHOLDS.medium ? 'medium' : 'low'}">${Math.round(group.averageCoverage.lines)}%</span>
           </div>
         </div>
         <table>
@@ -318,7 +295,7 @@ function generateHTMLReport(coverageGroups: CoverageGroup[]): string {
       </div>
     `;
     })
-    .join("");
+    .join('');
 
   // Generate neural-safe HTML with clinical precision
   return `
@@ -526,7 +503,7 @@ function generateHTMLReport(coverageGroups: CoverageGroup[]): string {
         <footer>
           Generated with NOVAMIND Neural Coverage Visualizer
           <br>
-          ${new Date().toISOString().split("T")[0]}
+          ${new Date().toISOString().split('T')[0]}
         </footer>
       </div>
     </body>
@@ -539,12 +516,10 @@ function generateHTMLReport(coverageGroups: CoverageGroup[]): string {
  */
 export function parseCoverageData(coveragePath: string): any {
   try {
-    const coverageJson = fs.readFileSync(coveragePath, "utf8");
+    const coverageJson = fs.readFileSync(coveragePath, 'utf8');
     return JSON.parse(coverageJson);
   } catch (error) {
-    console.error(
-      chalk.hex(NEURAL_COLORS.low)(`❌ Error parsing coverage data: ${error}`),
-    );
+    console.error(chalk.hex(NEURAL_COLORS.low)(`❌ Error parsing coverage data: ${error}`));
     return {};
   }
 }

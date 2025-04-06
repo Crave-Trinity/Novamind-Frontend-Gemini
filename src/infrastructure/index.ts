@@ -1,6 +1,6 @@
 /**
  * Infrastructure layer exports
- * 
+ *
  * This layer handles external services, APIs, and storage mechanisms.
  * It provides implementations of interfaces defined in the domain layer.
  */
@@ -15,4 +15,4 @@ export * from './storage';
 export * from './auth';
 
 // Analytics services
-export * from './analytics'; 
+export * from './analytics';

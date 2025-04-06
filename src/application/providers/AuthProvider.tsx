@@ -1,17 +1,17 @@
 /**
  * Authentication Provider Component
- * 
+ *
  * Provides authentication state and methods to the application through the Auth Context.
  * Implements HIPAA-compliant session management with automatic timeout.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 // Use remote imports but apply type modifiers from HEAD
-import { AuthContext, type AuthContextType } from "@application/contexts/AuthContext"; 
-import { authClient } from "@infrastructure/clients/authClient"; // Use client import
-import { auditLogClient, AuditEventType } from "@infrastructure/clients/auditLogClient"; // Use client import
-import type { User, Permission } from "@domain/types/auth/auth"; // Use type import
+import { AuthContext, type AuthContextType } from '@application/contexts/AuthContext';
+import { authClient } from '@infrastructure/clients/authClient'; // Use client import
+import { auditLogClient, AuditEventType } from '@infrastructure/clients/auditLogClient'; // Use client import
+import type { User, Permission } from '@domain/types/auth/auth'; // Use type import
 
 // Session warning time (5 minutes before expiration)
 const SESSION_WARNING_TIME = 5 * 60 * 1000;
@@ -24,115 +24,114 @@ interface AuthProviderProps {
 
 /**
  * Authentication Provider
- * 
+ *
  * Manages authentication state and session lifecycle
  */
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const navigate = useNavigate();
-  
+
   // Authentication state
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  
+
   // Session management
   const [sessionExpiresAt, setSessionExpiresAt] = useState<number>(0);
   const [showSessionWarning, setShowSessionWarning] = useState<boolean>(false);
-  
+
   /**
    * Initialize authentication state from storage
    */
   const initializeAuth = useCallback(() => {
     try {
       // Check if user is already authenticated (use authClient)
-      if (authClient.isAuthenticated()) { 
+      if (authClient.isAuthenticated()) {
         const currentUser = authClient.getCurrentUser();
         const sessionVerification = authClient.verifySession();
-        
+
         if (currentUser && sessionVerification.valid && sessionVerification.remainingTime) {
           setUser(currentUser);
           setIsAuthenticated(true);
           setSessionExpiresAt(Date.now() + sessionVerification.remainingTime);
-          
+
           // Log session reuse for audit (use auditLogClient)
-          auditLogClient.log(AuditEventType.USER_SESSION_VERIFY, { 
-            action: "session_restore",
-            details: "User session restored",
-            result: "success",
+          auditLogClient.log(AuditEventType.USER_SESSION_VERIFY, {
+            action: 'session_restore',
+            details: 'User session restored',
+            result: 'success',
           });
         }
       }
     } catch (err) {
-      console.error("Failed to initialize auth state:", err);
-      setError("Failed to restore authentication session.");
+      console.error('Failed to initialize auth state:', err);
+      setError('Failed to restore authentication session.');
     } finally {
       setIsLoading(false);
     }
   }, []);
-  
+
   /**
    * Login handler
    */
-  const login = useCallback(async (
-    email: string, 
-    password: string, 
-    rememberMe: boolean = false
-  ): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // Use authClient
-      const result = await authClient.login({ 
-        email, 
-        password, 
-        rememberMe 
-      });
-      
-      if (result.success && result.user && result.token) {
-        setUser(result.user);
-        setIsAuthenticated(true);
-        setSessionExpiresAt(result.token.expiresAt);
-        setIsLoading(false);
-        return true;
-      } else {
-        setError(result.error || "Authentication failed.");
+  const login = useCallback(
+    async (email: string, password: string, rememberMe: boolean = false): Promise<boolean> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // Use authClient
+        const result = await authClient.login({
+          email,
+          password,
+          rememberMe,
+        });
+
+        if (result.success && result.user && result.token) {
+          setUser(result.user);
+          setIsAuthenticated(true);
+          setSessionExpiresAt(result.token.expiresAt);
+          setIsLoading(false);
+          return true;
+        } else {
+          setError(result.error || 'Authentication failed.');
+          setIsLoading(false);
+          return false;
+        }
+      } catch (err) {
+        setError('An unexpected error occurred during login.');
         setIsLoading(false);
         return false;
       }
-    } catch (err) {
-      setError("An unexpected error occurred during login.");
-      setIsLoading(false);
-      return false;
-    }
-  }, []);
-  
+    },
+    []
+  );
+
   /**
    * Logout handler
    */
   const logout = useCallback(async (): Promise<void> => {
     setIsLoading(true);
-    
+
     try {
       // Use authClient
-      await authClient.logout(); 
-      
+      await authClient.logout();
+
       // Reset auth state
       setUser(null);
       setIsAuthenticated(false);
       setSessionExpiresAt(0);
       setError(null);
-      
+
       // Redirect to login page
-      navigate("/login");
+      navigate('/login');
     } catch (err) {
-      console.error("Logout error:", err);
+      console.error('Logout error:', err);
     } finally {
       setIsLoading(false);
     }
   }, [navigate]);
-  
+
   /**
    * Check session expiration time
    */
@@ -140,62 +139,65 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!isAuthenticated || sessionExpiresAt === 0) {
       return 0;
     }
-    
+
     const now = Date.now();
     return Math.max(0, sessionExpiresAt - now);
   }, [isAuthenticated, sessionExpiresAt]);
-  
+
   /**
    * Renew current session
    */
   const renewSession = useCallback((): void => {
     if (!isAuthenticated) return;
-    
+
     try {
       // Use authClient
-      const verification = authClient.renewSession(); 
-      
+      const verification = authClient.renewSession();
+
       if (verification.valid && verification.remainingTime) {
         setSessionExpiresAt(Date.now() + verification.remainingTime);
         setShowSessionWarning(false);
-        
+
         // Log session renewal for audit (use auditLogClient)
-        auditLogClient.log(AuditEventType.USER_SESSION_RENEWED, { 
-          action: "session_renewed",
-          details: "User session renewed",
-          result: "success",
+        auditLogClient.log(AuditEventType.USER_SESSION_RENEWED, {
+          action: 'session_renewed',
+          details: 'User session renewed',
+          result: 'success',
         });
       }
     } catch (err) {
-      console.error("Session renewal error:", err);
+      console.error('Session renewal error:', err);
     }
   }, [isAuthenticated]);
-  
+
   /**
    * Check permission
    */
-  const hasPermission = useCallback((permission: Permission): boolean => {
-    if (!user) return false;
-    return user.permissions.includes(permission);
-  }, [user]);
-  
+  const hasPermission = useCallback(
+    (permission: Permission): boolean => {
+      if (!user) return false;
+      return user.permissions.includes(permission);
+    },
+    [user]
+  );
+
   /**
    * Initialize auth state on mount
    */
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
-  
+
   /**
    * Session monitoring
    * Checks session status periodically and sets warning when close to expiration
    */
   useEffect(() => {
     if (!isAuthenticated) return;
-    
+
     const checkSession = () => {
       const remainingTime = checkSessionExpiration();
-      
+
       if (remainingTime <= 0) {
         // Session expired, log out
         logout();
@@ -204,43 +206,46 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setShowSessionWarning(true);
       }
     };
-    
+
     // Initial check
     checkSession();
-    
+
     // Set up periodic checks
     const interval = setInterval(checkSession, SESSION_CHECK_INTERVAL);
-    
+
     return () => {
       clearInterval(interval);
     };
   }, [isAuthenticated, checkSessionExpiration, logout]);
-  
+
   /**
    * Context value
    */
-  const contextValue = useMemo<AuthContextType>(() => ({
-    isAuthenticated,
-    isLoading,
-    error,
-    user,
-    login,
-    logout,
-    checkSessionExpiration,
-    renewSession,
-    hasPermission,
-  }), [
-    isAuthenticated,
-    isLoading, 
-    error, 
-    user, 
-    login, 
-    logout, 
-    checkSessionExpiration, 
-    renewSession, 
-    hasPermission
-  ]);
-  
+  const contextValue = useMemo<AuthContextType>(
+    () => ({
+      isAuthenticated,
+      isLoading,
+      error,
+      user,
+      login,
+      logout,
+      checkSessionExpiration,
+      renewSession,
+      hasPermission,
+    }),
+    [
+      isAuthenticated,
+      isLoading,
+      error,
+      user,
+      login,
+      logout,
+      checkSessionExpiration,
+      renewSession,
+      hasPermission,
+    ]
+  );
+
   return (
     <AuthContext.Provider value={contextValue}>
       {children}

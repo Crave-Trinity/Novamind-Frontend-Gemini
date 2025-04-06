@@ -3,7 +3,7 @@
  * Ensures that patient data structures conform to expected types at runtime, crucial for HIPAA compliance.
  */
 
-import { Ok, Err, type Result } from "ts-results";
+import { Ok, Err, type Result } from 'ts-results';
 // Import actual domain type and nested types
 import type {
   Patient,
@@ -13,7 +13,7 @@ import type {
   NeuralData,
   DataPermissions,
   // Import nested array item types if deeper validation is needed (e.g., Diagnosis, Symptom)
-} from "@domain/types/clinical/patient";
+} from '@domain/types/clinical/patient';
 // Assuming a standard validation error type might be defined later
 // import { ValidationError } from '@domain/errors/validation';
 
@@ -23,18 +23,18 @@ type PatientData = Patient;
 // --- Local Type Guards for Nested Patient Structures ---
 
 function isPatientDemographics(obj: unknown): obj is PatientDemographics {
-  if (typeof obj !== "object" || obj === null) return false;
+  if (typeof obj !== 'object' || obj === null) return false;
   const data = obj as Partial<PatientDemographics>;
   return (
-    typeof data.age === "number" &&
-    typeof data.biologicalSex === "string" && // Add enum check if needed
-    typeof data.anonymizationLevel === "string" // Add enum check if needed
+    typeof data.age === 'number' &&
+    typeof data.biologicalSex === 'string' && // Add enum check if needed
+    typeof data.anonymizationLevel === 'string' // Add enum check if needed
     // Optional fields don't need strict checks unless present
   );
 }
 
 function isClinicalData(obj: unknown): obj is ClinicalData {
-  if (typeof obj !== "object" || obj === null) return false;
+  if (typeof obj !== 'object' || obj === null) return false;
   const data = obj as Partial<ClinicalData>;
   // Check required arrays exist (can add .every(isDiagnosis) etc. for deeper checks)
   return (
@@ -48,7 +48,7 @@ function isClinicalData(obj: unknown): obj is ClinicalData {
 }
 
 function isTreatmentData(obj: unknown): obj is TreatmentData {
-  if (typeof obj !== "object" || obj === null) return false;
+  if (typeof obj !== 'object' || obj === null) return false;
   const data = obj as Partial<TreatmentData>;
   // Check required arrays exist
   return (
@@ -60,7 +60,7 @@ function isTreatmentData(obj: unknown): obj is TreatmentData {
 }
 
 function isNeuralData(obj: unknown): obj is NeuralData {
-  if (typeof obj !== "object" || obj === null) return false;
+  if (typeof obj !== 'object' || obj === null) return false;
   const data = obj as Partial<NeuralData>;
   // Check required arrays exist
   return Array.isArray(data.brainScans);
@@ -68,14 +68,14 @@ function isNeuralData(obj: unknown): obj is NeuralData {
 }
 
 function isDataPermissions(obj: unknown): obj is DataPermissions {
-  if (typeof obj !== "object" || obj === null) return false;
+  if (typeof obj !== 'object' || obj === null) return false;
   const data = obj as Partial<DataPermissions>;
   return (
-    typeof data.accessLevel === "string" && // Add enum check if needed
+    typeof data.accessLevel === 'string' && // Add enum check if needed
     Array.isArray(data.authorizedUsers) &&
-    typeof data.consentStatus === "string" && // Add enum check if needed
-    typeof data.dataRetentionPolicy === "string" &&
-    typeof data.lastReviewDate === "string"
+    typeof data.consentStatus === 'string' && // Add enum check if needed
+    typeof data.dataRetentionPolicy === 'string' &&
+    typeof data.lastReviewDate === 'string'
     // Optional fields don't need strict checks unless present
   );
 }
@@ -83,14 +83,14 @@ function isDataPermissions(obj: unknown): obj is DataPermissions {
 // --- Enhanced isPatient Guard ---
 // This guard performs deeper checks on nested required properties.
 function isPatientDeep(obj: unknown): obj is Patient {
-  if (typeof obj !== "object" || obj === null) return false;
+  if (typeof obj !== 'object' || obj === null) return false;
 
   const patient = obj as Partial<Patient>;
 
   return (
-    typeof patient.id === "string" &&
-    typeof patient.lastUpdated === "string" &&
-    typeof patient.version === "string" &&
+    typeof patient.id === 'string' &&
+    typeof patient.lastUpdated === 'string' &&
+    typeof patient.version === 'string' &&
     isPatientDemographics(patient.demographicData) &&
     isClinicalData(patient.clinicalData) &&
     isTreatmentData(patient.treatmentData) &&
@@ -112,10 +112,6 @@ export function validatePatientData(data: unknown): Result<PatientData, Error> {
   } else {
     // Provide a more informative error message
     // TODO: Potentially use a specific ValidationError class if defined
-    return Err(
-      new Error(
-        "Invalid PatientData: Data does not conform to the Patient structure.",
-      ),
-    );
+    return Err(new Error('Invalid PatientData: Data does not conform to the Patient structure.'));
   }
 }

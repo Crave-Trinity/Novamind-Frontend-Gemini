@@ -6,9 +6,9 @@
  * components or complex mocking to establish a baseline for testing.
  */
 
-import { describe, it, expect, vi } from "vitest";
-import React from "react";
-import { screen, within } from "@testing-library/react"; // Import within
+import { describe, it, expect, vi } from 'vitest';
+import React from 'react';
+import { screen, within } from '@testing-library/react'; // Import within
 import { renderWithProviders } from '@test/test-utils.unified'; // Import unified render
 
 // Define a standalone component that mimics the structure of BrainModelContainer
@@ -29,22 +29,20 @@ const StandaloneBrainContainer = () => {
   );
 };
 
-describe("Standalone Brain Container Test", () => {
-  it("renders the standalone container with quantum precision", () => {
+describe('Standalone Brain Container Test', () => {
+  it('renders the standalone container with quantum precision', () => {
     // Render the component with clinical precision
     renderWithProviders(<StandaloneBrainContainer />); // Use unified render
 
     // Verify that the component renders with mathematical elegance
-    expect(screen.getByTestId("brain-container")).toBeInTheDocument();
+    expect(screen.getByTestId('brain-container')).toBeInTheDocument();
     // Query within the first container found
-    const container = screen.getAllByTestId("brain-container")[0];
-    expect(within(container).getByTestId("brain-model")).toBeInTheDocument();
-    expect(within(container).getByTestId("control-panel")).toBeInTheDocument();
+    const container = screen.getAllByTestId('brain-container')[0];
+    expect(within(container).getByTestId('brain-model')).toBeInTheDocument();
+    expect(within(container).getByTestId('control-panel')).toBeInTheDocument();
 
     // Verify text content with neural precision
-    expect(
-      screen.getByText("Neural Visualization Placeholder"),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Neural Controls Placeholder")).toBeInTheDocument();
+    expect(screen.getByText('Neural Visualization Placeholder')).toBeInTheDocument();
+    expect(screen.getByText('Neural Controls Placeholder')).toBeInTheDocument();
   });
 });

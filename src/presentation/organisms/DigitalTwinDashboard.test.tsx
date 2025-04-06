@@ -6,7 +6,7 @@
 import React from 'react';
 import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Remove non-existent imports
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import DigitalTwinDashboard from './DigitalTwinDashboard'; // Use default import
 
 // Removed local R3F mock
@@ -23,7 +23,9 @@ describe('DigitalTwinDashboard (Minimal)', () => {
   afterEach(() => {
     const memoryReport = cleanupWebGLMocks();
     if (memoryReport && memoryReport.leakedObjectCount > 0) {
-      console.warn(`Memory leak detected in "DigitalTwinDashboard (Minimal)": ${memoryReport.leakedObjectCount} objects not properly disposed`);
+      console.warn(
+        `Memory leak detected in "DigitalTwinDashboard (Minimal)": ${memoryReport.leakedObjectCount} objects not properly disposed`
+      );
       console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
     }
   });

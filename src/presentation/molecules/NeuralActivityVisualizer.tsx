@@ -4,25 +4,11 @@
  * with clinical precision and temporal dynamics
  */
 
-import React, { useRef, useMemo, useEffect, useState } from "react";
-import { useFrame, useThree, extend } from "@react-three/fiber";
-import {
-  Sphere,
-  Line,
-  Text,
-  useTexture,
-  shaderMaterial,
-} from "@react-three/drei";
-import {
-  Vector3,
-  Color,
-  ShaderMaterial,
-  Mesh,
-  IUniform,
-  Group,
-  Event,
-} from "three";
-import { useSpring, animated } from "@react-spring/three";
+import React, { useRef, useMemo, useEffect, useState } from 'react';
+import { useFrame, useThree, extend } from '@react-three/fiber';
+import { Sphere, Line, Text, useTexture, shaderMaterial } from '@react-three/drei';
+import { Vector3, Color, ShaderMaterial, Mesh, IUniform, Group, Event } from 'three';
+import { useSpring, animated } from '@react-spring/three';
 
 // Domain types
 import {
@@ -30,9 +16,9 @@ import {
   ActivationLevel,
   TemporalActivationSequence,
   NeuralActivationPattern,
-} from "@domain/types/brain/activity";
-import { BrainRegion, NeuralConnection } from "@domain/types/brain/models";
-import { Vector3 as DomainVector3 } from "@domain/types/shared/common"; // Corrected path
+} from '@domain/types/brain/activity';
+import { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+import { Vector3 as DomainVector3 } from '@domain/types/shared/common'; // Corrected path
 
 /**
  * Neural-safe adapter to convert domain Vector3 to Three.js Vector3
@@ -47,8 +33,8 @@ const NeuralActivityShaderMaterial = shaderMaterial(
   {
     time: 0,
     activityLevel: 0,
-    activityColor: new Color("#ef4444"),
-    baseColor: new Color("#1e293b"),
+    activityColor: new Color('#ef4444'),
+    baseColor: new Color('#1e293b'),
     pulsePeriod: 1.5,
     noiseIntensity: 0.1,
     glowIntensity: 0.5,
@@ -110,7 +96,7 @@ const NeuralActivityShaderMaterial = shaderMaterial(
       // Output final color
       gl_FragColor = vec4(color, 1.0);
     }
-  `,
+  `
 );
 
 // Register the shader material with react-three-fiber
@@ -131,11 +117,9 @@ interface ActivityNodeProps {
   activeColor?: string;
   label?: string | undefined;
   showLabel?: boolean;
-  onClick?: ((
-    event: Event,
-    entityId: string,
-    entityType: "region" | "connection",
-  ) => void) | undefined; // Allow undefined for exactOptionalPropertyTypes
+  onClick?:
+    | ((event: Event, entityId: string, entityType: 'region' | 'connection') => void)
+    | undefined; // Allow undefined for exactOptionalPropertyTypes
 }
 
 /**
@@ -148,8 +132,8 @@ const ActivityNode: React.FC<ActivityNodeProps> = ({
   activityLevel,
   activationLevel,
   pulseSpeed = 1.5,
-  baseColor = "#1e293b",
-  activeColor = "#ef4444",
+  baseColor = '#1e293b',
+  activeColor = '#ef4444',
   label,
   showLabel = false,
   onClick,
@@ -198,7 +182,7 @@ const ActivityNode: React.FC<ActivityNodeProps> = ({
         ref={meshRef}
         data-testid="neural-node"
         data-color={activeColor}
-        onClick={(event) => onClick && onClick(event, "", "region")}
+        onClick={(event) => onClick && onClick(event, '', 'region')}
       >
         <Sphere args={[1, 32, 32]} /> {/* Use Sphere from drei import */}
         {/* Use PascalCase for extended components and ignore TS error */}
@@ -255,7 +239,7 @@ const ActivityFlow: React.FC<ActivityFlowProps> = ({
   activityLevel,
   flowSpeed = 1,
   width = 0.1,
-  color = "#3b82f6",
+  color = '#3b82f6',
   dashPattern = [0.1, 0.1],
   bidirectional = false,
 }) => {
@@ -275,8 +259,7 @@ const ActivityFlow: React.FC<ActivityFlowProps> = ({
   // Animation for flow effect
   useFrame((state, delta) => {
     // Update progress for flow animation
-    progress.current =
-      (progress.current + delta * flowSpeed * springActivity.get()) % 1;
+    progress.current = (progress.current + delta * flowSpeed * springActivity.get()) % 1;
   });
 
   // Only render if there's activity
@@ -348,7 +331,7 @@ interface NeuralActivityVisualizerProps {
   onActivityNodeClick?: (
     event: Event,
     entityId: string,
-    entityType: "region" | "connection",
+    entityType: 'region' | 'connection'
   ) => void;
 }
 
@@ -364,32 +347,29 @@ interface ActivityDisplayProperties {
 /**
  * Activity level display mapping
  */
-const defaultActivityDisplay: Record<
-  ActivationLevel,
-  ActivityDisplayProperties
-> = {
+const defaultActivityDisplay: Record<ActivationLevel, ActivityDisplayProperties> = {
   [ActivationLevel.NONE]: {
-    color: "#94a3b8",
+    color: '#94a3b8',
     pulseSpeed: 0.5,
     scale: 0.2,
   },
   [ActivationLevel.LOW]: {
-    color: "#60a5fa",
+    color: '#60a5fa',
     pulseSpeed: 0.8,
     scale: 0.3,
   },
   [ActivationLevel.MEDIUM]: {
-    color: "#fbbf24",
+    color: '#fbbf24',
     pulseSpeed: 1.2,
     scale: 0.4,
   },
   [ActivationLevel.HIGH]: {
-    color: "#f87171",
+    color: '#f87171',
     pulseSpeed: 1.6,
     scale: 0.5,
   },
   [ActivationLevel.EXTREME]: {
-    color: "#ef4444",
+    color: '#ef4444',
     pulseSpeed: 2.0,
     scale: 0.6,
   },
@@ -399,9 +379,7 @@ const defaultActivityDisplay: Record<
  * NeuralActivityVisualizer - Molecular component for neural activity visualization
  * Implements clinical precision neural activity with temporal dynamics
  */
-export const NeuralActivityVisualizer: React.FC<
-  NeuralActivityVisualizerProps
-> = ({
+export const NeuralActivityVisualizer: React.FC<NeuralActivityVisualizerProps> = ({
   regions,
   connections,
   activityStates = [],
@@ -410,13 +388,13 @@ export const NeuralActivityVisualizer: React.FC<
   playbackSpeed = 1.0,
   showLabels = false,
   colorMap = {
-    none: "#94a3b8",
-    low: "#60a5fa",
-    medium: "#fbbf24",
-    high: "#f87171",
-    extreme: "#ef4444",
+    none: '#94a3b8',
+    low: '#60a5fa',
+    medium: '#fbbf24',
+    high: '#f87171',
+    extreme: '#ef4444',
   },
-  flowColor = "#3b82f6",
+  flowColor = '#3b82f6',
   maxVisibleActivities = 100,
   enableTemporalSmoothing = true,
   onActivityNodeClick,
@@ -479,7 +457,7 @@ export const NeuralActivityVisualizer: React.FC<
       activationPattern.regionActivations.forEach((activation) => {
         patternActivities.push({
           entityId: activation.regionId,
-          entityType: "region",
+          entityType: 'region',
           timestamp: Date.now(),
           rawActivity: activation.activityLevel,
           activationLevel:
@@ -502,7 +480,7 @@ export const NeuralActivityVisualizer: React.FC<
         activationPattern.connectionActivations.forEach((activation) => {
           patternActivities.push({
             entityId: activation.connectionId,
-            entityType: "connection",
+            entityType: 'connection',
             timestamp: Date.now(),
             rawActivity: activation.activityLevel,
             activationLevel:
@@ -533,18 +511,13 @@ export const NeuralActivityVisualizer: React.FC<
     });
 
     return activities.slice(0, maxVisibleActivities);
-  }, [
-    activityStates,
-    activationPattern,
-    temporalSequence,
-    maxVisibleActivities,
-  ]);
+  }, [activityStates, activationPattern, temporalSequence, maxVisibleActivities]);
 
   // State for temporal sequence playback
   const [currentSequenceIndex, setCurrentSequenceIndex] = useState(0);
-  const [currentSequenceActivities, setCurrentSequenceActivities] = useState<
-    NeuralActivityState[]
-  >([]);
+  const [currentSequenceActivities, setCurrentSequenceActivities] = useState<NeuralActivityState[]>(
+    []
+  );
 
   // Effect for temporal sequence playback
   useEffect(() => {
@@ -570,14 +543,14 @@ export const NeuralActivityVisualizer: React.FC<
           ? temporalSequence.timeSteps[currentIndex + 1].timeOffset
           : temporalSequence.timeSteps[0].timeOffset + // Loop duration approximation
             (temporalSequence.timeSteps[temporalSequence.timeSteps.length - 1].timeOffset -
-             temporalSequence.timeSteps[0].timeOffset); // Add total duration for loop
+              temporalSequence.timeSteps[0].timeOffset); // Add total duration for loop
 
-      const duration = (nextTimeOffset - currentStepData.timeOffset); // Duration in ms
+      const duration = nextTimeOffset - currentStepData.timeOffset; // Duration in ms
       const playbackDuration = duration / (playbackSpeed || 1.0);
 
       // Update state with activities for the current step
       // Add activationDuration to each state for potential use in ActivityNode/Flow
-      const activitiesWithDuration = stepActivities.map(act => ({
+      const activitiesWithDuration = stepActivities.map((act) => ({
         ...act,
         activationDuration: duration, // Assign the calculated duration
       }));
@@ -598,18 +571,16 @@ export const NeuralActivityVisualizer: React.FC<
   }, [temporalSequence, playbackSpeed]);
 
   // Determine which activities to render
-  const activitiesToRender = temporalSequence
-    ? currentSequenceActivities
-    : processedActivities;
+  const activitiesToRender = temporalSequence ? currentSequenceActivities : processedActivities;
 
   // Render function for activity nodes and flows
   const renderActivityNodes = (activities: NeuralActivityState[]) => {
-    return activities.map((activity, index) => { // Add index here
+    return activities.map((activity, index) => {
+      // Add index here
       const displayProps =
-        activityDisplay[activity.activationLevel] ||
-        activityDisplay[ActivationLevel.NONE];
+        activityDisplay[activity.activationLevel] || activityDisplay[ActivationLevel.NONE];
 
-      if (activity.entityType === "region") {
+      if (activity.entityType === 'region') {
         const region = regionMap.get(activity.entityId);
         if (!region) return null;
         const position = adaptVector3(region.position);
@@ -628,17 +599,14 @@ export const NeuralActivityVisualizer: React.FC<
             onClick={onActivityNodeClick}
           />
         );
-      } else if (activity.entityType === "connection") {
+      } else if (activity.entityType === 'connection') {
         const connection = connectionMap.get(activity.entityId);
         if (!connection) return null;
         const regionA = regionMap.get(connection.sourceId);
         const regionB = regionMap.get(connection.targetId);
         if (!regionA || !regionB) return null;
 
-        const points = [
-          adaptVector3(regionA.position),
-          adaptVector3(regionB.position),
-        ];
+        const points = [adaptVector3(regionA.position), adaptVector3(regionB.position)];
         return (
           <ActivityFlow
             key={`connection-activity-${connection.id}-${index}`} // Add index to key

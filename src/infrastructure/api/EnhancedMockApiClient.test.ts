@@ -3,12 +3,12 @@
  * enhancedMockApiClient testing with quantum precision
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi } from 'vitest';
 
-import { enhancedMockApiClient } from "@api/EnhancedMockApiClient";
+import { enhancedMockApiClient } from '@api/EnhancedMockApiClient';
 
-describe("enhancedMockApiClient", () => {
-  it("processes data with mathematical precision", () => {
+describe('enhancedMockApiClient', () => {
+  it('processes data with mathematical precision', () => {
     // Arrange test data
     const testData = {};
 
@@ -19,7 +19,7 @@ describe("enhancedMockApiClient", () => {
     expect(result).toBeDefined();
   });
 
-  it("handles edge cases with clinical precision", () => {
+  it('handles edge cases with clinical precision', () => {
     // Test edge cases
     const edgeCaseData = {};
 

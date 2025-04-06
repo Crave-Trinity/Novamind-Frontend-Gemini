@@ -1,8 +1,8 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-import { mockApi } from "@api/mockApi";
-import { validateApiResponse } from "@api/ApiClient.runtime"; // Import the validator
-import { Result, Ok, Err } from "ts-results"; // Import Result types if needed for error handling
+import { mockApi } from '@api/mockApi';
+import { validateApiResponse } from '@api/ApiClient.runtime'; // Import the validator
+import { Result, Ok, Err } from 'ts-results'; // Import Result types if needed for error handling
 // Flag to toggle between mock and real API
 const USE_MOCK_API = true;
 
@@ -18,12 +18,12 @@ export class ApiClient {
   private instance: AxiosInstance;
   private authToken: string | null = null;
 
-  constructor(baseURL: string = "/api") {
+  constructor(baseURL: string = '/api') {
     this.instance = axios.create({
       baseURL,
       timeout: 30000,
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -32,13 +32,13 @@ export class ApiClient {
       (config) => {
         // Add auth token to headers if available
         if (this.authToken) {
-          config.headers["Authorization"] = `Bearer ${this.authToken}`;
+          config.headers['Authorization'] = `Bearer ${this.authToken}`;
         }
         return config;
       },
       (error) => {
         return Promise.reject(error);
-      },
+      }
     );
 
     // Response interceptor
@@ -52,23 +52,23 @@ export class ApiClient {
           switch (error.response.status) {
             case 401:
               // Handle unauthorized
-              console.error("Unauthorized access attempt");
+              console.error('Unauthorized access attempt');
               // Redirect to login or refresh token
-              localStorage.removeItem("auth_token");
-              window.location.href = "/login";
+              localStorage.removeItem('auth_token');
+              window.location.href = '/login';
               break;
             case 403:
               // Handle forbidden
-              console.error("Forbidden access attempt");
+              console.error('Forbidden access attempt');
               break;
             case 500:
               // Handle server error
-              console.error("Server error occurred");
+              console.error('Server error occurred');
               break;
           }
         }
         return Promise.reject(error);
-      },
+      }
     );
   }
 
@@ -77,7 +77,7 @@ export class ApiClient {
    */
   public setAuthToken(token: string): void {
     this.authToken = token;
-    localStorage.setItem("auth_token", token);
+    localStorage.setItem('auth_token', token);
   }
 
   /**
@@ -85,24 +85,20 @@ export class ApiClient {
    */
   public clearAuthToken(): void {
     this.authToken = null;
-    localStorage.removeItem("auth_token");
+    localStorage.removeItem('auth_token');
   }
 
   /**
    * Get authentication status
    */
   public isAuthenticated(): boolean {
-    return !!this.authToken || !!localStorage.getItem("auth_token");
+    return !!this.authToken || !!localStorage.getItem('auth_token');
   }
 
   /**
    * POST request method
    */
-  public async post<T>(
-    url: string,
-    data?: any,
-    config?: AxiosRequestConfig,
-  ): Promise<T> {
+  public async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
     // Use mock API if enabled
     if (USE_MOCK_API) {
       console.log(`[Mock API] POST ${url}`, data);
@@ -112,7 +108,7 @@ export class ApiClient {
 
     // Use real API
     return this.request<T>({
-      method: "POST",
+      method: 'POST',
       url,
       data,
       ...config,
@@ -132,7 +128,7 @@ export class ApiClient {
 
     // Use real API
     return this.request<T>({
-      method: "GET",
+      method: 'GET',
       url,
       ...config,
     });
@@ -141,11 +137,7 @@ export class ApiClient {
   /**
    * PUT request method
    */
-  public async put<T>(
-    url: string,
-    data?: any,
-    config?: AxiosRequestConfig,
-  ): Promise<T> {
+  public async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
     // Use mock API if enabled
     if (USE_MOCK_API) {
       console.log(`[Mock API] PUT ${url}`, data);
@@ -155,7 +147,7 @@ export class ApiClient {
 
     // Use real API
     return this.request<T>({
-      method: "PUT",
+      method: 'PUT',
       url,
       data,
       ...config,
@@ -175,7 +167,7 @@ export class ApiClient {
 
     // Use real API
     return this.request<T>({
-      method: "DELETE",
+      method: 'DELETE',
       url,
       ...config,
     });
@@ -188,40 +180,37 @@ export class ApiClient {
   private async request<T>(
     config: AxiosRequestConfig,
     // Optional: Pass the type guard for the expected response type T
-    responseGuard?: (data: unknown) => data is T,
+    responseGuard?: (data: unknown) => data is T
   ): Promise<T> {
     try {
-      const response: AxiosResponse<unknown> =
-        await this.instance.request(config); // Get raw response first
+      const response: AxiosResponse<unknown> = await this.instance.request(config); // Get raw response first
 
       // Validate the response data if a guard is provided
       if (responseGuard) {
         const validationResult = validateApiResponse(
           response.data,
           responseGuard,
-          `API Response [${config.method} ${config.url}]`,
+          `API Response [${config.method} ${config.url}]`
         );
         if (validationResult.ok) {
           return validationResult.val; // Return validated data
         } else {
           // Throw the validation error to be caught below
-          console.error(
-            `API Response Validation Failed: ${validationResult.val.message}`,
-          );
+          console.error(`API Response Validation Failed: ${validationResult.val.message}`);
           throw validationResult.val;
         }
       }
 
       // If no guard provided, return raw data (consider adding a warning or stricter policy)
       console.warn(
-        `[ApiClient] No response validation guard provided for ${config.method} ${config.url}. Returning raw data.`,
+        `[ApiClient] No response validation guard provided for ${config.method} ${config.url}. Returning raw data.`
       );
       return response.data as T;
     } catch (error) {
       // Log original Axios error or validation error
       console.error(
         `API request failed [${config.method} ${config.url}]:`,
-        error instanceof Error ? error.message : error,
+        error instanceof Error ? error.message : error
       );
       // Re-throw the original error or a custom API error
       throw error;
@@ -235,12 +224,12 @@ export class ApiClient {
   // User authentication
   public async login(email: string, password: string): Promise<any> {
     if (USE_MOCK_API) {
-      console.log("[Mock API] Login attempt", { email });
+      console.log('[Mock API] Login attempt', { email });
       // Simulate login success for mock API
-      return { success: true, token: "mock_token_123" };
+      return { success: true, token: 'mock_token_123' };
     }
 
-    const response = await this.post<any>("/auth/login", { email, password });
+    const response = await this.post<any>('/auth/login', { email, password });
     this.setAuthToken(response.token);
     return response;
   }
@@ -251,7 +240,7 @@ export class ApiClient {
       return mockApi.getPatients();
     }
 
-    return this.get<any[]>("/patients");
+    return this.get<any[]>('/patients');
   }
 
   // Get patient by ID
@@ -264,7 +253,7 @@ export class ApiClient {
   }
 
   // Get brain model
-  public async getBrainModel(modelId: string = "default"): Promise<BrainModel> {
+  public async getBrainModel(modelId: string = 'default'): Promise<BrainModel> {
     if (USE_MOCK_API) {
       return mockApi.getBrainModel(modelId);
     }
@@ -273,21 +262,12 @@ export class ApiClient {
   }
 
   // Predict treatment response
-  public async predictTreatmentResponse(
-    patientId: string,
-    treatmentData: any,
-  ): Promise<any> {
+  public async predictTreatmentResponse(patientId: string, treatmentData: any): Promise<any> {
     if (USE_MOCK_API) {
-      return mockApi.predictTreatmentResponse(
-        patientId,
-        treatmentData.treatment,
-      );
+      return mockApi.predictTreatmentResponse(patientId, treatmentData.treatment);
     }
 
-    return this.post<any>(
-      `/patients/${patientId}/predict-treatment`,
-      treatmentData,
-    );
+    return this.post<any>(`/patients/${patientId}/predict-treatment`, treatmentData);
   }
 
   // Get risk assessment
@@ -302,12 +282,12 @@ export class ApiClient {
   private handleMockResponse<T>(url: string, data?: any): T {
     // Implement mock response logic here
     // For example:
-    if (url === "/auth/login") {
-      return { success: true, token: "mock_token_123" } as T;
-    } else if (url === "/patients") {
+    if (url === '/auth/login') {
+      return { success: true, token: 'mock_token_123' } as T;
+    } else if (url === '/patients') {
       return [
-        { id: 1, name: "John Doe" },
-        { id: 2, name: "Jane Doe" },
+        { id: 1, name: 'John Doe' },
+        { id: 2, name: 'Jane Doe' },
       ] as T;
     } else {
       throw new Error(`Mock API: Unknown endpoint ${url}`);

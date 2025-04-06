@@ -1,13 +1,13 @@
-import React from "react";
+import React from 'react';
 
-import { AssessmentScore } from "@domain/models/clinical/digital-twin-profile";
+import { AssessmentScore } from '@domain/models/clinical/digital-twin-profile';
 
 interface ClinicalMetricProps {
   title: string;
   value: number;
   maxValue: number;
   change?: number | undefined;
-  severity: "none" | "mild" | "moderate" | "severe";
+  severity: 'none' | 'mild' | 'moderate' | 'severe';
   date?: string | undefined;
   description?: string | undefined;
   className?: string;
@@ -27,7 +27,7 @@ export const ClinicalMetricCard: React.FC<ClinicalMetricProps> = ({
   severity,
   date,
   description,
-  className = "",
+  className = '',
 }) => {
   // Calculate percentage for progress bar
   const percentage = Math.min(Math.round((value / maxValue) * 100), 100);
@@ -35,16 +35,16 @@ export const ClinicalMetricCard: React.FC<ClinicalMetricProps> = ({
   // Get severity color
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case "none":
-        return "bg-green-500";
-      case "mild":
-        return "bg-yellow-500";
-      case "moderate":
-        return "bg-orange-500";
-      case "severe":
-        return "bg-red-500";
+      case 'none':
+        return 'bg-green-500';
+      case 'mild':
+        return 'bg-yellow-500';
+      case 'moderate':
+        return 'bg-orange-500';
+      case 'severe':
+        return 'bg-red-500';
       default:
-        return "bg-gray-500";
+        return 'bg-gray-500';
     }
   };
 
@@ -57,12 +57,7 @@ export const ClinicalMetricCard: React.FC<ClinicalMetricProps> = ({
     if (change < 0) {
       return (
         <span className="ml-2 flex items-center text-sm text-green-500">
-          <svg
-            className="mr-1 h-3 w-3"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+          <svg className="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -76,12 +71,7 @@ export const ClinicalMetricCard: React.FC<ClinicalMetricProps> = ({
     } else if (change > 0) {
       return (
         <span className="ml-2 flex items-center text-sm text-red-500">
-          <svg
-            className="mr-1 h-3 w-3"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+          <svg className="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -96,18 +86,8 @@ export const ClinicalMetricCard: React.FC<ClinicalMetricProps> = ({
 
     return (
       <span className="ml-2 flex items-center text-sm text-gray-500">
-        <svg
-          className="mr-1 h-3 w-3"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 12h14"
-          />
+        <svg className="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14" />
         </svg>
         0
       </span>
@@ -115,13 +95,9 @@ export const ClinicalMetricCard: React.FC<ClinicalMetricProps> = ({
   };
 
   return (
-    <div
-      className={`rounded-lg bg-background-card p-4 shadow-md dark:shadow-none ${className}`}
-    >
+    <div className={`rounded-lg bg-background-card p-4 shadow-md dark:shadow-none ${className}`}>
       <div className="mb-2 flex items-start justify-between">
-        <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-          {title}
-        </h3>
+        <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{title}</h3>
         <div className="flex items-center">
           <span
             className={`inline-block h-3 w-3 rounded-full ${getSeverityColor(severity)}`}
@@ -134,9 +110,7 @@ export const ClinicalMetricCard: React.FC<ClinicalMetricProps> = ({
 
       <div className="mb-3 flex items-end">
         <span className="text-2xl font-semibold">{value}</span>
-        <span className="ml-1 text-sm text-neutral-500 dark:text-neutral-400">
-          / {maxValue}
-        </span>
+        <span className="ml-1 text-sm text-neutral-500 dark:text-neutral-400">/ {maxValue}</span>
         {getChangeIndicator()}
       </div>
 
@@ -148,9 +122,7 @@ export const ClinicalMetricCard: React.FC<ClinicalMetricProps> = ({
       </div>
 
       {description && (
-        <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
-          {description}
-        </p>
+        <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">{description}</p>
       )}
 
       {date && (
@@ -176,7 +148,7 @@ interface ClinicalMetricsGroupProps {
 export const ClinicalMetricsGroup: React.FC<ClinicalMetricsGroupProps> = ({
   title,
   metrics,
-  className = "",
+  className = '',
 }) => {
   if (!metrics.length) {
     return null;
@@ -184,9 +156,7 @@ export const ClinicalMetricsGroup: React.FC<ClinicalMetricsGroupProps> = ({
 
   return (
     <div className={className}>
-      <h2 className="mb-3 text-lg font-semibold text-neutral-800 dark:text-neutral-200">
-        {title}
-      </h2>
+      <h2 className="mb-3 text-lg font-semibold text-neutral-800 dark:text-neutral-200">{title}</h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {metrics.map((metric) => (
           <ClinicalMetricCard

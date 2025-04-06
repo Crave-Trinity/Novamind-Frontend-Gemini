@@ -1,29 +1,29 @@
 /**
  * Session Management Service for HIPAA Compliance
- * 
+ *
  * This service handles session timeout management,
  * implementing HIPAA requirements for automatic logouts
  * and warning users prior to session termination.
  */
 
-import { auditLogClient, AuditEventType } from "./auditLogClient";
+import { auditLogClient, AuditEventType } from './auditLogClient';
 
 interface SessionConfig {
   /**
    * Total session timeout in milliseconds
    */
   timeout: number;
-  
+
   /**
    * Time in milliseconds before timeout to display warning
    */
   warningTime: number;
-  
+
   /**
    * Callback to execute when session times out
    */
   onTimeout: () => void;
-  
+
   /**
    * Callback to execute when warning threshold is reached
    */
@@ -37,11 +37,11 @@ const DEFAULT_CONFIG: SessionConfig = {
   timeout: 15 * 60 * 1000, // 15 minutes
   warningTime: 60 * 1000, // 1 minute warning
   onTimeout: () => {
-    window.location.href = "/login?reason=timeout";
+    window.location.href = '/login?reason=timeout';
   },
   onWarning: () => {
-    console.debug("Session timeout warning triggered");
-  }
+    console.debug('Session timeout warning triggered');
+  },
 };
 
 /**
@@ -62,33 +62,33 @@ const resetTimers = (): void => {
     window.clearTimeout(activityTimeout);
     activityTimeout = undefined;
   }
-  
+
   if (warningTimeout) {
     window.clearTimeout(warningTimeout);
     warningTimeout = undefined;
   }
-  
+
   // Set warning timer
   const warningDelay = sessionConfig.timeout - sessionConfig.warningTime;
   warningTimeout = window.setTimeout(() => {
     isWarningActive = true;
     sessionConfig.onWarning();
-    
+
     auditLogClient.log(AuditEventType.USER_TIMEOUT, {
-      action: "session_warning",
-      details: "Session warning displayed",
-      result: "success"
+      action: 'session_warning',
+      details: 'Session warning displayed',
+      result: 'success',
     });
   }, warningDelay);
-  
+
   // Set timeout timer
   activityTimeout = window.setTimeout(() => {
     auditLogClient.log(AuditEventType.USER_TIMEOUT, {
-      action: "session_timeout",
-      details: "Session timed out due to inactivity",
-      result: "success"
+      action: 'session_timeout',
+      details: 'Session timed out due to inactivity',
+      result: 'success',
     });
-    
+
     // Execute timeout callback
     sessionConfig.onTimeout();
   }, sessionConfig.timeout);
@@ -99,7 +99,7 @@ const resetTimers = (): void => {
  */
 const trackActivity = (): void => {
   lastActivityTime = Date.now();
-  
+
   // Only reset timers if the warning is not active
   if (!isWarningActive) {
     resetTimers();
@@ -113,21 +113,21 @@ export const initializeSessionClient = (config: Partial<SessionConfig> = {}): vo
   // Merge provided config with defaults
   sessionConfig = {
     ...DEFAULT_CONFIG,
-    ...config
+    ...config,
   };
-  
+
   // Initialize activity tracking
-  ["mousedown", "keypress", "scroll", "touchstart"].forEach(eventType => {
+  ['mousedown', 'keypress', 'scroll', 'touchstart'].forEach((eventType) => {
     window.addEventListener(eventType, trackActivity, { passive: true });
   });
-  
+
   // Set initial timers
   resetTimers();
-  
+
   auditLogClient.log(AuditEventType.SYSTEM_CONFIG_CHANGE, {
-    action: "session_service_init",
+    action: 'session_service_init',
     details: `Session service initialized with timeout ${sessionConfig.timeout}ms`,
-    result: "success"
+    result: 'success',
   });
 };
 
@@ -137,11 +137,11 @@ export const initializeSessionClient = (config: Partial<SessionConfig> = {}): vo
 export const continueSession = (): void => {
   isWarningActive = false;
   trackActivity();
-  
+
   auditLogClient.log(AuditEventType.USER_TIMEOUT, {
-    action: "session_continued",
-    details: "User continued session after warning",
-    result: "success"
+    action: 'session_continued',
+    details: 'User continued session after warning',
+    result: 'success',
   });
 };
 
@@ -153,19 +153,19 @@ export const logout = (): void => {
   if (activityTimeout) {
     window.clearTimeout(activityTimeout);
   }
-  
+
   if (warningTimeout) {
     window.clearTimeout(warningTimeout);
   }
-  
+
   auditLogClient.log(AuditEventType.USER_LOGOUT, {
-    action: "user_logout",
-    details: "User manually logged out",
-    result: "success"
+    action: 'user_logout',
+    details: 'User manually logged out',
+    result: 'success',
   });
-  
+
   // Redirect to login
-  window.location.href = "/login?reason=logout";
+  window.location.href = '/login?reason=logout';
 };
 
 /**

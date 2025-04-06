@@ -5,7 +5,7 @@
  * This module provides runtime validation for the RiskLevel type.
  */
 
-import type { RiskLevel } from "@domain/types/clinical/risk-level";
+import type { RiskLevel } from '@domain/types/clinical/risk-level';
 
 /**
  * Runtime validation for RiskLevel
@@ -15,21 +15,21 @@ export const RiskLevelValidator = {
    * Validates if a value is a valid RiskLevel
    */
   isValid: (value: unknown): value is RiskLevel => {
-    if (typeof value !== "string") return false;
+    if (typeof value !== 'string') return false;
 
     // Create a set of valid risk levels for faster lookups
     const validLevels = new Set([
-      "minimal",
-      "low",
-      "moderate",
-      "high",
-      "critical",
-      "Minimal",
-      "Low",
-      "Moderate",
-      "High",
-      "Critical",
-      "Medium", // Legacy value
+      'minimal',
+      'low',
+      'moderate',
+      'high',
+      'critical',
+      'Minimal',
+      'Low',
+      'Moderate',
+      'High',
+      'Critical',
+      'Medium', // Legacy value
     ]);
 
     return validLevels.has(value);
@@ -49,7 +49,7 @@ export const RiskLevelValidator = {
     const normalized = level.toLowerCase();
 
     // Handle special case for 'Medium' which is equivalent to 'moderate'
-    if (normalized === "medium") return 2;
+    if (normalized === 'medium') return 2;
 
     const severityMap: Record<string, number> = {
       minimal: 0,

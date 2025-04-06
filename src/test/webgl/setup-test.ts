@@ -1,6 +1,6 @@
 /**
  * WebGL Testing Setup
- * 
+ *
  * This file provides utilities for setting up WebGL mocks in tests.
  * It's designed to work with the WebGL mocking system defined in index.ts.
  */
@@ -52,7 +52,7 @@ export function cleanupWebGLAfterTest(options: { failOnLeak?: boolean } = {}): M
 
 /**
  * Run a test with WebGL mocks
- * 
+ *
  * This utility combines setup and cleanup in a single function,
  * which is useful for individual tests that need WebGL mocking.
  */
@@ -69,6 +69,8 @@ export async function runTestWithWebGL(
   } finally {
     // Clean up WebGL mocks
     // Conditionally pass failOnLeak only if it's defined, due to exactOptionalPropertyTypes
-    return cleanupWebGLAfterTest(options.failOnLeak !== undefined ? { failOnLeak: options.failOnLeak } : {});
+    return cleanupWebGLAfterTest(
+      options.failOnLeak !== undefined ? { failOnLeak: options.failOnLeak } : {}
+    );
   }
 }

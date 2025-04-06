@@ -12,13 +12,24 @@ export interface IBrainService {
   // Brain Region Operations
   getBrainRegion(modelId: UUID, regionId: UUID): Promise<BrainRegion>;
   createBrainRegion(modelId: UUID, region: Omit<BrainRegion, 'id'>): Promise<BrainRegion>;
-  updateBrainRegion(modelId: UUID, regionId: UUID, region: Partial<BrainRegion>): Promise<BrainRegion>;
+  updateBrainRegion(
+    modelId: UUID,
+    regionId: UUID,
+    region: Partial<BrainRegion>
+  ): Promise<BrainRegion>;
   deleteBrainRegion(modelId: UUID, regionId: UUID): Promise<void>;
 
   // Neural Connection Operations
   getNeuralConnection(modelId: UUID, connectionId: UUID): Promise<NeuralConnection>;
-  createNeuralConnection(modelId: UUID, connection: Omit<NeuralConnection, 'id'>): Promise<NeuralConnection>;
-  updateNeuralConnection(modelId: UUID, connectionId: UUID, connection: Partial<NeuralConnection>): Promise<NeuralConnection>;
+  createNeuralConnection(
+    modelId: UUID,
+    connection: Omit<NeuralConnection, 'id'>
+  ): Promise<NeuralConnection>;
+  updateNeuralConnection(
+    modelId: UUID,
+    connectionId: UUID,
+    connection: Partial<NeuralConnection>
+  ): Promise<NeuralConnection>;
   deleteNeuralConnection(modelId: UUID, connectionId: UUID): Promise<void>;
 
   // Analysis Operations
@@ -72,4 +83,4 @@ export interface IBrainService {
       }[];
     };
   }>;
-} 
+}

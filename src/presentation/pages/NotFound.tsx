@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
-import { auditLogService, AuditEventType } from "@infrastructure/clients/auditLogClient"; // Use correct alias
+import { auditLogService, AuditEventType } from '@infrastructure/clients/auditLogClient'; // Use correct alias
 
 /**
  * 404 Not Found page
@@ -16,14 +16,14 @@ const NotFound: React.FC = () => {
   // Log the 404 event
   useEffect(() => {
     auditLogService.log(AuditEventType.SYSTEM_ERROR, {
-      action: "not_found",
+      action: 'not_found',
       details: `Attempted to navigate to ${location.pathname}`,
-      result: "failure",
+      result: 'failure',
     });
 
     // Set up automatic redirect after delay
     const redirectTimer = setTimeout(() => {
-      navigate("/dashboard", { replace: true });
+      navigate('/dashboard', { replace: true });
     }, 10000); // 10 seconds
 
     // Clean up timer
@@ -51,15 +51,12 @@ const NotFound: React.FC = () => {
             </svg>
           </div>
 
-          <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-            Page Not Found
-          </h1>
+          <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">Page Not Found</h1>
 
           <div className="mx-auto my-4 h-1 w-16 bg-blue-600"></div>
 
           <p className="mb-6 text-gray-600 dark:text-gray-300">
-            The page you're looking for doesn't exist or you don't have
-            permission to access it.
+            The page you're looking for doesn't exist or you don't have permission to access it.
           </p>
 
           <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
@@ -84,7 +81,7 @@ const NotFound: React.FC = () => {
         </div>
 
         {/* Error details (only shown in development) */}
-        {process.env.NODE_ENV === "development" && (
+        {process.env.NODE_ENV === 'development' && (
           <div className="mt-8 rounded bg-gray-100 p-4 text-left dark:bg-gray-900">
             <h3 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               Debug Information

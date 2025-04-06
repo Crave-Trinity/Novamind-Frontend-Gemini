@@ -3,16 +3,17 @@
  * useNeuroSyncOrchestrator testing with quantum precision
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react"; // Import renderHook and act
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderHook, act } from '@testing-library/react'; // Import renderHook and act
 
 import useNeuroSyncOrchestrator, {
   type NeuroSyncState,
-} from "@application/orchestrators/NeuroSyncOrchestrator"; // Use correct alias
+} from '@application/orchestrators/NeuroSyncOrchestrator'; // Use correct alias
 
 // Mock services (basic mocks, replace with more specific mocks if needed)
 // Mock services FIRST
-vi.mock("@application/services/brain/brain-model.service", () => ({ // Use correct alias
+vi.mock('@application/services/brain/brain-model.service', () => ({
+  // Use correct alias
   brainModelService: {
     fetchBrainModel: vi.fn().mockResolvedValue({ success: true, value: null }),
     // Add other methods if needed
@@ -22,7 +23,8 @@ vi.mock("@application/services/brain/brain-model.service", () => ({ // Use corre
     fetchBrainModel: vi.fn().mockResolvedValue({ success: true, value: null }),
   },
 }));
-vi.mock("@application/services/clinicalService", () => ({ // Use correct alias
+vi.mock('@application/services/clinicalService', () => ({
+  // Use correct alias
   clinicalService: {
     // Mock methods actually used, even if commented out in source for now
     // Only mock methods defined in the actual service or used by the hook
@@ -33,7 +35,8 @@ vi.mock("@application/services/clinicalService", () => ({ // Use correct alias
     submitBiometricAlert: vi.fn().mockResolvedValue({ success: true }),
   },
 }));
-vi.mock("@application/services/biometricService", () => ({ // Use correct alias
+vi.mock('@application/services/biometricService', () => ({
+  // Use correct alias
   biometricService: {
     getBiometricAlerts: vi.fn().mockResolvedValue({ success: true, value: [] }),
     getBiometricStreams: vi.fn().mockResolvedValue({ success: true, value: [] }),
@@ -46,9 +49,10 @@ vi.mock("@application/services/biometricService", () => ({ // Use correct alias
     getBiometricStreams: vi.fn().mockResolvedValue({ success: true, value: [] }),
     getStreamMetadata: vi.fn().mockResolvedValue({ success: true, value: [] }),
     calculateStreamCorrelations: vi.fn().mockResolvedValue({ success: true, value: {} }),
-  }
+  },
 }));
-vi.mock("@application/services/temporal", () => ({ // Use correct alias
+vi.mock('@application/services/temporal', () => ({
+  // Use correct alias
   temporalService: {
     getTemporalDynamics: vi
       .fn()
@@ -56,45 +60,72 @@ vi.mock("@application/services/temporal", () => ({ // Use correct alias
   },
 }));
 // Import services AFTER mocks
-import { brainModelService } from "@application/services/brain/brain-model.service";
-import { clinicalService } from "@application/services/clinicalService";
-import { biometricService } from "@application/services/biometricService";
-import { temporalService } from "@application/services/temporal";
-import type { BrainModel, BrainScan } from "@domain/types/brain/models"; // Import correct BrainModel interface and BrainScan
-import type { TemporalDynamics } from "@domain/types/temporal/dynamics";
-import type { Result } from "@domain/types/shared/common"; // Import Result type
-import type { BiometricAlert, BiometricStream } from "@domain/types/biometric/streams"; // Import Biometric types
+import { brainModelService } from '@application/services/brain/brain-model.service';
+import { clinicalService } from '@application/services/clinicalService';
+import { biometricService } from '@application/services/biometricService';
+import { temporalService } from '@application/services/temporal';
+import type { BrainModel, BrainScan } from '@domain/types/brain/models'; // Import correct BrainModel interface and BrainScan
+import type { TemporalDynamics } from '@domain/types/temporal/dynamics';
+import type { Result } from '@domain/types/shared/common'; // Import Result type
+import type { BiometricAlert, BiometricStream } from '@domain/types/biometric/streams'; // Import Biometric types
 
-describe("useNeuroSyncOrchestrator", () => {
-  const mockPatientId = "patient-123";
-  
+describe('useNeuroSyncOrchestrator', () => {
+  const mockPatientId = 'patient-123';
+
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset only the mocks that are actually defined in vi.mock
     // Return a minimal valid BrainModel object (matching the interface)
-    const minimalScan: BrainScan = { id: 'scan-1', patientId: mockPatientId, scanDate: new Date().toISOString(), scanType: 'fMRI', dataQualityScore: 0.9 };
-    const minimalBrainModel: BrainModel = {
-        id: 'mock-init-id',
-        patientId: mockPatientId,
-        regions: [],
-        connections: [], // Add missing property
-        scan: minimalScan, // Add missing property
-        timestamp: new Date().toISOString(),
-        version: '1.0', // Add missing property
-        processingLevel: 'analyzed', // Add missing property
-        lastUpdated: new Date().toISOString() // Add missing property
+    const minimalScan: BrainScan = {
+      id: 'scan-1',
+      patientId: mockPatientId,
+      scanDate: new Date().toISOString(),
+      scanType: 'fMRI',
+      dataQualityScore: 0.9,
     };
-    vi.mocked(brainModelService.fetchBrainModel).mockResolvedValue({ success: true, value: minimalBrainModel });
-    vi.mocked(clinicalService.submitBiometricAlert).mockResolvedValue({ success: true, value: undefined }); // Correct Result<void>
+    const minimalBrainModel: BrainModel = {
+      id: 'mock-init-id',
+      patientId: mockPatientId,
+      regions: [],
+      connections: [], // Add missing property
+      scan: minimalScan, // Add missing property
+      timestamp: new Date().toISOString(),
+      version: '1.0', // Add missing property
+      processingLevel: 'analyzed', // Add missing property
+      lastUpdated: new Date().toISOString(), // Add missing property
+    };
+    vi.mocked(brainModelService.fetchBrainModel).mockResolvedValue({
+      success: true,
+      value: minimalBrainModel,
+    });
+    vi.mocked(clinicalService.submitBiometricAlert).mockResolvedValue({
+      success: true,
+      value: undefined,
+    }); // Correct Result<void>
     // Reset only mocks defined in vi.mock above
-    vi.mocked(biometricService.getStreamMetadata).mockResolvedValue({ success: true, value: [] as BiometricStream[] });
-    vi.mocked(biometricService.calculateStreamCorrelations).mockResolvedValue({ success: true, value: new Map() });
+    vi.mocked(biometricService.getStreamMetadata).mockResolvedValue({
+      success: true,
+      value: [] as BiometricStream[],
+    });
+    vi.mocked(biometricService.calculateStreamCorrelations).mockResolvedValue({
+      success: true,
+      value: new Map(),
+    });
     // Assuming minimal mock for TemporalDynamics is okay for now
     // Ensure TemporalDynamics mock is sufficient or provide a more complete one if needed
-    vi.mocked(temporalService.getTemporalDynamics).mockResolvedValue({ success: true, value: { id: 'td-1', timestamps: [], values: {}, patterns: [], trends: [] } as TemporalDynamics }); // Use {} for values
+    vi.mocked(temporalService.getTemporalDynamics).mockResolvedValue({
+      success: true,
+      value: {
+        id: 'td-1',
+        timestamps: [],
+        values: {},
+        patterns: [],
+        trends: [],
+      } as TemporalDynamics,
+    }); // Use {} for values
   });
 
-  it("should initialize with default state", async () => {
+  it('should initialize with default state', async () => {
     // Make test async if needed for effects
     // Act
     // Wrap in act because the hook likely has useEffect for initial fetches
@@ -109,7 +140,7 @@ describe("useNeuroSyncOrchestrator", () => {
     // expect(result.current.state.errorMessage).toBeNull(); // Initial state seems complex
   });
 
-  it("should provide actions object", async () => {
+  it('should provide actions object', async () => {
     // Make test async if needed
     // Act
     let renderedHook;
@@ -120,7 +151,7 @@ describe("useNeuroSyncOrchestrator", () => {
 
     // Assert
     expect(result.current.actions).toBeDefined();
-    expect(typeof result.current.actions.selectRegion).toBe("function");
+    expect(typeof result.current.actions.selectRegion).toBe('function');
     // Add checks for other actions
   });
 

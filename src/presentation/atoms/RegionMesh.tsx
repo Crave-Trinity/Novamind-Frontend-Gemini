@@ -3,11 +3,11 @@
  * RegionMesh Atomic Component - renders individual brain regions with clinical precision
  */
 
-import React, { useRef, useEffect, useState, useCallback } from "react";
-import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
-import { ThemeSettings } from "@domain/types/brain/visualization";
-import { Vector3 } from "three"; // Import Vector3 from three
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+import { ThemeSettings } from '@domain/types/brain/visualization';
+import { Vector3 } from 'three'; // Import Vector3 from three
 
 // Neural-safe prop definition with explicit typing
 interface RegionMeshProps {
@@ -30,7 +30,7 @@ interface RegionMeshProps {
 
   // Visual appearance
   opacity?: number;
-  renderQuality?: "low" | "medium" | "high";
+  renderQuality?: 'low' | 'medium' | 'high';
   emissive?: string;
   emissiveIntensity?: number;
 
@@ -59,7 +59,7 @@ const RegionMesh: React.FC<RegionMeshProps> = ({
   pulseSpeed = 1,
   pulseIntensity = 0.1,
   opacity = 0.9,
-  renderQuality = "high",
+  renderQuality = 'high',
   emissive,
   emissiveIntensity,
   themeSettings,
@@ -76,11 +76,11 @@ const RegionMesh: React.FC<RegionMeshProps> = ({
   // Segment count based on render quality
   const getSegmentCount = () => {
     switch (renderQuality) {
-      case "low":
+      case 'low':
         return 8;
-      case "medium":
+      case 'medium':
         return 16;
-      case "high":
+      case 'high':
         return 32;
       default:
         return 16;
@@ -157,10 +157,8 @@ const RegionMesh: React.FC<RegionMeshProps> = ({
     // Optional glow effect through emissive intensity modulation
     if (materialRef.current && themeSettings.glowIntensity > 0) {
       const params = visualParams();
-      const glowPulse =
-        Math.sin(time * 1.5) * 0.2 * themeSettings.glowIntensity;
-      materialRef.current.emissiveIntensity =
-        params.emissiveIntensity + glowPulse;
+      const glowPulse = Math.sin(time * 1.5) * 0.2 * themeSettings.glowIntensity;
+      materialRef.current.emissiveIntensity = params.emissiveIntensity + glowPulse;
     }
   });
 
@@ -168,13 +166,13 @@ const RegionMesh: React.FC<RegionMeshProps> = ({
   const handlePointerOver = useCallback(() => {
     setHovered(true);
     if (onHover) onHover(id);
-    document.body.style.cursor = "pointer";
+    document.body.style.cursor = 'pointer';
   }, [id, onHover]);
 
   const handlePointerOut = useCallback(() => {
     setHovered(false);
     if (onHover) onHover(null);
-    document.body.style.cursor = "auto";
+    document.body.style.cursor = 'auto';
   }, [onHover]);
 
   const handleClick = useCallback(() => {

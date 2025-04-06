@@ -14,7 +14,7 @@ import {
   NeuralRiskCorrelate,
   RiskTimelineEvent,
   BiometricRiskAlert,
-} from "@domain/types/clinical/risk";
+} from '@domain/types/clinical/risk';
 
 /**
  * Runtime validation for RiskLevel enum values
@@ -24,7 +24,7 @@ export const RiskLevelValidator = {
    * Validates if a value is a valid RiskLevel
    */
   isValid: (value: unknown): value is RiskLevel => {
-    if (typeof value !== "string") return false;
+    if (typeof value !== 'string') return false;
 
     return Object.values(RiskLevel).includes(value as RiskLevel);
   },
@@ -38,23 +38,23 @@ export const RiskAssessmentValidator = {
    * Validates if an object is a valid RiskAssessment
    */
   isValid: (obj: unknown): obj is RiskAssessment => {
-    if (!obj || typeof obj !== "object") return false;
+    if (!obj || typeof obj !== 'object') return false;
 
     const assessment = obj as Partial<RiskAssessment>;
     return (
-      typeof assessment.id === "string" &&
-      typeof assessment.patientId === "string" &&
-      typeof assessment.timestamp === "string" &&
-      (assessment.assessmentType === "automated" ||
-        assessment.assessmentType === "clinician" ||
-        assessment.assessmentType === "hybrid") &&
+      typeof assessment.id === 'string' &&
+      typeof assessment.patientId === 'string' &&
+      typeof assessment.timestamp === 'string' &&
+      (assessment.assessmentType === 'automated' ||
+        assessment.assessmentType === 'clinician' ||
+        assessment.assessmentType === 'hybrid') &&
       RiskLevelValidator.isValid(assessment.overallRisk) &&
-      typeof assessment.confidenceScore === "number" &&
+      typeof assessment.confidenceScore === 'number' &&
       Array.isArray(assessment.domainRisks) &&
-      (assessment.temporalTrend === "increasing" ||
-        assessment.temporalTrend === "decreasing" ||
-        assessment.temporalTrend === "stable" ||
-        assessment.temporalTrend === "fluctuating") &&
+      (assessment.temporalTrend === 'increasing' ||
+        assessment.temporalTrend === 'decreasing' ||
+        assessment.temporalTrend === 'stable' ||
+        assessment.temporalTrend === 'fluctuating') &&
       Array.isArray(assessment.contributingFactors) &&
       Array.isArray(assessment.protectiveFactors) &&
       Array.isArray(assessment.neuralCorrelates)
@@ -70,35 +70,33 @@ export const DomainRiskValidator = {
    * Validates if an object is a valid DomainRisk
    */
   isValid: (obj: unknown): obj is DomainRisk => {
-    if (!obj || typeof obj !== "object") return false;
+    if (!obj || typeof obj !== 'object') return false;
 
     const domainRisk = obj as Partial<DomainRisk>;
 
     // Validate domain field
     const validDomains = [
-      "suicide",
-      "self_harm",
-      "harm_to_others",
-      "psychosis",
-      "substance_use",
-      "functional_decline",
-      "treatment_resistance",
-      "medical_complication",
+      'suicide',
+      'self_harm',
+      'harm_to_others',
+      'psychosis',
+      'substance_use',
+      'functional_decline',
+      'treatment_resistance',
+      'medical_complication',
     ];
     const hasValidDomain =
-      typeof domainRisk.domain === "string" &&
-      validDomains.includes(domainRisk.domain);
+      typeof domainRisk.domain === 'string' && validDomains.includes(domainRisk.domain);
 
     // Validate urgency field
-    const validUrgencies = ["immediate", "urgent", "monitor", "routine"];
+    const validUrgencies = ['immediate', 'urgent', 'monitor', 'routine'];
     const hasValidUrgency =
-      typeof domainRisk.urgency === "string" &&
-      validUrgencies.includes(domainRisk.urgency);
+      typeof domainRisk.urgency === 'string' && validUrgencies.includes(domainRisk.urgency);
 
     return (
       hasValidDomain &&
       RiskLevelValidator.isValid(domainRisk.riskLevel) &&
-      typeof domainRisk.confidenceScore === "number" &&
+      typeof domainRisk.confidenceScore === 'number' &&
       Array.isArray(domainRisk.evidence) &&
       hasValidUrgency
     );
@@ -113,44 +111,39 @@ export const ContributingFactorValidator = {
    * Validates if an object is a valid ContributingFactor
    */
   isValid: (obj: unknown): obj is ContributingFactor => {
-    if (!obj || typeof obj !== "object") return false;
+    if (!obj || typeof obj !== 'object') return false;
 
     const factor = obj as Partial<ContributingFactor>;
 
     // Validate category field
     const validCategories = [
-      "demographic",
-      "clinical",
-      "psychological",
-      "social",
-      "environmental",
-      "neurobiological",
+      'demographic',
+      'clinical',
+      'psychological',
+      'social',
+      'environmental',
+      'neurobiological',
     ];
     const hasValidCategory =
-      typeof factor.category === "string" &&
-      validCategories.includes(factor.category);
+      typeof factor.category === 'string' && validCategories.includes(factor.category);
 
     // Validate modifiability field
-    const validModifiabilities = [
-      "non-modifiable",
-      "partially-modifiable",
-      "modifiable",
-    ];
+    const validModifiabilities = ['non-modifiable', 'partially-modifiable', 'modifiable'];
     const hasValidModifiability =
-      typeof factor.modifiability === "string" &&
+      typeof factor.modifiability === 'string' &&
       validModifiabilities.includes(factor.modifiability);
 
     // Validate temporalRelevance field
-    const validTemporalRelevances = ["immediate", "short-term", "long-term"];
+    const validTemporalRelevances = ['immediate', 'short-term', 'long-term'];
     const hasValidTemporalRelevance =
-      typeof factor.temporalRelevance === "string" &&
+      typeof factor.temporalRelevance === 'string' &&
       validTemporalRelevances.includes(factor.temporalRelevance);
 
     return (
-      typeof factor.id === "string" &&
-      typeof factor.name === "string" &&
+      typeof factor.id === 'string' &&
+      typeof factor.name === 'string' &&
       hasValidCategory &&
-      typeof factor.impactWeight === "number" &&
+      typeof factor.impactWeight === 'number' &&
       hasValidModifiability &&
       hasValidTemporalRelevance
     );
@@ -165,37 +158,36 @@ export const ProtectiveFactorValidator = {
    * Validates if an object is a valid ProtectiveFactor
    */
   isValid: (obj: unknown): obj is ProtectiveFactor => {
-    if (!obj || typeof obj !== "object") return false;
+    if (!obj || typeof obj !== 'object') return false;
 
     const factor = obj as Partial<ProtectiveFactor>;
 
     // Validate category field
     const validCategories = [
-      "clinical",
-      "psychological",
-      "social",
-      "environmental",
-      "neurobiological",
+      'clinical',
+      'psychological',
+      'social',
+      'environmental',
+      'neurobiological',
     ];
     const hasValidCategory =
-      typeof factor.category === "string" &&
-      validCategories.includes(factor.category);
+      typeof factor.category === 'string' && validCategories.includes(factor.category);
 
     // Validate strengthLevel field
-    const validStrengthLevels = ["minimal", "moderate", "strong"];
+    const validStrengthLevels = ['minimal', 'moderate', 'strong'];
     const hasValidStrengthLevel =
-      typeof factor.strengthLevel === "string" &&
+      typeof factor.strengthLevel === 'string' &&
       validStrengthLevels.includes(factor.strengthLevel);
 
     // Validate temporalStability field
-    const validTemporalStabilities = ["transient", "episodic", "stable"];
+    const validTemporalStabilities = ['transient', 'episodic', 'stable'];
     const hasValidTemporalStability =
-      typeof factor.temporalStability === "string" &&
+      typeof factor.temporalStability === 'string' &&
       validTemporalStabilities.includes(factor.temporalStability);
 
     return (
-      typeof factor.id === "string" &&
-      typeof factor.name === "string" &&
+      typeof factor.id === 'string' &&
+      typeof factor.name === 'string' &&
       hasValidCategory &&
       hasValidStrengthLevel &&
       hasValidTemporalStability

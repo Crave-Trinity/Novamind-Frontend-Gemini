@@ -104,7 +104,7 @@ export class AnalyticsService {
 
   constructor() {
     this.sessionId = `session_${Date.now()}`;
-    
+
     // Add default provider in development
     if (process.env.NODE_ENV === 'development') {
       this.providers.push(new MockAnalyticsProvider());
@@ -195,4 +195,4 @@ export class AnalyticsService {
       await provider.setUserProperties(this.userId, properties);
     }
   }
-} 
+}

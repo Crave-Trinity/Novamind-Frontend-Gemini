@@ -12,7 +12,10 @@ export class BrainService implements IBrainService {
     return response.data;
   }
 
-  async getBrainModels(patientId: UUID, params: PaginationParams): Promise<PaginatedResponse<BrainModel>> {
+  async getBrainModels(
+    patientId: UUID,
+    params: PaginationParams
+  ): Promise<PaginatedResponse<BrainModel>> {
     const response = await this.apiClient.get<PaginatedResponse<BrainModel>>('/brain-models', {
       params: { patientId, ...params },
     });
@@ -163,4 +166,4 @@ export class BrainService implements IBrainService {
     }>(`/brain-models/${modelId}/simulate/activity`, params);
     return response.data;
   }
-} 
+}

@@ -3,25 +3,23 @@
  * useClinicalPredictionController testing with quantum precision
  */
 
-import { describe, it, expect, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react"; // Import renderHook and act
+import { describe, it, expect, vi } from 'vitest';
+import { renderHook, act } from '@testing-library/react'; // Import renderHook and act
 
-import { useClinicalPredictionController } from "@application/controllers/ClinicalPredictionController";
+import { useClinicalPredictionController } from '@application/controllers/ClinicalPredictionController';
 // Import necessary types and mocks if needed for the hook's logic
 // Example: import { PredictionState } from '@application/controllers/ClinicalPredictionController';
 
-describe("useClinicalPredictionController", () => {
-  it("processes data with mathematical precision", () => {
+describe('useClinicalPredictionController', () => {
+  it('processes data with mathematical precision', () => {
     // Arrange test data - Provide a valid patientId
-    const patientId = "patient-123";
+    const patientId = 'patient-123';
 
     // Mock any dependencies if the hook makes API calls, etc.
     // vi.mock('@/services/apiClient', () => ({ ... }));
 
     // Act: Use renderHook
-    const { result } = renderHook(() =>
-      useClinicalPredictionController(patientId),
-    );
+    const { result } = renderHook(() => useClinicalPredictionController(patientId));
 
     // Assert: Check the initial state properties and returned functions directly
     expect(result.current.predictionHorizon).toBe(90); // Access directly
@@ -36,9 +34,9 @@ describe("useClinicalPredictionController", () => {
     expect(result.current.configurePrediction).toBeInstanceOf(Function);
   });
 
-  it("handles edge cases with clinical precision", () => {
+  it('handles edge cases with clinical precision', () => {
     // Test edge cases - e.g., invalid patientId or API error simulation
-    const invalidPatientId = ""; // Example edge case
+    const invalidPatientId = ''; // Example edge case
 
     // Mock API client to simulate an error if necessary
     // vi.mock('@/services/apiClient', () => ({
@@ -47,7 +45,7 @@ describe("useClinicalPredictionController", () => {
 
     // Act: Use renderHook with edge case data
     const { result: edgeResult } = renderHook(() =>
-      useClinicalPredictionController(invalidPatientId),
+      useClinicalPredictionController(invalidPatientId)
     );
 
     // Assert: Check the state after potential actions or initial render with edge case

@@ -4,19 +4,19 @@
  * with clinical precision and type-safe implementation
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo } from 'react';
 
 // UI components
-import { Badge } from "@/presentation/atoms/Badge"; // Corrected alias path
+import { Badge } from '@/presentation/atoms/Badge'; // Corrected alias path
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/presentation/atoms/Tooltip"; // Corrected alias path
+} from '@/presentation/atoms/Tooltip'; // Corrected alias path
 
 // Icons
-import { Brain, Activity, Zap } from "lucide-react";
+import { Brain, Activity, Zap } from 'lucide-react';
 
 /**
  * Neural correlation data with mathematical precision
@@ -46,7 +46,7 @@ interface NeuralCorrelationBadgeProps {
   showIcon?: boolean;
   showStrength?: boolean;
   showTooltip?: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
@@ -59,47 +59,33 @@ export const NeuralCorrelationBadge: React.FC<NeuralCorrelationBadgeProps> = ({
   showIcon = true,
   showStrength = true,
   showTooltip = true,
-  size = "md",
-  className = "",
+  size = 'md',
+  className = '',
 }) => {
   // Calculate badge color based on correlation strength
   const badgeColor = useMemo(() => {
     if (correlation.strength >= 0.8) {
-      return "bg-green-100 text-green-800 border-green-300 hover:bg-green-200";
+      return 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200';
     } else if (correlation.strength >= 0.5) {
-      return "bg-blue-100 text-blue-800 border-blue-300 hover:bg-blue-200";
+      return 'bg-blue-100 text-blue-800 border-blue-300 hover:bg-blue-200';
     } else if (correlation.strength >= 0.3) {
-      return "bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200";
+      return 'bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200';
     } else {
-      return "bg-slate-100 text-slate-800 border-slate-300 hover:bg-slate-200";
+      return 'bg-slate-100 text-slate-800 border-slate-300 hover:bg-slate-200';
     }
   }, [correlation.strength]);
 
   // Calculate icon based on correlation strength
   const correlationIcon = useMemo(() => {
     if (correlation.strength >= 0.8) {
-      return (
-        <Zap
-          className={
-            size === "sm" ? "h-3 w-3" : size === "lg" ? "h-5 w-5" : "h-4 w-4"
-          }
-        />
-      );
+      return <Zap className={size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'} />;
     } else if (correlation.strength >= 0.5) {
       return (
-        <Brain
-          className={
-            size === "sm" ? "h-3 w-3" : size === "lg" ? "h-5 w-5" : "h-4 w-4"
-          }
-        />
+        <Brain className={size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'} />
       );
     } else {
       return (
-        <Activity
-          className={
-            size === "sm" ? "h-3 w-3" : size === "lg" ? "h-5 w-5" : "h-4 w-4"
-          }
-        />
+        <Activity className={size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'} />
       );
     }
   }, [correlation.strength, size]);
@@ -112,12 +98,12 @@ export const NeuralCorrelationBadge: React.FC<NeuralCorrelationBadgeProps> = ({
   // Size-based classes
   const sizeClasses = useMemo(() => {
     switch (size) {
-      case "sm":
-        return "text-xs py-0.5 px-1.5";
-      case "lg":
-        return "text-sm py-1 px-3";
+      case 'sm':
+        return 'text-xs py-0.5 px-1.5';
+      case 'lg':
+        return 'text-sm py-1 px-3';
       default:
-        return "text-xs py-0.5 px-2";
+        return 'text-xs py-0.5 px-2';
     }
   }, [size]);
 
@@ -146,9 +132,7 @@ export const NeuralCorrelationBadge: React.FC<NeuralCorrelationBadgeProps> = ({
         )}
 
         {correlation.confidence !== undefined && (
-          <p className="text-xs mt-1">
-            Confidence: {Math.round(correlation.confidence * 100)}%
-          </p>
+          <p className="text-xs mt-1">Confidence: {Math.round(correlation.confidence * 100)}%</p>
         )}
       </div>
     );
@@ -162,7 +146,7 @@ export const NeuralCorrelationBadge: React.FC<NeuralCorrelationBadgeProps> = ({
         className={`${badgeColor} ${sizeClasses} ${className} flex items-center`}
       >
         {showIcon && <span className="mr-1">{correlationIcon}</span>}
-        {showStrength ? `Neural Match: ${formattedStrength}` : "Neural Match"}
+        {showStrength ? `Neural Match: ${formattedStrength}` : 'Neural Match'}
       </Badge>
     );
   }
@@ -177,9 +161,7 @@ export const NeuralCorrelationBadge: React.FC<NeuralCorrelationBadgeProps> = ({
             className={`${badgeColor} ${sizeClasses} ${className} flex items-center cursor-help`}
           >
             {showIcon && <span className="mr-1">{correlationIcon}</span>}
-            {showStrength
-              ? `Neural Match: ${formattedStrength}`
-              : "Neural Match"}
+            {showStrength ? `Neural Match: ${formattedStrength}` : 'Neural Match'}
           </Badge>
         </TooltipTrigger>
         <TooltipContent className="max-w-xs">{tooltipContent}</TooltipContent>

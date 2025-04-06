@@ -8,7 +8,7 @@ import { describe, it, expect, vi } from 'vitest';
 import ConnectionLine from './ConnectionLine'; // Use default import
 // Mock R3F locally for this test file
 vi.mock('@react-three/fiber', async (importOriginal) => {
-  const actual = await importOriginal() as any;
+  const actual = (await importOriginal()) as any;
   return {
     ...actual,
     Canvas: forwardRef(({ children, ...props }: any, ref: any) =>
@@ -22,7 +22,8 @@ vi.mock('@react-three/fiber', async (importOriginal) => {
 
 // Minimal test relies on the mock above
 // Minimal test to verify component can be imported
-describe('ConnectionLine (Minimal)', () => { // Test suite description
+describe('ConnectionLine (Minimal)', () => {
+  // Test suite description
   it('exists as a module', () => {
     expect(ConnectionLine).toBeDefined();
   });

@@ -13,7 +13,7 @@
  */
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number,
+  wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -41,7 +41,7 @@ export function debounce<T extends (...args: any[]) => any>(
  */
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
-  limit: number,
+  limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle = false;
   let lastFunc: ReturnType<typeof setTimeout>;
@@ -65,7 +65,7 @@ export function throttle<T extends (...args: any[]) => any>(
             lastRan = Date.now();
           }
         },
-        limit - (Date.now() - lastRan),
+        limit - (Date.now() - lastRan)
       );
     }
   };
@@ -78,19 +78,16 @@ export function throttle<T extends (...args: any[]) => any>(
  * @param callback The function to call on resize
  * @param delay The debounce delay in milliseconds
  */
-export function useWindowResizeDebounced(
-  callback: () => void,
-  delay = 250,
-): void {
+export function useWindowResizeDebounced(callback: () => void, delay = 250): void {
   React.useEffect(() => {
     const handleResize = debounce(() => {
       callback();
     }, delay);
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener('resize', handleResize);
     };
   }, [callback, delay]);
 }
@@ -108,10 +105,10 @@ export function useScrollThrottled(callback: () => void, delay = 100): void {
       callback();
     }, delay);
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, [callback, delay]);
 }
@@ -151,7 +148,7 @@ export function scheduleDOMWrite(callback: () => void): void {
  */
 export function batchDOMOperations(
   reads: Array<() => any>,
-  writes: Array<(readResults: any[]) => void>,
+  writes: Array<(readResults: any[]) => void>
 ): void {
   requestAnimationFrame(() => {
     // Perform all reads first
@@ -166,4 +163,4 @@ export function batchDOMOperations(
 }
 
 // Missing React import
-import React from "react";
+import React from 'react';

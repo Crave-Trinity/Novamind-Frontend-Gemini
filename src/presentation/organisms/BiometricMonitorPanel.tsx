@@ -4,28 +4,23 @@
  * with clinical precision and HIPAA-compliant data handling
  */
 
-import React, { useState, useCallback, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Neural visualization coordinator
 // import { useVisualizationCoordinator } from "@application/coordinators/NeuralVisualizationCoordinator"; // Module missing
 
 // UI components
 // Correct import paths for Shadcn components
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button"; // Correct path and named import
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button'; // Correct path and named import
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@presentation/atoms/Tooltip"; // Assuming this path is correct
-import { Badge } from "@presentation/atoms/Badge"; // Assuming this path is correct
+} from '@presentation/atoms/Tooltip'; // Assuming this path is correct
+import { Badge } from '@presentation/atoms/Badge'; // Assuming this path is correct
 // Correct import path for Shadcn Card components
 import {
   Card,
@@ -34,9 +29,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"; // Path is now correct
-import { ScrollArea } from "@/components/ui/scroll-area"; // Correct path
-import { Progress } from "@/components/ui/progress"; // Correct path
+} from '@/components/ui/card'; // Path is now correct
+import { ScrollArea } from '@/components/ui/scroll-area'; // Correct path
+import { Progress } from '@/components/ui/progress'; // Correct path
 
 // Icons
 import {
@@ -54,10 +49,10 @@ import {
   HeartPulse, // Use HeartPulse as an alternative
   Brain,
   Eye,
-} from "lucide-react";
+} from 'lucide-react';
 
 // Domain types
-import { BiometricAlert, AlertPriority } from "@domain/types/biometric/streams";
+import { BiometricAlert, AlertPriority } from '@domain/types/biometric/streams';
 
 // TEMPORARY Placeholder Type to resolve 'never' errors until coordinator is fixed/implemented
 type PlaceholderBiometricAlert = {
@@ -69,7 +64,6 @@ type PlaceholderBiometricAlert = {
   acknowledged: boolean;
   triggeringValue: number; // Use correct property name
 };
-
 
 /**
  * Props with neural-safe typing
@@ -83,24 +77,21 @@ interface BiometricMonitorPanelProps {
 /**
  * Alert priority to color mapping with clinical precision
  */
-const alertPriorityColorMap: Record<
-  AlertPriority,
-  { bg: string; text: string; border: string }
-> = {
+const alertPriorityColorMap: Record<AlertPriority, { bg: string; text: string; border: string }> = {
   urgent: {
-    bg: "bg-red-900/60",
-    text: "text-red-100",
-    border: "border-red-700",
+    bg: 'bg-red-900/60',
+    text: 'text-red-100',
+    border: 'border-red-700',
   },
   warning: {
-    bg: "bg-amber-900/60",
-    text: "text-amber-100",
-    border: "border-amber-700",
+    bg: 'bg-amber-900/60',
+    text: 'text-amber-100',
+    border: 'border-amber-700',
   },
   informational: {
-    bg: "bg-slate-700/60",
-    text: "text-slate-100",
-    border: "border-slate-600",
+    bg: 'bg-slate-700/60',
+    text: 'text-slate-100',
+    border: 'border-slate-600',
   },
 };
 
@@ -131,7 +122,7 @@ const getIconForBiometricType = (type: string) => {
  * with clinical precision and HIPAA-compliant visualization
  */
 export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
-  className = "",
+  className = '',
   compact = false,
   maxAlerts = 5,
 }) => {
@@ -140,7 +131,7 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
 
   // Local UI state
   const [expanded, setExpanded] = useState(!compact);
-  const [activeTab, setActiveTab] = useState("alerts");
+  const [activeTab, setActiveTab] = useState('alerts');
 
   // Toggle expansion state
   const toggleExpanded = useCallback(() => {
@@ -148,7 +139,8 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
   }, []);
 
   // Handle acknowledge alert
-  const handleAcknowledgeAlert = useCallback( (alertId: string) => { // Add type for alertId
+  const handleAcknowledgeAlert = useCallback((alertId: string) => {
+    // Add type for alertId
     // acknowledgeAlert(alertId); // Commented out - acknowledgeAlert is not defined
   }, []); // Removed acknowledgeAlert dependency
 
@@ -168,8 +160,7 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
           informational: 2,
         };
 
-        const priorityDiff =
-          priorityOrder[a.priority] - priorityOrder[b.priority]; // Use placeholder type properties
+        const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority]; // Use placeholder type properties
         if (priorityDiff !== 0) return priorityDiff;
 
         // Most recent alerts first
@@ -217,46 +208,47 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
       totalAlerts: allAlerts.length, // Use placeholder length
       totalUnacknowledged: unacknowledgedAlerts.length, // Use placeholder length
     };
-  // }, [state.biometricAlerts, maxAlerts]); // Commented out - state is not defined
+    // }, [state.biometricAlerts, maxAlerts]); // Commented out - state is not defined
   }, [maxAlerts]); // Update dependencies
 
   // Get alert badge variant based on counts
   const alertBadgeVariant = useMemo(() => {
-    if (alertMetrics.countsByPriority.urgent > 0) return "destructive";
-    if (alertMetrics.countsByPriority.warning > 0) return "destructive"; // Map warning to destructive for badge
-    return "secondary";
+    if (alertMetrics.countsByPriority.urgent > 0) return 'destructive';
+    if (alertMetrics.countsByPriority.warning > 0) return 'destructive'; // Map warning to destructive for badge
+    return 'secondary';
   }, [alertMetrics.countsByPriority]);
 
   // Format timestamp to readable time
-  const formatTimestamp = useCallback((timestamp: string | Date) => { // Accept string or Date
+  const formatTimestamp = useCallback((timestamp: string | Date) => {
+    // Accept string or Date
     return new Date(timestamp).toLocaleTimeString(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
     });
   }, []);
 
   // Format alert message with clinical precision
-  const formatAlertValue = useCallback((alert: PlaceholderBiometricAlert) => { // Use placeholder type
+  const formatAlertValue = useCallback((alert: PlaceholderBiometricAlert) => {
+    // Use placeholder type
     // Add units based on biometric type
     const units: Record<string, string> = {
-      heartRate: " bpm",
-      bloodPressureSystolic: " mmHg",
-      bloodPressureDiastolic: " mmHg",
-      bloodGlucose: " mg/dL",
-      oxygenSaturation: "%",
-      respiratoryRate: " bpm",
-      bodyTemperature: "°C",
-      eegThetaPower: " μV²",
-      pupilDilation: " mm",
+      heartRate: ' bpm',
+      bloodPressureSystolic: ' mmHg',
+      bloodPressureDiastolic: ' mmHg',
+      bloodGlucose: ' mg/dL',
+      oxygenSaturation: '%',
+      respiratoryRate: ' bpm',
+      bodyTemperature: '°C',
+      eegThetaPower: ' μV²',
+      pupilDilation: ' mm',
     };
 
-    const unit = units[alert.biometricType] || "";
+    const unit = units[alert.biometricType] || '';
     // Use the correct property 'triggeringValue' from BiometricAlert type
     // Check if triggeringValue exists before calling toFixed
-    const valueString = typeof alert.triggeringValue === 'number' 
-      ? alert.triggeringValue.toFixed(1) 
-      : 'N/A';
+    const valueString =
+      typeof alert.triggeringValue === 'number' ? alert.triggeringValue.toFixed(1) : 'N/A';
     return `${valueString}${unit}`;
   }, []);
 
@@ -292,7 +284,7 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
               <p>
                 {alertMetrics.totalUnacknowledged > 0
                   ? `${alertMetrics.totalUnacknowledged} unacknowledged alerts`
-                  : "No active alerts"}
+                  : 'No active alerts'}
               </p>
             </TooltipContent>
           </Tooltip>
@@ -328,24 +320,18 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
           <CardDescription className="text-slate-400">
             {alertMetrics.totalUnacknowledged > 0
               ? `${alertMetrics.totalUnacknowledged} unacknowledged alerts`
-              : "No active alerts"}
+              : 'No active alerts'}
           </CardDescription>
         </CardHeader>
 
         <CardContent className="pb-3">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-2 mb-4 bg-slate-700/50">
-              <TabsTrigger
-                value="alerts"
-                className="data-[state=active]:bg-indigo-600"
-              >
+              <TabsTrigger value="alerts" className="data-[state=active]:bg-indigo-600">
                 <AlertTriangle className="h-4 w-4 mr-2" />
                 Alerts
               </TabsTrigger>
-              <TabsTrigger
-                value="monitoring"
-                className="data-[state=active]:bg-indigo-600"
-              >
+              <TabsTrigger value="monitoring" className="data-[state=active]:bg-indigo-600">
                 <Activity className="h-4 w-4 mr-2" />
                 Monitoring
               </TabsTrigger>
@@ -355,9 +341,7 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
               <div className="space-y-4">
                 {/* Alert Summary */}
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-slate-300">
-                    Alert Summary
-                  </h3>
+                  <h3 className="text-sm font-medium text-slate-300">Alert Summary</h3>
 
                   <div className="grid grid-cols-3 gap-2">
                     <div className="bg-red-900/40 rounded-md p-2 text-center border border-red-800/50">
@@ -385,17 +369,14 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
 
                 {/* Active Alerts */}
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-slate-300">
-                    Active Alerts
-                  </h3>
+                  <h3 className="text-sm font-medium text-slate-300">Active Alerts</h3>
 
                   <div className="rounded-md">
                     {alertMetrics.unacknowledgedAlerts.length > 0 ? (
                       <ScrollArea className="h-[200px]">
                         <div className="space-y-2 p-0.5">
                           {alertMetrics.unacknowledgedAlerts.map((alert) => {
-                            const { bg, text, border } =
-                              alertPriorityColorMap[alert.priority]; // Use placeholder type property
+                            const { bg, text, border } = alertPriorityColorMap[alert.priority]; // Use placeholder type property
 
                             return (
                               <div
@@ -404,10 +385,10 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
                               >
                                 <div className="flex items-center justify-between mb-1">
                                   <div className="flex items-center">
-                                    {alert.priority === "urgent" && ( // Use placeholder type property
+                                    {alert.priority === 'urgent' && ( // Use placeholder type property
                                       <AlertCircle className="h-4 w-4 text-red-400 mr-1" />
                                     )}
-                                    {alert.priority === "warning" && ( // Use placeholder type property
+                                    {alert.priority === 'warning' && ( // Use placeholder type property
                                       <AlertTriangle className="h-4 w-4 text-amber-400 mr-1" />
                                     )}
                                     <span className="text-xs font-medium">
@@ -416,7 +397,7 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
                                   </div>
                                   <Badge
                                     variant="outline"
-                                    className={`text-xs py-0 border-${alert.priority === "urgent" ? "red" : alert.priority === "warning" ? "amber" : "slate"}-600`} // Use placeholder type property
+                                    className={`text-xs py-0 border-${alert.priority === 'urgent' ? 'red' : alert.priority === 'warning' ? 'amber' : 'slate'}-600`} // Use placeholder type property
                                   >
                                     {alert.priority} {/* Use placeholder type property */}
                                   </Badge>
@@ -428,7 +409,8 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
 
                                 <div className="flex items-center justify-between text-xs opacity-80">
                                   <span>
-                                    {formatTimestamp(alert.timestamp)} {/* Use placeholder type property */}
+                                    {formatTimestamp(alert.timestamp)}{' '}
+                                    {/* Use placeholder type property */}
                                   </span>
                                   <span>{formatAlertValue(alert)}</span>
                                 </div>
@@ -438,14 +420,14 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
                                     variant="ghost"
                                     size="sm"
                                     className={`text-xs h-7 ${
-                                      alert.priority === "urgent" // Use placeholder type property
-                                        ? "hover:bg-red-800/60"
-                                        : alert.priority === "warning" // Use placeholder type property
-                                          ? "hover:bg-amber-800/60"
-                                          : "hover:bg-slate-600/60"
+                                      alert.priority === 'urgent' // Use placeholder type property
+                                        ? 'hover:bg-red-800/60'
+                                        : alert.priority === 'warning' // Use placeholder type property
+                                          ? 'hover:bg-amber-800/60'
+                                          : 'hover:bg-slate-600/60'
                                     }`}
-                                    onClick={() =>
-                                      handleAcknowledgeAlert(alert.id) // Use placeholder type property
+                                    onClick={
+                                      () => handleAcknowledgeAlert(alert.id) // Use placeholder type property
                                     }
                                   >
                                     <Check className="h-3 w-3 mr-1" />
@@ -460,9 +442,7 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
                     ) : (
                       <div className="bg-slate-700/50 rounded-md p-4 text-center">
                         <BellOff className="h-6 w-6 text-slate-400 mx-auto mb-2" />
-                        <div className="text-sm text-slate-400">
-                          No active alerts
-                        </div>
+                        <div className="text-sm text-slate-400">No active alerts</div>
                       </div>
                     )}
                   </div>
@@ -474,9 +454,7 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
               <div className="space-y-4">
                 {/* Top Alert Sources */}
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-slate-300">
-                    Top Alert Sources
-                  </h3>
+                  <h3 className="text-sm font-medium text-slate-300">Top Alert Sources</h3>
 
                   <div className="bg-slate-700/50 rounded-md p-3">
                     {alertMetrics.topAlertTypes.length > 0 ? (
@@ -486,13 +464,9 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
                             <div className="flex items-center justify-between mb-1">
                               <div className="flex items-center">
                                 {getIconForBiometricType(type)}
-                                <span className="text-xs text-white ml-2">
-                                  {type}
-                                </span>
+                                <span className="text-xs text-white ml-2">{type}</span>
                               </div>
-                              <span className="text-xs text-white">
-                                {count}
-                              </span>
+                              <span className="text-xs text-white">{count}</span>
                             </div>
                             <Progress
                               value={
@@ -519,19 +493,25 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
                   </h3>
                   <div className="bg-slate-700/50 rounded-md p-3 space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="flex items-center"><Heart className="h-4 w-4 mr-1 text-red-400"/> Heart Rate</span>
+                      <span className="flex items-center">
+                        <Heart className="h-4 w-4 mr-1 text-red-400" /> Heart Rate
+                      </span>
                       <span className="text-white">72 bpm</span>
                     </div>
                     <Progress value={60} className="h-1 bg-slate-700" />
 
                     <div className="flex items-center justify-between text-xs">
-                      <span className="flex items-center"><HeartPulse className="h-4 w-4 mr-1 text-blue-400"/> SpO2</span>
+                      <span className="flex items-center">
+                        <HeartPulse className="h-4 w-4 mr-1 text-blue-400" /> SpO2
+                      </span>
                       <span className="text-white">98%</span>
                     </div>
                     <Progress value={98} className="h-1 bg-slate-700" />
 
                     <div className="flex items-center justify-between text-xs">
-                      <span className="flex items-center"><Thermometer className="h-4 w-4 mr-1 text-green-400"/> Temp</span>
+                      <span className="flex items-center">
+                        <Thermometer className="h-4 w-4 mr-1 text-green-400" /> Temp
+                      </span>
                       <span className="text-white">36.8°C</span>
                     </div>
                     <Progress value={80} className="h-1 bg-slate-700" />
@@ -570,7 +550,7 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
                 Syncing...
               </span>
             ) : (
-              "Real-time Monitoring Active"
+              'Real-time Monitoring Active'
             )}
           </span>
           {/* Add other footer elements if needed */}

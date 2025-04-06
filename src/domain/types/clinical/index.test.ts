@@ -3,25 +3,25 @@
  * index testing with quantum precision
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi } from 'vitest';
 
-import { index } from "@domain/types/clinical/index";
+import { index } from '@domain/types/clinical/index';
 
 // Mock data with clinical precision
 const mockData = {
   // Add appropriate mock data for this specific type
-  id: "test-id",
-  name: "test-name",
+  id: 'test-id',
+  name: 'test-name',
   value: 42,
   active: true,
   timestamp: new Date().toISOString(),
   metadata: {
-    version: "1.0",
-    source: "unit-test",
+    version: '1.0',
+    source: 'unit-test',
   },
 };
-describe("index", () => {
-  it("processes data with mathematical precision", () => {
+describe('index', () => {
+  it('processes data with mathematical precision', () => {
     // Arrange test data
     const testData = {};
 
@@ -37,7 +37,7 @@ describe("index", () => {
     // Add more specific assertions for this particular test case
   });
 
-  it("handles edge cases with clinical precision", () => {
+  it('handles edge cases with clinical precision', () => {
     // Test edge cases
     const edgeCaseData = {};
 

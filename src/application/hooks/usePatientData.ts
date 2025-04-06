@@ -4,15 +4,22 @@
  * with HIPAA-compliant data handling
  */
 
-import { useState, useCallback, useEffect, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient, type UseMutationOptions, type UseMutationResult, type UseMutateFunction } from "@tanstack/react-query"; // Already correct
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  type UseMutationOptions,
+  type UseMutationResult,
+  type UseMutateFunction,
+} from '@tanstack/react-query'; // Already correct
 
 // Domain types
-import type { Patient, Symptom, Diagnosis } from "@domain/types/clinical/patient"; // Already correct
-import { type Result, success, failure } from "@domain/types/shared/common"; // Already correct
+import type { Patient, Symptom, Diagnosis } from '@domain/types/clinical/patient'; // Already correct
+import { type Result, success, failure } from '@domain/types/shared/common'; // Already correct
 
 // Application services
-import { clinicalService } from "@application/services/clinical/clinical.service"; // Correct filename
+import { clinicalService } from '@application/services/clinical/clinical.service'; // Correct filename
 
 /**
  * Hook return type with discriminated union for type safety
@@ -31,8 +38,13 @@ interface UsePatientDataReturn {
 
   // Methods
   fetchPatientData: (patientId: string) => Promise<Result<Symptom[]>>; // Adjusted return type
-  updateSymptomSeverity: UseMutateFunction<Patient, Error, { symptomId: string; severity: number; }, unknown>;
-  addSymptom: UseMutateFunction<Patient, Error, Omit<Symptom, "id">, unknown>;
+  updateSymptomSeverity: UseMutateFunction<
+    Patient,
+    Error,
+    { symptomId: string; severity: number },
+    unknown
+  >;
+  addSymptom: UseMutateFunction<Patient, Error, Omit<Symptom, 'id'>, unknown>;
   removeSymptom: UseMutateFunction<Patient, Error, string, unknown>;
   reset: () => void;
 }
@@ -42,14 +54,12 @@ interface UsePatientDataReturn {
  * Implements HIPAA-compliant patterns for clinical data operations
  * NOTE: This version primarily fetches symptoms. Full patient data fetching and mutations need rework.
  */
-export function usePatientData(
-  initialPatientId?: string,
-): UsePatientDataReturn {
+export function usePatientData(initialPatientId?: string): UsePatientDataReturn {
   // QueryClient for React Query
   const queryClient = useQueryClient();
 
   // Query keys
-  const patientQueryKey = "patientData"; // Base key
+  const patientQueryKey = 'patientData'; // Base key
 
   // Fetch patient symptoms query
   const {
@@ -58,7 +68,8 @@ export function usePatientData(
     isError: isSymptomsError,
     error: symptomsError,
     refetch: refetchSymptoms,
-  } = useQuery<Symptom[], Error>({ // Use v5 object syntax, update return type
+  } = useQuery<Symptom[], Error>({
+    // Use v5 object syntax, update return type
     queryKey: [patientQueryKey, initialPatientId, 'symptoms'], // More specific key
     queryFn: async () => {
       if (!initialPatientId) {
@@ -68,11 +79,15 @@ export function usePatientData(
       }
       // Fetch symptoms using the available service method
       const result = await clinicalService.fetchPatientSymptoms(initialPatientId);
-      if (result.success && result.value) { // Check result.value
+      if (result.success && result.value) {
+        // Check result.value
         return result.value;
       } else {
         // If result is not success, it must be failure, so error exists
-        throw (result as { success: false; error: Error }).error || new Error("Failed to fetch patient symptoms");
+        throw (
+          (result as { success: false; error: Error }).error ||
+          new Error('Failed to fetch patient symptoms')
+        );
       }
     },
     // v5 options
@@ -92,7 +107,8 @@ export function usePatientData(
 
   // Fetch patient data explicitly (currently only fetches symptoms)
   const fetchPatientData = useCallback(
-    async (patientId: string): Promise<Result<Symptom[]>> => { // Adjusted return type
+    async (patientId: string): Promise<Result<Symptom[]>> => {
+      // Adjusted return type
       try {
         // Fetch symptoms instead of the full patient object
         const result = await clinicalService.fetchPatientSymptoms(patientId);
@@ -103,35 +119,39 @@ export function usePatientData(
 
           // Invalidate queries if needed (use object syntax for filters in v5)
           if (initialPatientId !== patientId) {
-             // Invalidate the specific query or broader patient data if structure changes
+            // Invalidate the specific query or broader patient data if structure changes
             queryClient.invalidateQueries({ queryKey: [patientQueryKey, patientId] });
           }
           return success(result.value); // Return symptoms array
         } else {
           return failure(
             // If result is not success, it must be failure, so error exists
-            (result as { success: false; error: Error }).error || new Error("Failed to fetch patient symptoms"),
+            (result as { success: false; error: Error }).error ||
+              new Error('Failed to fetch patient symptoms')
           );
         }
       } catch (err) {
         const error =
-          err instanceof Error
-            ? err
-            : new Error("Unknown error fetching patient symptoms");
+          err instanceof Error ? err : new Error('Unknown error fetching patient symptoms');
         return failure(error);
       }
     },
-    [queryClient, initialPatientId],
+    [queryClient, initialPatientId]
   );
 
   // --- Mutations (Need Rework) ---
   // These mutations assume access to the full 'patient' object, which is not fetched here.
   // They should ideally call specific API endpoints to update data.
 
-  const updateSymptomSeverityMutation = useMutation<Patient, Error, { symptomId: string; severity: number }>({
-    mutationFn: async ({ symptomId: _symptomId, severity: _severity }) => { // Mark as unused
-      console.warn("updateSymptomSeverityMutation needs rework - Patient object not available");
-      throw new Error("updateSymptomSeverity not fully implemented in this hook version");
+  const updateSymptomSeverityMutation = useMutation<
+    Patient,
+    Error,
+    { symptomId: string; severity: number }
+  >({
+    mutationFn: async ({ symptomId: _symptomId, severity: _severity }) => {
+      // Mark as unused
+      console.warn('updateSymptomSeverityMutation needs rework - Patient object not available');
+      throw new Error('updateSymptomSeverity not fully implemented in this hook version');
       // Placeholder: return {} as Patient;
     },
     onSuccess: (updatedPatient) => {
@@ -140,22 +160,22 @@ export function usePatientData(
     },
   });
 
-  const addSymptomMutation = useMutation<Patient, Error, Omit<Symptom, "id">>({
+  const addSymptomMutation = useMutation<Patient, Error, Omit<Symptom, 'id'>>({
     mutationFn: async (symptomData) => {
-      console.warn("addSymptomMutation needs rework - Patient object not available");
-      throw new Error("addSymptom not fully implemented in this hook version");
+      console.warn('addSymptomMutation needs rework - Patient object not available');
+      throw new Error('addSymptom not fully implemented in this hook version');
       // Placeholder: return {} as Patient;
     },
     onSuccess: (updatedPatient) => {
-       // Update cache logic needs rework
+      // Update cache logic needs rework
       // if (patient?.id) { queryClient.setQueryData([patientQueryKey, patient.id], updatedPatient); }
     },
   });
 
   const removeSymptomMutation = useMutation<Patient, Error, string>({
     mutationFn: async (symptomId) => {
-      console.warn("removeSymptomMutation needs rework - Patient object not available");
-      throw new Error("removeSymptom not fully implemented in this hook version");
+      console.warn('removeSymptomMutation needs rework - Patient object not available');
+      throw new Error('removeSymptom not fully implemented in this hook version');
       // Placeholder: return {} as Patient;
     },
     onSuccess: (updatedPatient) => {
@@ -179,7 +199,13 @@ export function usePatientData(
     updateSymptomSeverityMutation.reset();
     addSymptomMutation.reset();
     removeSymptomMutation.reset();
-  }, [queryClient, initialPatientId, updateSymptomSeverityMutation, addSymptomMutation, removeSymptomMutation]);
+  }, [
+    queryClient,
+    initialPatientId,
+    updateSymptomSeverityMutation,
+    addSymptomMutation,
+    removeSymptomMutation,
+  ]);
 
   // Combine loading states
   const isLoading =

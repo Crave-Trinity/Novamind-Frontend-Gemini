@@ -3,21 +3,21 @@
  * BiometricStreamController testing with focused, incremental tests.
  */
 
-import { describe, it, expect, vi, beforeEach, type Mocked } from "vitest"; // Already correct
-import { renderHook, act, waitFor } from "@testing-library/react";
-import { biometricService } from "@application/services/biometricService";
-import { useBiometricStreamController } from "@application/services/BiometricStreamController"; // Corrected path
+import { describe, it, expect, vi, beforeEach, type Mocked } from 'vitest'; // Already correct
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { biometricService } from '@application/services/biometricService';
+import { useBiometricStreamController } from '@application/services/BiometricStreamController'; // Corrected path
 import {
   type BiometricDataPoint, // Already correct
   type BiometricAlert, // Already correct
   type BiometricStream, // Already correct
   // BiometricType,
   // AlertPriority,
-} from "../../domain/types/biometric/streams";
-import { type Result, success, failure } from "../../domain/types/shared/common"; // Already correct
+} from '../../domain/types/biometric/streams';
+import { type Result, success, failure } from '../../domain/types/shared/common'; // Already correct
 
 // Mock the biometricService
-vi.mock("@application/services/biometricService", () => ({
+vi.mock('@application/services/biometricService', () => ({
   biometricService: {
     getStreamMetadata: vi.fn(),
     calculateStreamCorrelations: vi.fn(),
@@ -26,13 +26,48 @@ vi.mock("@application/services/biometricService", () => ({
 }));
 
 // Mock data
-const mockPatientId = "patient-123";
+const mockPatientId = 'patient-123';
 const mockStreamMetadata: BiometricStream[] = [
-  { id: "stream-hr", patientId: mockPatientId, type: "heartRate", source: "wearable", name: "Heart Rate Monitor", unit: "bpm", isActive: true, lastDataPointTimestamp: new Date() },
-  { id: "stream-bp", patientId: mockPatientId, type: "bloodPressureSystolic", source: "clinical", name: "Blood Pressure Cuff (Systolic)", unit: "mmHg", isActive: true, lastDataPointTimestamp: new Date() },
-  { id: "stream-bp-dia", patientId: mockPatientId, type: "bloodPressureDiastolic", source: "clinical", name: "Blood Pressure Cuff (Diastolic)", unit: "mmHg", isActive: true, lastDataPointTimestamp: new Date() },
+  {
+    id: 'stream-hr',
+    patientId: mockPatientId,
+    type: 'heartRate',
+    source: 'wearable',
+    name: 'Heart Rate Monitor',
+    unit: 'bpm',
+    isActive: true,
+    lastDataPointTimestamp: new Date(),
+  },
+  {
+    id: 'stream-bp',
+    patientId: mockPatientId,
+    type: 'bloodPressureSystolic',
+    source: 'clinical',
+    name: 'Blood Pressure Cuff (Systolic)',
+    unit: 'mmHg',
+    isActive: true,
+    lastDataPointTimestamp: new Date(),
+  },
+  {
+    id: 'stream-bp-dia',
+    patientId: mockPatientId,
+    type: 'bloodPressureDiastolic',
+    source: 'clinical',
+    name: 'Blood Pressure Cuff (Diastolic)',
+    unit: 'mmHg',
+    isActive: true,
+    lastDataPointTimestamp: new Date(),
+  },
 ];
-const mockDataPoint: BiometricDataPoint = { id: "dp-hr-1", streamId: "stream-hr", timestamp: new Date(), value: 75, type: "heartRate", source: "wearable", quality: "high" };
+const mockDataPoint: BiometricDataPoint = {
+  id: 'dp-hr-1',
+  streamId: 'stream-hr',
+  timestamp: new Date(),
+  value: 75,
+  type: 'heartRate',
+  source: 'wearable',
+  quality: 'high',
+};
 
 // Mock WebSocket connection
 class MockWebSocket {
@@ -47,7 +82,7 @@ class MockWebSocket {
     this.readyState = 1; // OPEN
     queueMicrotask(() => {
       if (this.onopen) {
-        this.onopen({ type: "open" });
+        this.onopen({ type: 'open' });
       }
     });
   }
@@ -55,12 +90,20 @@ class MockWebSocket {
   close = vi.fn(() => {
     this.readyState = 3; // CLOSED
     if (this.onclose) {
-      this.onclose({ type: "close", code: 1000, reason: "Test closed" });
+      this.onclose({ type: 'close', code: 1000, reason: 'Test closed' });
     }
   });
   // Helper methods for tests
-  simulateMessage(data: any) { if (this.onmessage) { this.onmessage({ data: typeof data === "string" ? data : JSON.stringify(data) }); } }
-  simulateError(errorData: any) { if (this.onerror) { this.onerror(errorData); } }
+  simulateMessage(data: any) {
+    if (this.onmessage) {
+      this.onmessage({ data: typeof data === 'string' ? data : JSON.stringify(data) });
+    }
+  }
+  simulateError(errorData: any) {
+    if (this.onerror) {
+      this.onerror(errorData);
+    }
+  }
 }
 
 let lastMockWebSocketInstance: MockWebSocket | null = null;
@@ -70,8 +113,8 @@ global.WebSocket = vi.fn().mockImplementation((url: string) => {
   return instance;
 }) as any;
 
-
-describe.skip("BiometricStreamController (Rebuilt)", () => { // Re-skip due to persistent timeout
+describe.skip('BiometricStreamController (Rebuilt)', () => {
+  // Re-skip due to persistent timeout
   // Removed local vi.useRealTimers(); Global setup now manages timers.
 
   const mockedBiometricService = biometricService as Mocked<typeof biometricService>;
@@ -83,9 +126,10 @@ describe.skip("BiometricStreamController (Rebuilt)", () => { // Re-skip due to p
     // Default dynamic mock for getStreamMetadata
     mockedBiometricService.getStreamMetadata.mockImplementation(
       async (patientId: string, streamIds?: string[]): Promise<Result<BiometricStream[]>> => {
-        const streamsToReturn = streamIds && streamIds.length > 0
-          ? mockStreamMetadata.filter(meta => streamIds.includes(meta.id))
-          : []; // Default to empty array if no IDs provided
+        const streamsToReturn =
+          streamIds && streamIds.length > 0
+            ? mockStreamMetadata.filter((meta) => streamIds.includes(meta.id))
+            : []; // Default to empty array if no IDs provided
         return success(streamsToReturn);
       }
     );
@@ -95,9 +139,9 @@ describe.skip("BiometricStreamController (Rebuilt)", () => { // Re-skip due to p
     );
   });
 
-  it("initializes with default state", () => {
-    const { result } = renderHook(() =>
-      useBiometricStreamController(mockPatientId) // Initialize without specific streamIds
+  it('initializes with default state', () => {
+    const { result } = renderHook(
+      () => useBiometricStreamController(mockPatientId) // Initialize without specific streamIds
     );
 
     expect(result.current.isConnected).toBe(false);
@@ -108,12 +152,12 @@ describe.skip("BiometricStreamController (Rebuilt)", () => { // Re-skip due to p
     expect(result.current.getStreamData('stream-hr')).toEqual([]);
   });
 
-  it("connects streams and updates state", async () => {
+  it('connects streams and updates state', async () => {
     // vi.useFakeTimers(); // Disable fake timers for this test
-    const requestedStreamIds = ["stream-hr", "stream-bp"];
-    
+    const requestedStreamIds = ['stream-hr', 'stream-bp'];
+
     // Ensure the mock returns the correct structure expected by the hook
-    const specificMetadata = mockStreamMetadata.filter(m => requestedStreamIds.includes(m.id));
+    const specificMetadata = mockStreamMetadata.filter((m) => requestedStreamIds.includes(m.id));
     mockedBiometricService.getStreamMetadata.mockResolvedValue(success(specificMetadata));
 
     const { result } = renderHook(() =>
@@ -128,25 +172,30 @@ describe.skip("BiometricStreamController (Rebuilt)", () => { // Re-skip due to p
     await act(async () => {
       await result.current.connectStreams();
     });
-    
+
     // Wait ONLY for the expected state changes using waitFor
     // Wait specifically for isConnected to become true
-    await waitFor(() => {
-      vi.advanceTimersByTime(100); // Advance timers slightly within waitFor
-      expect(result.current.isConnected).toBe(true);
-    }, { timeout: 20000 });
-    
+    await waitFor(
+      () => {
+        vi.advanceTimersByTime(100); // Advance timers slightly within waitFor
+        expect(result.current.isConnected).toBe(true);
+      },
+      { timeout: 20000 }
+    );
+
     // Assert activeStreams size after isConnected is confirmed
     expect(result.current.activeStreams.size).toBe(specificMetadata.length);
 
     // Final assertions
-    expect(mockedBiometricService.getStreamMetadata).toHaveBeenCalledWith(mockPatientId, requestedStreamIds);
-    expect(result.current.activeStreams.get("stream-hr")).toBeDefined();
-    expect(result.current.activeStreams.get("stream-bp")).toBeDefined();
-    
+    expect(mockedBiometricService.getStreamMetadata).toHaveBeenCalledWith(
+      mockPatientId,
+      requestedStreamIds
+    );
+    expect(result.current.activeStreams.get('stream-hr')).toBeDefined();
+    expect(result.current.activeStreams.get('stream-bp')).toBeDefined();
+
     // vi.useRealTimers(); // Not needed if fake timers aren't used in the test
   });
 
   // --- Add more focused tests below ---
-
 });

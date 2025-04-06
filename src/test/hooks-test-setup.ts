@@ -1,7 +1,7 @@
 /**
  * NOVAMIND Testing Framework
  * Specialized Hook Testing Setup
- * 
+ *
  * This setup file provides a clean environment for testing React hooks,
  * particularly those using React Query, which is a common source of test hangs.
  */
@@ -17,7 +17,7 @@ let testQueryClient: QueryClient | null = null;
 beforeEach(() => {
   // Always use real timers for hook tests
   vi.useRealTimers();
-  
+
   // Create a fresh QueryClient for each test
   testQueryClient = new QueryClient({
     defaultOptions: {
@@ -36,7 +36,7 @@ beforeEach(() => {
       },
     },
   });
-  
+
   // Force React Query's cache to clear
   testQueryClient.clear();
 });
@@ -46,7 +46,7 @@ afterEach(() => {
   vi.clearAllMocks();
   vi.resetAllMocks();
   vi.restoreAllMocks();
-  
+
   // Clear the query cache again
   if (testQueryClient) {
     testQueryClient.clear();

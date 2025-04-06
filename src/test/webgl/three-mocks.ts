@@ -1,9 +1,9 @@
 /**
  * Three.js Comprehensive Mock System
- * 
+ *
  * This module provides complete mocks for Three.js objects and their lifecycle methods,
  * preventing memory leaks and test hangs when testing visualization components.
- * 
+ *
  * These mocks are designed to work with the WebGL context mocks from mock-webgl.ts
  * to create a complete testing environment for Three.js components.
  */
@@ -33,30 +33,36 @@ export class MockObject3D {
   matrix: any = { identity: () => {}, copy: () => {}, multiply: () => {} };
   matrixWorld: any = { identity: () => {}, copy: () => {}, multiply: () => {} };
 
-  add: MockFunction<(object: MockObject3D) => MockObject3D> = createMockFunction((object: MockObject3D) => {
-    this.children.push(object);
-    object.parent = this;
-    return this;
-  });
-
-  remove: MockFunction<(object: MockObject3D) => MockObject3D> = createMockFunction((object: MockObject3D) => {
-    const index = this.children.indexOf(object);
-    if (index !== -1) {
-      this.children.splice(index, 1);
-      object.parent = null;
+  add: MockFunction<(object: MockObject3D) => MockObject3D> = createMockFunction(
+    (object: MockObject3D) => {
+      this.children.push(object);
+      object.parent = this;
+      return this;
     }
-    return this;
-  });
+  );
+
+  remove: MockFunction<(object: MockObject3D) => MockObject3D> = createMockFunction(
+    (object: MockObject3D) => {
+      const index = this.children.indexOf(object);
+      if (index !== -1) {
+        this.children.splice(index, 1);
+        object.parent = null;
+      }
+      return this;
+    }
+  );
 
   updateMatrix: MockFunction<() => void> = createMockFunction(() => {});
   updateMatrixWorld: MockFunction<(force?: boolean) => void> = createMockFunction(() => {});
   lookAt: MockFunction<(vector: Vector3Like) => void> = createMockFunction(() => {});
-  traverse: MockFunction<(callback: (object: MockObject3D) => void) => void> = createMockFunction((callback) => {
-    callback(this);
-    for (const child of this.children) {
-      child.traverse(callback);
+  traverse: MockFunction<(callback: (object: MockObject3D) => void) => void> = createMockFunction(
+    (callback) => {
+      callback(this);
+      for (const child of this.children) {
+        child.traverse(callback);
+      }
     }
-  });
+  );
 
   dispose: MockFunction<() => void> = createMockFunction(() => {
     // Clean up children to prevent memory leaks
@@ -127,17 +133,17 @@ export class MockMesh extends MockObject3D {
     while (this.children.length > 0) {
       this.remove(this.children[0]);
     }
-    
+
     // Release references to parent
     if (this.parent) {
       this.parent = null;
     }
-    
+
     // Dispose geometry and material
     this.geometry.dispose();
-    
+
     if (Array.isArray(this.material)) {
-      this.material.forEach(m => m.dispose());
+      this.material.forEach((m) => m.dispose());
     } else {
       this.material.dispose();
     }
@@ -165,12 +171,12 @@ export class MockLine extends MockObject3D {
     while (this.children.length > 0) {
       this.remove(this.children[0]);
     }
-    
+
     // Release references to parent
     if (this.parent) {
       this.parent = null;
     }
-    
+
     // Dispose geometry and material
     this.geometry.dispose();
     this.material.dispose();
@@ -244,10 +250,11 @@ export class MockBufferGeometry {
   boundingSphere: any = null;
   userData: Record<string, any> = {};
 
-  setAttribute: MockFunction<(name: string, attribute: any) => MockBufferGeometry> = createMockFunction((name, attribute) => {
-    this.attributes[name] = attribute;
-    return this;
-  });
+  setAttribute: MockFunction<(name: string, attribute: any) => MockBufferGeometry> =
+    createMockFunction((name, attribute) => {
+      this.attributes[name] = attribute;
+      return this;
+    });
 
   getAttribute: MockFunction<(name: string) => any> = createMockFunction((name) => {
     return this.attributes[name];
@@ -264,9 +271,11 @@ export class MockBufferGeometry {
     return new MockBufferGeometry();
   });
 
-  setFromPoints: MockFunction<(points: Vector3Like[]) => MockBufferGeometry> = createMockFunction(() => {
-    return this;
-  });
+  setFromPoints: MockFunction<(points: Vector3Like[]) => MockBufferGeometry> = createMockFunction(
+    () => {
+      return this;
+    }
+  );
 }
 
 export class MockSphereGeometry extends MockBufferGeometry {
@@ -278,7 +287,7 @@ export class MockSphereGeometry extends MockBufferGeometry {
     phiStart: 0,
     phiLength: Math.PI * 2,
     thetaStart: 0,
-    thetaLength: Math.PI
+    thetaLength: Math.PI,
   };
 }
 
@@ -290,7 +299,7 @@ export class MockBoxGeometry extends MockBufferGeometry {
     depth: 1,
     widthSegments: 1,
     heightSegments: 1,
-    depthSegments: 1
+    depthSegments: 1,
   };
 }
 
@@ -304,7 +313,7 @@ export class MockCylinderGeometry extends MockBufferGeometry {
     heightSegments: 1,
     openEnded: false,
     thetaStart: 0,
-    thetaLength: Math.PI * 2
+    thetaLength: Math.PI * 2,
   };
 }
 
@@ -320,16 +329,19 @@ export class MockWebGLRenderer {
   localClippingEnabled = false;
   gammaFactor = 2.0;
   info = { render: { calls: 0, triangles: 0, frame: 0 } };
-  
+
   constructor(parameters?: { antialias?: boolean; alpha?: boolean }) {
     this.domElement = document.createElement('canvas');
     this.domElement.width = 800;
     this.domElement.height = 600;
   }
-  
-  setSize: MockFunction<(width: number, height: number, updateStyle?: boolean) => void> = createMockFunction(() => {});
+
+  setSize: MockFunction<(width: number, height: number, updateStyle?: boolean) => void> =
+    createMockFunction(() => {});
   setPixelRatio: MockFunction<(value: number) => void> = createMockFunction(() => {});
-  render: MockFunction<(scene: MockScene, camera: MockPerspectiveCamera | MockOrthographicCamera) => void> = createMockFunction(() => {});
+  render: MockFunction<
+    (scene: MockScene, camera: MockPerspectiveCamera | MockOrthographicCamera) => void
+  > = createMockFunction(() => {});
   dispose: MockFunction<() => void> = createMockFunction(() => {});
   setClearColor: MockFunction<(color: any, alpha?: number) => void> = createMockFunction(() => {});
   setRenderTarget: MockFunction<(renderTarget: any) => void> = createMockFunction(() => {});
@@ -348,11 +360,11 @@ export class MockOrbitControls {
   dampingFactor: number = 0.05;
   enablePan: boolean = true;
   autoRotate: boolean = false;
-  
+
   constructor(camera: MockPerspectiveCamera | MockOrthographicCamera, domElement?: HTMLElement) {
     // Constructor takes camera and optional domElement
   }
-  
+
   update: MockFunction<() => boolean> = createMockFunction(() => true);
   dispose: MockFunction<() => void> = createMockFunction(() => {});
 }
@@ -378,7 +390,7 @@ export class MockTexture {
   center: Vector2Like = { x: 0, y: 0 };
   rotation: number = 0;
   matrixAutoUpdate: boolean = true;
-  
+
   dispose: MockFunction<() => void> = createMockFunction(() => {});
   updateMatrix: MockFunction<() => void> = createMockFunction(() => {});
   transformUv: MockFunction<(uv: Vector2Like) => Vector2Like> = createMockFunction((uv) => uv);
@@ -392,34 +404,34 @@ export const ThreeMocks = {
   Object3D: MockObject3D,
   Scene: MockScene,
   Group: MockGroup,
-  
+
   // Cameras
   PerspectiveCamera: MockPerspectiveCamera,
   OrthographicCamera: MockOrthographicCamera,
-  
+
   // Renderables
   Mesh: MockMesh,
   Line: MockLine,
-  
+
   // Materials
   Material: MockMaterial,
   MeshBasicMaterial: MockMeshBasicMaterial,
   MeshStandardMaterial: MockMeshStandardMaterial,
   LineBasicMaterial: MockLineBasicMaterial,
   LineDashedMaterial: MockLineDashedMaterial,
-  
+
   // Geometries
   BufferGeometry: MockBufferGeometry,
   SphereGeometry: MockSphereGeometry,
   BoxGeometry: MockBoxGeometry,
   CylinderGeometry: MockCylinderGeometry,
-  
+
   // Renderer
   WebGLRenderer: MockWebGLRenderer,
-  
+
   // Controls
   OrbitControls: MockOrbitControls,
-  
+
   // Textures
   Texture: MockTexture,
 };

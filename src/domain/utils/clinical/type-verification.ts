@@ -12,10 +12,10 @@ import {
   Medication, // Added import
   PsychometricAssessment, // Added import
   MedicalHistoryItem, // Added import
-} from "@domain/types/clinical/patient"; // Corrected path
-import { RiskLevel, RiskAssessment } from "@domain/types/clinical/risk"; // Corrected path
-import { Result } from "@domain/types/shared/common"; // Corrected path
-import { TypeVerificationError } from "@domain/models/shared/type-verification"; // Error class only
+} from '@domain/types/clinical/patient'; // Corrected path
+import { RiskLevel, RiskAssessment } from '@domain/types/clinical/risk'; // Corrected path
+import { Result } from '@domain/types/shared/common'; // Corrected path
+import { TypeVerificationError } from '@domain/models/shared/type-verification'; // Error class only
 import {
   validateString,
   validateNumber,
@@ -25,7 +25,7 @@ import {
   validateOneOf,
   validateArrayOf, // Use this for validating arrays of specific types
   // Add other necessary validation functions as needed
-} from "@domain/models/shared/type-verification.runtime"; // Import runtime validators
+} from '@domain/models/shared/type-verification.runtime'; // Import runtime validators
 
 /**
  * Clinical model type verification utilities
@@ -40,8 +40,8 @@ export class ClinicalTypeVerifier {
     const isValid = validateType(
       level,
       validateOneOf(validLevels),
-      "RiskLevel", // Provide a type name for the error message
-      field,
+      'RiskLevel', // Provide a type name for the error message
+      field
     );
 
     if (isValid) {
@@ -55,9 +55,9 @@ export class ClinicalTypeVerifier {
       return {
         success: false,
         error: new TypeVerificationError(
-          "RiskLevel",
+          'RiskLevel',
           level, // Pass the actual received value
-          field,
+          field
         ),
       };
     }
@@ -71,70 +71,62 @@ export class ClinicalTypeVerifier {
     if (!validateObject(obj, field)) {
       return {
         success: false,
-        error: new TypeVerificationError("object", obj, field),
+        error: new TypeVerificationError('object', obj, field),
       };
     }
     // Cast is safe after validation
     const object = obj as Record<string, unknown>;
 
     // Verify required properties
-    const idField = field ? `${field}.id` : "id";
+    const idField = field ? `${field}.id` : 'id';
     if (!validateString(object.id, idField)) {
       return {
         success: false,
-        error: new TypeVerificationError("string", object.id, idField),
+        error: new TypeVerificationError('string', object.id, idField),
       };
     }
     const id = object.id as string; // Safe cast
 
-    const nameField = field ? `${field}.name` : "name";
+    const nameField = field ? `${field}.name` : 'name';
     if (!validateString(object.name, nameField)) {
       return {
         success: false,
-        error: new TypeVerificationError("string", object.name, nameField),
+        error: new TypeVerificationError('string', object.name, nameField),
       };
     }
     const name = object.name as string; // Safe cast
 
-    const severityField = field ? `${field}.severity` : "severity";
+    const severityField = field ? `${field}.severity` : 'severity';
     if (!validateNumber(object.severity, severityField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "number",
-          object.severity,
-          severityField,
-        ),
+        error: new TypeVerificationError('number', object.severity, severityField),
       };
     }
     const severity = object.severity as number; // Safe cast
 
     // Optional properties
-    const onsetDateField = field ? `${field}.onsetDate` : "onsetDate";
+    const onsetDateField = field ? `${field}.onsetDate` : 'onsetDate';
     let onsetDate: string | undefined;
     if (object.onsetDate !== undefined) {
       if (!validateString(object.onsetDate, onsetDateField)) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "string",
-            object.onsetDate,
-            onsetDateField,
-          ),
+          error: new TypeVerificationError('string', object.onsetDate, onsetDateField),
         };
       }
       onsetDate = object.onsetDate as string; // Safe cast
     }
 
     // frequency should be one of specific literals - Use validateType with validateOneOf
-    const frequencyField = field ? `${field}.frequency` : "frequency";
+    const frequencyField = field ? `${field}.frequency` : 'frequency';
     const allowedFrequencies = [
-      "constant",
-      "daily",
-      "weekly",
-      "monthly",
-      "episodic",
-      "situational",
+      'constant',
+      'daily',
+      'weekly',
+      'monthly',
+      'episodic',
+      'situational',
     ] as const;
     type Frequency = (typeof allowedFrequencies)[number];
     if (
@@ -142,214 +134,167 @@ export class ClinicalTypeVerifier {
       !validateType(
         object.frequency,
         validateOneOf(allowedFrequencies),
-        "Frequency",
-        frequencyField,
+        'Frequency',
+        frequencyField
       )
     ) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "Frequency",
-          object.frequency,
-          frequencyField,
-        ),
+        error: new TypeVerificationError('Frequency', object.frequency, frequencyField),
       };
     }
     const frequency = object.frequency as Frequency | undefined; // Safe cast
 
     // impact should be one of specific literals
-    const impactField = field ? `${field}.impact` : "impact";
-    const allowedImpacts = ["none", "mild", "moderate", "severe"] as const;
+    const impactField = field ? `${field}.impact` : 'impact';
+    const allowedImpacts = ['none', 'mild', 'moderate', 'severe'] as const;
     type Impact = (typeof allowedImpacts)[number];
     if (
       object.impact !== undefined &&
-      !validateType(
-        object.impact,
-        validateOneOf(allowedImpacts),
-        "Impact",
-        impactField,
-      )
+      !validateType(object.impact, validateOneOf(allowedImpacts), 'Impact', impactField)
     ) {
       return {
         success: false,
-        error: new TypeVerificationError("Impact", object.impact, impactField),
+        error: new TypeVerificationError('Impact', object.impact, impactField),
       };
     }
     const impact = object.impact as Impact | undefined; // Safe cast
 
     // progression should be one of specific literals
-    const progressionField = field ? `${field}.progression` : "progression";
-    const allowedProgressions = [
-      "improving",
-      "stable",
-      "worsening",
-      "fluctuating",
-    ] as const;
+    const progressionField = field ? `${field}.progression` : 'progression';
+    const allowedProgressions = ['improving', 'stable', 'worsening', 'fluctuating'] as const;
     type Progression = (typeof allowedProgressions)[number];
     if (
       object.progression !== undefined &&
       !validateType(
         object.progression,
         validateOneOf(allowedProgressions),
-        "Progression",
-        progressionField,
+        'Progression',
+        progressionField
       )
     ) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "Progression",
-          object.progression,
-          progressionField,
-        ),
+        error: new TypeVerificationError('Progression', object.progression, progressionField),
       };
     }
     const progression = object.progression as Progression | undefined; // Safe cast
 
     // category should be one of specific literals
-    const categoryField = field ? `${field}.category` : "category";
+    const categoryField = field ? `${field}.category` : 'category';
     const allowedCategories = [
-      "cognitive",
-      "affective",
-      "behavioral",
-      "somatic",
-      "perceptual",
+      'cognitive',
+      'affective',
+      'behavioral',
+      'somatic',
+      'perceptual',
     ] as const;
     type Category = (typeof allowedCategories)[number];
     // Assuming category is required based on Symptom type
     if (
-      !validateType(
-        object.category,
-        validateOneOf(allowedCategories),
-        "Category",
-        categoryField,
-      )
+      !validateType(object.category, validateOneOf(allowedCategories), 'Category', categoryField)
     ) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "Category",
-          object.category,
-          categoryField,
-        ),
+        error: new TypeVerificationError('Category', object.category, categoryField),
       };
     }
     const category = object.category as Category; // Safe cast
 
     // Optional string fields from Symptom type
-    const lastOccurrenceField = field
-      ? `${field}.lastOccurrence`
-      : "lastOccurrence";
+    const lastOccurrenceField = field ? `${field}.lastOccurrence` : 'lastOccurrence';
     let lastOccurrence: string | undefined;
     if (object.lastOccurrence !== undefined) {
       if (!validateString(object.lastOccurrence, lastOccurrenceField)) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "string",
-            object.lastOccurrence,
-            lastOccurrenceField,
-          ),
+          error: new TypeVerificationError('string', object.lastOccurrence, lastOccurrenceField),
         };
       }
       lastOccurrence = object.lastOccurrence as string;
     }
 
-    const durationField = field ? `${field}.duration` : "duration";
+    const durationField = field ? `${field}.duration` : 'duration';
     let duration: string | undefined;
     if (object.duration !== undefined) {
       if (!validateString(object.duration, durationField)) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "string",
-            object.duration,
-            durationField,
-          ),
+          error: new TypeVerificationError('string', object.duration, durationField),
         };
       }
       duration = object.duration as string;
     }
 
-    const notesField = field ? `${field}.notes` : "notes";
+    const notesField = field ? `${field}.notes` : 'notes';
     let notes: string | undefined;
     if (object.notes !== undefined) {
       if (!validateString(object.notes, notesField)) {
         return {
           success: false,
-          error: new TypeVerificationError("string", object.notes, notesField),
+          error: new TypeVerificationError('string', object.notes, notesField),
         };
       }
       notes = object.notes as string;
     }
 
     // Optional string array fields
-    const triggersField = field ? `${field}.triggers` : "triggers";
+    const triggersField = field ? `${field}.triggers` : 'triggers';
     let triggers: string[] | undefined;
     if (object.triggers !== undefined) {
       if (
         !validateArrayOf(
           object.triggers,
           (item): item is string => validateString(item, triggersField),
-          triggersField,
+          triggersField
         )
       ) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "Array<string>",
-            object.triggers,
-            triggersField,
-          ),
+          error: new TypeVerificationError('Array<string>', object.triggers, triggersField),
         };
       }
       triggers = object.triggers as string[];
     }
 
-    const alleviatingFactorsField = field
-      ? `${field}.alleviatingFactors`
-      : "alleviatingFactors";
+    const alleviatingFactorsField = field ? `${field}.alleviatingFactors` : 'alleviatingFactors';
     let alleviatingFactors: string[] | undefined;
     if (object.alleviatingFactors !== undefined) {
       if (
         !validateArrayOf(
           object.alleviatingFactors,
-          (item): item is string =>
-            validateString(item, alleviatingFactorsField),
-          alleviatingFactorsField,
+          (item): item is string => validateString(item, alleviatingFactorsField),
+          alleviatingFactorsField
         )
       ) {
         return {
           success: false,
           error: new TypeVerificationError(
-            "Array<string>",
+            'Array<string>',
             object.alleviatingFactors,
-            alleviatingFactorsField,
+            alleviatingFactorsField
           ),
         };
       }
       alleviatingFactors = object.alleviatingFactors as string[];
     }
 
-    const associatedDiagnosesField = field
-      ? `${field}.associatedDiagnoses`
-      : "associatedDiagnoses";
+    const associatedDiagnosesField = field ? `${field}.associatedDiagnoses` : 'associatedDiagnoses';
     let associatedDiagnoses: string[] | undefined;
     if (object.associatedDiagnoses !== undefined) {
       if (
         !validateArrayOf(
           object.associatedDiagnoses,
-          (item): item is string =>
-            validateString(item, associatedDiagnosesField),
-          associatedDiagnosesField,
+          (item): item is string => validateString(item, associatedDiagnosesField),
+          associatedDiagnosesField
         )
       ) {
         return {
           success: false,
           error: new TypeVerificationError(
-            "Array<string>",
+            'Array<string>',
             object.associatedDiagnoses,
-            associatedDiagnosesField,
+            associatedDiagnosesField
           ),
         };
       }
@@ -358,23 +303,22 @@ export class ClinicalTypeVerifier {
 
     const associatedBrainRegionsField = field
       ? `${field}.associatedBrainRegions`
-      : "associatedBrainRegions";
+      : 'associatedBrainRegions';
     let associatedBrainRegions: string[] | undefined;
     if (object.associatedBrainRegions !== undefined) {
       if (
         !validateArrayOf(
           object.associatedBrainRegions,
-          (item): item is string =>
-            validateString(item, associatedBrainRegionsField),
-          associatedBrainRegionsField,
+          (item): item is string => validateString(item, associatedBrainRegionsField),
+          associatedBrainRegionsField
         )
       ) {
         return {
           success: false,
           error: new TypeVerificationError(
-            "Array<string>",
+            'Array<string>',
             object.associatedBrainRegions,
-            associatedBrainRegionsField,
+            associatedBrainRegionsField
           ),
         };
       }
@@ -412,54 +356,48 @@ export class ClinicalTypeVerifier {
     if (!validateObject(obj, field)) {
       return {
         success: false,
-        error: new TypeVerificationError("object", obj, field),
+        error: new TypeVerificationError('object', obj, field),
       };
     }
     const object = obj as Record<string, unknown>; // Safe cast
 
     // Verify required properties
-    const idField = field ? `${field}.id` : "id";
+    const idField = field ? `${field}.id` : 'id';
     if (!validateString(object.id, idField)) {
       return {
         success: false,
-        error: new TypeVerificationError("string", object.id, idField),
+        error: new TypeVerificationError('string', object.id, idField),
       };
     }
     const id = object.id as string;
 
-    const nameField = field ? `${field}.name` : "name";
+    const nameField = field ? `${field}.name` : 'name';
     if (!validateString(object.name, nameField)) {
       return {
         success: false,
-        error: new TypeVerificationError("string", object.name, nameField),
+        error: new TypeVerificationError('string', object.name, nameField),
       };
     }
     const name = object.name as string;
 
     // diagnosisDate should be string according to Diagnosis type
-    const diagnosisDateField = field
-      ? `${field}.diagnosisDate`
-      : "diagnosisDate";
+    const diagnosisDateField = field ? `${field}.diagnosisDate` : 'diagnosisDate';
     if (!validateString(object.diagnosisDate, diagnosisDateField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "string",
-          object.diagnosisDate,
-          diagnosisDateField,
-        ),
+        error: new TypeVerificationError('string', object.diagnosisDate, diagnosisDateField),
       };
     }
     const diagnosisDate = object.diagnosisDate as string;
 
     // severity should be one of specific literals
-    const severityField = field ? `${field}.severity` : "severity";
+    const severityField = field ? `${field}.severity` : 'severity';
     const allowedSeverities = [
-      "mild",
-      "moderate",
-      "severe",
-      "in remission",
-      "unspecified",
+      'mild',
+      'moderate',
+      'severe',
+      'in remission',
+      'unspecified',
     ] as const;
     type DiagnosisSeverity = (typeof allowedSeverities)[number];
     // Severity is required in Diagnosis type
@@ -467,155 +405,115 @@ export class ClinicalTypeVerifier {
       !validateType(
         object.severity,
         validateOneOf(allowedSeverities),
-        "DiagnosisSeverity",
-        severityField,
+        'DiagnosisSeverity',
+        severityField
       )
     ) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "DiagnosisSeverity",
-          object.severity,
-          severityField,
-        ),
+        error: new TypeVerificationError('DiagnosisSeverity', object.severity, severityField),
       };
     }
     const severity = object.severity as DiagnosisSeverity;
 
     // code is required
-    const codeField = field ? `${field}.code` : "code";
+    const codeField = field ? `${field}.code` : 'code';
     if (!validateString(object.code, codeField)) {
       return {
         success: false,
-        error: new TypeVerificationError("string", object.code, codeField),
+        error: new TypeVerificationError('string', object.code, codeField),
       };
     }
     const code = object.code as string;
 
     // codingSystem is required
-    const codingSystemField = field ? `${field}.codingSystem` : "codingSystem";
+    const codingSystemField = field ? `${field}.codingSystem` : 'codingSystem';
     const allowedCodingSystems = [
-      "ICD-10",
-      "ICD-11",
-      "DSM-5",
-      "DSM-5-TR", // Added DSM-5-TR based on type
-      "SNOMED-CT",
-      "Other",
+      'ICD-10',
+      'ICD-11',
+      'DSM-5',
+      'DSM-5-TR', // Added DSM-5-TR based on type
+      'SNOMED-CT',
+      'Other',
     ] as const;
     type CodingSystem = (typeof allowedCodingSystems)[number];
     if (
       !validateType(
         object.codingSystem,
         validateOneOf(allowedCodingSystems),
-        "CodingSystem",
-        codingSystemField,
+        'CodingSystem',
+        codingSystemField
       )
     ) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "CodingSystem",
-          object.codingSystem,
-          codingSystemField,
-        ),
+        error: new TypeVerificationError('CodingSystem', object.codingSystem, codingSystemField),
       };
     }
     const codingSystem = object.codingSystem as CodingSystem;
 
     // status is required
-    const statusField = field ? `${field}.status` : "status";
-    const allowedStatuses = [
-      "active",
-      "resolved",
-      "in remission",
-      "recurrent",
-    ] as const; // Updated based on type
+    const statusField = field ? `${field}.status` : 'status';
+    const allowedStatuses = ['active', 'resolved', 'in remission', 'recurrent'] as const; // Updated based on type
     type DiagnosisStatus = (typeof allowedStatuses)[number];
     if (
-      !validateType(
-        object.status,
-        validateOneOf(allowedStatuses),
-        "DiagnosisStatus",
-        statusField,
-      )
+      !validateType(object.status, validateOneOf(allowedStatuses), 'DiagnosisStatus', statusField)
     ) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "DiagnosisStatus",
-          object.status,
-          statusField,
-        ),
+        error: new TypeVerificationError('DiagnosisStatus', object.status, statusField),
       };
     }
     const status = object.status as DiagnosisStatus;
 
     // Optional properties
-    const onsetDateFieldDiag = field ? `${field}.onsetDate` : "onsetDate";
+    const onsetDateFieldDiag = field ? `${field}.onsetDate` : 'onsetDate';
     let onsetDateDiag: string | undefined;
     if (object.onsetDate !== undefined) {
       if (!validateString(object.onsetDate, onsetDateFieldDiag)) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "string",
-            object.onsetDate,
-            onsetDateFieldDiag,
-          ),
+          error: new TypeVerificationError('string', object.onsetDate, onsetDateFieldDiag),
         };
       }
       onsetDateDiag = object.onsetDate as string;
     }
 
-    const diagnosingClinicianField = field
-      ? `${field}.diagnosingClinician`
-      : "diagnosingClinician";
+    const diagnosingClinicianField = field ? `${field}.diagnosingClinician` : 'diagnosingClinician';
     let diagnosingClinician: string | undefined;
     if (object.diagnosingClinician !== undefined) {
-      if (
-        !validateString(object.diagnosingClinician, diagnosingClinicianField)
-      ) {
+      if (!validateString(object.diagnosingClinician, diagnosingClinicianField)) {
         return {
           success: false,
           error: new TypeVerificationError(
-            "string",
+            'string',
             object.diagnosingClinician,
-            diagnosingClinicianField,
+            diagnosingClinicianField
           ),
         };
       }
       diagnosingClinician = object.diagnosingClinician as string;
     }
 
-    const notesFieldDiag = field ? `${field}.notes` : "notes";
+    const notesFieldDiag = field ? `${field}.notes` : 'notes';
     let notesDiag: string | undefined;
     if (object.notes !== undefined) {
       if (!validateString(object.notes, notesFieldDiag)) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "string",
-            object.notes,
-            notesFieldDiag,
-          ),
+          error: new TypeVerificationError('string', object.notes, notesFieldDiag),
         };
       }
       notesDiag = object.notes as string;
     }
 
-    const confidenceLevelField = field
-      ? `${field}.confidenceLevel`
-      : "confidenceLevel";
+    const confidenceLevelField = field ? `${field}.confidenceLevel` : 'confidenceLevel';
     let confidenceLevel: number | undefined;
     if (object.confidenceLevel !== undefined) {
       if (!validateNumber(object.confidenceLevel, confidenceLevelField)) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "number",
-            object.confidenceLevel,
-            confidenceLevelField,
-          ),
+          error: new TypeVerificationError('number', object.confidenceLevel, confidenceLevelField),
         };
       }
       confidenceLevel = object.confidenceLevel as number;
@@ -623,23 +521,22 @@ export class ClinicalTypeVerifier {
 
     const associatedBrainRegionsFieldDiag = field
       ? `${field}.associatedBrainRegions`
-      : "associatedBrainRegions";
+      : 'associatedBrainRegions';
     let associatedBrainRegionsDiag: string[] | undefined;
     if (object.associatedBrainRegions !== undefined) {
       if (
         !validateArrayOf(
           object.associatedBrainRegions,
-          (item): item is string =>
-            validateString(item, associatedBrainRegionsFieldDiag),
-          associatedBrainRegionsFieldDiag,
+          (item): item is string => validateString(item, associatedBrainRegionsFieldDiag),
+          associatedBrainRegionsFieldDiag
         )
       ) {
         return {
           success: false,
           error: new TypeVerificationError(
-            "Array<string>",
+            'Array<string>',
             object.associatedBrainRegions,
-            associatedBrainRegionsFieldDiag,
+            associatedBrainRegionsFieldDiag
           ),
         };
       }
@@ -676,140 +573,99 @@ export class ClinicalTypeVerifier {
     if (!validateObject(obj, field)) {
       return {
         success: false,
-        error: new TypeVerificationError("object", obj, field),
+        error: new TypeVerificationError('object', obj, field),
       };
     }
     const object = obj as Record<string, unknown>; // Safe cast
 
     // Verify required properties
-    const idField = field ? `${field}.id` : "id";
+    const idField = field ? `${field}.id` : 'id';
     if (!validateString(object.id, idField)) {
       return {
         success: false,
-        error: new TypeVerificationError("string", object.id, idField),
+        error: new TypeVerificationError('string', object.id, idField),
       };
     }
     const id = object.id as string;
 
-    const nameField = field ? `${field}.name` : "name";
+    const nameField = field ? `${field}.name` : 'name';
     if (!validateString(object.name, nameField)) {
       return {
         success: false,
-        error: new TypeVerificationError("string", object.name, nameField),
+        error: new TypeVerificationError('string', object.name, nameField),
       };
     }
     const name = object.name as string;
 
-    const typeField = field ? `${field}.type` : "type";
+    const typeField = field ? `${field}.type` : 'type';
     const allowedTypes = [
-      "pharmacological", // Updated based on type
-      "psychotherapy",
-      "neuromodulation",
-      "lifestyle",
-      "complementary", // Added based on type
-      "other",
+      'pharmacological', // Updated based on type
+      'psychotherapy',
+      'neuromodulation',
+      'lifestyle',
+      'complementary', // Added based on type
+      'other',
     ] as const;
     type TreatmentType = (typeof allowedTypes)[number];
-    if (
-      !validateType(
-        object.type,
-        validateOneOf(allowedTypes),
-        "TreatmentType",
-        typeField,
-      )
-    ) {
+    if (!validateType(object.type, validateOneOf(allowedTypes), 'TreatmentType', typeField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "TreatmentType",
-          object.type,
-          typeField,
-        ),
+        error: new TypeVerificationError('TreatmentType', object.type, typeField),
       };
     }
     const type = object.type as TreatmentType;
 
-    const descriptionField = field ? `${field}.description` : "description";
+    const descriptionField = field ? `${field}.description` : 'description';
     if (!validateString(object.description, descriptionField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "string",
-          object.description,
-          descriptionField,
-        ),
+        error: new TypeVerificationError('string', object.description, descriptionField),
       };
     }
     const description = object.description as string;
 
-    const startDateField = field ? `${field}.startDate` : "startDate";
+    const startDateField = field ? `${field}.startDate` : 'startDate';
     if (!validateString(object.startDate, startDateField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "string",
-          object.startDate,
-          startDateField,
-        ),
+        error: new TypeVerificationError('string', object.startDate, startDateField),
       };
     }
     const startDate = object.startDate as string;
 
-    const statusField = field ? `${field}.status` : "status";
-    const allowedStatuses = [
-      "active",
-      "completed",
-      "discontinued",
-      "planned",
-    ] as const; // Updated based on type
+    const statusField = field ? `${field}.status` : 'status';
+    const allowedStatuses = ['active', 'completed', 'discontinued', 'planned'] as const; // Updated based on type
     type TreatmentStatus = (typeof allowedStatuses)[number];
     if (
-      !validateType(
-        object.status,
-        validateOneOf(allowedStatuses),
-        "TreatmentStatus",
-        statusField,
-      )
+      !validateType(object.status, validateOneOf(allowedStatuses), 'TreatmentStatus', statusField)
     ) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "TreatmentStatus",
-          object.status,
-          statusField,
-        ),
+        error: new TypeVerificationError('TreatmentStatus', object.status, statusField),
       };
     }
     const status = object.status as TreatmentStatus;
 
     // Optional properties
-    const endDateField = field ? `${field}.endDate` : "endDate";
+    const endDateField = field ? `${field}.endDate` : 'endDate';
     let endDate: string | undefined;
     if (object.endDate !== undefined) {
       if (!validateString(object.endDate, endDateField)) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "string",
-            object.endDate,
-            endDateField,
-          ),
+          error: new TypeVerificationError('string', object.endDate, endDateField),
         };
       }
       endDate = object.endDate as string;
     }
 
-    const providerField = field ? `${field}.provider` : "provider";
+    const providerField = field ? `${field}.provider` : 'provider';
     let provider: string | undefined;
     if (object.provider !== undefined) {
       if (!validateString(object.provider, providerField)) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "string",
-            object.provider,
-            providerField,
-          ),
+          error: new TypeVerificationError('string', object.provider, providerField),
         };
       }
       provider = object.provider as string;
@@ -817,166 +673,139 @@ export class ClinicalTypeVerifier {
 
     const discontinuationReasonField = field
       ? `${field}.discontinuationReason`
-      : "discontinuationReason";
+      : 'discontinuationReason';
     let discontinuationReason: string | undefined;
     if (object.discontinuationReason !== undefined) {
-      if (
-        !validateString(
-          object.discontinuationReason,
-          discontinuationReasonField,
-        )
-      ) {
+      if (!validateString(object.discontinuationReason, discontinuationReasonField)) {
         return {
           success: false,
           error: new TypeVerificationError(
-            "string",
+            'string',
             object.discontinuationReason,
-            discontinuationReasonField,
+            discontinuationReasonField
           ),
         };
       }
       discontinuationReason = object.discontinuationReason as string;
     }
 
-    const frequencyField = field ? `${field}.frequency` : "frequency";
+    const frequencyField = field ? `${field}.frequency` : 'frequency';
     let frequency: string | undefined;
     if (object.frequency !== undefined) {
       if (!validateString(object.frequency, frequencyField)) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "string",
-            object.frequency,
-            frequencyField,
-          ),
+          error: new TypeVerificationError('string', object.frequency, frequencyField),
         };
       }
       frequency = object.frequency as string;
     }
 
-    const doseField = field ? `${field}.dose` : "dose";
+    const doseField = field ? `${field}.dose` : 'dose';
     let dose: string | undefined;
     if (object.dose !== undefined) {
       if (!validateString(object.dose, doseField)) {
         return {
           success: false,
-          error: new TypeVerificationError("string", object.dose, doseField),
+          error: new TypeVerificationError('string', object.dose, doseField),
         };
       }
       dose = object.dose as string;
     }
 
-    const effectivenessField = field
-      ? `${field}.effectiveness`
-      : "effectiveness";
+    const effectivenessField = field ? `${field}.effectiveness` : 'effectiveness';
     let effectiveness: number | undefined;
     if (object.effectiveness !== undefined) {
       if (!validateNumber(object.effectiveness, effectivenessField)) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "number",
-            object.effectiveness,
-            effectivenessField,
-          ),
+          error: new TypeVerificationError('number', object.effectiveness, effectivenessField),
         };
       }
       effectiveness = object.effectiveness as number;
     }
 
-    const adherenceField = field ? `${field}.adherence` : "adherence";
+    const adherenceField = field ? `${field}.adherence` : 'adherence';
     let adherence: number | undefined;
     if (object.adherence !== undefined) {
       if (!validateNumber(object.adherence, adherenceField)) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "number",
-            object.adherence,
-            adherenceField,
-          ),
+          error: new TypeVerificationError('number', object.adherence, adherenceField),
         };
       }
       adherence = object.adherence as number;
     }
 
-    const notesField = field ? `${field}.notes` : "notes";
+    const notesField = field ? `${field}.notes` : 'notes';
     let notes: string | undefined;
     if (object.notes !== undefined) {
       if (!validateString(object.notes, notesField)) {
         return {
           success: false,
-          error: new TypeVerificationError("string", object.notes, notesField),
+          error: new TypeVerificationError('string', object.notes, notesField),
         };
       }
       notes = object.notes as string;
     }
 
-    const targetSymptomsField = field
-      ? `${field}.targetSymptoms`
-      : "targetSymptoms";
+    const targetSymptomsField = field ? `${field}.targetSymptoms` : 'targetSymptoms';
     let targetSymptoms: string[] | undefined;
     if (object.targetSymptoms !== undefined) {
       if (
         !validateArrayOf(
           object.targetSymptoms,
           (item): item is string => validateString(item, targetSymptomsField),
-          targetSymptomsField,
+          targetSymptomsField
         )
       ) {
         return {
           success: false,
           error: new TypeVerificationError(
-            "Array<string>",
+            'Array<string>',
             object.targetSymptoms,
-            targetSymptomsField,
+            targetSymptomsField
           ),
         };
       }
       targetSymptoms = object.targetSymptoms as string[];
     }
 
-    const targetBrainRegionsField = field
-      ? `${field}.targetBrainRegions`
-      : "targetBrainRegions";
+    const targetBrainRegionsField = field ? `${field}.targetBrainRegions` : 'targetBrainRegions';
     let targetBrainRegions: string[] | undefined;
     if (object.targetBrainRegions !== undefined) {
       if (
         !validateArrayOf(
           object.targetBrainRegions,
           (item): item is string => validateString(item, targetBrainRegionsField),
-          targetBrainRegionsField,
+          targetBrainRegionsField
         )
       ) {
         return {
           success: false,
           error: new TypeVerificationError(
-            "Array<string>",
+            'Array<string>',
             object.targetBrainRegions,
-            targetBrainRegionsField,
+            targetBrainRegionsField
           ),
         };
       }
       targetBrainRegions = object.targetBrainRegions as string[];
     }
 
-    const sideEffectsField = field ? `${field}.sideEffects` : "sideEffects";
+    const sideEffectsField = field ? `${field}.sideEffects` : 'sideEffects';
     let sideEffects: string[] | undefined;
     if (object.sideEffects !== undefined) {
       if (
         !validateArrayOf(
           object.sideEffects,
           (item): item is string => validateString(item, sideEffectsField),
-          sideEffectsField,
+          sideEffectsField
         )
       ) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "Array<string>",
-            object.sideEffects,
-            sideEffectsField,
-          ),
+          error: new TypeVerificationError('Array<string>', object.sideEffects, sideEffectsField),
         };
       }
       sideEffects = object.sideEffects as string[];
@@ -1015,7 +844,7 @@ export class ClinicalTypeVerifier {
     if (!validateObject(obj, field)) {
       return {
         success: false,
-        error: new TypeVerificationError("object", obj, field),
+        error: new TypeVerificationError('object', obj, field),
       };
     }
     // Placeholder: Assume valid for now
@@ -1026,14 +855,11 @@ export class ClinicalTypeVerifier {
    * Verify that an object conforms to the PsychometricAssessment interface (placeholder)
    * TODO: Implement full verification based on PsychometricAssessment type definition
    */
-  verifyPsychometricAssessment(
-    obj: unknown,
-    field?: string,
-  ): Result<PsychometricAssessment> {
+  verifyPsychometricAssessment(obj: unknown, field?: string): Result<PsychometricAssessment> {
     if (!validateObject(obj, field)) {
       return {
         success: false,
-        error: new TypeVerificationError("object", obj, field),
+        error: new TypeVerificationError('object', obj, field),
       };
     }
     // Placeholder: Assume valid for now
@@ -1044,14 +870,11 @@ export class ClinicalTypeVerifier {
    * Verify that an object conforms to the MedicalHistoryItem interface (placeholder)
    * TODO: Implement full verification based on MedicalHistoryItem type definition
    */
-  verifyMedicalHistoryItem(
-    obj: unknown,
-    field?: string,
-  ): Result<MedicalHistoryItem> {
+  verifyMedicalHistoryItem(obj: unknown, field?: string): Result<MedicalHistoryItem> {
     if (!validateObject(obj, field)) {
       return {
         success: false,
-        error: new TypeVerificationError("object", obj, field),
+        error: new TypeVerificationError('object', obj, field),
       };
     }
     // Placeholder: Assume valid for now
@@ -1061,15 +884,12 @@ export class ClinicalTypeVerifier {
   /**
    * Verify that an object conforms to the TreatmentResponse interface
    */
-  verifyTreatmentResponse(
-    obj: unknown,
-    field?: string,
-  ): Result<TreatmentResponse> {
-    const baseField = field ?? "TreatmentResponse";
+  verifyTreatmentResponse(obj: unknown, field?: string): Result<TreatmentResponse> {
+    const baseField = field ?? 'TreatmentResponse';
     if (!validateObject(obj, baseField)) {
       return {
         success: false,
-        error: new TypeVerificationError("object", obj, baseField),
+        error: new TypeVerificationError('object', obj, baseField),
       };
     }
     const object = obj as Record<string, unknown>; // Safe cast
@@ -1079,11 +899,7 @@ export class ClinicalTypeVerifier {
     if (!validateString(object.treatmentId, treatmentIdField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "string",
-          object.treatmentId,
-          treatmentIdField,
-        ),
+        error: new TypeVerificationError('string', object.treatmentId, treatmentIdField),
       };
     }
     const treatmentId = object.treatmentId as string;
@@ -1092,38 +908,34 @@ export class ClinicalTypeVerifier {
     if (!validateString(object.assessmentDate, assessmentDateField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "string",
-          object.assessmentDate,
-          assessmentDateField,
-        ),
+        error: new TypeVerificationError('string', object.assessmentDate, assessmentDateField),
       };
     }
     const assessmentDate = object.assessmentDate as string;
 
     const clinicalResponseField = `${baseField}.clinicalResponse`;
     const allowedClinicalResponses = [
-      "remission",
-      "response",
-      "partial response",
-      "no response",
-      "worsening",
+      'remission',
+      'response',
+      'partial response',
+      'no response',
+      'worsening',
     ] as const;
     type ClinicalResponse = (typeof allowedClinicalResponses)[number];
     if (
       !validateType(
         object.clinicalResponse,
         validateOneOf(allowedClinicalResponses),
-        "ClinicalResponse",
-        clinicalResponseField,
+        'ClinicalResponse',
+        clinicalResponseField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "ClinicalResponse",
+          'ClinicalResponse',
           object.clinicalResponse,
-          clinicalResponseField,
+          clinicalResponseField
         ),
       };
     }
@@ -1134,61 +946,53 @@ export class ClinicalTypeVerifier {
     if (
       !validateArrayOf(
         object.symptomChanges,
-        (item): item is TreatmentResponse["symptomChanges"][number] => {
+        (item): item is TreatmentResponse['symptomChanges'][number] => {
           const itemField = `${symptomChangesField}[]`;
           if (!validateObject(item, itemField)) return false;
           const itemObj = item as Record<string, unknown>;
           return (
             validateString(itemObj.symptomId, `${itemField}.symptomId`) &&
-            validateNumber(
-              itemObj.changePercentage,
-              `${itemField}.changePercentage`,
-            ) &&
-            (itemObj.notes === undefined ||
-              validateString(itemObj.notes, `${itemField}.notes`))
+            validateNumber(itemObj.changePercentage, `${itemField}.changePercentage`) &&
+            (itemObj.notes === undefined || validateString(itemObj.notes, `${itemField}.notes`))
           );
         },
-        symptomChangesField,
+        symptomChangesField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "Array<{symptomId: string, changePercentage: number, notes?: string}>",
+          'Array<{symptomId: string, changePercentage: number, notes?: string}>',
           object.symptomChanges,
-          symptomChangesField,
+          symptomChangesField
         ),
       };
     }
-    const symptomChanges =
-      object.symptomChanges as TreatmentResponse["symptomChanges"];
+    const symptomChanges = object.symptomChanges as TreatmentResponse['symptomChanges'];
 
     // Verify required sideEffects array
     const sideEffectsField = `${baseField}.sideEffects`;
     if (
       !validateArrayOf(
         object.sideEffects,
-        (item): item is TreatmentResponse["sideEffects"][number] => {
+        (item): item is TreatmentResponse['sideEffects'][number] => {
           const itemField = `${sideEffectsField}[]`;
           if (!validateObject(item, itemField)) return false;
           const itemObj = item as Record<string, unknown>;
-          const allowedSeverities = ["mild", "moderate", "severe"] as const;
+          const allowedSeverities = ['mild', 'moderate', 'severe'] as const;
           return (
             validateString(itemObj.description, `${itemField}.description`) &&
             validateType(
               itemObj.severity,
               validateOneOf(allowedSeverities),
-              "Severity",
-              `${itemField}.severity`,
+              'Severity',
+              `${itemField}.severity`
             ) &&
             (itemObj.managementStrategy === undefined ||
-              validateString(
-                itemObj.managementStrategy,
-                `${itemField}.managementStrategy`,
-              ))
+              validateString(itemObj.managementStrategy, `${itemField}.managementStrategy`))
           );
         },
-        sideEffectsField,
+        sideEffectsField
       )
     ) {
       return {
@@ -1196,54 +1000,47 @@ export class ClinicalTypeVerifier {
         error: new TypeVerificationError(
           "Array<{description: string, severity: 'mild'|'moderate'|'severe', managementStrategy?: string}>",
           object.sideEffects,
-          sideEffectsField,
+          sideEffectsField
         ),
       };
     }
-    const sideEffects = object.sideEffects as TreatmentResponse["sideEffects"];
+    const sideEffects = object.sideEffects as TreatmentResponse['sideEffects'];
 
     // Optional properties
     const neurobiologicalChangesField = `${baseField}.neurobiologicalChanges`;
-    let neurobiologicalChanges:
-      | TreatmentResponse["neurobiologicalChanges"]
-      | undefined;
+    let neurobiologicalChanges: TreatmentResponse['neurobiologicalChanges'] | undefined;
     if (object.neurobiologicalChanges !== undefined) {
       if (
         !validateArrayOf(
           object.neurobiologicalChanges,
           (
-            item,
-          ): item is { regionId: string; activityChange: number; connectivityChange?: number; } => { // Corrected item type
+            item
+          ): item is { regionId: string; activityChange: number; connectivityChange?: number } => {
+            // Corrected item type
             const itemField = `${neurobiologicalChangesField}[]`;
             if (!validateObject(item, itemField)) return false;
             const itemObj = item as Record<string, unknown>;
             return (
               validateString(itemObj.regionId, `${itemField}.regionId`) &&
-              validateNumber(
-                itemObj.activityChange,
-                `${itemField}.activityChange`,
-              ) &&
+              validateNumber(itemObj.activityChange, `${itemField}.activityChange`) &&
               (itemObj.connectivityChange === undefined ||
-                validateNumber(
-                  itemObj.connectivityChange,
-                  `${itemField}.connectivityChange`,
-                ))
+                validateNumber(itemObj.connectivityChange, `${itemField}.connectivityChange`))
             );
           },
-          neurobiologicalChangesField,
+          neurobiologicalChangesField
         )
       ) {
         return {
           success: false,
           error: new TypeVerificationError(
-            "Array<{regionId: string, activityChange: number, connectivityChange?: number}>",
+            'Array<{regionId: string, activityChange: number, connectivityChange?: number}>',
             object.neurobiologicalChanges,
-            neurobiologicalChangesField,
+            neurobiologicalChangesField
           ),
         };
       }
       neurobiologicalChanges =
-        object.neurobiologicalChanges as TreatmentResponse["neurobiologicalChanges"];
+        object.neurobiologicalChanges as TreatmentResponse['neurobiologicalChanges'];
     }
 
     const functionalImprovementsField = `${baseField}.functionalImprovements`;
@@ -1252,17 +1049,16 @@ export class ClinicalTypeVerifier {
       if (
         !validateArrayOf(
           object.functionalImprovements,
-          (item): item is string =>
-            validateString(item, functionalImprovementsField),
-          functionalImprovementsField,
+          (item): item is string => validateString(item, functionalImprovementsField),
+          functionalImprovementsField
         )
       ) {
         return {
           success: false,
           error: new TypeVerificationError(
-            "Array<string>",
+            'Array<string>',
             object.functionalImprovements,
-            functionalImprovementsField,
+            functionalImprovementsField
           ),
         };
       }
@@ -1272,18 +1068,13 @@ export class ClinicalTypeVerifier {
     const patientReportedOutcomeField = `${baseField}.patientReportedOutcome`;
     let patientReportedOutcome: number | undefined;
     if (object.patientReportedOutcome !== undefined) {
-      if (
-        !validateNumber(
-          object.patientReportedOutcome,
-          patientReportedOutcomeField,
-        )
-      ) {
+      if (!validateNumber(object.patientReportedOutcome, patientReportedOutcomeField)) {
         return {
           success: false,
           error: new TypeVerificationError(
-            "number",
+            'number',
             object.patientReportedOutcome,
-            patientReportedOutcomeField,
+            patientReportedOutcomeField
           ),
         };
       }
@@ -1293,15 +1084,13 @@ export class ClinicalTypeVerifier {
     const clinicianEvaluationField = `${baseField}.clinicianEvaluation`;
     let clinicianEvaluation: string | undefined;
     if (object.clinicianEvaluation !== undefined) {
-      if (
-        !validateString(object.clinicianEvaluation, clinicianEvaluationField)
-      ) {
+      if (!validateString(object.clinicianEvaluation, clinicianEvaluationField)) {
         return {
           success: false,
           error: new TypeVerificationError(
-            "string",
+            'string',
             object.clinicianEvaluation,
-            clinicianEvaluationField,
+            clinicianEvaluationField
           ),
         };
       }
@@ -1329,12 +1118,12 @@ export class ClinicalTypeVerifier {
    * Verify that an object conforms to the Patient interface
    */
   verifyPatient(obj: unknown, field?: string): Result<Patient> {
-    const baseField = field ?? "Patient";
+    const baseField = field ?? 'Patient';
     // Use direct validation function
     if (!validateObject(obj, baseField)) {
       return {
         success: false,
-        error: new TypeVerificationError("object", obj, baseField),
+        error: new TypeVerificationError('object', obj, baseField),
       };
     }
     const object = obj as Record<string, unknown>; // Safe cast
@@ -1344,7 +1133,7 @@ export class ClinicalTypeVerifier {
     if (!validateString(object.id, idField)) {
       return {
         success: false,
-        error: new TypeVerificationError("string", object.id, idField),
+        error: new TypeVerificationError('string', object.id, idField),
       };
     }
     const id = object.id as string;
@@ -1353,11 +1142,7 @@ export class ClinicalTypeVerifier {
     if (!validateString(object.lastUpdated, lastUpdatedField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "string",
-          object.lastUpdated,
-          lastUpdatedField,
-        ),
+        error: new TypeVerificationError('string', object.lastUpdated, lastUpdatedField),
       };
     }
     const lastUpdated = object.lastUpdated as string;
@@ -1366,11 +1151,7 @@ export class ClinicalTypeVerifier {
     if (!validateString(object.version, versionField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "string",
-          object.version,
-          versionField,
-        ),
+        error: new TypeVerificationError('string', object.version, versionField),
       };
     }
     const version = object.version as string;
@@ -1380,11 +1161,7 @@ export class ClinicalTypeVerifier {
     if (!validateObject(object.demographicData, demographicDataField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "object",
-          object.demographicData,
-          demographicDataField,
-        ),
+        error: new TypeVerificationError('object', object.demographicData, demographicDataField),
       };
     }
     const demographicData = object.demographicData as Record<string, unknown>;
@@ -1393,11 +1170,7 @@ export class ClinicalTypeVerifier {
     if (!validateObject(object.clinicalData, clinicalDataField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "object",
-          object.clinicalData,
-          clinicalDataField,
-        ),
+        error: new TypeVerificationError('object', object.clinicalData, clinicalDataField),
       };
     }
     const clinicalData = object.clinicalData as Record<string, unknown>;
@@ -1406,11 +1179,7 @@ export class ClinicalTypeVerifier {
     if (!validateObject(object.treatmentData, treatmentDataField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "object",
-          object.treatmentData,
-          treatmentDataField,
-        ),
+        error: new TypeVerificationError('object', object.treatmentData, treatmentDataField),
       };
     }
     const treatmentData = object.treatmentData as Record<string, unknown>;
@@ -1419,100 +1188,79 @@ export class ClinicalTypeVerifier {
     if (!validateObject(object.neuralData, neuralDataField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "object",
-          object.neuralData,
-          neuralDataField,
-        ),
+        error: new TypeVerificationError('object', object.neuralData, neuralDataField),
       };
     }
     const neuralData = object.neuralData as Record<string, unknown>;
 
     const dataAccessPermissionsField = `${baseField}.dataAccessPermissions`;
-    if (
-      !validateObject(object.dataAccessPermissions, dataAccessPermissionsField)
-    ) {
+    if (!validateObject(object.dataAccessPermissions, dataAccessPermissionsField)) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "object",
+          'object',
           object.dataAccessPermissions,
-          dataAccessPermissionsField,
+          dataAccessPermissionsField
         ),
       };
     }
-    const dataAccessPermissions = object.dataAccessPermissions as Record<
-      string,
-      unknown
-    >;
+    const dataAccessPermissions = object.dataAccessPermissions as Record<string, unknown>;
 
     // --- Verify Demographic Data ---
     const ageField = `${demographicDataField}.age`;
     if (!validateNumber(demographicData.age, ageField)) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "number",
-          demographicData.age,
-          ageField,
-        ),
+        error: new TypeVerificationError('number', demographicData.age, ageField),
       };
     }
     const age = demographicData.age as number;
 
     const biologicalSexField = `${demographicDataField}.biologicalSex`;
-    const allowedSexes = ["male", "female", "other"] as const;
+    const allowedSexes = ['male', 'female', 'other'] as const;
     if (
       !validateType(
         demographicData.biologicalSex,
         validateOneOf(allowedSexes),
-        "BiologicalSex",
-        biologicalSexField,
+        'BiologicalSex',
+        biologicalSexField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "BiologicalSex",
+          'BiologicalSex',
           demographicData.biologicalSex,
-          biologicalSexField,
+          biologicalSexField
         ),
       };
     }
-    const biologicalSex = demographicData.biologicalSex as
-      | "male"
-      | "female"
-      | "other";
+    const biologicalSex = demographicData.biologicalSex as 'male' | 'female' | 'other';
 
     const anonymizationLevelField = `${demographicDataField}.anonymizationLevel`;
-    const allowedAnonymizationLevels = [
-      "full",
-      "partial",
-      "research",
-      "clinical",
-    ] as const;
+    const allowedAnonymizationLevels = ['full', 'partial', 'research', 'clinical'] as const;
     if (
       !validateType(
         demographicData.anonymizationLevel,
         validateOneOf(allowedAnonymizationLevels),
-        "AnonymizationLevel",
-        anonymizationLevelField,
+        'AnonymizationLevel',
+        anonymizationLevelField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "AnonymizationLevel",
+          'AnonymizationLevel',
           demographicData.anonymizationLevel,
-          anonymizationLevelField,
+          anonymizationLevelField
         ),
       };
     }
     const anonymizationLevel = demographicData.anonymizationLevel as
-      | "full"
-      | "partial"
-      | "research"
-      | "clinical";
+      | 'full'
+      | 'partial'
+      | 'research'
+      | 'clinical';
 
     // Optional demographic fields
     const ethnicityField = `${demographicDataField}.ethnicity`;
@@ -1521,11 +1269,7 @@ export class ClinicalTypeVerifier {
       if (!validateString(demographicData.ethnicity, ethnicityField)) {
         return {
           success: false,
-          error: new TypeVerificationError(
-            "string",
-            demographicData.ethnicity,
-            ethnicityField,
-          ),
+          error: new TypeVerificationError('string', demographicData.ethnicity, ethnicityField),
         };
       }
       ethnicity = demographicData.ethnicity as string;
@@ -1538,9 +1282,9 @@ export class ClinicalTypeVerifier {
         return {
           success: false,
           error: new TypeVerificationError(
-            "string",
+            'string',
             demographicData.occupationalStatus,
-            occupationalStatusField,
+            occupationalStatusField
           ),
         };
       }
@@ -1558,15 +1302,15 @@ export class ClinicalTypeVerifier {
           const result = this.verifyDiagnosis(item, diagnosesField);
           return result.success;
         },
-        diagnosesField,
+        diagnosesField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "Array<Diagnosis>",
+          'Array<Diagnosis>',
           clinicalData.diagnoses,
-          diagnosesField,
+          diagnosesField
         ),
       };
     }
@@ -1581,16 +1325,12 @@ export class ClinicalTypeVerifier {
           const result = this.verifySymptom(item, symptomsField);
           return result.success;
         },
-        symptomsField,
+        symptomsField
       )
     ) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "Array<Symptom>",
-          clinicalData.symptoms,
-          symptomsField,
-        ),
+        error: new TypeVerificationError('Array<Symptom>', clinicalData.symptoms, symptomsField),
       };
     }
     const symptoms = clinicalData.symptoms as Symptom[];
@@ -1605,15 +1345,15 @@ export class ClinicalTypeVerifier {
           const result = this.verifyMedication(item, medicationsField);
           return result.success;
         },
-        medicationsField,
+        medicationsField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "Array<Medication>",
+          'Array<Medication>',
           clinicalData.medications,
-          medicationsField,
+          medicationsField
         ),
       };
     }
@@ -1626,21 +1366,18 @@ export class ClinicalTypeVerifier {
         (item): item is PsychometricAssessment => {
           // Pass the base field path; validateArrayOf handles indexing
           // Using placeholder verifyPsychometricAssessment - needs implementation
-          const result = this.verifyPsychometricAssessment(
-            item,
-            psychometricAssessmentsField,
-          );
+          const result = this.verifyPsychometricAssessment(item, psychometricAssessmentsField);
           return result.success;
         },
-        psychometricAssessmentsField,
+        psychometricAssessmentsField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "Array<PsychometricAssessment>",
+          'Array<PsychometricAssessment>',
           clinicalData.psychometricAssessments,
-          psychometricAssessmentsField,
+          psychometricAssessmentsField
         ),
       };
     }
@@ -1654,21 +1391,18 @@ export class ClinicalTypeVerifier {
         (item): item is MedicalHistoryItem => {
           // Pass the base field path; validateArrayOf handles indexing
           // Using placeholder verifyMedicalHistoryItem - needs implementation
-          const result = this.verifyMedicalHistoryItem(
-            item,
-            medicalHistoryField,
-          );
+          const result = this.verifyMedicalHistoryItem(item, medicalHistoryField);
           return result.success;
         },
-        medicalHistoryField,
+        medicalHistoryField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "Array<MedicalHistoryItem>",
+          'Array<MedicalHistoryItem>',
           clinicalData.medicalHistory,
-          medicalHistoryField,
+          medicalHistoryField
         ),
       };
     }
@@ -1686,15 +1420,15 @@ export class ClinicalTypeVerifier {
           const result = this.verifyTreatment(item, currentTreatmentsField);
           return result.success;
         },
-        currentTreatmentsField,
+        currentTreatmentsField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "Array<Treatment>",
+          'Array<Treatment>',
           treatmentData.currentTreatments,
-          currentTreatmentsField,
+          currentTreatmentsField
         ),
       };
     }
@@ -1709,20 +1443,19 @@ export class ClinicalTypeVerifier {
           const result = this.verifyTreatment(item, historicalTreatmentsField);
           return result.success;
         },
-        historicalTreatmentsField,
+        historicalTreatmentsField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "Array<Treatment>",
+          'Array<Treatment>',
           treatmentData.historicalTreatments,
-          historicalTreatmentsField,
+          historicalTreatmentsField
         ),
       };
     }
-    const historicalTreatments =
-      treatmentData.historicalTreatments as Treatment[];
+    const historicalTreatments = treatmentData.historicalTreatments as Treatment[];
 
     const treatmentResponsesField = `${treatmentDataField}.treatmentResponses`;
     if (
@@ -1730,26 +1463,22 @@ export class ClinicalTypeVerifier {
         treatmentData.treatmentResponses,
         (item): item is TreatmentResponse => {
           // Pass the base field path; validateArrayOf handles indexing
-          const result = this.verifyTreatmentResponse(
-            item,
-            treatmentResponsesField,
-          );
+          const result = this.verifyTreatmentResponse(item, treatmentResponsesField);
           return result.success;
         },
-        treatmentResponsesField,
+        treatmentResponsesField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "Array<TreatmentResponse>",
+          'Array<TreatmentResponse>',
           treatmentData.treatmentResponses,
-          treatmentResponsesField,
+          treatmentResponsesField
         ),
       };
     }
-    const treatmentResponses =
-      treatmentData.treatmentResponses as TreatmentResponse[];
+    const treatmentResponses = treatmentData.treatmentResponses as TreatmentResponse[];
 
     // ... add validation for optional treatment fields (treatmentPlan, etc.) ...
 
@@ -1761,16 +1490,12 @@ export class ClinicalTypeVerifier {
         (item): item is string =>
           // Pass the base field path; validateArrayOf handles indexing
           validateString(item, brainScansField),
-        brainScansField,
+        brainScansField
       )
     ) {
       return {
         success: false,
-        error: new TypeVerificationError(
-          "Array<string>",
-          neuralData.brainScans,
-          brainScansField,
-        ),
+        error: new TypeVerificationError('Array<string>', neuralData.brainScans, brainScansField),
       };
     }
     const brainScans = neuralData.brainScans as string[];
@@ -1779,34 +1504,29 @@ export class ClinicalTypeVerifier {
 
     // --- Verify Data Permissions ---
     const accessLevelField = `${dataAccessPermissionsField}.accessLevel`;
-    const allowedAccessLevels = [
-      "full",
-      "treatment",
-      "research",
-      "limited",
-    ] as const;
+    const allowedAccessLevels = ['full', 'treatment', 'research', 'limited'] as const;
     if (
       !validateType(
         dataAccessPermissions.accessLevel,
         validateOneOf(allowedAccessLevels),
-        "AccessLevel",
-        accessLevelField,
+        'AccessLevel',
+        accessLevelField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "AccessLevel",
+          'AccessLevel',
           dataAccessPermissions.accessLevel,
-          accessLevelField,
+          accessLevelField
         ),
       };
     }
     const accessLevel = dataAccessPermissions.accessLevel as
-      | "full"
-      | "treatment"
-      | "research"
-      | "limited";
+      | 'full'
+      | 'treatment'
+      | 'research'
+      | 'limited';
 
     const authorizedUsersField = `${dataAccessPermissionsField}.authorizedUsers`;
     if (
@@ -1815,79 +1535,66 @@ export class ClinicalTypeVerifier {
         (item): item is string =>
           // Pass the base field path; validateArrayOf handles indexing
           validateString(item, authorizedUsersField),
-        authorizedUsersField,
+        authorizedUsersField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "Array<string>",
+          'Array<string>',
           dataAccessPermissions.authorizedUsers,
-          authorizedUsersField,
+          authorizedUsersField
         ),
       };
     }
     const authorizedUsers = dataAccessPermissions.authorizedUsers as string[];
 
     const consentStatusField = `${dataAccessPermissionsField}.consentStatus`;
-    const allowedConsentStatuses = [
-      "full",
-      "partial",
-      "research-only",
-      "none",
-    ] as const;
+    const allowedConsentStatuses = ['full', 'partial', 'research-only', 'none'] as const;
     if (
       !validateType(
         dataAccessPermissions.consentStatus,
         validateOneOf(allowedConsentStatuses),
-        "ConsentStatus",
-        consentStatusField,
+        'ConsentStatus',
+        consentStatusField
       )
     ) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "ConsentStatus",
+          'ConsentStatus',
           dataAccessPermissions.consentStatus,
-          consentStatusField,
+          consentStatusField
         ),
       };
     }
     const consentStatus = dataAccessPermissions.consentStatus as
-      | "full"
-      | "partial"
-      | "research-only"
-      | "none";
+      | 'full'
+      | 'partial'
+      | 'research-only'
+      | 'none';
 
     const dataRetentionPolicyField = `${dataAccessPermissionsField}.dataRetentionPolicy`;
-    if (
-      !validateString(
-        dataAccessPermissions.dataRetentionPolicy,
-        dataRetentionPolicyField,
-      )
-    ) {
+    if (!validateString(dataAccessPermissions.dataRetentionPolicy, dataRetentionPolicyField)) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "string",
+          'string',
           dataAccessPermissions.dataRetentionPolicy,
-          dataRetentionPolicyField,
+          dataRetentionPolicyField
         ),
       };
     }
-    const dataRetentionPolicy =
-      dataAccessPermissions.dataRetentionPolicy as string;
+    const dataRetentionPolicy = dataAccessPermissions.dataRetentionPolicy as string;
 
     const lastReviewDateField = `${dataAccessPermissionsField}.lastReviewDate`;
-    if (
-      !validateString(dataAccessPermissions.lastReviewDate, lastReviewDateField)
-    ) {
+    if (!validateString(dataAccessPermissions.lastReviewDate, lastReviewDateField)) {
       return {
         success: false,
         error: new TypeVerificationError(
-          "string",
+          'string',
           dataAccessPermissions.lastReviewDate,
-          lastReviewDateField,
+          lastReviewDateField
         ),
       };
     }
@@ -1949,7 +1656,7 @@ export class ClinicalTypeVerifier {
     const result = this.verifyRiskLevel(value, field);
     if (!result.success) {
       // Throw a new error instance created in this context to ensure instanceof works in tests
-      throw new TypeVerificationError("TypeAssertionFailed", value, field);
+      throw new TypeVerificationError('TypeAssertionFailed', value, field);
     }
   }
 
@@ -1960,7 +1667,7 @@ export class ClinicalTypeVerifier {
     const result = this.verifySymptom(value, field);
     if (!result.success) {
       // Throw a new error instance created in this context to ensure instanceof works in tests
-      throw new TypeVerificationError("TypeAssertionFailed", value, field);
+      throw new TypeVerificationError('TypeAssertionFailed', value, field);
     }
   }
 
@@ -1971,7 +1678,7 @@ export class ClinicalTypeVerifier {
     const result = this.verifyDiagnosis(value, field);
     if (!result.success) {
       // Throw a new error instance created in this context to ensure instanceof works in tests
-      throw new TypeVerificationError("TypeAssertionFailed", value, field);
+      throw new TypeVerificationError('TypeAssertionFailed', value, field);
     }
   }
 
@@ -1982,21 +1689,18 @@ export class ClinicalTypeVerifier {
     const result = this.verifyTreatment(value, field);
     if (!result.success) {
       // Throw a new error instance created in this context to ensure instanceof works in tests
-      throw new TypeVerificationError("TypeAssertionFailed", value, field);
+      throw new TypeVerificationError('TypeAssertionFailed', value, field);
     }
   }
 
   /**
    * Asserts that a value is a valid TreatmentResponse
    */
-  assertTreatmentResponse(
-    value: unknown,
-    field?: string,
-  ): asserts value is TreatmentResponse {
+  assertTreatmentResponse(value: unknown, field?: string): asserts value is TreatmentResponse {
     const result = this.verifyTreatmentResponse(value, field);
     if (!result.success) {
       // Throw a new error instance created in this context to ensure instanceof works in tests
-      throw new TypeVerificationError("TypeAssertionFailed", value, field);
+      throw new TypeVerificationError('TypeAssertionFailed', value, field);
     }
   }
 
@@ -2007,7 +1711,7 @@ export class ClinicalTypeVerifier {
     const result = this.verifyPatient(value, field);
     if (!result.success) {
       // Throw a new error instance created in this context to ensure instanceof works in tests
-      throw new TypeVerificationError("TypeAssertionFailed", value, field);
+      throw new TypeVerificationError('TypeAssertionFailed', value, field);
     }
   }
 }

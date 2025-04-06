@@ -3,7 +3,7 @@
  * Re-exports the temporal service.
  */
 
-export * from "./temporal.service";
+export * from './temporal.service';
 
 /**
  * Temporal services exports

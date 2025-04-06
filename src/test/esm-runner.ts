@@ -6,15 +6,15 @@
  * ESM modules and bypasses the problematic transformation pipeline.
  */
 
-import { spawn } from "child_process";
-import * as path from "path";
-import * as fs from "fs";
-import { fileURLToPath } from "url";
+import { spawn } from 'child_process';
+import * as path from 'path';
+import * as fs from 'fs';
+import { fileURLToPath } from 'url';
 
 // Get proper ESM-compatible directory paths
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, "../..");
+const projectRoot = path.resolve(__dirname, '../..');
 
 // Define TypeScript interfaces for our test runner
 interface TestRunnerOptions {
@@ -30,8 +30,8 @@ interface TestRunnerOptions {
 export async function runTests(options: TestRunnerOptions): Promise<void> {
   const { testPattern, tsconfig, verbose } = options;
 
-  console.log("🧠 NOVAMIND ESM TypeScript Test Runner");
-  console.log("------------------------------------------");
+  console.log('🧠 NOVAMIND ESM TypeScript Test Runner');
+  console.log('------------------------------------------');
   console.log(`Running tests matching pattern: ${testPattern}`);
 
   // Find test files
@@ -56,24 +56,19 @@ export async function runTests(options: TestRunnerOptions): Promise<void> {
 
     try {
       const result = spawn(
-        "node",
-        [
-          "--experimental-specifier-resolution=node",
-          "--loader",
-          "ts-node/esm",
-          wrapperFile,
-        ],
+        'node',
+        ['--experimental-specifier-resolution=node', '--loader', 'ts-node/esm', wrapperFile],
         {
-          stdio: verbose ? "inherit" : "pipe",
+          stdio: verbose ? 'inherit' : 'pipe',
           env: {
             ...process.env,
             TS_NODE_PROJECT: tsconfig,
           },
-        },
+        }
       );
 
       await new Promise<void>((resolve) => {
-        result.on("close", (code) => {
+        result.on('close', (code) => {
           if (code === 0) {
             console.log(`✅ Test passed: ${path.basename(testFile)}`);
             passedCount++;
@@ -92,7 +87,7 @@ export async function runTests(options: TestRunnerOptions): Promise<void> {
     }
   }
 
-  console.log("\n------------------------------------------");
+  console.log('\n------------------------------------------');
   console.log(`Test Results: ${passedCount} passed, ${failedCount} failed`);
 
   if (failedCount > 0) {
@@ -108,7 +103,7 @@ async function findTestFiles(pattern: string): Promise<string[]> {
 
   // Convert glob pattern to regex
   const regexPattern = new RegExp(
-    pattern.replace(/\./g, "\\.").replace(/\*/g, ".*").replace(/\?/g, "."),
+    pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.')
   );
 
   async function searchDirectory(dir: string): Promise<void> {
@@ -119,12 +114,12 @@ async function findTestFiles(pattern: string): Promise<string[]> {
 
       if (entry.isDirectory()) {
         // Skip node_modules and hidden directories
-        if (entry.name !== "node_modules" && !entry.name.startsWith(".")) {
+        if (entry.name !== 'node_modules' && !entry.name.startsWith('.')) {
           await searchDirectory(fullPath);
         }
       } else if (
         entry.isFile() &&
-        (entry.name.endsWith(".test.ts") || entry.name.endsWith(".test.tsx")) &&
+        (entry.name.endsWith('.test.ts') || entry.name.endsWith('.test.tsx')) &&
         regexPattern.test(fullPath)
       ) {
         files.push(fullPath);
@@ -142,13 +137,10 @@ async function findTestFiles(pattern: string): Promise<string[]> {
 async function createEsmWrapper(testFile: string): Promise<string> {
   const wrapperContent = `
 import './esm-test-setup.js';
-import '${testFile.replace(/\\/g, "/")}';
+import '${testFile.replace(/\\/g, '/')}';
 `;
 
-  const wrapperFile = path.join(
-    path.dirname(testFile),
-    `__wrapper_${path.basename(testFile)}.mjs`,
-  );
+  const wrapperFile = path.join(path.dirname(testFile), `__wrapper_${path.basename(testFile)}.mjs`);
 
   fs.writeFileSync(wrapperFile, wrapperContent);
   return wrapperFile;
@@ -157,16 +149,16 @@ import '${testFile.replace(/\\/g, "/")}';
 // Run the tests if this script is executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
-  const testPattern = args[0] || "src/**/*.test.{ts,tsx}";
-  const tsconfig = args[1] || "./tsconfig.json";
-  const verbose = args.includes("--verbose");
+  const testPattern = args[0] || 'src/**/*.test.{ts,tsx}';
+  const tsconfig = args[1] || './tsconfig.json';
+  const verbose = args.includes('--verbose');
 
   runTests({
     testPattern,
     tsconfig,
     verbose,
   }).catch((error) => {
-    console.error("Error running tests:", error);
+    console.error('Error running tests:', error);
     process.exit(1);
   });
 }

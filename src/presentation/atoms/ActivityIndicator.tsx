@@ -4,13 +4,13 @@
  * with neuropsychiatric precision and mathematical elegance
  */
 
-import React, { useRef, useMemo, useEffect } from "react";
-import { useFrame } from "@react-three/fiber";
-import { Vector3, Color, ShaderMaterial, Mesh, DoubleSide } from "three";
-import { useSpring, animated } from "@react-spring/three";
+import React, { useRef, useMemo, useEffect } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { Vector3, Color, ShaderMaterial, Mesh, DoubleSide } from 'three';
+import { useSpring, animated } from '@react-spring/three';
 
 // Import types
-import { ActivationLevel } from "@domain/types/brain/activity";
+import { ActivationLevel } from '@domain/types/brain/activity';
 
 // Neural activity shader with advanced clinical precision effects
 const activityShader = {
@@ -110,8 +110,8 @@ const activationLevelMap: Record<ActivationLevel, number> = {
 export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
   position,
   scale,
-  baseColor = "#94a3b8", // Default slate color
-  activeColor = "#ef4444", // Default red for active state
+  baseColor = '#94a3b8', // Default slate color
+  activeColor = '#ef4444', // Default red for active state
   activationLevel,
   rawActivity,
   opacity = 0.8,
@@ -127,7 +127,7 @@ export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
 
   // Calculate derived scale
   const derivedScale = useMemo(() => {
-    if (typeof scale === "number") {
+    if (typeof scale === 'number') {
       return new Vector3(scale, scale, scale);
     }
     return scale;
@@ -175,15 +175,7 @@ export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
       side: DoubleSide, // Visible from both sides
       depthWrite: false, // Prevent Z-fighting with brain region
     });
-  }, [
-    baseColorObj,
-    activeColorObj,
-    opacity,
-    pulsePeriod,
-    waveSpeed,
-    waveAmplitude,
-    glowIntensity,
-  ]);
+  }, [baseColorObj, activeColorObj, opacity, pulsePeriod, waveSpeed, waveAmplitude, glowIntensity]);
 
   // Update material when activity level changes
   useEffect(() => {
@@ -213,11 +205,7 @@ export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
       scale={derivedScale.clone().multiplyScalar(1.1)} // Slightly larger than the region
     >
       <sphereGeometry args={[1, 32, 32]} />
-      <shaderMaterial
-        ref={materialRef}
-        args={[shaderMaterial]}
-        attach="material"
-      />
+      <shaderMaterial ref={materialRef} args={[shaderMaterial]} attach="material" />
     </animated.mesh>
   );
 };

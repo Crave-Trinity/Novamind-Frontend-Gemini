@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface CardProps {
   /** Card content */
@@ -15,12 +15,7 @@ interface CardProps {
  * Card Component
  * Container with consistent styling and elevation
  */
-const Card: React.FC<CardProps> = ({
-  children,
-  title,
-  className = "",
-  onClick,
-}) => {
+const Card: React.FC<CardProps> = ({ children, title, className = '', onClick }) => {
   return (
     <div
       className={`rounded-lg bg-white p-4 shadow-md dark:bg-gray-800 ${className}`}

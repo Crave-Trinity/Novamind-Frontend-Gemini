@@ -3,11 +3,11 @@
  * BrainRegionLabels Molecular Component - clinical region annotation with quantum precision
  */
 
-import React, { useMemo } from "react";
-import { Html } from "@react-three/drei";
-import { BrainRegion } from "@domain/types/brain/models";
-import { ThemeSettings } from "@domain/types/brain/visualization";
-import { SafeArray, Vector3 } from "@domain/types/shared/common";
+import React, { useMemo } from 'react';
+import { Html } from '@react-three/drei';
+import { BrainRegion } from '@domain/types/brain/models';
+import { ThemeSettings } from '@domain/types/brain/visualization';
+import { SafeArray, Vector3 } from '@domain/types/shared/common';
 
 // Neural-safe prop definition with explicit typing
 interface BrainRegionLabelsProps {
@@ -69,30 +69,18 @@ const BrainRegionLabels: React.FC<BrainRegionLabelsProps> = ({
     }
 
     // Always show selected and highlighted regions
-    const priorityIds = new Set([
-      ...safeSelectedIds.toArray(),
-      ...safeHighlightedIds.toArray(),
-    ]);
+    const priorityIds = new Set([...safeSelectedIds.toArray(), ...safeHighlightedIds.toArray()]);
 
     // Sort by importance (selected > highlighted > active > others)
-    const sorted = filtered.toArray().sort((a, b) => { // Convert SafeArray to array before sorting
+    const sorted = filtered.toArray().sort((a, b) => {
+      // Convert SafeArray to array before sorting
       // First priority: selected regions
-      if (safeSelectedIds.includes(a.id) && !safeSelectedIds.includes(b.id))
-        return -1;
-      if (!safeSelectedIds.includes(a.id) && safeSelectedIds.includes(b.id))
-        return 1;
+      if (safeSelectedIds.includes(a.id) && !safeSelectedIds.includes(b.id)) return -1;
+      if (!safeSelectedIds.includes(a.id) && safeSelectedIds.includes(b.id)) return 1;
 
       // Second priority: highlighted regions
-      if (
-        safeHighlightedIds.includes(a.id) &&
-        !safeHighlightedIds.includes(b.id)
-      )
-        return -1;
-      if (
-        !safeHighlightedIds.includes(a.id) &&
-        safeHighlightedIds.includes(b.id)
-      )
-        return 1;
+      if (safeHighlightedIds.includes(a.id) && !safeHighlightedIds.includes(b.id)) return -1;
+      if (!safeHighlightedIds.includes(a.id) && safeHighlightedIds.includes(b.id)) return 1;
 
       // Third priority: activity level
       return b.activityLevel - a.activityLevel;
@@ -173,17 +161,17 @@ const BrainRegionLabels: React.FC<BrainRegionLabelsProps> = ({
                 px-1.5 py-0.5 rounded text-xs backdrop-blur-sm transition-all duration-200
                 ${
                   isSelected
-                    ? "bg-blue-600 text-white font-bold shadow-lg scale-105"
+                    ? 'bg-blue-600 text-white font-bold shadow-lg scale-105'
                     : isHighlighted
-                      ? "bg-yellow-500/80 text-white font-medium shadow-md scale-100"
-                      : "bg-black/50 text-white/90 font-normal shadow hover:bg-black/70 scale-95"
+                      ? 'bg-yellow-500/80 text-white font-medium shadow-md scale-100'
+                      : 'bg-black/50 text-white/90 font-normal shadow hover:bg-black/70 scale-95'
                 }
-                ${region.isActive ? "ring-1 ring-white/30" : ""}
+                ${region.isActive ? 'ring-1 ring-white/30' : ''}
               `}
               style={{
                 fontSize: `${0.8 * labelScale}rem`,
                 transform: `scale(${0.8 + region.activityLevel * 0.4})`,
-                minWidth: "12px",
+                minWidth: '12px',
               }}
               onClick={() => handleLabelClick(region.id)}
             >
@@ -194,7 +182,7 @@ const BrainRegionLabels: React.FC<BrainRegionLabelsProps> = ({
                 <div
                   className={`
                   mt-0.5 flex items-center justify-center gap-1 text-2xs font-normal
-                  ${isSelected ? "text-blue-100" : "text-white/80"}
+                  ${isSelected ? 'text-blue-100' : 'text-white/80'}
                 `}
                 >
                   {clinical.hasSymptoms && (
@@ -214,21 +202,20 @@ const BrainRegionLabels: React.FC<BrainRegionLabelsProps> = ({
               )}
 
               {/* Optional tooltip for detailed indicators */}
-              {clinical.indicators.length > 0 &&
-                (isSelected || isHighlighted) && (
-                  <div
-                    className={`
+              {clinical.indicators.length > 0 && (isSelected || isHighlighted) && (
+                <div
+                  className={`
                   absolute -bottom-1 left-1/2 transform -translate-x-1/2 translate-y-full
                   bg-black/80 text-white px-2 py-1 rounded text-2xs w-max max-w-[12rem] z-10
                 `}
-                  >
-                    {clinical.indicators.map((indicator, i) => (
-                      <div key={i} className="whitespace-normal">
-                        • {indicator}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                >
+                  {clinical.indicators.map((indicator, i) => (
+                    <div key={i} className="whitespace-normal">
+                      • {indicator}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </Html>
         );

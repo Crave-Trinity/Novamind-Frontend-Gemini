@@ -4,19 +4,13 @@
  * with HIPAA-compliant clinical precision and priority management
  */
 
-import React, {
-  useRef,
-  useMemo,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
-import { Html, useFrame } from "@react-three/fiber";
-import { Vector3, Group } from "three";
-import { Text, Billboard } from "@react-three/drei";
+import React, { useRef, useMemo, useState, useEffect, useCallback } from 'react';
+import { Html, useFrame } from '@react-three/fiber';
+import { Vector3, Group } from 'three';
+import { Text, Billboard } from '@react-three/drei';
 
 // Domain types
-import { BrainRegion } from "@domain/types/brain/models";
+import { BrainRegion } from '@domain/types/brain/models';
 
 /**
  * Clinical alert with neural-safe typing
@@ -29,13 +23,8 @@ export interface ClinicalAlert {
   sourceMetric: string;
   value: number;
   threshold: number;
-  priority: "urgent" | "warning" | "informational";
-  category:
-    | "physiological"
-    | "behavioral"
-    | "self-reported"
-    | "environmental"
-    | "treatment";
+  priority: 'urgent' | 'warning' | 'informational';
+  category: 'physiological' | 'behavioral' | 'self-reported' | 'environmental' | 'treatment';
   relatedRegionIds?: string[];
   confidenceLevel: number; // 0.0-1.0
   ruleId?: string;
@@ -52,17 +41,17 @@ interface BiometricAlertVisualizerProps {
   regions: BrainRegion[];
   maxVisibleAlerts?: number;
   showAcknowledged?: boolean;
-  priorityFilter?: ("urgent" | "warning" | "informational")[];
+  priorityFilter?: ('urgent' | 'warning' | 'informational')[];
   categoryFilter?: (
-    | "physiological"
-    | "behavioral"
-    | "self-reported"
-    | "environmental"
-    | "treatment"
+    | 'physiological'
+    | 'behavioral'
+    | 'self-reported'
+    | 'environmental'
+    | 'treatment'
   )[];
   onAlertClick?: (alertId: string) => void;
   onAlertAcknowledge?: (alertId: string) => void;
-  alertPositionMode?: "region" | "floating" | "hybrid";
+  alertPositionMode?: 'region' | 'floating' | 'hybrid';
   floatingPosition?: Vector3;
   themeColors?: {
     urgent: string;
@@ -81,20 +70,20 @@ const PRIORITY_CONFIG = {
   urgent: {
     order: 0,
     pulseSpeed: 2.0,
-    icon: "⚠️",
-    defaultColor: "#ef4444", // Red
+    icon: '⚠️',
+    defaultColor: '#ef4444', // Red
   },
   warning: {
     order: 1,
     pulseSpeed: 1.2,
-    icon: "⚠",
-    defaultColor: "#f97316", // Orange
+    icon: '⚠',
+    defaultColor: '#f97316', // Orange
   },
   informational: {
     order: 2,
     pulseSpeed: 0.8,
-    icon: "ℹ️",
-    defaultColor: "#3b82f6", // Blue
+    icon: 'ℹ️',
+    defaultColor: '#3b82f6', // Blue
   },
 };
 
@@ -103,24 +92,24 @@ const PRIORITY_CONFIG = {
  */
 const CATEGORY_CONFIG = {
   physiological: {
-    icon: "❤️",
-    label: "Physiological",
+    icon: '❤️',
+    label: 'Physiological',
   },
   behavioral: {
-    icon: "🚶",
-    label: "Behavioral",
+    icon: '🚶',
+    label: 'Behavioral',
   },
-  "self-reported": {
-    icon: "💬",
-    label: "Self-Reported",
+  'self-reported': {
+    icon: '💬',
+    label: 'Self-Reported',
   },
   environmental: {
-    icon: "🌤️",
-    label: "Environmental",
+    icon: '🌤️',
+    label: 'Environmental',
   },
   treatment: {
-    icon: "💊",
-    label: "Treatment",
+    icon: '💊',
+    label: 'Treatment',
   },
 };
 
@@ -128,9 +117,7 @@ const CATEGORY_CONFIG = {
  * BiometricAlertVisualizer - Molecular component for clinical alert visualization
  * Implements HIPAA-compliant alert presentation with priority management
  */
-export const BiometricAlertVisualizer: React.FC<
-  BiometricAlertVisualizerProps
-> = ({
+export const BiometricAlertVisualizer: React.FC<BiometricAlertVisualizerProps> = ({
   alerts,
   regions,
   maxVisibleAlerts = 10,
@@ -139,15 +126,15 @@ export const BiometricAlertVisualizer: React.FC<
   categoryFilter,
   onAlertClick,
   onAlertAcknowledge,
-  alertPositionMode = "hybrid",
+  alertPositionMode = 'hybrid',
   floatingPosition = new Vector3(0, 5, 0),
   themeColors = {
-    urgent: "#ef4444",
-    warning: "#f97316",
-    informational: "#3b82f6",
-    acknowledged: "#94a3b8",
-    text: "#ffffff",
-    background: "#1e293b",
+    urgent: '#ef4444',
+    warning: '#f97316',
+    informational: '#3b82f6',
+    acknowledged: '#94a3b8',
+    text: '#ffffff',
+    background: '#1e293b',
   },
 }) => {
   // Refs
@@ -178,29 +165,22 @@ export const BiometricAlertVisualizer: React.FC<
 
     // Apply priority filter
     if (priorityFilter && priorityFilter.length > 0) {
-      filteredAlerts = filteredAlerts.filter((alert) =>
-        priorityFilter.includes(alert.priority),
-      );
+      filteredAlerts = filteredAlerts.filter((alert) => priorityFilter.includes(alert.priority));
     }
 
     // Apply category filter
     if (categoryFilter && categoryFilter.length > 0) {
-      filteredAlerts = filteredAlerts.filter((alert) =>
-        categoryFilter.includes(alert.category),
-      );
+      filteredAlerts = filteredAlerts.filter((alert) => categoryFilter.includes(alert.category));
     }
 
     // Filter expired alerts
     const now = Date.now();
-    filteredAlerts = filteredAlerts.filter(
-      (alert) => !alert.expiresAt || alert.expiresAt > now,
-    );
+    filteredAlerts = filteredAlerts.filter((alert) => !alert.expiresAt || alert.expiresAt > now);
 
     // Sort by priority and timestamp
     filteredAlerts.sort((a, b) => {
       // First by priority
-      const priorityDiff =
-        PRIORITY_CONFIG[a.priority].order - PRIORITY_CONFIG[b.priority].order;
+      const priorityDiff = PRIORITY_CONFIG[a.priority].order - PRIORITY_CONFIG[b.priority].order;
 
       if (priorityDiff !== 0) return priorityDiff;
 
@@ -215,13 +195,7 @@ export const BiometricAlertVisualizer: React.FC<
 
     // Limit to max visible
     return filteredAlerts.slice(0, maxVisibleAlerts);
-  }, [
-    alerts,
-    showAcknowledged,
-    priorityFilter,
-    categoryFilter,
-    maxVisibleAlerts,
-  ]);
+  }, [alerts, showAcknowledged, priorityFilter, categoryFilter, maxVisibleAlerts]);
 
   // Determine alert positions
   const alertPositions = useMemo(() => {
@@ -230,7 +204,7 @@ export const BiometricAlertVisualizer: React.FC<
     processedAlerts.forEach((alert, index) => {
       let position: Vector3;
 
-      if (alertPositionMode === "region" && alert.relatedRegionIds?.length) {
+      if (alertPositionMode === 'region' && alert.relatedRegionIds?.length) {
         // Position near the first related region
         const regionId = alert.relatedRegionIds[0];
         const region = regionMap.get(regionId);
@@ -240,14 +214,9 @@ export const BiometricAlertVisualizer: React.FC<
           position = region.position.clone().add(new Vector3(0, 1.5, 0));
         } else {
           // Fallback to floating position with index-based offset
-          position = floatingPosition
-            .clone()
-            .add(new Vector3(0, -index * 1.2, 0));
+          position = floatingPosition.clone().add(new Vector3(0, -index * 1.2, 0));
         }
-      } else if (
-        alertPositionMode === "hybrid" &&
-        alert.relatedRegionIds?.length
-      ) {
+      } else if (alertPositionMode === 'hybrid' && alert.relatedRegionIds?.length) {
         // Position near the first related region
         const regionId = alert.relatedRegionIds[0];
         const region = regionMap.get(regionId);
@@ -257,15 +226,11 @@ export const BiometricAlertVisualizer: React.FC<
           position = region.position.clone().add(new Vector3(0, 1.5, 0));
         } else {
           // Fallback to floating position with index-based offset
-          position = floatingPosition
-            .clone()
-            .add(new Vector3(0, -index * 1.2, 0));
+          position = floatingPosition.clone().add(new Vector3(0, -index * 1.2, 0));
         }
       } else {
         // Floating position with index-based offset
-        position = floatingPosition
-          .clone()
-          .add(new Vector3(0, -index * 1.2, 0));
+        position = floatingPosition.clone().add(new Vector3(0, -index * 1.2, 0));
       }
 
       positions.set(alert.id, position);
@@ -296,7 +261,7 @@ export const BiometricAlertVisualizer: React.FC<
         onAlertClick(alertId);
       }
     },
-    [onAlertClick],
+    [onAlertClick]
   );
 
   // Handle alert acknowledge
@@ -308,7 +273,7 @@ export const BiometricAlertVisualizer: React.FC<
         onAlertAcknowledge(alertId);
       }
     },
-    [onAlertAcknowledge],
+    [onAlertAcknowledge]
   );
 
   // Format alert timestamp
@@ -318,7 +283,7 @@ export const BiometricAlertVisualizer: React.FC<
 
     // If less than a minute ago
     if (diff < 60000) {
-      return "Just now";
+      return 'Just now';
     }
 
     // If less than an hour ago
@@ -346,15 +311,12 @@ export const BiometricAlertVisualizer: React.FC<
 
         // Get pulse value for animation
         const pulseValue = pulseState.get(alert.id) || 0;
-        const pulseScale = alert.isAcknowledged
-          ? 1.0
-          : 0.9 + 0.1 * Math.sin(pulseValue);
+        const pulseScale = alert.isAcknowledged ? 1.0 : 0.9 + 0.1 * Math.sin(pulseValue);
 
         // Determine color based on priority and acknowledgement status
         const color = alert.isAcknowledged
           ? themeColors.acknowledged
-          : themeColors[alert.priority] ||
-            PRIORITY_CONFIG[alert.priority].defaultColor;
+          : themeColors[alert.priority] || PRIORITY_CONFIG[alert.priority].defaultColor;
 
         // Get category icon and info
         const category = CATEGORY_CONFIG[alert.category];
@@ -383,42 +345,42 @@ export const BiometricAlertVisualizer: React.FC<
                 style={{
                   backgroundColor: `${themeColors.background}dd`,
                   borderLeft: `4px solid ${color}`,
-                  borderRadius: "0.375rem",
-                  padding: "0.5rem 0.75rem",
-                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                  borderRadius: '0.375rem',
+                  padding: '0.5rem 0.75rem',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                   color: themeColors.text,
-                  fontFamily: "system-ui, -apple-system, sans-serif",
-                  fontSize: "0.875rem",
-                  width: "280px",
-                  maxWidth: "280px",
-                  transition: "transform 0.2s ease-out",
-                  cursor: "pointer",
-                  userSelect: "none",
-                  marginBottom: "0.5rem",
-                  backdropFilter: "blur(8px)",
+                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  fontSize: '0.875rem',
+                  width: '280px',
+                  maxWidth: '280px',
+                  transition: 'transform 0.2s ease-out',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  marginBottom: '0.5rem',
+                  backdropFilter: 'blur(8px)',
                   opacity: alert.isAcknowledged ? 0.7 : 1.0,
                 }}
                 onClick={() => handleAlertClick(alert.id)}
               >
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginBottom: "0.25rem",
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.25rem',
                   }}
                 >
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
+                      display: 'flex',
+                      alignItems: 'center',
                       fontWeight: 600,
                     }}
                   >
                     <span
                       style={{
-                        marginRight: "0.5rem",
-                        fontSize: "1rem",
+                        marginRight: '0.5rem',
+                        fontSize: '1rem',
                       }}
                     >
                       {PRIORITY_CONFIG[alert.priority].icon}
@@ -427,7 +389,7 @@ export const BiometricAlertVisualizer: React.FC<
                   </div>
                   <div
                     style={{
-                      fontSize: "0.75rem",
+                      fontSize: '0.75rem',
                       opacity: 0.8,
                     }}
                   >
@@ -435,40 +397,38 @@ export const BiometricAlertVisualizer: React.FC<
                   </div>
                 </div>
 
-                <div style={{ marginBottom: "0.5rem" }}>{alert.message}</div>
+                <div style={{ marginBottom: '0.5rem' }}>{alert.message}</div>
 
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-                    paddingTop: "0.5rem",
-                    marginTop: "0.25rem",
-                    fontSize: "0.75rem",
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                    paddingTop: '0.5rem',
+                    marginTop: '0.25rem',
+                    fontSize: '0.75rem',
                   }}
                 >
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
+                      display: 'flex',
+                      alignItems: 'center',
                       opacity: 0.8,
                     }}
                   >
-                    <span style={{ marginRight: "0.25rem" }}>
-                      {category.icon}
-                    </span>
+                    <span style={{ marginRight: '0.25rem' }}>{category.icon}</span>
                     {category.label}
 
                     {alert.isPatientSpecific && (
                       <span
                         style={{
-                          marginLeft: "0.5rem",
+                          marginLeft: '0.5rem',
                           backgroundColor: color,
-                          color: "white",
-                          padding: "0.125rem 0.375rem",
-                          borderRadius: "1rem",
-                          fontSize: "0.625rem",
+                          color: 'white',
+                          padding: '0.125rem 0.375rem',
+                          borderRadius: '1rem',
+                          fontSize: '0.625rem',
                         }}
                       >
                         Patient-Specific
@@ -479,13 +439,13 @@ export const BiometricAlertVisualizer: React.FC<
                   {!alert.isAcknowledged && onAlertAcknowledge && (
                     <button
                       style={{
-                        backgroundColor: "transparent",
-                        border: "1px solid rgba(255, 255, 255, 0.3)",
-                        color: "white",
-                        padding: "0.125rem 0.375rem",
-                        borderRadius: "0.25rem",
-                        fontSize: "0.75rem",
-                        cursor: "pointer",
+                        backgroundColor: 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        color: 'white',
+                        padding: '0.125rem 0.375rem',
+                        borderRadius: '0.25rem',
+                        fontSize: '0.75rem',
+                        cursor: 'pointer',
                       }}
                       onClick={(e) => handleAlertAcknowledge(e, alert.id)}
                     >
@@ -497,19 +457,19 @@ export const BiometricAlertVisualizer: React.FC<
                 {/* Confidence indicator */}
                 <div
                   style={{
-                    marginTop: "0.5rem",
-                    height: "3px",
-                    backgroundColor: "rgba(255, 255, 255, 0.1)",
-                    borderRadius: "1px",
-                    overflow: "hidden",
+                    marginTop: '0.5rem',
+                    height: '3px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: '1px',
+                    overflow: 'hidden',
                   }}
                 >
                   <div
                     style={{
-                      height: "100%",
+                      height: '100%',
                       width: `${alert.confidenceLevel * 100}%`,
                       backgroundColor: color,
-                      transition: "width 0.3s ease-out",
+                      transition: 'width 0.3s ease-out',
                     }}
                   />
                 </div>

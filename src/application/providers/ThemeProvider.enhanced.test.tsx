@@ -13,9 +13,7 @@ const ThemeConsumerComponent: React.FC = () => {
 
   return (
     <div data-testid="theme-consumer">
-      <div data-testid="theme-status">
-        Current: {theme}
-      </div>
+      <div data-testid="theme-status">Current: {theme}</div>
       <button onClick={() => setTheme('light')}>Set Light</button>
       <button onClick={() => setTheme('dark')}>Set Dark</button>
       <button onClick={() => setTheme('system')}>Set System</button>
@@ -23,14 +21,15 @@ const ThemeConsumerComponent: React.FC = () => {
   );
 };
 
-describe('ThemeProvider (Enhanced Tests with renderWithProviders)', () => { // Re-enabled suite
+describe('ThemeProvider (Enhanced Tests with renderWithProviders)', () => {
+  // Re-enabled suite
   beforeEach(() => {
     // Reset localStorage before each test
     localStorage.removeItem('theme');
     document.documentElement.classList.remove('dark', 'light'); // Clean slate
     // Removed attempt to trigger matchMedia mock as it's causing errors
     // and likely handled globally or by renderWithProviders setup.
- });
+  });
 
   afterEach(() => {
     // Restore any potential mocks if needed, though renderWithProviders doesn't mock per-test
@@ -45,7 +44,7 @@ describe('ThemeProvider (Enhanced Tests with renderWithProviders)', () => { // R
 
   it('toggles to dark mode via setTheme', () => {
     const { isDarkMode } = renderWithProviders(<ThemeConsumerComponent />);
-    
+
     expect(isDarkMode()).toBe(false); // Initial check
 
     act(() => {
@@ -62,7 +61,7 @@ describe('ThemeProvider (Enhanced Tests with renderWithProviders)', () => { // R
     // Start in dark mode for this test
     // Pass 'dark' as defaultTheme to start in dark mode
     renderWithProviders(<ThemeConsumerComponent />, { defaultTheme: 'dark' });
-    
+
     expect(screen.getByTestId('theme-status')).toHaveTextContent('Current: dark'); // Should now correctly start dark
     expect(document.documentElement.classList.contains('dark')).toBe(true);
 
@@ -81,12 +80,13 @@ describe('ThemeProvider (Enhanced Tests with renderWithProviders)', () => { // R
     expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
 
-  it.skip('uses system preference when theme is set to system', () => { // Skip due to matchMedia mock issues
+  it.skip('uses system preference when theme is set to system', () => {
+    // Skip due to matchMedia mock issues
     // Mock system preference to dark
-     (window.matchMedia('(prefers-color-scheme: dark)') as any)._triggerChange(true);
+    (window.matchMedia('(prefers-color-scheme: dark)') as any)._triggerChange(true);
 
     renderWithProviders(<ThemeConsumerComponent />);
-    
+
     act(() => {
       screen.getByRole('button', { name: /set system/i }).click();
     });
@@ -95,26 +95,26 @@ describe('ThemeProvider (Enhanced Tests with renderWithProviders)', () => { // R
     expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
 
-   it.skip('updates theme when system preference changes while set to system', () => { // Skip due to matchMedia mock issues
-     // Start with light system preference
-     (window.matchMedia('(prefers-color-scheme: dark)') as any)._triggerChange(false);
-     renderWithProviders(<ThemeConsumerComponent />);
+  it.skip('updates theme when system preference changes while set to system', () => {
+    // Skip due to matchMedia mock issues
+    // Start with light system preference
+    (window.matchMedia('(prefers-color-scheme: dark)') as any)._triggerChange(false);
+    renderWithProviders(<ThemeConsumerComponent />);
 
-     // Set theme to system
-     act(() => {
-       screen.getByRole('button', { name: /set system/i }).click();
-     });
-     expect(screen.getByTestId('theme-status')).toHaveTextContent('Current: system');
-     expect(document.documentElement.classList.contains('dark')).toBe(false);
+    // Set theme to system
+    act(() => {
+      screen.getByRole('button', { name: /set system/i }).click();
+    });
+    expect(screen.getByTestId('theme-status')).toHaveTextContent('Current: system');
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
 
-     // Simulate system preference changing to dark
-     act(() => {
-        (window.matchMedia('(prefers-color-scheme: dark)') as any)._triggerChange(true);
-     });
-     
-     // Theme should update
-     expect(screen.getByTestId('theme-status')).toHaveTextContent('Current: system');
-     expect(document.documentElement.classList.contains('dark')).toBe(true);
-   });
+    // Simulate system preference changing to dark
+    act(() => {
+      (window.matchMedia('(prefers-color-scheme: dark)') as any)._triggerChange(true);
+    });
 
+    // Theme should update
+    expect(screen.getByTestId('theme-status')).toHaveTextContent('Current: system');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+  });
 });

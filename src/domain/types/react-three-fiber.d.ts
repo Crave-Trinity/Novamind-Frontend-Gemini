@@ -14,7 +14,7 @@ declare global {
   namespace JSX {
     interface IntrinsicElements {
       // Core Three.js Primitives - explicitly override DOM elements
-      'line': ReactThreeFiber.Object3DNode<THREE.Line, typeof THREE.Line> & {
+      line: ReactThreeFiber.Object3DNode<THREE.Line, typeof THREE.Line> & {
         geometry?: any;
         onClick?: (event: any) => void;
         onPointerOver?: (event: any) => void;
@@ -38,17 +38,26 @@ declare global {
       latheGeometry: ReactThreeFiber.Node<THREE.LatheGeometry, typeof THREE.LatheGeometry>;
       ringGeometry: ReactThreeFiber.Node<THREE.RingGeometry, typeof THREE.RingGeometry>;
       torusGeometry: ReactThreeFiber.Node<THREE.TorusGeometry, typeof THREE.TorusGeometry>;
-      torusKnotGeometry: ReactThreeFiber.Node<THREE.TorusKnotGeometry, typeof THREE.TorusKnotGeometry>;
+      torusKnotGeometry: ReactThreeFiber.Node<
+        THREE.TorusKnotGeometry,
+        typeof THREE.TorusKnotGeometry
+      >;
       shapeGeometry: ReactThreeFiber.Node<THREE.ShapeGeometry, typeof THREE.ShapeGeometry>;
 
       // Materials with explicit props
-      'lineBasicMaterial': ReactThreeFiber.Node<THREE.LineBasicMaterial, typeof THREE.LineBasicMaterial> & {
+      lineBasicMaterial: ReactThreeFiber.Node<
+        THREE.LineBasicMaterial,
+        typeof THREE.LineBasicMaterial
+      > & {
         color?: string | number;
         opacity?: number;
         transparent?: boolean;
         linewidth?: number;
       };
-      'lineDashedMaterial': ReactThreeFiber.Node<THREE.LineDashedMaterial, typeof THREE.LineDashedMaterial> & {
+      lineDashedMaterial: ReactThreeFiber.Node<
+        THREE.LineDashedMaterial,
+        typeof THREE.LineDashedMaterial
+      > & {
         color?: string | number;
         opacity?: number;
         transparent?: boolean;
@@ -58,16 +67,37 @@ declare global {
         scale?: number;
         dashOffset?: number;
       };
-      
+
       // Other materials
       material: ReactThreeFiber.Node<THREE.Material, typeof THREE.Material>;
-      meshBasicMaterial: ReactThreeFiber.Node<THREE.MeshBasicMaterial, typeof THREE.MeshBasicMaterial>;
-      meshStandardMaterial: ReactThreeFiber.Node<THREE.MeshStandardMaterial, typeof THREE.MeshStandardMaterial>;
-      meshPhysicalMaterial: ReactThreeFiber.Node<THREE.MeshPhysicalMaterial, typeof THREE.MeshPhysicalMaterial>;
-      meshPhongMaterial: ReactThreeFiber.Node<THREE.MeshPhongMaterial, typeof THREE.MeshPhongMaterial>;
-      meshLambertMaterial: ReactThreeFiber.Node<THREE.MeshLambertMaterial, typeof THREE.MeshLambertMaterial>;
-      meshDepthMaterial: ReactThreeFiber.Node<THREE.MeshDepthMaterial, typeof THREE.MeshDepthMaterial>;
-      meshNormalMaterial: ReactThreeFiber.Node<THREE.MeshNormalMaterial, typeof THREE.MeshNormalMaterial>;
+      meshBasicMaterial: ReactThreeFiber.Node<
+        THREE.MeshBasicMaterial,
+        typeof THREE.MeshBasicMaterial
+      >;
+      meshStandardMaterial: ReactThreeFiber.Node<
+        THREE.MeshStandardMaterial,
+        typeof THREE.MeshStandardMaterial
+      >;
+      meshPhysicalMaterial: ReactThreeFiber.Node<
+        THREE.MeshPhysicalMaterial,
+        typeof THREE.MeshPhysicalMaterial
+      >;
+      meshPhongMaterial: ReactThreeFiber.Node<
+        THREE.MeshPhongMaterial,
+        typeof THREE.MeshPhongMaterial
+      >;
+      meshLambertMaterial: ReactThreeFiber.Node<
+        THREE.MeshLambertMaterial,
+        typeof THREE.MeshLambertMaterial
+      >;
+      meshDepthMaterial: ReactThreeFiber.Node<
+        THREE.MeshDepthMaterial,
+        typeof THREE.MeshDepthMaterial
+      >;
+      meshNormalMaterial: ReactThreeFiber.Node<
+        THREE.MeshNormalMaterial,
+        typeof THREE.MeshNormalMaterial
+      >;
       pointsMaterial: ReactThreeFiber.Node<THREE.PointsMaterial, typeof THREE.PointsMaterial>;
       shaderMaterial: ReactThreeFiber.Node<THREE.ShaderMaterial, typeof THREE.ShaderMaterial>;
       shadowMaterial: ReactThreeFiber.Node<THREE.ShadowMaterial, typeof THREE.ShadowMaterial>;
@@ -75,10 +105,16 @@ declare global {
 
       // Lights
       ambientLight: ReactThreeFiber.Object3DNode<THREE.AmbientLight, typeof THREE.AmbientLight>;
-      directionalLight: ReactThreeFiber.Object3DNode<THREE.DirectionalLight, typeof THREE.DirectionalLight>;
+      directionalLight: ReactThreeFiber.Object3DNode<
+        THREE.DirectionalLight,
+        typeof THREE.DirectionalLight
+      >;
       pointLight: ReactThreeFiber.Object3DNode<THREE.PointLight, typeof THREE.PointLight>;
       spotLight: ReactThreeFiber.Object3DNode<THREE.SpotLight, typeof THREE.SpotLight>;
-      hemisphereLight: ReactThreeFiber.Object3DNode<THREE.HemisphereLight, typeof THREE.HemisphereLight>;
+      hemisphereLight: ReactThreeFiber.Object3DNode<
+        THREE.HemisphereLight,
+        typeof THREE.HemisphereLight
+      >;
       rectAreaLight: ReactThreeFiber.Object3DNode<THREE.RectAreaLight, typeof THREE.RectAreaLight>;
 
       // Helpers

@@ -3,27 +3,27 @@
  * Button testing with quantum precision
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi } from 'vitest';
 
-import { render, screen, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import Button from "./Button"; // Changed to default import
-import { renderWithProviders } from "@test/test-utils";
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import Button from './Button'; // Changed to default import
+import { renderWithProviders } from '@test/test-utils';
 
 // Mock data with clinical precision
 const mockProps = {
   // Add component props here
 };
 
-describe("Button", () => {
-  it("renders with neural precision", () => {
+describe('Button', () => {
+  it('renders with neural precision', () => {
     render(<Button {...mockProps} />);
 
     // Add assertions for rendered content
     expect(screen).toBeDefined();
   });
 
-  it("responds to user interaction with quantum precision", async () => {
+  it('responds to user interaction with quantum precision', async () => {
     const user = userEvent.setup();
     render(<Button {...mockProps} />);
 

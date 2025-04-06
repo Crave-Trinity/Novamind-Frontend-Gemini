@@ -4,23 +4,14 @@
  * with multi-scale pattern recognition and state transition precision
  */
 
-import React, {
-  useRef,
-  useMemo,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
-import { useFrame, useThree } from "@react-three/fiber";
-import { Line, Plane, Html, Text } from "@react-three/drei";
-import { Vector3, Color, Group, Mesh, MathUtils } from "three";
-import { useSpring, animated } from "@react-spring/three";
+import React, { useRef, useMemo, useState, useEffect, useCallback } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { Line, Plane, Html, Text } from '@react-three/drei';
+import { Vector3, Color, Group, Mesh, MathUtils } from 'three';
+import { useSpring, animated } from '@react-spring/three';
 
 // Domain types
-import {
-  NeuralStateTransition,
-  TemporalActivationSequence,
-} from "@domain/types/brain/activity";
+import { NeuralStateTransition, TemporalActivationSequence } from '@domain/types/brain/activity';
 
 /**
  * Props with neural-safe typing
@@ -37,7 +28,7 @@ interface TemporalDynamicsVisualizerProps {
   showGrid?: boolean;
   showLabels?: boolean;
   showTimescale?: boolean;
-  temporalScale?: "momentary" | "daily" | "weekly" | "monthly" | "auto";
+  temporalScale?: 'momentary' | 'daily' | 'weekly' | 'monthly' | 'auto';
   highlightTransitionPoints?: boolean;
   colorMap?: {
     background: string;
@@ -81,9 +72,7 @@ interface GridLine {
  * TemporalDynamicsVisualizer - Molecular component for temporal neural dynamics
  * Implements clinical precision visualization of multi-scale temporal patterns
  */
-export const TemporalDynamicsVisualizer: React.FC<
-  TemporalDynamicsVisualizerProps
-> = ({
+export const TemporalDynamicsVisualizer: React.FC<TemporalDynamicsVisualizerProps> = ({
   stateTransitions = [],
   temporalSequences = [],
   timeRange,
@@ -95,18 +84,18 @@ export const TemporalDynamicsVisualizer: React.FC<
   showGrid = true,
   showLabels = true,
   showTimescale = true,
-  temporalScale = "auto",
+  temporalScale = 'auto',
   highlightTransitionPoints = true,
   colorMap = {
-    background: "#0f172a88", // Semi-transparent dark blue
-    grid: "#334155",
-    axis: "#64748b",
-    label: "#e2e8f0",
-    momentary: "#3b82f6", // Blue
-    daily: "#22c55e", // Green
-    weekly: "#f59e0b", // Amber
-    monthly: "#8b5cf6", // Violet
-    criticalPoint: "#ef4444", // Red
+    background: '#0f172a88', // Semi-transparent dark blue
+    grid: '#334155',
+    axis: '#64748b',
+    label: '#e2e8f0',
+    momentary: '#3b82f6', // Blue
+    daily: '#22c55e', // Green
+    weekly: '#f59e0b', // Amber
+    monthly: '#8b5cf6', // Violet
+    criticalPoint: '#ef4444', // Red
   },
   interactable = true,
   onTransitionPointClick,
@@ -147,7 +136,7 @@ export const TemporalDynamicsVisualizer: React.FC<
     // Check sequences
     if (temporalSequences.length > 0) {
       const sequenceTimes = temporalSequences.flatMap((seq) =>
-        seq.timeSteps.map((step) => step.timeOffset),
+        seq.timeSteps.map((step) => step.timeOffset)
       );
 
       if (sequenceTimes.length > 0) {
@@ -177,40 +166,40 @@ export const TemporalDynamicsVisualizer: React.FC<
   const timeScales = useMemo<Record<string, TimeScaleDefinition>>(
     () => ({
       momentary: {
-        name: "Momentary",
+        name: 'Momentary',
         duration: 300000, // 5 minutes
         majorGridInterval: 60000, // 1 minute
         minorGridInterval: 15000, // 15 seconds
         color: colorMap.momentary,
         labelFormat: (timestamp) => {
           const date = new Date(timestamp);
-          return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`;
+          return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
         },
       },
       daily: {
-        name: "Daily",
+        name: 'Daily',
         duration: 86400000, // 24 hours
         majorGridInterval: 10800000, // 3 hours
         minorGridInterval: 3600000, // 1 hour
         color: colorMap.daily,
         labelFormat: (timestamp) => {
           const date = new Date(timestamp);
-          return `${date.getHours().toString().padStart(2, "0")}:00`;
+          return `${date.getHours().toString().padStart(2, '0')}:00`;
         },
       },
       weekly: {
-        name: "Weekly",
+        name: 'Weekly',
         duration: 604800000, // 7 days
         majorGridInterval: 86400000, // 1 day
         minorGridInterval: 21600000, // 6 hours
         color: colorMap.weekly,
         labelFormat: (timestamp) => {
           const date = new Date(timestamp);
-          return date.toLocaleDateString(undefined, { weekday: "short" });
+          return date.toLocaleDateString(undefined, { weekday: 'short' });
         },
       },
       monthly: {
-        name: "Monthly",
+        name: 'Monthly',
         duration: 2592000000, // 30 days
         majorGridInterval: 604800000, // 1 week
         minorGridInterval: 86400000, // 1 day
@@ -218,26 +207,26 @@ export const TemporalDynamicsVisualizer: React.FC<
         labelFormat: (timestamp) => {
           const date = new Date(timestamp);
           return date.toLocaleDateString(undefined, {
-            month: "short",
-            day: "numeric",
+            month: 'short',
+            day: 'numeric',
           });
         },
       },
     }),
-    [colorMap],
+    [colorMap]
   );
 
   // Determine effective time scale
   const effectiveTemporalScale = useMemo(() => {
-    if (temporalScale !== "auto") return temporalScale;
+    if (temporalScale !== 'auto') return temporalScale;
 
     // Auto-select based on range duration
     const duration = effectiveTimeRange.end - effectiveTimeRange.start;
 
-    if (duration <= timeScales.momentary.duration) return "momentary";
-    if (duration <= timeScales.daily.duration) return "daily";
-    if (duration <= timeScales.weekly.duration) return "weekly";
-    return "monthly";
+    if (duration <= timeScales.momentary.duration) return 'momentary';
+    if (duration <= timeScales.daily.duration) return 'daily';
+    if (duration <= timeScales.weekly.duration) return 'weekly';
+    return 'monthly';
   }, [temporalScale, effectiveTimeRange, timeScales]);
 
   // Generate grid lines
@@ -255,8 +244,7 @@ export const TemporalDynamicsVisualizer: React.FC<
       const x = MathUtils.lerp(
         -width / 2,
         width / 2,
-        (timestamp - effectiveTimeRange.start) /
-          (effectiveTimeRange.end - effectiveTimeRange.start),
+        (timestamp - effectiveTimeRange.start) / (effectiveTimeRange.end - effectiveTimeRange.start)
       );
 
       // Vertical line
@@ -279,8 +267,7 @@ export const TemporalDynamicsVisualizer: React.FC<
       const x = MathUtils.lerp(
         -width / 2,
         width / 2,
-        (timestamp - effectiveTimeRange.start) /
-          (effectiveTimeRange.end - effectiveTimeRange.start),
+        (timestamp - effectiveTimeRange.start) / (effectiveTimeRange.end - effectiveTimeRange.start)
       );
 
       // Vertical line
@@ -307,15 +294,7 @@ export const TemporalDynamicsVisualizer: React.FC<
     }
 
     return lines;
-  }, [
-    showGrid,
-    timeScales,
-    effectiveTemporalScale,
-    effectiveTimeRange,
-    width,
-    height,
-    colorMap,
-  ]);
+  }, [showGrid, timeScales, effectiveTemporalScale, effectiveTimeRange, width, height, colorMap]);
 
   // Process state transitions
   const processedTransitions = useMemo(() => {
@@ -325,7 +304,7 @@ export const TemporalDynamicsVisualizer: React.FC<
         -width / 2,
         width / 2,
         (transition.startState.timestamp - effectiveTimeRange.start) /
-          (effectiveTimeRange.end - effectiveTimeRange.start),
+          (effectiveTimeRange.end - effectiveTimeRange.start)
       );
 
       const endX = MathUtils.lerp(
@@ -334,21 +313,13 @@ export const TemporalDynamicsVisualizer: React.FC<
         (transition.startState.timestamp +
           transition.transitionDuration -
           effectiveTimeRange.start) /
-          (effectiveTimeRange.end - effectiveTimeRange.start),
+          (effectiveTimeRange.end - effectiveTimeRange.start)
       );
 
       // Map activity levels to y position
-      const startY = MathUtils.lerp(
-        -height / 2,
-        height / 2,
-        transition.startState.rawActivity,
-      );
+      const startY = MathUtils.lerp(-height / 2, height / 2, transition.startState.rawActivity);
 
-      const endY = MathUtils.lerp(
-        -height / 2,
-        height / 2,
-        transition.endState.rawActivity,
-      );
+      const endY = MathUtils.lerp(-height / 2, height / 2, transition.endState.rawActivity);
 
       // Determine color based on whether transition is clinically significant
       const color = transition.clinicallySignificant
@@ -359,11 +330,11 @@ export const TemporalDynamicsVisualizer: React.FC<
       const points = [];
 
       // Add points based on transition type
-      if (transition.transitionType === "abrupt") {
+      if (transition.transitionType === 'abrupt') {
         // Sharp transition with just start and end
         points.push(new Vector3(startX, startY, 0));
         points.push(new Vector3(endX, endY, 0));
-      } else if (transition.transitionType === "oscillating") {
+      } else if (transition.transitionType === 'oscillating') {
         // Oscillating with sine wave pattern
         const steps = 20;
         for (let i = 0; i <= steps; i++) {
@@ -415,17 +386,15 @@ export const TemporalDynamicsVisualizer: React.FC<
       const points = sequence.timeSteps.map((step) => {
         // Calculate average activity across all states
         const avgActivity =
-          step.activationStates.reduce(
-            (sum, state) => sum + state.rawActivity,
-            0,
-          ) / Math.max(1, step.activationStates.length);
+          step.activationStates.reduce((sum, state) => sum + state.rawActivity, 0) /
+          Math.max(1, step.activationStates.length);
 
         // Map to visualization space
         const x = MathUtils.lerp(
           -width / 2,
           width / 2,
           (step.timeOffset - effectiveTimeRange.start) /
-            (effectiveTimeRange.end - effectiveTimeRange.start),
+            (effectiveTimeRange.end - effectiveTimeRange.start)
         );
 
         const y = MathUtils.lerp(-height / 2, height / 2, avgActivity);
@@ -439,14 +408,7 @@ export const TemporalDynamicsVisualizer: React.FC<
         color: timeScales[effectiveTemporalScale].color,
       };
     });
-  }, [
-    temporalSequences,
-    effectiveTimeRange,
-    width,
-    height,
-    timeScales,
-    effectiveTemporalScale,
-  ]);
+  }, [temporalSequences, effectiveTimeRange, width, height, timeScales, effectiveTemporalScale]);
 
   // Handle interaction
   const handleWheel = useCallback(
@@ -454,10 +416,7 @@ export const TemporalDynamicsVisualizer: React.FC<
       if (!interactable) return;
 
       // Update zoom level
-      const newZoom = Math.max(
-        0.5,
-        Math.min(5, zoomLevel + event.deltaY * -0.001),
-      );
+      const newZoom = Math.max(0.5, Math.min(5, zoomLevel + event.deltaY * -0.001));
       setZoomLevel(newZoom);
 
       // Notify of time range change if enabled
@@ -473,7 +432,7 @@ export const TemporalDynamicsVisualizer: React.FC<
         });
       }
     },
-    [interactable, zoomLevel, effectiveTimeRange, onTimeRangeChange],
+    [interactable, zoomLevel, effectiveTimeRange, onTimeRangeChange]
   );
 
   const handlePointerDown = useCallback(
@@ -483,7 +442,7 @@ export const TemporalDynamicsVisualizer: React.FC<
       setIsDragging(true);
       setDragStart({ x: event.clientX, y: event.clientY });
     },
-    [interactable],
+    [interactable]
   );
 
   const handlePointerMove = useCallback(
@@ -514,14 +473,7 @@ export const TemporalDynamicsVisualizer: React.FC<
         });
       }
     },
-    [
-      interactable,
-      isDragging,
-      dragStart,
-      width,
-      effectiveTimeRange,
-      onTimeRangeChange,
-    ],
+    [interactable, isDragging, dragStart, width, effectiveTimeRange, onTimeRangeChange]
   );
 
   const handlePointerUp = useCallback(() => {
@@ -535,7 +487,7 @@ export const TemporalDynamicsVisualizer: React.FC<
         onTransitionPointClick(transition);
       }
     },
-    [onTransitionPointClick],
+    [onTransitionPointClick]
   );
 
   return (
@@ -556,11 +508,7 @@ export const TemporalDynamicsVisualizer: React.FC<
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        <meshBasicMaterial
-          color={colorMap.background}
-          transparent
-          opacity={0.7}
-        />
+        <meshBasicMaterial color={colorMap.background} transparent opacity={0.7} />
       </Plane>
 
       {/* Grid lines */}
@@ -569,7 +517,7 @@ export const TemporalDynamicsVisualizer: React.FC<
           <Line
             key={`grid-line-${i}`}
             points={line.points.map((p) =>
-              p.clone().add(new Vector3(viewOffset.x, viewOffset.y, 0)),
+              p.clone().add(new Vector3(viewOffset.x, viewOffset.y, 0))
             )}
             color={line.color}
             lineWidth={line.lineWidth}
@@ -584,11 +532,7 @@ export const TemporalDynamicsVisualizer: React.FC<
           {/* Generate time axis labels */}
           {[...Array(5)].map((_, i) => {
             const t = i / 4;
-            const timestamp = MathUtils.lerp(
-              effectiveTimeRange.start,
-              effectiveTimeRange.end,
-              t,
-            );
+            const timestamp = MathUtils.lerp(effectiveTimeRange.start, effectiveTimeRange.end, t);
             const x = MathUtils.lerp(-width / 2, width / 2, t);
 
             return (
@@ -641,12 +585,7 @@ export const TemporalDynamicsVisualizer: React.FC<
       <group position={[viewOffset.x, viewOffset.y, 0.2]}>
         {processedTransitions.map((transition, i) => (
           <group key={`transition-${i}`}>
-            <Line
-              points={transition.points}
-              color={transition.color}
-              lineWidth={2}
-              opacity={0.8}
-            />
+            <Line points={transition.points} color={transition.color} lineWidth={2} opacity={0.8} />
 
             {highlightTransitionPoints && (
               <>
@@ -673,24 +612,22 @@ export const TemporalDynamicsVisualizer: React.FC<
                 {/* Label for significant transitions */}
                 {transition.clinicallySignificant && (
                   <Html
-                    position={transition.endPos
-                      .clone()
-                      .add(new Vector3(0, 0.5, 0))}
+                    position={transition.endPos.clone().add(new Vector3(0, 0.5, 0))}
                     center
                     sprite
                   >
                     <div
                       style={{
                         backgroundColor: colorMap.criticalPoint,
-                        color: "white",
-                        padding: "0.25rem 0.5rem",
-                        borderRadius: "1rem",
-                        fontSize: "0.75rem",
-                        whiteSpace: "nowrap",
-                        fontWeight: "bold",
+                        color: 'white',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '1rem',
+                        fontSize: '0.75rem',
+                        whiteSpace: 'nowrap',
+                        fontWeight: 'bold',
                       }}
                     >
-                      {transition.associatedEvent || "Critical Point"}
+                      {transition.associatedEvent || 'Critical Point'}
                     </div>
                   </Html>
                 )}

@@ -4,13 +4,13 @@
  * with clinical-grade connection visualization
  */
 
-import React, { useMemo, useCallback } from "react";
-import { Line } from "@react-three/drei";
-import * as THREE from "three";
-import ConnectionLine from "@presentation/atoms/ConnectionLine";
-import { BrainRegion, NeuralConnection } from "@domain/types/brain/models";
-import { ThemeSettings, RenderMode } from "@domain/types/brain/visualization";
-import { SafeArray, Vector3 } from "@domain/types/shared/common";
+import React, { useMemo, useCallback } from 'react';
+import { Line } from '@react-three/drei';
+import * as THREE from 'three';
+import ConnectionLine from '@presentation/atoms/ConnectionLine';
+import { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+import { ThemeSettings, RenderMode } from '@domain/types/brain/visualization';
+import { SafeArray, Vector3 } from '@domain/types/shared/common';
 
 // Neural-safe prop definition with explicit typing
 interface NeuralConnectionsProps {
@@ -92,10 +92,20 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
 
       // Ensure consistent return type [number, number, number]
       // Type-safe handling of position formats - check array first
-      if (Array.isArray(region.position) && region.position.length === 3 && region.position.every(n => typeof n === 'number')) {
+      if (
+        Array.isArray(region.position) &&
+        region.position.length === 3 &&
+        region.position.every((n) => typeof n === 'number')
+      ) {
         // If it's an array of 3 numbers, construct the tuple explicitly
         return [region.position[0], region.position[1], region.position[2]];
-      } else if (typeof region.position === 'object' && region.position !== null && 'x' in region.position && 'y' in region.position && 'z' in region.position) {
+      } else if (
+        typeof region.position === 'object' &&
+        region.position !== null &&
+        'x' in region.position &&
+        'y' in region.position &&
+        'z' in region.position
+      ) {
         // If it's a Vector3-like object, construct the tuple
         const pos = region.position as Vector3; // Safe assertion after checks
         return [pos.x, pos.y, pos.z];
@@ -104,7 +114,7 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
       console.warn(`Unexpected position format for region ${regionId}:`, region.position);
       return [0, 0, 0];
     },
-    [regionsById],
+    [regionsById]
   );
 
   // Filter connections based on settings and selection state
@@ -120,9 +130,7 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
     // If specific regions are selected, prioritize their connections
     if (safeSelectedIds.size() > 0) {
       filtered = filtered.filter(
-        (conn) =>
-          safeSelectedIds.includes(conn.sourceId) ||
-          safeSelectedIds.includes(conn.targetId),
+        (conn) => safeSelectedIds.includes(conn.sourceId) || safeSelectedIds.includes(conn.targetId)
       );
     }
 
@@ -191,37 +199,33 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
     (connectionId: string) => {
       if (onConnectionClick) onConnectionClick(connectionId);
     },
-    [onConnectionClick],
+    [onConnectionClick]
   );
 
   const handleConnectionHover = useCallback(
     (connectionId: string | null) => {
       if (onConnectionHover) onConnectionHover(connectionId);
     },
-    [onConnectionHover],
+    [onConnectionHover]
   );
 
   // Determine if a connection is active or highlighted
   const isConnectionActive = useCallback(
     (conn: NeuralConnection): boolean => {
       // Connection is active if either connected region is selected
-      return (
-        safeSelectedIds.includes(conn.sourceId) ||
-        safeSelectedIds.includes(conn.targetId)
-      );
+      return safeSelectedIds.includes(conn.sourceId) || safeSelectedIds.includes(conn.targetId);
     },
-    [safeSelectedIds],
+    [safeSelectedIds]
   );
 
   const isConnectionHighlighted = useCallback(
     (conn: NeuralConnection): boolean => {
       // Connection is highlighted if either connected region is highlighted
       return (
-        safeHighlightedIds.includes(conn.sourceId) ||
-        safeHighlightedIds.includes(conn.targetId)
+        safeHighlightedIds.includes(conn.sourceId) || safeHighlightedIds.includes(conn.targetId)
       );
     },
-    [safeHighlightedIds],
+    [safeHighlightedIds]
   );
 
   // Calculate connection activity level based on connected regions
@@ -235,7 +239,7 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
       // Average the activity of connected regions
       return (sourceRegion.activityLevel + targetRegion.activityLevel) / 2;
     },
-    [regionsById],
+    [regionsById]
   );
 
   // Calculate connection color based on various factors
@@ -247,10 +251,10 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
         // Placeholder scale - replace with actual scale from VisualizationSettings when available
         // Using theme colors as placeholders for activity scale
         const scale = {
-          high: themeSettings.accentColor || "#FF0000",
-          medium: themeSettings.secondaryColor || "#FFA500",
-          low: themeSettings.primaryColor || "#FFFF00",
-          none: themeSettings.connectionBaseColor || "#808080"
+          high: themeSettings.accentColor || '#FF0000',
+          medium: themeSettings.secondaryColor || '#FFA500',
+          low: themeSettings.primaryColor || '#FFFF00',
+          none: themeSettings.connectionBaseColor || '#808080',
         };
 
         if (activity > 0.7) return scale.high;
@@ -270,7 +274,14 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
       return themeSettings.connectionBaseColor;
     },
     // Removed themeSettings from dependencies as specific color props are missing/placeholders used
-    [renderMode, getConnectionActivity, themeSettings.accentColor, themeSettings.secondaryColor, themeSettings.primaryColor, themeSettings.connectionBaseColor],
+    [
+      renderMode,
+      getConnectionActivity,
+      themeSettings.accentColor,
+      themeSettings.secondaryColor,
+      themeSettings.primaryColor,
+      themeSettings.connectionBaseColor,
+    ]
   );
 
   // Use optimized batch rendering for high performance mode
@@ -313,16 +324,12 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
             dashGap={0.1}
             strength={conn.strength}
             // Use 'directionality' property for flow direction
-            flowDirection={
-              conn.directionality === "bidirectional" ? "bidirectional" : "forward"
-            }
+            flowDirection={conn.directionality === 'bidirectional' ? 'bidirectional' : 'forward'}
             activityLevel={getConnectionActivity(conn)}
             animated={animated && renderMode !== RenderMode.ANATOMICAL}
             animationSpeed={animationSpeed}
             // Use 'directionality' property for flow direction
-            flowDirection={
-              conn.directionality === "bidirectional" ? "bidirectional" : "forward"
-            }
+            flowDirection={conn.directionality === 'bidirectional' ? 'bidirectional' : 'forward'}
             isActive={isConnectionActive(conn)}
             isHighlighted={isConnectionHighlighted(conn)}
             themeSettings={themeSettings}

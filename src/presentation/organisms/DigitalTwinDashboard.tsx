@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { DigitalTwinProfile } from "@domain/models/clinical/digital-twin-profile";
-import Button from "@presentation/atoms/Button";
-import ClinicalMetricsGroup from "@presentation/molecules/ClinicalMetricsCard";
+import { DigitalTwinProfile } from '@domain/models/clinical/digital-twin-profile';
+import Button from '@presentation/atoms/Button';
+import ClinicalMetricsGroup from '@presentation/molecules/ClinicalMetricsCard';
 
-import BrainVisualization from "@presentation/organisms/BrainVisualization";
-import RiskAssessmentPanel from "@presentation/organisms/RiskAssessmentPanel";
-import TreatmentResponsePredictor from "@presentation/organisms/TreatmentResponsePredictor";
+import BrainVisualization from '@presentation/organisms/BrainVisualization';
+import RiskAssessmentPanel from '@presentation/organisms/RiskAssessmentPanel';
+import TreatmentResponsePredictor from '@presentation/organisms/TreatmentResponsePredictor';
 
 interface DigitalTwinDashboardProps {
   patientId: string;
@@ -23,12 +23,12 @@ interface DigitalTwinDashboardProps {
 const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
   patientId,
   profile,
-  className = "",
+  className = '',
 }) => {
   // Active tab state
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "brain" | "metrics" | "predictions"
-  >("overview");
+  const [activeTab, setActiveTab] = useState<'overview' | 'brain' | 'metrics' | 'predictions'>(
+    'overview'
+  );
 
   // Active brain region for highlighting
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
@@ -36,7 +36,7 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
   // Handle brain region click
   const handleRegionClick = (regionId: string) => {
     setActiveRegion(regionId);
-    setActiveTab("brain");
+    setActiveTab('brain');
   };
 
   return (
@@ -49,8 +49,7 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
           <div>
             <h1 className="text-2xl font-semibold">Digital Twin</h1>
             <p className="text-sm text-blue-100">
-              {profile.primaryDiagnosis.charAt(0).toUpperCase() +
-                profile.primaryDiagnosis.slice(1)}{" "}
+              {profile.primaryDiagnosis.charAt(0).toUpperCase() + profile.primaryDiagnosis.slice(1)}{' '}
               | Severity: {profile.currentSeverity}
             </p>
           </div>
@@ -73,41 +72,41 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
       <div className="flex border-b border-neutral-200 dark:border-neutral-800">
         <button
           className={`px-4 py-2 text-sm font-medium ${
-            activeTab === "overview"
-              ? "border-b-2 border-primary-500 text-primary-600 dark:text-primary-400"
-              : "text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+            activeTab === 'overview'
+              ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400'
+              : 'text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200'
           }`}
-          onClick={() => setActiveTab("overview")}
+          onClick={() => setActiveTab('overview')}
         >
           Overview
         </button>
         <button
           className={`px-4 py-2 text-sm font-medium ${
-            activeTab === "brain"
-              ? "border-b-2 border-primary-500 text-primary-600 dark:text-primary-400"
-              : "text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+            activeTab === 'brain'
+              ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400'
+              : 'text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200'
           }`}
-          onClick={() => setActiveTab("brain")}
+          onClick={() => setActiveTab('brain')}
         >
           Brain Model
         </button>
         <button
           className={`px-4 py-2 text-sm font-medium ${
-            activeTab === "metrics"
-              ? "border-b-2 border-primary-500 text-primary-600 dark:text-primary-400"
-              : "text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+            activeTab === 'metrics'
+              ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400'
+              : 'text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200'
           }`}
-          onClick={() => setActiveTab("metrics")}
+          onClick={() => setActiveTab('metrics')}
         >
           Clinical Metrics
         </button>
         <button
           className={`px-4 py-2 text-sm font-medium ${
-            activeTab === "predictions"
-              ? "border-b-2 border-primary-500 text-primary-600 dark:text-primary-400"
-              : "text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+            activeTab === 'predictions'
+              ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400'
+              : 'text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200'
           }`}
-          onClick={() => setActiveTab("predictions")}
+          onClick={() => setActiveTab('predictions')}
         >
           Predictions
         </button>
@@ -116,18 +115,14 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
       {/* Dashboard Content */}
       <div className="p-6">
         {/* Overview Tab */}
-        {activeTab === "overview" && (
+        {activeTab === 'overview' && (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {/* Brain Visualization (smaller) */}
             <div className="lg:col-span-2">
               <div className="overflow-hidden rounded-lg bg-background-card shadow-md dark:bg-background-elevated">
                 <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-800">
                   <h3 className="font-medium">Brain Activity Model</h3>
-                  <Button
-                    size="xs"
-                    variant="ghost"
-                    onClick={() => setActiveTab("brain")}
-                  >
+                  <Button size="xs" variant="ghost" onClick={() => setActiveTab('brain')}>
                     Enlarge
                   </Button>
                 </div>
@@ -164,21 +159,13 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
               <div className="overflow-hidden rounded-lg bg-background-card shadow-md dark:bg-background-elevated">
                 <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-800">
                   <h3 className="font-medium">Clinical Metrics</h3>
-                  <Button
-                    size="xs"
-                    variant="ghost"
-                    onClick={() => setActiveTab("metrics")}
-                  >
+                  <Button size="xs" variant="ghost" onClick={() => setActiveTab('metrics')}>
                     View All
                   </Button>
                 </div>
                 <div className="space-y-4 p-4">
                   {profile.assessmentScores.slice(0, 3).map((score) => (
-                    <ClinicalMetricsGroup
-                      key={score.id}
-                      title={score.type}
-                      metrics={[score]}
-                    />
+                    <ClinicalMetricsGroup key={score.id} title={score.type} metrics={[score]} />
                   ))}
                 </div>
               </div>
@@ -195,26 +182,18 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
                         Current Treatments
                       </h4>
                       <div className="space-y-2">
-                        {profile.treatmentPlan.treatments.map(
-                          (treatment, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center justify-between rounded bg-background-lighter p-2 dark:bg-background-card"
-                            >
-                              <div>
-                                <span className="font-medium capitalize">
-                                  {treatment.type}
-                                </span>
-                                <p className="text-xs text-neutral-500">
-                                  {treatment.details}
-                                </p>
-                              </div>
-                              <div className="text-xs text-neutral-500">
-                                {treatment.timeframe}
-                              </div>
+                        {profile.treatmentPlan.treatments.map((treatment, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between rounded bg-background-lighter p-2 dark:bg-background-card"
+                          >
+                            <div>
+                              <span className="font-medium capitalize">{treatment.type}</span>
+                              <p className="text-xs text-neutral-500">{treatment.details}</p>
                             </div>
-                          ),
-                        )}
+                            <div className="text-xs text-neutral-500">{treatment.timeframe}</div>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
@@ -231,12 +210,8 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
                         ></div>
                       </div>
                       <div className="flex justify-between text-xs text-neutral-500">
-                        <span>
-                          Effectiveness: {profile.treatmentPlan.effectiveness}%
-                        </span>
-                        <span>
-                          Adherence: {profile.treatmentPlan.adherence}%
-                        </span>
+                        <span>Effectiveness: {profile.treatmentPlan.effectiveness}%</span>
+                        <span>Adherence: {profile.treatmentPlan.adherence}%</span>
                       </div>
                     </div>
                   </div>
@@ -247,7 +222,7 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
         )}
 
         {/* Brain Model Tab */}
-        {activeTab === "brain" && (
+        {activeTab === 'brain' && (
           <div>
             <div className="overflow-hidden rounded-lg bg-background-card shadow-md dark:bg-background-elevated">
               <div className="border-b border-neutral-200 px-4 py-3 dark:border-neutral-800">
@@ -297,7 +272,7 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
         )}
 
         {/* Clinical Metrics Tab */}
-        {activeTab === "metrics" && (
+        {activeTab === 'metrics' && (
           <div>
             <div className="overflow-hidden rounded-lg bg-background-card shadow-md dark:bg-background-elevated">
               <div className="border-b border-neutral-200 px-4 py-3 dark:border-neutral-800">
@@ -309,7 +284,7 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
                   <ClinicalMetricsGroup
                     title="Depression Metrics"
                     metrics={profile.assessmentScores.filter((score) =>
-                      ["PHQ9", "BDI", "MADRS"].includes(score.type),
+                      ['PHQ9', 'BDI', 'MADRS'].includes(score.type)
                     )}
                   />
 
@@ -317,7 +292,7 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
                   <ClinicalMetricsGroup
                     title="Anxiety Metrics"
                     metrics={profile.assessmentScores.filter((score) =>
-                      ["GAD7", "HAM-A", "DASS"].includes(score.type),
+                      ['GAD7', 'HAM-A', 'DASS'].includes(score.type)
                     )}
                   />
 
@@ -325,7 +300,7 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
                   <ClinicalMetricsGroup
                     title="Functional Metrics"
                     metrics={profile.assessmentScores.filter((score) =>
-                      ["WSAS", "SF-36", "Q-LES-Q"].includes(score.type),
+                      ['WSAS', 'SF-36', 'Q-LES-Q'].includes(score.type)
                     )}
                   />
                 </div>
@@ -370,23 +345,23 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
                               {biomarker.value} {biomarker.unit}
                             </td>
                             <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
-                              {biomarker.referenceRange.min} -{" "}
-                              {biomarker.referenceRange.max} {biomarker.unit}
+                              {biomarker.referenceRange.min} - {biomarker.referenceRange.max}{' '}
+                              {biomarker.unit}
                             </td>
                             <td className="whitespace-nowrap px-6 py-4">
                               <span
                                 className={`inline-flex rounded-full px-2 text-xs font-semibold ${
                                   biomarker.isAbnormal
-                                    ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                                    : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                    : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                                 }`}
                               >
-                                {biomarker.isAbnormal ? "Abnormal" : "Normal"}
+                                {biomarker.isAbnormal ? 'Abnormal' : 'Normal'}
                               </span>
                             </td>
                             <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
                               <div className="flex items-center">
-                                {biomarker.trend === "increasing" && (
+                                {biomarker.trend === 'increasing' && (
                                   <svg
                                     className="mr-1 h-4 w-4 text-red-500"
                                     fill="none"
@@ -401,7 +376,7 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
                                     />
                                   </svg>
                                 )}
-                                {biomarker.trend === "decreasing" && (
+                                {biomarker.trend === 'decreasing' && (
                                   <svg
                                     className="mr-1 h-4 w-4 text-green-500"
                                     fill="none"
@@ -416,7 +391,7 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
                                     />
                                   </svg>
                                 )}
-                                {biomarker.trend === "stable" && (
+                                {biomarker.trend === 'stable' && (
                                   <svg
                                     className="mr-1 h-4 w-4 text-blue-500"
                                     fill="none"
@@ -446,7 +421,7 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
         )}
 
         {/* Predictions Tab */}
-        {activeTab === "predictions" && (
+        {activeTab === 'predictions' && (
           <div className="space-y-6">
             {/* Treatment Response Predictor */}
             <div className="overflow-hidden rounded-lg bg-background-card shadow-md dark:bg-background-elevated">
@@ -454,10 +429,7 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
                 <h3 className="font-medium">Treatment Response Prediction</h3>
               </div>
               <div className="p-4">
-                <TreatmentResponsePredictor
-                  patientId={patientId}
-                  profile={profile}
-                />
+                <TreatmentResponsePredictor patientId={patientId} profile={profile} />
               </div>
             </div>
 
@@ -482,9 +454,7 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
               </div>
               <div className="p-4">
                 <div className="flex h-96 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-900">
-                  <p className="text-neutral-500">
-                    Outcome prediction chart would render here
-                  </p>
+                  <p className="text-neutral-500">Outcome prediction chart would render here</p>
                 </div>
                 <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="rounded-lg bg-background p-4 dark:bg-background-card">

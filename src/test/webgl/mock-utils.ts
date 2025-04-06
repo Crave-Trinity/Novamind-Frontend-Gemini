@@ -1,13 +1,13 @@
 /**
  * Utilities for creating and managing mock functions and objects
- * 
+ *
  * These utilities provide a consistent approach to mocking across the testing system
  */
 import { MockFunction } from './mock-types';
 
 /**
  * Create a mock function with a consistent interface
- * 
+ *
  * @param implementation Optional initial implementation of the mock function
  * @returns A mock function with tracking capabilities
  */
@@ -16,11 +16,13 @@ export function createMockFunction<T extends (...args: any[]) => any>(
 ): MockFunction<T> {
   const calls: Parameters<T>[][] = [];
   const results: { type: 'return' | 'throw'; value: any }[] = [];
-  
+
   const mockFn = ((...args: Parameters<T>): ReturnType<T> => {
     calls.push([...args]);
     try {
-      const result = implementation ? implementation(...args) : undefined as unknown as ReturnType<T>;
+      const result = implementation
+        ? implementation(...args)
+        : (undefined as unknown as ReturnType<T>);
       results.push({ type: 'return', value: result });
       return result;
     } catch (error) {
@@ -28,24 +30,24 @@ export function createMockFunction<T extends (...args: any[]) => any>(
       throw error;
     }
   }) as MockFunction<T>;
-  
+
   mockFn.mock = { calls, results };
-  
+
   mockFn.mockImplementation = (newImplementation: T) => {
     implementation = newImplementation;
     return mockFn;
   };
-  
+
   mockFn.mockReturnValue = (value: ReturnType<T>) => {
     implementation = (() => value) as unknown as T;
     return mockFn;
   };
-  
+
   mockFn.mockReset = () => {
     calls.length = 0;
     results.length = 0;
   };
-  
+
   return mockFn;
 }
 

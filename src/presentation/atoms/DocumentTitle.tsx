@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
 
 interface DocumentTitleProps {
   title: string;
@@ -21,10 +21,7 @@ interface DocumentTitleProps {
  *   <div>Content here</div>
  * </DocumentTitle>
  */
-export const DocumentTitle: React.FC<DocumentTitleProps> = ({
-  title,
-  children,
-}) => {
+export const DocumentTitle: React.FC<DocumentTitleProps> = ({ title, children }) => {
   useEffect(() => {
     // Save previous title to restore on unmount
     const prevTitle = document.title;

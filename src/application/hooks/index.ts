@@ -1,6 +1,6 @@
 /**
  * Application hooks exports
- * 
+ *
  * This module exports all custom hooks from the application layer.
  * Each hook should be imported specifically to minimize bundle size.
  */
@@ -21,4 +21,4 @@ export { useTreatmentPrediction } from './useTreatmentPrediction';
 export { useBlockingTransition } from './useBlockingTransition';
 export { useSearchParams } from './useSearchParams';
 export { useTheme } from './useTheme';
-export { useVisualSettings } from './useVisualSettings'; 
+export { useVisualSettings } from './useVisualSettings';

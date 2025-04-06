@@ -2,7 +2,7 @@
  * NOVAMIND Neural Architecture
  * Placeholder component for strategic testing
  */
-import React from "react";
+import React from 'react';
 
 export interface BrainRegionSelectorProps {
   width?: number;
@@ -22,13 +22,10 @@ const BrainRegionSelector: React.FC<BrainRegionSelectorProps> = ({
   return (
     <div
       data-testid="brainregionselector"
-      style={{ width, height, position: "relative" }}
+      style={{ width, height, position: 'relative' }}
       {...props}
     >
-      <div
-        className="placeholder-content"
-        data-position={JSON.stringify(position)}
-      >
+      <div className="placeholder-content" data-position={JSON.stringify(position)}>
         BrainRegionSelector Placeholder
       </div>
     </div>

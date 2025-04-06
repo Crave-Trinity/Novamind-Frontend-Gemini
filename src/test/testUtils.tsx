@@ -1,6 +1,9 @@
 function setupThreeJsMocks() {
   // Mock WebGL renderer and context
-  window.HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, contextId: string) {
+  window.HTMLCanvasElement.prototype.getContext = function (
+    this: HTMLCanvasElement,
+    contextId: string
+  ) {
     if (contextId === 'webgl' || contextId === 'webgl2') {
       return {
         canvas: this,
@@ -44,14 +47,16 @@ function setupThreeJsMocks() {
   // Mock IntersectionObserver with required properties
   window.IntersectionObserver = class MockIntersectionObserver implements IntersectionObserver {
     root: Element | null = null;
-    rootMargin: string = "0px";
+    rootMargin: string = '0px';
     thresholds: ReadonlyArray<number> = [0];
-    
+
     constructor(private readonly _callback: IntersectionObserverCallback) {}
-    
+
     observe(): void {}
     unobserve(): void {}
     disconnect(): void {}
-    takeRecords(): IntersectionObserverEntry[] { return []; }
+    takeRecords(): IntersectionObserverEntry[] {
+      return [];
+    }
   } as any;
 }

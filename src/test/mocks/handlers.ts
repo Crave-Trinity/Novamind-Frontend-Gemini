@@ -15,12 +15,12 @@ const mockPatient: Patient = {
     street: '123 Main St',
     city: 'Boston',
     state: 'MA',
-    zip: '02108'
+    zip: '02108',
   },
   insurance: {
     provider: 'TestInsurance',
-    policyNumber: '12345'
-  }
+    policyNumber: '12345',
+  },
 };
 
 const mockBrainScan: BrainScan = {
@@ -37,8 +37,8 @@ const mockBrainScan: BrainScan = {
   machine: {
     id: 'scanner-01',
     type: 'Siemens Magnetom',
-    calibrationDate: '2024-01-01'
-  }
+    calibrationDate: '2024-01-01',
+  },
 };
 
 const mockRegions: BrainRegion[] = [
@@ -56,8 +56,8 @@ const mockRegions: BrainRegion[] = [
     metrics: {
       density: 0.85,
       thickness: 2.5,
-      surfaceArea: 120
-    }
+      surfaceArea: 120,
+    },
   },
   {
     id: 'region-2',
@@ -73,9 +73,9 @@ const mockRegions: BrainRegion[] = [
     metrics: {
       density: 0.75,
       thickness: 1.8,
-      surfaceArea: 45
-    }
-  }
+      surfaceArea: 45,
+    },
+  },
 ];
 
 const mockConnections: NeuralConnection[] = [
@@ -89,14 +89,14 @@ const mockConnections: NeuralConnection[] = [
     metrics: {
       signalSpeed: 0.85,
       bandwidth: 0.65,
-      reliability: 0.9
+      reliability: 0.9,
     },
     pathPoints: [
       { x: 0, y: 0, z: 0 },
       { x: 5, y: -2.5, z: 2.5 },
-      { x: 10, y: -5, z: 5 }
-    ]
-  }
+      { x: 10, y: -5, z: 5 },
+    ],
+  },
 ];
 
 const mockBrainModel: BrainModel = {
@@ -108,13 +108,13 @@ const mockBrainModel: BrainModel = {
   metadata: {
     version: '1.0.0',
     generatedAt: '2024-03-20T12:00:00Z',
-    algorithm: 'DeepBrain v2.1'
+    algorithm: 'DeepBrain v2.1',
   },
   analysisResults: {
     overallHealth: 0.85,
     anomalies: [],
-    recommendations: []
-  }
+    recommendations: [],
+  },
 };
 
 // API Handlers
@@ -199,5 +199,5 @@ export const handlers = [
   http.all('*', ({ request }) => {
     console.error(`Unhandled ${request.method} request to ${request.url}`);
     return new HttpResponse(null, { status: 404 });
-  })
-]; 
+  }),
+];

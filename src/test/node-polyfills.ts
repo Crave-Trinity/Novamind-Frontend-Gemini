@@ -6,10 +6,7 @@
  * but are required for testing browser-based components.
  */
 
-import {
-  TextEncoder as NodeTextEncoder,
-  TextDecoder as NodeTextDecoder,
-} from "util";
+import { TextEncoder as NodeTextEncoder, TextDecoder as NodeTextDecoder } from 'util';
 
 // Create proper TextEncoder implementation that passes instanceof checks
 class FixedTextEncoder extends NodeTextEncoder {
@@ -33,7 +30,7 @@ class FixedTextDecoder extends NodeTextDecoder {
 
   override decode(
     input?: ArrayBuffer | NodeJS.ArrayBufferView | null,
-    options?: { stream?: boolean },
+    options?: { stream?: boolean }
   ): string {
     return super.decode(input, options);
   }
@@ -41,39 +38,37 @@ class FixedTextDecoder extends NodeTextDecoder {
 
 // Replace global TextEncoder and TextDecoder with our fixed versions
 if (
-  typeof global.TextEncoder === "undefined" ||
-  !(new global.TextEncoder().encode("") instanceof Uint8Array)
+  typeof global.TextEncoder === 'undefined' ||
+  !(new global.TextEncoder().encode('') instanceof Uint8Array)
 ) {
   (global as any).TextEncoder = FixedTextEncoder;
 }
 
-if (typeof global.TextDecoder === "undefined") {
+if (typeof global.TextDecoder === 'undefined') {
   (global as any).TextDecoder = FixedTextDecoder;
 }
 
 // Verify that our TextEncoder implementation works correctly
 const testEncoder = new TextEncoder();
-const testResult = testEncoder.encode("");
+const testResult = testEncoder.encode('');
 if (!(testResult instanceof Uint8Array)) {
-  console.error(
-    "TextEncoder polyfill failed: encode() result is not instanceof Uint8Array",
-  );
-  console.error("Result type:", Object.prototype.toString.call(testResult));
-  console.error("Result prototype chain:", Object.getPrototypeOf(testResult));
-  throw new Error("TextEncoder polyfill failed");
+  console.error('TextEncoder polyfill failed: encode() result is not instanceof Uint8Array');
+  console.error('Result type:', Object.prototype.toString.call(testResult));
+  console.error('Result prototype chain:', Object.getPrototypeOf(testResult));
+  throw new Error('TextEncoder polyfill failed');
 }
 
 // Mock browser-specific APIs that might be missing
-if (typeof global.fetch === "undefined") {
+if (typeof global.fetch === 'undefined') {
   global.fetch = (() =>
     Promise.resolve({
       json: () => Promise.resolve({}),
-      text: () => Promise.resolve(""),
+      text: () => Promise.resolve(''),
       arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
       blob: () => Promise.resolve(new Blob([])),
       ok: true,
       status: 200,
-      statusText: "OK",
+      statusText: 'OK',
       headers: new Map(),
     })) as any;
 }
@@ -98,13 +93,10 @@ export const setupNodePolyfills = (): void => {
   // The polyfills are applied when this module is imported
 
   // Additional verification
-  console.log("Node polyfills initialized");
+  console.log('Node polyfills initialized');
+  console.log('TextEncoder available:', typeof global.TextEncoder !== 'undefined');
   console.log(
-    "TextEncoder available:",
-    typeof global.TextEncoder !== "undefined",
-  );
-  console.log(
-    "TextEncoder.encode() instanceof Uint8Array:",
-    new TextEncoder().encode("") instanceof Uint8Array,
+    'TextEncoder.encode() instanceof Uint8Array:',
+    new TextEncoder().encode('') instanceof Uint8Array
   );
 };

@@ -4,11 +4,8 @@
  * with quantum-level precision and neuropsychiatric awareness
  */
 
-import React, { useState, useCallback } from "react";
-import {
-  RenderMode,
-  VisualizationSettings,
-} from "@domain/types/brain/visualization";
+import React, { useState, useCallback } from 'react';
+import { RenderMode, VisualizationSettings } from '@domain/types/brain/visualization';
 
 // Neural-safe prop definition with explicit typing
 interface VisualizationControlsProps {
@@ -34,7 +31,7 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
   showAdvancedControls = false,
   compact = false,
   showResetButton = true,
-  className = "",
+  className = '',
 }) => {
   // Local state for advanced controls panel
   const [showSettings, setShowSettings] = useState<boolean>(false);
@@ -51,7 +48,7 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
         onSettingsChange({ [key]: value });
       }
     },
-    [onSettingsChange],
+    [onSettingsChange]
   );
 
   // Reset to default settings
@@ -66,7 +63,7 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
         showLabels: true,
         showRegionCount: true,
         showLegend: true,
-        backgroundColor: "#000000",
+        backgroundColor: '#000000',
       });
     }
   }, [onSettingsChange]);
@@ -79,19 +76,19 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
   // Get class name based on render mode for styling
   const getModeClassName = (mode: RenderMode) => {
     return renderMode === mode
-      ? "bg-blue-600 text-white font-medium"
-      : "bg-black/50 text-white/80 hover:bg-black/60";
+      ? 'bg-blue-600 text-white font-medium'
+      : 'bg-black/50 text-white/80 hover:bg-black/60';
   };
 
   // Get human-readable name for render mode
   const getRenderModeName = (mode: RenderMode): string => {
     switch (mode) {
       case RenderMode.ANATOMICAL:
-        return "Anatomical";
+        return 'Anatomical';
       case RenderMode.FUNCTIONAL:
-        return "Functional";
+        return 'Functional';
       case RenderMode.CONNECTIVITY:
-        return "Connectivity";
+        return 'Connectivity';
       default:
         return mode;
     }
@@ -101,13 +98,13 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
   const getRenderModeDescription = (mode: RenderMode): string => {
     switch (mode) {
       case RenderMode.ANATOMICAL:
-        return "View anatomical structure";
+        return 'View anatomical structure';
       case RenderMode.FUNCTIONAL:
-        return "View neural activity";
+        return 'View neural activity';
       case RenderMode.CONNECTIVITY:
-        return "View neural pathways";
+        return 'View neural pathways';
       default:
-        return "";
+        return '';
     }
   };
 
@@ -115,13 +112,13 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
   const getRenderModeIcon = (mode: RenderMode): string => {
     switch (mode) {
       case RenderMode.ANATOMICAL:
-        return "🧠";
+        return '🧠';
       case RenderMode.FUNCTIONAL:
-        return "⚡";
+        return '⚡';
       case RenderMode.CONNECTIVITY:
-        return "🔄";
+        return '🔄';
       default:
-        return "";
+        return '';
     }
   };
 
@@ -129,17 +126,11 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
     <div className={`relative ${className}`}>
       {/* Primary controls */}
       <div className="bg-black/40 backdrop-blur-sm rounded-lg p-3">
-        <h3 className="text-white text-sm font-medium mb-2">
-          Visualization Mode
-        </h3>
+        <h3 className="text-white text-sm font-medium mb-2">Visualization Mode</h3>
 
         <div className="flex flex-wrap gap-2">
           {/* Render mode buttons */}
-          {[
-            RenderMode.ANATOMICAL,
-            RenderMode.FUNCTIONAL,
-            RenderMode.CONNECTIVITY,
-          ].map((mode) => (
+          {[RenderMode.ANATOMICAL, RenderMode.FUNCTIONAL, RenderMode.CONNECTIVITY].map((mode) => (
             <button
               key={mode}
               onClick={() => handleRenderModeChange(mode)}
@@ -159,7 +150,7 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
           <button
             onClick={toggleSettings}
             className={`
-              ${showSettings ? "bg-gray-700 text-white" : "bg-black/50 text-white/80 hover:bg-black/60"}
+              ${showSettings ? 'bg-gray-700 text-white' : 'bg-black/50 text-white/80 hover:bg-black/60'}
               rounded px-3 py-1.5 text-xs
               transition-colors duration-200 ml-auto
             `}
@@ -186,16 +177,14 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
                   d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
-              {!compact && "Settings"}
+              {!compact && 'Settings'}
             </span>
           </button>
         </div>
 
         {/* Mode description for current mode */}
         {!compact && (
-          <div className="mt-2 text-gray-300 text-xs">
-            {getRenderModeDescription(renderMode)}
-          </div>
+          <div className="mt-2 text-gray-300 text-xs">{getRenderModeDescription(renderMode)}</div>
         )}
       </div>
 
@@ -203,9 +192,7 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
       {showSettings && (
         <div className="mt-2 bg-black/40 backdrop-blur-sm rounded-lg p-3 w-64 max-w-full">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-white text-sm font-medium">
-              Visualization Settings
-            </h3>
+            <h3 className="text-white text-sm font-medium">Visualization Settings</h3>
             {showResetButton && (
               <button
                 onClick={handleResetSettings}
@@ -231,10 +218,7 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
                 step="0.05"
                 value={visualizationSettings?.activityThreshold || 0.2}
                 onChange={(e) =>
-                  handleSettingChange(
-                    "activityThreshold",
-                    parseFloat(e.target.value),
-                  )
+                  handleSettingChange('activityThreshold', parseFloat(e.target.value))
                 }
                 className="w-full h-1.5 rounded-full appearance-none bg-gray-700 outline-none cursor-pointer"
               />
@@ -247,65 +231,50 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
             {/* Toggle switches */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs text-gray-300">
-                  Show Inactive Regions
-                </label>
+                <label className="text-xs text-gray-300">Show Inactive Regions</label>
                 <div className="relative inline-block w-8 h-4 rounded-full cursor-pointer">
                   <input
                     type="checkbox"
                     className="sr-only"
-                    checked={
-                      visualizationSettings?.showInactiveRegions !== false
-                    }
-                    onChange={(e) =>
-                      handleSettingChange(
-                        "showInactiveRegions",
-                        e.target.checked,
-                      )
-                    }
+                    checked={visualizationSettings?.showInactiveRegions !== false}
+                    onChange={(e) => handleSettingChange('showInactiveRegions', e.target.checked)}
                   />
                   <div
                     className={`w-8 h-4 rounded-full ${
                       visualizationSettings?.showInactiveRegions !== false
-                        ? "bg-blue-600"
-                        : "bg-gray-700"
+                        ? 'bg-blue-600'
+                        : 'bg-gray-700'
                     }`}
                   />
                   <div
                     className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transform transition-transform ${
                       visualizationSettings?.showInactiveRegions !== false
-                        ? "translate-x-4"
-                        : "translate-x-0"
+                        ? 'translate-x-4'
+                        : 'translate-x-0'
                     }`}
                   />
                 </div>
               </div>
 
               <div className="flex items-center justify-between">
-                <label className="text-xs text-gray-300">
-                  Enable Bloom Effect
-                </label>
+                <label className="text-xs text-gray-300">Enable Bloom Effect</label>
                 <div className="relative inline-block w-8 h-4 rounded-full cursor-pointer">
                   <input
                     type="checkbox"
                     className="sr-only"
                     checked={visualizationSettings?.enableBloom !== false}
-                    onChange={(e) =>
-                      handleSettingChange("enableBloom", e.target.checked)
-                    }
+                    onChange={(e) => handleSettingChange('enableBloom', e.target.checked)}
                   />
                   <div
                     className={`w-8 h-4 rounded-full ${
-                      visualizationSettings?.enableBloom !== false
-                        ? "bg-blue-600"
-                        : "bg-gray-700"
+                      visualizationSettings?.enableBloom !== false ? 'bg-blue-600' : 'bg-gray-700'
                     }`}
                   />
                   <div
                     className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transform transition-transform ${
                       visualizationSettings?.enableBloom !== false
-                        ? "translate-x-4"
-                        : "translate-x-0"
+                        ? 'translate-x-4'
+                        : 'translate-x-0'
                     }`}
                   />
                 </div>
@@ -318,22 +287,18 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
                     type="checkbox"
                     className="sr-only"
                     checked={visualizationSettings?.showLabels !== false}
-                    onChange={(e) =>
-                      handleSettingChange("showLabels", e.target.checked)
-                    }
+                    onChange={(e) => handleSettingChange('showLabels', e.target.checked)}
                   />
                   <div
                     className={`w-8 h-4 rounded-full ${
-                      visualizationSettings?.showLabels !== false
-                        ? "bg-blue-600"
-                        : "bg-gray-700"
+                      visualizationSettings?.showLabels !== false ? 'bg-blue-600' : 'bg-gray-700'
                     }`}
                   />
                   <div
                     className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transform transition-transform ${
                       visualizationSettings?.showLabels !== false
-                        ? "translate-x-4"
-                        : "translate-x-0"
+                        ? 'translate-x-4'
+                        : 'translate-x-0'
                     }`}
                   />
                 </div>
@@ -346,22 +311,18 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
                     type="checkbox"
                     className="sr-only"
                     checked={visualizationSettings?.showLegend !== false}
-                    onChange={(e) =>
-                      handleSettingChange("showLegend", e.target.checked)
-                    }
+                    onChange={(e) => handleSettingChange('showLegend', e.target.checked)}
                   />
                   <div
                     className={`w-8 h-4 rounded-full ${
-                      visualizationSettings?.showLegend !== false
-                        ? "bg-blue-600"
-                        : "bg-gray-700"
+                      visualizationSettings?.showLegend !== false ? 'bg-blue-600' : 'bg-gray-700'
                     }`}
                   />
                   <div
                     className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transform transition-transform ${
                       visualizationSettings?.showLegend !== false
-                        ? "translate-x-4"
-                        : "translate-x-0"
+                        ? 'translate-x-4'
+                        : 'translate-x-0'
                     }`}
                   />
                 </div>
@@ -372,41 +333,32 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
             {showAdvancedControls && (
               <>
                 <div className="border-t border-gray-700 pt-2 mt-2">
-                  <h4 className="text-xs font-medium text-gray-300 mb-2">
-                    Advanced Settings
-                  </h4>
+                  <h4 className="text-xs font-medium text-gray-300 mb-2">Advanced Settings</h4>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs text-gray-300">
-                        Depth of Field
-                      </label>
+                      <label className="text-xs text-gray-300">Depth of Field</label>
                       <div className="relative inline-block w-8 h-4 rounded-full cursor-pointer">
                         <input
                           type="checkbox"
                           className="sr-only"
-                          checked={
-                            visualizationSettings?.enableDepthOfField === true
-                          }
+                          checked={visualizationSettings?.enableDepthOfField === true}
                           onChange={(e) =>
-                            handleSettingChange(
-                              "enableDepthOfField",
-                              e.target.checked,
-                            )
+                            handleSettingChange('enableDepthOfField', e.target.checked)
                           }
                         />
                         <div
                           className={`w-8 h-4 rounded-full ${
                             visualizationSettings?.enableDepthOfField === true
-                              ? "bg-blue-600"
-                              : "bg-gray-700"
+                              ? 'bg-blue-600'
+                              : 'bg-gray-700'
                           }`}
                         />
                         <div
                           className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transform transition-transform ${
                             visualizationSettings?.enableDepthOfField === true
-                              ? "translate-x-4"
-                              : "translate-x-0"
+                              ? 'translate-x-4'
+                              : 'translate-x-0'
                           }`}
                         />
                       </div>
@@ -414,34 +366,18 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
 
                     {/* Background color picker */}
                     <div>
-                      <label className="text-xs text-gray-300 block mb-1">
-                        Background Color
-                      </label>
+                      <label className="text-xs text-gray-300 block mb-1">Background Color</label>
                       <div className="flex items-center">
                         <input
                           type="color"
-                          value={
-                            visualizationSettings?.backgroundColor || "#000000"
-                          }
-                          onChange={(e) =>
-                            handleSettingChange(
-                              "backgroundColor",
-                              e.target.value,
-                            )
-                          }
+                          value={visualizationSettings?.backgroundColor || '#000000'}
+                          onChange={(e) => handleSettingChange('backgroundColor', e.target.value)}
                           className="w-6 h-6 rounded overflow-hidden cursor-pointer mr-2"
                         />
                         <input
                           type="text"
-                          value={
-                            visualizationSettings?.backgroundColor || "#000000"
-                          }
-                          onChange={(e) =>
-                            handleSettingChange(
-                              "backgroundColor",
-                              e.target.value,
-                            )
-                          }
+                          value={visualizationSettings?.backgroundColor || '#000000'}
+                          onChange={(e) => handleSettingChange('backgroundColor', e.target.value)}
                           className="bg-black/60 text-white text-xs rounded px-2 py-1 w-20"
                         />
                       </div>
@@ -449,16 +385,10 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
 
                     {/* Performance mode */}
                     <div className="flex items-center justify-between">
-                      <label className="text-xs text-gray-300">
-                        Performance Mode
-                      </label>
+                      <label className="text-xs text-gray-300">Performance Mode</label>
                       <select
-                        value={
-                          visualizationSettings?.performanceMode || "balanced"
-                        }
-                        onChange={(e) =>
-                          handleSettingChange("performanceMode", e.target.value)
-                        }
+                        value={visualizationSettings?.performanceMode || 'balanced'}
+                        onChange={(e) => handleSettingChange('performanceMode', e.target.value)}
                         className="bg-black/60 text-white text-xs rounded px-2 py-1"
                       >
                         <option value="quality">Quality</option>

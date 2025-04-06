@@ -15,19 +15,19 @@ vi.mock('next-themes', () => ({
     theme: 'light',
     setTheme: vi.fn(),
     resolvedTheme: 'light',
-    themes: ['light', 'dark', 'neuro', 'clinical']
-  })
+    themes: ['light', 'dark', 'neuro', 'clinical'],
+  }),
 }));
 
 // Mock Three.js and React Three Fiber
 vi.mock('@react-three/fiber', () => ({
   Canvas: ({ children }) => <div data-testid="mock-canvas">{children}</div>,
   useFrame: vi.fn(),
-  useThree: vi.fn(() => ({ 
+  useThree: vi.fn(() => ({
     camera: { position: { set: vi.fn() }, lookAt: vi.fn() },
-    scene: {}, 
-    size: { width: 800, height: 600 } 
-  }))
+    scene: {},
+    size: { width: 800, height: 600 },
+  })),
 }));
 
 vi.mock('three', () => ({
@@ -36,11 +36,11 @@ vi.mock('three', () => ({
     render: vi.fn(),
     dispose: vi.fn(),
     setSize: vi.fn(),
-    setPixelRatio: vi.fn()
+    setPixelRatio: vi.fn(),
   })),
   PerspectiveCamera: vi.fn(() => ({
     position: { set: vi.fn() },
-    lookAt: vi.fn()
+    lookAt: vi.fn(),
   })),
   Vector3: vi.fn(() => ({ set: vi.fn() })),
   Color: vi.fn(() => ({ set: vi.fn() })),
@@ -48,7 +48,7 @@ vi.mock('three', () => ({
   Group: vi.fn(() => ({
     add: vi.fn(),
     remove: vi.fn(),
-    children: []
+    children: [],
   })),
   BoxGeometry: vi.fn(),
   SphereGeometry: vi.fn(),
@@ -60,24 +60,24 @@ vi.mock('three', () => ({
   HemisphereLight: vi.fn(),
   PointLight: vi.fn(),
   TextureLoader: vi.fn(() => ({
-    load: vi.fn(() => ({}))
+    load: vi.fn(() => ({})),
   })),
   Clock: vi.fn(() => ({
-    getElapsedTime: vi.fn(() => 0)
+    getElapsedTime: vi.fn(() => 0),
   })),
   BufferGeometry: vi.fn(() => ({
-    dispose: vi.fn()
+    dispose: vi.fn(),
   })),
   Material: vi.fn(() => ({
-    dispose: vi.fn()
+    dispose: vi.fn(),
   })),
   QuadraticBezierCurve3: vi.fn(() => ({
-    getPoints: vi.fn(() => [])
+    getPoints: vi.fn(() => []),
   })),
   BufferAttribute: vi.fn(),
   Line: vi.fn(),
   LineBasicMaterial: vi.fn(),
-  LineDashedMaterial: vi.fn()
+  LineDashedMaterial: vi.fn(),
 }));
 
 // React Query mock
@@ -85,12 +85,12 @@ vi.mock('@tanstack/react-query', () => ({
   useQuery: vi.fn(() => ({
     data: { regions: [] },
     isLoading: false,
-    error: null
+    error: null,
   })),
   QueryClientProvider: ({ children }) => <div>{children}</div>,
   QueryClient: vi.fn(() => ({
-    invalidateQueries: vi.fn()
-  }))
+    invalidateQueries: vi.fn(),
+  })),
 }));
 
 // Factory function that creates dynamic mock implementations
@@ -105,7 +105,7 @@ const mockBrainModelContainerImplementation = vi.fn(() => (
 
 // This mocks the BrainModelContainer component implementation directly
 vi.mock('./BrainModelContainer', () => ({
-  default: () => mockBrainModelContainerImplementation()
+  default: () => mockBrainModelContainerImplementation(),
 }));
 
 // Now import the mocked component
@@ -133,9 +133,9 @@ describe('BrainModelContainer', () => {
 
   it('renders with neural precision', () => {
     renderWithProviders(<BrainModelContainer />); // Use renderWithProviders
-    
+
     // Verify the component renders without crashing
-    expect(screen.getByTestId("brainmodelcontainer-container")).toBeInTheDocument();
+    expect(screen.getByTestId('brainmodelcontainer-container')).toBeInTheDocument();
   });
 
   it('responds to user interaction with quantum precision', () => {
@@ -145,9 +145,9 @@ describe('BrainModelContainer', () => {
         <button data-testid="interactive-element">Interact</button>
       </div>
     ));
-    
+
     renderWithProviders(<BrainModelContainer />); // Use renderWithProviders
-    
+
     // Verify interaction element is rendered
     // Query within the specific container rendered by this test's mock
     const container = screen.getByTestId('brainmodelcontainer-container');

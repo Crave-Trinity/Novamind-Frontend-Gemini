@@ -10,14 +10,14 @@ import {
   isBrainRegion, // Import guards
   isNeuralConnection,
   isBrainModel,
-} from "@domain/types/brain/models"; // Corrected import path
+} from '@domain/types/brain/models'; // Corrected import path
 import {
   validateBrainModelData,
   validateBrainRegionArray,
   validateNeuralConnectionArray,
   validateProgressCallback,
-} from "@/utils/progressiveLoader.runtime"; // Import validators
-import { Result, Ok, Err } from "ts-results";
+} from '@/utils/progressiveLoader.runtime'; // Import validators
+import { Result, Ok, Err } from 'ts-results';
 
 // Use BrainModel directly
 type BrainData = BrainModel;
@@ -35,7 +35,7 @@ type ProgressCallback = (percent: number) => void;
 export const loadRegionsProgressively = async (
   regions: unknown, // Accept unknown for validation
   chunkSize = 20,
-  onProgress?: unknown, // Accept unknown for validation
+  onProgress?: unknown // Accept unknown for validation
 ): Promise<Result<BrainRegion[], Error>> => {
   // Return Result
   // Validate inputs
@@ -65,10 +65,7 @@ export const loadRegionsProgressively = async (
 
       if (validatedOnProgress) {
         // Use validated callback
-        const progress = Math.min(
-          100,
-          Math.round(((i + chunk.length) / totalRegions) * 100),
-        ); // Use chunk.length
+        const progress = Math.min(100, Math.round(((i + chunk.length) / totalRegions) * 100)); // Use chunk.length
         validatedOnProgress(progress);
       }
 
@@ -77,11 +74,9 @@ export const loadRegionsProgressively = async (
     }
     return Ok(processedRegions); // Return Ok
   } catch (error) {
-    console.error("Error during progressive region loading:", error);
+    console.error('Error during progressive region loading:', error);
     return Err(
-      error instanceof Error
-        ? error
-        : new Error("Unknown error during progressive region loading"),
+      error instanceof Error ? error : new Error('Unknown error during progressive region loading')
     );
   }
 };
@@ -96,7 +91,7 @@ export const loadRegionsProgressively = async (
 export const loadConnectionsProgressively = async (
   connections: unknown, // Accept unknown
   chunkSize = 50,
-  onProgress?: unknown, // Accept unknown
+  onProgress?: unknown // Accept unknown
 ): Promise<Result<NeuralConnection[], Error>> => {
   // Return Result
   // Validate inputs
@@ -125,10 +120,7 @@ export const loadConnectionsProgressively = async (
 
       if (validatedOnProgress) {
         // Use validated callback
-        const progress = Math.min(
-          100,
-          Math.round(((i + chunk.length) / totalConnections) * 100),
-        ); // Use chunk.length
+        const progress = Math.min(100, Math.round(((i + chunk.length) / totalConnections) * 100)); // Use chunk.length
         validatedOnProgress(progress);
       }
 
@@ -137,11 +129,11 @@ export const loadConnectionsProgressively = async (
     }
     return Ok(processedConnections); // Return Ok
   } catch (error) {
-    console.error("Error during progressive connection loading:", error);
+    console.error('Error during progressive connection loading:', error);
     return Err(
       error instanceof Error
         ? error
-        : new Error("Unknown error during progressive connection loading"),
+        : new Error('Unknown error during progressive connection loading')
     );
   }
 };
@@ -156,7 +148,7 @@ export const loadConnectionsProgressively = async (
 export const loadBrainDataProgressively = async (
   brainData: unknown, // Accept unknown
   onRegionsProgress?: unknown, // Accept unknown
-  onConnectionsProgress?: unknown, // Accept unknown
+  onConnectionsProgress?: unknown // Accept unknown
 ): Promise<Result<BrainData, Error>> => {
   // Return Result
   // Validate inputs
@@ -164,11 +156,8 @@ export const loadBrainDataProgressively = async (
   if (dataValidation.err) return Err(dataValidation.val);
   const regionsProgressValidation = validateProgressCallback(onRegionsProgress);
   if (regionsProgressValidation.err) return Err(regionsProgressValidation.val);
-  const connectionsProgressValidation = validateProgressCallback(
-    onConnectionsProgress,
-  );
-  if (connectionsProgressValidation.err)
-    return Err(connectionsProgressValidation.val);
+  const connectionsProgressValidation = validateProgressCallback(onConnectionsProgress);
+  if (connectionsProgressValidation.err) return Err(connectionsProgressValidation.val);
 
   const validatedData = dataValidation.val;
   const validatedRegionsProgress = regionsProgressValidation.val;
@@ -179,14 +168,14 @@ export const loadBrainDataProgressively = async (
     const regionsResult = await loadRegionsProgressively(
       validatedData.regions,
       20,
-      validatedRegionsProgress,
+      validatedRegionsProgress
     );
     if (regionsResult.err) return regionsResult; // Propagate error
 
     const connectionsResult = await loadConnectionsProgressively(
       validatedData.connections,
       50,
-      validatedConnectionsProgress,
+      validatedConnectionsProgress
     );
     if (connectionsResult.err) return connectionsResult; // Propagate error
 
@@ -197,11 +186,11 @@ export const loadBrainDataProgressively = async (
       connections: connectionsResult.val,
     }); // Added missing closing parenthesis
   } catch (error) {
-    console.error("Error during progressive brain data loading:", error);
+    console.error('Error during progressive brain data loading:', error);
     return Err(
       error instanceof Error
         ? error
-        : new Error("Unknown error during progressive brain data loading"),
+        : new Error('Unknown error during progressive brain data loading')
     );
   }
 };
@@ -213,22 +202,20 @@ export const loadBrainDataProgressively = async (
  * @returns Result containing prioritized array of regions or an Error
  */
 export const createPriorityLoadingQueue = (
-  regions: unknown, // Accept unknown
+  regions: unknown // Accept unknown
 ): Result<BrainRegion[], Error> => {
   // Return Result
   // Validate input
   const regionsValidation = validateBrainRegionArray(regions);
   if (regionsValidation.err) {
-    console.error(
-      "createPriorityLoadingQueue: Invalid input, regions must be an array.",
-    );
+    console.error('createPriorityLoadingQueue: Invalid input, regions must be an array.');
     return Err(regionsValidation.val);
   }
   const validatedRegions = regionsValidation.val;
 
   // This check should be redundant after validation
   if (!Array.isArray(validatedRegions)) {
-    return Err(new Error("Validation passed but input is not an array.")); // Should not happen
+    return Err(new Error('Validation passed but input is not an array.')); // Should not happen
   }
   const queue = [...validatedRegions]; // Use validated array
 
@@ -244,11 +231,7 @@ export const createPriorityLoadingQueue = (
     });
     return Ok(queue); // Return the sorted queue on success
   } catch (error) {
-    console.error("Error creating priority loading queue:", error);
-    return Err(
-      error instanceof Error
-        ? error
-        : new Error("Unknown error creating priority queue"),
-    );
+    console.error('Error creating priority loading queue:', error);
+    return Err(error instanceof Error ? error : new Error('Unknown error creating priority queue'));
   }
 }; // Added missing closing brace for the function

@@ -3,19 +3,19 @@
  * useBrainModel - Quantum-level hook for brain model interaction
  */
 
-import { useState, useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Domain types
-import type { BrainModel } from "@domain/types/brain/models";
-import type { RenderMode } from "@domain/types/brain/visualization";
-import { type Result, success, failure, SafeArray } from "../../domain/types/shared/common"; // Corrected relative path
+import type { BrainModel } from '@domain/types/brain/models';
+import type { RenderMode } from '@domain/types/brain/visualization';
+import { type Result, success, failure, SafeArray } from '../../domain/types/shared/common'; // Corrected relative path
 
 // Domain utilities
-import { brainTypeVerifier } from "../../domain/utils/brain/type-verification"; // Correct relative path to brain utils
+import { brainTypeVerifier } from '../../domain/utils/brain/type-verification'; // Correct relative path to brain utils
 
 // Application services
-import { brainModelService } from "../services/brain/brain-model.service"; // Correct relative path
+import { brainModelService } from '../services/brain/brain-model.service'; // Correct relative path
 
 /**
  * Hook return type with discriminated union for type safety
@@ -50,7 +50,7 @@ export function useBrainModel(): UseBrainModelReturn {
   const queryClient = useQueryClient();
 
   // Query key
-  const brainModelQueryKey = "brainModel"; // Reinstate base query key
+  const brainModelQueryKey = 'brainModel'; // Reinstate base query key
 
   // Local state for highlights and selections
   // State for selected and highlighted regions (Removed unused variables TS6133)
@@ -66,21 +66,18 @@ export function useBrainModel(): UseBrainModelReturn {
     refetch,
     // Use a query key that can include the scanId when the query is enabled
     // The actual scanId will be passed when rendering the hook in the test
-  } = useQuery<BrainModel, Error>({ // Use v5 object syntax
+  } = useQuery<BrainModel, Error>({
+    // Use v5 object syntax
     queryKey: [brainModelQueryKey],
     queryFn: async () => {
       // Return cached model if available (this is just a placeholder)
-      const cachedModel = queryClient.getQueryData<BrainModel>([
-        brainModelQueryKey,
-      ]);
+      const cachedModel = queryClient.getQueryData<BrainModel>([brainModelQueryKey]);
       if (cachedModel) {
         return cachedModel;
       }
       // In a real scenario, you might fetch initial data here or rely on fetchBrainModel
       // For now, throwing error if not explicitly fetched is okay for the hook's logic
-      throw new Error(
-        "No brain model loaded - call fetchBrainModel with a scan ID",
-      );
+      throw new Error('No brain model loaded - call fetchBrainModel with a scan ID');
     },
     // Options remain largely the same in v5
     enabled: false,
@@ -110,26 +107,19 @@ export function useBrainModel(): UseBrainModelReturn {
             return success(result.value); // Correct usage
           } else {
             // Type verification failed
-            return failure(
-              verificationResult.error || new Error("Type verification failed"),
-            );
+            return failure(verificationResult.error || new Error('Type verification failed'));
           }
         } else {
           // Service call failed
-          return failure(
-            result.error || new Error("Failed to fetch brain model"),
-          );
+          return failure(result.error || new Error('Failed to fetch brain model'));
         }
       } catch (err) {
         // Unexpected error
-        const error =
-          err instanceof Error
-            ? err
-            : new Error("Unknown error fetching brain model");
+        const error = err instanceof Error ? err : new Error('Unknown error fetching brain model');
         return failure(error);
       }
     },
-    [queryClient, refetch],
+    [queryClient, refetch]
   );
 
   // Update region activity mutation
@@ -137,25 +127,24 @@ export function useBrainModel(): UseBrainModelReturn {
     BrainModel,
     Error,
     { regionId: string; activityLevel: number }
-  >({ // Use v5 object syntax
+  >({
+    // Use v5 object syntax
     mutationFn: async ({ regionId, activityLevel }) => {
       // Validate inputs
       const currentModel = queryClient.getQueryData<BrainModel>([brainModelQueryKey]);
       if (!currentModel) {
-        throw new Error("No brain model loaded");
+        throw new Error('No brain model loaded');
       }
 
       if (activityLevel < 0 || activityLevel > 1) {
-        throw new Error("Activity level must be between 0 and 1");
+        throw new Error('Activity level must be between 0 and 1');
       }
 
       // Create a deep copy of the brain model to avoid mutation
       const updatedModel: BrainModel = JSON.parse(JSON.stringify(currentModel));
 
       // Find and update the region
-      const regionIndex = updatedModel.regions.findIndex(
-        (r) => r.id === regionId,
-      );
+      const regionIndex = updatedModel.regions.findIndex((r) => r.id === regionId);
       if (regionIndex === -1) {
         throw new Error(`Region with ID ${regionId} not found`);
       }
@@ -179,21 +168,20 @@ export function useBrainModel(): UseBrainModelReturn {
     BrainModel,
     Error,
     string // regionId
-  >({ // Use v5 object syntax
+  >({
+    // Use v5 object syntax
     mutationFn: async (regionId) => {
       // Validate inputs
       const currentModel = queryClient.getQueryData<BrainModel>([brainModelQueryKey]);
       if (!currentModel) {
-        throw new Error("No brain model loaded");
+        throw new Error('No brain model loaded');
       }
 
       // Create a deep copy of the brain model to avoid mutation
       const updatedModel: BrainModel = JSON.parse(JSON.stringify(currentModel));
 
       // Find and update the region
-      const regionIndex = updatedModel.regions.findIndex(
-        (r) => r.id === regionId,
-      );
+      const regionIndex = updatedModel.regions.findIndex((r) => r.id === regionId);
       if (regionIndex === -1) {
         throw new Error(`Region with ID ${regionId} not found`);
       }
@@ -203,7 +191,8 @@ export function useBrainModel(): UseBrainModelReturn {
       updatedModel.regions[regionIndex].isActive = isActive;
 
       // Update activity level based on active state
-      if (isActive && updatedModel.regions[regionIndex].activityLevel < 0.3) { // Assuming 0.3 threshold
+      if (isActive && updatedModel.regions[regionIndex].activityLevel < 0.3) {
+        // Assuming 0.3 threshold
         updatedModel.regions[regionIndex].activityLevel = 0.5; // Default active level
       } else if (
         !isActive &&
@@ -225,7 +214,7 @@ export function useBrainModel(): UseBrainModelReturn {
     (regionId: string, activityLevel: number) => {
       updateRegionActivityMutation.mutate({ regionId, activityLevel });
     },
-    [updateRegionActivityMutation],
+    [updateRegionActivityMutation]
   );
 
   // Toggle region active
@@ -233,7 +222,7 @@ export function useBrainModel(): UseBrainModelReturn {
     (regionId: string) => {
       toggleRegionActiveMutation.mutate(regionId);
     },
-    [toggleRegionActiveMutation],
+    [toggleRegionActiveMutation]
   );
 
   // Select regions
@@ -286,23 +275,19 @@ export function useBrainModel(): UseBrainModelReturn {
 
   // Combine errors
   const error =
-    queryError ||
-    updateRegionActivityMutation.error ||
-    toggleRegionActiveMutation.error;
+    queryError || updateRegionActivityMutation.error || toggleRegionActiveMutation.error;
 
   return {
     // Data
     brainModel: brainModel || null,
 
     // State
-    isLoading: // Use isPending in v5
+    // Use isPending in v5
+    isLoading:
       isLoading || // from useQuery (keep using isLoading for useQuery result)
       updateRegionActivityMutation.isPending || // Correct v5 property
       toggleRegionActiveMutation.isPending, // Correct v5 property
-    isError:
-      isError ||
-      updateRegionActivityMutation.isError ||
-      toggleRegionActiveMutation.isError,
+    isError: isError || updateRegionActivityMutation.isError || toggleRegionActiveMutation.isError,
     error: error || null,
 
     // Methods

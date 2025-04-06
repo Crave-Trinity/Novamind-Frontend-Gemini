@@ -9,11 +9,11 @@
 
 // Define common EEG frequency bands
 export type NeuralFrequencyBand =
-  | "delta" // 0.5-4 Hz
-  | "theta" // 4-8 Hz
-  | "alpha" // 8-13 Hz
-  | "beta" // 13-30 Hz
-  | "gamma"; // 30-100+ Hz
+  | 'delta' // 0.5-4 Hz
+  | 'theta' // 4-8 Hz
+  | 'alpha' // 8-13 Hz
+  | 'beta' // 13-30 Hz
+  | 'gamma'; // 30-100+ Hz
 
 /**
  * Neural-safe transform definition with clinical precision
@@ -39,7 +39,7 @@ export interface NeuralTransform {
   /**
    * Type of transition to apply
    */
-  transitionType: "gradual" | "abrupt" | "oscillating"; // Use literal union directly
+  transitionType: 'gradual' | 'abrupt' | 'oscillating'; // Use literal union directly
 
   /**
    * Optional frequency band to affect
@@ -49,12 +49,7 @@ export interface NeuralTransform {
   /**
    * Source trigger for this neural transform
    */
-  sourceTrigger:
-    | "symptom"
-    | "medication"
-    | "stimulation"
-    | "baseline"
-    | "manual";
+  sourceTrigger: 'symptom' | 'medication' | 'stimulation' | 'baseline' | 'manual';
 
   /**
    * Clinical correlation identifier
@@ -112,7 +107,7 @@ export interface NeuralTransformBatch {
   /**
    * Source of the transform batch
    */
-  source: "clinical" | "algorithmic" | "manual" | "simulation";
+  source: 'clinical' | 'algorithmic' | 'manual' | 'simulation';
 
   /**
    * Application timestamp
@@ -228,6 +223,6 @@ export interface NeuralTransformResult {
     /**
      * Computation intensity
      */
-    computationalIntensity: "low" | "medium" | "high";
+    computationalIntensity: 'low' | 'medium' | 'high';
   };
 }

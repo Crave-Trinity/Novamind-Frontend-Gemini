@@ -1,21 +1,16 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 // Import with proper type definitions
-import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
-import {
-  PatientModel,
-  createPatientModel,
-} from "@domain/models/clinical/patient-model"; // Ensure factory is imported
-import { RiskLevel } from "@domain/types/clinical/risk-level"; // Correct path
-import Button from "@presentation/atoms/Button";
+import { PatientModel, createPatientModel } from '@domain/models/clinical/patient-model'; // Ensure factory is imported
+import { RiskLevel } from '@domain/types/clinical/risk-level'; // Correct path
+import Button from '@presentation/atoms/Button';
 
 const PatientsList: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState<
-    "all" | "recent" | "high-risk"
-  >("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'recent' | 'high-risk'>('all');
 
   // Fetch patients data
   const {
@@ -24,7 +19,7 @@ const PatientsList: React.FC = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["patients"],
+    queryKey: ['patients'],
     queryFn: async () => {
       // In a real app, this would call the API with proper filters
       // For now, we'll return mock data
@@ -34,157 +29,157 @@ const PatientsList: React.FC = () => {
           () =>
             resolve([
               createPatientModel({
-                id: "1",
-                firstName: "Emma",
-                lastName: "Thompson",
-                dateOfBirth: new Date("1985-05-12"),
-                demographics: { age: 39, biologicalSex: "female" },
+                id: '1',
+                firstName: 'Emma',
+                lastName: 'Thompson',
+                dateOfBirth: new Date('1985-05-12'),
+                demographics: { age: 39, biologicalSex: 'female' },
                 clinicalHistory: {
-                  primaryDiagnosis: "Major Depressive Disorder",
-                  secondaryDiagnoses: ["Generalized Anxiety Disorder"],
+                  primaryDiagnosis: 'Major Depressive Disorder',
+                  secondaryDiagnoses: ['Generalized Anxiety Disorder'],
                 },
                 medications: [
                   {
-                    id: "med1",
-                    name: "Sertraline",
-                    dosage: "100mg",
-                    frequency: "Daily",
-                    startDate: new Date("2024-01-15"),
+                    id: 'med1',
+                    name: 'Sertraline',
+                    dosage: '100mg',
+                    frequency: 'Daily',
+                    startDate: new Date('2024-01-15'),
                   },
                   {
-                    id: "med2",
-                    name: "Clonazepam",
-                    dosage: "0.5mg",
-                    frequency: "As needed",
-                    startDate: new Date("2024-01-15"),
+                    id: 'med2',
+                    name: 'Clonazepam',
+                    dosage: '0.5mg',
+                    frequency: 'As needed',
+                    startDate: new Date('2024-01-15'),
                   },
                 ],
                 symptoms: [],
                 treatmentResponses: [],
-                lastUpdated: new Date("2025-03-15"),
+                lastUpdated: new Date('2025-03-15'),
               }),
               createPatientModel({
-                id: "2",
-                firstName: "Michael",
-                lastName: "Rodriguez",
-                dateOfBirth: new Date("1992-11-03"),
-                demographics: { age: 32, biologicalSex: "male" },
+                id: '2',
+                firstName: 'Michael',
+                lastName: 'Rodriguez',
+                dateOfBirth: new Date('1992-11-03'),
+                demographics: { age: 32, biologicalSex: 'male' },
                 clinicalHistory: {
-                  primaryDiagnosis: "Bipolar I Disorder",
-                  secondaryDiagnoses: ["Substance Use Disorder"],
+                  primaryDiagnosis: 'Bipolar I Disorder',
+                  secondaryDiagnoses: ['Substance Use Disorder'],
                 },
                 medications: [
                   {
-                    id: "med3",
-                    name: "Lithium",
-                    dosage: "900mg",
-                    frequency: "Daily",
-                    startDate: new Date("2023-12-01"),
+                    id: 'med3',
+                    name: 'Lithium',
+                    dosage: '900mg',
+                    frequency: 'Daily',
+                    startDate: new Date('2023-12-01'),
                   },
                   {
-                    id: "med4",
-                    name: "Quetiapine",
-                    dosage: "300mg",
-                    frequency: "Nightly",
-                    startDate: new Date("2023-12-01"),
+                    id: 'med4',
+                    name: 'Quetiapine',
+                    dosage: '300mg',
+                    frequency: 'Nightly',
+                    startDate: new Date('2023-12-01'),
                   },
                 ],
                 symptoms: [],
                 treatmentResponses: [],
-                lastUpdated: new Date("2025-03-20"),
+                lastUpdated: new Date('2025-03-20'),
               }),
               createPatientModel({
-                id: "3",
-                firstName: "Sarah",
-                lastName: "Chen",
-                dateOfBirth: new Date("1979-03-24"),
-                demographics: { age: 46, biologicalSex: "female" },
+                id: '3',
+                firstName: 'Sarah',
+                lastName: 'Chen',
+                dateOfBirth: new Date('1979-03-24'),
+                demographics: { age: 46, biologicalSex: 'female' },
                 clinicalHistory: {
-                  primaryDiagnosis: "Post-Traumatic Stress Disorder",
+                  primaryDiagnosis: 'Post-Traumatic Stress Disorder',
                 },
                 medications: [
                   {
-                    id: "med5",
-                    name: "Prazosin",
-                    dosage: "1mg",
-                    frequency: "Nightly",
-                    startDate: new Date("2024-02-10"),
+                    id: 'med5',
+                    name: 'Prazosin',
+                    dosage: '1mg',
+                    frequency: 'Nightly',
+                    startDate: new Date('2024-02-10'),
                   },
                   {
-                    id: "med6",
-                    name: "Bupropion",
-                    dosage: "150mg",
-                    frequency: "Daily",
-                    startDate: new Date("2024-03-01"),
+                    id: 'med6',
+                    name: 'Bupropion',
+                    dosage: '150mg',
+                    frequency: 'Daily',
+                    startDate: new Date('2024-03-01'),
                   },
                 ],
                 symptoms: [],
                 treatmentResponses: [],
-                lastUpdated: new Date("2025-03-10"),
+                lastUpdated: new Date('2025-03-10'),
               }),
               createPatientModel({
-                id: "4",
-                firstName: "David",
-                lastName: "Wilson",
-                dateOfBirth: new Date("1988-07-16"),
-                demographics: { age: 36, biologicalSex: "male" },
+                id: '4',
+                firstName: 'David',
+                lastName: 'Wilson',
+                dateOfBirth: new Date('1988-07-16'),
+                demographics: { age: 36, biologicalSex: 'male' },
                 clinicalHistory: {
-                  primaryDiagnosis: "Schizophrenia",
-                  secondaryDiagnoses: ["Obsessive-Compulsive Disorder"],
+                  primaryDiagnosis: 'Schizophrenia',
+                  secondaryDiagnoses: ['Obsessive-Compulsive Disorder'],
                 },
                 medications: [
                   {
-                    id: "med7",
-                    name: "Risperidone",
-                    dosage: "4mg",
-                    frequency: "Daily",
-                    startDate: new Date("2022-05-20"),
+                    id: 'med7',
+                    name: 'Risperidone',
+                    dosage: '4mg',
+                    frequency: 'Daily',
+                    startDate: new Date('2022-05-20'),
                   },
                   {
-                    id: "med8",
-                    name: "Fluoxetine",
-                    dosage: "40mg",
-                    frequency: "Daily",
-                    startDate: new Date("2023-01-10"),
+                    id: 'med8',
+                    name: 'Fluoxetine',
+                    dosage: '40mg',
+                    frequency: 'Daily',
+                    startDate: new Date('2023-01-10'),
                   },
                 ],
                 symptoms: [],
                 treatmentResponses: [],
-                lastUpdated: new Date("2025-03-22"),
+                lastUpdated: new Date('2025-03-22'),
               }),
               createPatientModel({
-                id: "5",
-                firstName: "Olivia",
-                lastName: "Johnson",
-                dateOfBirth: new Date("1995-12-05"),
-                demographics: { age: 29, biologicalSex: "female" },
+                id: '5',
+                firstName: 'Olivia',
+                lastName: 'Johnson',
+                dateOfBirth: new Date('1995-12-05'),
+                demographics: { age: 29, biologicalSex: 'female' },
                 clinicalHistory: {
-                  primaryDiagnosis: "Major Depressive Disorder",
-                  secondaryDiagnoses: ["Eating Disorder NOS"],
+                  primaryDiagnosis: 'Major Depressive Disorder',
+                  secondaryDiagnoses: ['Eating Disorder NOS'],
                 },
                 medications: [
                   {
-                    id: "med9",
-                    name: "Escitalopram",
-                    dosage: "20mg",
-                    frequency: "Daily",
-                    startDate: new Date("2024-04-01"),
+                    id: 'med9',
+                    name: 'Escitalopram',
+                    dosage: '20mg',
+                    frequency: 'Daily',
+                    startDate: new Date('2024-04-01'),
                   },
                   {
-                    id: "med10",
-                    name: "Olanzapine",
-                    dosage: "5mg",
-                    frequency: "Nightly",
-                    startDate: new Date("2024-04-01"),
+                    id: 'med10',
+                    name: 'Olanzapine',
+                    dosage: '5mg',
+                    frequency: 'Nightly',
+                    startDate: new Date('2024-04-01'),
                   },
                 ],
                 symptoms: [],
                 treatmentResponses: [],
-                lastUpdated: new Date("2025-03-18"),
+                lastUpdated: new Date('2025-03-18'),
               }),
             ]),
-          800,
-        ),
+          800
+        )
       );
     },
   });
@@ -202,22 +197,18 @@ const PatientsList: React.FC = () => {
       const search = searchTerm.toLowerCase();
       filtered = filtered.filter(
         (patient) =>
-          `${patient.firstName} ${patient.lastName}`
-            .toLowerCase()
-            .includes(search) ||
+          `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(search) ||
           // MRN not in model
           // Check primary and secondary diagnoses
-          patient.clinicalHistory.primaryDiagnosis
-            .toLowerCase()
-            .includes(search) ||
+          patient.clinicalHistory.primaryDiagnosis.toLowerCase().includes(search) ||
           (patient.clinicalHistory.secondaryDiagnoses || []).some((d: string) =>
-            d.toLowerCase().includes(search),
-          ),
+            d.toLowerCase().includes(search)
+          )
       );
     }
 
     // Apply category filter
-    if (selectedFilter === "high-risk") {
+    if (selectedFilter === 'high-risk') {
       // Risk level filtering needs adjustment as it's not directly on PatientModel
       // This logic needs to be updated based on how risk is determined/stored
       // Example: Fetch risk assessments separately and filter based on that
@@ -226,16 +217,12 @@ const PatientsList: React.FC = () => {
       //    return latestAssessment?.overallRisk === RiskLevel.HIGH || latestAssessment?.overallRisk === RiskLevel.SEVERE;
       // });
       // Temporarily removing risk filter logic
-    } else if (selectedFilter === "recent") {
+    } else if (selectedFilter === 'recent') {
       // Sort by most recent visit and take top 3
       // Sort by lastUpdated date
       // Sort by lastUpdated date
       filtered = [...filtered]
-        .sort(
-          (a, b) =>
-            new Date(b.lastUpdated).getTime() -
-            new Date(a.lastUpdated).getTime(),
-        )
+        .sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime())
         .slice(0, 3);
     }
 
@@ -255,13 +242,11 @@ const PatientsList: React.FC = () => {
 
   // Get risk level badge color - Updated to accept RiskLevel enum or string
   const getRiskLevelColor = (
-    riskLevel: RiskLevel | string | undefined, // Accept string for potential mock data issues
+    riskLevel: RiskLevel | string | undefined // Accept string for potential mock data issues
   ) => {
     // Handle potential string values from mock data if necessary, prioritize enum
     const level =
-      typeof riskLevel === "string"
-        ? (riskLevel.toLowerCase() as RiskLevel)
-        : riskLevel;
+      typeof riskLevel === 'string' ? (riskLevel.toLowerCase() as RiskLevel) : riskLevel;
 
     // Compare with enum string values
     // Compare with enum string values
@@ -271,15 +256,15 @@ const PatientsList: React.FC = () => {
     switch (level) {
       case RiskLevel.HIGH:
       case RiskLevel.SEVERE: // Group severe with high for color
-        return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
+        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
       case RiskLevel.MODERATE:
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
       case RiskLevel.LOW:
-        return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
+        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
       case RiskLevel.NONE:
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"; // Added color for None
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'; // Added color for None
       default: // Handles UNKNOWN or undefined
-        return "bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-400";
+        return 'bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-400';
     }
   };
 
@@ -289,9 +274,7 @@ const PatientsList: React.FC = () => {
       <div className="bg-white p-6 shadow-sm dark:bg-background-card">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-              Patients
-            </h1>
+            <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Patients</h1>
             <p className="mt-1 text-neutral-500 dark:text-neutral-400">
               View and manage patient digital twins
             </p>
@@ -300,12 +283,7 @@ const PatientsList: React.FC = () => {
             variant="primary"
             size="md"
             icon={
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -351,31 +329,31 @@ const PatientsList: React.FC = () => {
           <div className="flex gap-2">
             <button
               className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                selectedFilter === "all"
-                  ? "bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400"
-                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                selectedFilter === 'all'
+                  ? 'bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400'
+                  : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
               }`}
-              onClick={() => setSelectedFilter("all")}
+              onClick={() => setSelectedFilter('all')}
             >
               All Patients
             </button>
             <button
               className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                selectedFilter === "high-risk"
-                  ? "bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400"
-                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                selectedFilter === 'high-risk'
+                  ? 'bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400'
+                  : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
               }`}
-              onClick={() => setSelectedFilter("high-risk")}
+              onClick={() => setSelectedFilter('high-risk')}
             >
               High Risk
             </button>
             <button
               className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                selectedFilter === "recent"
-                  ? "bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400"
-                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                selectedFilter === 'recent'
+                  ? 'bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400'
+                  : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700'
               }`}
-              onClick={() => setSelectedFilter("recent")}
+              onClick={() => setSelectedFilter('recent')}
             >
               Recent Visits
             </button>
@@ -408,16 +386,9 @@ const PatientsList: React.FC = () => {
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 />
               </svg>
-              <h3 className="mb-2 text-lg font-semibold">
-                Error Loading Patients
-              </h3>
+              <h3 className="mb-2 text-lg font-semibold">Error Loading Patients</h3>
               <p className="text-sm">{String(error)}</p>
-              <Button
-                variant="danger"
-                size="sm"
-                className="mt-4"
-                onClick={() => refetch()}
-              >
+              <Button variant="danger" size="sm" className="mt-4" onClick={() => refetch()}>
                 Retry
               </Button>
             </div>
@@ -443,14 +414,10 @@ const PatientsList: React.FC = () => {
             <p className="mb-6 max-w-md text-sm text-neutral-500 dark:text-neutral-400">
               {searchTerm
                 ? `No patients match the search term "${searchTerm}". Try a different search or reset filters.`
-                : "No patients found with the selected filters."}
+                : 'No patients found with the selected filters.'}
             </p>
             {searchTerm && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSearchTerm("")}
-              >
+              <Button variant="outline" size="sm" onClick={() => setSearchTerm('')}>
                 Clear Search
               </Button>
             )}
@@ -459,7 +426,7 @@ const PatientsList: React.FC = () => {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredPatients.map(
               (
-                patient: PatientModel, // Use PatientModel type
+                patient: PatientModel // Use PatientModel type
               ) => (
                 <div
                   key={patient.id}
@@ -474,9 +441,8 @@ const PatientsList: React.FC = () => {
                           {patient.firstName} {patient.lastName}
                         </h2>
                         <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                          {/* MRN not in model */} DOB:{" "}
-                          {patient.dateOfBirth.toLocaleDateString()} | Gender:{" "}
-                          {patient.demographics.biologicalSex}{" "}
+                          {/* MRN not in model */} DOB: {patient.dateOfBirth.toLocaleDateString()} |
+                          Gender: {patient.demographics.biologicalSex}{' '}
                           {/* Access via demographics */}
                         </p>
                       </div>
@@ -490,7 +456,7 @@ const PatientsList: React.FC = () => {
                         Risk: N/A {/* Placeholder */}
                       </span>
                       <span className="text-sm text-neutral-500 dark:text-neutral-400">
-                        Last Updated: {patient.lastUpdated.toLocaleDateString()}{" "}
+                        Last Updated: {patient.lastUpdated.toLocaleDateString()}{' '}
                         {/* Use lastUpdated */}
                       </span>
                     </div>
@@ -522,7 +488,7 @@ const PatientsList: React.FC = () => {
                       {patient.medications.map(
                         (
                           med,
-                          index, // Use medications array
+                          index // Use medications array
                         ) => (
                           <span
                             key={med.id || index} // Use med.id if available, fallback to index
@@ -530,7 +496,7 @@ const PatientsList: React.FC = () => {
                           >
                             {med.name} ({med.dosage})
                           </span>
-                        ),
+                        )
                       )}
                     </div>
                   </div>
@@ -563,7 +529,7 @@ const PatientsList: React.FC = () => {
                     {/* Removed extra closing div */}
                   </div>
                 </div>
-              ),
+              )
             )}
           </div>
         )}

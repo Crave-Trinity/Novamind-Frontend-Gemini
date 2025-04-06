@@ -7,8 +7,8 @@
 export const checkAuthStatus = (): boolean => {
   // Basic check for demo token
   if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-    return !!localStorage.getItem("auth_token");
+    return !!localStorage.getItem('auth_token');
   }
   // Default to false in non-browser environments (like SSR or some test setups)
-  return false; 
+  return false;
 };

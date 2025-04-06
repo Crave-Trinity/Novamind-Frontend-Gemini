@@ -3,7 +3,7 @@
  * Provides mocks and test helpers for THREE.js component testing
  */
 
-import { vi } from "vitest";
+import { vi } from 'vitest';
 
 // Mock THREE context
 export const mockThreeContext = {
@@ -16,7 +16,7 @@ export const mockThreeContext = {
   gl: {
     setSize: vi.fn(),
     render: vi.fn(),
-    domElement: document.createElement("canvas"),
+    domElement: document.createElement('canvas'),
     setClearColor: vi.fn(),
   },
   scene: {
@@ -76,14 +76,15 @@ export const createMockBrainRegions = (count = 5) => {
     },
     color: `#${Math.floor(Math.random() * 16777215)
       .toString(16)
-      .padStart(6, "0")}`,
+      .padStart(6, '0')}`,
     connections: [],
     activityLevel: Math.random(),
     isActive: Math.random() > 0.5,
     // Ensure hemisphereLocation matches the expected literal types
-    hemisphereLocation: ["left", "right", "central"][
-      Math.floor(Math.random() * 3)
-    ] as "left" | "right" | "central",
+    hemisphereLocation: ['left', 'right', 'central'][Math.floor(Math.random() * 3)] as
+      | 'left'
+      | 'right'
+      | 'central',
     dataConfidence: Math.random(),
     volume: Math.random() * 100 + 50, // Correct property name to 'volume'
     activity: Math.random(), // Correct type to number
@@ -91,10 +92,7 @@ export const createMockBrainRegions = (count = 5) => {
 };
 
 // Mock data structures
-export const createMockNeuralConnections = (
-  regions: any[],
-  connectionCount = 10,
-) => {
+export const createMockNeuralConnections = (regions: any[], connectionCount = 10) => {
   return Array.from({ length: connectionCount }, (_, i) => {
     const sourceIndex = Math.floor(Math.random() * regions.length);
     let targetIndex;
@@ -108,13 +106,14 @@ export const createMockNeuralConnections = (
       targetId: regions[targetIndex].id,
       strength: Math.random(),
       // Ensure type matches the expected literal types
-      type: ["functional", "structural", "effective"][
-        Math.floor(Math.random() * 3)
-      ] as "functional" | "structural" | "effective",
+      type: ['functional', 'structural', 'effective'][Math.floor(Math.random() * 3)] as
+        | 'functional'
+        | 'structural'
+        | 'effective',
       // Ensure directionality matches the expected literal types
-      directionality: ["bidirectional", "unidirectional"][
-        Math.floor(Math.random() * 2)
-      ] as "bidirectional" | "unidirectional",
+      directionality: ['bidirectional', 'unidirectional'][Math.floor(Math.random() * 2)] as
+        | 'bidirectional'
+        | 'unidirectional',
       activityLevel: Math.random(),
       dataConfidence: Math.random(),
     };

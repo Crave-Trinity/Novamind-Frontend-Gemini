@@ -12,7 +12,7 @@ export interface AssessmentScore {
   score: number;
   maxScore: number;
   change?: number;
-  clinicalSignificance: "none" | "mild" | "moderate" | "severe";
+  clinicalSignificance: 'none' | 'mild' | 'moderate' | 'severe';
   date?: string;
   notes?: string;
 }
@@ -36,18 +36,16 @@ export interface DigitalTwinProfile {
 
 // Optional: Type guard
 export function isDigitalTwinProfile(obj: unknown): obj is DigitalTwinProfile {
-  if (!obj || typeof obj !== "object") return false;
+  if (!obj || typeof obj !== 'object') return false;
   const profile = obj as Partial<DigitalTwinProfile>;
   return (
-    typeof profile.id === "string" &&
-    typeof profile.primaryDiagnosis === "string" &&
-    (typeof profile.currentSeverity === "string" ||
-      typeof profile.currentSeverity === "number") &&
-    (profile.updatedAt instanceof Date ||
-      typeof profile.updatedAt === "string") &&
+    typeof profile.id === 'string' &&
+    typeof profile.primaryDiagnosis === 'string' &&
+    (typeof profile.currentSeverity === 'string' || typeof profile.currentSeverity === 'number') &&
+    (profile.updatedAt instanceof Date || typeof profile.updatedAt === 'string') &&
     Array.isArray(profile.riskAssessments) &&
     Array.isArray(profile.assessmentScores) &&
-    typeof profile.treatmentPlan === "object" && // Basic check
+    typeof profile.treatmentPlan === 'object' && // Basic check
     Array.isArray(profile.biomarkers)
     // Add checks for other required fields
   );

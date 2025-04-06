@@ -1,17 +1,17 @@
 /**
  * WebGL Memory Monitor
- * 
+ *
  * This utility provides advanced memory monitoring capabilities for Three.js/WebGL tests,
  * helping to identify memory leaks and ensure proper resource cleanup.
- * 
+ *
  * Usage:
  * ```
  * import { startMemoryMonitoring, stopMemoryMonitoring, getMemoryReport } from '@test/webgl/memory-monitor';
- * 
+ *
  * beforeEach(() => {
  *   startMemoryMonitoring();
  * });
- * 
+ *
  * afterEach(() => {
  *   const report = stopMemoryMonitoring();
  *   expect(report.leakedObjectCount).toBe(0);
@@ -42,7 +42,7 @@ const registry = new FinalizationRegistry<{ type: string }>((details) => {
     if (typeSet) {
       // Object was garbage collected, remove it from our count
       // This is approximate as we can't directly reference the original object
-      typeSet.forEach(ref => {
+      typeSet.forEach((ref) => {
         const obj = ref.deref();
         if (!obj) {
           typeSet.delete(ref);
@@ -58,9 +58,9 @@ const registry = new FinalizationRegistry<{ type: string }>((details) => {
 export function startMemoryMonitoring(): void {
   currentSnapshot = {
     objects: new Map<string, Set<WeakRef<any>>>(),
-    timestamp: performance.now()
+    timestamp: performance.now(),
   };
-  
+
   // Clear any previous data
   currentSnapshot.objects.clear();
 }
@@ -72,7 +72,7 @@ export function stopMemoryMonitoring(): MemoryReport {
   if (!currentSnapshot) {
     throw new Error('Memory monitoring not started');
   }
-  
+
   const endTime = performance.now();
   const report: MemoryReport = {
     createdObjects: 0,
@@ -81,19 +81,19 @@ export function stopMemoryMonitoring(): MemoryReport {
     leakedObjectTypes: {},
     duration: endTime - currentSnapshot.timestamp,
     startTime: currentSnapshot.timestamp,
-    endTime
+    endTime,
   };
-  
+
   // Calculate totals from each object type
   currentSnapshot.objects.forEach((objects, type) => {
     const livingCount = countLivingObjects(objects);
     report.leakedObjectCount += livingCount;
-    
+
     if (livingCount > 0) {
       report.leakedObjectTypes[type] = livingCount;
     }
   });
-  
+
   return report;
 }
 
@@ -102,7 +102,7 @@ export function stopMemoryMonitoring(): MemoryReport {
  */
 function countLivingObjects(refs: Set<WeakRef<any>>): number {
   let count = 0;
-  refs.forEach(ref => {
+  refs.forEach((ref) => {
     if (ref.deref()) {
       count++;
     }
@@ -115,15 +115,15 @@ function countLivingObjects(refs: Set<WeakRef<any>>): number {
  */
 export function trackObject(obj: any, type: string): void {
   if (!currentSnapshot) return;
-  
+
   if (!currentSnapshot.objects.has(type)) {
     currentSnapshot.objects.set(type, new Set());
   }
-  
+
   const typeSet = currentSnapshot.objects.get(type)!;
   const ref = new WeakRef(obj);
   typeSet.add(ref);
-  
+
   // Register for garbage collection notification
   registry.register(obj, { type });
 }
@@ -133,12 +133,12 @@ export function trackObject(obj: any, type: string): void {
  */
 export function markDisposed(obj: any, type: string): void {
   if (!currentSnapshot) return;
-  
+
   const typeSet = currentSnapshot.objects.get(type);
   if (typeSet) {
     // We can't directly remove the specific WeakRef since we don't have the reference
     // Instead, we'll check all refs for this type and remove any that match
-    typeSet.forEach(ref => {
+    typeSet.forEach((ref) => {
       if (ref.deref() === obj) {
         typeSet.delete(ref);
       }
@@ -153,12 +153,12 @@ export function getMemorySnapshot(): Record<string, number> {
   if (!currentSnapshot) {
     return {};
   }
-  
+
   const snapshot: Record<string, number> = {};
   currentSnapshot.objects.forEach((objects, type) => {
     snapshot[type] = countLivingObjects(objects);
   });
-  
+
   return snapshot;
 }
 
@@ -181,5 +181,5 @@ export default {
   trackObject,
   markDisposed,
   getMemorySnapshot,
-  attemptGarbageCollection
+  attemptGarbageCollection,
 };

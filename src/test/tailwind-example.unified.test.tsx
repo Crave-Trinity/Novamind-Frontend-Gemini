@@ -11,13 +11,9 @@ const TailwindComponent: React.FC<{ title: string }> = ({ title }) => {
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded shadow">
       <h2 className="text-gray-800 dark:text-white">{title}</h2>
-      <div className="bg-primary-500 text-white px-4 py-2 rounded">
-        This is a primary button
-      </div>
+      <div className="bg-primary-500 text-white px-4 py-2 rounded">This is a primary button</div>
       <div className="mt-2 bg-gray-100 dark:bg-gray-900 p-2">
-        <p className="text-black dark:text-gray-300">
-          This text changes color in dark mode
-        </p>
+        <p className="text-black dark:text-gray-300">This text changes color in dark mode</p>
       </div>
     </div>
   );
@@ -37,9 +33,12 @@ describe('Tailwind CSS Testing with Unified Setup', () => {
     // We don't check for absence of dark class, just the presence of light class
   });
 
-  it('components have proper dark mode classes', async () => { // Add async
+  it('components have proper dark mode classes', async () => {
+    // Add async
     // Render initially in light mode
-    const { isDarkMode, enableDarkMode } = renderWithProviders(<TailwindComponent title="Dark Mode Classes Test" />);
+    const { isDarkMode, enableDarkMode } = renderWithProviders(
+      <TailwindComponent title="Dark Mode Classes Test" />
+    );
 
     // Explicitly enable dark mode within act
     act(() => {
@@ -57,7 +56,8 @@ describe('Tailwind CSS Testing with Unified Setup', () => {
     // expect(textContainer).toHaveClass('dark:bg-gray-900'); // Removed brittle check
   });
 
-  it('can toggle dark mode during test execution', async () => { // Re-enabled
+  it('can toggle dark mode during test execution', async () => {
+    // Re-enabled
     const { isDarkMode, enableDarkMode, disableDarkMode } = renderWithProviders(
       <TailwindComponent title="Toggle Dark Mode Test" />
     );

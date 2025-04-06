@@ -3,11 +3,11 @@
  * initializeApp testing with quantum precision
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi } from 'vitest';
 
-import { initializeApp } from "@/app/initializeApp";
+import { initializeApp } from '@/app/initializeApp';
 
-describe("initializeApp", () => {
+describe('initializeApp', () => {
   // TODO: Add meaningful tests for initializeApp
   // These tests should mock dependencies (services, window APIs)
   // and verify that the expected side effects occur (e.g., services initialized,
@@ -15,7 +15,7 @@ describe("initializeApp", () => {
   // The original tests were removed because they incorrectly asserted on the
   // return value of a void function and passed arguments unnecessarily.
 
-  it.skip("should be tested properly", () => {
+  it.skip('should be tested properly', () => {
     // Placeholder to remind us to write real tests
     expect(true).toBe(true);
   });

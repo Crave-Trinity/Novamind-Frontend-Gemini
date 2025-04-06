@@ -15,25 +15,25 @@ export interface ClinicalEventBase {
 }
 
 // Discriminating union type for different event types
-export type ClinicalEventType = 
-  | "symptom" 
-  | "medication" 
-  | "diagnosis" 
-  | "assessment" 
-  | "therapy" // Example: Add other potential types
-  | "lifestyle"; // Example: Add other potential types
+export type ClinicalEventType =
+  | 'symptom'
+  | 'medication'
+  | 'diagnosis'
+  | 'assessment'
+  | 'therapy' // Example: Add other potential types
+  | 'lifestyle'; // Example: Add other potential types
 
 // Specific event types extending the base
 export interface SymptomEvent extends ClinicalEventBase {
-  type: "symptom";
-  severity: "mild" | "moderate" | "severe"; // Use specific severity levels
+  type: 'symptom';
+  severity: 'mild' | 'moderate' | 'severe'; // Use specific severity levels
   duration?: string;
   triggers?: string[];
   regions?: string[]; // Associated neural regions
 }
 
 export interface TreatmentEvent extends ClinicalEventBase {
-  type: "medication"; // Assuming 'medication' is a type of TreatmentEvent
+  type: 'medication'; // Assuming 'medication' is a type of TreatmentEvent
   dosage?: string;
   frequency?: string;
   targetSymptoms?: string[];
@@ -41,14 +41,14 @@ export interface TreatmentEvent extends ClinicalEventBase {
 }
 
 export interface DiagnosisEvent extends ClinicalEventBase {
-  type: "diagnosis";
+  type: 'diagnosis';
   code?: string; // e.g., ICD-10 code
   clinician?: string;
   relatedSymptoms?: string[];
 }
 
 export interface AssessmentEvent extends ClinicalEventBase {
-  type: "assessment";
+  type: 'assessment';
   score?: number;
   clinician?: string;
   findings?: string[];
@@ -63,9 +63,5 @@ interface NeuralCorrelation {
 }
 
 // Union type representing any possible clinical event
-export type ClinicalEvent = 
-  | SymptomEvent 
-  | TreatmentEvent 
-  | DiagnosisEvent 
-  | AssessmentEvent;
-  // Add other event types to the union as needed
+export type ClinicalEvent = SymptomEvent | TreatmentEvent | DiagnosisEvent | AssessmentEvent;
+// Add other event types to the union as needed

@@ -3,7 +3,7 @@
  * Ensures that data structures conform to expected types at runtime.
  */
 
-import { Ok, Err, type Result } from "ts-results"; // Import Result as type
+import { Ok, Err, type Result } from 'ts-results'; // Import Result as type
 // Import actual domain types and type guard
 // Import nested type guards and types
 import {
@@ -12,7 +12,7 @@ import {
   BrainRegion, // Keep as value (used in .every)
   isBrainRegion,
   type Connection, // Already type-only
-} from "@domain/types/brain/core-models";
+} from '@domain/types/brain/core-models';
 // Assuming a standard validation error type might be defined later
 // import { ValidationError } from '@domain/errors/validation';
 
@@ -24,9 +24,7 @@ type BrainModelData = BrainModel;
  * @param data - The data to validate.
  * @returns Result<BrainModelData, Error> - Using generic Error for now.
  */
-export function validateBrainModelData(
-  data: unknown,
-): Result<BrainModelData, Error> {
+export function validateBrainModelData(data: unknown): Result<BrainModelData, Error> {
   // Use the domain type guard and add checks for nested array contents
   if (
     isBrainModel(data) &&
@@ -39,9 +37,7 @@ export function validateBrainModelData(
     // Provide a more informative error message
     // TODO: Potentially use a specific ValidationError class if defined
     return Err(
-      new Error(
-        "Invalid BrainModelData: Data does not conform to the BrainModel structure.",
-      ),
+      new Error('Invalid BrainModelData: Data does not conform to the BrainModel structure.')
     );
   }
 }
@@ -50,16 +46,16 @@ export function validateBrainModelData(
 
 // Basic type guard for Connection interface (as it's not exported from domain)
 function isConnection(obj: unknown): obj is Connection {
-  if (typeof obj !== "object" || obj === null) return false;
+  if (typeof obj !== 'object' || obj === null) return false;
   const conn = obj as Partial<Connection>;
   return (
-    typeof conn.id === "string" &&
-    typeof conn.sourceId === "string" &&
-    typeof conn.targetId === "string" &&
-    typeof conn.strength === "number" &&
-    typeof conn.type === "string" && // Basic check
-    typeof conn.isActive === "boolean" &&
-    typeof conn.color === "string"
+    typeof conn.id === 'string' &&
+    typeof conn.sourceId === 'string' &&
+    typeof conn.targetId === 'string' &&
+    typeof conn.strength === 'number' &&
+    typeof conn.type === 'string' && // Basic check
+    typeof conn.isActive === 'boolean' &&
+    typeof conn.color === 'string'
   );
 }
 

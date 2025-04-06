@@ -4,19 +4,15 @@
  * for specific neural regions with clinical precision
  */
 
-import React, { useMemo, useState } from "react";
-import {
-  BrainModel,
-  BrainRegion,
-  NeuralConnection,
-} from "@domain/types/brain/models";
-import { Patient, Symptom, Diagnosis } from "@domain/types/clinical/patient";
-import { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
+import React, { useMemo, useState } from 'react';
+import { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+import { Patient, Symptom, Diagnosis } from '@domain/types/clinical/patient';
+import { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
 import {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
-} from "@domain/models/brain/mapping/brain-mapping"; // Corrected import path
-import { SafeArray } from "@domain/types/shared/common"; // Corrected import path
+} from '@domain/models/brain/mapping/brain-mapping'; // Corrected import path
+import { SafeArray } from '@domain/types/shared/common'; // Corrected import path
 
 // Neural-safe prop definition with explicit typing
 interface BrainRegionDetailsProps {
@@ -55,12 +51,12 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
   diagnosisMappings,
   onClose,
   onConnectedRegionSelect,
-  className = "",
+  className = '',
 }) => {
   // Local state
   const [activeTab, setActiveTab] = useState<
-    "overview" | "connectivity" | "clinical" | "treatment"
-  >("overview");
+    'overview' | 'connectivity' | 'clinical' | 'treatment'
+  >('overview');
 
   // Safe array wrappers for null safety
   const safeRegions = new SafeArray(brainModel.regions);
@@ -81,9 +77,7 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
   const regionConnections = useMemo(() => {
     // Ensure SafeArray has filter and toArray methods implemented
     return safeConnections
-      .filter(
-        (conn) => conn.sourceId === regionId || conn.targetId === regionId,
-      )
+      .filter((conn) => conn.sourceId === regionId || conn.targetId === regionId)
       .toArray();
   }, [safeConnections, regionId]);
 
@@ -107,12 +101,12 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
     safeSymptomMappings.forEach((mapping) => {
       const patterns = new SafeArray(mapping.activationPatterns);
       const affectsRegion = patterns.some((pattern) =>
-        new SafeArray(pattern.regionIds).includes(regionId),
+        new SafeArray(pattern.regionIds).includes(regionId)
       );
 
       if (affectsRegion) {
         const matchingSymptom = safeSymptoms.find(
-          (s) => s.id === mapping.symptomId || s.name === mapping.symptomName,
+          (s) => s.id === mapping.symptomId || s.name === mapping.symptomName
         );
         if (matchingSymptom) {
           symptomsResult.push(matchingSymptom);
@@ -131,13 +125,12 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
     safeDiagnosisMappings.forEach((mapping) => {
       const patterns = new SafeArray(mapping.activationPatterns);
       const affectsRegion = patterns.some((pattern) =>
-        new SafeArray(pattern.regionIds).includes(regionId),
+        new SafeArray(pattern.regionIds).includes(regionId)
       );
 
       if (affectsRegion) {
         const matchingDiagnosis = safeDiagnoses.find(
-          (d) =>
-            d.id === mapping.diagnosisId || d.name === mapping.diagnosisName,
+          (d) => d.id === mapping.diagnosisId || d.name === mapping.diagnosisName
         );
         if (matchingDiagnosis) {
           diagnosesResult.push(matchingDiagnosis);
@@ -153,13 +146,12 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
     // Ensure SafeArray has flatMap, filter, includes, size, toArray methods implemented
     const effects = safeTreatmentPredictions
       .flatMap((prediction) => {
-        const neurobiologicalMechanisms = new SafeArray(
-          prediction.neurobiologicalMechanisms,
-        );
+        const neurobiologicalMechanisms = new SafeArray(prediction.neurobiologicalMechanisms);
 
         const relevantMechanisms = neurobiologicalMechanisms.filter(
-          (mechanism: any) => // Add type assertion or guard if needed
-            new SafeArray(mechanism?.relevantRegions).includes(regionId),
+          (
+            mechanism: any // Add type assertion or guard if needed
+          ) => new SafeArray(mechanism?.relevantRegions).includes(regionId)
         );
 
         if (relevantMechanisms.size() === 0) return [];
@@ -170,12 +162,12 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
             responseProbability: prediction.prediction.responseProbability,
             mechanisms: relevantMechanisms.toArray(),
             expectedImpact:
-              prediction.prediction.responseType === "remission" ||
-              prediction.prediction.responseType === "response"
-                ? "positive"
-                : prediction.prediction.responseType === "partial_response"
-                  ? "moderate"
-                  : "minimal",
+              prediction.prediction.responseType === 'remission' ||
+              prediction.prediction.responseType === 'response'
+                ? 'positive'
+                : prediction.prediction.responseType === 'partial_response'
+                  ? 'moderate'
+                  : 'minimal',
           },
         ];
       })
@@ -191,25 +183,17 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
       <div className={`bg-gray-900 rounded-lg shadow-xl p-4 ${className}`}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-white text-lg font-medium">Region Not Found</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white"
-            aria-label="Close"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-white" aria-label="Close">
             &times;
           </button>
         </div>
-        <p className="text-gray-300">
-          The specified region could not be found.
-        </p>
+        <p className="text-gray-300">The specified region could not be found.</p>
       </div>
     );
   }
 
   // Handle tab change
-  const handleTabChange = (
-    tab: "overview" | "connectivity" | "clinical" | "treatment",
-  ) => {
+  const handleTabChange = (tab: 'overview' | 'connectivity' | 'clinical' | 'treatment') => {
     setActiveTab(tab);
   };
 
@@ -224,11 +208,11 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
   const renderActivityIndicator = (activityLevel: number) => {
     const width = `${Math.max(1, Math.round(activityLevel * 100))}%`;
 
-    let color = "bg-gray-600";
-    if (activityLevel > 0.8) color = "bg-red-500";
-    else if (activityLevel > 0.6) color = "bg-orange-500";
-    else if (activityLevel > 0.4) color = "bg-yellow-500";
-    else if (activityLevel > 0.2) color = "bg-blue-500";
+    let color = 'bg-gray-600';
+    if (activityLevel > 0.8) color = 'bg-red-500';
+    else if (activityLevel > 0.6) color = 'bg-orange-500';
+    else if (activityLevel > 0.4) color = 'bg-yellow-500';
+    else if (activityLevel > 0.2) color = 'bg-blue-500';
 
     return (
       <div className="w-full bg-gray-900 rounded-full h-2 overflow-hidden">
@@ -271,41 +255,41 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
       <div className="border-b border-gray-700 mb-4">
         <nav className="-mb-px flex">
           <button
-            onClick={() => handleTabChange("overview")}
+            onClick={() => handleTabChange('overview')}
             className={`py-2 px-4 text-sm font-medium mr-2 ${
-              activeTab === "overview"
-                ? "text-blue-500 border-b-2 border-blue-500"
-                : "text-gray-400 hover:text-gray-300"
+              activeTab === 'overview'
+                ? 'text-blue-500 border-b-2 border-blue-500'
+                : 'text-gray-400 hover:text-gray-300'
             }`}
           >
             Overview
           </button>
           <button
-            onClick={() => handleTabChange("connectivity")}
+            onClick={() => handleTabChange('connectivity')}
             className={`py-2 px-4 text-sm font-medium mr-2 ${
-              activeTab === "connectivity"
-                ? "text-blue-500 border-b-2 border-blue-500"
-                : "text-gray-400 hover:text-gray-300"
+              activeTab === 'connectivity'
+                ? 'text-blue-500 border-b-2 border-blue-500'
+                : 'text-gray-400 hover:text-gray-300'
             }`}
           >
             Connectivity
           </button>
           <button
-            onClick={() => handleTabChange("clinical")}
+            onClick={() => handleTabChange('clinical')}
             className={`py-2 px-4 text-sm font-medium mr-2 ${
-              activeTab === "clinical"
-                ? "text-blue-500 border-b-2 border-blue-500"
-                : "text-gray-400 hover:text-gray-300"
+              activeTab === 'clinical'
+                ? 'text-blue-500 border-b-2 border-blue-500'
+                : 'text-gray-400 hover:text-gray-300'
             }`}
           >
             Clinical
           </button>
           <button
-            onClick={() => handleTabChange("treatment")}
+            onClick={() => handleTabChange('treatment')}
             className={`py-2 px-4 text-sm font-medium ${
-              activeTab === "treatment"
-                ? "text-blue-500 border-b-2 border-blue-500"
-                : "text-gray-400 hover:text-gray-300"
+              activeTab === 'treatment'
+                ? 'text-blue-500 border-b-2 border-blue-500'
+                : 'text-gray-400 hover:text-gray-300'
             }`}
           >
             Treatment
@@ -314,7 +298,7 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
       </div>
 
       {/* Tab content */}
-      {activeTab === "overview" && (
+      {activeTab === 'overview' && (
         <div className="text-white">
           <h4 className="text-sm font-medium mb-3">Region Overview</h4>
 
@@ -322,15 +306,11 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-gray-400 text-xs mb-1">Status</p>
-                <p className="text-sm font-medium">
-                  {region.isActive ? "Active" : "Inactive"}
-                </p>
+                <p className="text-sm font-medium">{region.isActive ? 'Active' : 'Inactive'}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-xs mb-1">Connections</p>
-                <p className="text-sm font-medium">
-                  {regionConnections.length}
-                </p>
+                <p className="text-sm font-medium">{regionConnections.length}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-xs mb-1">Related Symptoms</p>
@@ -360,32 +340,27 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
           <h4 className="text-sm font-medium mb-2">Summary</h4>
           <div className="bg-gray-800 rounded-lg p-4">
             <p className="text-sm">
-              This region{" "}
-              {region.isActive
-                ? "is currently active"
-                : "is currently inactive"}{" "}
-              with
+              This region {region.isActive ? 'is currently active' : 'is currently inactive'} with
               {region.activityLevel > 0.7
-                ? " high"
+                ? ' high'
                 : region.activityLevel > 0.4
-                  ? " moderate"
+                  ? ' moderate'
                   : region.activityLevel > 0.2
-                    ? " low"
-                    : " minimal"}{" "}
-              neural activity. It has {regionConnections.length} neural pathways
-              connecting to {connectedRegions.length} other regions.
+                    ? ' low'
+                    : ' minimal'}{' '}
+              neural activity. It has {regionConnections.length} neural pathways connecting to{' '}
+              {connectedRegions.length} other regions.
             </p>
 
             {relatedSymptoms.length > 0 && (
               <p className="text-sm mt-2">
-                This region is associated with {relatedSymptoms.length} clinical
-                symptoms
+                This region is associated with {relatedSymptoms.length} clinical symptoms
                 {relatedSymptoms.length > 0
                   ? `, including ${relatedSymptoms
                       .slice(0, 2)
                       .map((s) => s.name)
-                      .join(", ")}`
-                  : ""}
+                      .join(', ')}`
+                  : ''}
                 .
               </p>
             )}
@@ -393,13 +368,11 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
         </div>
       )}
 
-      {activeTab === "connectivity" && (
+      {activeTab === 'connectivity' && (
         <div className="text-white">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-medium">Neural Connectivity</h4>
-            <span className="text-xs text-gray-400">
-              {regionConnections.length} Connections
-            </span>
+            <span className="text-xs text-gray-400">{regionConnections.length} Connections</span>
           </div>
 
           {regionConnections.length > 0 ? (
@@ -412,53 +385,43 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
                     // Find the connection details
                     const connection = regionConnections.find(
                       (conn) =>
-                        (conn.sourceId === regionId &&
-                          conn.targetId === connectedRegion.id) ||
-                        (conn.targetId === regionId &&
-                          conn.sourceId === connectedRegion.id),
+                        (conn.sourceId === regionId && conn.targetId === connectedRegion.id) ||
+                        (conn.targetId === regionId && conn.sourceId === connectedRegion.id)
                     );
 
                     // Determine direction
-                    const isOutgoing = connection
-                      ? connection.sourceId === regionId
-                      : false;
+                    const isOutgoing = connection ? connection.sourceId === regionId : false;
 
                     return (
                       <div
                         key={connectedRegion.id}
                         className="bg-gray-700 rounded p-2 cursor-pointer hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         onClick={() => handleConnectedRegionClick(connectedRegion.id)}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleConnectedRegionClick(connectedRegion.id); }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ')
+                            handleConnectedRegionClick(connectedRegion.id);
+                        }}
                         role="button" // Added role
                         tabIndex={0} // Added tabIndex
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
-                            <span className="text-sm font-medium">
-                              {connectedRegion.name}
-                            </span>
+                            <span className="text-sm font-medium">{connectedRegion.name}</span>
                             {isOutgoing ? (
-                              <span className="ml-2 text-green-400 text-xs">
-                                → outgoing
-                              </span>
+                              <span className="ml-2 text-green-400 text-xs">→ outgoing</span>
                             ) : (
-                              <span className="ml-2 text-blue-400 text-xs">
-                                ← incoming
-                              </span>
+                              <span className="ml-2 text-blue-400 text-xs">← incoming</span>
                             )}
                           </div>
                           <span className="text-xs bg-gray-900 rounded-full px-2 py-0.5">
-                            {connection
-                              ? (connection.strength * 100).toFixed(0)
-                              : 0}
-                            % strength
+                            {connection ? (connection.strength * 100).toFixed(0) : 0}% strength
                           </span>
                         </div>
 
                         {connection && (
                           <div className="mt-1 w-full bg-gray-900 rounded-full h-1.5 overflow-hidden">
                             <div
-                              className={`${isOutgoing ? "bg-green-500" : "bg-blue-500"} h-full rounded-full`}
+                              className={`${isOutgoing ? 'bg-green-500' : 'bg-blue-500'} h-full rounded-full`}
                               style={{
                                 width: `${Math.max(1, Math.round(connection.strength * 100))}%`,
                               }}
@@ -467,11 +430,8 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
                         )}
 
                         <div className="mt-2 flex justify-between text-xs text-gray-400">
-                          <span>
-                            Activity:{" "}
-                            {(connectedRegion.activityLevel * 100).toFixed(0)}%
-                          </span>
-                          <span>Type: {connection?.type || "unknown"}</span>
+                          <span>Activity: {(connectedRegion.activityLevel * 100).toFixed(0)}%</span>
+                          <span>Type: {connection?.type || 'unknown'}</span>
                         </div>
                       </div>
                     );
@@ -481,61 +441,38 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
 
               {/* Connectivity statistics */}
               <div className="bg-gray-800 rounded-lg p-4">
-                <h5 className="text-sm font-medium mb-2">
-                  Connectivity Statistics
-                </h5>
+                <h5 className="text-sm font-medium mb-2">Connectivity Statistics</h5>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-gray-400 text-xs mb-1">
-                      Incoming Connections
-                    </p>
+                    <p className="text-gray-400 text-xs mb-1">Incoming Connections</p>
                     <p className="text-sm font-medium">
-                      {
-                        regionConnections.filter(
-                          (conn) => conn.targetId === regionId,
-                        ).length
-                      }
+                      {regionConnections.filter((conn) => conn.targetId === regionId).length}
                     </p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-xs mb-1">
-                      Outgoing Connections
-                    </p>
+                    <p className="text-gray-400 text-xs mb-1">Outgoing Connections</p>
                     <p className="text-sm font-medium">
-                      {
-                        regionConnections.filter(
-                          (conn) => conn.sourceId === regionId,
-                        ).length
-                      }
+                      {regionConnections.filter((conn) => conn.sourceId === regionId).length}
                     </p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-xs mb-1">
-                      Average Strength
-                    </p>
+                    <p className="text-gray-400 text-xs mb-1">Average Strength</p>
                     <p className="text-sm font-medium">
                       {(
-                        (regionConnections.reduce(
-                          (sum, conn) => sum + conn.strength,
-                          0,
-                        ) /
+                        (regionConnections.reduce((sum, conn) => sum + conn.strength, 0) /
                           regionConnections.length || 0) * 100
                       ).toFixed(0)}
                       %
                     </p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-xs mb-1">
-                      Dominant Connection Type
-                    </p>
+                    <p className="text-gray-400 text-xs mb-1">Dominant Connection Type</p>
                     <p className="text-sm font-medium">
                       {/* Simple majority check */}
-                      {regionConnections.filter((conn) => conn.type === "excitatory")
-                        .length >
-                      regionConnections.filter((conn) => conn.type === "inhibitory")
-                        .length
-                        ? "Excitatory"
-                        : "Inhibitory"}
+                      {regionConnections.filter((conn) => conn.type === 'excitatory').length >
+                      regionConnections.filter((conn) => conn.type === 'inhibitory').length
+                        ? 'Excitatory'
+                        : 'Inhibitory'}
                     </p>
                   </div>
                 </div>
@@ -547,7 +484,7 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
         </div>
       )}
 
-      {activeTab === "clinical" && (
+      {activeTab === 'clinical' && (
         <div className="text-white">
           <h4 className="text-sm font-medium mb-3">Clinical Correlations</h4>
 
@@ -597,7 +534,7 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
         </div>
       )}
 
-      {activeTab === "treatment" && (
+      {activeTab === 'treatment' && (
         <div className="text-white">
           <h4 className="text-sm font-medium mb-3">Treatment Response</h4>
 
@@ -606,32 +543,27 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
               {treatmentEffects.map((effect, index) => (
                 <div key={index} className="bg-gray-800 rounded-lg p-4">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium">
-                      {effect.treatmentType}
-                    </span>
+                    <span className="text-sm font-medium">{effect.treatmentType}</span>
                     <span
                       className={`text-xs rounded-full px-2 py-0.5 ${
-                        effect.expectedImpact === "positive"
-                          ? "bg-green-600"
-                          : effect.expectedImpact === "moderate"
-                            ? "bg-yellow-600"
-                            : "bg-red-600"
+                        effect.expectedImpact === 'positive'
+                          ? 'bg-green-600'
+                          : effect.expectedImpact === 'moderate'
+                            ? 'bg-yellow-600'
+                            : 'bg-red-600'
                       }`}
                     >
                       {(effect.responseProbability * 100).toFixed(0)}% Response
                     </span>
                   </div>
                   <p className="text-xs text-gray-400 mb-2">
-                    Expected Impact:{" "}
-                    <span className="capitalize">{effect.expectedImpact}</span>
+                    Expected Impact: <span className="capitalize">{effect.expectedImpact}</span>
                   </p>
-                  <h6 className="text-xs font-medium mb-1">
-                    Neurobiological Mechanisms:
-                  </h6>
+                  <h6 className="text-xs font-medium mb-1">Neurobiological Mechanisms:</h6>
                   <ul className="list-disc list-inside text-xs text-gray-300 space-y-1">
                     {effect.mechanisms.map((mech, mechIndex) => (
                       <li key={mechIndex}>
-                        {mech.description} (Target: {mech.neurotransmitter || "N/A"})
+                        {mech.description} (Target: {mech.neurotransmitter || 'N/A'})
                       </li>
                     ))}
                   </ul>
@@ -639,9 +571,7 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
               ))}
             </div>
           ) : (
-            <p className="text-gray-400 text-sm">
-              No predicted treatment effects for this region.
-            </p>
+            <p className="text-gray-400 text-sm">No predicted treatment effects for this region.</p>
           )}
         </div>
       )}

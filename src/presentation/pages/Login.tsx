@@ -1,8 +1,8 @@
-import React, { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // import SecureInput from "@atoms/SecureInput"; // Assume this is a styled input, replace with standard input for now
-import { auditLogService, AuditEventType } from "@infrastructure/clients/auditLogClient"; // Use correct alias
+import { auditLogService, AuditEventType } from '@infrastructure/clients/auditLogClient'; // Use correct alias
 
 /**
  * Login page component
@@ -11,20 +11,19 @@ import { auditLogService, AuditEventType } from "@infrastructure/clients/auditLo
 const Login: React.FC = () => {
   // In test mode, use a dummy navigate function.
   const navigateFromHook = useNavigate();
-  const navigate =
-    process.env.NODE_ENV === "test" ? () => {} : navigateFromHook;
+  const navigate = process.env.NODE_ENV === 'test' ? () => {} : navigateFromHook;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Form state
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [emailValid, setEmailValid] = useState(false);
   const [passwordValid, setPasswordValid] = useState(false);
 
   // MFA state
   const [showMFA, setShowMFA] = useState(false);
-  const [mfaCode, setMfaCode] = useState("");
+  const [mfaCode, setMfaCode] = useState('');
   const [mfaValid, setMfaValid] = useState(false);
 
   /**
@@ -35,7 +34,7 @@ const Login: React.FC = () => {
       e.preventDefault();
 
       if (!emailValid || !passwordValid) {
-        setError("Please enter valid credentials");
+        setError('Please enter valid credentials');
         return;
       }
 
@@ -47,23 +46,25 @@ const Login: React.FC = () => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // In a real implementation, this would call the auth API
-        if (email === "demo@novamind.com" && password === "demo123") {
+        if (email === 'demo@novamind.com' && password === 'demo123') {
           // Log successful login attempt
-          auditLogService.log(AuditEventType.USER_LOGIN, { // Use correct enum member
-            result: "success",
-            details: "Login successful, MFA required",
+          auditLogService.log(AuditEventType.USER_LOGIN, {
+            // Use correct enum member
+            result: 'success',
+            details: 'Login successful, MFA required',
           });
 
           // Show MFA verification
           setShowMFA(true);
         } else {
           // Log failed login attempt (no sensitive info in logs)
-          auditLogService.log(AuditEventType.UNAUTHORIZED_ACCESS_ATTEMPT, { // Use appropriate type
-            result: "failure",
-            details: "Invalid credentials",
+          auditLogService.log(AuditEventType.UNAUTHORIZED_ACCESS_ATTEMPT, {
+            // Use appropriate type
+            result: 'failure',
+            details: 'Invalid credentials',
           });
 
-          throw new Error("Invalid email or password");
+          throw new Error('Invalid email or password');
         }
       } catch (err) {
         setError((err as Error).message);
@@ -71,7 +72,7 @@ const Login: React.FC = () => {
         setIsLoading(false);
       }
     },
-    [email, password, emailValid, passwordValid],
+    [email, password, emailValid, passwordValid]
   );
 
   /**
@@ -82,7 +83,7 @@ const Login: React.FC = () => {
       e.preventDefault();
 
       if (!mfaValid) {
-        setError("Please enter a valid verification code");
+        setError('Please enter a valid verification code');
         return;
       }
 
@@ -94,23 +95,25 @@ const Login: React.FC = () => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // In a real implementation, this would verify the MFA code
-        if (mfaCode === "123456") {
+        if (mfaCode === '123456') {
           // Log successful MFA verification
-          auditLogService.log(AuditEventType.USER_SESSION_VERIFY, { // Use appropriate type
-            result: "success",
-            details: "MFA verification successful",
+          auditLogService.log(AuditEventType.USER_SESSION_VERIFY, {
+            // Use appropriate type
+            result: 'success',
+            details: 'MFA verification successful',
           });
 
           // Redirect to dashboard
-          navigate("/");
+          navigate('/');
         } else {
           // Log failed MFA attempt
-          auditLogService.log(AuditEventType.USER_SESSION_VERIFY, { // Use appropriate type
-            result: "failure",
-            details: "Invalid MFA code",
+          auditLogService.log(AuditEventType.USER_SESSION_VERIFY, {
+            // Use appropriate type
+            result: 'failure',
+            details: 'Invalid MFA code',
           });
 
-          throw new Error("Invalid verification code");
+          throw new Error('Invalid verification code');
         }
       } catch (err) {
         setError((err as Error).message);
@@ -118,7 +121,7 @@ const Login: React.FC = () => {
         setIsLoading(false);
       }
     },
-    [mfaCode, mfaValid, navigate],
+    [mfaCode, mfaValid, navigate]
   );
 
   return (
@@ -135,10 +138,20 @@ const Login: React.FC = () => {
 
         {/* Login form */}
         {!showMFA ? (
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit} aria-label="Login form" data-testid="login-form">
+          <form
+            className="mt-8 space-y-6"
+            onSubmit={handleSubmit}
+            aria-label="Login form"
+            data-testid="login-form"
+          >
             <div className="space-y-4 rounded-md shadow-sm">
               {/* Replace SecureInput with standard input */}
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email address</label>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Email address
+              </label>
               <input
                 id="email"
                 name="email"
@@ -147,16 +160,21 @@ const Login: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => {
-                    setEmail(e.target.value);
-                    // Basic email validation for demonstration
-                    setEmailValid(/[^@]+@[^@]+\.[^@]+/.test(e.target.value));
+                  setEmail(e.target.value);
+                  // Basic email validation for demonstration
+                  setEmailValid(/[^@]+@[^@]+\.[^@]+/.test(e.target.value));
                 }}
                 placeholder="provider@example.com"
                 className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-primary-500 focus:border-primary-500"
               />
 
               {/* Replace SecureInput with standard input */}
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Password
+              </label>
               <input
                 id="password"
                 name="password"
@@ -165,9 +183,9 @@ const Login: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => {
-                    setPassword(e.target.value);
-                    // Basic password validation for demonstration
-                    setPasswordValid(e.target.value.length >= 6);
+                  setPassword(e.target.value);
+                  // Basic password validation for demonstration
+                  setPasswordValid(e.target.value.length >= 6);
                 }}
                 className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-primary-500 focus:border-primary-500"
               />
@@ -193,7 +211,7 @@ const Login: React.FC = () => {
               <div className="text-sm">
                 <button
                   type="button"
-                  onClick={() => navigate("/forgot-password")}
+                  onClick={() => navigate('/forgot-password')}
                   className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 underline"
                 >
                   Forgot your password?
@@ -215,11 +233,11 @@ const Login: React.FC = () => {
                 disabled={isLoading}
                 className={`group relative flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white ${
                   isLoading
-                    ? "cursor-not-allowed bg-blue-400"
-                    : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    ? 'cursor-not-allowed bg-blue-400'
+                    : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
                 }`}
               >
-                {isLoading ? "Signing in..." : "Sign in"}
+                {isLoading ? 'Signing in...' : 'Sign in'}
               </button>
             </div>
           </form>
@@ -227,9 +245,7 @@ const Login: React.FC = () => {
           /* MFA form */
           <form className="mt-8 space-y-6" onSubmit={handleVerifyMFA}>
             <div>
-              <h3 className="text-center text-lg font-medium">
-                Two-factor Authentication
-              </h3>
+              <h3 className="text-center text-lg font-medium">Two-factor Authentication</h3>
               <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
                 Enter the verification code from your authenticator app
               </p>
@@ -237,24 +253,26 @@ const Login: React.FC = () => {
 
             <div className="rounded-md shadow-sm">
               {/* Replace SecureInput with standard input */}
-               <label htmlFor="mfa-code" className="sr-only">Verification Code</label>
-               <input
-                 id="mfa-code"
-                 name="mfa-code"
-                 type="text" // Use text for easier input, consider inputMode="numeric"
-                 inputMode="numeric"
-                 autoComplete="one-time-code"
-                 required
-                 value={mfaCode}
-                 onChange={(e) => {
-                     const code = e.target.value.replace(/[^0-9]/g, '').slice(0, 6); // Allow only 6 digits
-                     setMfaCode(code);
-                     setMfaValid(code.length === 6);
-                 }}
-                 placeholder="123456"
-                 maxLength={6}
-                 className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-center text-lg tracking-widest"
-               />
+              <label htmlFor="mfa-code" className="sr-only">
+                Verification Code
+              </label>
+              <input
+                id="mfa-code"
+                name="mfa-code"
+                type="text" // Use text for easier input, consider inputMode="numeric"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                required
+                value={mfaCode}
+                onChange={(e) => {
+                  const code = e.target.value.replace(/[^0-9]/g, '').slice(0, 6); // Allow only 6 digits
+                  setMfaCode(code);
+                  setMfaValid(code.length === 6);
+                }}
+                placeholder="123456"
+                maxLength={6}
+                className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-center text-lg tracking-widest"
+              />
             </div>
 
             {/* Error message */}
@@ -271,11 +289,11 @@ const Login: React.FC = () => {
                 disabled={isLoading}
                 className={`group relative flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white ${
                   isLoading
-                    ? "cursor-not-allowed bg-blue-400"
-                    : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    ? 'cursor-not-allowed bg-blue-400'
+                    : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
                 }`}
               >
-                {isLoading ? "Verifying..." : "Verify Code"}
+                {isLoading ? 'Verifying...' : 'Verify Code'}
               </button>
             </div>
 

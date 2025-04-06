@@ -6,7 +6,7 @@
  * mechanism for quantum-precise testing with clinical accuracy.
  */
 
-import { vi } from "vitest";
+import { vi } from 'vitest';
 
 // Neural-safe test state registry with quantum precision
 interface NeuralTestState {
@@ -95,6 +95,4 @@ export const getVisualizationErrorState = (): {
 };
 
 // Initialize neural-safe test registry
-console.log(
-  "🧠 NOVAMIND Neural Test Registry: Initialized with quantum precision",
-);
+console.log('🧠 NOVAMIND Neural Test Registry: Initialized with quantum precision');
