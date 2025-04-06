@@ -13,7 +13,7 @@ import {
   isNeuralConnection,
   validateNeuralConnection,
   ValidationError, // Import the custom error type
-} from '@services/brain/brain-model.service.runtime'; // Use @services alias
+} from '@services/brain/brain-model.service.runtime.ts'; // Use @services alias
 import type { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
 
 describe('BrainModelService Runtime Validation', () => {

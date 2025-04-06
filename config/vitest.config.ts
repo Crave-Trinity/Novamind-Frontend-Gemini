@@ -3,53 +3,54 @@ import react from '@vitejs/plugin-react';
 // import tsconfigPaths from 'vite-tsconfig-paths'; // Removed plugin
 import { defineConfig } from 'vitest/config';
 import path from 'path'; // Need path for manual alias resolution
-// import { resolve } from 'path'; // Removed unused import TS6133
+
+const projectRoot = '/Users/ray/Desktop/GITHUB/Novamind-Frontend'; // Define project root
 
 // https://vitest.dev/config/
 export default defineConfig({
   plugins: [react()], // Removed tsconfigPaths()
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, '../src'), // Adjusted path relative to config/
-      '@domain': path.resolve(__dirname, '../src/domain'),
-      '@application': path.resolve(__dirname, '../src/application'),
-      '@infrastructure': path.resolve(__dirname, '../src/infrastructure'),
-      '@presentation': path.resolve(__dirname, '../src/presentation'),
-      '@shared': path.resolve(__dirname, '../src/shared'),
-      '@atoms': path.resolve(__dirname, '../src/presentation/atoms'),
-      '@molecules': path.resolve(__dirname, '../src/presentation/molecules'),
-      '@organisms': path.resolve(__dirname, '../src/presentation/organisms'),
-      '@templates': path.resolve(__dirname, '../src/presentation/templates'),
-      '@pages': path.resolve(__dirname, '../src/presentation/pages'),
-      '@hooks': path.resolve(__dirname, '../src/application/hooks'),
-      '@contexts': path.resolve(__dirname, '../src/application/contexts'),
-      '@providers': path.resolve(__dirname, '../src/application/providers'),
-      '@stores': path.resolve(__dirname, '../src/application/stores'),
-      '@services': path.resolve(__dirname, '../src/application/services'),
-      '@clients': path.resolve(__dirname, '../src/infrastructure/clients'),
-      '@api': path.resolve(__dirname, '../src/infrastructure/api'),
-      '@utils': path.resolve(__dirname, '../src/shared/utils'),
-      '@types': path.resolve(__dirname, '../src/domain/types'),
-      '@models': path.resolve(__dirname, '../src/domain/models'),
-      '@constants': path.resolve(__dirname, '../src/domain/constants'),
-      '@validation': path.resolve(__dirname, '../src/domain/validation'),
-      '@assets': path.resolve(__dirname, '../src/presentation/assets'),
-      '@styles': path.resolve(__dirname, '../src/presentation/styles'),
-      '@shaders': path.resolve(__dirname, '../src/presentation/shaders'),
-      '@test': path.resolve(__dirname, '../src/test'),
-      '@config': path.resolve(__dirname, '../config'), // Points to config dir itself
+      '@': path.resolve(projectRoot, 'src'),
+      '@domain': path.resolve(projectRoot, 'src/domain'),
+      '@application': path.resolve(projectRoot, 'src/application'),
+      '@infrastructure': path.resolve(projectRoot, 'src/infrastructure'),
+      '@presentation': path.resolve(projectRoot, 'src/presentation'),
+      '@shared': path.resolve(projectRoot, 'src/shared'),
+      '@atoms': path.resolve(projectRoot, 'src/presentation/atoms'),
+      '@molecules': path.resolve(projectRoot, 'src/presentation/molecules'),
+      '@organisms': path.resolve(projectRoot, 'src/presentation/organisms'),
+      '@templates': path.resolve(projectRoot, 'src/presentation/templates'),
+      '@pages': path.resolve(projectRoot, 'src/presentation/pages'),
+      '@hooks': path.resolve(projectRoot, 'src/application/hooks'),
+      '@contexts': path.resolve(projectRoot, 'src/application/contexts'),
+      '@providers': path.resolve(projectRoot, 'src/application/providers'),
+      '@stores': path.resolve(projectRoot, 'src/application/stores'),
+      '@services': path.resolve(projectRoot, 'src/application/services'),
+      '@clients': path.resolve(projectRoot, 'src/infrastructure/clients'),
+      '@api': path.resolve(projectRoot, 'src/infrastructure/api'),
+      '@utils': path.resolve(projectRoot, 'src/shared/utils'),
+      '@types': path.resolve(projectRoot, 'src/domain/types'),
+      '@models': path.resolve(projectRoot, 'src/domain/models'),
+      '@constants': path.resolve(projectRoot, 'src/domain/constants'),
+      '@validation': path.resolve(projectRoot, 'src/domain/validation'),
+      '@assets': path.resolve(projectRoot, 'src/presentation/assets'),
+      '@styles': path.resolve(projectRoot, 'src/presentation/styles'),
+      '@shaders': path.resolve(projectRoot, 'src/presentation/shaders'),
+      '@test': path.resolve(projectRoot, 'src/test'),
+      '@config': path.resolve(projectRoot, 'config'),
     },
   },
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
+    setupFiles: ['./src/test/setup.ts'], // Path relative to project root
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'dist', '.idea', '.git', '.cache'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      reportsDirectory: './coverage',
+      reportsDirectory: './coverage', // Path relative to project root
       exclude: [
         'coverage/**',
         'dist/**',
@@ -69,7 +70,7 @@ export default defineConfig({
     },
     reporters: ['default', 'junit'],
     outputFile: {
-      junit: './test-reports/junit.xml',
+      junit: './test-reports/junit.xml', // Path relative to project root
     },
   },
 }); 

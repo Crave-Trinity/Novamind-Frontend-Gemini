@@ -16,7 +16,7 @@ import {
   validateRiskAssessment,
   isTreatmentResponsePrediction,
   validateTreatmentResponsePrediction,
-} from '@services/clinical/clinical.service.runtime'; // Use @services alias
+} from '@services/clinical/clinical.service.runtime.ts'; // Use @services alias
 import type { Symptom, Diagnosis, Treatment } from '@domain/types/clinical/patient'; // Use type import
 import { RiskAssessment, RiskLevel } from '@domain/types/clinical/risk';
 import { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
