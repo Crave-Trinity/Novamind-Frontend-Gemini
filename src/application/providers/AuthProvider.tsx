@@ -7,10 +7,10 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext, AuthContextType } from "@application/contexts/AuthContext";
+import { AuthContext, type AuthContextType } from "@application/contexts/AuthContext";
 import { authService } from "@infrastructure/services/AuthService";
-import { User, Permission } from "@domain/types/auth/auth";
-import { auditLogService, AuditEventType } from "@infrastructure/services/AuditLogService";
+import type { User, Permission } from "@domain/types/auth/auth";
+import { auditLogService, AuditEventType } from "@infrastructure/services/AuditLogService"; // AuditEventType is an enum (value)
 
 // Session warning time (5 minutes before expiration)
 const SESSION_WARNING_TIME = 5 * 60 * 1000;
@@ -18,7 +18,7 @@ const SESSION_WARNING_TIME = 5 * 60 * 1000;
 const SESSION_CHECK_INTERVAL = 60 * 1000;
 
 interface AuthProviderProps {
-  children: React.ReactNode;
+  children: React.ReactNode; // ReactNode is already a type
 }
 
 /**

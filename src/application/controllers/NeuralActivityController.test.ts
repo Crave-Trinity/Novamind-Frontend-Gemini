@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
+import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks } from '@test/webgl'; // Removed memoryMonitor
 
 import * as Controller from '@/application/controllers/NeuralActivityController';
 

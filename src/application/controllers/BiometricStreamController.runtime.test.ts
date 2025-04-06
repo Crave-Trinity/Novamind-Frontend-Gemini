@@ -9,7 +9,7 @@ import {
   // Import locally defined types/enums if needed for mock data clarity
   // BiometricType, AlertPriority, BiometricThreshold, BiometricDataPoint, BiometricSource, PartialStreamConfig
 } from "@application/controllers/BiometricStreamController.runtime";
-import { StreamConfig } from "@application/controllers/BiometricStreamController"; // Import from the correct controller file
+import type { StreamConfig } from "@application/controllers/BiometricStreamController"; // Import from the correct controller file
 
 // --- Mock Data (Based on inferred types) ---
 

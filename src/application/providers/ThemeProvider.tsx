@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { ThemeContext, ThemeMode } from '@application/contexts/ThemeContext';
+import { ThemeContext, type ThemeMode } from '@application/contexts/ThemeContext';
 import { auditLogService, AuditEventType } from '@infrastructure/services/AuditLogService';
 
 // Validate if a string is a valid theme mode
@@ -12,7 +12,7 @@ const isValidTheme = (theme: string | null): theme is ThemeMode => {
 
 interface ThemeProviderProps {
   defaultTheme?: ThemeMode;
-  children: React.ReactNode;
+  children: React.ReactNode; // Already correct
 }
 
 /**

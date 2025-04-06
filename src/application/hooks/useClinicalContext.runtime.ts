@@ -3,13 +3,13 @@
  * Ensures that clinical context data structures conform to expected types at runtime.
  */
 
-import { Result, Ok, Err } from "ts-results";
-import { RiskAssessment, isRiskAssessment } from "@domain/types/clinical/risk";
+import { Ok, Err, type Result } from "ts-results";
+import { type RiskAssessment, isRiskAssessment } from "@domain/types/clinical/risk";
 import {
-  TreatmentResponsePrediction,
+  type TreatmentResponsePrediction,
   isTreatmentResponsePrediction,
 } from "@domain/types/clinical/treatment";
-import {
+import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,

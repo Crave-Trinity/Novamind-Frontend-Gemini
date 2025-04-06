@@ -9,8 +9,8 @@ import {
 } from "@hooks/useTheme.runtime";
 // Import actual domain types and the theme definitions
 import {
-  ThemeSettings,
-  ThemeOption,
+  type ThemeSettings,
+  type ThemeOption,
   isValidTheme,
   visualizationThemes,
 } from "@domain/types/brain/visualization";

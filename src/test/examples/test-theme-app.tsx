@@ -1,9 +1,9 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import './src/index.css'; // Import styles
-import { ThemeProvider } from './src/application/providers/ThemeProvider';
-import { auditLogService, AuditEventType } from './src/infrastructure/services/AuditLogService';
-import { ThemeContext, ThemeMode } from './src/application/contexts/ThemeContext';
+import '@/index.css'; // Import styles using alias
+import ThemeProvider from '@application/contexts/ThemeProvider'; // Use default import
+import { auditLogService, AuditEventType } from '@services/AuditLogService'; // Use @services alias
+import { ThemeContext, ThemeMode } from '@contexts/ThemeContext'; // Use @contexts alias
 import { useContext } from 'react';
 
 /**

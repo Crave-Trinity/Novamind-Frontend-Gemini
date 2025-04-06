@@ -10,7 +10,7 @@ import React, {
   useCallback,
   useMemo,
   useEffect,
-  ReactNode,
+  type ReactNode,
 } from "react";
 
 // Import controllers
@@ -21,23 +21,23 @@ import { useBiometricStreamController } from "@application/controllers/Biometric
 import { useTemporalDynamicsController } from "@application/controllers/TemporalDynamicsController";
 
 // Domain types
-import {
+import type {
   BrainRegion,
   NeuralConnection,
   BrainModel,
 } from "@domain/types/brain/models";
 import {
-  NeuralActivationLevel,
-  NeuralActivityState,
+  ActivationLevel, // Corrected import name
+  type NeuralActivityState,
 } from "@domain/types/brain/activity";
-import { SymptomNeuralMapping } from "@domain/types/clinical/mapping";
-import { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
-import {
+import type { SymptomNeuralMapping } from "@domain/models/brain/mapping/brain-mapping"; // Corrected path
+import type { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
+import type {
   BiometricAlert,
   BiometricStream,
 } from "@domain/types/biometric/streams";
-import { TemporalPattern, TimeScale } from "@domain/types/temporal/dynamics";
-import { NeuralTransform } from "@domain/types/neural/transforms";
+import type { TemporalPattern, TimeScale } from "@domain/types/temporal/dynamics";
+import type { NeuralTransform } from "@domain/types/neural/transforms";
 
 /**
  * Unified visualization state with neural-safe typing
@@ -49,7 +49,7 @@ interface VisualizationState {
   activeRegions: string[];
 
   // Activity state
-  neuralActivation: Map<string, NeuralActivationLevel>;
+  neuralActivation: Map<string, ActivationLevel>; // Use corrected type name
   connectionStrengths: Map<string, number>;
 
   // Clinical data
@@ -134,7 +134,7 @@ const defaultContext: VisualizationCoordinatorContext = {
     biometricAlerts: [],
     biometricStreams: new Map(),
     temporalPatterns: [],
-    currentTimeScale: "daily",
+    currentTimeScale: "daily", // Keep 'daily' as a valid default
     renderMode: "standard",
     detailLevel: "medium",
     isLoading: false,
@@ -296,11 +296,14 @@ export const VisualizationCoordinatorProvider: React.FC<
     [neuroSync.actions],
   );
 
-  // Set the time scale
+  // Set the time scale by reloading data for that scale
   const setTimeScale = useCallback(
     (scale: TimeScale) => {
-      neuroSync.actions.setTimeScale(scale);
-      temporalDynamics.setTimeScale(scale);
+      neuroSync.actions.setTimeScale(scale); // Update UI/sync state
+      temporalDynamics.loadTemporalDynamics(scale).catch(error => { // Load data for the new scale
+        console.error(`Failed to load temporal dynamics for scale ${scale}:`, error);
+        // Optionally update an error state here
+      });
     },
     [neuroSync.actions, temporalDynamics],
   );

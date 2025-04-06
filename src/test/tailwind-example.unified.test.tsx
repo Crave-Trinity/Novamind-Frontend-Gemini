@@ -38,10 +38,14 @@ describe('Tailwind CSS Testing with Unified Setup', () => {
   });
 
   it('components have proper dark mode classes', async () => { // Add async
-    // Render with dark mode enabled via provider option
-    const { isDarkMode } = renderWithProviders(<TailwindComponent title="Dark Mode Classes Test" />, { darkMode: true });
+    // Render initially in light mode
+    const { isDarkMode, enableDarkMode } = renderWithProviders(<TailwindComponent title="Dark Mode Classes Test" />);
 
-    // Wait for the classList to update after renderWithProviders applies the theme
+    // Explicitly enable dark mode within act
+    act(() => {
+      enableDarkMode();
+    });
+    // Wait for the classList to update
     await waitFor(() => expect(document.documentElement.classList.contains('dark')).toBe(true));
 
     const container = screen.getByText('Dark Mode Classes Test').parentElement;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { screen, act } from '@testing-library/react'; // Import act
+import { screen, act, waitFor } from '@testing-library/react'; // Import act and waitFor
 import { renderWithProviders } from '@test/test-utils.unified'; // Use unified setup
 
 /**
@@ -36,10 +36,15 @@ describe('Tailwind CSS Testing with Unified Setup', () => { // Update describe b
     expect(container.classList.contains('dark:bg-gray-800')).toBe(true); // Class is present, but not applied
   });
 
-  it.skip('renders component with correct dark mode classes when dark mode is enabled', () => {
-    const { isDarkMode } = renderWithProviders(<TailwindTestComponent />, { darkMode: true }); // Use unified render with darkMode option
+  it('renders component with correct dark mode classes when dark mode is enabled', async () => { // Re-enabled and made async
+    const { isDarkMode, enableDarkMode } = renderWithProviders(<TailwindTestComponent />); // Render light first
     // Check classList directly for initial render with darkMode: true
-    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    // Explicitly enable dark mode within act
+    act(() => {
+      enableDarkMode();
+    });
+    // Wait for the classList to update
+    await waitFor(() => expect(document.documentElement.classList.contains('dark')).toBe(true));
 
     const container = screen.getByTestId('tailwind-test-container');
     expect(container.classList.contains('bg-white')).toBe(true);

@@ -8,13 +8,13 @@ import { useState, useCallback, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Domain types
-import { RiskAssessment } from "@domain/types/clinical/risk";
-import { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
+import type { RiskAssessment } from "@domain/types/clinical/risk";
+import type { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
 // Use relative path as alias seems problematic in tests for this file
-import { Result, success, failure, SafeArray } from "../../domain/types/shared/common";
+import { type Result, success, failure } from "../../domain/types/shared/common"; // Removed unused SafeArray
 
 // Domain models
-import {
+import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,

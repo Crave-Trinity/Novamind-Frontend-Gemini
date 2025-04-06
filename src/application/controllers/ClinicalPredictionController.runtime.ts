@@ -5,7 +5,7 @@
  */
 
 import { Result, Ok, Err } from "ts-results";
-import { RiskAssessment } from "@domain/types/clinical/risk"; // Assuming this exists and is correct
+import type { RiskAssessment } from "@domain/types/clinical/risk"; // Assuming this exists and is correct
 // import { ValidationError } from '@domain/errors/validation'; // If specific error types are defined
 
 // --- Inferred Types & Enums (Based on ClinicalPredictionController.ts usage) ---

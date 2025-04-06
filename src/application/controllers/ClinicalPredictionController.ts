@@ -23,8 +23,8 @@ type RelapsePrediction = any;
 type TimeseriesDataPoint = any;
 
 // Import existing types from correct locations
-import { RiskAssessment } from "@domain/types/clinical/risk";
-import { Result, success, failure } from "@domain/types/shared/common"; // Corrected path
+import type { RiskAssessment } from "@domain/types/clinical/risk";
+import { Result, type Result as ResultType, success, failure } from "@domain/types/shared/common"; // Corrected path
 
 // Services
 import { clinicalService } from "@application/services/clinical/clinical.service"; // Corrected path
@@ -84,7 +84,7 @@ export function useClinicalPredictionController(patientId: string) {
     async (
       symptomIds: string[],
       predictionHorizon?: number,
-    ): Promise<Result<Map<string, SymptomTrajectory>>> => {
+    ): Promise<ResultType<Map<string, SymptomTrajectory>>> => {
       try {
         const horizon = predictionHorizon || state.predictionHorizon;
 
@@ -104,56 +104,67 @@ export function useClinicalPredictionController(patientId: string) {
         console.warn(
           "predictSymptomTrajectories service method not implemented.",
         );
-        const result = failure(
+        // Placeholder failure with appropriate type for demonstration
+        const result: ResultType<any, Error> = failure(
           new Error(
             "Service method predictSymptomTrajectories not implemented.",
           ),
-        ); // Placeholder failure
+        );
 
-        if (result.success && result.data) {
-          // Update state with new predictions
-          setState((prevState) => {
-            const newSymptomTrajectories = new Map(
-              prevState.symptomTrajectories,
-            );
-            const newConfidenceIntervals = new Map(
-              prevState.confidenceIntervals,
-            );
+        if (Result.isSuccess(result)) {
+          const trajectories = result.value; // Access the value
+          if (trajectories) { // Check if value exists (though success implies it should)
+            // Update state with new predictions
+            setState((prevState) => {
+              const newSymptomTrajectories = new Map(
+                prevState.symptomTrajectories,
+              );
+              const newConfidenceIntervals = new Map(
+                prevState.confidenceIntervals,
+              );
 
-            // Add each symptom trajectory to the maps
-            result.data.forEach((trajectory: any) => {
-              // Add 'any' type for now
-              newSymptomTrajectories.set(trajectory.symptomId, trajectory);
+              // Add each symptom trajectory to the maps
+              trajectories.forEach((trajectory: any) => { // Use extracted value
+                // Add 'any' type for now
+                newSymptomTrajectories.set(trajectory.symptomId, trajectory);
 
-              // Store confidence intervals separately for easier access
-              newConfidenceIntervals.set(`symptom-${trajectory.symptomId}`, {
-                upper: trajectory.confidenceInterval.upper,
-                lower: trajectory.confidenceInterval.lower,
-                confidenceLevel: trajectory.confidenceInterval.confidenceLevel,
+                // Store confidence intervals separately for easier access
+                if (trajectory.confidenceInterval) { // Add safety check
+                  newConfidenceIntervals.set(`symptom-${trajectory.symptomId}`, {
+                    upper: trajectory.confidenceInterval.upper,
+                    lower: trajectory.confidenceInterval.lower,
+                    confidenceLevel: trajectory.confidenceInterval.confidenceLevel,
+                  });
+                }
               });
+
+              return {
+                ...prevState,
+                symptomTrajectories: newSymptomTrajectories,
+                confidenceIntervals: newConfidenceIntervals,
+                lastUpdated: new Date(),
+                dataPoints: trajectories.reduce( // Use extracted value
+                  (sum: number, traj: any) => sum + (traj.dataPoints || 0), // Add types
+                  0,
+                ),
+              };
             });
 
-            return {
-              ...prevState,
-              symptomTrajectories: newSymptomTrajectories,
-              confidenceIntervals: newConfidenceIntervals,
-              lastUpdated: new Date(),
-              dataPoints: result.data.reduce(
-                (sum: number, traj: any) => sum + (traj.dataPoints || 0), // Add types
-                0,
-              ),
-            };
-          });
-
-          // Return a copy of the trajectories map
-          return success(
-            new Map(result.data.map((t: any) => [t.symptomId, t])),
-          ); // Add type
+            // Return a copy of the trajectories map
+            return success(
+              new Map(trajectories.map((t: any) => [t.symptomId, t])), // Use extracted value
+            ); // Add type
+          } else {
+             // Handle case where success is true but value is unexpectedly null/undefined
+             return failure(new Error("Prediction successful but data is missing."));
+          }
+        } else {
+          // Handle failure case
+          const errorMessage = result.error instanceof Error ? result.error.message : String(result.error);
+          return failure(
+            new Error(errorMessage || "Failed to predict symptom trajectories"),
+          );
         }
-
-        return failure(
-          result.error || new Error("Failed to predict symptom trajectories"), // Wrap string in Error
-        );
       } catch (error) {
         return failure(
           // Ensure error object is passed
@@ -178,7 +189,7 @@ export function useClinicalPredictionController(patientId: string) {
     async (
       treatmentIds: string[],
       predictionHorizon?: number,
-    ): Promise<Result<Map<string, TreatmentOutcome>>> => {
+    ): Promise<ResultType<Map<string, TreatmentOutcome>>> => {
       try {
         const horizon = predictionHorizon || state.predictionHorizon;
 
@@ -198,52 +209,62 @@ export function useClinicalPredictionController(patientId: string) {
         console.warn(
           "predictTreatmentOutcomes service method not implemented.",
         );
-        const result = failure(
+        // Placeholder failure with appropriate type for demonstration
+        const result: ResultType<any, Error> = failure(
           new Error("Service method predictTreatmentOutcomes not implemented."),
-        ); // Placeholder failure
+        );
 
-        if (result.success && result.data) {
-          // Update state with new predictions
-          setState((prevState) => {
-            const newTreatmentOutcomes = new Map(prevState.treatmentOutcomes);
-            const newConfidenceIntervals = new Map(
-              prevState.confidenceIntervals,
-            );
+        if (Result.isSuccess(result)) {
+          const outcomes = result.value; // Access the value
+          if (outcomes) { // Check if value exists
+            // Update state with new predictions
+            setState((prevState) => {
+              const newTreatmentOutcomes = new Map(prevState.treatmentOutcomes);
+              const newConfidenceIntervals = new Map(
+                prevState.confidenceIntervals,
+              );
 
-            // Add each treatment outcome to the maps
-            result.data.forEach((outcome: any) => {
-              // Add 'any' type for now
-              newTreatmentOutcomes.set(outcome.treatmentId, outcome);
+              // Add each treatment outcome to the maps
+              outcomes.forEach((outcome: any) => { // Use extracted value
+                // Add 'any' type for now
+                newTreatmentOutcomes.set(outcome.treatmentId, outcome);
 
-              // Store confidence intervals separately
-              newConfidenceIntervals.set(`treatment-${outcome.treatmentId}`, {
-                upper: outcome.confidenceInterval.upper,
-                lower: outcome.confidenceInterval.lower,
-                confidenceLevel: outcome.confidenceInterval.confidenceLevel,
+                // Store confidence intervals separately
+                if (outcome.confidenceInterval) { // Add safety check
+                  newConfidenceIntervals.set(`treatment-${outcome.treatmentId}`, {
+                    upper: outcome.confidenceInterval.upper,
+                    lower: outcome.confidenceInterval.lower,
+                    confidenceLevel: outcome.confidenceInterval.confidenceLevel,
+                  });
+                }
               });
+
+              return {
+                ...prevState,
+                treatmentOutcomes: newTreatmentOutcomes,
+                confidenceIntervals: newConfidenceIntervals,
+                lastUpdated: new Date(),
+                dataPoints: outcomes.reduce( // Use extracted value
+                  (sum: number, outcome: any) => sum + (outcome.dataPoints || 0), // Add types
+                  0,
+                ),
+              };
             });
 
-            return {
-              ...prevState,
-              treatmentOutcomes: newTreatmentOutcomes,
-              confidenceIntervals: newConfidenceIntervals,
-              lastUpdated: new Date(),
-              dataPoints: result.data.reduce(
-                (sum: number, outcome: any) => sum + (outcome.dataPoints || 0), // Add types
-                0,
-              ),
-            };
-          });
-
-          // Return a copy of the outcomes map
-          return success(
-            new Map(result.data.map((o: any) => [o.treatmentId, o])),
-          ); // Add type
+            // Return a copy of the outcomes map
+            return success(
+              new Map(outcomes.map((o: any) => [o.treatmentId, o])), // Use extracted value
+            ); // Add type
+          } else {
+            return failure(new Error("Prediction successful but data is missing."));
+          }
+        } else {
+          // Handle failure case
+          const errorMessage = result.error instanceof Error ? result.error.message : String(result.error);
+          return failure(
+            new Error(errorMessage || "Failed to predict treatment outcomes"),
+          );
         }
-
-        return failure(
-          result.error || new Error("Failed to predict treatment outcomes"),
-        ); // Wrap string in Error
       } catch (error) {
         return failure(
           // Ensure error object is passed
@@ -268,7 +289,7 @@ export function useClinicalPredictionController(patientId: string) {
     async (
       disorderIds: string[],
       predictionHorizon?: number,
-    ): Promise<Result<RelapsePrediction[]>> => {
+    ): Promise<ResultType<RelapsePrediction[]>> => {
       try {
         const horizon = predictionHorizon || state.predictionHorizon;
 
@@ -286,43 +307,55 @@ export function useClinicalPredictionController(patientId: string) {
         // TODO: Implement actual service call when available
         // const result = await clinicalService.predictRelapse(predictionParams);
         console.warn("predictRelapse service method not implemented.");
-        const result = failure(
+        // Placeholder failure with appropriate type for demonstration
+        const result: ResultType<any, Error> = failure(
           new Error("Service method predictRelapse not implemented."),
-        ); // Placeholder failure
+        );
 
-        if (result.success && result.data) {
-          // Update state with new predictions
-          setState((prevState) => {
-            // Update confidence intervals
-            const newConfidenceIntervals = new Map(
-              prevState.confidenceIntervals,
-            );
+        if (Result.isSuccess(result)) {
+          const predictions = result.value; // Access the value
+          if (predictions) { // Check if value exists
+            // Update state with new predictions
+            setState((prevState) => {
+              // Update confidence intervals
+              const newConfidenceIntervals = new Map(
+                prevState.confidenceIntervals,
+              );
 
-            result.data.forEach((prediction: any) => {
-              // Add 'any' type for now
-              newConfidenceIntervals.set(`relapse-${prediction.disorderId}`, {
-                upper: prediction.confidenceInterval.upper,
-                lower: prediction.confidenceInterval.lower,
-                confidenceLevel: prediction.confidenceInterval.confidenceLevel,
+              predictions.forEach((prediction: any) => { // Use extracted value
+                // Add 'any' type for now
+                if (prediction.confidenceInterval) { // Add safety check
+                  newConfidenceIntervals.set(`relapse-${prediction.disorderId}`, {
+                    upper: prediction.confidenceInterval.upper,
+                    lower: prediction.confidenceInterval.lower,
+                    confidenceLevel: prediction.confidenceInterval.confidenceLevel,
+                  });
+                }
               });
+
+              return {
+                ...prevState,
+                relapsePredictions: predictions, // Use extracted value
+                confidenceIntervals: newConfidenceIntervals,
+                lastUpdated: new Date(),
+                dataPoints: predictions.reduce( // Use extracted value
+                  (sum: number, pred: any) => sum + (pred.dataPoints || 0), // Add types
+                  0,
+                ),
+              };
             });
 
-            return {
-              ...prevState,
-              relapsePredictions: result.data,
-              confidenceIntervals: newConfidenceIntervals,
-              lastUpdated: new Date(),
-              dataPoints: result.data.reduce(
-                (sum: number, pred: any) => sum + (pred.dataPoints || 0), // Add types
-                0,
-              ),
-            };
-          });
-
-          return success(result.data);
+            return success(predictions); // Use extracted value
+          } else {
+            return failure(new Error("Prediction successful but data is missing."));
+          }
+        } else {
+          // Handle failure case
+          const errorMessage = result.error instanceof Error ? result.error.message : String(result.error);
+          return failure(
+            new Error(errorMessage || "Failed to predict relapse"),
+          );
         }
-
-        return failure(result.error || new Error("Failed to predict relapse")); // Wrap string in Error
       } catch (error) {
         return failure(
           // Ensure error object is passed
@@ -346,7 +379,7 @@ export function useClinicalPredictionController(patientId: string) {
   const assessRisks = useCallback(
     async (
       riskFactors: string[],
-    ): Promise<Result<Map<string, RiskAssessment>>> => {
+    ): Promise<ResultType<Map<string, RiskAssessment>>> => {
       try {
         // Configure assessment parameters
         const assessmentParams = {
@@ -361,51 +394,66 @@ export function useClinicalPredictionController(patientId: string) {
         // TODO: Implement actual service call when available
         // const result = await clinicalService.assessRisks(assessmentParams);
         console.warn("assessRisks service method not implemented.");
-        const result = failure(
+        // Placeholder failure with appropriate type for demonstration
+        // Placeholder failure with appropriate type for demonstration
+        const result: ResultType<any, Error> = failure(
           new Error("Service method assessRisks not implemented."),
-        ); // Placeholder failure
+        );
 
-        if (result.success && result.data) {
-          // Update state with new assessments
-          setState((prevState) => {
-            const newRiskAssessments = new Map(prevState.riskAssessments);
-            const newConfidenceIntervals = new Map(
-              prevState.confidenceIntervals,
-            );
+        // This block was already refactored correctly in the previous step.
+        // No changes needed here. Keeping the existing correct logic:
+        if (Result.isSuccess(result)) {
+          const assessments = result.value; // Access the value
+          if (assessments) { // Check if value exists
+            // Update state with new assessments
+            setState((prevState) => {
+              const newRiskAssessments = new Map(prevState.riskAssessments);
+              const newConfidenceIntervals = new Map(
+                prevState.confidenceIntervals,
+              );
 
-            // Add each risk assessment to the maps
-            result.data.forEach((assessment: any) => {
-              // Add 'any' type for now
-              newRiskAssessments.set(assessment.riskFactorId, assessment);
+              // Add each risk assessment to the maps
+              assessments.forEach((assessment: any) => { // Use extracted value
+                // Add 'any' type for now
+                newRiskAssessments.set(assessment.riskFactorId, assessment);
 
-              // Store confidence intervals separately
-              newConfidenceIntervals.set(`risk-${assessment.riskFactorId}`, {
-                upper: assessment.confidenceInterval.upper,
-                lower: assessment.confidenceInterval.lower,
-                confidenceLevel: assessment.confidenceInterval.confidenceLevel,
+                // Store confidence intervals separately
+                if (assessment.confidenceInterval) { // Add safety check
+                  newConfidenceIntervals.set(`risk-${assessment.riskFactorId}`, {
+                    upper: assessment.confidenceInterval.upper,
+                    lower: assessment.confidenceInterval.lower,
+                    confidenceLevel: assessment.confidenceInterval.confidenceLevel,
+                  });
+                }
               });
+
+              return {
+                ...prevState,
+                riskAssessments: newRiskAssessments,
+                confidenceIntervals: newConfidenceIntervals,
+                lastUpdated: new Date(),
+                dataPoints: assessments.reduce( // Use extracted value
+                  (sum: number, assessment: any) =>
+                    sum + (assessment.dataPoints || 0), // Add types
+                  0,
+                ),
+              };
             });
 
-            return {
-              ...prevState,
-              riskAssessments: newRiskAssessments,
-              confidenceIntervals: newConfidenceIntervals,
-              lastUpdated: new Date(),
-              dataPoints: result.data.reduce(
-                (sum: number, assessment: any) =>
-                  sum + (assessment.dataPoints || 0), // Add types
-                0,
-              ),
-            };
-          });
-
-          // Return a copy of the assessments map
-          return success(
-            new Map(result.data.map((a: any) => [a.riskFactorId, a])),
-          ); // Add type
+            // Return a copy of the assessments map
+            return success(
+              new Map(assessments.map((a: any) => [a.riskFactorId, a])), // Use extracted value
+            ); // Add type
+          } else {
+            return failure(new Error("Assessment successful but data is missing."));
+          }
+        } else {
+          // Handle failure case
+          const errorMessage = result.error instanceof Error ? result.error.message : String(result.error);
+          return failure(
+            new Error(errorMessage || "Failed to assess risks"),
+          );
         }
-
-        return failure(result.error || new Error("Failed to assess risks")); // Wrap string in Error
       } catch (error) {
         return failure(
           // Ensure error object is passed
@@ -467,7 +515,7 @@ export function useClinicalPredictionController(patientId: string) {
     async (
       predictionType: "symptom" | "treatment" | "relapse" | "risk",
       timeframe: "week" | "month" | "quarter" | "year",
-    ): Promise<Result<PredictionAccuracy>> => {
+    ): Promise<ResultType<PredictionAccuracy>> => {
       try {
         // TODO: Implement actual service call when available
         // const result = await clinicalService.calculateAccuracy({ /* ... params ... */ });
@@ -494,7 +542,7 @@ export function useClinicalPredictionController(patientId: string) {
     async <T extends PredictionResult>(
       results: T[],
       confidenceLevels: ConfidenceLevel[],
-    ): Promise<Result<T>> => {
+    ): Promise<ResultType<T>> => {
       try {
         if (results.length === 0) {
           return failure(new Error("No prediction results to combine")); // Corrected failure call

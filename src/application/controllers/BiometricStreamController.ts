@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // Domain types
-import {
+import type {
   BiometricStream,
   BiometricDataPoint,
   BiometricAlert,
@@ -17,7 +17,7 @@ import {
   AlertSource, // Keep AlertSource if used, otherwise remove
   BiometricThreshold,
 } from "@domain/types/biometric/streams"; // Use alias
-import { Result, success, failure } from "@domain/types/shared/common"; // Use alias
+import { Result, type Result as ResultType, success, failure } from "@domain/types/shared/common"; // Import Result as value, ResultType as type
 
 // Services
 import { biometricService } from "@application/services/biometricService"; // Revert to alias
@@ -303,7 +303,7 @@ export function useBiometricStreamController(
 
   // Connect to biometric streams
   const connectStreams = useCallback(
-    async (streamIds?: string[]): Promise<Result<void>> => {
+    async (streamIds?: string[]): Promise<ResultType<void>> => {
       try {
         // Target streams (use provided or configured)
         const targetStreamIds = streamIds || config.streamIds;
@@ -325,25 +325,36 @@ export function useBiometricStreamController(
           targetStreamIds,
         );
 
-        if (!streamsResult.success || !streamsResult.data) {
+        // Use type guard to check for failure
+        if (Result.isFailure(streamsResult)) {
+          const errorMessage = streamsResult.error instanceof Error ? streamsResult.error.message : String(streamsResult.error);
           setState((prevState) => ({
             ...prevState,
             isProcessing: false,
-            errorState: streamsResult.error || "Failed to load stream metadata",
+            errorState: errorMessage || "Failed to load stream metadata",
           }));
 
           return failure(
-            new Error(
-              streamsResult.error?.message || "Failed to load stream metadata",
-            ),
+            new Error(errorMessage || "Failed to load stream metadata"),
           );
+        }
+        
+        // Now TypeScript knows streamsResult is { success: true; value: T }
+        const streams = streamsResult.value; // Access the value property
+        if (!streams) { // Add a check for potentially empty value (though unlikely with success)
+            setState((prevState) => ({
+                ...prevState,
+                isProcessing: false,
+                errorState: "Stream metadata loaded successfully but value is empty.",
+            }));
+            return failure(new Error("Stream metadata loaded successfully but value is empty."));
         }
 
         // Initialize stream data storage
         const newActiveStreams = new Map<string, BiometricStream>();
         const newStreamData = new Map<string, BiometricDataPoint[]>();
 
-        streamsResult.data.forEach((stream) => {
+        streams.forEach((stream) => { // Use the extracted 'streams' variable
           newActiveStreams.set(stream.id, stream);
           newStreamData.set(stream.id, []);
         });
@@ -429,7 +440,7 @@ export function useBiometricStreamController(
   );
 
   // Disconnect from biometric streams
-  const disconnectStreams = useCallback((): Result<void> => {
+  const disconnectStreams = useCallback((): ResultType<void> => {
     try {
       // Close WebSocket connection
       if (wsRef.current) {
@@ -629,7 +640,7 @@ export function useBiometricStreamController(
   );
 
   // Acknowledge an alert
-  const acknowledgeAlert = useCallback((alertId: string): Result<void> => {
+  const acknowledgeAlert = useCallback((alertId: string): ResultType<void> => {
     try {
       setState((prevState) => {
         const alertIndex = prevState.alerts.findIndex(
@@ -704,7 +715,7 @@ export function useBiometricStreamController(
   );
 
   // Calculate correlations between biometric streams
-  const calculateCorrelations = useCallback((): Result<Map<string, number>> => {
+  const calculateCorrelations = useCallback((): ResultType<Map<string, number>> => {
     try {
       // Get all stream IDs
       const streamIds = Array.from(state.activeStreams.keys());

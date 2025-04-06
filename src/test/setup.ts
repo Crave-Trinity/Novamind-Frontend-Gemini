@@ -9,7 +9,14 @@ import React from 'react'; // Import React
 import { vi, afterEach } from 'vitest'; // Keep only necessary imports
 // Removed tailwind-mock import - handled by test utils
 // Removed WebGL setup/cleanup - handle in specific tests or dedicated setup if needed
-import './webgl/examples/neural-controllers-mock'; // Keep static neural controller mocks import
+import './webgl/examples/neural-controllers-mock';
+// Import WebGL mock classes needed for three mock
+import {
+  CoreWebGLRenderer,
+  MockWebGLTexture,
+  MockWebGLGeometry,
+  MockWebGLMaterial
+} from './webgl/mock-webgl';
 
 // Mock browser APIs and globals
 // Define a more complete default mock for MediaQueryList
@@ -114,6 +121,7 @@ afterEach(() => {
   localStorageMock.clear(); // Clear localStorage mock state
 });
 
+// Removed global 'three' mock - will be handled per-file if needed
 // Removed afterAll block - WebGL cleanup handled elsewhere or per suite
 // Removed vi.setConfig - Timeouts configured in vitest.config.ts
 

@@ -10,13 +10,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTheme } from '@application/hooks/useTheme';
 
 // Domain types
-import {
+import type {
   VisualizationSettings,
   ThemeSettings,
   RenderMode,
 } from "@domain/types/brain/visualization";
 // Assuming the path alias is correct, ensure the file exists and exports these
-import { Result, success, failure } from "@domain/types/shared/common";
+import type { Result } from "@domain/types/shared/common"; // Removed unused success, failure
 
 // Default theme settings
 const DEFAULT_THEME_SETTINGS: Record<string, ThemeSettings> = {

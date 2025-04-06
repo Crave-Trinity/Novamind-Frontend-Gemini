@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 // Domain types
 // TODO: Locate or define these temporal dynamics types
 // Using placeholders for now
-type TimeScale = "momentary" | "hourly" | "daily" | "weekly" | "monthly";
+type TimeScale = "hourly" | "daily" | "weekly" | "monthly" | "realtime"; // Aligned with domain type
 type TemporalDynamics = any;
 type TemporalPattern = any;
 type PatternClass = any;
@@ -65,17 +65,18 @@ interface TemporalState {
  * Default temporal configuration with clinical precision
  */
 const defaultTemporalConfig: TemporalConfig = {
-  timeScales: ["momentary", "hourly", "daily", "weekly", "monthly"],
+  timeScales: ["hourly", "daily", "weekly", "monthly", "realtime"], // Aligned with domain type
   patternRecognitionThreshold: 0.7,
   criticalTransitionSensitivity: 0.8,
   historyLength: {
-    momentary: 60,
+    // momentary: 60, // Removed momentary
     hourly: 24,
     daily: 30,
     weekly: 12,
     monthly: 24,
+    realtime: 60, // Added realtime history length
   },
-  samplingRate: { momentary: 60, hourly: 6, daily: 24, weekly: 7, monthly: 30 },
+  samplingRate: { hourly: 6, daily: 24, weekly: 7, monthly: 30, realtime: 60 }, // Removed momentary, added realtime (assuming 60/min)
   periodicity: true,
   anomalyDetection: true,
   filterNoise: true,
@@ -87,11 +88,12 @@ const defaultTemporalConfig: TemporalConfig = {
  */
 const createInitialTemporalState = (): TemporalState => ({
   dynamicsData: {
-    momentary: [],
+    // momentary: [], // Removed momentary
     hourly: [],
     daily: [],
     weekly: [],
     monthly: [],
+    realtime: [], // Added realtime data array
   },
   detectedPatterns: [],
   stateTransitions: [],

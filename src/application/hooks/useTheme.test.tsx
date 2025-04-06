@@ -3,14 +3,14 @@
  * useTheme testing with quantum precision
  */
 
-import { describe, it, expect, vi, beforeEach, SpyInstance } from "vitest"; // Explicitly import SpyInstance
+import { describe, it, expect, vi, beforeEach } from "vitest"; // Removed SpyInstance
 import { renderHook } from "@testing-library/react"; // Updated import source
 import React from "react";
 // Import the hook itself and the context type, but not the provider
 // Import hook and context from ThemeProvider
 // Import hook and context from ThemeProvider
 import { useTheme, ThemeContext } from '@/application/contexts/ThemeProvider';
-import { ThemeMode } from '@domain/types/theme'; // Import ThemeMode from domain
+import type { ThemeMode } from '@domain/types/theme'; // Import ThemeMode from domain
 
 // Define types locally to match ThemeProvider.tsx internal structure
 interface ThemeSettings {

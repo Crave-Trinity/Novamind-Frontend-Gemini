@@ -3,8 +3,8 @@
  * useSearchParams testing with quantum precision
  */
 
-import React, { PropsWithChildren } from 'react'; // Import React and PropsWithChildren
-import { describe, it, expect, vi, Mock } from "vitest"; // Import Mock
+import React, { type PropsWithChildren } from 'react'; // Import React and PropsWithChildren
+import { describe, it, expect, vi, type Mock } from "vitest"; // Import Mock
 import { renderHook } from '@testing-library/react'; // Keep single import
 import { MemoryRouter, useLocation, useSearchParams as useReactRouterSearchParams } from 'react-router-dom'; // Keep single import
 import { useSearchParams } from "@hooks/useSearchParams"; // Import the custom hook

@@ -5,12 +5,12 @@
  */
 
 import axios from "axios";
-import {
+import type {
   BrainModel,
   BrainRegion,
   NeuralConnection,
 } from "@domain/types/brain/models";
-import { Result, success, failure } from "@/domain/types/shared/common"; // Corrected path alias and location
+import { type Result, success, failure } from "@/domain/types/shared/common"; // Corrected path alias and location
 
 // API endpoints
 const API_BASE_URL =

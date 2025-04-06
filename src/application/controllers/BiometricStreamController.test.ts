@@ -3,18 +3,18 @@
  * BiometricStreamController testing with focused, incremental tests.
  */
 
-import { describe, it, expect, vi, beforeEach, Mocked } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mocked } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { biometricService } from "@application/services/biometricService";
 import { useBiometricStreamController } from "@application/controllers/BiometricStreamController";
 import {
-  BiometricDataPoint,
-  BiometricAlert,
-  BiometricStream,
+  type BiometricDataPoint,
+  type BiometricAlert,
+  type BiometricStream,
   // BiometricType, // Assuming type strings are used internally if not directly imported
   // AlertPriority, // Assuming type strings are used internally if not directly imported
 } from "../../domain/types/biometric/streams"; // Adjusted path
-import { Result, success, failure } from "../../domain/types/shared/common"; // Adjusted path
+import { type Result, success, failure } from "../../domain/types/shared/common"; // Adjusted path
 
 // Mock the biometricService
 vi.mock("@application/services/biometricService", () => ({

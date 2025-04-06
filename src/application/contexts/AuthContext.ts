@@ -7,7 +7,7 @@
  */
 
 import { createContext } from "react";
-import { User, Permission } from "@domain/types/auth/auth";
+import type { User, Permission } from "@domain/types/auth/auth";
 
 /**
  * Shape of the authentication context

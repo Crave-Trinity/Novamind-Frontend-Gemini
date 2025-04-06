@@ -7,13 +7,12 @@ import { useState, useEffect, useCallback } from "react";
 // Import with proper type definitions
 import { useQuery } from "@tanstack/react-query";
 
-import {
+import type {
   BrainRegion,
   BrainViewState,
   NeuralPathway,
-  // RenderMode, // Remove import from outdated location
 } from "@domain/models/brain/BrainModel";
-import { RenderMode } from "@domain/types/brain/visualization"; // Import correct RenderMode
+import type { RenderMode } from "@domain/types/brain/visualization"; // Import correct RenderMode
 import { apiClient } from "@api/ApiClient";
 
 interface UseBrainVisualizationOptions {

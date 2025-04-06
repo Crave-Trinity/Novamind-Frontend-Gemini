@@ -4,15 +4,15 @@
  * with clinical precision and mathematical integrity
  */
 
-import {
+import type {
   BrainModel,
   BrainRegion,
   NeuralConnection,
-} from "@/domain/types/brain/models"; 
-import { Result, success, failure } from "@/domain/types/shared/common";
+} from "@/domain/types/brain/models";
+import { type Result, success, failure } from "@/domain/types/shared/common";
 
 // Extend Error properly to match the expected type
-class ValidationError extends Error {
+export class ValidationError extends Error { // Export the class
   constructor(
     message: string,
     public field?: string

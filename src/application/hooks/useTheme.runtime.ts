@@ -3,11 +3,11 @@
  * Ensures that theme settings and structures conform to expected types at runtime.
  */
 
-import { Result, Ok, Err } from "ts-results";
+import { Ok, Err, type Result } from "ts-results";
 // Import actual domain types and type guard
 import {
-  ThemeSettings,
-  ThemeOption,
+  type ThemeSettings,
+  type ThemeOption,
   isValidTheme,
   visualizationThemes, // Import themes for validation if needed
 } from "@domain/types/brain/visualization";

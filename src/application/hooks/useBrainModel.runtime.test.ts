@@ -6,10 +6,10 @@ import { describe, it, expect } from "vitest";
 import { validateBrainModelData } from "@hooks/useBrainModel.runtime";
 // Import actual domain types and factory for precise testing
 import {
-  BrainModel,
-  BrainRegion, // Interface and Factory object share the name
-  Connection,
-  Vector3,
+  type BrainModel,
+  BrainRegion, // Interface and Factory object share the name - Keep as value import
+  type Connection,
+  type Vector3,
   // BrainRegionFactory does not exist, use BrainRegion.create
   // ConnectionFactory does not exist
 } from "@domain/types/brain/core-models"; // Adjust path/exports if needed

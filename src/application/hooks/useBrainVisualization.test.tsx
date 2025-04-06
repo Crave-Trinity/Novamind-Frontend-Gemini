@@ -3,8 +3,8 @@
  * useBrainVisualization testing with quantum precision
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach, Mock } from "vitest";
-import React, { ReactNode } from 'react';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from "vitest";
+import React, { type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, act, waitFor } from "@testing-library/react"; // Import waitFor
 import { useBrainVisualization } from "@hooks/useBrainVisualization"; // Import the actual hook
@@ -22,7 +22,7 @@ vi.mock('@api/ApiClient', () => ({
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
 // Define the wrapper component globally
-const QueryWrapper = ({ children }: { children: ReactNode }): JSX.Element => {
+const QueryWrapper = ({ children }: { children: ReactNode }): React.ReactElement => {
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );

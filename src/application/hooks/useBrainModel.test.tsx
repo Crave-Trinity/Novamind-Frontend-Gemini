@@ -7,7 +7,7 @@ import { renderHook, act, waitFor } from "@testing-library/react";
 import { useBrainModel } from "@hooks/useBrainModel";
 import { createMockBrainRegions } from "@test/three-test-utils"; // Correct import path
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrainModel, BrainRegion } from "@domain/types/brain/models"; // Import types
+import type { BrainModel, BrainRegion } from "@domain/types/brain/models"; // Import types
 import { brainModelService } from "@application/services/brain/brain-model.service"; // Import the actual service
 
 // Create a quantum-precise mock API client
@@ -39,7 +39,7 @@ const createTestQueryClient = () =>
   });
 
 // Neural-safe wrapper for hook testing
-const Wrapper = ({ children }: { children: React.ReactNode }) => {
+const Wrapper = ({ children }: { children: React.ReactNode }) => { // ReactNode is already correctly used as a type here
   const queryClient = createTestQueryClient();
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

@@ -3,14 +3,14 @@
  * Ensures that visual settings structures conform to expected types at runtime.
  */
 
-import { Result, Ok, Err } from "ts-results";
+import { Ok, Err, type Result } from "ts-results";
 // Import relevant domain types and type guards
 import {
-  VisualizationSettings,
-  ThemeSettings,
-  RenderMode,
+  type VisualizationSettings,
+  type ThemeSettings,
+  type RenderMode, // Used only as type via isValidRenderMode
   isValidRenderMode,
-  ThemeOption,
+  type ThemeOption, // Used only as type via isValidTheme
   isValidTheme,
 } from "@domain/types/brain/visualization";
 // import { ValidationError } from '@domain/errors/validation';

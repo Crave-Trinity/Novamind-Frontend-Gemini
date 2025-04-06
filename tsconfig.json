@@ -14,7 +14,7 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
-    "verbatimModuleSyntax": false, // Temporarily disabled for neural migration
+    "verbatimModuleSyntax": true, // Enable modern default for stricter module handling
     "noEmit": true,
     "jsx": "react-jsx",
 
@@ -86,6 +86,6 @@
     }
   },
   "include": ["src", "src/test"], // Include test files for better TS integration
-  "exclude": ["vite.config.ts", "vite.config.prod.ts", "vite.config.prod.enhanced.ts", "node_modules", "dist"],
+  "exclude": ["vite.config.ts", "vite.config.prod.ts", "node_modules", "dist"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

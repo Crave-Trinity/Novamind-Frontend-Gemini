@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react"; // Import renderHook and act
 
 import useNeuroSyncOrchestrator, {
-  NeuroSyncState,
+  type NeuroSyncState,
 } from "@application/orchestrators/NeuroSyncOrchestrator"; // Use correct alias
 
 // Mock services (basic mocks, replace with more specific mocks if needed)
@@ -60,10 +60,10 @@ import { brainModelService } from "@application/services/brain/brain-model.servi
 import { clinicalService } from "@application/services/clinicalService";
 import { biometricService } from "@application/services/biometricService";
 import { temporalService } from "@application/services/temporal";
-import { BrainModel, BrainScan } from "@domain/types/brain/models"; // Import correct BrainModel interface and BrainScan
-import { TemporalDynamics } from "@domain/types/temporal/dynamics";
-import { Result } from "@domain/types/shared/common"; // Import Result type
-import { BiometricAlert, BiometricStream } from "@domain/types/biometric/streams"; // Import Biometric types
+import type { BrainModel, BrainScan } from "@domain/types/brain/models"; // Import correct BrainModel interface and BrainScan
+import type { TemporalDynamics } from "@domain/types/temporal/dynamics";
+import type { Result } from "@domain/types/shared/common"; // Import Result type
+import type { BiometricAlert, BiometricStream } from "@domain/types/biometric/streams"; // Import Biometric types
 
 describe("useNeuroSyncOrchestrator", () => {
   const mockPatientId = "patient-123";

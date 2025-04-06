@@ -5,13 +5,13 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import tsconfigPaths from 'vite-tsconfig-paths'; // Import the plugin
 
-// Define a merged configuration type that includes Vitest's 'test' property
-interface MergedConfig extends UserConfig {
-  test: VitestUserConfig['test'];
-}
+// Vitest configuration is defined in separate vitest.config.ts files
+// interface MergedConfig extends UserConfig {
+//   test: VitestUserConfig['test']; // Removed test property
+// }
 
 // Export the configuration using the merged type
-export default defineConfig(({ command, mode }): MergedConfig => ({
+export default defineConfig(({ command, mode }): UserConfig => ({ // Use UserConfig directly
   plugins: [react(), tsconfigPaths()],
   // Enable CSS processing (including PostCSS/Tailwind) for tests
   css: {
@@ -71,17 +71,5 @@ export default defineConfig(({ command, mode }): MergedConfig => ({
     }
   },
 
-  // Vitest configuration
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: './src/test/setup.unified.ts',
-    // css: { ... } // Moved to top level
-    // Optional: Add coverage configuration if needed
-    // coverage: {
-    //   provider: 'v8', // or 'istanbul'
-    //   reporter: ['text', 'json', 'html'],
-    // },
-    testTimeout: 30000, // Increase global timeout to 30s
-  }
+  // Vitest configuration is now managed in vitest.config.ts files
 }));

@@ -10,12 +10,12 @@ import {
   validateTreatmentResponseRequest, // Validates the Request DTO
   validateTreatmentResponseResponse, // Validates the Response DTO
 } from "@hooks/useTreatmentPrediction.runtime";
-import {
+import type {
   ClinicalPredictionData, // Domain type
   GeneticPredictionData,
   TreatmentType, // Keep if needed for mock data, but use string literals for values
 } from "@domain/types/clinical/treatment";
-import {
+import type {
   TreatmentResponseRequest, // DTO type
   TreatmentResponseResponse, // DTO type
 } from "@infrastructure/api/XGBoostService";

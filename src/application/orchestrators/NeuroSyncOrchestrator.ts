@@ -7,30 +7,30 @@
 import { useCallback, useEffect, useMemo, useReducer } from "react"; // Import useReducer
 
 // Domain types
-import {
+import type {
   BrainRegion,
   NeuralConnection,
   BrainModel,
 } from "@/domain/types/brain/models";
 import {
   ActivationLevel,
-  NeuralActivityState,
+  type NeuralActivityState,
 } from "@/domain/types/brain/activity";
-import {
+import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
 } from "@/domain/models/brain/mapping/brain-mapping"; // Use @/ alias (already correct)
-import { TreatmentResponsePrediction } from "@/domain/types/clinical/treatment";
-import {
+import type { TreatmentResponsePrediction } from "@/domain/types/clinical/treatment";
+import type {
   BiometricAlert,
   BiometricStream,
 } from "@/domain/types/biometric/streams";
-import { TemporalDynamics } from "@/domain/types/temporal/dynamics"; // Revert to specific file, maybe index isn't picked up
-import { Result, success, failure } from "@/domain/types/shared/common"; // Use @/ alias (already correct)
+import type { TemporalDynamics } from "@/domain/types/temporal/dynamics"; // Revert to specific file, maybe index isn't picked up
+import { type Result, success, failure } from "@/domain/types/shared/common"; // Use @/ alias (already correct)
 
 // Services
 import { brainModelService } from "@/application/services/brain/brain-model.service"; // Corrected path and added extension
-import { clinicalService } from "@/application/services/clinicalService";
+import { clinicalService } from "@application/services/clinical/clinical.service"; // Corrected path
 import { biometricService } from "@/application/services/biometricService";
 import { temporalService } from "@/application/services/temporal/temporal.service"; // Revert to specific file
 
@@ -239,14 +239,20 @@ export function useNeuroSyncOrchestrator(
 
       const result = await brainModelService.fetchBrainModel(patientId);
 
-      if (result.success && result.value) {
-        // Corrected: Check result.value
-        dispatch({ type: "SET_BRAIN_MODEL", payload: result.value }); // Use .value for success case
-        dispatch({ type: "SET_LOADING_STATE", payload: "loaded" });
+      if (result.success) { // Check success first
+        if (result.value) { // Then check value
+          dispatch({ type: "SET_BRAIN_MODEL", payload: result.value });
+          dispatch({ type: "SET_LOADING_STATE", payload: "loaded" });
+        } else {
+          // Handle success but missing value case
+          dispatch({ type: "SET_ERROR", payload: "Brain model data missing despite successful fetch." });
+        }
       } else {
+        // Handle failure case using the custom Result type properties
+        const errorMessage = result.error instanceof Error ? result.error.message : String(result.error);
         dispatch({
           type: "SET_ERROR",
-          payload: result.error?.message || "Failed to load brain model", // Access error message correctly
+          payload: errorMessage || "Failed to load brain model",
         });
       }
     } catch (error) {
@@ -264,31 +270,31 @@ export function useNeuroSyncOrchestrator(
   const fetchClinicalData = useCallback(async () => {
     try {
       // Fetch symptom mappings
-      const symptomResult = await clinicalService.getSymptomMappings(patientId);
-      if (symptomResult.success && symptomResult.data) {
+      const symptomResult = await clinicalService.fetchSymptomMappings();
+      if (symptomResult.success && symptomResult.value) { // Check .value
         dispatch({
           type: "SET_SYMPTOM_MAPPINGS",
           payload: symptomResult.value,
-        }); // Use .value for success case
+        });
       }
 
       // Fetch diagnosis mappings
       const diagnosisResult =
-        await clinicalService.getDiagnosisMappings(patientId);
-      if (diagnosisResult.success && diagnosisResult.data) {
+        await clinicalService.fetchDiagnosisMappings();
+      if (diagnosisResult.success && diagnosisResult.value) { // Check .value
         dispatch({
           type: "SET_DIAGNOSIS_MAPPINGS",
-          payload: diagnosisResult.value, // Use .value for success case
+          payload: diagnosisResult.value,
         });
       }
 
       // Fetch treatment predictions
       const treatmentResult =
-        await clinicalService.getTreatmentPredictions(patientId);
-      if (treatmentResult.success && treatmentResult.data) {
+        await clinicalService.fetchTreatmentPredictions(patientId);
+      if (treatmentResult.success && treatmentResult.value) { // Check .value
         dispatch({
           type: "SET_TREATMENT_PREDICTIONS",
-          payload: treatmentResult.value, // Use .value for success case
+          payload: treatmentResult.value,
         });
       }
     } catch (error) {
@@ -305,21 +311,22 @@ export function useNeuroSyncOrchestrator(
   // Fetch biometric data
   const fetchBiometricData = useCallback(async () => {
     try {
+      // TODO: Implement or remove calls to missing biometricService methods
       // Fetch biometric alerts
-      const alertsResult = await biometricService.getBiometricAlerts(patientId);
-      if (alertsResult.success && alertsResult.data) {
-        dispatch({ type: "SET_BIOMETRIC_ALERTS", payload: alertsResult.value }); // Use .value for success case
-      }
+      // const alertsResult = await biometricService.getBiometricAlerts(patientId);
+      // if (alertsResult.success && alertsResult.value) { // Check .value
+      //   dispatch({ type: "SET_BIOMETRIC_ALERTS", payload: alertsResult.value });
+      // }
 
       // Fetch biometric streams
-      const streamsResult =
-        await biometricService.getBiometricStreams(patientId);
-      if (streamsResult.success && streamsResult.data) {
-        dispatch({
-          type: "SET_BIOMETRIC_STREAMS",
-          payload: streamsResult.value, // Use .value for success case
-        });
-      }
+      // const streamsResult =
+      //   await biometricService.getBiometricStreams(patientId);
+      // if (streamsResult.success && streamsResult.value) { // Check .value
+      //   dispatch({
+      //     type: "SET_BIOMETRIC_STREAMS",
+      //     payload: streamsResult.value,
+      //   });
+      // }
     } catch (error) {
       // Non-blocking error for biometric data - log but don't disrupt visualization
       console.error("Error loading biometric data:", error);

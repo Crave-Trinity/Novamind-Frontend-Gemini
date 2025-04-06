@@ -9,8 +9,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
   xgboostService,
-  TreatmentResponseRequest,
-  TreatmentResponseResponse,
+  type TreatmentResponseRequest,
+  type TreatmentResponseResponse,
 } from "@api/XGBoostService";
 
 interface UseTreatmentPredictionOptions {
@@ -59,23 +59,30 @@ export function useTreatmentPrediction({
         [key: string]: unknown;
       };
       geneticData?: string[];
-    }) => {
+    }): Promise<TreatmentResponseResponse> => { // Ensure return type matches useMutation expectation
       const request: TreatmentResponseRequest = {
         patient_id: patientId,
         treatment_type: treatmentConfig.treatmentType,
         treatment_details: treatmentConfig.details,
         clinical_data: clinicalData,
-        genetic_data: geneticData,
+        // Conditionally spread genetic_data only if it's defined
+        ...(geneticData && { genetic_data: geneticData }),
       };
 
-      const response = await xgboostService.predictTreatmentResponse(request);
+      const result = await xgboostService.predictTreatmentResponse(request);
 
-      // Store the prediction ID for related queries
-      if (response.prediction_id) {
-        setActivePredictionId(response.prediction_id);
+      // Use ts-results API
+      if (result.ok) {
+        const responseData = result.val; // Use .val
+        // Store the prediction ID for related queries
+        if (responseData.prediction_id) {
+          setActivePredictionId(responseData.prediction_id);
+        }
+        return responseData; // Return unwrapped data on success
+      } else {
+        // Throw error on failure, as expected by useMutation
+        throw result.err || new Error("Prediction failed"); // Use .err
       }
-
-      return response;
     },
     onSuccess: (data: TreatmentResponseResponse) => {
       onPredictionSuccess?.(data);

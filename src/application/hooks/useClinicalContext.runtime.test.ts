@@ -11,12 +11,12 @@ import {
   validateDiagnosisMappingArray,
   validateTreatmentMappingArray,
 } from "@hooks/useClinicalContext.runtime";
-import { RiskAssessment, RiskLevel } from "@domain/types/clinical/risk";
-import {
+import { type RiskAssessment, RiskLevel } from "@domain/types/clinical/risk";
+import type {
   TreatmentResponsePrediction,
   TreatmentType,
 } from "@domain/types/clinical/treatment";
-import {
+import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
@@ -44,6 +44,7 @@ const mockInvalidRiskAssessment = { id: "ra-2", patientId: "p2" }; // Missing re
 const mockValidTreatmentPrediction: TreatmentResponsePrediction = {
   requestId: "req-1",
   patientId: "p1",
+  treatmentId: "tmt-mock-1", // Added missing required property
   treatmentType: "pharmacological",
   timestamp: new Date().toISOString(), // Use string literal
   algorithm: { name: "XGBoost", version: "1.2", confidence: 0.9 },

@@ -11,6 +11,9 @@ try {
   console.warn('Could not import THREE. Using dummy THREE namespace for mocks.');
   THREE = {};
 }
+// Re-export mocks and utilities
+export * from './three-mocks'; // Assuming ThreeMocks is exported here
+// Removed incorrect re-export for memory-monitor
 
 export interface MemoryReport {
   leakedObjectCount: number;

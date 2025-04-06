@@ -3,15 +3,15 @@
  * Ensures that data structures conform to expected types at runtime.
  */
 
-import { Result, Ok, Err } from "ts-results";
+import { Ok, Err, type Result } from "ts-results"; // Import Result as type
 // Import actual domain types and type guard
 // Import nested type guards and types
 import {
-  BrainModel,
+  type BrainModel,
   isBrainModel,
-  BrainRegion,
+  BrainRegion, // Keep as value (used in .every)
   isBrainRegion,
-  Connection,
+  type Connection,
 } from "@domain/types/brain/core-models";
 // Assuming a standard validation error type might be defined later
 // import { ValidationError } from '@domain/errors/validation';

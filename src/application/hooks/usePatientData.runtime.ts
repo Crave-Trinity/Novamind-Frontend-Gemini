@@ -3,9 +3,9 @@
  * Ensures that patient data structures conform to expected types at runtime, crucial for HIPAA compliance.
  */
 
-import { Result, Ok, Err } from "ts-results";
+import { Ok, Err, type Result } from "ts-results";
 // Import actual domain type and nested types
-import {
+import type {
   Patient,
   PatientDemographics,
   ClinicalData,

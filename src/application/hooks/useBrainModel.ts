@@ -7,9 +7,9 @@ import { useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // Domain types
-import { BrainModel } from "@domain/types/brain/models";
-import { RenderMode } from "@domain/types/brain/visualization";
-import { Result, success, failure, SafeArray } from "../../domain/types/shared/common"; // Corrected relative path
+import type { BrainModel } from "@domain/types/brain/models";
+import type { RenderMode } from "@domain/types/brain/visualization";
+import { type Result, success, failure, SafeArray } from "../../domain/types/shared/common"; // Corrected relative path
 
 // Domain utilities
 import { brainTypeVerifier } from "../../domain/utils/brain/type-verification"; // Correct relative path to brain utils

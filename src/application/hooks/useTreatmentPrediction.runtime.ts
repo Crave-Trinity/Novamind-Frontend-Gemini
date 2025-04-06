@@ -3,14 +3,14 @@
  * Ensures that treatment prediction request/response DTOs and inputs conform to expected types.
  */
 
-import { Result, Ok, Err } from "ts-results";
+import { Ok, Err, type Result } from "ts-results";
 // Import DTOs from infrastructure
-import {
+import type {
   TreatmentResponseRequest,
   TreatmentResponseResponse,
 } from "@infrastructure/api/XGBoostService"; // Using alias
 // Import relevant Domain types and type guards
-import {
+import type {
   ClinicalPredictionData, // Domain type, used for validateClinicalPredictionData
   GeneticPredictionData,
   TreatmentType,

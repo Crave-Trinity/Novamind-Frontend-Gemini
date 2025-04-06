@@ -2,8 +2,8 @@
  * NOVAMIND Neural-Safe Service Layer
  * Biometric Service - Handles retrieval and processing of biometric data.
  */
-import { Result, success, failure } from "@domain/types/shared/common";
-import { BiometricStream } from "@domain/types/biometric/streams";
+import { type Result, success, failure } from "@domain/types/shared/common";
+import type { BiometricStream } from "@domain/types/biometric/streams";
 
 // Placeholder implementation - replace with actual logic
 

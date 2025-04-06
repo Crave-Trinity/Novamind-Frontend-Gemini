@@ -6,7 +6,7 @@
 import { Result, Ok, Err } from "ts-results";
 import {
   ActivationLevel,
-  NeuralStateTransition,
+  type NeuralStateTransition,
   // NeuralFrequencyBand, // Missing type
 } from "@domain/types/brain/activity";
 // import { ValidationError } from '@domain/errors/validation'; // If specific error types are defined

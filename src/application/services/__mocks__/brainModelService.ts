@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { BrainModel, BrainScan } from "@domain/types/brain/models";
+import type { BrainModel, BrainScan } from "@domain/types/brain/models";
 
 // Define mock data structure matching BrainModel interface
 const mockPatientId = "mock-patient";

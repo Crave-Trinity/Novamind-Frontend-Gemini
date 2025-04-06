@@ -9,10 +9,10 @@ import {
   validateFullThemeSettings,
 } from "@hooks/useVisualSettings.runtime";
 import {
-  VisualizationSettings,
-  ThemeSettings,
+  type VisualizationSettings,
+  type ThemeSettings,
   RenderMode,
-  ThemeOption,
+  type ThemeOption,
   visualizationThemes, // Import predefined themes for testing
   defaultVisualizationSettings, // Import defaults for base valid object
 } from "@domain/types/brain/visualization";

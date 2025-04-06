@@ -14,16 +14,7 @@ import {
   MockWebGLMaterial  // Import the mock class
 } from './mock-webgl'; // Keep setup/cleanup imports
 
-// Explicitly mock the 'three' module for this test file
-vi.mock('three', () => ({
-  WebGLRenderer: CoreWebGLRenderer,
-  Texture: MockWebGLTexture,
-  BufferGeometry: MockWebGLGeometry,
-  MeshBasicMaterial: MockWebGLMaterial,
-  Scene: vi.fn(), // Simple mock for Scene
-  PerspectiveCamera: vi.fn(), // Simple mock for PerspectiveCamera
-  // Add other necessary mocks if needed
-}));
+// Mock for 'three' moved to global setup (src/test/setup.ts)
 
 // Now import the names which will resolve to the mocks defined above
 import {
@@ -34,7 +25,7 @@ import {
   Scene,
   PerspectiveCamera
 } from 'three';
-describe.skip('WebGL Mocking', () => { // Skip due to persistent mock issues
+describe.skip('WebGL Mocking', () => { // Re-skip due to persistent mock issues
   beforeEach(() => {
     // Set up WebGL mocks before each test
     setupWebGLMocks();

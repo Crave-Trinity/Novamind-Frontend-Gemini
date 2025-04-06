@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import axios from "axios";
 import { brainModelService } from "@application/services/brain/brain-model.service";
-import {
+import type {
   BrainModel,
   BrainRegion,
   NeuralConnection,
@@ -24,12 +24,18 @@ describe("Brain Model Service", () => {
   describe("fetchBrainModel", () => {
     it("successfully fetches a brain model by ID", async () => {
       // Arrange
-      const mockBrainModel: Partial<BrainModel> = {
+      // Use the full BrainModel type and ensure all required fields are present
+      const mockBrainModel: BrainModel = {
         id: "scan123",
-        name: "Test Brain Model",
+        // name: "Test Brain Model", // Removed name
         regions: [],
         connections: [],
-        version: 1,
+        version: "1", // Corrected type to string
+        patientId: "patient-test", // Added required
+        scan: { id: 'scan-test', patientId: 'patient-test', scanDate: new Date().toISOString(), scanType: 'fMRI', dataQualityScore: 0.9 }, // Added required
+        timestamp: new Date().toISOString(), // Added required
+        processingLevel: "analyzed", // Added required
+        lastUpdated: new Date().toISOString(), // Added required
       };
 
       mockedAxios.get.mockResolvedValueOnce({
@@ -42,7 +48,7 @@ describe("Brain Model Service", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.value).toEqual(mockBrainModel);
+      if (result.success) expect(result.value).toEqual(mockBrainModel); // Access value only on success
       expect(mockedAxios.get).toHaveBeenCalledWith(
         expect.stringContaining("/scan123"),
         expect.objectContaining({
@@ -69,7 +75,7 @@ describe("Brain Model Service", () => {
 
       // Assert
       expect(result.success).toBe(false);
-      expect(result.error?.message).toContain("not found");
+      if (!result.success) expect(result.error?.message).toContain("not found"); // Access error only on failure
     });
 
     it("handles network errors gracefully", async () => {
@@ -87,7 +93,7 @@ describe("Brain Model Service", () => {
 
       // Assert
       expect(result.success).toBe(false);
-      expect(result.error?.message).toContain("No response received");
+      if (!result.success) expect(result.error?.message).toContain("No response received"); // Access error only on failure
     });
   });
 
@@ -123,8 +129,10 @@ describe("Brain Model Service", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.value.models).toHaveLength(1);
-      expect(result.value.total).toBe(1);
+      if (result.success) { // Access value only on success
+        expect(result.value.models).toHaveLength(1);
+        expect(result.value.total).toBe(1);
+      }
       expect(mockedAxios.get).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
@@ -165,7 +173,7 @@ describe("Brain Model Service", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.value).toEqual(mockRegion);
+      if (result.success) expect(result.value).toEqual(mockRegion); // Access value only on success
     });
   });
 
@@ -175,7 +183,7 @@ describe("Brain Model Service", () => {
       const mockConnection: Partial<NeuralConnection> = {
         id: "conn123",
         strength: 0.6,
-        isActive: true,
+        // Removed isActive as it's not part of NeuralConnection
       };
 
       mockedAxios.patch.mockResolvedValueOnce({
@@ -187,12 +195,12 @@ describe("Brain Model Service", () => {
       const result = await brainModelService.updateConnection(
         "scan123",
         "conn123",
-        { strength: 0.6, isActive: true },
+        { strength: 0.6 }, // Removed isActive
       );
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.value).toEqual(mockConnection);
+      if (result.success) expect(result.value).toEqual(mockConnection); // Access value only on success
     });
   });
 
@@ -225,7 +233,7 @@ describe("Brain Model Service", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.value.id).toBe("anno123");
+      if (result.success) expect(result.value.id).toBe("anno123"); // Access value only on success
       expect(mockedAxios.post).toHaveBeenCalledWith(
         expect.stringContaining("/annotations"),
         mockAnnotation,
@@ -252,7 +260,7 @@ describe("Brain Model Service", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.value.status).toBe("processing");
+      if (result.success) expect(result.value.status).toBe("processing"); // Access value only on success
       expect(mockedAxios.post).toHaveBeenCalledWith(
         expect.stringContaining("/generate"),
         { patientId: "patient456" },
@@ -281,8 +289,10 @@ describe("Brain Model Service", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.value.status).toBe("processing");
-      expect(result.value.progress).toBe(0.65);
+      if (result.success) { // Access value only on success
+        expect(result.value.status).toBe("processing");
+        expect(result.value.progress).toBe(0.65);
+      }
     });
   });
 });

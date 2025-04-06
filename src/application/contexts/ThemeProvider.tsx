@@ -3,10 +3,10 @@ import React, {
   useEffect,
   useCallback,
   createContext,
-  ReactNode,
+  type ReactNode,
 } from "react";
 
-import { ThemeMode } from "../../domain/types/theme";
+import type { ThemeMode } from "../../domain/types/theme";
 
 // Define ThemeSettings interface for visualization settings
 interface ThemeSettings {
