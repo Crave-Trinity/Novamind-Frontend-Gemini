@@ -6,7 +6,7 @@
  * the aliases are working properly.
  */
 
-import { vi } from 'vitest';
+// Removed unused import: vi from 'vitest';
 import path from 'path';
 
 // Log that path alias fix is running

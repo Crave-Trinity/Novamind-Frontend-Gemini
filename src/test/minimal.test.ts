@@ -22,7 +22,7 @@ class MockTextEncoder {
 beforeAll(() => {
   // Only add the polyfill if it doesn't exist
   if (typeof global.TextEncoder === 'undefined') {
-    global.TextEncoder = MockTextEncoder as any;
+    global.TextEncoder = MockTextEncoder as typeof TextEncoder;
   }
 });
 

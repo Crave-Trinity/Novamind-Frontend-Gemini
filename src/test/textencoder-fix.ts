@@ -26,5 +26,5 @@ if (
   typeof globalThis.TextEncoder === 'undefined' ||
   !(new globalThis.TextEncoder().encode('') instanceof Uint8Array)
 ) {
-  globalThis.TextEncoder = FixedTextEncoder as any;
+  globalThis.TextEncoder = FixedTextEncoder as typeof TextEncoder;
 }

@@ -9,76 +9,134 @@ import { vi } from 'vitest';
 // Core neural mocks for all atomic components with clinical precision
 const mockComponents = {
   // Atom components
-  Button: ({ children, onClick, className = '' }: any) => (
+  Button: ({
+    children,
+    onClick,
+    className = '',
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    className?: string;
+  }) => (
     <button onClick={onClick} className={className} data-testid="mock-button">
       {children}
     </button>
   ),
 
-  Card: ({ children, className = '' }: any) => (
+  Card: ({ children, className = '' }: React.PropsWithChildren<{ className?: string }>) => (
     <div className={`mock-card ${className}`} data-testid="mock-card">
       {children}
     </div>
   ),
 
-  CardHeader: ({ children }: any) => <div data-testid="mock-card-header">{children}</div>,
+  CardHeader: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-card-header">{children}</div>
+  ),
 
-  CardTitle: ({ children }: any) => <div data-testid="mock-card-title">{children}</div>,
+  CardTitle: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-card-title">{children}</div>
+  ),
 
-  CardDescription: ({ children }: any) => <div data-testid="mock-card-description">{children}</div>,
+  CardDescription: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-card-description">{children}</div>
+  ),
 
-  CardContent: ({ children }: any) => <div data-testid="mock-card-content">{children}</div>,
+  CardContent: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-card-content">{children}</div>
+  ),
 
-  CardFooter: ({ children }: any) => <div data-testid="mock-card-footer">{children}</div>,
+  CardFooter: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-card-footer">{children}</div>
+  ),
 
-  Badge: ({ children, variant = 'default', className = '' }: any) => (
+  Badge: ({
+    children,
+    variant = 'default',
+    className = '',
+  }: {
+    children: React.ReactNode;
+    variant?: string;
+    className?: string;
+  }) => (
     <span className={`mock-badge-${variant} ${className}`} data-testid="mock-badge">
       {children}
     </span>
   ),
 
-  Tooltip: ({ children }: any) => <div data-testid="mock-tooltip">{children}</div>,
+  Tooltip: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-tooltip">{children}</div>
+  ),
 
-  TooltipTrigger: ({ children }: any) => <div data-testid="mock-tooltip-trigger">{children}</div>,
+  TooltipTrigger: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-tooltip-trigger">{children}</div>
+  ),
 
-  TooltipContent: ({ children }: any) => <div data-testid="mock-tooltip-content">{children}</div>,
+  TooltipContent: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-tooltip-content">{children}</div>
+  ),
 
-  TooltipProvider: ({ children }: any) => <div data-testid="mock-tooltip-provider">{children}</div>,
+  TooltipProvider: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-tooltip-provider">{children}</div>
+  ),
 
-  Tabs: ({ children }: any) => <div data-testid="mock-tabs">{children}</div>,
+  Tabs: ({ children }: React.PropsWithChildren) => <div data-testid="mock-tabs">{children}</div>,
 
-  TabsList: ({ children }: any) => <div data-testid="mock-tabs-list">{children}</div>,
+  TabsList: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-tabs-list">{children}</div>
+  ),
 
-  TabsTrigger: ({ children, value }: any) => (
+  TabsTrigger: ({ children, value }: { children: React.ReactNode; value: string }) => (
     <div data-testid={`mock-tabs-trigger-${value}`}>{children}</div>
   ),
 
-  TabsContent: ({ children, value }: any) => (
+  TabsContent: ({ children, value }: { children: React.ReactNode; value: string }) => (
     <div data-testid={`mock-tabs-content-${value}`}>{children}</div>
   ),
 
-  Progress: ({ value }: any) => <div data-testid="mock-progress" data-value={value}></div>,
+  Progress: ({ value }: { value?: number | null }) => (
+    <div data-testid="mock-progress" data-value={value ?? undefined}></div>
+  ),
 
-  ScrollArea: ({ children }: any) => <div data-testid="mock-scroll-area">{children}</div>,
+  ScrollArea: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-scroll-area">{children}</div>
+  ),
 
-  ScrollBar: ({ orientation = 'vertical' }: any) => (
+  ScrollBar: ({ orientation = 'vertical' }: { orientation?: 'vertical' | 'horizontal' }) => (
     <div data-testid={`mock-scroll-bar-${orientation}`}></div>
   ),
 
   // Neural visualization components
-  Canvas: ({ children }: any) => <div data-testid="mock-canvas">{children}</div>,
+  Canvas: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-canvas">{children}</div>
+  ),
 
-  ThreeCanvas: ({ children }: any) => <div data-testid="mock-three-canvas">{children}</div>,
+  ThreeCanvas: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-three-canvas">{children}</div>
+  ),
 
-  RegionMesh: ({ region, selected, onClick }: any) => (
+  RegionMesh: ({
+    region,
+    selected,
+    onClick,
+  }: {
+    region: { id: string | number };
+    selected?: boolean;
+    onClick?: () => void;
+  }) => (
     <div data-testid={`mock-region-${region.id}`} onClick={onClick}>
       {selected ? 'Selected' : 'Not Selected'}
     </div>
   ),
 
-  ConnectionLine: ({ source, target, strength }: any) => (
-    <div data-testid={`mock-connection-${source}-${target}`} data-strength={strength}></div>
-  ),
+  ConnectionLine: ({
+    source,
+    target,
+    strength,
+  }: {
+    source: string | number;
+    target: string | number;
+    strength?: number;
+  }) => <div data-testid={`mock-connection-${source}-${target}`} data-strength={strength}></div>,
 
   // Neural icons
   Brain: () => <div data-testid="mock-icon-brain">Brain Icon</div>,
@@ -99,10 +157,16 @@ const mockComponents = {
 
 // Neural-safe mocks for React Router
 const mockRouter = {
-  BrowserRouter: ({ children }: any) => <div data-testid="mock-browser-router">{children}</div>,
-  Routes: ({ children }: any) => <div data-testid="mock-routes">{children}</div>,
-  Route: ({ path, element }: any) => <div data-testid={`mock-route-${path}`}>{element}</div>,
-  Link: ({ to, children }: any) => (
+  BrowserRouter: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-browser-router">{children}</div>
+  ),
+  Routes: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="mock-routes">{children}</div>
+  ),
+  Route: ({ path, element }: { path: string; element: React.ReactNode }) => (
+    <div data-testid={`mock-route-${path}`}>{element}</div>
+  ),
+  Link: ({ to, children }: { to: string; children: React.ReactNode }) => (
     <a href={to} data-testid={`mock-link-${to}`}>
       {children}
     </a>
@@ -123,7 +187,7 @@ const mockReactQuery = {
       return Promise.resolve();
     }
   },
-  QueryClientProvider: ({ children }: any) => (
+  QueryClientProvider: ({ children }: React.PropsWithChildren) => (
     <div data-testid="mock-query-client-provider">{children}</div>
   ),
   useQuery: () => ({

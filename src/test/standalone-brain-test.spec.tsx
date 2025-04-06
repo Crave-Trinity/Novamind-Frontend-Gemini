@@ -6,7 +6,7 @@
  * components or complex mocking to establish a baseline for testing.
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest'; // Removed unused vi import
 import React from 'react';
 import { screen, within } from '@testing-library/react'; // Import within
 import { renderWithProviders } from '@test/test-utils.unified'; // Import unified render

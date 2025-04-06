@@ -20,7 +20,7 @@ class FixedTextEncoder extends NodeTextEncoder {
 }
 
 // Apply TextEncoder fix globally
-globalThis.TextEncoder = FixedTextEncoder as any;
+globalThis.TextEncoder = FixedTextEncoder as typeof TextEncoder;
 
 // Fix URL constructor to handle edge cases
 if (typeof URL !== 'undefined') {
@@ -32,8 +32,13 @@ if (typeof URL !== 'undefined') {
       try {
         // Try original constructor first
         super(url, base);
-      } catch (error: any) {
-        if (error.code === 'ERR_INVALID_URL_SCHEME') {
+      } catch (error: unknown) {
+        // Check if error is an object with a 'code' property
+        const errorCode =
+          typeof error === 'object' && error !== null && 'code' in error
+            ? (error as { code: unknown }).code
+            : undefined;
+        if (errorCode === 'ERR_INVALID_URL_SCHEME') {
           // If URL has invalid scheme, fix it
           if (typeof url === 'string' && !url.startsWith('file:') && !url.match(/^[a-z]+:\/\//i)) {
             // Add file:// scheme if missing
@@ -49,7 +54,7 @@ if (typeof URL !== 'undefined') {
   }
 
   // Apply URL patch globally
-  globalThis.URL = PatchedURL as any;
+  globalThis.URL = PatchedURL as typeof URL;
 }
 
 // Verify fixes were successful

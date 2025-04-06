@@ -103,7 +103,7 @@ const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;
 const originalConsoleLog = console.log;
 
-console.error = (...args: any[]) => {
+console.error = (...args: unknown[]) => {
   // Filter React internal errors during tests
   const isReactBug = args.some(
     (arg) =>
@@ -116,7 +116,7 @@ console.error = (...args: any[]) => {
   }
 };
 
-console.warn = (...args: any[]) => {
+console.warn = (...args: unknown[]) => {
   // Filter common test warnings
   const isTestingWarning = args.some(
     (arg) =>
@@ -142,7 +142,9 @@ afterEach(() => {
   try {
     vi.spyOn(window, 'requestAnimationFrame').mockRestore();
     vi.spyOn(window, 'cancelAnimationFrame').mockRestore();
-  } catch (e) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_e) {
+    // Mark e as unused - ESLint disable added
     // Ignore errors if the mocks don't exist
   }
 
@@ -157,7 +159,9 @@ afterEach(() => {
         }
       }
       canvas.remove();
-    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_e) {
+      // Mark e as unused - ESLint disable added
       // Ignore errors from canvas cleanup
     }
   });

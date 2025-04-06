@@ -79,12 +79,8 @@ vi.mock('three', async () => {
   };
 });
 
-// Add missing DOM APIs if not in jsdom environment
-if (typeof window.TextEncoder === 'undefined') {
-  const { TextEncoder, TextDecoder } = require('util');
-  global.TextEncoder = TextEncoder;
-  global.TextDecoder = TextDecoder;
-}
+// Removed potentially unnecessary TextEncoder/TextDecoder polyfill block.
+// Modern test environments (jsdom) usually provide these globals.
 
 // Cleanup after each test
 afterEach(() => {
@@ -96,12 +92,12 @@ afterEach(() => {
 const originalError = console.error;
 const originalWarn = console.warn;
 
-console.error = (...args: any[]) => {
+console.error = (...args: unknown[]) => {
   originalError(...args);
   throw new Error('Console error was called - fix this first');
 };
 
-console.warn = (...args: any[]) => {
+console.warn = (...args: unknown[]) => {
   originalWarn(...args);
   throw new Error('Console warn was called - fix this first');
 };

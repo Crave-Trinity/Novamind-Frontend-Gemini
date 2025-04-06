@@ -12,14 +12,15 @@ import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers'
 
 // Keep Vitest Assertion extension
 declare module 'vitest' {
-  interface Assertion<T = any> extends TestingLibraryMatchers<T, void> {}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type
+  interface Assertion<T = any> extends TestingLibraryMatchers<T, void> {} // Disable rules for module augmentation
 }
 
 // Keep Mock extension
 declare module 'vitest' {
   interface Mock {
     mockReturnValue<T>(val: T): Mock;
-    mockImplementation<T, Y extends any[]>(fn: (...args: Y) => T): Mock;
+    mockImplementation<T, Y extends unknown[]>(fn: (...args: Y) => T): Mock;
   }
 }
 
@@ -146,12 +147,12 @@ const originalGetContext = HTMLCanvasElement.prototype.getContext;
 HTMLCanvasElement.prototype.getContext = function (
   this: HTMLCanvasElement,
   contextId: string,
-  options?: any
+  options?: unknown
 ): RenderingContext | null {
   if (contextId === 'webgl' || contextId === 'webgl2' || contextId === 'experimental-webgl') {
     // Cast the return type of createMockWebGLContext if necessary,
     // or ensure it returns a type compatible with RenderingContext | null
-    return createMockWebGLContext() as any;
+    return createMockWebGLContext() as unknown as RenderingContext | null;
   } else if (contextId === '2d') {
     return null;
   }
@@ -162,7 +163,7 @@ HTMLCanvasElement.prototype.getContext = function (
     return Function.prototype.call.call(originalGetContext, this, contextId, options);
   }
   return null; // Fallback if original context is somehow unavailable
-} as any; // Apply cast correctly to the function expression
+} as typeof HTMLCanvasElement.prototype.getContext; // Apply more specific cast
 
 // Cleanup after each test
 afterEach(() => {
@@ -188,15 +189,20 @@ beforeAll(() => {
 
 // --- Library Mocks ---
 
+import type * as FramerMotion from 'framer-motion'; // Type import for mocking
+
 // Mock framer-motion (from HEAD)
 vi.mock('framer-motion', async (importOriginal) => {
-  const actual = (await importOriginal()) as any;
+  const actual = (await importOriginal()) as typeof FramerMotion;
 
   const motionProxy = new Proxy(
     {},
     {
       get: (target, prop) => {
-        const Component = ({ children, ...props }: React.PropsWithChildren<any>) =>
+        const Component = ({
+          children,
+          ...props
+        }: React.PropsWithChildren<Record<string, unknown>>) =>
           React.createElement(prop as string, props, children);
         Component.displayName = `motion.${String(prop)}`;
         return Component;
@@ -208,8 +214,9 @@ vi.mock('framer-motion', async (importOriginal) => {
     __esModule: true,
     ...actual,
     motion: motionProxy,
-    AnimatePresence: ({ children }: React.PropsWithChildren<{}>) =>
-      React.createElement(React.Fragment, null, children),
+    AnimatePresence: (
+      { children }: React.PropsWithChildren<unknown> // Replace {} with unknown
+    ) => React.createElement(React.Fragment, null, children),
     useReducedMotion: () => false,
     useScroll: () => ({ scrollYProgress: { onChange: vi.fn(), current: 0 } }),
     useSpring: () => ({ onChange: vi.fn(), current: 0 }),

@@ -9,12 +9,14 @@ import { screen, within } from '@testing-library/react'; // Added 'within' impor
 import userEvent from '@testing-library/user-event';
 import Dashboard from '@pages/Dashboard'; // Use correct alias
 import { renderWithProviders } from '@test/test-utils.unified.tsx'; // Use correct unified path
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Imported for mocking purposes
 import { useNavigate } from 'react-router-dom'; // Import for mocking
+import type * as ReactRouterDom from 'react-router-dom'; // Type import for mocking
 
 // Mock react-router-dom specifically for this test
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = (await importOriginal()) as any;
+  const actual = (await importOriginal()) as typeof ReactRouterDom;
   return {
     ...actual,
     useNavigate: () => mockNavigate,

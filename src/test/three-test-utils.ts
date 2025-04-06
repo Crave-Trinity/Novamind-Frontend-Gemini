@@ -64,6 +64,21 @@ export const mockVector3 = {
   applyQuaternion: vi.fn().mockReturnThis(),
 };
 
+// Define interface for mock brain region data
+interface MockBrainRegion {
+  id: string;
+  name: string;
+  position: { x: number; y: number; z: number };
+  color: string;
+  connections: unknown[]; // Assuming connections structure is not defined here
+  activityLevel: number;
+  isActive: boolean;
+  hemisphereLocation: 'left' | 'right' | 'central';
+  dataConfidence: number;
+  volume: number;
+  activity: number;
+}
+
 // Mock data structures
 export const createMockBrainRegions = (count = 5) => {
   return Array.from({ length: count }, (_, i) => ({
@@ -92,7 +107,7 @@ export const createMockBrainRegions = (count = 5) => {
 };
 
 // Mock data structures
-export const createMockNeuralConnections = (regions: any[], connectionCount = 10) => {
+export const createMockNeuralConnections = (regions: MockBrainRegion[], connectionCount = 10) => {
   return Array.from({ length: connectionCount }, (_, i) => {
     const sourceIndex = Math.floor(Math.random() * regions.length);
     let targetIndex;

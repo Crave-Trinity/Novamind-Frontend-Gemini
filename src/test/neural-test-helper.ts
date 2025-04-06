@@ -15,12 +15,15 @@ import { vi } from 'vitest';
 export function createNeuralSafeSpy<T extends object, K extends keyof T>(
   object: T,
   method: K,
-  implementation?: (...args: any[]) => any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  implementation?: (...args: any[]) => any // Reverting to any for compatibility with mockImplementation
 ) {
   // Preserve original method for coverage instrumentation
   const originalMethod = object[method];
 
   // Create spy with quantum precision
+  // Keep 'as any' here as vi.spyOn has complex typing with generics that can be hard to satisfy perfectly
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const spy = vi.spyOn(object, method as any);
 
   // Implement custom behavior if provided
@@ -28,12 +31,14 @@ export function createNeuralSafeSpy<T extends object, K extends keyof T>(
     spy.mockImplementation(implementation);
   } else {
     // Use mockImplementation to ensure proper type safety
-    spy.mockImplementation((...args: any[]) => {
+    spy.mockImplementation((...args: unknown[]) => {
       // If original is a function, preserve its behavior for coverage
       if (typeof originalMethod === 'function') {
         try {
           return originalMethod.apply(object, args);
-        } catch (error) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (_error) {
+          // Mark error as unused - ESLint disable added
           console.warn(`Neural-safe warning: Original method threw an error, using fallback mock`);
           return undefined;
         }
@@ -53,12 +58,12 @@ export function createNeuralSafeSpy<T extends object, K extends keyof T>(
  */
 export function createNeuralServiceMock(
   serviceName: string,
-  methods: Record<string, (...args: any[]) => any> = {}
+  methods: Record<string, (...args: unknown[]) => unknown> = {}
 ) {
   console.log(`🧠 Creating neural-safe service mock: ${serviceName}`);
 
   // Create mock with clinical precision
-  const serviceMock: Record<string, any> = {};
+  const serviceMock: Record<string, unknown> = {};
 
   // Implement methods with quantum precision
   Object.entries(methods).forEach(([methodName, implementation]) => {
@@ -76,12 +81,14 @@ export function createNeuralServiceMock(
  */
 export function createNeuralComponentMock(
   componentName: string,
-  implementation?: (props: any) => any
+  // Using a generic functional component type
+  implementation?: React.FC<Record<string, unknown>>
 ) {
   console.log(`🧠 Creating neural-safe component mock: ${componentName}`);
 
   // Create default implementation with clinical precision
-  const defaultImplementation = (props: any) => {
+  const defaultImplementation = (_props: Record<string, unknown>) => {
+    // Mark props as unused
     console.log(`🧠 Rendering neural-safe mock component: ${componentName}`);
     return null;
   };
@@ -130,7 +137,8 @@ export function createThreeJsMocks() {
       dispose: vi.fn(),
     })),
 
-    Color: vi.fn().mockImplementation((color) => ({
+    Color: vi.fn().mockImplementation((_color) => ({
+      // Mark color as unused
       r: 1,
       g: 1,
       b: 1,
@@ -271,20 +279,34 @@ export function createThreeJsMocks() {
       clock: new mockThree.Clock(),
     }),
 
-    useFrame: vi.fn().mockImplementation((callback: (state: any, delta: number) => void) => {
-      // Call the callback once to simulate a frame
-      if (callback) {
-        const state = {
-          clock: new mockThree.Clock(),
-          camera: new mockThree.PerspectiveCamera(),
-          scene: new mockThree.Scene(),
-          gl: new mockThree.WebGLRenderer(),
-          delta: 0.016,
-        };
-        callback(state, 0.016);
+    // Define a placeholder type for the frame state based on the mock structure
+    useFrame: vi.fn().mockImplementation(
+      (
+        callback: (
+          state: {
+            clock: ReturnType<typeof mockThree.Clock>;
+            camera: ReturnType<typeof mockThree.PerspectiveCamera>;
+            scene: ReturnType<typeof mockThree.Scene>;
+            gl: ReturnType<typeof mockThree.WebGLRenderer>;
+            delta: number;
+          },
+          delta: number
+        ) => void
+      ) => {
+        // Call the callback once to simulate a frame
+        if (callback) {
+          const state = {
+            clock: new mockThree.Clock(),
+            camera: new mockThree.PerspectiveCamera(),
+            scene: new mockThree.Scene(),
+            gl: new mockThree.WebGLRenderer(),
+            delta: 0.016,
+          };
+          callback(state, 0.016);
+        }
+        return undefined;
       }
-      return undefined;
-    }),
+    ),
 
     extend: vi.fn(),
 
@@ -385,11 +407,13 @@ export function registerNeuralMocks() {
     if (!window.ResizeObserver) {
       // Create a minimal implementation that satisfies TypeScript
       class MockResizeObserver {
-        observe(target: Element): void {
+        observe(_target: Element): void {
+          // Mark target as unused
           // Implementation with clinical precision
         }
 
-        unobserve(target: Element): void {
+        unobserve(_target: Element): void {
+          // Mark target as unused
           // Implementation with mathematical elegance
         }
 
@@ -398,7 +422,8 @@ export function registerNeuralMocks() {
         }
       }
 
-      window.ResizeObserver = MockResizeObserver as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      window.ResizeObserver = MockResizeObserver as any; // Reverting to any for minimal mock
     }
 
     // Mock IntersectionObserver with proper type assertion
@@ -413,11 +438,13 @@ export function registerNeuralMocks() {
           this.options = options;
         }
 
-        observe(target: Element): void {
+        observe(_target: Element): void {
+          // Mark target as unused
           // Implementation with clinical precision
         }
 
-        unobserve(target: Element): void {
+        unobserve(_target: Element): void {
+          // Mark target as unused
           // Implementation with mathematical elegance
         }
 
@@ -430,7 +457,8 @@ export function registerNeuralMocks() {
         }
       }
 
-      window.IntersectionObserver = MockIntersectionObserver as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      window.IntersectionObserver = MockIntersectionObserver as any; // Reverting to any for minimal mock
     }
 
     // Mock requestAnimationFrame and cancelAnimationFrame

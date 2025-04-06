@@ -37,7 +37,7 @@ describe('Tailwind CSS Testing with Unified Setup', () => {
 
   it('renders component with correct dark mode classes when dark mode is enabled', async () => {
     // Re-enabled and made async
-    const { isDarkMode, enableDarkMode } = renderWithProviders(<TailwindTestComponent />); // Render light first
+    const { enableDarkMode } = renderWithProviders(<TailwindTestComponent />); // Render light first, removed unused isDarkMode
     // Check classList directly for initial render with darkMode: true
     // Explicitly enable dark mode within act
     act(() => {

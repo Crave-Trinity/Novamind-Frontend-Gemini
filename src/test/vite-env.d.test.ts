@@ -3,7 +3,7 @@
  * Vite environment types verification with quantum precision
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest'; // Removed unused vi import
 
 // Declaration files (.d.ts) are not imported directly
 // They extend the global namespace with additional types

@@ -9,7 +9,28 @@
 import fs from 'fs';
 import path from 'path';
 
+// Type definitions for coverage data structure
+interface CoverageMetric {
+  total: number;
+  covered: number;
+  skipped: number;
+  pct: number;
+}
+
+interface CoverageMetricsDetail {
+  statements: CoverageMetric;
+  branches: CoverageMetric;
+  functions: CoverageMetric;
+  lines: CoverageMetric;
+}
+
+// Interface for the overall coverage data object, including the 'total' summary
+interface CoverageData extends Record<string, CoverageMetricsDetail> {
+  total: CoverageMetricsDetail;
+}
+
 // Neural-safe coverage rendering with quantum precision
+// Represents the calculated percentages for display
 interface NeuralCoverageMetrics {
   statements: number;
   branches: number;
@@ -37,7 +58,7 @@ interface ComponentCoverage {
  * Generate neural-safe coverage HTML report with quantum precision
  */
 export function generateCoverageVisualization(
-  coverageData: Record<string, any>,
+  coverageData: CoverageData,
   outputPath: string
 ): void {
   // Extract component metrics with clinical precision
@@ -82,7 +103,8 @@ export function generateCoverageVisualization(
     const componentName = fileName.replace(/\.(ts|tsx)$/, '');
 
     // Calculate component metrics with clinical precision
-    const fileMetrics = metrics as any;
+    // Type assertion is no longer needed as coverageData is typed
+    const fileMetrics = metrics;
 
     components.push({
       name: componentName,
@@ -135,7 +157,10 @@ export function generateCoverageVisualization(
 /**
  * Generate HTML report with quantum precision
  */
-function generateHtmlReport(components: ComponentCoverage[], totalMetrics: any): string {
+function generateHtmlReport(
+  components: ComponentCoverage[],
+  totalMetrics: CoverageMetricsDetail
+): string {
   // Calculate total coverage with clinical precision
   const totalCoverage: NeuralCoverageMetrics = {
     statements: totalMetrics.statements.pct,

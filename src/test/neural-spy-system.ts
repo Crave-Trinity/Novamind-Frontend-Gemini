@@ -6,22 +6,22 @@
  * instead of vi.mock(), ensuring accurate metrics while maintaining mock functionality.
  */
 
-import type { SpyInstance } from 'vitest';
-import { vi, Mock } from 'vitest';
+// Removed invalid import: SpyInstance is not exported from 'vitest'
+import { vi } from 'vitest'; // Removed unused Mock import
 import type React from 'react';
-import { ReactNode } from 'react';
+// Removed unused ReactNode import from 'react'
 
 // Type for creating neural-safe mock functions with quantum precision
-type MockFunctionFactory<T> = (original?: T) => T;
+// Removed unused type MockFunctionFactory
 type ExtractableKey<T> = Extract<keyof T, string | number>;
 
 /**
  * Create neural-safe module mocks with quantum precision
  * This preserves coverage instrumentation unlike vi.mock()
  */
-export async function createNeuralSafeMock<T extends Record<string, any>>(
+export async function createNeuralSafeMock<T extends Record<string, unknown>>(
   modulePath: string,
-  mockImplementations: Partial<Record<keyof T, any>> = {}
+  mockImplementations: Partial<Record<keyof T, unknown>> = {}
 ): Promise<T> {
   try {
     // Import the actual module to preserve instrumentation path
@@ -33,11 +33,14 @@ export async function createNeuralSafeMock<T extends Record<string, any>>(
         const typedKey = key as ExtractableKey<T>;
         if (typedKey in mockImplementations) {
           // Apply custom mock implementation with quantum precision
-          // @ts-ignore - Type safety sacrificed for neural coverage with mathematical elegance
-          vi.spyOn(actualModule, typedKey).mockImplementation(mockImplementations[typedKey]);
+          // Type safety sacrificed for neural coverage with mathematical elegance (ts-expect-error removed as it was unused)
+          // Assert the implementation is a function type compatible with mockImplementation
+          vi.spyOn(actualModule, typedKey).mockImplementation(
+            mockImplementations[typedKey] as (...args: unknown[]) => unknown
+          );
         } else if (typeof actualModule[key] === 'function') {
           // Default mock for functions with clinical precision
-          // @ts-ignore - Type safety sacrificed for neural coverage with mathematical elegance
+          // Type safety sacrificed for neural coverage with mathematical elegance (ts-expect-error removed as it was unused)
           vi.spyOn(actualModule, typedKey).mockImplementation(() => null);
         }
       }
@@ -65,9 +68,9 @@ export async function createNeuralSafeMock<T extends Record<string, any>>(
  */
 export function createNeuralComponentMock(
   displayName: string,
-  implementation: React.FC<any> = () => null
-): React.FC<any> {
-  const componentMock = vi.fn(implementation) as unknown as React.FC<any>;
+  implementation: React.FC<Record<string, unknown>> = () => null
+): React.FC<Record<string, unknown>> {
+  const componentMock = vi.fn(implementation) as unknown as React.FC<Record<string, unknown>>;
   Object.defineProperty(componentMock, 'displayName', {
     value: displayName,
     configurable: true,
@@ -79,7 +82,7 @@ export function createNeuralComponentMock(
  * Create neural-safe service mocks with clinical precision
  * Preserves coverage instrumentation while providing mock functionality
  */
-export function createNeuralServiceMock<T extends Record<string, any>>(
+export function createNeuralServiceMock<T extends Record<string, unknown>>(
   serviceName: string,
   mockMethods: Partial<T> = {}
 ): T {
@@ -97,12 +100,19 @@ export function createNeuralServiceMock<T extends Record<string, any>>(
  * Type-safe neural spy function with quantum precision
  * Handles complex TypeScript constraints for test instrumentation
  */
-export function neuralSafeSpy<T extends Record<string, any>, K extends keyof T>(
+// Define a more specific type for the implementation function
+// Define a general function type for spy implementations
+// Define a general function type for spy implementations using unknown for safety
+// Define a general function type for spy implementations using unknown for safety
+type SpyImplementation = (...args: unknown[]) => unknown;
+
+export function neuralSafeSpy<T extends Record<string, unknown>, K extends keyof T>(
   module: T,
   method: K,
-  implementation: any
-): SpyInstance {
-  // @ts-ignore - Neural-safe implementation with specialized type constraints
+  implementation: SpyImplementation // Use the simpler type
+) {
+  // Removed explicit : SpyInstance return type annotation
+  // @ts-expect-error - Neural-safe implementation with specialized type constraints
   return vi.spyOn(module, method).mockImplementation(implementation);
 }
 
@@ -110,18 +120,20 @@ export function neuralSafeSpy<T extends Record<string, any>, K extends keyof T>(
  * Register neural-safe spies on a module with quantum precision
  * Preserves instrumentation while mocking functionality
  */
-export async function spyOnModule<T extends Record<string, any>>(
+export async function spyOnModule<T extends Record<string, unknown>>(
   module: T,
-  mocks: Partial<Record<keyof T, any>> = {}
+  mocks: Partial<Record<keyof T, unknown>> = {}
 ): Promise<void> {
   for (const key in module) {
     if (Object.prototype.hasOwnProperty.call(module, key)) {
       const typedKey = key as Extract<keyof T, string>;
       if (typedKey in mocks) {
         // Apply custom mock with clinical precision
-        neuralSafeSpy(module, typedKey, mocks[typedKey]);
+        // Assert the mock is a compatible function type
+        neuralSafeSpy(module, typedKey, mocks[typedKey] as SpyImplementation);
       } else if (typeof module[key] === 'function') {
         // Default mock with quantum precision
+        // The revised SpyImplementation type should now accept this default mock
         neuralSafeSpy(module, typedKey, () => null);
       }
     }

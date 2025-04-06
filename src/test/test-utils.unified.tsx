@@ -22,7 +22,7 @@ import { vi } from 'vitest'; // Import vi
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query) => {
-    let listeners: any[] = [];
+    let listeners: ((event: Event) => void)[] = [];
     const instance = {
       matches: false, // Default to light
       media: query,
@@ -50,7 +50,9 @@ Object.defineProperty(window, 'matchMedia', {
       },
     };
     // Allow tests to override initial matches via setup
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((globalThis as any).__vitest_matchMedia_matches) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       instance.matches = (globalThis as any).__vitest_matchMedia_matches;
     }
     return instance;

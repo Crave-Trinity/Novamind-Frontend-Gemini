@@ -41,11 +41,12 @@ if (
   typeof global.TextEncoder === 'undefined' ||
   !(new global.TextEncoder().encode('') instanceof Uint8Array)
 ) {
-  (global as any).TextEncoder = FixedTextEncoder;
+  (global as typeof globalThis).TextEncoder = FixedTextEncoder;
 }
 
 if (typeof global.TextDecoder === 'undefined') {
-  (global as any).TextDecoder = FixedTextDecoder;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (global as any).TextDecoder = FixedTextDecoder; // Reverting to any for minimal polyfill
 }
 
 // Verify that our TextEncoder implementation works correctly
@@ -70,7 +71,8 @@ if (typeof global.fetch === 'undefined') {
       status: 200,
       statusText: 'OK',
       headers: new Map(),
-    })) as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    })) as any; // Reverting to any for minimal polyfill
 }
 
 // Mock requestAnimationFrame and cancelAnimationFrame

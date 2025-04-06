@@ -2,7 +2,7 @@
  * Tailwind CSS Testing Example (Using Unified Test Setup)
  */
 import React from 'react';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest'; // Removed unused beforeEach, afterEach
 import { screen, act, waitFor } from '@testing-library/react'; // Import act and waitFor
 import { renderWithProviders } from '@test/test-utils.unified'; // Use correct import
 
@@ -36,7 +36,8 @@ describe('Tailwind CSS Testing with Unified Setup', () => {
   it('components have proper dark mode classes', async () => {
     // Add async
     // Render initially in light mode
-    const { isDarkMode, enableDarkMode } = renderWithProviders(
+    const { enableDarkMode } = renderWithProviders(
+      // Removed unused isDarkMode
       <TailwindComponent title="Dark Mode Classes Test" />
     );
 
@@ -47,7 +48,8 @@ describe('Tailwind CSS Testing with Unified Setup', () => {
     // Wait for the classList to update
     await waitFor(() => expect(document.documentElement.classList.contains('dark')).toBe(true));
 
-    const container = screen.getByText('Dark Mode Classes Test').parentElement;
+    // Removed unused variable: container
+    // const container = screen.getByText('Dark Mode Classes Test').parentElement;
     // Asserting dark:* classes directly can be brittle.
     // The key check is that the 'dark' class is applied to the root.
     // Individual component styling in dark mode is better tested visually or via computed styles if needed.

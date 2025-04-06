@@ -16,7 +16,9 @@ export function applyURLFix(): void {
     // Ensure URLSearchParams is available and functioning
     if (!window.URLSearchParams) {
       // Simple mock if URLSearchParams is missing
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).URLSearchParams = class MockURLSearchParams {
+        // Reverting to any for minimal polyfill
         private params: Map<string, string>;
 
         constructor(init?: string | Record<string, string> | URLSearchParams) {

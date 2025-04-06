@@ -62,9 +62,14 @@ class MockWebSocket {
   readyState = MockWebSocket.CONNECTING;
   url: string;
   protocol: string = '';
+  // Reverting event types to any for mock compatibility
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onopen: ((event: any) => void) | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onclose: ((event: any) => void) | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onmessage: ((event: any) => void) | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onerror: ((event: any) => void) | null = null;
 
   constructor(url: string, protocol?: string | string[]) {
@@ -91,7 +96,7 @@ Object.defineProperty(window, 'WebSocket', {
 });
 
 // Mock requestAnimationFrame and cancelAnimationFrame
-global.requestAnimationFrame = vi.fn((callback) => setTimeout(callback, 0));
+global.requestAnimationFrame = vi.fn((callback) => setTimeout(callback, 0) as unknown as number);
 global.cancelAnimationFrame = vi.fn((id) => clearTimeout(id));
 
 // Mock performance.now()

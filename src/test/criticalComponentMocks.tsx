@@ -31,8 +31,9 @@ vi.mock('@react-three/drei', () => ({
       },
       'Node'
     ),
-  Line: ({ points: _points, color }) => // Mark points as unused
-    React.createElement('div', { 'data-testid': 'neural-line', 'data-color': color }, 'Line'),
+  Line: (
+    { points: _points, color } // Mark points as unused
+  ) => React.createElement('div', { 'data-testid': 'neural-line', 'data-color': color }, 'Line'),
   // Removed extra comma causing syntax error
   Text: ({ children, color }) =>
     React.createElement('div', { 'data-testid': 'neural-text', 'data-color': color }, children),
@@ -94,7 +95,9 @@ export const MockTemporalVisualizer = ({ timeRange, stateTransitions }) =>
     React.createElement('div', null, `Transitions: ${stateTransitions?.length || 0}`)
   );
 
-export const MockClinicalDataDisplay = ({ data, colorMap: _colorMap }) => // Mark colorMap as unused
+export const MockClinicalDataDisplay = (
+  { data, colorMap: _colorMap } // Mark colorMap as unused
+) =>
   React.createElement(
     'div',
     { 'data-testid': 'clinical-data-display' },
