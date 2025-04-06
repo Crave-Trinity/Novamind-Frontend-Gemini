@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, vi } from "vitest";
 
-import { render, screen } from "@testing-library/react"; // Keep screen
+import { screen } from "@testing-library/react"; // Removed unused 'render' TS6133
 import userEvent from "@testing-library/user-event";
 import { VisualizationCoordinatorProvider } from "@application/controllers/coordinators/NeuralVisualizationCoordinator";
 import { renderWithProviders } from "@test/test-utils.unified.tsx";
@@ -67,7 +67,7 @@ describe("VisualizationCoordinatorProvider", () => { // Re-enabled suite
   });
 
   it("responds to user interaction with quantum precision", async () => {
-    const user = userEvent.setup();
+    userEvent.setup(); // Setup userEvent but don't assign if 'user' is unused TS6133
     renderWithProviders(<VisualizationCoordinatorProvider {...mockProps} />); // Use renderWithProviders
 
     // Simulate user interactions

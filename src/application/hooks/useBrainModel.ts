@@ -3,7 +3,7 @@
  * useBrainModel - Quantum-level hook for brain model interaction
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // Domain types
@@ -53,10 +53,9 @@ export function useBrainModel(): UseBrainModelReturn {
   const brainModelQueryKey = "brainModel"; // Reinstate base query key
 
   // Local state for highlights and selections
-  const [selectedRegionIds, setSelectedRegionIds] = useState<string[]>([]);
-  const [highlightedRegionIds, setHighlightedRegionIds] = useState<string[]>(
-    [],
-  );
+  // State for selected and highlighted regions (Removed unused variables TS6133)
+  const [, setSelectedRegionIds] = useState<string[]>([]);
+  const [, setHighlightedRegionIds] = useState<string[]>([]);
 
   // Fetch brain model query
   const {

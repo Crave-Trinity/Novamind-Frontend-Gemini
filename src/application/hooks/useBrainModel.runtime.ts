@@ -11,7 +11,7 @@ import {
   isBrainModel,
   BrainRegion, // Keep as value (used in .every)
   isBrainRegion,
-  type Connection,
+  type Connection, // Already type-only
 } from "@domain/types/brain/core-models";
 // Assuming a standard validation error type might be defined later
 // import { ValidationError } from '@domain/errors/validation';

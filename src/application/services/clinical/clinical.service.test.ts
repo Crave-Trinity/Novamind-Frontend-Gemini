@@ -6,14 +6,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import axios from "axios";
 import { clinicalService } from "@application/services/clinical/clinical.service";
-import {
+import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
-} from "@domain/models/brainMapping";
-import { RiskAssessment } from "@domain/types/clinical/risk";
-import { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
-import { Symptom, Diagnosis, Treatment } from "@domain/types/clinical/patient";
+} from "@domain/models/brain/mapping/brain-mapping"; // Corrected path and use type import
+import type { RiskAssessment } from "@domain/types/clinical/risk"; // Use type import
+import { RiskLevel } from "@domain/types/clinical/risk"; // Import RiskLevel enum
+import type { TreatmentResponsePrediction } from "@domain/types/clinical/treatment"; // Use type import
+import type { Symptom, Diagnosis, Treatment } from "@domain/types/clinical/patient"; // Use type import
 
 // Mock axios for isolated testing
 vi.mock("axios");
@@ -31,10 +32,10 @@ describe("Clinical Service", () => {
         {
           symptomId: "s1",
           symptomName: "Anxiety",
-          brainRegions: ["prefrontal-cortex", "amygdala"],
-          connectionTypes: ["inhibitory"],
-          mappingConfidence: 0.85,
-          mappingSource: "clinical-research-v2",
+          activationPatterns: [],
+          category: "affective",
+          evidenceQuality: "established",
+          contributingFactors: [],
         },
       ];
 
@@ -86,12 +87,9 @@ describe("Clinical Service", () => {
         {
           diagnosisId: "d1",
           diagnosisName: "Major Depressive Disorder",
-          brainRegions: ["prefrontal-cortex", "hippocampus"],
-          activityPatterns: [
-            { regionId: "prefrontal-cortex", activity: "reduced" },
-          ],
-          mappingConfidence: 0.8,
-          mappingSource: "clinical-research-v2",
+          activationPatterns: [],
+          codingSystem: "ICD-10",
+          evidenceQuality: "probable",
         },
       ];
 
@@ -116,13 +114,20 @@ describe("Clinical Service", () => {
         {
           treatmentId: "t1",
           treatmentName: "SSRI",
-          targetRegions: ["raphe-nuclei", "prefrontal-cortex"],
-          primaryMechanism: "serotonin-reuptake-inhibition",
-          expectedResponse: [
-            { regionId: "prefrontal-cortex", response: "increased-activity" },
-          ],
-          mappingConfidence: 0.9,
-          mappingSource: "clinical-research-v2",
+          // targetRegions: ["raphe-nuclei", "prefrontal-cortex"], // Removed invalid property
+          mechanismsOfAction: [{ // Correct structure to array of objects
+            description: "serotonin-reuptake-inhibition",
+            affectedRegions: ["raphe-nuclei", "prefrontal-cortex"],
+            timeToEffect: "2-4 weeks",
+            confidenceLevel: 0.9
+          }],
+          effectPatterns: {
+            increasedActivity: ["prefrontal-cortex"], // Correct type to string[]
+            decreasedActivity: [],
+            normalizedConnectivity: [],
+          },
+          // mappingConfidence: 0.9, // Removed invalid property
+          // mappingSource: "clinical-research-v2", // Removed invalid property
         },
       ];
 
@@ -145,12 +150,22 @@ describe("Clinical Service", () => {
       // Arrange
       const mockAssessment: RiskAssessment = {
         patientId: "p1",
-        overallRiskScore: 0.65,
-        riskFactors: [
-          { factor: "prior-history", score: 0.8, confidence: 0.9 },
-          { factor: "recent-life-events", score: 0.7, confidence: 0.85 },
-        ],
-        assessmentDate: "2023-04-01T10:00:00Z",
+        overallRisk: RiskLevel.MODERATE, // Correct property name and use enum
+        // riskFactors: [ // Removed invalid property
+        //   { factor: "prior-history", score: 0.8, confidence: 0.9 },
+        //   { factor: "recent-life-events", score: 0.7, confidence: 0.85 },
+        // ],
+        // Add required properties based on RiskAssessment type
+        id: "ra-test-1",
+        timestamp: new Date().toISOString(),
+        assessmentType: "hybrid", // Correct to valid enum value
+        confidenceScore: 0.85,
+        domainRisks: [],
+        temporalTrend: "stable",
+        contributingFactors: [],
+        protectiveFactors: [],
+        neuralCorrelates: [],
+        // assessmentDate: "2023-04-01T10:00:00Z", // Removed invalid property
         nextAssessmentDue: "2023-04-15T10:00:00Z",
       };
 
@@ -199,15 +214,31 @@ describe("Clinical Service", () => {
       const mockPredictions: TreatmentResponsePrediction[] = [
         {
           treatmentId: "t1",
-          treatmentName: "SSRI",
-          predictedEfficacy: 0.75,
-          confidence: 0.8,
-          timeToResponse: { min: 14, max: 28, unit: "days" },
+          requestId: "req-test-1",
+          patientId: "p1",
+          treatmentType: "pharmacological",
+          prediction: {
+            responseType: "response",
+            responseProbability: 0.75,
+            confidenceInterval: [0.65, 0.85],
+            timeToEffect: { expected: 21, range: [14, 28] },
+            durability: { expected: 12, probability: 0.7 }
+          },
+          timestamp: new Date().toISOString(),
+          algorithm: { name: "test-algo", version: "1.0", confidence: 0.8 },
+          personalizationFactors: [],
+          dataQualityAssessment: {
+            overallQuality: "high",
+            missingDataImpact: "minimal",
+            biasRiskLevel: "low"
+          },
           sideEffectRisks: [
-            { effect: "nausea", probability: 0.3, severity: "mild" },
+            { effect: "nausea", probability: 0.3, severity: "mild", timeline: "acute", mitigationPossible: true },
           ],
-          recommendationStrength: "strong",
-          neuralBasis: "altered-serotonin-activity",
+          symptomSpecificPredictions: [],
+          neurobiologicalMechanisms: [],
+          limitations: [],
+          alternatives: [],
         },
       ];
 
@@ -233,8 +264,12 @@ describe("Clinical Service", () => {
           id: "s1",
           name: "Depressed Mood",
           severity: 0.7,
-          onset: "2023-03-15T00:00:00Z",
-          duration: { value: 3, unit: "weeks" },
+          // onset: "2023-03-15T00:00:00Z", // Removed invalid property
+          // Add missing required properties for Symptom
+          category: "affective", // Already added
+          impact: "moderate", // Already added
+          progression: "stable", // Already added
+          duration: "3 weeks", // Correct type to string
           frequency: "daily",
           triggers: ["stress", "poor-sleep"],
           notes: "Worse in evenings",
@@ -262,8 +297,12 @@ describe("Clinical Service", () => {
         id: "s1",
         name: "Depressed Mood",
         severity: 0.5, // Updated severity
-        onset: "2023-03-15T00:00:00Z",
-        duration: { value: 3, unit: "weeks" },
+        // onset: "2023-03-15T00:00:00Z", // Removed invalid property
+        // Add missing required properties for Symptom
+        category: "affective", // Already added
+        impact: "moderate", // Already added
+        progression: "improving", // Already added
+        duration: "3 weeks", // Correct type to string
         frequency: "daily",
         triggers: ["stress", "poor-sleep"],
         notes: "Improving with treatment",

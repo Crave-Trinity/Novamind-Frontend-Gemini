@@ -8,10 +8,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import axios from "axios";
 import { clinicalService } from "@application/services/clinical/clinical.service";
-import { SymptomNeuralMapping } from "@domain/models/brainMapping";
-import { RiskAssessment } from "@domain/types/clinical/risk";
-import { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
-import { Symptom } from "@domain/types/clinical/patient";
+import type { SymptomNeuralMapping } from "@domain/models/brain/mapping/brain-mapping"; // Use type import
+import { type RiskAssessment, RiskLevel } from "@domain/types/clinical/risk"; // Import RiskLevel enum
+import type { TreatmentResponsePrediction } from "@domain/types/clinical/treatment"; // Use type import
+import type { Symptom } from "@domain/types/clinical/patient"; // Use type import
 
 // Mock axios
 vi.mock("axios");
@@ -29,10 +29,14 @@ describe("clinicalService", () => {
         {
           symptomId: "symptom-123",
           symptomName: "Anxiety",
-          brainRegions: ["prefrontal-cortex", "amygdala"],
-          connectionTypes: ["inhibitory"],
-          mappingConfidence: 0.85,
-          mappingSource: "neural-database-v2",
+          activationPatterns: [], // Correct property name, use empty array for simplicity
+          // connectionTypes: ["inhibitory"], // Removed invalid property
+          // mappingConfidence: 0.85, // Removed invalid property
+          // mappingSource: "neural-database-v2", // Removed invalid property
+          // Add missing required properties for SymptomNeuralMapping if any
+          category: "Emotional", // Added required
+          evidenceQuality: "established", // Added required
+          contributingFactors: [], // Added required
         },
       ];
 
@@ -43,7 +47,7 @@ describe("clinicalService", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.value).toEqual(mockMappings);
+      if (result.success) expect(result.value).toEqual(mockMappings); // Access value only on success
       expect(mockedAxios.get).toHaveBeenCalledWith(
         expect.stringContaining("/mappings/symptoms"),
         expect.objectContaining({
@@ -59,12 +63,22 @@ describe("clinicalService", () => {
       // Arrange
       const mockAssessment: RiskAssessment = {
         patientId: "patient-456",
-        overallRiskScore: 0.65,
-        riskFactors: [
-          { factor: "prior-episode", score: 0.8, confidence: 0.9 },
-          { factor: "social-isolation", score: 0.7, confidence: 0.85 },
-        ],
-        assessmentDate: "2023-04-01T00:00:00Z",
+        overallRisk: RiskLevel.MODERATE, // Correct property name and use enum
+        // riskFactors: [ // Removed invalid property
+        //   { factor: "prior-episode", score: 0.8, confidence: 0.9 },
+        //   { factor: "social-isolation", score: 0.7, confidence: 0.85 },
+        // ],
+        // Add required properties for RiskAssessment
+        id: "ra-mock-1",
+        timestamp: new Date().toISOString(),
+        assessmentType: "hybrid",
+        confidenceScore: 0.8,
+        domainRisks: [],
+        temporalTrend: "stable",
+        contributingFactors: [],
+        protectiveFactors: [],
+        neuralCorrelates: [],
+        // assessmentDate: "2023-04-01T00:00:00Z", // Removed invalid property
         nextAssessmentDue: "2023-04-15T00:00:00Z",
       };
 
@@ -75,7 +89,7 @@ describe("clinicalService", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.value).toEqual(mockAssessment);
+      if (result.success) expect(result.value).toEqual(mockAssessment); // Access value only on success
       expect(mockedAxios.get).toHaveBeenCalledWith(
         expect.stringContaining("/patients/patient-456/risk-assessment"),
         expect.anything(),
@@ -90,11 +104,15 @@ describe("clinicalService", () => {
         id: "symptom-1",
         name: "Depressed Mood",
         severity: 0.5, // Updated severity
-        onset: "2023-03-01T00:00:00Z",
-        duration: { value: 4, unit: "weeks" },
+        // onset removed
+        duration: "4 weeks",
         frequency: "daily",
         triggers: ["stress", "poor-sleep"],
         notes: "Improving with current treatment",
+        // Add missing required properties for Symptom
+        category: "affective", // Corrected to valid enum value
+        impact: "moderate", // Corrected casing
+        progression: "improving", // Corrected casing
       };
 
       mockedAxios.patch.mockResolvedValueOnce({ data: mockUpdatedSymptom });
@@ -111,8 +129,10 @@ describe("clinicalService", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.value.severity).toBe(0.5);
-      expect(result.value.notes).toBe("Improving with current treatment");
+      if (result.success) { // Access value only on success
+        expect(result.value.severity).toBe(0.5);
+        expect(result.value.notes).toBe("Improving with current treatment");
+      }
     });
   });
 
@@ -154,7 +174,7 @@ describe("clinicalService", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.value.timeSeries).toHaveLength(3);
+      if (result.success) expect(result.value.timeSeries).toHaveLength(3); // Access value only on success
       expect(mockedAxios.post).toHaveBeenCalledWith(
         expect.stringContaining("/temporal-projections"),
         expect.objectContaining({

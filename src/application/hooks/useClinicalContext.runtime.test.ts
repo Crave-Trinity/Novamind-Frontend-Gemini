@@ -11,16 +11,16 @@ import {
   validateDiagnosisMappingArray,
   validateTreatmentMappingArray,
 } from "@hooks/useClinicalContext.runtime";
-import { type RiskAssessment, RiskLevel } from "@domain/types/clinical/risk";
+import { type RiskAssessment, RiskLevel } from "@domain/types/clinical/risk"; // Already correct
 import type {
   TreatmentResponsePrediction,
-  TreatmentType,
+  TreatmentType, // Already type-only
 } from "@domain/types/clinical/treatment";
 import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
-  NeuralActivationPattern,
+  NeuralActivationPattern, // Already type-only
 } from "@domain/models/brain/mapping/brain-mapping";
 
 // --- Mock Data ---

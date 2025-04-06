@@ -7,11 +7,11 @@ import { describe, it, expect } from "vitest";
 import { validatePatientData } from "@hooks/usePatientData.runtime";
 import type {
   Patient,
-  PatientDemographics,
-  ClinicalData,
-  TreatmentData,
-  NeuralData,
-  DataPermissions,
+  PatientDemographics, // Already type-only
+  ClinicalData, // Already type-only
+  TreatmentData, // Already type-only
+  NeuralData, // Already type-only
+  DataPermissions, // Already type-only
   // Import nested types if needed for more specific invalid mocks
 } from "@domain/types/clinical/patient";
 

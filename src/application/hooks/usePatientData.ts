@@ -5,11 +5,11 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient, type UseMutationOptions, type UseMutationResult, type UseMutateFunction } from "@tanstack/react-query"; // Import necessary types
+import { useQuery, useMutation, useQueryClient, type UseMutationOptions, type UseMutationResult, type UseMutateFunction } from "@tanstack/react-query"; // Already correct
 
 // Domain types
-import type { Patient, Symptom, Diagnosis } from "@domain/types/clinical/patient";
-import { type Result, success, failure } from "@domain/types/shared/common"; // Correct path, removed SafeArray
+import type { Patient, Symptom, Diagnosis } from "@domain/types/clinical/patient"; // Already correct
+import { type Result, success, failure } from "@domain/types/shared/common"; // Already correct
 
 // Application services
 import { clinicalService } from "@application/services/clinical/clinical.service"; // Correct filename
@@ -129,7 +129,7 @@ export function usePatientData(
   // They should ideally call specific API endpoints to update data.
 
   const updateSymptomSeverityMutation = useMutation<Patient, Error, { symptomId: string; severity: number }>({
-    mutationFn: async ({ symptomId, severity }) => {
+    mutationFn: async ({ symptomId: _symptomId, severity: _severity }) => { // Mark as unused
       console.warn("updateSymptomSeverityMutation needs rework - Patient object not available");
       throw new Error("updateSymptomSeverity not fully implemented in this hook version");
       // Placeholder: return {} as Patient;

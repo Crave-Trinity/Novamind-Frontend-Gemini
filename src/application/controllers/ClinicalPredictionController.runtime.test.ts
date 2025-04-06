@@ -5,9 +5,9 @@
 import { describe, it, expect } from "vitest";
 import {
   validateSymptomPredictionParams,
-  validateTreatmentPredictionParams,
-  validateRelapsePredictionParams,
-  validateRiskAssessmentParams,
+  // validateTreatmentPredictionParams, // Removed unused TS6133
+  // validateRelapsePredictionParams, // Removed unused TS6133
+  // validateRiskAssessmentParams, // Removed unused TS6133
   validateConfigurePredictionParams,
   validatePredictionResultData, // Placeholder validation
   validateRiskAssessmentData, // Basic validation

@@ -10,7 +10,7 @@ import {
 // Import actual domain types and the theme definitions
 import {
   type ThemeSettings,
-  type ThemeOption,
+  type ThemeOption, // Already type-only
   isValidTheme,
   visualizationThemes,
 } from "@domain/types/brain/visualization";

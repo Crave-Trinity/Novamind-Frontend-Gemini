@@ -219,31 +219,33 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
     if (typeof window !== 'undefined' && window.matchMedia) {
       try {
         const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-        const handleChange = (e: MediaQueryListEvent) => {
-          const savedTheme = localStorage.getItem("theme");
-          if (!savedTheme) {
-            setTheme(e.matches ? "dark" : "light");
-          }
-        };
+        // const handleChange = (e: MediaQueryListEvent) => { // Removed unused variable TS6133
+        //   const savedTheme = localStorage.getItem("theme");
+        //   if (!savedTheme) {
+        //     setTheme(e.matches ? "dark" : "light");
+        //   }
+        // };
 
         // Ensure mediaQuery was successfully created before using it
         if (mediaQuery) {
-          const handleChange = (e: MediaQueryListEvent) => {
+          // Define handleChange inline or ensure it's defined if used below
+          const inlineHandleChange = (e: MediaQueryListEvent) => { // Renamed to avoid conflict if outer one is restored
             const savedTheme = localStorage.getItem("theme");
-            if (!savedTheme) {
+            // Only set theme based on system change if no theme is explicitly saved
+            if (!savedTheme || savedTheme === 'system') {
               setTheme(e.matches ? "dark" : "light");
             }
           };
 
           // Modern API - addEventListener
           if (mediaQuery.addEventListener) {
-            mediaQuery.addEventListener("change", handleChange);
-            return () => mediaQuery.removeEventListener("change", handleChange);
+            mediaQuery.addEventListener("change", inlineHandleChange); // Use renamed handler
+            return () => mediaQuery.removeEventListener("change", inlineHandleChange); // Use renamed handler
           }
           // Fallback for older browsers - addListener
           else if (mediaQuery.addListener) {
-            mediaQuery.addListener(handleChange as any);
-            return () => mediaQuery.removeListener(handleChange as any);
+            mediaQuery.addListener(inlineHandleChange as any); // Use renamed handler
+            return () => mediaQuery.removeListener(inlineHandleChange as any); // Use renamed handler
           }
         } else {
           console.warn("window.matchMedia returned undefined or null, cannot add listener.");

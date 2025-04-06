@@ -11,13 +11,13 @@ import type {
   BiometricStream,
   BiometricDataPoint,
   BiometricAlert,
-  BiometricSource,
-  BiometricType,
-  AlertPriority,
-  AlertSource, // Keep AlertSource if used, otherwise remove
-  BiometricThreshold,
-} from "@domain/types/biometric/streams"; // Use alias
-import { Result, type Result as ResultType, success, failure } from "@domain/types/shared/common"; // Import Result as value, ResultType as type
+  BiometricSource, // Already type-only
+  BiometricType, // Already type-only
+  AlertPriority, // Already type-only
+  AlertSource, // Already type-only
+  BiometricThreshold, // Already type-only
+} from "@domain/types/biometric/streams";
+import { Result, type Result as ResultType, success, failure } from "@domain/types/shared/common"; // Already correct
 
 // Services
 import { biometricService } from "@application/services/biometricService"; // Revert to alias

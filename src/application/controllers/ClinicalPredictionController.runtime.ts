@@ -11,15 +11,15 @@ import type { RiskAssessment } from "@domain/types/clinical/risk"; // Assuming t
 // --- Inferred Types & Enums (Based on ClinicalPredictionController.ts usage) ---
 
 // Placeholder types matching the controller
-type PredictionInterval = any;
-type PredictionResult = any;
-type PredictionAccuracy = any;
+// type PredictionInterval = any; // Removed unused TS6196
+type PredictionResult = any; // Restore used type alias
+// type PredictionAccuracy = any; // Removed unused TS6196
 type PredictionModel = any; // Controller uses string literals: 'bayesian', 'statistical'
-type ConfidenceLevel = any;
-type SymptomTrajectory = any;
-type TreatmentOutcome = any;
-type RelapsePrediction = any;
-type TimeseriesDataPoint = any;
+// type ConfidenceLevel = any; // Removed unused TS6196
+// type SymptomTrajectory = any; // Removed unused TS6196
+// type TreatmentOutcome = any; // Removed unused TS6196
+// type RelapsePrediction = any; // Removed unused TS6196
+// type TimeseriesDataPoint = any; // Removed unused TS6196
 
 type AggregationMethod =
   | "weighted"

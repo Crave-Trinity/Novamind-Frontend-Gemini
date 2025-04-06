@@ -85,6 +85,8 @@ export const createMockBrainRegions = (count = 5) => {
       Math.floor(Math.random() * 3)
     ] as "left" | "right" | "central",
     dataConfidence: Math.random(),
+    volume: Math.random() * 100 + 50, // Correct property name to 'volume'
+    activity: Math.random(), // Correct type to number
   }));
 };
 

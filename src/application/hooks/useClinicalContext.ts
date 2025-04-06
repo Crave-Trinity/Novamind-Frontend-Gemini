@@ -8,8 +8,8 @@ import { useState, useCallback, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Domain types
-import type { RiskAssessment } from "@domain/types/clinical/risk";
-import type { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
+import type { RiskAssessment } from "@domain/types/clinical/risk"; // Already type-only
+import type { TreatmentResponsePrediction } from "@domain/types/clinical/treatment"; // Already type-only
 // Use relative path as alias seems problematic in tests for this file
 import { type Result, success, failure } from "../../domain/types/shared/common"; // Removed unused SafeArray
 
@@ -17,8 +17,8 @@ import { type Result, success, failure } from "../../domain/types/shared/common"
 import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
-  TreatmentNeuralMapping,
-} from "@domain/models/brain/mapping/brain-mapping"; // Correct path
+  TreatmentNeuralMapping, // Already type-only
+} from "@domain/models/brain/mapping/brain-mapping";
 
 // Application services
 import { clinicalService } from "@application/services/clinical/clinical.service"; // Corrected path from previous step

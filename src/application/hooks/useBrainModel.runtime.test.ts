@@ -7,12 +7,12 @@ import { validateBrainModelData } from "@hooks/useBrainModel.runtime";
 // Import actual domain types and factory for precise testing
 import {
   type BrainModel,
-  BrainRegion, // Interface and Factory object share the name - Keep as value import
+  BrainRegion, // Keep as value import (used for BrainRegion.create)
   type Connection,
   type Vector3,
   // BrainRegionFactory does not exist, use BrainRegion.create
   // ConnectionFactory does not exist
-} from "@domain/types/brain/core-models"; // Adjust path/exports if needed
+} from "@domain/types/brain/core-models";
 
 // Helper to create a basic valid BrainModel for testing
 // Helper to create a basic valid BrainModel for testing

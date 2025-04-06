@@ -31,7 +31,7 @@ vi.mock("./ThemeContext", () => ({
 }));
 
 // Import the hook after mocking (this will use our mock implementation)
-import { useTheme } from "./ThemeContext";
+import { useTheme } from "./ThemeProvider"; // Import from the provider file
 
 // Test suite
 describe("useTheme", () => {

@@ -17,10 +17,10 @@ import {
   isTreatmentResponsePrediction,
   validateTreatmentResponsePrediction,
 } from "@application/services/clinical/clinical.service.runtime";
-import { Symptom, Diagnosis, Treatment } from "@domain/types/clinical/patient";
+import type { Symptom, Diagnosis, Treatment } from "@domain/types/clinical/patient"; // Use type import
 import { RiskAssessment, RiskLevel } from "@domain/types/clinical/risk";
 import { TreatmentResponsePrediction } from "@domain/types/clinical/treatment";
-import { Result } from "@domain/types/shared/common";
+import type { Result } from "@domain/types/shared/common"; // Use type import
 
 // Custom type for TypeVerificationError for proper type assertion
 type TypeVerificationError = Error & {

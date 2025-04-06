@@ -14,11 +14,11 @@ import React, {
 } from "react";
 
 // Import controllers
-import { useNeuroSyncOrchestrator } from "@application/orchestrators/NeuroSyncOrchestrator";
-import { useNeuralActivityController } from "@application/controllers/NeuralActivityController";
-import { useClinicalPredictionController } from "@application/controllers/ClinicalPredictionController";
-import { useBiometricStreamController } from "@application/controllers/BiometricStreamController";
-import { useTemporalDynamicsController } from "@application/controllers/TemporalDynamicsController";
+import { useNeuroSyncOrchestrator } from "@application/services/NeuroSyncOrchestrator"; // Corrected path
+import { useNeuralActivityController } from "@application/services/NeuralActivityController"; // Corrected path
+import { useClinicalPredictionController } from "@application/services/ClinicalPredictionController"; // Corrected path
+import { useBiometricStreamController } from "@application/services/BiometricStreamController"; // Corrected path
+import { useTemporalDynamicsController } from "@application/services/TemporalDynamicsController"; // Corrected path
 
 // Domain types
 import type {
