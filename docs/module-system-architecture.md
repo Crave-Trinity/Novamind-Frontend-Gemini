@@ -20,26 +20,16 @@ The frontend follows Clean Architecture principles with a clear separation of co
 ```
 frontend/
 ├── src/
-│   ├── domain/           # Business logic, interfaces, entities
-│   ├── application/      # Use cases, state management, providers
-│   │   ├── contexts/     # React contexts
-│   │   ├── hooks/        # Custom hooks
-│   │   ├── providers/    # Context providers
-│   │   └── utils/        # Application-level utilities
-│   ├── infrastructure/   # External services, API clients
-│   │   ├── api/          # API client implementations
-│   │   └── services/     # External service integrations
-│   ├── presentation/     # UI components (Atomic Design)
-│   │   ├── atoms/        # Basic UI elements
-│   │   ├── molecules/    # Combinations of atoms
-│   │   ├── organisms/    # Complex UI components
-│   │   ├── templates/    # Page layouts
-│   │   └── pages/        # Full pages
-│   ├── components/       # Legacy components (being migrated)
-│   └── App.tsx           # Application entry point
+│   ├── domain/           # Core business logic, models, types, interfaces
+│   ├── application/      # Use cases, application logic, state
+│   ├── infrastructure/   # External concerns: frameworks, drivers, tools
+│   ├── presentation/     # UI components, styles, assets (Atomic Design)
+│   ├── shared/           # Utilities/types shared across multiple layers
+│   └── main.tsx          # Application entry point
 ├── public/               # Static assets
-└── config/               # Configuration files
+└── config/               # Build/Tool configurations (Vite, Vitest, PostCSS, etc.)
 ```
+*Note: See `CLEAN_ARCHITECTURE_PLAN.md` for a more detailed breakdown of subdirectories.*
 
 ## Import Patterns
 
@@ -49,10 +39,10 @@ The project uses path aliases to maintain clean imports and enforce architectura
 
 ```typescript
 // Clean Architecture layer imports
-import { Patient } from "@domain/entities/Patient";
-import { usePatientData } from "@application/hooks/usePatientData";
-import { apiClient } from "@api/apiClient"; // Use preferred alias
-import { PatientCard } from "@presentation/molecules/PatientCard";
+import { Patient } from "@domain/models/Patient"; // Example model
+import { usePatientData } from "@hooks/usePatientData"; // Correct alias
+import { apiClient } from "@api/ApiClient"; // Example API client import
+import { PatientCard } from "@molecules/PatientCard"; // Example molecule
 
 // Atomic Design component imports
 import { Button } from "@atoms/Button";
@@ -61,9 +51,10 @@ import { PatientDashboard } from "@organisms/PatientDashboard";
 import { DashboardLayout } from "@templates/DashboardLayout";
 import { PatientPage } from "@pages/PatientPage";
 
-// Legacy imports (for backward compatibility)
-import { LegacyComponent } from "@components/LegacyComponent";
+// Shared utility import
+import { cn } from "@utils/cn"; // Correct alias for shared utils
 ```
+*Note: Refer to `tsconfig.json` for the complete list of current path aliases.*
 
 ### Import Best Practices
 
@@ -87,7 +78,7 @@ import { LegacyComponent } from "@components/LegacyComponent";
    import { PatientService } from '../../infrastructure/services/PatientService';
    
    // Prefer
-   import { PatientService } from '@infrastructure/services/PatientService';
+   import { SomeInfrastructureService } from '@infrastructure/services/SomeService'; // Example
    ```
 
 ## Configuration Files
@@ -97,12 +88,14 @@ import { LegacyComponent } from "@components/LegacyComponent";
 Most configuration files use TypeScript with ESM syntax:
 
 ```typescript
-// vite.config.ts
+// config/vite.config.ts
 import { defineConfig } from 'vite';
-import path from 'path';
+import react from '@vitejs/plugin-react';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  // Configuration
+  plugins: [react(), tsconfigPaths()],
+  // ... other config
 });
 ```
 
@@ -111,12 +104,15 @@ export default defineConfig({
 Only specific build tools that require CommonJS use `.cjs` extension:
 
 ```javascript
-// postcss.config.cjs
+// config/postcss/postcss.config.cjs
 module.exports = {
-  plugins: [
-    require('tailwindcss'),
-    require('autoprefixer')
-  ]
+  plugins: {
+    'postcss-import': {},
+    'tailwindcss/nesting': {},
+    tailwindcss: {},
+    autoprefixer: {},
+    ...(process.env.NODE_ENV === 'production' ? { cssnano: {} } : {})
+  }
 };
 ```
 
@@ -129,15 +125,6 @@ The project uses ESM-compatible dependencies whenever possible. For packages tha
 1. **External Marking**: Mark problematic dependencies as external in the build configuration
 2. **ESM/CommonJS Interop**: Configure Vite to handle interoperability between ESM and CommonJS modules
 3. **Module Federation**: For larger dependencies, use dynamic imports with React.lazy()
-
-## Migration Strategy
-
-The codebase is transitioning from a legacy structure to the Clean Architecture pattern:
-
-1. **Legacy Components**: Currently in `src/components/` directory
-2. **Target Architecture**: Moving to Clean Architecture layers with Atomic Design
-3. **Path Aliases**: Support both old and new import patterns during migration
-4. **Gradual Migration**: Components are migrated one by one to maintain stability
 
 ## Visualization Stack
 

@@ -12,63 +12,33 @@ This document serves as the **source of truth** for configuring the Vitest testi
 *   **Clarity:** Make mocking strategies explicit and easy to understand.
 *   **JSDOM Limitations:** Acknowledge JSDOM cannot fully replicate a browser, especially for WebGL/layout, and mock accordingly. Mock essential browser APIs not present in JSDOM or needing specific behavior for tests.
 
-## 2. Vitest Configuration (`vitest.config.ts`)
+## 2. Configuration File Strategy
 
-The primary `vitest.config.ts` defines the core testing setup. Other specific configurations (e.g., `vitest.webgl.config.ts`) may extend or override this base configuration if needed for specialized test runs.
+Configuration files are primarily located in the `/config` directory for better organization. However, some tools expect configuration files in the root directory by convention:
 
-**Canonical `vitest.config.ts` Structure:**
+*   **`/config/` Directory:** Contains configurations for Vite (`vite.config.ts`), Vitest (`vitest.config.ts`), PostCSS (`postcss.config.cjs`), Tailwind (`tailwind.config.cjs`), and TypeScript variants (`tsconfig.*.json`). Scripts in `package.json` explicitly point to these files (e.g., `vite --config config/vite.config.ts`).
+*   **Root Directory:** Contains configurations automatically detected by tools: ESLint (`eslint.config.js`), Prettier (`.prettierrc`), and the base TypeScript config (`tsconfig.json`).
 
+This separation keeps the root cleaner while leveraging the standard locations for auto-detected configs and centralizing explicit configs in `/config`.
+
+## 3. Vitest Configuration (`config/vitest.config.ts`)
+
+The primary Vitest configuration resides at `config/vitest.config.ts`. Other specific configurations (e.g., `vitest.webgl.config.ts`) may extend or override this base configuration if needed for specialized test runs.
+
+**Canonical `config/vitest.config.ts` Structure:**
+*(Note: This is illustrative; refer to the actual file for the most up-to-date settings)*
 ```typescript
 /// <reference types="vitest" />
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
-import path from 'path';
-// Note: vite-tsconfig-paths plugin is often unnecessary if aliases are defined directly.
+import tsconfigPaths from 'vite-tsconfig-paths'; // Used for alias resolution
 
 export default defineConfig({
   plugins: [
     react(), // Standard React plugin
+    tsconfigPaths(), // Automatically use paths from tsconfig.json
   ],
-  resolve: {
-    // Aliases MUST mirror tsconfig.json paths for consistency
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@domain': path.resolve(__dirname, './src/domain'),
-      '@application': path.resolve(__dirname, './src/application'),
-      '@infrastructure': path.resolve(__dirname, './src/infrastructure'),
-      '@presentation': path.resolve(__dirname, './src/presentation'),
-      '@atoms': path.resolve(__dirname, './src/presentation/atoms'),
-      '@molecules': path.resolve(__dirname, './src/presentation/molecules'),
-      '@organisms': path.resolve(__dirname, './src/presentation/organisms'),
-      '@templates': path.resolve(__dirname, './src/presentation/templates'),
-      '@pages': path.resolve(__dirname, './src/presentation/pages'),
-      '@services': path.resolve(__dirname, './src/infrastructure/services'),
-      '@hooks': path.resolve(__dirname, './src/application/hooks'),
-      '@utils': path.resolve(__dirname, './src/application/utils'),
-      '@contexts': path.resolve(__dirname, './src/application/contexts'),
-      '@types': path.resolve(__dirname, './src/domain/types'),
-      '@models': path.resolve(__dirname, './src/domain/models'),
-      '@assets': path.resolve(__dirname, './src/presentation/assets'),
-      '@shaders': path.resolve(__dirname, './src/presentation/shaders'),
-      '@store': path.resolve(__dirname, './src/application/store'),
-      '@styles': path.resolve(__dirname, './src/presentation/styles'),
-      '@api': path.resolve(__dirname, './src/infrastructure/api'),
-      '@config': path.resolve(__dirname, './src/infrastructure/config'),
-      '@constants': path.resolve(__dirname, './src/domain/constants'),
-      '@validation': path.resolve(__dirname, './src/domain/validation'),
-      '@visualizations': path.resolve(__dirname, './src/presentation/visualizations'),
-      '@test': path.resolve(__dirname, './src/test'),
-
-      // --- Library Mocks ---
-      // Redirect imports of heavy/incompatible libraries to mocks
-      // Use named exports in mock files. This strategy is currently used but may be insufficient
-      // for R3F components, leading to test failures (see known issues).
-      'three': path.resolve(__dirname, './src/test/mocks/three.ts'),
-      '@react-three/fiber': path.resolve(__dirname, './src/test/mocks/react-three-fiber.ts'),
-      '@react-three/drei': path.resolve(__dirname, './src/test/mocks/react-three-drei.ts'),
-      // Add other necessary library mocks here (e.g., 'next-themes')
-    },
-  },
+  // No manual 'resolve.alias' needed when using vite-tsconfig-paths
   test: {
     // --- Core Settings ---
     globals: true, // Enable global APIs (describe, it, expect, vi)
@@ -143,212 +113,148 @@ export default defineConfig({
 });
 ```
 
-## 3. Global Test Setup (`src/test/setup.ts`)
+## 4. Global Test Setup (`src/test/setup.ts`)
 
 This file runs once before the test suite. It should contain only essential global mocks and polyfills required by the JSDOM environment. Avoid complex logic or mocks specific to certain test types here.
 
 **Canonical `src/test/setup.ts` Contents:**
 
 ```typescript
-/**
- * Global test setup for Vitest/JSDOM environment.
- * Runs once before all tests.
- */
-import '@testing-library/jest-dom'; // Extends Vitest's expect with DOM matchers
-import { vi, afterEach } from 'vitest'; // Import afterEach for cleanup
+// src/test/setup.ts (Illustrative - Refer to actual file)
+import React from 'react';
+import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/react';
+import { afterEach, beforeAll, vi } from 'vitest';
+import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers';
+import type * as FramerMotion from 'framer-motion'; // Type import for mocking
 
-// --- Polyfills ---
-// Add polyfills for browser APIs missing in JSDOM if needed
-// Example: TextEncoder/TextDecoder (if using Node < 16 or specific features)
-// import { TextEncoder, TextDecoder } from 'util';
-// global.TextEncoder = TextEncoder;
-// global.TextDecoder = TextDecoder as typeof global.TextDecoder;
+// --- Vitest Augmentation ---
+declare module 'vitest' {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type
+  interface Assertion<T = any> extends TestingLibraryMatchers<T, void> {}
+  interface Mock {
+    mockReturnValue<T>(val: T): Mock;
+    mockImplementation<T, Y extends unknown[]>(fn: (...args: Y) => T): Mock;
+  }
+}
 
 // --- Essential Global Mocks ---
+// (Includes mocks for IntersectionObserver, ResizeObserver, matchMedia, localStorage, sessionStorage, getContext, requestAnimationFrame, etc.)
+// ... See actual src/test/setup.ts for complete implementation ...
 
-// Mock window.matchMedia (Needed by ThemeProvider and potentially others)
-// Ensure this mock is robust and returns a complete MediaQueryList object.
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  configurable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: query.includes('dark'), // Default mock behavior (false for non-dark queries)
-    media: query,
-    onchange: null,
-    addListener: vi.fn(), // Deprecated but mock for compatibility
-    removeListener: vi.fn(), // Deprecated but mock for compatibility
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
-
-// Mock localStorage (Commonly used for storing preferences like theme)
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
+// --- Library Mocks (Example) ---
+vi.mock('framer-motion', async (importOriginal) => {
+  const actual = (await importOriginal()) as typeof FramerMotion;
+  const motionProxy = new Proxy({}, { /* ... proxy handler ... */ });
   return {
-    getItem: vi.fn((key: string) => store[key] || null),
-    setItem: vi.fn((key: string, value: string) => { store[key] = value.toString(); }),
-    removeItem: vi.fn((key: string) => { delete store[key]; }),
-    clear: vi.fn(() => { store = {}; }),
-    key: vi.fn((index: number) => Object.keys(store)[index] || null),
-    get length() { return Object.keys(store).length; }
+    __esModule: true,
+    ...actual,
+    motion: motionProxy,
+    AnimatePresence: ({ children }: React.PropsWithChildren<unknown>) => React.createElement(React.Fragment, null, children),
+    // ... other framer-motion mocks ...
   };
-})();
-Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true, configurable: true });
-
-// Mock IntersectionObserver (Often used for lazy loading or animations)
-Object.defineProperty(window, 'IntersectionObserver', {
-  writable: true,
-  configurable: true,
-  value: vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-    root: null,
-    rootMargin: '',
-    thresholds: [],
-  })),
 });
-
-// Mock ResizeObserver (Used for responsive layouts)
-Object.defineProperty(window, 'ResizeObserver', {
-  writable: true,
-  configurable: true,
-  value: vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-  })),
-});
-
-// Mock requestAnimationFrame (Crucial for preventing hangs with animations/R3F)
-// Use simple setTimeout to avoid infinite loops in tests.
-Object.defineProperty(window, 'requestAnimationFrame', {
-  writable: true,
-  configurable: true,
-  value: vi.fn((callback) => setTimeout(callback, 0)),
-});
-Object.defineProperty(window, 'cancelAnimationFrame', {
-  writable: true,
-  configurable: true,
-  value: vi.fn((id) => clearTimeout(id)),
-});
-
 
 // --- Global Hooks ---
-// Use afterEach for consistent cleanup
 afterEach(() => {
-  vi.clearAllMocks(); // Clear mock history
-  // Note: vi.restoreAllMocks() is often handled by restoreMocks: true in config
-  localStorageMock.clear(); // Clear localStorage mock state
-  // Add any other necessary global cleanup
+  cleanup(); // Cleans up DOM rendered by testing-library
+  vi.clearAllMocks(); // Clears mock call history
+  localStorage.clear(); // Clear mocked localStorage
+  sessionStorage.clear(); // Clear mocked sessionStorage
 });
 
-// --- Static Mocks Import ---
-// Import files containing top-level vi.mock calls to ensure they are hoisted.
-// Ensure these mock files themselves don't have side effects beyond vi.mock.
-import './webgl/examples/neural-controllers-mock'; // Example if needed globally
+// --- Global Error Handling ---
+beforeAll(() => {
+  // Optional: Override console.error/warn to catch specific errors/warnings
+});
 
 console.log('[TEST SETUP] Global setup complete.');
-
 ```
 
-## 4. Mocking Strategy
+## 5. Mocking Strategy
 
-*   **Library Mocks:** For heavy libraries incompatible with JSDOM (Three.js, R3F, Drei), use the `resolve.alias` in `vitest.config.ts` to point to dedicated mock files in `src/test/mocks/`.
+*   **Library Mocks:** For heavy libraries incompatible with JSDOM (Three.js, R3F, Drei), use `vi.mock` within the global `src/test/setup.ts` or within specific test files. The previous `resolve.alias` strategy in `vitest.config.ts` has been removed in favor of explicit mocking.
 *   **Mock File Structure:** Mock files MUST use **named exports** mirroring the actual library structure. Avoid default exports for library mocks. Ensure mocked classes/functions have the correct basic signatures (accept expected arguments, even if unused) and properties expected by the code under test.
 *   **`vi.mock`:** For mocking application modules (services, components), use `vi.mock('module/path', factory)` at the **top level** of the test file *before* any imports from that module. Avoid dynamic `vi.mock` calls inside functions or loops.
 *   **Spying:** Use `vi.spyOn` for observing method calls on actual or partially mocked objects. Remember to restore spies using `vi.restoreAllMocks()` or ensure `restoreMocks: true` is set in the config.
 
-## 5. Test Utilities (`src/test/test-utils.unified.tsx`)
+## 6. Test Utilities (`src/test/test-utils.unified.tsx`)
 
 This file provides a custom `render` function that wraps components with necessary providers.
 
 **Canonical `src/test/test-utils.unified.tsx` Structure:**
 
 ```typescript
-import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+// src/test/test-utils.unified.tsx (Illustrative - Refer to actual file)
+import type { ReactElement } from 'react';
+import React from 'react';
+import type { RenderOptions } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from '@application/providers/ThemeProvider'; // Use named import
-import { ThemeMode } from '@application/contexts/ThemeContext';
-import { BrowserRouter } from 'react-router-dom'; // Add Router for hooks like useNavigate
+import { ThemeProvider } from '@application/providers/ThemeProvider';
+import type { ThemeMode } from '@application/contexts/ThemeContext';
+import { BrowserRouter } from 'react-router-dom';
+import { tailwindHelper } from './setup.unified'; // Assuming this helper exists
+import { vi } from 'vitest';
 
-// Create a stable query client instance for tests
-const testQueryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      gcTime: Infinity, // Keep data indefinitely for tests unless invalidated
-      staleTime: Infinity, // Data never becomes stale automatically in tests
-    },
-  },
-});
+// Mock matchMedia if not already done globally
+// ... matchMedia mock ...
+
+// Create a query client instance for tests
+const testQueryClient = new QueryClient({ /* ... options ... */ });
 
 interface TestProviderProps {
   children: React.ReactNode;
   defaultTheme?: ThemeMode;
 }
 
-// Wrapper component including all necessary providers
-export const AllProviders: React.FC<TestProviderProps> = ({
-  children,
-  defaultTheme = 'clinical',
-}) => {
-  // Clear query cache before each render using this provider if needed,
-  // though typically managed per test suite or file.
-  // testQueryClient.clear(); 
-
+// All-in-one providers wrapper
+export const AllProviders: React.FC<TestProviderProps> = ({ children, defaultTheme = 'clinical' }) => {
+  // ... theme setup logic ...
   return (
-    <BrowserRouter> {/* Add Router */}
+    <BrowserRouter>
       <QueryClientProvider client={testQueryClient}>
-        <ThemeProvider defaultTheme={defaultTheme}>
-          {children}
-        </ThemeProvider>
+        <ThemeProvider defaultTheme={defaultTheme}>{children}</ThemeProvider>
       </QueryClientProvider>
     </BrowserRouter>
   );
 };
 
-// Custom render options extending RTL's RenderOptions
 interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   defaultTheme?: ThemeMode;
-  // Add other options like initial route if needed for router
+  darkMode?: boolean;
 }
 
-// Custom render function
+// Custom render function with providers and helpers
 export function renderWithProviders(
   ui: ReactElement,
-  {
-    defaultTheme = 'clinical',
-    ...options
-  }: ExtendedRenderOptions = {}
+  { defaultTheme = 'clinical', darkMode = false, ...options }: ExtendedRenderOptions = {}
 ) {
+  // ... dark mode setup ...
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <AllProviders defaultTheme={defaultTheme}>
-      {children}
-    </AllProviders>
+    <AllProviders defaultTheme={defaultTheme}>{children}</AllProviders>
   );
 
-  // Render the UI with the wrapper
-  return render(ui, { wrapper: Wrapper, ...options });
+  return {
+    ...render(ui, { wrapper: Wrapper, ...options }),
+    // Return additional utilities if needed
+    // isDarkMode: tailwindHelper.isDarkMode,
+    // enableDarkMode: tailwindHelper.enableDarkMode,
+    // disableDarkMode: tailwindHelper.disableDarkMode,
+  };
 }
 
-// Re-export everything from testing-library
 export * from '@testing-library/react';
-
-// Override render export with our custom function
 export { renderWithProviders as render };
-
 ```
 
-## 6. Path Alias Configuration (`tsconfig.json`)
+## 7. Path Alias Configuration (`tsconfig.json`)
 
-Ensure `paths` in `tsconfig.json` match the aliases defined in `vitest.config.ts`.
+Ensure `paths` in `tsconfig.json` are correctly defined. Vite uses `vite-tsconfig-paths` to read these automatically.
 
 ```json
-// tsconfig.json (relevant part)
+```json
+// tsconfig.json (paths section - illustrative)
 {
   "compilerOptions": {
     "baseUrl": ".",
@@ -358,37 +264,28 @@ Ensure `paths` in `tsconfig.json` match the aliases defined in `vitest.config.ts
       "@application/*": ["src/application/*"],
       "@infrastructure/*": ["src/infrastructure/*"],
       "@presentation/*": ["src/presentation/*"],
+      "@shared/*": ["src/shared/*"],
       "@atoms/*": ["src/presentation/atoms/*"],
-      "@molecules/*": ["src/presentation/molecules/*"],
-      "@organisms/*": ["src/presentation/organisms/*"],
-      "@templates/*": ["src/presentation/templates/*"],
-      "@pages/*": ["src/presentation/pages/*"],
-      "@services/*": ["src/infrastructure/services/*"],
+      // ... other presentation aliases ...
       "@hooks/*": ["src/application/hooks/*"],
-      "@utils/*": ["src/application/utils/*"],
       "@contexts/*": ["src/application/contexts/*"],
+      "@providers/*": ["src/application/providers/*"],
+      "@services/*": ["src/application/services/*"],
+      "@api/*": ["src/infrastructure/api/*"],
+      "@utils/*": ["src/shared/utils/*"], // Points to shared
       "@types/*": ["src/domain/types/*"],
       "@models/*": ["src/domain/models/*"],
-      "@assets/*": ["src/presentation/assets/*"],
-      "@shaders/*": ["src/presentation/shaders/*"],
-      "@store/*": ["src/application/store/*"],
-      "@styles/*": ["src/presentation/styles/*"],
-      "@api/*": ["src/infrastructure/api/*"],
-      "@config/*": ["src/infrastructure/config/*"],
-      "@constants/*": ["src/domain/constants/*"],
-      "@validation/*": ["src/domain/validation/*"],
-      "@visualizations/*": ["src/presentation/visualizations/*"],
-      "@test/*": ["src/test/*"]
-      // Ensure these match vitest.config.ts aliases
+      "@test/*": ["src/test/*"],
+      "@config/*": ["config/*"] // Points to top-level config
     }
     // ... other options
   },
-  "include": ["src", "src/test"], // Ensure test files are included
-  // ... other settings
+  "include": ["src", "config", "*.ts", "*.tsx", "*.d.ts"], // Updated include
+  // ... exclude ...
 }
 ```
 
-## 7. Dependency Management & Build Configuration Notes
+## 8. Dependency Management & Build Configuration Notes
 
 While this document focuses on the *testing* environment, understanding the build/dev dependency strategy is crucial context.
 
@@ -406,38 +303,24 @@ The 3D visualization stack requires careful version management:
 
 **Note:** Specific versions are pinned in `package.json` using `overrides` to manage compatibility issues between `@react-three/fiber` v8 and other libraries expecting v9+. These overrides should be respected during dependency updates unless a coordinated upgrade of the entire R3F ecosystem is planned.
 
-### Vite `optimizeDeps` Strategy (`vite.config.ts`)
+### Vite `optimizeDeps` Strategy (`config/vite.config.ts`)
 
-To handle R3F complexities and ensure smooth development server startup, the following `optimizeDeps` configuration is used in the main `vite.config.ts`:
+The `optimizeDeps` configuration in `config/vite.config.ts` helps manage dependencies during development:
 
 ```typescript
-// From vite.config.ts
+// From config/vite.config.ts
 optimizeDeps: {
-  include: [ // Ensure these are pre-bundled
-    'three', 
-    '@react-three/fiber', 
-    '@react-three/drei', 
-    '@react-three/postprocessing',
-    'react', 
-    'react-dom' 
+  include: [
+    'react',
+    'react-dom',
+    'three',
+    '@react-three/fiber',
+    '@react-three/drei'
   ],
-  exclude: [ // Prevent pre-bundling of potentially problematic transitive deps
-    '@react-three/fiber', // Excluding here might seem counter-intuitive but helps resolve specific conflicts
-    '@react-three/postprocessing',
-    'zustand',
-    'suspend-react',
-    'its-fine',
-    'scheduler',
-    'react-use-measure'
-  ],
-  esbuildOptions: { // Define globalThis for browser compatibility
-    define: {
-      global: 'globalThis'
-    }
-  }
+  exclude: ['@react-three/postprocessing'] // Exclude specific packages if needed
 }
 ```
-This strategy aims to pre-bundle core libraries while excluding specific R3F-related packages that caused resolution issues during Vite's dependency scanning phase.
+*Note: The exact `include` and `exclude` lists might need adjustment based on dependency changes.*
 
 ### Useful Dependency Analysis Tools
 
@@ -466,9 +349,4 @@ npm ls <package-name>
 5.  **Use `overrides`:** Leverage npm overrides (as currently done for R3F) to resolve complex peer dependency conflicts.
 
 
-## 8. Next Steps
-
-1.  Implement the configurations defined in this document (`vitest.config.ts`, `setup.ts`, `test-utils.unified.tsx`, mocks).
-2.  Consolidate remaining relevant documentation into this file or linked files. Remove obsolete docs.
-3.  Clean up the `scripts/` directory.
-4.  Start running tests incrementally, beginning with the simplest ones, fixing errors based on this canonical setup.
+*Note: The R3F version table and dependency analysis tools sections remain relevant.*

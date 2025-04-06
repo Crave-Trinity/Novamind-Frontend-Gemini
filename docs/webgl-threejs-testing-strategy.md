@@ -1,5 +1,6 @@
-# WebGL / Three.js / R3F Testing Strategy Analysis & Refactoring Plan
+# WebGL / Three.js / R3F Testing Strategy Analysis & Refactoring Plan (Proposed: 2025-04-05)
 
+*Note: This document outlines the analysis and proposed refactoring plan as of April 5, 2025. Implementation status is ongoing. The core challenges remain, and this plan serves as the roadmap for addressing R3F testability.*
 ## Current State & Challenges (As of 2025-04-05)
 
 The current test setup for WebGL, Three.js, and React Three Fiber (R3F) components faces significant challenges, leading to numerous skipped or failing tests.
