@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { auditLogService, AuditEventType } from "@infrastructure/services/AuditLogService";
+import { auditLogService, AuditEventType } from "@infrastructure/clients/auditLogClient";
 import LoadingIndicator from "@atoms/LoadingIndicator";
 
 interface PatientCard {

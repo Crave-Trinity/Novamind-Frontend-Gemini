@@ -4,7 +4,15 @@
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "strict": true
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "../../config/**/*.ts",
+    "../../config/**/*.tsx",
+    "../../vite.config.ts"
+  ],
+  "paths": {
+    "vite.config.ts": ["./vite.config.ts"]
+  }
 }

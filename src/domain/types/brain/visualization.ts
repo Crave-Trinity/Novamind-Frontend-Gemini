@@ -3,6 +3,7 @@
  * Brain visualization types with quantum-level type safety
  */
 import { BrainModel, BrainRegion, NeuralConnection } from "@domain/types/brain/models";
+import type { Color, Vector3 } from '../common';
 
 // Digital Twin visualization modes with clinical precision
 export enum RenderMode {
@@ -315,4 +316,78 @@ export function isValidRenderMode(mode: unknown): mode is RenderMode {
     typeof mode === "string" &&
     Object.values(RenderMode).includes(mode as RenderMode)
   );
+}
+
+export interface BrainVisualizationSettings {
+  // Camera settings
+  cameraPosition: Vector3;
+  cameraTarget: Vector3;
+  cameraFov: number;
+  
+  // Rendering settings
+  backgroundColor: Color;
+  ambientLightColor: Color;
+  ambientLightIntensity: number;
+  directionalLightColor: Color;
+  directionalLightIntensity: number;
+  
+  // Region visualization
+  regionMaterial: {
+    opacity: number;
+    shininess: number;
+    emissiveIntensity: number;
+  };
+  
+  // Connection visualization
+  connectionMaterial: {
+    opacity: number;
+    thickness: number;
+    pulseSpeed: number;
+    pulseIntensity: number;
+  };
+  
+  // Activity visualization
+  activityColorScale: {
+    min: Color;
+    max: Color;
+  };
+  
+  // Animation settings
+  transitionDuration: number;
+  rotationSpeed: number;
+}
+
+export interface RegionHighlight {
+  regionId: string;
+  color: Color;
+  pulseIntensity: number;
+  duration: number;
+}
+
+export interface ConnectionHighlight {
+  connectionId: string;
+  color: Color;
+  pulseIntensity: number;
+  duration: number;
+}
+
+export interface VisualizationState {
+  settings: BrainVisualizationSettings;
+  highlightedRegions: RegionHighlight[];
+  highlightedConnections: ConnectionHighlight[];
+  isRotating: boolean;
+  isPulsing: boolean;
+  isTransitioning: boolean;
+}
+
+export interface BrainVisualizationProps {
+  model: {
+    regions: BrainRegion[];
+    connections: NeuralConnection[];
+  };
+  settings?: Partial<BrainVisualizationSettings>;
+  onRegionClick?: (region: BrainRegion) => void;
+  onConnectionClick?: (connection: NeuralConnection) => void;
+  highlightedRegions?: RegionHighlight[];
+  highlightedConnections?: ConnectionHighlight[];
 }

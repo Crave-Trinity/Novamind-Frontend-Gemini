@@ -3,7 +3,7 @@ import { Canvas } from "@react-three/fiber";
 // @ts-ignore - Types will be handled by overrides in package.json
 import { OrbitControls, Environment, useGLTF } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
-import { auditLogService, AuditEventType } from "@infrastructure/services/AuditLogService";
+import { auditLogService, AuditEventType } from "@infrastructure/clients/auditLogClient";
 import type { NeuralNode } from "@organisms/BrainModel";
 
 // Lazy-loaded brain model for code splitting

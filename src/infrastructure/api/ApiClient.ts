@@ -6,6 +6,8 @@ import { Result, Ok, Err } from "ts-results"; // Import Result types if needed f
 // Flag to toggle between mock and real API
 const USE_MOCK_API = true;
 
+import type { BrainModel } from '@domain/types/brain/models';
+
 /**
  * API Client for the Novamind Digital Twin Backend
  *
@@ -262,12 +264,12 @@ export class ApiClient {
   }
 
   // Get brain model
-  public async getBrainModel(modelId: string = "default"): Promise<any> {
+  public async getBrainModel(modelId: string = "default"): Promise<BrainModel> {
     if (USE_MOCK_API) {
       return mockApi.getBrainModel(modelId);
     }
 
-    return this.get<any>(`/brain-models/${modelId}`);
+    return this.get<BrainModel>(`/brain-models/${modelId}`);
   }
 
   // Predict treatment response

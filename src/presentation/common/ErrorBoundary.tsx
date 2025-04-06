@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { auditLogService, AuditEventType } from "@infrastructure/services/AuditLogService";
+import { auditLogService, AuditEventType } from "@infrastructure/clients/auditLogClient";
 
 interface ErrorBoundaryProps {
   /**

@@ -1,0 +1,1643 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="164" failures="164" errors="0" time="12.102">
+    <testsuite name="src/app/index.test.tsx" timestamp="2025-04-05T19:38:13.961Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/app/index.test.tsx" name="src/app/index.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/initializeApp.test.ts" timestamp="2025-04-05T19:38:13.963Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/app/initializeApp.test.ts" name="src/app/initializeApp.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/main.test.tsx" timestamp="2025-04-05T19:38:13.964Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/app/main.test.tsx" name="src/app/main.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/App.test.tsx" timestamp="2025-04-05T19:38:13.965Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/App.test.tsx" name="src/presentation/App.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/providers/ThemeProvider.test.tsx" timestamp="2025-04-05T19:38:13.967Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/providers/ThemeProvider.test.tsx" name="src/providers/ThemeProvider.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/BrainModelContainer.minimal.spec.tsx" timestamp="2025-04-05T19:38:13.969Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/BrainModelContainer.minimal.spec.tsx" name="src/test/BrainModelContainer.minimal.spec.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/absolute-minimal.spec.tsx" timestamp="2025-04-05T19:38:13.970Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/absolute-minimal.spec.tsx" name="src/test/absolute-minimal.spec.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/minimal-brain-container.spec.tsx" timestamp="2025-04-05T19:38:13.971Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/minimal-brain-container.spec.tsx" name="src/test/minimal-brain-container.spec.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/minimal-brain-test.spec.ts" timestamp="2025-04-05T19:38:13.972Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/minimal-brain-test.spec.ts" name="src/test/minimal-brain-test.spec.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/minimal-ts.test.ts" timestamp="2025-04-05T19:38:13.973Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/minimal-ts.test.ts" name="src/test/minimal-ts.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/minimal.test.ts" timestamp="2025-04-05T19:38:13.973Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/minimal.test.ts" name="src/test/minimal.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/neural-standalone.spec.tsx" timestamp="2025-04-05T19:38:13.973Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/neural-standalone.spec.tsx" name="src/test/neural-standalone.spec.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/sanity.test.ts" timestamp="2025-04-05T19:38:13.974Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/sanity.test.ts" name="src/test/sanity.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/standalone-brain-test.spec.tsx" timestamp="2025-04-05T19:38:13.975Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/standalone-brain-test.spec.tsx" name="src/test/standalone-brain-test.spec.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/tailwind-example.unified.test.tsx" timestamp="2025-04-05T19:38:13.975Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/tailwind-example.unified.test.tsx" name="src/test/tailwind-example.unified.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/tailwind-testing-example.test.tsx" timestamp="2025-04-05T19:38:13.978Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/tailwind-testing-example.test.tsx" name="src/test/tailwind-testing-example.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/vite-env.d.test.ts" timestamp="2025-04-05T19:38:13.979Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/vite-env.d.test.ts" name="src/test/vite-env.d.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/infrastructure/api/ApiClient.runtime.test.ts" timestamp="2025-04-05T19:38:13.979Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/infrastructure/api/ApiClient.runtime.test.ts" name="src/infrastructure/api/ApiClient.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/infrastructure/api/ApiClient.test.ts" timestamp="2025-04-05T19:38:13.979Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/infrastructure/api/ApiClient.test.ts" name="src/infrastructure/api/ApiClient.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/infrastructure/api/ApiGateway.test.ts" timestamp="2025-04-05T19:38:13.980Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/infrastructure/api/ApiGateway.test.ts" name="src/infrastructure/api/ApiGateway.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/infrastructure/api/EnhancedMockApiClient.test.ts" timestamp="2025-04-05T19:38:13.981Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/infrastructure/api/EnhancedMockApiClient.test.ts" name="src/infrastructure/api/EnhancedMockApiClient.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/infrastructure/api/IApiClient.test.ts" timestamp="2025-04-05T19:38:13.982Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/infrastructure/api/IApiClient.test.ts" name="src/infrastructure/api/IApiClient.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/infrastructure/api/MockApiClient.test.ts" timestamp="2025-04-05T19:38:13.983Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/infrastructure/api/MockApiClient.test.ts" name="src/infrastructure/api/MockApiClient.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/infrastructure/api/XGBoostService.runtime.test.ts" timestamp="2025-04-05T19:38:13.984Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/infrastructure/api/XGBoostService.runtime.test.ts" name="src/infrastructure/api/XGBoostService.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/infrastructure/api/XGBoostService.test.ts" timestamp="2025-04-05T19:38:13.985Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/infrastructure/api/XGBoostService.test.ts" name="src/infrastructure/api/XGBoostService.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/infrastructure/api/mockApi.test.ts" timestamp="2025-04-05T19:38:13.985Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/infrastructure/api/mockApi.test.ts" name="src/infrastructure/api/mockApi.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/models/index.test.ts" timestamp="2025-04-05T19:38:13.986Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/models/index.test.ts" name="src/domain/models/index.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/utils/brainDataTransformer.runtime.test.ts" timestamp="2025-04-05T19:38:13.986Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/utils/brainDataTransformer.runtime.test.ts" name="src/domain/utils/brainDataTransformer.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/utils/brainDataTransformer.test.ts" timestamp="2025-04-05T19:38:13.987Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/utils/brainDataTransformer.test.ts" name="src/domain/utils/brainDataTransformer.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/utils/index.test.ts" timestamp="2025-04-05T19:38:13.987Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/utils/index.test.ts" name="src/domain/utils/index.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/utils/performanceUtils.test.ts" timestamp="2025-04-05T19:38:13.988Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/utils/performanceUtils.test.ts" name="src/domain/utils/performanceUtils.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/utils/progressiveLoader.runtime.test.ts" timestamp="2025-04-05T19:38:13.988Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/utils/progressiveLoader.runtime.test.ts" name="src/domain/utils/progressiveLoader.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/utils/progressiveLoader.test.ts" timestamp="2025-04-05T19:38:13.989Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/utils/progressiveLoader.test.ts" name="src/domain/utils/progressiveLoader.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/common/AdaptiveLOD.test.tsx" timestamp="2025-04-05T19:38:13.990Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/common/AdaptiveLOD.test.tsx" name="src/presentation/common/AdaptiveLOD.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/common/LoadingFallback.test.tsx" timestamp="2025-04-05T19:38:13.990Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/common/LoadingFallback.test.tsx" name="src/presentation/common/LoadingFallback.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/common/PerformanceMonitor.test.tsx" timestamp="2025-04-05T19:38:13.994Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/common/PerformanceMonitor.test.tsx" name="src/presentation/common/PerformanceMonitor.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/common/VisualizationErrorBoundary.test.tsx" timestamp="2025-04-05T19:38:13.995Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/common/VisualizationErrorBoundary.test.tsx" name="src/presentation/common/VisualizationErrorBoundary.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/atoms/ActivityIndicator.test.tsx" timestamp="2025-04-05T19:38:13.995Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/atoms/ActivityIndicator.test.tsx" name="src/presentation/atoms/ActivityIndicator.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/atoms/Button.test.tsx" timestamp="2025-04-05T19:38:13.996Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/atoms/Button.test.tsx" name="src/presentation/atoms/Button.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/atoms/Card.test.tsx" timestamp="2025-04-05T19:38:13.996Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/atoms/Card.test.tsx" name="src/presentation/atoms/Card.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/atoms/ConnectionLine.test.tsx" timestamp="2025-04-05T19:38:13.997Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/atoms/ConnectionLine.test.tsx" name="src/presentation/atoms/ConnectionLine.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/atoms/DocumentTitle.test.tsx" timestamp="2025-04-05T19:38:13.997Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/atoms/DocumentTitle.test.tsx" name="src/presentation/atoms/DocumentTitle.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/atoms/NeuralCorrelationBadge.test.tsx" timestamp="2025-04-05T19:38:13.998Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/atoms/NeuralCorrelationBadge.test.tsx" name="src/presentation/atoms/NeuralCorrelationBadge.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/atoms/RegionMesh.test.tsx" timestamp="2025-04-05T19:38:13.998Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/atoms/RegionMesh.test.tsx" name="src/presentation/atoms/RegionMesh.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/atoms/RegionSelectionIndicator.test.tsx" timestamp="2025-04-05T19:38:13.999Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/atoms/RegionSelectionIndicator.test.tsx" name="src/presentation/atoms/RegionSelectionIndicator.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/atoms/index.test.ts" timestamp="2025-04-05T19:38:13.999Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/atoms/index.test.ts" name="src/presentation/atoms/index.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/containers/BrainModelContainer.minimal.test.tsx" timestamp="2025-04-05T19:38:13.999Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/containers/BrainModelContainer.minimal.test.tsx" name="src/presentation/containers/BrainModelContainer.minimal.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/containers/BrainModelContainer.test.tsx" timestamp="2025-04-05T19:38:14.000Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/containers/BrainModelContainer.test.tsx" name="src/presentation/containers/BrainModelContainer.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/containers/minimal.minimal.test.tsx" timestamp="2025-04-05T19:38:14.000Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/containers/minimal.minimal.test.tsx" name="src/presentation/containers/minimal.minimal.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/containers/minimal.test.tsx" timestamp="2025-04-05T19:38:14.001Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/containers/minimal.test.tsx" name="src/presentation/containers/minimal.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/BiometricAlertVisualizer.test.tsx" timestamp="2025-04-05T19:38:14.001Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/BiometricAlertVisualizer.test.tsx" name="src/presentation/molecules/BiometricAlertVisualizer.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/BrainRegionDetails.test.tsx" timestamp="2025-04-05T19:38:14.001Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/BrainRegionDetails.test.tsx" name="src/presentation/molecules/BrainRegionDetails.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/BrainRegionGroup.test.tsx" timestamp="2025-04-05T19:38:14.002Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/BrainRegionGroup.test.tsx" name="src/presentation/molecules/BrainRegionGroup.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/BrainRegionLabels.test.tsx" timestamp="2025-04-05T19:38:14.002Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/BrainRegionLabels.test.tsx" name="src/presentation/molecules/BrainRegionLabels.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/BrainRegionSelector.test.tsx" timestamp="2025-04-05T19:38:14.002Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/BrainRegionSelector.test.tsx" name="src/presentation/molecules/BrainRegionSelector.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/BrainVisualizationControls.test.tsx" timestamp="2025-04-05T19:38:14.002Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/BrainVisualizationControls.test.tsx" name="src/presentation/molecules/BrainVisualizationControls.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/Chart.test.tsx" timestamp="2025-04-05T19:38:14.003Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/Chart.test.tsx" name="src/presentation/molecules/Chart.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/ClinicalDataOverlay.test.tsx" timestamp="2025-04-05T19:38:14.003Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/ClinicalDataOverlay.test.tsx" name="src/presentation/molecules/ClinicalDataOverlay.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/ClinicalMetricsCard.test.tsx" timestamp="2025-04-05T19:38:14.003Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/ClinicalMetricsCard.test.tsx" name="src/presentation/molecules/ClinicalMetricsCard.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/DataStreamVisualizer.test.tsx" timestamp="2025-04-05T19:38:14.004Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/DataStreamVisualizer.test.tsx" name="src/presentation/molecules/DataStreamVisualizer.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/Header.test.tsx" timestamp="2025-04-05T19:38:14.004Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/Header.test.tsx" name="src/presentation/molecules/Header.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/NeuralActivityVisualizer.test.tsx" timestamp="2025-04-05T19:38:14.004Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/NeuralActivityVisualizer.test.tsx" name="src/presentation/molecules/NeuralActivityVisualizer.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/NeuralConnections.test.tsx" timestamp="2025-04-05T19:38:14.004Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/NeuralConnections.test.tsx" name="src/presentation/molecules/NeuralConnections.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/PatientHeader.test.tsx" timestamp="2025-04-05T19:38:14.005Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/PatientHeader.test.tsx" name="src/presentation/molecules/PatientHeader.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/RegionSelectionPanel.test.tsx" timestamp="2025-04-05T19:38:14.005Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/RegionSelectionPanel.test.tsx" name="src/presentation/molecules/RegionSelectionPanel.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/SymptomRegionMappingVisualizer.test.tsx" timestamp="2025-04-05T19:38:14.005Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/SymptomRegionMappingVisualizer.test.tsx" name="src/presentation/molecules/SymptomRegionMappingVisualizer.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/TemporalDynamicsVisualizer.test.tsx" timestamp="2025-04-05T19:38:14.005Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/TemporalDynamicsVisualizer.test.tsx" name="src/presentation/molecules/TemporalDynamicsVisualizer.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/TherapeuticTimelineVisualizer.test.tsx" timestamp="2025-04-05T19:38:14.006Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/TherapeuticTimelineVisualizer.test.tsx" name="src/presentation/molecules/TherapeuticTimelineVisualizer.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/TimelineEvent.test.tsx" timestamp="2025-04-05T19:38:14.006Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/TimelineEvent.test.tsx" name="src/presentation/molecules/TimelineEvent.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/TreatmentResponseVisualizer.test.tsx" timestamp="2025-04-05T19:38:14.006Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/TreatmentResponseVisualizer.test.tsx" name="src/presentation/molecules/TreatmentResponseVisualizer.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/VisualizationControls.test.tsx" timestamp="2025-04-05T19:38:14.007Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/VisualizationControls.test.tsx" name="src/presentation/molecules/VisualizationControls.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/molecules/index.test.ts" timestamp="2025-04-05T19:38:14.007Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/molecules/index.test.ts" name="src/presentation/molecules/index.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/organisms/BiometricMonitorPanel.test.tsx" timestamp="2025-04-05T19:38:14.008Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/organisms/BiometricMonitorPanel.test.tsx" name="src/presentation/organisms/BiometricMonitorPanel.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/organisms/BrainModelViewer.test.tsx" timestamp="2025-04-05T19:38:14.008Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/organisms/BrainModelViewer.test.tsx" name="src/presentation/organisms/BrainModelViewer.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/organisms/BrainVisualization.test.tsx" timestamp="2025-04-05T19:38:14.009Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/organisms/BrainVisualization.test.tsx" name="src/presentation/organisms/BrainVisualization.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/organisms/BrainVisualizationContainer.test.tsx" timestamp="2025-04-05T19:38:14.009Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/organisms/BrainVisualizationContainer.test.tsx" name="src/presentation/organisms/BrainVisualizationContainer.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/organisms/ClinicalMetricsPanel.test.tsx" timestamp="2025-04-05T19:38:14.010Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/organisms/ClinicalMetricsPanel.test.tsx" name="src/presentation/organisms/ClinicalMetricsPanel.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/organisms/ClinicalTimelinePanel.test.tsx" timestamp="2025-04-05T19:38:14.010Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/organisms/ClinicalTimelinePanel.test.tsx" name="src/presentation/organisms/ClinicalTimelinePanel.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/organisms/DigitalTwinDashboard.test.tsx" timestamp="2025-04-05T19:38:14.010Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/organisms/DigitalTwinDashboard.test.tsx" name="src/presentation/organisms/DigitalTwinDashboard.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/organisms/NeuralControlPanel.test.tsx" timestamp="2025-04-05T19:38:14.011Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/organisms/NeuralControlPanel.test.tsx" name="src/presentation/organisms/NeuralControlPanel.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/organisms/RiskAssessmentPanel.test.tsx" timestamp="2025-04-05T19:38:14.011Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/organisms/RiskAssessmentPanel.test.tsx" name="src/presentation/organisms/RiskAssessmentPanel.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/organisms/TreatmentResponsePredictor.test.tsx" timestamp="2025-04-05T19:38:14.011Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/organisms/TreatmentResponsePredictor.test.tsx" name="src/presentation/organisms/TreatmentResponsePredictor.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/pages/BrainModelViewer.test.tsx" timestamp="2025-04-05T19:38:14.012Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/pages/BrainModelViewer.test.tsx" name="src/presentation/pages/BrainModelViewer.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/pages/BrainVisualizationPage.test.tsx" timestamp="2025-04-05T19:38:14.012Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/pages/BrainVisualizationPage.test.tsx" name="src/presentation/pages/BrainVisualizationPage.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/pages/Dashboard.test.tsx" timestamp="2025-04-05T19:38:14.013Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/pages/Dashboard.test.tsx" name="src/presentation/pages/Dashboard.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/pages/DigitalTwinDemo.test.tsx" timestamp="2025-04-05T19:38:14.013Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/pages/DigitalTwinDemo.test.tsx" name="src/presentation/pages/DigitalTwinDemo.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/pages/DigitalTwinPage.test.tsx" timestamp="2025-04-05T19:38:14.013Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/pages/DigitalTwinPage.test.tsx" name="src/presentation/pages/DigitalTwinPage.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/pages/Login.test.tsx" timestamp="2025-04-05T19:38:14.013Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/pages/Login.test.tsx" name="src/presentation/pages/Login.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/pages/NotFound.test.tsx" timestamp="2025-04-05T19:38:14.014Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/pages/NotFound.test.tsx" name="src/presentation/pages/NotFound.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/pages/PatientProfile.test.tsx" timestamp="2025-04-05T19:38:14.014Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/pages/PatientProfile.test.tsx" name="src/presentation/pages/PatientProfile.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/pages/PatientsList.test.tsx" timestamp="2025-04-05T19:38:14.015Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/pages/PatientsList.test.tsx" name="src/presentation/pages/PatientsList.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/pages/PredictionAnalytics.test.tsx" timestamp="2025-04-05T19:38:14.015Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/pages/PredictionAnalytics.test.tsx" name="src/presentation/pages/PredictionAnalytics.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/pages/Settings.test.tsx" timestamp="2025-04-05T19:38:14.015Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/pages/Settings.test.tsx" name="src/presentation/pages/Settings.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/templates/AuthRoute.test.tsx" timestamp="2025-04-05T19:38:14.015Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/templates/AuthRoute.test.tsx" name="src/presentation/templates/AuthRoute.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/templates/BrainModelContainer.test.tsx" timestamp="2025-04-05T19:38:14.016Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/templates/BrainModelContainer.test.tsx" name="src/presentation/templates/BrainModelContainer.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/templates/ErrorBoundary.test.tsx" timestamp="2025-04-05T19:38:14.016Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/templates/ErrorBoundary.test.tsx" name="src/presentation/templates/ErrorBoundary.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/templates/MainLayout.test.tsx" timestamp="2025-04-05T19:38:14.016Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/templates/MainLayout.test.tsx" name="src/presentation/templates/MainLayout.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/contexts/ThemeContext.test.tsx" timestamp="2025-04-05T19:38:14.017Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/contexts/ThemeContext.test.tsx" name="src/application/contexts/ThemeContext.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/contexts/ThemeProviderComponent.test.tsx" timestamp="2025-04-05T19:38:14.017Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/contexts/ThemeProviderComponent.test.tsx" name="src/application/contexts/ThemeProviderComponent.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/controllers/BiometricStreamController.runtime.test.ts" timestamp="2025-04-05T19:38:14.017Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/controllers/BiometricStreamController.runtime.test.ts" name="src/application/controllers/BiometricStreamController.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/controllers/BiometricStreamController.test.ts" timestamp="2025-04-05T19:38:14.017Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/controllers/BiometricStreamController.test.ts" name="src/application/controllers/BiometricStreamController.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/controllers/ClinicalPredictionController.runtime.test.ts" timestamp="2025-04-05T19:38:14.018Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/controllers/ClinicalPredictionController.runtime.test.ts" name="src/application/controllers/ClinicalPredictionController.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/controllers/ClinicalPredictionController.test.ts" timestamp="2025-04-05T19:38:14.018Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/controllers/ClinicalPredictionController.test.ts" name="src/application/controllers/ClinicalPredictionController.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/controllers/NeuralActivityController.runtime.test.ts" timestamp="2025-04-05T19:38:14.019Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/controllers/NeuralActivityController.runtime.test.ts" name="src/application/controllers/NeuralActivityController.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/controllers/NeuralActivityController.test.ts" timestamp="2025-04-05T19:38:14.019Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/controllers/NeuralActivityController.test.ts" name="src/application/controllers/NeuralActivityController.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/controllers/TemporalDynamicsController.runtime.test.ts" timestamp="2025-04-05T19:38:14.019Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/controllers/TemporalDynamicsController.runtime.test.ts" name="src/application/controllers/TemporalDynamicsController.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/controllers/TemporalDynamicsController.test.ts" timestamp="2025-04-05T19:38:14.020Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/controllers/TemporalDynamicsController.test.ts" name="src/application/controllers/TemporalDynamicsController.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useBlockingTransition.test.ts" timestamp="2025-04-05T19:38:14.020Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useBlockingTransition.test.ts" name="src/application/hooks/useBlockingTransition.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useBrainModel.runtime.test.ts" timestamp="2025-04-05T19:38:14.020Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useBrainModel.runtime.test.ts" name="src/application/hooks/useBrainModel.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useBrainModel.test.tsx" timestamp="2025-04-05T19:38:14.020Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useBrainModel.test.tsx" name="src/application/hooks/useBrainModel.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useBrainVisualization.runtime.test.ts" timestamp="2025-04-05T19:38:14.021Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useBrainVisualization.runtime.test.ts" name="src/application/hooks/useBrainVisualization.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useBrainVisualization.test.ts" timestamp="2025-04-05T19:38:14.021Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useBrainVisualization.test.ts" name="src/application/hooks/useBrainVisualization.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useClinicalContext.runtime.test.ts" timestamp="2025-04-05T19:38:14.021Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useClinicalContext.runtime.test.ts" name="src/application/hooks/useClinicalContext.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useClinicalContext.test.ts" timestamp="2025-04-05T19:38:14.022Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useClinicalContext.test.ts" name="src/application/hooks/useClinicalContext.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/usePatientData.runtime.test.ts" timestamp="2025-04-05T19:38:14.022Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/usePatientData.runtime.test.ts" name="src/application/hooks/usePatientData.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/usePatientData.test.ts" timestamp="2025-04-05T19:38:14.022Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/usePatientData.test.ts" name="src/application/hooks/usePatientData.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useSearchParams.runtime.test.ts" timestamp="2025-04-05T19:38:14.022Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useSearchParams.runtime.test.ts" name="src/application/hooks/useSearchParams.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useSearchParams.test.ts" timestamp="2025-04-05T19:38:14.023Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useSearchParams.test.ts" name="src/application/hooks/useSearchParams.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useTheme.runtime.test.ts" timestamp="2025-04-05T19:38:14.023Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useTheme.runtime.test.ts" name="src/application/hooks/useTheme.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useTheme.test.tsx" timestamp="2025-04-05T19:38:14.024Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useTheme.test.tsx" name="src/application/hooks/useTheme.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useTreatmentPrediction.runtime.test.ts" timestamp="2025-04-05T19:38:14.024Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useTreatmentPrediction.runtime.test.ts" name="src/application/hooks/useTreatmentPrediction.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useTreatmentPrediction.test.ts" timestamp="2025-04-05T19:38:14.025Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useTreatmentPrediction.test.ts" name="src/application/hooks/useTreatmentPrediction.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useVisualSettings.runtime.test.ts" timestamp="2025-04-05T19:38:14.025Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useVisualSettings.runtime.test.ts" name="src/application/hooks/useVisualSettings.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/hooks/useVisualSettings.test.ts" timestamp="2025-04-05T19:38:14.025Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/hooks/useVisualSettings.test.ts" name="src/application/hooks/useVisualSettings.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/orchestrators/NeuroSyncOrchestrator.test.ts" timestamp="2025-04-05T19:38:14.026Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/orchestrators/NeuroSyncOrchestrator.test.ts" name="src/application/orchestrators/NeuroSyncOrchestrator.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/providers/ThemeProvider.enhanced.test.tsx" timestamp="2025-04-05T19:38:14.026Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/providers/ThemeProvider.enhanced.test.tsx" name="src/application/providers/ThemeProvider.enhanced.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/providers/ThemeProvider.test.tsx" timestamp="2025-04-05T19:38:14.027Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/providers/ThemeProvider.test.tsx" name="src/application/providers/ThemeProvider.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/examples/tailwind-enhanced.test.tsx" timestamp="2025-04-05T19:38:14.028Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/examples/tailwind-enhanced.test.tsx" name="src/test/examples/tailwind-enhanced.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/models/brain/brain-model.runtime.test.ts" timestamp="2025-04-05T19:38:14.028Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/models/brain/brain-model.runtime.test.ts" name="src/domain/models/brain/brain-model.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/webgl/mock-webgl.test.ts" timestamp="2025-04-05T19:38:14.028Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/webgl/mock-webgl.test.ts" name="src/test/webgl/mock-webgl.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/webgl/three-mocks.test.ts" timestamp="2025-04-05T19:38:14.029Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/webgl/three-mocks.test.ts" name="src/test/webgl/three-mocks.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/models/shared/type-verification.runtime.test.ts" timestamp="2025-04-05T19:38:14.029Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/models/shared/type-verification.runtime.test.ts" name="src/domain/models/shared/type-verification.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/models/clinical/patient-model.runtime.test.ts" timestamp="2025-04-05T19:38:14.029Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/models/clinical/patient-model.runtime.test.ts" name="src/domain/models/clinical/patient-model.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/brain/activity.test.ts" timestamp="2025-04-05T19:38:14.029Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/brain/activity.test.ts" name="src/domain/types/brain/activity.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/brain/core-models.runtime.test.ts" timestamp="2025-04-05T19:38:14.030Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/brain/core-models.runtime.test.ts" name="src/domain/types/brain/core-models.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/brain/index.test.ts" timestamp="2025-04-05T19:38:14.030Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/brain/index.test.ts" name="src/domain/types/brain/index.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/brain/models.test.ts" timestamp="2025-04-05T19:38:14.031Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/brain/models.test.ts" name="src/domain/types/brain/models.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/brain/visualization.runtime.test.ts" timestamp="2025-04-05T19:38:14.031Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/brain/visualization.runtime.test.ts" name="src/domain/types/brain/visualization.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/brain/visualization.test.ts" timestamp="2025-04-05T19:38:14.031Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/brain/visualization.test.ts" name="src/domain/types/brain/visualization.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/clinical/index.test.ts" timestamp="2025-04-05T19:38:14.032Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/clinical/index.test.ts" name="src/domain/types/clinical/index.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/clinical/patient.runtime.test.ts" timestamp="2025-04-05T19:38:14.032Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/clinical/patient.runtime.test.ts" name="src/domain/types/clinical/patient.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/clinical/risk-level.runtime.test.ts" timestamp="2025-04-05T19:38:14.032Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/clinical/risk-level.runtime.test.ts" name="src/domain/types/clinical/risk-level.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/clinical/risk.runtime.test.ts" timestamp="2025-04-05T19:38:14.032Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/clinical/risk.runtime.test.ts" name="src/domain/types/clinical/risk.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/clinical/treatment.runtime.test.ts" timestamp="2025-04-05T19:38:14.033Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/clinical/treatment.runtime.test.ts" name="src/domain/types/clinical/treatment.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/neural/transforms.runtime.test.ts" timestamp="2025-04-05T19:38:14.033Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/neural/transforms.runtime.test.ts" name="src/domain/types/neural/transforms.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/neural/transforms.test.ts" timestamp="2025-04-05T19:38:14.033Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/neural/transforms.test.ts" name="src/domain/types/neural/transforms.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/types/shared/common.runtime.test.ts" timestamp="2025-04-05T19:38:14.033Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/types/shared/common.runtime.test.ts" name="src/domain/types/shared/common.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/utils/brain/type-verification.test.ts" timestamp="2025-04-05T19:38:14.033Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/utils/brain/type-verification.test.ts" name="src/domain/utils/brain/type-verification.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/utils/clinical/type-verification.test.ts" timestamp="2025-04-05T19:38:14.034Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/utils/clinical/type-verification.test.ts" name="src/domain/utils/clinical/type-verification.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/utils/shared/type-verification.test.ts" timestamp="2025-04-05T19:38:14.034Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/utils/shared/type-verification.test.ts" name="src/domain/utils/shared/type-verification.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/containers/__tests__/BrainModelContainer.test.tsx" timestamp="2025-04-05T19:38:14.034Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/containers/__tests__/BrainModelContainer.test.tsx" name="src/presentation/containers/__tests__/BrainModelContainer.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/components/organisms/BrainVisualization.test.tsx" timestamp="2025-04-05T19:38:14.034Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/components/organisms/BrainVisualization.test.tsx" name="src/presentation/components/organisms/BrainVisualization.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/shaders/shaders/neuralGlow.test.ts" timestamp="2025-04-05T19:38:14.035Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/shaders/shaders/neuralGlow.test.ts" name="src/presentation/shaders/shaders/neuralGlow.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/controllers/coordinators/NeuralVisualizationCoordinator.runtime.test.ts" timestamp="2025-04-05T19:38:14.035Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/controllers/coordinators/NeuralVisualizationCoordinator.runtime.test.ts" name="src/application/controllers/coordinators/NeuralVisualizationCoordinator.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/controllers/coordinators/NeuralVisualizationCoordinator.test.tsx" timestamp="2025-04-05T19:38:14.035Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/controllers/coordinators/NeuralVisualizationCoordinator.test.tsx" name="src/application/controllers/coordinators/NeuralVisualizationCoordinator.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/services/brain/brain-model.service.runtime.test.ts" timestamp="2025-04-05T19:38:14.036Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/services/brain/brain-model.service.runtime.test.ts" name="src/application/services/brain/brain-model.service.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/services/brain/brain-model.service.test.ts" timestamp="2025-04-05T19:38:14.036Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/services/brain/brain-model.service.test.ts" name="src/application/services/brain/brain-model.service.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/services/clinical/clinical.service.minimal.test.ts" timestamp="2025-04-05T19:38:14.036Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/services/clinical/clinical.service.minimal.test.ts" name="src/application/services/clinical/clinical.service.minimal.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/services/clinical/clinical.service.runtime.test.ts" timestamp="2025-04-05T19:38:14.036Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/services/clinical/clinical.service.runtime.test.ts" name="src/application/services/clinical/clinical.service.runtime.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/services/clinical/clinical.service.test.ts" timestamp="2025-04-05T19:38:14.036Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/services/clinical/clinical.service.test.ts" name="src/application/services/clinical/clinical.service.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/application/services/clinical/risk-assessment.service.test.ts" timestamp="2025-04-05T19:38:14.037Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/application/services/clinical/risk-assessment.service.test.ts" name="src/application/services/clinical/risk-assessment.service.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/domain/models/brain/mapping/brain-mapping.test.ts" timestamp="2025-04-05T19:38:14.037Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/domain/models/brain/mapping/brain-mapping.test.ts" name="src/domain/models/brain/mapping/brain-mapping.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/test/webgl/examples/BrainRegionVisualizer.test.ts" timestamp="2025-04-05T19:38:14.037Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/test/webgl/examples/BrainRegionVisualizer.test.ts" name="src/test/webgl/examples/BrainRegionVisualizer.test.ts" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/presentation/components/organisms/__tests__/BrainVisualizationExample.test.tsx" timestamp="2025-04-05T19:38:14.037Z" hostname="MacBookPro" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/presentation/components/organisms/__tests__/BrainVisualizationExample.test.tsx" name="src/presentation/components/organisms/__tests__/BrainVisualizationExample.test.tsx" time="0">
+            <failure message="parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;" type="Error">
+Error: parsing /Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json failed: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+ ❯ node_modules/vite/dist/node/chunks/dep-Dyl6b77n.js:18698:10
+
+Caused by: Error: ENOENT: no such file or directory, open &apos;/Users/ray/Desktop/GITHUB/Novamind-Frontend-Cursor/tsconfig.node.json&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

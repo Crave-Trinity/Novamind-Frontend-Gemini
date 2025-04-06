@@ -1,16 +1,17 @@
 {
-  "name": "novamind-digital-twin",
+  "name": "novamind-frontend",
+  "private": true,
   "version": "0.1.0",
   "type": "module",
   "description": "Neural visualization platform for psychiatry and mental health",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "test": "NODE_OPTIONS=--max-old-space-size=8192 vitest run",
-    "test:watch": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
+    "dev": "vite --config config/vite.config.ts",
+    "build": "tsc && vite build --config config/vite.config.ts",
+    "preview": "vite preview --config config/vite.config.ts",
+    "test": "vitest --config config/vitest.config.ts",
+    "test:watch": "vitest --config config/vitest.config.ts",
+    "test:ui": "vitest --ui --config config/vitest.config.ts",
+    "test:coverage": "vitest run --coverage --config config/vitest.config.ts",
     "test:safe": "npx ts-node --esm scripts/run-with-timeout.ts",
     "test:tailwind": "npx ts-node --esm scripts/run-tailwind-tests.ts",
     "test:unified": "vitest run --config vitest.config.unified.ts",
@@ -18,7 +19,12 @@
     "test:visualization": "npx ts-node --esm scripts/run-3d-visualization-tests.ts --dir=src/presentation --pattern=\"**/*{Visua,Render,Brain,3D,Three}*.test.tsx\"",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "prepare": "husky install",
+    "deps:check": "npm outdated",
+    "deps:update": "npm update",
+    "clean": "rm -rf node_modules/.vite dist coverage"
   },
   "dependencies": {
     "@alloc/quick-lru": "^5.2.0",
@@ -66,6 +72,8 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@babel/plugin-transform-react-jsx": "^7.23.4",
+    "@babel/plugin-transform-react-jsx-source": "^7.23.3",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
@@ -80,13 +88,25 @@
     "@typescript-eslint/eslint-plugin": "^8.29.0",
     "@typescript-eslint/parser": "^8.29.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^3.1.1",
+    "@vitest/ui": "^3.1.1",
     "autoprefixer": "^10.4.21",
+    "cssnano": "^7.0.6",
     "eslint": "^9.24.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-prettier": "^5.2.6",
     "eslint-plugin-react-hooks": "5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
+    "husky": "^9.0.11",
     "jsdom": "^26.0.0",
+    "lint-staged": "^15.2.2",
     "make-error": "^1.3.6",
+    "msw": "^2.7.3",
     "postcss": "^8.5.3",
+    "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.6.11",
     "react-refresh": "^0.17.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
@@ -94,8 +114,16 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.1.1"
   },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,md}": "prettier --write"
+  },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   },
   "overrides": {
     "react": "19.1.0",

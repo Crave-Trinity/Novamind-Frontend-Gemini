@@ -4,150 +4,213 @@
  * This file is loaded automatically before any test files are run.
  * It sets up the testing environment with necessary mocks and configurations.
  */
+import React from 'react'; // Keep React import
 import '@testing-library/jest-dom';
-import React from 'react'; // Import React
-import { vi, afterEach } from 'vitest'; // Keep only necessary imports
-// Removed tailwind-mock import - handled by test utils
-// Removed WebGL setup/cleanup - handle in specific tests or dedicated setup if needed
-import './webgl/examples/neural-controllers-mock';
-// Import WebGL mock classes needed for three mock
-import {
-  CoreWebGLRenderer,
-  MockWebGLTexture,
-  MockWebGLGeometry,
-  MockWebGLMaterial
-} from './webgl/mock-webgl';
+import { cleanup } from '@testing-library/react'; // Keep cleanup import
+import { afterEach, beforeAll, vi } from 'vitest'; // Keep combined vitest imports
+import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers'; // Keep type import
 
-// Mock browser APIs and globals
-// Define a more complete default mock for MediaQueryList
-const createMockMediaQueryList = (matches: boolean) => ({
-  matches,
-  media: '',
+// Keep Vitest Assertion extension
+declare module 'vitest' {
+  interface Assertion<T = any>
+    extends TestingLibraryMatchers<T, void> {}
+}
+
+// Keep Mock extension
+declare module 'vitest' {
+  interface Mock {
+    mockReturnValue<T>(val: T): Mock;
+    mockImplementation<T, Y extends any[]>(fn: (...args: Y) => T): Mock;
+  }
+}
+
+// Mock IntersectionObserver
+const mockIntersectionObserver = vi.fn();
+mockIntersectionObserver.mockReturnValue({
+  observe: () => null,
+  unobserve: () => null,
+  disconnect: () => null,
+  // Add takeRecords to satisfy the interface
+  takeRecords: () => [], 
+});
+window.IntersectionObserver = mockIntersectionObserver;
+
+// Mock ResizeObserver
+window.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+// Mock window.matchMedia
+window.matchMedia = vi.fn().mockImplementation((query) => ({
+  matches: false,
+  media: query,
   onchange: null,
-  addListener: vi.fn(), // Deprecated
-  removeListener: vi.fn(), // Deprecated
+  addListener: vi.fn(),
+  removeListener: vi.fn(),
   addEventListener: vi.fn(),
   removeEventListener: vi.fn(),
   dispatchEvent: vi.fn(),
-});
+}));
 
-// Removed beforeAll block - Mocks are defined directly below
-
-// Mock localStorage (Using Object.defineProperty as per canonical doc)
+// Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
-    getItem: vi.fn((key: string) => store[key] || null),
-    setItem: vi.fn((key: string, value: string) => { store[key] = value.toString(); }),
-    removeItem: vi.fn((key: string) => { delete store[key]; }),
-    clear: vi.fn(() => { store = {}; }),
-    key: vi.fn((index: number) => Object.keys(store)[index] || null),
-    get length() { return Object.keys(store).length; }
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
   };
 })();
-Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true, configurable: true });
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
-// Re-add window.matchMedia mock here for global availability before component/library initialization
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  configurable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: query.includes('dark'), // Default mock behavior
-    media: query,
-    onchange: null,
-    addListener: vi.fn(), // Deprecated
-    removeListener: vi.fn(), // Deprecated
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
+// Mock sessionStorage
+const sessionStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+  };
+})();
+Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
+
+// Mock WebGL context (Simpler version from Incoming)
+const createMockWebGLContext = () => ({
+  canvas: document.createElement('canvas'),
+  drawingBufferWidth: 0,
+  drawingBufferHeight: 0,
+  VERTEX_SHADER: 35633,
+  FRAGMENT_SHADER: 35632,
+  HIGH_FLOAT: 36338,
+  MEDIUM_FLOAT: 36337,
+  LOW_FLOAT: 36336,
+  HIGH_INT: 36341,
+  MEDIUM_INT: 36340,
+  LOW_INT: 36339,
+  getShaderPrecisionFormat: vi.fn(() => ({ precision: 23, rangeMin: 127, rangeMax: 127 })),
+  getExtension: vi.fn(() => null),
+  createShader: vi.fn(() => ({})),
+  shaderSource: vi.fn(),
+  compileShader: vi.fn(),
+  getShaderParameter: vi.fn(() => true),
+  getShaderInfoLog: vi.fn(() => ''),
+  createProgram: vi.fn(() => ({})),
+  attachShader: vi.fn(),
+  linkProgram: vi.fn(),
+  getProgramParameter: vi.fn(() => true),
+  getProgramInfoLog: vi.fn(() => ''),
+  deleteShader: vi.fn(),
+  useProgram: vi.fn(),
+  createBuffer: vi.fn(() => ({})),
+  bindBuffer: vi.fn(),
+  bufferData: vi.fn(),
+  enableVertexAttribArray: vi.fn(),
+  vertexAttribPointer: vi.fn(),
+  clear: vi.fn(),
+  drawArrays: vi.fn(),
+  // Add missing methods based on previous mocks if needed
+  getParameter: vi.fn(),
+  createTexture: vi.fn(() => ({})),
+  bindTexture: vi.fn(),
+  texImage2D: vi.fn(),
+  texParameteri: vi.fn(),
+  clearColor: vi.fn(),
+  enable: vi.fn(),
+  disable: vi.fn(),
+  blendFunc: vi.fn(),
+  depthFunc: vi.fn(),
+  drawElements: vi.fn(),
+  viewport: vi.fn(),
+  createVertexArray: vi.fn(() => ({})),
+  bindVertexArray: vi.fn(),
+  finish: vi.fn(),
 });
 
-
-// Mock for window.matchMedia moved to test-utils.unified.tsx
-
-// Removed document setup for Tailwind - handled by test utils or specific tests
-
-  // Mock requestAnimationFrame and cancelAnimationFrame to prevent test hangs
-// Mock requestAnimationFrame (Using Object.defineProperty as per canonical doc)
-Object.defineProperty(window, 'requestAnimationFrame', {
-  writable: true,
-  configurable: true,
-  value: vi.fn((callback) => setTimeout(callback, 0)),
-});
-Object.defineProperty(window, 'cancelAnimationFrame', {
-  writable: true,
-  configurable: true,
-  value: vi.fn((id) => clearTimeout(id)),
-});
-
-  // Mock IntersectionObserver
-// Mock IntersectionObserver (Using Object.defineProperty as per canonical doc)
-Object.defineProperty(window, 'IntersectionObserver', {
-  writable: true,
-  configurable: true,
-  value: vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-    root: null,
-    rootMargin: '',
-    thresholds: [],
-  })),
-});
-
-  // Mock ResizeObserver
-// Mock ResizeObserver (Using Object.defineProperty as per canonical doc)
-Object.defineProperty(window, 'ResizeObserver', {
-  writable: true,
-  configurable: true,
-  value: vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-  })),
-});
-
-// Removed console silencing - enable explicitly if needed for debugging
-// console.error = vi.fn();
-// console.warn = vi.fn();
-
-// --- Global Hooks --- (Moved from original position)
-
-// Clean up after each test
-afterEach(() => {
-  // Reset all mocks between tests
-  vi.clearAllMocks(); // Clear mock history
-  localStorageMock.clear(); // Clear localStorage mock state
-});
-
-// Removed global 'three' mock - will be handled per-file if needed
-// Removed afterAll block - WebGL cleanup handled elsewhere or per suite
-// Removed vi.setConfig - Timeouts configured in vitest.config.ts
-
-console.log('[TEST SETUP] Global setup complete.'); // Add log as per canonical doc
-
-// Mock framer-motion to prevent errors in tests
-vi.mock('framer-motion', async (importOriginal) => {
-  const actual = await importOriginal() as any; // Import actual module
+const originalGetContext = HTMLCanvasElement.prototype.getContext;
+// Assign the mock function directly, casting the function expression itself to 'any'
+HTMLCanvasElement.prototype.getContext = (function(this: HTMLCanvasElement, contextId: string, options?: any): RenderingContext | null {
+  if (contextId === 'webgl' || contextId === 'webgl2' || contextId === 'experimental-webgl') {
+    // Cast the return type of createMockWebGLContext if necessary,
+    // or ensure it returns a type compatible with RenderingContext | null
+    return createMockWebGLContext() as any;
+  } else if (contextId === '2d') {
+    return null;
+  }
   
-  // Create a proxy for the 'motion' object
+  // Ensure originalGetContext is callable for other types
+  if (typeof originalGetContext === 'function') {
+    // Use Function.prototype.call for type safety with 'this'
+    return Function.prototype.call.call(originalGetContext, this, contextId, options);
+  }
+  return null; // Fallback if original context is somehow unavailable
+}) as any; // Apply cast correctly to the function expression
+
+
+// Cleanup after each test
+afterEach(() => {
+  cleanup();
+  localStorage.clear();
+  sessionStorage.clear();
+});
+
+// Global error handler (from Incoming)
+beforeAll(() => {
+  const originalConsoleError = console.error;
+  console.error = (...args) => {
+    // Suppress specific React 18 warning
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('Warning: ReactDOM.render is no longer supported')
+    ) {
+      return;
+    }
+    originalConsoleError.call(console, ...args);
+  };
+});
+
+// --- Library Mocks ---
+
+// Mock framer-motion (from HEAD)
+vi.mock('framer-motion', async (importOriginal) => {
+  const actual = await importOriginal() as any;
+  
   const motionProxy = new Proxy({}, {
     get: (target, prop) => {
-      // Return a simple functional component that renders its children
-      const Component = ({ children, ...props }: React.PropsWithChildren<any>) => React.createElement(prop as string, props, children);
+      const Component = ({ children, ...props }: React.PropsWithChildren<any>) => 
+        React.createElement(prop as string, props, children);
       Component.displayName = `motion.${String(prop)}`;
       return Component;
     }
   });
 
-  // Return the actual module exports, but replace 'motion' and 'AnimatePresence'
   return {
-    __esModule: true, // Ensure it's treated as an ES module
-    ...actual,        // Spread actual exports first
-    motion: motionProxy, // Override motion with our proxy
-    AnimatePresence: ({ children }: React.PropsWithChildren<{}>) => React.createElement(React.Fragment, null, children), // Simple AnimatePresence mock
-    // Add mocks for other specific exports if they cause issues
-    // e.g., useReducedMotion: () => false,
+    __esModule: true,
+    ...actual,
+    motion: motionProxy,
+    AnimatePresence: ({ children }: React.PropsWithChildren<{}>) => 
+      React.createElement(React.Fragment, null, children),
+    useReducedMotion: () => false,
+    useScroll: () => ({ scrollYProgress: { onChange: vi.fn(), current: 0 } }),
+    useSpring: () => ({ onChange: vi.fn(), current: 0 }),
+    useTransform: () => ({ onChange: vi.fn(), current: 0 }),
   };
 });
+
+// --- Setup Complete ---
+console.log('[TEST SETUP] Global setup complete.');

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@application/hooks/useAuth";
-import { auditLogService, AuditEventType } from "@infrastructure/services/AuditLogService";
+import { auditLogService, AuditEventType } from "@infrastructure/clients/auditLogClient";
 
 interface SessionWarningModalProps {
   /**

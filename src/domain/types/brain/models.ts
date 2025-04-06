@@ -7,6 +7,7 @@ import {
   Vector3 as ImportedVector3,
   SafeArray,
 } from "@domain/types/shared/common"; // Import Vector3 with alias
+import type { Vector3 } from '@domain/types/common';
 
 // Define Vector3 locally if needed, or ensure it's correctly imported and used
 // Assuming Vector3 should be the imported one, remove local declaration if present
@@ -29,6 +30,8 @@ export interface BrainRegion {
   hemisphereLocation: "left" | "right" | "central";
   tissueType?: "gray" | "white";
   dataConfidence: number; // 0-1 representing confidence level of data
+  volume: number;
+  activity: number;
 }
 
 // Neural connection with mathematical precision
@@ -37,7 +40,7 @@ export interface NeuralConnection {
   sourceId: string;
   targetId: string;
   strength: number; // 0-1 connection strength
-  type: "structural" | "functional" | "effective";
+  type: 'excitatory' | 'inhibitory';
   directionality: "unidirectional" | "bidirectional";
   activityLevel: number;
   pathwayLength?: number; // mm
@@ -49,8 +52,9 @@ export interface BrainScan {
   id: string;
   patientId: string;
   scanDate: string;
-  scanType: "fMRI" | "PET" | "MRI" | "DTI" | "EEG" | "MEG";
-  resolution?: string;
+  scanType: 'fMRI' | 'MRI' | 'CT' | 'PET';
+  resolution: Vector3;
+  metadata: Record<string, unknown>;
   scannerModel?: string;
   contrastAgent?: boolean;
   notes?: string;
@@ -126,7 +130,7 @@ export function isNeuralConnection(obj: unknown): obj is NeuralConnection {
 
   const isValidType =
     typeof conn.type === "string" &&
-    ["structural", "functional", "effective"].includes(conn.type);
+    ["excitatory", "inhibitory"].includes(conn.type);
   const isValidDirectionality =
     typeof conn.directionality === "string" &&
     ["unidirectional", "bidirectional"].includes(conn.directionality);

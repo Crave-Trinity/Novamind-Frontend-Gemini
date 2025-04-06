@@ -1,0 +1,91 @@
+{
+  "compilerOptions": {
+    // Target latest ECMAScript standard for neural-level optimization
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+
+    /* Bundler Mode Optimization */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true, // Enable modern default for stricter module handling
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Neural-Safe Type System - Zero Error State Protocol */
+    "strict": true,
+    "noImplicitAny": false, 
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    "noUncheckedIndexedAccess": false, 
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": true,
+    "noPropertyAccessFromIndexSignature": false, 
+    
+    /* Quantum-level Type Precision */
+    "noUnusedLocals": false, 
+    "noUnusedParameters": false, 
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "noImplicitOverride": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Advanced Typechecking Optimization */
+    "checkJs": false, 
+    "incremental": true,
+    "stripInternal": true,
+    
+    /* Neural Architecture Path Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      
+      /* Clean Architecture Layers */
+      "@domain/*": ["src/domain/*"],
+      "@application/*": ["src/application/*"],
+      "@infrastructure/*": ["src/infrastructure/*"],
+      "@presentation/*": ["src/presentation/*"],
+      
+      /* Atomic Design Components */
+      // Removed "@components/*" alias as it was potentially redundant/confusing
+      "@atoms/*": ["src/presentation/atoms/*"], // Corrected path
+      "@molecules/*": ["src/presentation/molecules/*"], // Corrected path
+      "@organisms/*": ["src/presentation/organisms/*"], // Corrected path
+      "@templates/*": ["src/presentation/templates/*"], // Corrected path
+      "@pages/*": ["src/presentation/pages/*"], // Path seems correct
+      
+      /* Domain-Driven Architecture Shortcuts */
+      "@services/*": ["src/infrastructure/services/*"],
+      "@hooks/*": ["src/application/hooks/*"],
+      "@utils/*": ["src/application/utils/*"],
+      "@contexts/*": ["src/application/contexts/*"],
+      "@types/*": ["src/domain/types/*"],
+      "@models/*": ["src/domain/models/*"],
+      "@assets/*": ["src/presentation/assets/*"],
+      "@shaders/*": ["src/presentation/shaders/*"],
+      "@store/*": ["src/application/store/*"],
+      "@styles/*": ["src/presentation/styles/*"],
+      "@api/*": ["src/infrastructure/api/*"],
+      "@config/*": ["src/infrastructure/config/*"],
+      "@constants/*": ["src/domain/constants/*"],
+      "@validation/*": ["src/domain/validation/*"],
+      "@visualizations/*": ["src/presentation/visualizations/*"],
+      "@test/*": ["src/test/*"]
+    }
+  },
+  "include": ["src", "src/test"], // Include test files for better TS integration
+  "exclude": ["vite.config.ts", "vite.config.prod.ts", "node_modules", "dist"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

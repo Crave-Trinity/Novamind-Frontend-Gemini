@@ -4,8 +4,8 @@
  */
 
 // Export all brain model types
-export * from "./models";
-export * from "./visualization";
+export * from './models';
+export * from './visualization';
 
 // Re-export common types that are directly related to brain visualization
 export {

@@ -7,10 +7,11 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext, type AuthContextType } from "@application/contexts/AuthContext";
-import { authService } from "@infrastructure/services/AuthService";
-import type { User, Permission } from "@domain/types/auth/auth";
-import { auditLogService, AuditEventType } from "@infrastructure/services/AuditLogService"; // AuditEventType is an enum (value)
+// Use remote imports but apply type modifiers from HEAD
+import { AuthContext, type AuthContextType } from "@application/contexts/AuthContext"; 
+import { authClient } from "@infrastructure/clients/authClient"; // Use client import
+import { auditLogClient, AuditEventType } from "@infrastructure/clients/auditLogClient"; // Use client import
+import type { User, Permission } from "@domain/types/auth/auth"; // Use type import
 
 // Session warning time (5 minutes before expiration)
 const SESSION_WARNING_TIME = 5 * 60 * 1000;
@@ -18,7 +19,7 @@ const SESSION_WARNING_TIME = 5 * 60 * 1000;
 const SESSION_CHECK_INTERVAL = 60 * 1000;
 
 interface AuthProviderProps {
-  children: React.ReactNode; // ReactNode is already a type
+  children: React.ReactNode; // Keep type usage
 }
 
 /**
@@ -44,18 +45,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    */
   const initializeAuth = useCallback(() => {
     try {
-      // Check if user is already authenticated
-      if (authService.isAuthenticated()) {
-        const currentUser = authService.getCurrentUser();
-        const sessionVerification = authService.verifySession();
+      // Check if user is already authenticated (use authClient)
+      if (authClient.isAuthenticated()) { 
+        const currentUser = authClient.getCurrentUser();
+        const sessionVerification = authClient.verifySession();
         
         if (currentUser && sessionVerification.valid && sessionVerification.remainingTime) {
           setUser(currentUser);
           setIsAuthenticated(true);
           setSessionExpiresAt(Date.now() + sessionVerification.remainingTime);
           
-          // Log session reuse for audit
-          auditLogService.log(AuditEventType.USER_SESSION_VERIFY, {
+          // Log session reuse for audit (use auditLogClient)
+          auditLogClient.log(AuditEventType.USER_SESSION_VERIFY, { 
             action: "session_restore",
             details: "User session restored",
             result: "success",
@@ -82,7 +83,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
     
     try {
-      const result = await authService.login({ 
+      // Use authClient
+      const result = await authClient.login({ 
         email, 
         password, 
         rememberMe 
@@ -113,7 +115,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     
     try {
-      await authService.logout();
+      // Use authClient
+      await authClient.logout(); 
       
       // Reset auth state
       setUser(null);
@@ -149,14 +152,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!isAuthenticated) return;
     
     try {
-      const verification = authService.renewSession();
+      // Use authClient
+      const verification = authClient.renewSession(); 
       
       if (verification.valid && verification.remainingTime) {
         setSessionExpiresAt(Date.now() + verification.remainingTime);
         setShowSessionWarning(false);
         
-        // Log session renewal for audit
-        auditLogService.log(AuditEventType.USER_SESSION_RENEWED, {
+        // Log session renewal for audit (use auditLogClient)
+        auditLogClient.log(AuditEventType.USER_SESSION_RENEWED, { 
           action: "session_renewed",
           details: "User session renewed",
           result: "success",
