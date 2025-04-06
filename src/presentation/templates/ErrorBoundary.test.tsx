@@ -8,7 +8,7 @@ import { screen, fireEvent } from '@testing-library/react'; // render is importe
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import ErrorBoundary from './ErrorBoundary'; // Assuming default export
-import { render } from '@test/test-utils.unified'; // Import the unified render
+import { render } from '@test/test-utils.unified.tsx'; // Add .tsx extension
 
 // Mock data with clinical precision
 // Mock data with clinical precision - ErrorBoundary requires children

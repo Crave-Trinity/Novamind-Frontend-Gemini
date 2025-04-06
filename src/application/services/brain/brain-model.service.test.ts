@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
-import { brainModelService } from '@application/services/brain/brain-model.service';
+import { brainModelService } from '@services/brain/brain-model.service.ts'; // Use @services alias and add .ts
 import type { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
 
 // Mock axios for isolated testing
@@ -34,7 +34,9 @@ describe('Brain Model Service', () => {
           scanDate: new Date().toISOString(),
           scanType: 'fMRI',
           dataQualityScore: 0.9,
-        }, // Added required
+          resolution: { x: 1, y: 1, z: 1 }, // Added missing property
+          metadata: { acquisitionTime: 300 }, // Added missing property
+        },
         timestamp: new Date().toISOString(), // Added required
         processingLevel: 'analyzed', // Added required
         lastUpdated: new Date().toISOString(), // Added required

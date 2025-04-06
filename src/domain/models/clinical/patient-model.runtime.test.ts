@@ -11,7 +11,7 @@ import {
   SymptomValidator,
   TreatmentResponseValidator,
   PatientModelValidator,
-} from '@models/clinical/patient-model.runtime';
+} from '@domain/models/clinical/patient-model.runtime'; // Add @domain prefix
 
 describe('Patient Model Runtime Validators', () => {
   describe('PatientDemographicsValidator', () => {
@@ -362,11 +362,11 @@ describe('Patient Model Runtime Validators', () => {
       const normalized = PatientModelValidator.normalize({
         demographics: {
           age: 42,
-        },
+        } as any, // Cast input for normalization test
         medications: [
           {
             name: 'Xanax',
-          },
+          } as any, // Cast input for normalization test
         ],
       });
 

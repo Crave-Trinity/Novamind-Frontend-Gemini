@@ -16,7 +16,7 @@ import {
   validateRiskAssessment,
   isTreatmentResponsePrediction,
   validateTreatmentResponsePrediction,
-} from '@application/services/clinical/clinical.service.runtime';
+} from '@services/clinical/clinical.service.runtime'; // Use @services alias
 import type { Symptom, Diagnosis, Treatment } from '@domain/types/clinical/patient'; // Use type import
 import { RiskAssessment, RiskLevel } from '@domain/types/clinical/risk';
 import { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
@@ -468,6 +468,7 @@ describe('ClinicalService Runtime Validation', () => {
       const validPrediction: TreatmentResponsePrediction = {
         requestId: 'req-123',
         patientId: 'patient-456',
+        treatmentId: 'treatment-mock-1', // Added missing property
         treatmentType: 'pharmacological',
         timestamp: '2025-04-01T10:00:00Z',
         algorithm: {
@@ -552,6 +553,7 @@ describe('ClinicalService Runtime Validation', () => {
       const validPrediction: TreatmentResponsePrediction = {
         requestId: 'req-123',
         patientId: 'patient-456',
+        treatmentId: 'treatment-mock-2', // Added missing property
         treatmentType: 'pharmacological',
         timestamp: '2025-04-01T10:00:00Z',
         algorithm: {

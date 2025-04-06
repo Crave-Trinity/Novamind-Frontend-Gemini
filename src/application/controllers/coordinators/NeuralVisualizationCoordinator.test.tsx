@@ -6,7 +6,7 @@ import { describe, it, expect, vi } from 'vitest';
 
 import { screen } from '@testing-library/react'; // Removed unused 'render' TS6133
 import userEvent from '@testing-library/user-event';
-import { VisualizationCoordinatorProvider } from '@application/controllers/coordinators/NeuralVisualizationCoordinator';
+import { VisualizationCoordinatorProvider } from '@application/controllers/coordinators/NeuralVisualizationCoordinator.tsx'; // Add .tsx extension
 import { renderWithProviders } from '@test/test-utils.unified.tsx';
 
 // Mock the internal hooks used by the provider

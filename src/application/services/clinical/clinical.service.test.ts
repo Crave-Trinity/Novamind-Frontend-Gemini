@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
-import { clinicalService } from '@application/services/clinical/clinical.service';
+import { clinicalService } from '@services/clinical/clinical.service.ts'; // Use @services alias and add .ts
 import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,

@@ -19,7 +19,7 @@ import {
   asNumber,
   asBoolean,
   asDate,
-} from '@models/shared/type-verification';
+} from '@domain/models/shared/type-verification'; // Add @domain prefix
 
 import {
   validateDefined,

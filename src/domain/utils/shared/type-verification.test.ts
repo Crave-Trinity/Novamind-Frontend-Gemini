@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { typeVerifier, TypeVerificationError } from '@domain/utils/shared/type-verification';
+import { typeVerifier, TypeVerificationError } from '@domain/utils/shared/type-verification.ts'; // Add .ts extension
 
 describe('Shared type verification', () => {
   describe('TypeVerificationError', () => {
@@ -96,7 +96,7 @@ describe('Shared type verification', () => {
     it('verifies valid strings', () => {
       const result = typeVerifier.verifyString('hello');
       expect(result.success).toBe(true);
-      expect(result.value).toBe('hello');
+      if (result.success) expect(result.value).toBe('hello');
     });
 
     it('fails on non-string values', () => {
@@ -110,7 +110,7 @@ describe('Shared type verification', () => {
     it('includes field name in error when provided', () => {
       const result = typeVerifier.verifyString(42, 'user.name');
       expect(result.success).toBe(false);
-      expect(result.error?.field).toBe('user.name');
+      if (!result.success) expect((result.error as TypeVerificationError)?.field).toBe('user.name'); // Assert error type
     });
   });
 
@@ -118,7 +118,7 @@ describe('Shared type verification', () => {
     it('verifies valid numbers', () => {
       const result = typeVerifier.verifyNumber(42);
       expect(result.success).toBe(true);
-      expect(result.value).toBe(42);
+      if (result.success) expect(result.value).toBe(42);
     });
 
     it('fails on non-number values', () => {
@@ -138,11 +138,11 @@ describe('Shared type verification', () => {
     it('verifies valid booleans', () => {
       const trueResult = typeVerifier.verifyBoolean(true);
       expect(trueResult.success).toBe(true);
-      expect(trueResult.value).toBe(true);
+      if (trueResult.success) expect(trueResult.value).toBe(true);
 
       const falseResult = typeVerifier.verifyBoolean(false);
       expect(falseResult.success).toBe(true);
-      expect(falseResult.value).toBe(false);
+      if (falseResult.success) expect(falseResult.value).toBe(false);
     });
 
     it('fails on non-boolean values', () => {
@@ -158,7 +158,7 @@ describe('Shared type verification', () => {
     it('verifies valid arrays', () => {
       const result = typeVerifier.verifyArray([1, 2, 3]);
       expect(result.success).toBe(true);
-      expect(result.value).toEqual([1, 2, 3]);
+      if (result.success) expect(result.value).toEqual([1, 2, 3]);
     });
 
     it('fails on non-array values', () => {
@@ -172,7 +172,7 @@ describe('Shared type verification', () => {
     it('verifies array items with provided verifier', () => {
       const result = typeVerifier.verifyArray([1, 2, 3], (item) => typeVerifier.verifyNumber(item));
       expect(result.success).toBe(true);
-      expect(result.value).toEqual([1, 2, 3]);
+      if (result.success) expect(result.value).toEqual([1, 2, 3]);
     });
 
     it('fails when any array item fails verification', () => {
@@ -187,7 +187,7 @@ describe('Shared type verification', () => {
     it('verifies valid objects', () => {
       const result = typeVerifier.verifyObject({ name: 'test' });
       expect(result.success).toBe(true);
-      expect(result.value).toEqual({ name: 'test' });
+      if (result.success) expect(result.value).toEqual({ name: 'test' });
     });
 
     it('fails on non-object values', () => {

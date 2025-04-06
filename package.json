@@ -24,7 +24,8 @@
     "prepare": "husky install",
     "deps:check": "npm outdated",
     "deps:update": "npm update",
-    "clean": "rm -rf node_modules/.vite dist coverage"
+    "clean": "rm -rf node_modules/.vite dist coverage",
+    "test:puppeteer": "node test-puppeteer/r3f-basic.test.js"
   },
   "dependencies": {
     "@alloc/quick-lru": "^5.2.0",
@@ -109,6 +110,7 @@
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "puppeteer": "^24.6.0",
     "react-refresh": "^0.17.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",

@@ -36,7 +36,7 @@ const Card: React.FC<CardProps> = ({ title, description, variant = 'primary', cl
 
 // Mock useTheme to control it
 const mockSetTheme = vi.fn();
-vi.mock('@application/hooks/useTheme', () => ({
+vi.mock('@hooks/useTheme', () => ({ // Use correct alias
   useTheme: vi.fn(), // Mock the hook directly
 }));
 

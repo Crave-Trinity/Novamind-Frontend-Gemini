@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { ClinicalTypeVerifier } from '@domain/utils/clinical/type-verification'; // Import the class
+import { ClinicalTypeVerifier } from '@domain/utils/clinical/type-verification.ts'; // Add .ts extension
 import { RiskLevel } from '@domain/types/clinical/risk';
 import {
   Patient,

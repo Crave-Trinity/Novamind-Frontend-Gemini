@@ -8,7 +8,7 @@ import {
   BrainRegionValidator,
   NeuralConnectionValidator,
   BrainModelValidator,
-} from '@models/brain/brain-model.runtime';
+} from '@domain/models/brain/brain-model.runtime'; // Add @domain prefix
 
 describe('Brain Model Runtime Validators', () => {
   describe('BrainRegionValidator', () => {
@@ -210,8 +210,8 @@ describe('Brain Model Runtime Validators', () => {
 
     it('normalizes model with partial regions and connections', () => {
       const normalized = BrainModelValidator.normalize({
-        regions: [{ name: 'Amygdala' }],
-        connections: [{ sourceRegionId: 'r1', targetRegionId: 'r2' }],
+        regions: [{ name: 'Amygdala' }] as any, // Cast input for normalization test
+        connections: [{ sourceRegionId: 'r1', targetRegionId: 'r2' }] as any, // Cast input for normalization test
       });
 
       expect(normalized.regions[0].name).toBe('Amygdala');

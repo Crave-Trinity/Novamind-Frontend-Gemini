@@ -168,8 +168,8 @@ HTMLCanvasElement.prototype.getContext = function (
 // Cleanup after each test
 afterEach(() => {
   cleanup();
-  localStorage.clear();
-  sessionStorage.clear();
+  localStorageMock.clear(); // Call clear on the mock object
+  sessionStorageMock.clear(); // Call clear on the mock object
 });
 
 // Global error handler (from Incoming)

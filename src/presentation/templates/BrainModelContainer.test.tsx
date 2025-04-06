@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Remove non-existent imports
+import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl/index'; // Explicitly point to index
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import BrainModelContainer from './BrainModelContainer'; // Use default import

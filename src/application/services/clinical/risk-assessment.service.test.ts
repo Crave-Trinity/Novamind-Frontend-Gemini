@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RiskAssessmentService } from '@application/services/clinical/risk-assessment.service';
-import { RiskLevel } from '@domain/types/RiskLevel';
+import { RiskAssessmentService } from '@services/clinical/risk-assessment.service.ts'; // Use @services alias and add .ts
+import { RiskLevel } from '@domain/types/clinical/risk'; // Correct path for RiskLevel
 
 describe('RiskAssessmentService', () => {
   let riskAssessmentService: RiskAssessmentService;

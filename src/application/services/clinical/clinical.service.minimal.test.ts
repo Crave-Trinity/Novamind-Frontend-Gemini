@@ -7,7 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
-import { clinicalService } from '@application/services/clinical/clinical.service';
+import { clinicalService } from '@services/clinical/clinical.service.ts'; // Use @services alias and add .ts
 import type { SymptomNeuralMapping } from '@domain/models/brain/mapping/brain-mapping'; // Use type import
 import { type RiskAssessment, RiskLevel } from '@domain/types/clinical/risk'; // Import RiskLevel enum
 import type { TreatmentResponsePrediction } from '@domain/types/clinical/treatment'; // Use type import

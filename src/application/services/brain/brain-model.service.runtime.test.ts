@@ -13,7 +13,7 @@ import {
   isNeuralConnection,
   validateNeuralConnection,
   ValidationError, // Import the custom error type
-} from '@application/services/brain/brain-model.service.runtime';
+} from '@services/brain/brain-model.service.runtime'; // Use @services alias
 import type { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
 
 describe('BrainModelService Runtime Validation', () => {
@@ -28,8 +28,10 @@ describe('BrainModelService Runtime Validation', () => {
         connections: ['connection-1'],
         hemisphereLocation: 'left',
         dataConfidence: 0.9,
-        activityLevel: 0.8, // Keep required property
-        isActive: true, // Keep required property
+        activityLevel: 0.8,
+        isActive: true,
+        volume: 100, // Added missing property
+        activity: 0.5, // Added missing property
       };
       // Create a minimal valid NeuralConnection
       const validConnection: NeuralConnection = {
@@ -37,7 +39,7 @@ describe('BrainModelService Runtime Validation', () => {
         sourceId: 'region-1',
         targetId: 'region-2', // Assuming region-2 exists elsewhere or is mocked
         strength: 0.7,
-        type: 'functional', // Use valid type
+        type: 'excitatory', // Use valid type ('excitatory' or 'inhibitory')
         directionality: 'unidirectional', // Added required property
         activityLevel: 0.6, // Added required property
         dataConfidence: 0.85, // Added required property
@@ -58,7 +60,9 @@ describe('BrainModelService Runtime Validation', () => {
           scanDate: new Date().toISOString(),
           scanType: 'fMRI',
           dataQualityScore: 0.9,
-        }, // Added required
+          resolution: { x: 1, y: 1, z: 1 }, // Corrected type to Vector3-like object
+          metadata: { acquisitionTime: 300 }, // Added missing property
+        },
         timestamp: new Date().toISOString(), // Added required
         processingLevel: 'raw', // Added required
         lastUpdated: new Date().toISOString(), // Added required
@@ -141,13 +145,15 @@ describe('BrainModelService Runtime Validation', () => {
         dataConfidence: 0.9,
         activityLevel: 0.8,
         isActive: true,
-      }; // Keep required properties
+        volume: 100, // Added missing property
+        activity: 0.5, // Added missing property
+      };
       const validConnection: NeuralConnection = {
         id: 'connection-1',
         sourceId: 'region-1',
         targetId: 'region-2',
         strength: 0.7,
-        type: 'functional',
+        type: 'inhibitory', // Use valid type ('excitatory' or 'inhibitory')
         directionality: 'unidirectional',
         activityLevel: 0.6,
         dataConfidence: 0.85,
@@ -164,6 +170,8 @@ describe('BrainModelService Runtime Validation', () => {
           scanDate: new Date().toISOString(),
           scanType: 'fMRI',
           dataQualityScore: 0.9,
+          resolution: { x: 1, y: 1, z: 1 }, // Corrected type to Vector3-like object
+          metadata: { acquisitionTime: 300 }, // Added missing property
         },
         timestamp: new Date().toISOString(),
         processingLevel: 'raw',
@@ -261,7 +269,9 @@ describe('BrainModelService Runtime Validation', () => {
         dataConfidence: 0.9,
         activityLevel: 0.8,
         isActive: true,
-      }; // Keep required properties
+        volume: 100, // Added missing property
+        activity: 0.5, // Added missing property
+      };
 
       expect(isBrainRegion(validRegion)).toBe(true);
     });
@@ -324,7 +334,9 @@ describe('BrainModelService Runtime Validation', () => {
         dataConfidence: 0.9,
         activityLevel: 0.8,
         isActive: true,
-      }; // Keep required properties
+        volume: 100, // Added missing property
+        activity: 0.5, // Added missing property
+      };
 
       const result = validateBrainRegion(validRegion);
       expect(result.success).toBe(true);
@@ -364,7 +376,7 @@ describe('BrainModelService Runtime Validation', () => {
         sourceId: 'region-1',
         targetId: 'region-2',
         strength: 0.7,
-        type: 'functional',
+        type: 'excitatory', // Use valid type ('excitatory' or 'inhibitory')
         directionality: 'unidirectional',
         activityLevel: 0.6,
         dataConfidence: 0.85,
@@ -412,7 +424,7 @@ describe('BrainModelService Runtime Validation', () => {
         sourceId: 'region-1',
         targetId: 'region-2',
         strength: 0.7,
-        type: 'functional',
+        type: 'inhibitory', // Use valid type ('excitatory' or 'inhibitory')
         directionality: 'unidirectional',
         activityLevel: 0.6,
         dataConfidence: 0.85,
