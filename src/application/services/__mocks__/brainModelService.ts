@@ -28,18 +28,16 @@ export const mockGetBrainModel = vi
 export const mockUpdateBrainModel = vi
   .fn()
   .mockResolvedValue({ success: true, value: { ...minimalBrainModel, version: '1.1-mock' } });
-export const mockPredictTreatmentResponse = vi
-  .fn()
-  .mockResolvedValue({
-    success: true,
-    value: {
-      predictionId: 'pred-mock',
-      predictedResponse: 0.7,
-      confidenceInterval: [0.6, 0.8],
-      treatmentId: 'treat-mock',
-      patientId: mockPatientId,
-    },
-  });
+export const mockPredictTreatmentResponse = vi.fn().mockResolvedValue({
+  success: true,
+  value: {
+    predictionId: 'pred-mock',
+    predictedResponse: 0.7,
+    confidenceInterval: [0.6, 0.8],
+    treatmentId: 'treat-mock',
+    patientId: mockPatientId,
+  },
+});
 
 export const brainModelService = {
   getBrainModel: mockGetBrainModel,

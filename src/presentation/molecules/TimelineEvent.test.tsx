@@ -5,7 +5,7 @@
 import React from 'react'; // Added React import
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Keep WebGL setup
+import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl/index'; // Explicitly point to index
 import { TimelineEvent } from './TimelineEvent';
 import { renderWithProviders } from '@test/test-utils.unified';
 // Import the necessary event types

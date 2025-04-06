@@ -16,7 +16,7 @@ import {
   ColorRGBValidator,
   ColorRGBAValidator,
   DimensionsValidator,
-} from '@domain/types/shared/common.runtime';
+} from '@domain/types/shared/common.runtime.ts'; // Add .ts extension
 
 describe('Common Shared Types runtime validators', () => {
   describe('IDValidator', () => {

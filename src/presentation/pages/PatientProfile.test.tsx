@@ -23,6 +23,13 @@ vi.mock('react-router-dom', async (importOriginal) => {
 import PatientProfile from '@presentation/pages/PatientProfile'; // Correct alias
 import { renderWithProviders } from '@test/test-utils.unified.tsx'; // Correct filename and keep alias
 
+// Mock audit log service
+vi.mock('@infrastructure/services/AuditLogService', () => ({ // Adjust path if needed
+  auditLogService: {
+    log: vi.fn(),
+  },
+}));
+
 // Mock data with clinical precision - Assuming no specific props are required for PatientProfile page
 const mockProps = {};
 

@@ -8,7 +8,7 @@
 import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest'; // Import vi
 import { render, screen } from '@testing-library/react';
-import BrainModelContainer from '../BrainModelContainer'; // Assuming default export
+import BrainModelContainer from '@organisms/BrainModelContainer.tsx'; // Use correct alias and add .tsx extension
 import { renderWithProviders } from '@test/test-utils.unified';
 
 // Mock useContextBridge as it might cause issues in JSDOM

@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 
-import { calculateNeuralActivation } from '@/domain/models/brain/mapping/brain-mapping';
+import { calculateNeuralActivation } from '@domain/models/brain/mapping/brain-mapping.ts'; // Correct alias and add .ts
 // Import necessary types
 import { BrainRegion } from '@domain/types/brain/models';
 import { Symptom, Diagnosis } from '@domain/types/clinical/patient';
@@ -13,7 +13,7 @@ import {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   NeuralActivationPattern,
-} from '@/domain/models/brain/mapping/brain-mapping';
+} from '@domain/models/brain/mapping/brain-mapping.ts'; // Correct alias and add .ts
 describe('calculateNeuralActivation', () => {
   // --- Mock Data ---
   const mockRegions: BrainRegion[] = [
@@ -28,6 +28,8 @@ describe('calculateNeuralActivation', () => {
       connections: [],
       hemisphereLocation: 'left',
       dataConfidence: 1,
+      volume: 100, // Added missing property
+      activity: 0, // Added missing property
     },
     {
       id: 'r2',
@@ -39,6 +41,8 @@ describe('calculateNeuralActivation', () => {
       connections: [],
       hemisphereLocation: 'right',
       dataConfidence: 1,
+      volume: 100, // Added missing property
+      activity: 0, // Added missing property
     },
     {
       id: 'r3',
@@ -50,6 +54,8 @@ describe('calculateNeuralActivation', () => {
       connections: [],
       hemisphereLocation: 'central',
       dataConfidence: 1,
+      volume: 100, // Added missing property
+      activity: 0, // Added missing property
     },
   ];
 

@@ -13,6 +13,12 @@ import { renderWithProviders } from '@test/test-utils.unified.tsx'; // Use corre
 import { useNavigate } from 'react-router-dom'; // Import for mocking
 import type * as ReactRouterDom from 'react-router-dom'; // Type import for mocking
 
+// Mock audit log service
+vi.mock('@infrastructure/services/AuditLogService', () => ({ // Adjust path if needed
+  auditLogService: {
+    log: vi.fn(),
+  },
+}));
 // Mock react-router-dom specifically for this test
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async (importOriginal) => {

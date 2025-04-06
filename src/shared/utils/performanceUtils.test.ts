@@ -3,14 +3,16 @@
  * debounce testing with quantum precision
  */
 
-import { describe, it, expect, vi } from "vitest"; // Added vi import
+import { describe, it, expect, vi } from 'vitest'; // Added vi import
 
-import { debounce } from "./performanceUtils"; // Use relative path
+import { debounce } from './performanceUtils'; // Use relative path
 
-describe("debounce", () => {
-  vi.useFakeTimers(); // Use fake timers for debounce testing
+describe('debounce', () => {
+  beforeEach(() => {
+    vi.useFakeTimers(); // Use fake timers for debounce testing
+  });
 
-  it("should only call the function after the delay", () => {
+  it('should only call the function after the delay', () => {
     const func = vi.fn();
     const debouncedFunc = debounce(func, 100);
 
@@ -28,11 +30,11 @@ describe("debounce", () => {
     expect(func).toHaveBeenCalledTimes(1);
   });
 
-  it("should pass arguments to the debounced function", () => {
+  it('should pass arguments to the debounced function', () => {
     const func = vi.fn();
     const debouncedFunc = debounce(func, 100);
     const arg1 = { a: 1 };
-    const arg2 = "test";
+    const arg2 = 'test';
 
     debouncedFunc(arg1, arg2);
 
@@ -42,7 +44,7 @@ describe("debounce", () => {
     expect(func).toHaveBeenCalledWith(arg1, arg2);
   });
 
-  it("should reset the timer if called again within the delay", () => {
+  it('should reset the timer if called again within the delay', () => {
     const func = vi.fn();
     const debouncedFunc = debounce(func, 100);
 
@@ -62,6 +64,6 @@ describe("debounce", () => {
   // Restore real timers after tests
   afterEach(() => {
     vi.clearAllTimers();
+    vi.useRealTimers(); // Restore real timers after each test
   });
-  vi.useRealTimers(); // Ensure real timers are restored globally if needed elsewhere
 });

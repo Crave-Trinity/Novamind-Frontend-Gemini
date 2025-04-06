@@ -70,7 +70,7 @@ const localStorageMock = (() => {
     },
   };
 })();
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true, configurable: true });
 
 // Mock sessionStorage
 const sessionStorageMock = (() => {
@@ -88,7 +88,7 @@ const sessionStorageMock = (() => {
     },
   };
 })();
-Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
+Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock, writable: true, configurable: true });
 
 // Mock WebGL context (Simpler version from Incoming)
 const createMockWebGLContext = () => ({

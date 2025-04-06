@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { RiskLevelValidator } from '@domain/types/clinical/risk-level.runtime';
+import { RiskLevelValidator } from '@domain/types/clinical/risk-level.runtime.ts'; // Add .ts extension
 
 describe('Risk Level runtime validators', () => {
   it('RiskLevelValidator validates correct risk levels', () => {
@@ -35,9 +35,9 @@ describe('Risk Level runtime validators', () => {
 
   it('RiskLevelValidator normalizes risk levels correctly', () => {
     expect(RiskLevelValidator.normalize('Minimal')).toBe('minimal');
-    expect(RiskLevelValidator.normalize('LOW')).toBe('low');
+    expect(RiskLevelValidator.normalize('LOW' as any)).toBe('low'); // Cast uppercase input for test
     expect(RiskLevelValidator.normalize('Moderate')).toBe('moderate');
-    expect(RiskLevelValidator.normalize('HIGH')).toBe('high');
+    expect(RiskLevelValidator.normalize('HIGH' as any)).toBe('high'); // Cast uppercase input for test
     expect(RiskLevelValidator.normalize('Critical')).toBe('critical');
     expect(RiskLevelValidator.normalize('Medium')).toBe('medium');
   });

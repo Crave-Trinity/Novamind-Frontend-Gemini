@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import App from '@/App';
-import '@/index.css';
+import App from '@presentation/App.tsx'; // Revert to default import, assuming App.tsx will export default
+import '@styles/index.css'; // Correct alias
 
 // Add error handler for uncaught errors
 window.addEventListener('error', (event) => {

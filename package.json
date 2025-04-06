@@ -25,7 +25,8 @@
     "deps:check": "npm outdated",
     "deps:update": "npm update",
     "clean": "rm -rf node_modules/.vite dist coverage",
-    "test:puppeteer": "node test-puppeteer/r3f-basic.test.js"
+    "test:puppeteer": "node test-puppeteer/r3f-basic.test.js",
+    "test:puppeteer:brain-vis": "node test-puppeteer/BrainVisualizationPage.test.js"
   },
   "dependencies": {
     "@alloc/quick-lru": "^5.2.0",

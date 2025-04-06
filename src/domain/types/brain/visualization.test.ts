@@ -10,7 +10,7 @@ import {
   defaultVisualizationSettings,
   isValidTheme,
   isValidRenderMode,
-} from '@types/brain/visualization'; // Use relative path
+} from '@domain/types/brain/visualization'; // Add @domain prefix
 
 // Type imports for type annotations only, not for runtime checks
 import type {
@@ -22,8 +22,8 @@ import type {
   ProcessedBrainData,
   ProcessedBrainRegion,
   ProcessedNeuralConnection,
-} from '@types/brain/visualization';
-import type { BrainModel } from '@types/brain/models';
+} from '@domain/types/brain/visualization'; // Correct path alias
+import type { BrainModel } from '@domain/types/brain/models'; // Correct path alias
 
 describe('visualization type definitions', () => {
   it('exports visualizationThemes with correct structure', () => {
@@ -79,6 +79,8 @@ describe('visualization type definitions', () => {
         scanDate: '2025-01-01T00:00:00Z',
         scanType: 'fMRI',
         dataQualityScore: 0.98,
+        resolution: { x: 1, y: 1, z: 1 }, // Added missing property
+        metadata: { acquisitionTime: 300 }, // Added missing property
       },
       timestamp: '2025-01-01T00:00:00Z',
       version: '1.0.0',

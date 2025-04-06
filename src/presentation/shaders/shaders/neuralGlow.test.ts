@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 
-import { createNeuralGlowUniforms } from '@presentation/shaders/neuralGlow';
+import { createNeuralGlowUniforms } from '@shaders/neuralGlow.ts'; // Use @shaders alias and add .ts
 
 describe('createNeuralGlowUniforms', () => {
   it('processes data with mathematical precision', () => {

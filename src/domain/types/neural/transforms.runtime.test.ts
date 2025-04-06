@@ -9,7 +9,7 @@ import {
   NeuralTransformBatchValidator,
   NeuralTransformSequenceValidator,
   NeuralTransformResultValidator,
-} from '@domain/types/neural/transforms.runtime';
+} from './transforms.runtime.ts'; // Use relative path instead of alias
 
 describe('Neural Transforms runtime validators', () => {
   it('NeuralTransformValidator validates correct NeuralTransform objects', () => {
