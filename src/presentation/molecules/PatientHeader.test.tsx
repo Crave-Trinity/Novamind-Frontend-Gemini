@@ -1,55 +1,80 @@
+/**
+ * NOVAMIND Neural Test Suite
+ * PatientHeader testing with quantum precision
+ */
+import React from 'react'; // Added React import
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Keep WebGL setup
+import { PatientHeader } from "./PatientHeader";
+import { renderWithProviders } from "@test/test-utils.unified";
+import { Patient } from "@domain/types/clinical/patient"; // Added import for Patient type
 
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
+// Setup WebGL mocks with memory monitoring - Moved outside describe block
+beforeEach(() => {
+  setupWebGLMocks({ monitorMemory: true, debugMode: true });
+});
 
-describe('PatientHeader with WebGL Mocks', () => {
-  // Setup WebGL mocks with memory monitoring
-  beforeEach(() => {
-    setupWebGLMocks({ monitorMemory: true, debugMode: true });
-  });
-
-  afterEach(() => {
-    const memoryReport = cleanupWebGLMocks();
-    if (memoryReport && memoryReport.leakedObjectCount > 0) {
-      console.warn(`Memory leak detected in "PatientHeader": ${memoryReport.leakedObjectCount} objects not properly disposed`);
-      console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
-    }
-  });
+afterEach(() => {
+  const memoryReport = cleanupWebGLMocks();
+  if (memoryReport && memoryReport.leakedObjectCount > 0) {
+    console.warn(`Memory leak detected in "PatientHeader": ${memoryReport.leakedObjectCount} objects not properly disposed`);
+    console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
+  }
+});
 
 /**
  * NOVAMIND Neural Test Suite
  * PatientHeader testing with quantum precision
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
-
-import { render, screen, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { PatientHeader } from "./PatientHeader";
-import { renderWithProviders } from "@test/test-utils";
 
 // Mock data with clinical precision
-const mockPatient = {
-  patientId: "P12345",
-  firstName: "Jane",
-  lastName: "Doe",
-  dateOfBirth: "1985-07-15", // Required for age calculation
-  profileImage: null,
-  riskLevel: "moderate",
-  lastVisit: new Date().toISOString(),
+// Mock data conforming to the actual Patient type structure
+const mockPatient: Patient = {
+  id: "P12345",
+  demographicData: {
+    age: 38, // Provide age directly
+    biologicalSex: "female",
+    anonymizationLevel: "clinical",
+    // Add other optional demographic fields if needed by the component
+  },
+  clinicalData: {
+    diagnoses: [ // Provide Diagnosis objects
+      { id: 'd1', code: 'F33.2', codingSystem: 'ICD-10', name: 'Major depressive disorder, recurrent, severe without psychotic features', severity: 'severe', diagnosisDate: '2023-01-15', status: 'active' },
+      { id: 'd2', code: 'F41.1', codingSystem: 'ICD-10', name: 'Generalized anxiety disorder', severity: 'moderate', diagnosisDate: '2023-01-15', status: 'active' },
+    ],
+    symptoms: [], // Add mock symptoms if needed
+    medications: [], // Add mock medications if needed
+    psychometricAssessments: [], // Add mock assessments if needed
+    medicalHistory: [], // Add mock history if needed
+    // Add other optional clinical data fields if needed
+  },
+  treatmentData: { // Add minimal required structure
+    currentTreatments: [],
+    historicalTreatments: [],
+    treatmentResponses: [],
+  },
+  neuralData: { // Add minimal required structure
+    brainScans: [],
+  },
+  dataAccessPermissions: { // Add minimal required structure
+    accessLevel: 'treatment',
+    authorizedUsers: [],
+    consentStatus: 'full',
+    dataRetentionPolicy: 'standard',
+    lastReviewDate: new Date().toISOString(),
+  },
   lastUpdated: new Date().toISOString(),
-  diagnoses: ["Major Depressive Disorder", "Generalized Anxiety Disorder"],
-  alerts: ["Medication review overdue"],
-  gender: "Female",
-  riskNotes: "Moderate risk due to recent life events.",
+  version: "1.0",
 };
 
 const mockProps = {
   patient: mockPatient,
 };
 
-describe.skip("PatientHeader", () => { // Skip this suite for now due to errors/potential hangs
+describe("PatientHeader", () => { // Re-enabled suite
   it("renders with neural precision", () => {
     render(<PatientHeader {...mockProps} />);
 
@@ -70,4 +95,4 @@ describe.skip("PatientHeader", () => { // Skip this suite for now due to errors/
   // Add more component-specific tests
 });
 
-});
+// Removed closing brace for the outer describe block

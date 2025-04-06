@@ -9,19 +9,15 @@ import { motion } from "framer-motion";
 
 // UI components
 import { Badge } from "@presentation/atoms/Badge";
-import { Button } from "@presentation/atoms/Button";
+import Button from "@presentation/atoms/Button"; // Corrected to default import
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@presentation/atoms/Tooltip";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@presentation/atoms/Collapsible";
-import { Card } from "@presentation/atoms/Card";
+// Collapsible import removed as component doesn't exist at this path
+import Card from "@presentation/atoms/Card"; // Corrected to default import
 
 // Icons
 import {
@@ -33,6 +29,7 @@ import {
 } from "lucide-react";
 
 // Domain types
+// Corrected path for clinical event types
 import {
   ClinicalEvent,
   ClinicalEventType,

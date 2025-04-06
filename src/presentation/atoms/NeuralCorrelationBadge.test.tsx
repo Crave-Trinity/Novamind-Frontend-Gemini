@@ -33,7 +33,7 @@ describe("NeuralCorrelationBadge", () => {
     activityPatterns: ["Theta Oscillations", "Sharp Wave Ripples"],
   };
 
-  it.skip("renders with minimal props and displays correct strength", () => { // Skip
+  it("renders with minimal props and displays correct strength", () => { // Re-enabled
     render(<NeuralCorrelationBadge correlation={mockLowCorrelation} />);
 
     // Verify correlation strength is displayed with mathematical precision
@@ -82,7 +82,7 @@ describe("NeuralCorrelationBadge", () => {
     expect(highBadge).toHaveClass("bg-green-100");
   });
 
-  it.skip("hides strength when showStrength is false", () => { // Skip
+  it("hides strength when showStrength is false", () => { // Re-enabled
     render(
       <NeuralCorrelationBadge
         correlation={mockMediumCorrelation}
@@ -95,7 +95,7 @@ describe("NeuralCorrelationBadge", () => {
     expect(screen.queryByText(/Neural Match: 50%/i)).not.toBeInTheDocument();
   });
 
-  it.skip("respects size prop with corresponding CSS classes", () => { // Skip
+  it("respects size prop with corresponding CSS classes", () => { // Re-enabled
     const { rerender } = render(
       <NeuralCorrelationBadge correlation={mockMediumCorrelation} size="sm" />,
     );
@@ -119,7 +119,7 @@ describe("NeuralCorrelationBadge", () => {
     expect(largeBadge).toHaveClass("text-sm py-1 px-3");
   });
 
-  it.skip("applies custom className when provided", () => { // Skip
+  it("applies custom className when provided", () => { // Re-enabled
     render(
       <NeuralCorrelationBadge
         correlation={mockMediumCorrelation}
@@ -134,7 +134,7 @@ describe("NeuralCorrelationBadge", () => {
     expect(badge).toHaveClass("custom-test-class");
   });
 
-  it.skip("renders without tooltip when showTooltip is false", () => { // Skip
+  it("renders without tooltip when showTooltip is false", () => { // Re-enabled
     render(
       <NeuralCorrelationBadge
         correlation={mockHighCorrelation}

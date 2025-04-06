@@ -58,7 +58,7 @@ const mockPatients: PatientModel[] = [
   }),
 ];
 
-describe.skip('PatientsList Page', () => { // Skip due to timeout
+describe('PatientsList Page', () => { // Re-enabled suite
   const mockedUseQuery = ReactQuery.useQuery as Mock;
   const mockedUseNavigate = ReactRouterDom.useNavigate as Mock;
   const mockNavigate = vi.fn();

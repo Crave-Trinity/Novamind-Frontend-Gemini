@@ -104,7 +104,14 @@ export const ThemeContext = createContext<ThemeContextType>({
 });
 
 // Hook for accessing theme context
-export const useTheme = () => React.useContext(ThemeContext);
+export const useTheme = () => {
+  const context = React.useContext(ThemeContext);
+  if (context === undefined) {
+    // This error ensures the hook is used correctly within the provider tree
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+  return context;
+};
 
 /**
  * Theme provider props

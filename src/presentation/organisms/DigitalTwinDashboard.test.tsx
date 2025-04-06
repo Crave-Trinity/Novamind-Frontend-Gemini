@@ -9,6 +9,8 @@ import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Remove non-
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import DigitalTwinDashboard from './DigitalTwinDashboard'; // Use default import
 
+// Removed local R3F mock
+
 // Remove local mocks - rely on global mocks via vitest.config.ts alias
 
 // Minimal test to verify component can be imported

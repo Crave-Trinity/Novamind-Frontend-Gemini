@@ -11,6 +11,8 @@ import BrainRegionGroup from "./BrainRegionGroup"; // Assuming default export
 import { render } from "@test/test-utils.unified"; // Import the unified render
 import { RenderMode, ThemeOption } from "@domain/types/brain/visualization"; // Import RenderMode and ThemeOption
 
+// Removed local R3F mock
+
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for BrainRegionGroup
 // Mock data with clinical precision - Requires specific props for BrainRegionGroup

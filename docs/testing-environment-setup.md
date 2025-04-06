@@ -61,7 +61,8 @@ export default defineConfig({
 
       // --- Library Mocks ---
       // Redirect imports of heavy/incompatible libraries to mocks
-      // Use named exports in mock files.
+      // Use named exports in mock files. This strategy is currently used but may be insufficient
+      // for R3F components, leading to test failures (see known issues).
       'three': path.resolve(__dirname, './src/test/mocks/three.ts'),
       '@react-three/fiber': path.resolve(__dirname, './src/test/mocks/react-three-fiber.ts'),
       '@react-three/drei': path.resolve(__dirname, './src/test/mocks/react-three-drei.ts'),
@@ -397,9 +398,9 @@ The 3D visualization stack requires careful version management:
 
 | Package                     | Version Pinned | Notes                                      |
 | --------------------------- | -------------- | ------------------------------------------ |
-| `three`                     | `0.158.0`      | Core 3D engine                             |
-| `@react-three/fiber`        | `8.15.11`      | React reconciler (See overrides)           |
-| `@react-three/drei`         | `9.80.1`       | Helpers (See overrides)                    |
+| `three`                     | `^0.175.0`     | Core 3D engine                             |
+| `@react-three/fiber`        | `^9.1.1`       | React reconciler (See overrides)           |
+| `@react-three/drei`         | `^10.0.5`      | Helpers (See overrides)                    |
 | `@react-three/postprocessing` | `^2.7.1`       | Post-processing (Version constrained by R3F) |
 | `@react-spring/three`       | `9.7.3`        | Animation system                           |
 

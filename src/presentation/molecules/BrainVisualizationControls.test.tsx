@@ -4,70 +4,39 @@
  */
 
 import React from 'react';
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
+import { describe, it, expect, vi } from "vitest"; // Remove beforeEach, afterEach
+import { render, screen } from "@test/test-utils.unified"; // Use unified render
+import BrainVisualizationControls from './BrainVisualizationControls'; // Use default import
+// Remove WebGL mock imports
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { BrainVisualizationControls } from './BrainVisualizationControls';
-
-// Mock React Three Fiber
-vi.mock('@react-three/fiber', () => ({
-  useFrame: vi.fn(),
-  useThree: () => ({
-    gl: {
-      setSize: vi.fn(),
-      render: vi.fn(),
-      dispose: vi.fn()
-    },
-    camera: {
-      position: { set: vi.fn() },
-      lookAt: vi.fn()
-    },
-    scene: {}
-  }),
-  Canvas: ({ children }) => <div data-testid="mock-canvas">{children}</div>
-}));
-
-// Mock Three.js
-vi.mock('three', () => ({
-  WebGLRenderer: vi.fn().mockImplementation(() => ({
-    setSize: vi.fn(),
-    render: vi.fn(),
-    dispose: vi.fn()
-  })),
-  Scene: vi.fn(),
-  PerspectiveCamera: vi.fn().mockImplementation(() => ({
-    position: { set: vi.fn() },
-    lookAt: vi.fn()
-  })),
-  Vector3: vi.fn().mockImplementation(() => ({
-    set: vi.fn(),
-    normalize: vi.fn(),
-    multiplyScalar: vi.fn()
-  })),
-  Color: vi.fn(),
-  MeshBasicMaterial: vi.fn(),
-  MeshStandardMaterial: vi.fn(),
-  SphereGeometry: vi.fn(),
-  BoxGeometry: vi.fn(),
-  Mesh: vi.fn()
-}));
+// Remove unnecessary R3F/Three mocks for this component test
 
 // Minimal test to verify component can be imported
-describe('BrainVisualizationControls (Minimal)', () => {
-  // Setup WebGL mocks with memory monitoring
-  beforeEach(() => {
-    setupWebGLMocks({ monitorMemory: true, debugMode: true });
+// Mock props
+const mockProps = {
+  viewMode: "normal" as const,
+  rotationSpeed: 1,
+  rotationEnabled: true,
+  onViewModeChange: vi.fn(),
+  onRotationSpeedChange: vi.fn(),
+  onRotationToggle: vi.fn(),
+};
+
+describe('BrainVisualizationControls', () => {
+  // Remove WebGL setup/teardown
+
+  it('renders controls correctly', () => {
+    render(<BrainVisualizationControls {...mockProps} />);
+
+    // Check for key elements
+    expect(screen.getByText('View:')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Normal/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Activity/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Connections/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Rotation: On/i })).toBeInTheDocument();
+    expect(screen.getByText('Speed:')).toBeInTheDocument();
+    expect(screen.getByRole('slider')).toBeInTheDocument();
   });
 
-  afterEach(() => {
-    const memoryReport = cleanupWebGLMocks();
-    if (memoryReport && memoryReport.leakedObjectCount > 0) {
-      console.warn(`Memory leak detected in "BrainVisualizationControls (Minimal)": ${memoryReport.leakedObjectCount} objects not properly disposed`);
-      console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
-    }
-  });
-
-  it('exists as a module', () => {
-    expect(BrainVisualizationControls).toBeDefined();
-  });
+  // Add interaction tests if needed later
 });

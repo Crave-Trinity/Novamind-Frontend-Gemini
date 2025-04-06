@@ -39,11 +39,23 @@ beforeAll(() => {
     }));
     
     // Mock ResizeObserver
-    window.ResizeObserver = vi.fn().mockImplementation(() => ({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-    }));
+    // Mock ResizeObserver: Provide expected methods and potentially call callback
+    window.ResizeObserver = vi.fn().mockImplementation((callback) => {
+      const observer = {
+        observe: vi.fn((element) => {
+          // Immediately invoke callback with mock data if a callback is provided
+          // This might be necessary for hooks like react-use-measure
+          if (callback) {
+             // Define a default mock rect, adjust if needed
+            const mockRect = { width: 100, height: 100, top: 0, left: 0, bottom: 100, right: 100 };
+            callback([{ target: element, contentRect: mockRect }], observer);
+          }
+        }),
+        unobserve: vi.fn(),
+        disconnect: vi.fn(),
+      };
+      return observer;
+    });
 
     console.log('[setup.unified.ts] Browser API mocks applied');
   }

@@ -58,10 +58,10 @@ export default defineConfig(({ command, mode }): MergedConfig => ({
     exclude: [
       // '@react-three/fiber', // Let Vite process these
       // '@react-three/postprocessing',
-      'zustand',
-      'suspend-react',
-      'its-fine',
-      'scheduler',
+      // 'zustand', // Removed from exclude to allow Vite processing
+      // 'suspend-react', // Removed from exclude
+      // 'its-fine', // Removed from exclude
+      // 'scheduler', // Removed from exclude
       'react-use-measure'
     ],
     esbuildOptions: {

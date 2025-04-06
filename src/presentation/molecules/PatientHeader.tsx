@@ -8,9 +8,9 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 
 // UI components
-import { Avatar } from "@presentation/atoms/Avatar";
+import Avatar from "@presentation/atoms/Avatar"; // Corrected to default import
 import { Badge } from "@presentation/atoms/Badge";
-import { Button } from "@presentation/atoms/Button";
+import Button from "@presentation/atoms/Button"; // Corrected to default import
 import {
   Tooltip,
   TooltipContent,
@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 
 // Domain types
-import { Patient } from "@domain/types/patient/patient";
+import { Patient } from "@domain/types/clinical/patient"; // Corrected path
 
 /**
  * Props with neural-safe typing
@@ -45,36 +45,12 @@ interface PatientHeaderProps {
 /**
  * Calculate age from birthdate with clinical precision
  */
-const calculateAge = (birthDate: Date): number => {
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDifference = today.getMonth() - birthDate.getMonth();
-
-  if (
-    monthDifference < 0 ||
-    (monthDifference === 0 && today.getDate() < birthDate.getDate())
-  ) {
-    age--;
-  }
-
-  return age;
-};
+// Removed calculateAge function as dateOfBirth is not directly available; age comes from demographicData
 
 /**
  * Determine risk level badge variant
  */
-const getRiskLevelBadge = (riskLevel: string) => {
-  switch (riskLevel.toLowerCase()) {
-    case "high":
-      return <Badge variant="destructive">High Risk</Badge>;
-    case "moderate":
-      return <Badge variant="warning">Moderate Risk</Badge>;
-    case "low":
-      return <Badge variant="secondary">Low Risk</Badge>;
-    default:
-      return <Badge variant="outline">Unknown Risk</Badge>;
-  }
-};
+// Removed getRiskLevelBadge function as riskLevel is not directly available
 
 /**
  * Format date with clinical precision
@@ -98,51 +74,39 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({
   showLastUpdate = true,
   className = "",
 }) => {
-  // Calculate patient age
-  const age = useMemo(() => {
-    return calculateAge(new Date(patient.dateOfBirth));
-  }, [patient.dateOfBirth]);
+  // Access age directly from demographicData
+  const age = patient.demographicData.age;
 
-  // Calculate days since last visit
-  const daysSinceLastVisit = useMemo(() => {
-    if (!patient.lastVisit) return null;
-
-    const lastVisit = new Date(patient.lastVisit);
-    const today = new Date();
-    const diffTime = Math.abs(today.getTime() - lastVisit.getTime());
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  }, [patient.lastVisit]);
+  // Removed daysSinceLastVisit calculation as lastVisit is not directly available
 
   // Compact version for minimal space usage
   if (compact) {
     return (
       <div className={`flex items-center ${className}`}>
         <Avatar
-          src={patient.profileImage}
-          fallback={`${patient.firstName.charAt(0)}${patient.lastName.charAt(0)}`}
+          // src={patient.profileImage} // profileImage not available on Patient type
+          fallback={`P${patient.id.substring(0, 1)}`} // Use ID for fallback
           className="h-10 w-10"
         />
 
         <div className="ml-3">
           <div className="flex items-center">
             <h3 className="text-sm font-medium text-slate-900">
-              {patient.firstName} {patient.lastName}
+              Patient {patient.id} {/* Display ID instead of name */}
             </h3>
 
-            {showRiskLevel && patient.riskLevel && (
-              <div className="ml-2">{getRiskLevelBadge(patient.riskLevel)}</div>
-            )}
+            {/* Risk level display removed as patient.riskLevel is not available */}
           </div>
 
           <div className="flex items-center text-xs text-slate-500 mt-0.5">
             <span className="flex items-center">
               <User className="h-3 w-3 mr-1" />
-              {patient.patientId}
+              {patient.id} {/* Use patient.id */}
             </span>
             <span className="mx-1.5">•</span>
             <span className="flex items-center">
               <Calendar className="h-3 w-3 mr-1" />
-              {age} yrs
+              {age} yrs {/* Use direct age from demographicData */}
             </span>
           </div>
         </div>
@@ -160,8 +124,8 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({
     >
       <div className="flex items-start">
         <Avatar
-          src={patient.profileImage}
-          fallback={`${patient.firstName.charAt(0)}${patient.lastName.charAt(0)}`}
+          // src={patient.profileImage} // profileImage not available on Patient type
+          fallback={`P${patient.id.substring(0, 1)}`} // Use ID for fallback
           className="h-16 w-16"
         />
 
@@ -169,64 +133,49 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-xl font-semibold text-slate-900">
-                {patient.firstName} {patient.lastName}
+                Patient {patient.id} {/* Display ID instead of name */}
               </h2>
 
               <div className="flex items-center mt-1 space-x-3">
                 <span className="flex items-center text-sm text-slate-600">
                   <User className="h-4 w-4 mr-1 text-slate-400" />
-                  ID: {patient.patientId}
+                  ID: {patient.id} {/* Use patient.id */}
                 </span>
 
                 <span className="flex items-center text-sm text-slate-600">
                   <Calendar className="h-4 w-4 mr-1 text-slate-400" />
-                  {age} years
+                  {age} years {/* Use direct age from demographicData */}
                 </span>
 
-                {patient.gender && (
-                  <span className="text-sm text-slate-600">
-                    {patient.gender}
+                {patient.demographicData.biologicalSex && ( // Use biologicalSex from demographicData
+                  <span className="text-sm text-slate-600 capitalize"> {/* Added capitalize */}
+                    {patient.demographicData.biologicalSex}
                   </span>
                 )}
               </div>
             </div>
 
-            {showRiskLevel && patient.riskLevel && (
-              <div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div>{getRiskLevelBadge(patient.riskLevel)}</div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        {patient.riskNotes ||
-                          "Risk assessment based on clinical factors"}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            )}
+            {/* Risk level display removed as patient.riskLevel/riskNotes are not available */}
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-3 items-center">
             <div>
               <div className="flex items-center text-sm">
-                {patient.diagnoses && patient.diagnoses.length > 0 ? (
+                {/* Access diagnoses via clinicalData */}
+                {patient.clinicalData.diagnoses && patient.clinicalData.diagnoses.length > 0 ? (
                   <div className="flex flex-wrap gap-1.5 mt-1">
-                    {patient.diagnoses.slice(0, 3).map((diagnosis, index) => (
+                    {patient.clinicalData.diagnoses.slice(0, 3).map((diagnosis, index) => (
                       <Badge
-                        key={index}
+                        key={diagnosis.id || index} // Use diagnosis.id if available
                         variant="outline"
                         className="font-normal text-xs"
                       >
-                        {diagnosis}
+                        {diagnosis.name} {/* Display diagnosis name */}
                       </Badge>
                     ))}
-                    {patient.diagnoses.length > 3 && (
+                    {patient.clinicalData.diagnoses.length > 3 && (
                       <Badge variant="outline" className="font-normal text-xs">
-                        +{patient.diagnoses.length - 3} more
+                        +{patient.clinicalData.diagnoses.length - 3} more
                       </Badge>
                     )}
                   </div>
@@ -239,18 +188,9 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({
             </div>
 
             <div className="space-y-1">
-              {patient.lastVisit && (
-                <div className="flex items-center justify-end text-sm text-slate-600">
-                  <Clock className="h-4 w-4 mr-1 text-slate-400" />
-                  Last visit: {formatDate(new Date(patient.lastVisit))}
-                  {daysSinceLastVisit !== null && (
-                    <span className="ml-1 text-xs text-slate-500">
-                      ({daysSinceLastVisit} days ago)
-                    </span>
-                  )}
-                </div>
-              )}
+              {/* Last visit display removed as patient.lastVisit is not available */}
 
+              {/* Use top-level lastUpdated */}
               {showLastUpdate && patient.lastUpdated && (
                 <div className="flex items-center justify-end text-sm text-slate-600">
                   <FileText className="h-4 w-4 mr-1 text-slate-400" />
@@ -262,26 +202,7 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({
         </div>
       </div>
 
-      {patient.alerts && patient.alerts.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-slate-200">
-          <div className="flex items-center">
-            <AlertTriangle className="h-4 w-4 text-amber-500 mr-2" />
-            <span className="text-sm font-medium text-slate-800">Alerts</span>
-          </div>
-
-          <div className="flex flex-wrap gap-2 mt-2">
-            {patient.alerts.map((alert, index) => (
-              <Badge
-                key={index}
-                variant="outline"
-                className="bg-amber-50 text-amber-700 border-amber-200 text-xs"
-              >
-                {alert}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Alerts display removed as patient.alerts is not available */}
     </motion.div>
   );
 };

@@ -71,7 +71,7 @@ global.WebSocket = vi.fn().mockImplementation((url: string) => {
 }) as any;
 
 
-describe.skip("BiometricStreamController (Rebuilt)", () => { // Skip due to persistent timeout
+describe.skip("BiometricStreamController (Rebuilt)", () => { // Re-skip due to persistent timeout
   // Removed local vi.useRealTimers(); Global setup now manages timers.
 
   const mockedBiometricService = biometricService as Mocked<typeof biometricService>;
@@ -130,10 +130,14 @@ describe.skip("BiometricStreamController (Rebuilt)", () => { // Skip due to pers
     });
     
     // Wait ONLY for the expected state changes using waitFor
+    // Wait specifically for isConnected to become true
     await waitFor(() => {
+      vi.advanceTimersByTime(100); // Advance timers slightly within waitFor
       expect(result.current.isConnected).toBe(true);
-      expect(result.current.activeStreams.size).toBe(specificMetadata.length);
-    }, { timeout: 20000 }); // Use a longer timeout for diagnostics
+    }, { timeout: 20000 });
+    
+    // Assert activeStreams size after isConnected is confirmed
+    expect(result.current.activeStreams.size).toBe(specificMetadata.length);
 
     // Final assertions
     expect(mockedBiometricService.getStreamMetadata).toHaveBeenCalledWith(mockPatientId, requestedStreamIds);

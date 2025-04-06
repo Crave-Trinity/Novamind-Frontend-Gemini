@@ -1,31 +1,41 @@
+/**
+ * NOVAMIND Neural Test Suite
+ * TimelineEvent component testing with quantum precision
+ */
+import React from 'react'; // Added React import
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Keep WebGL setup
+import { TimelineEvent } from "./TimelineEvent";
+import { renderWithProviders } from "@test/test-utils.unified";
+// Import the necessary event types
+import {
+  ClinicalEvent,
+  SymptomEvent,
+  TreatmentEvent,
+  DiagnosisEvent,
+  AssessmentEvent
+} from "@domain/types/clinical/events";
 
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
+// Setup WebGL mocks with memory monitoring - Moved outside describe block
+beforeEach(() => {
+  setupWebGLMocks({ monitorMemory: true, debugMode: true });
+});
 
-describe('TimelineEvent with WebGL Mocks', () => {
-  // Setup WebGL mocks with memory monitoring
-  beforeEach(() => {
-    setupWebGLMocks({ monitorMemory: true, debugMode: true });
-  });
-
-  afterEach(() => {
-    const memoryReport = cleanupWebGLMocks();
-    if (memoryReport && memoryReport.leakedObjectCount > 0) {
-      console.warn(`Memory leak detected in "TimelineEvent": ${memoryReport.leakedObjectCount} objects not properly disposed`);
-      console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
-    }
-  });
+afterEach(() => {
+  const memoryReport = cleanupWebGLMocks();
+  if (memoryReport && memoryReport.leakedObjectCount > 0) {
+    console.warn(`Memory leak detected in "TimelineEvent": ${memoryReport.leakedObjectCount} objects not properly disposed`);
+    console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
+  }
+});
 
 /**
  * NOVAMIND Neural Test Suite
  * TimelineEvent component testing with quantum precision
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"; import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
-
-// Added beforeEach
-import { render, screen, fireEvent } from "@testing-library/react";
-import { TimelineEvent } from "./TimelineEvent";
-import { renderWithProviders } from "@test/test-utils";
+// Removed duplicate/misplaced imports
 
 // Domain mock data with clinical precision
 const mockSymptomEvent = {
@@ -101,7 +111,7 @@ const mockAssessmentEvent = {
   },
 };
 
-describe.skip("TimelineEvent", () => { // Skip this suite for now due to errors/potential hangs
+describe("TimelineEvent", () => { // Re-enabled suite
   // Add local matchMedia mock before each test in this suite
   beforeEach(() => {
     Object.defineProperty(window, "matchMedia", {
@@ -124,7 +134,7 @@ describe.skip("TimelineEvent", () => { // Skip this suite for now due to errors/
 
     render(
       <TimelineEvent
-        event={mockSymptomEvent as any}
+        event={mockSymptomEvent as SymptomEvent} // Use correct type assertion
         isSelected={false}
         onClick={handleClick}
       />,
@@ -140,7 +150,7 @@ describe.skip("TimelineEvent", () => { // Skip this suite for now due to errors/
 
     render(
       <TimelineEvent
-        event={mockMedicationEvent as any}
+        event={mockMedicationEvent as TreatmentEvent} // Use correct type assertion
         isSelected={false}
         onClick={handleClick}
       />,
@@ -155,7 +165,7 @@ describe.skip("TimelineEvent", () => { // Skip this suite for now due to errors/
 
     render(
       <TimelineEvent
-        event={mockDiagnosisEvent as any}
+        event={mockDiagnosisEvent as DiagnosisEvent} // Use correct type assertion
         isSelected={true}
         onClick={handleClick}
       />,
@@ -179,7 +189,7 @@ describe.skip("TimelineEvent", () => { // Skip this suite for now due to errors/
 
     render(
       <TimelineEvent
-        event={mockAssessmentEvent as any}
+        event={mockAssessmentEvent as AssessmentEvent} // Use correct type assertion
         isSelected={true}
         onClick={handleClick}
         showNeuralCorrelation={true}
@@ -202,7 +212,7 @@ describe.skip("TimelineEvent", () => { // Skip this suite for now due to errors/
 
     render(
       <TimelineEvent
-        event={mockAssessmentEvent as any}
+        event={mockAssessmentEvent as AssessmentEvent} // Use correct type assertion
         isSelected={true}
         onClick={handleClick}
         showNeuralCorrelation={false}
@@ -218,7 +228,7 @@ describe.skip("TimelineEvent", () => { // Skip this suite for now due to errors/
 
     render(
       <TimelineEvent
-        event={mockSymptomEvent as any}
+        event={mockSymptomEvent as SymptomEvent} // Use correct type assertion
         isSelected={false}
         onClick={handleClick}
       />,
@@ -233,7 +243,7 @@ describe.skip("TimelineEvent", () => { // Skip this suite for now due to errors/
 
     render(
       <TimelineEvent
-        event={mockMedicationEvent as any}
+        event={mockMedicationEvent as TreatmentEvent} // Use correct type assertion
         isSelected={false}
         onClick={handleClick}
         colorClass="border-blue-400 bg-blue-50"
@@ -252,7 +262,7 @@ describe.skip("TimelineEvent", () => { // Skip this suite for now due to errors/
 
     render(
       <TimelineEvent
-        event={mockSymptomEvent as any}
+        event={mockSymptomEvent as SymptomEvent} // Use correct type assertion
         isSelected={false}
         onClick={handleClick}
       />,
@@ -268,7 +278,7 @@ describe.skip("TimelineEvent", () => { // Skip this suite for now due to errors/
 
     render(
       <TimelineEvent
-        event={mockSymptomEvent as any}
+        event={mockSymptomEvent as SymptomEvent} // Use correct type assertion
         isSelected={false}
         onClick={handleClick}
         showTime={false}
@@ -284,7 +294,7 @@ describe.skip("TimelineEvent", () => { // Skip this suite for now due to errors/
 
     const { rerender } = render(
       <TimelineEvent
-        event={mockSymptomEvent as any}
+        event={mockSymptomEvent as SymptomEvent} // Use correct type assertion
         isSelected={false}
         onClick={handleClick}
       />,
@@ -297,7 +307,7 @@ describe.skip("TimelineEvent", () => { // Skip this suite for now due to errors/
     // Selected state should have ring highlight
     rerender(
       <TimelineEvent
-        event={mockSymptomEvent as any}
+        event={mockSymptomEvent as SymptomEvent} // Use correct type assertion
         isSelected={true}
         onClick={handleClick}
       />,
@@ -309,4 +319,4 @@ describe.skip("TimelineEvent", () => { // Skip this suite for now due to errors/
   });
 });
 
-});
+// Removed closing brace for the outer describe block

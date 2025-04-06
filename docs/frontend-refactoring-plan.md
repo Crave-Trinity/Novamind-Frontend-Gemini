@@ -89,7 +89,7 @@ The target architecture should use consistent path aliases:
 // Clean Architecture imports
 import { Patient } from "@domain/models/Patient";
 import { usePatientData } from "@application/hooks/usePatientData";
-import { apiClient } from "@infrastructure/api/apiClient";
+import { apiClient } from "@api/apiClient"; // Use preferred alias
 
 // Atomic Design imports
 import { Button } from "@atoms/Button";

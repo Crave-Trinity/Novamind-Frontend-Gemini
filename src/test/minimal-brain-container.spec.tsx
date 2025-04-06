@@ -36,7 +36,7 @@ vi.mock(
 // Import the component AFTER mocking
 import BrainModelContainer from "@presentation/templates/BrainModelContainer";
 
-describe.skip("Minimal Brain Container Test", () => { // Skip due to persistent mocking/rendering issue
+describe("Minimal Brain Container Test", () => { // Re-enabled suite
   // No beforeEach needed for this simple test
 
   it("should render the mocked component with neural precision", async () => {

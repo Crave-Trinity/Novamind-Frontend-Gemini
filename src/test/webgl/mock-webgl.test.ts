@@ -5,16 +5,35 @@
  * and prevents test hangs in Three.js components.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { setupWebGLMocks, cleanupWebGLMocks } from './mock-webgl'; // Keep setup/cleanup imports
+import {
+  setupWebGLMocks,
+  cleanupWebGLMocks,
+  CoreWebGLRenderer, // Import the mock class
+  MockWebGLTexture,  // Import the mock class
+  MockWebGLGeometry, // Import the mock class
+  MockWebGLMaterial  // Import the mock class
+} from './mock-webgl'; // Keep setup/cleanup imports
+
+// Explicitly mock the 'three' module for this test file
+vi.mock('three', () => ({
+  WebGLRenderer: CoreWebGLRenderer,
+  Texture: MockWebGLTexture,
+  BufferGeometry: MockWebGLGeometry,
+  MeshBasicMaterial: MockWebGLMaterial,
+  Scene: vi.fn(), // Simple mock for Scene
+  PerspectiveCamera: vi.fn(), // Simple mock for PerspectiveCamera
+  // Add other necessary mocks if needed
+}));
+
+// Now import the names which will resolve to the mocks defined above
 import {
   WebGLRenderer,
-  Texture, // Assuming Texture is mocked or needed
-  BufferGeometry, // Use exported mock name
-  MeshBasicMaterial, // Use exported mock name
-  Scene, // Add Scene import
-  PerspectiveCamera // Add PerspectiveCamera import
-} from 'three'; // Import standard names - alias will provide mocks
-
+  Texture,
+  BufferGeometry,
+  MeshBasicMaterial,
+  Scene,
+  PerspectiveCamera
+} from 'three';
 describe.skip('WebGL Mocking', () => { // Skip due to persistent mock issues
   beforeEach(() => {
     // Set up WebGL mocks before each test

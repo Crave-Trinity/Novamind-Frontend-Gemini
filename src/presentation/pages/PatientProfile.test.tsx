@@ -27,7 +27,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
 
 // No need to mock react-query as the component uses internal state/fetch simulation
 
-describe.skip("PatientProfile", () => { // Skip due to timeout
+describe("PatientProfile", () => { // Re-enabled suite
   const mockPatientId = "test-patient-123";
   const mockNavigate = vi.fn();
 

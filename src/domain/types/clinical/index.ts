@@ -7,6 +7,7 @@
 export * from "./patient";
 export * from "./risk";
 export * from "./treatment";
+export * from "./events"; // Add export for events
 
 // Re-export common types that are directly related to clinical visualization
 export {

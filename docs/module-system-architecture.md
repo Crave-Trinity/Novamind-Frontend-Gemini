@@ -51,7 +51,7 @@ The project uses path aliases to maintain clean imports and enforce architectura
 // Clean Architecture layer imports
 import { Patient } from "@domain/entities/Patient";
 import { usePatientData } from "@application/hooks/usePatientData";
-import { apiClient } from "@infrastructure/api/apiClient";
+import { apiClient } from "@api/apiClient"; // Use preferred alias
 import { PatientCard } from "@presentation/molecules/PatientCard";
 
 // Atomic Design component imports

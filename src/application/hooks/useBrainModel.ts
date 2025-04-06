@@ -50,7 +50,7 @@ export function useBrainModel(): UseBrainModelReturn {
   const queryClient = useQueryClient();
 
   // Query key
-  const brainModelQueryKey = "brainModel";
+  const brainModelQueryKey = "brainModel"; // Reinstate base query key
 
   // Local state for highlights and selections
   const [selectedRegionIds, setSelectedRegionIds] = useState<string[]>([]);
@@ -65,6 +65,8 @@ export function useBrainModel(): UseBrainModelReturn {
     isError,
     error: queryError,
     refetch,
+    // Use a query key that can include the scanId when the query is enabled
+    // The actual scanId will be passed when rendering the hook in the test
   } = useQuery<BrainModel, Error>({ // Use v5 object syntax
     queryKey: [brainModelQueryKey],
     queryFn: async () => {
@@ -102,7 +104,8 @@ export function useBrainModel(): UseBrainModelReturn {
 
           if (verificationResult.success) {
             // Update cache
-            queryClient.setQueryData([brainModelQueryKey], result.value); // Correct usage
+            // Use the base key for setting data after manual fetch
+            queryClient.setQueryData([brainModelQueryKey], result.value);
             // Trigger refetch to update state
             refetch();
             return success(result.value); // Correct usage
@@ -138,7 +141,7 @@ export function useBrainModel(): UseBrainModelReturn {
   >({ // Use v5 object syntax
     mutationFn: async ({ regionId, activityLevel }) => {
       // Validate inputs
-      const currentModel = queryClient.getQueryData<BrainModel>([brainModelQueryKey]); // Get current model from cache
+      const currentModel = queryClient.getQueryData<BrainModel>([brainModelQueryKey]);
       if (!currentModel) {
         throw new Error("No brain model loaded");
       }
@@ -168,7 +171,7 @@ export function useBrainModel(): UseBrainModelReturn {
     },
     onSuccess: (updatedModel) => {
       // Update cache
-      queryClient.setQueryData([brainModelQueryKey], updatedModel);
+      queryClient.setQueryData([brainModelQueryKey], updatedModel); // Update cache using base key
     },
   });
 
@@ -180,7 +183,7 @@ export function useBrainModel(): UseBrainModelReturn {
   >({ // Use v5 object syntax
     mutationFn: async (regionId) => {
       // Validate inputs
-      const currentModel = queryClient.getQueryData<BrainModel>([brainModelQueryKey]); // Get current model from cache
+      const currentModel = queryClient.getQueryData<BrainModel>([brainModelQueryKey]);
       if (!currentModel) {
         throw new Error("No brain model loaded");
       }
@@ -214,7 +217,7 @@ export function useBrainModel(): UseBrainModelReturn {
     },
     onSuccess: (updatedModel) => {
       // Update cache
-      queryClient.setQueryData([brainModelQueryKey], updatedModel);
+      queryClient.setQueryData([brainModelQueryKey], updatedModel); // Update cache using base key
     },
   });
 
@@ -279,7 +282,7 @@ export function useBrainModel(): UseBrainModelReturn {
   const reset = useCallback(() => {
     setSelectedRegionIds([]);
     setHighlightedRegionIds([]);
-    queryClient.removeQueries({ queryKey: [brainModelQueryKey] }); // Correct v5 syntax
+    queryClient.removeQueries({ queryKey: [brainModelQueryKey] }); // Remove using base key
   }, [queryClient]);
 
   // Combine errors

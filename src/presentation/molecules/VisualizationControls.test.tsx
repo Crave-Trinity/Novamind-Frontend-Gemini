@@ -1,33 +1,17 @@
-
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
-
-describe('VisualizationControls with WebGL Mocks', () => {
-  // Setup WebGL mocks with memory monitoring
-  beforeEach(() => {
-    setupWebGLMocks({ monitorMemory: true, debugMode: true });
-  });
-
-  afterEach(() => {
-    const memoryReport = cleanupWebGLMocks();
-    if (memoryReport && memoryReport.leakedObjectCount > 0) {
-      console.warn(`Memory leak detected in "VisualizationControls": ${memoryReport.leakedObjectCount} objects not properly disposed`);
-      console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
-    }
-  });
-
 /**
  * NOVAMIND Neural Test Suite
  * VisualizationControls testing with quantum precision
  */
-
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"; import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
-
+import React from 'react'; // Add React import for JSX
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+// Removed duplicate WebGL mock imports, keep setup/cleanup if needed, but likely handled globally or by test-utils
+// import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl';
 // Removed beforeEach import
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import VisualizationControls from "./VisualizationControls";
-import { renderWithProviders } from "@test/test-utils";
+import { renderWithProviders } from "@test/test-utils.unified"; // Correct import path
 import { RenderMode } from "@domain/types/brain/visualization"; // Import RenderMode
 
 // Mock data with clinical precision including required props
@@ -37,7 +21,7 @@ const mockProps = {
   // Add other optional component props here if needed for specific tests
 };
 
-describe.skip("VisualizationControls", () => { // Skip this suite for now due to timeout
+describe("VisualizationControls", () => { // Unskip the suite
   // Local matchMedia mock removed - relying on global mock in setup.ts
 
   it("renders with neural precision", () => {
@@ -75,4 +59,4 @@ describe.skip("VisualizationControls", () => { // Skip this suite for now due to
   // Add more component-specific tests, e.g., for settings changes
 });
 
-});
+// Removed redundant closing brace

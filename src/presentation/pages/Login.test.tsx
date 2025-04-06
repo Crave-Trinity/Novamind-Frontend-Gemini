@@ -34,7 +34,7 @@ import Login from './Login';
 // Import the hook we are mocking
 import { useAuth } from '@application/hooks/useAuth';
 
-describe.skip('Login Page', () => { // Skip due to timeout
+describe('Login Page', () => { // Re-enabled suite
   // Cast the mocked hook
   const mockedUseAuth = useAuth as Mock;
 

@@ -10,8 +10,8 @@ Novamind Digital Twin frontend uses Tailwind CSS v3.4.x with pure TypeScript ESM
 
 We've configured all Tailwind-related files using TypeScript ESM format wherever possible:
 
-- `tailwind.config.ts` - Main Tailwind configuration (ESM)
-- `postcss.config.mjs` - PostCSS configuration (ESM)
+- `tailwind.config.cjs` - Main Tailwind configuration (CommonJS - Exception)
+- `postcss.config.cjs` - PostCSS configuration (CommonJS - Exception)
 
 This approach honors our core architectural principle:
 

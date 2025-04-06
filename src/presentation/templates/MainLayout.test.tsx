@@ -16,7 +16,7 @@ const mockProps = {
   children: React.createElement("div", null, "Test Child Content"),
 };
 
-describe.skip("MainLayout", () => { // Skip due to timeout
+describe("MainLayout", () => { // Re-enabled suite
   // Store original matchMedia
   let originalMatchMedia: typeof window.matchMedia;
 

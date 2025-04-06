@@ -28,4 +28,12 @@ export const Center = vi.fn(({ children, ...props }) => React.createElement('div
 export const Environment = vi.fn(({ children, ...props }) => React.createElement('div', { 'data-testid': 'mock-drei-environment', ...props }, children));
 
 // Ensure all necessary exports are mocked to avoid import errors in tests
+// Mock shaderMaterial - returns a simple div for testing purposes
+export const shaderMaterial = vi.fn((_uniforms, _vertexShader, _fragmentShader, _onInit) => {
+  // Return a simple component factory or a mock class instance
+  // For simplicity, let's return a function component that renders a div
+  const MockMaterial = (props: any) => React.createElement('div', { 'data-testid': 'mock-drei-shadermaterial', ...props });
+  return MockMaterial;
+});
+
 // Add more mocks here based on specific test failures if they arise

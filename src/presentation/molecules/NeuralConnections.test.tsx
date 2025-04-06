@@ -15,6 +15,8 @@ import {
   ThemeOption,
 } from "@domain/types/brain/visualization"; // Import necessary types
 
+// Removed local R3F mock
+
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for NeuralConnections
 // Mock data with clinical precision - Requires specific props for NeuralConnections

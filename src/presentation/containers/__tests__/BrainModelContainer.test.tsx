@@ -32,7 +32,7 @@ const mockBrainRegions = [
 // Make sure the BrainModelContainer renders a root element with:
 // <div data-testid="brain-model-container-root" className={...}>
 
-describe.skip("BrainModelContainer", () => { // Skip due to useContextBridge error
+describe("BrainModelContainer", () => { // Re-enable test suite
   beforeEach(() => {
     // Make the test fully reproducible by resetting mocks
     // vi.clearAllMocks(); // Consider if mocks are needed and clear appropriately

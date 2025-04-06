@@ -13,8 +13,8 @@ Tailwind CSS v3.4 offers several integration methods, each with specific use cas
 This is our chosen approach for the Novamind Digital Twin frontend:
 
 ```js
-// postcss.config.mjs (ESM syntax)
-export default {
+// postcss.config.cjs (CommonJS syntax - Exception)
+module.exports = {
   plugins: {
     tailwindcss: {},
     autoprefixer: {},
@@ -63,10 +63,10 @@ npx tailwindcss -i ./src/input.css -o ./src/output.css --watch
 Tailwind CSS v3.4 works well with TypeScript ESM configurations, allowing us to maintain our strict TypeScript and ESM-only codebase:
 
 ```ts
-// tailwind.config.ts
-import type { Config } from 'tailwindcss'
+// tailwind.config.cjs (CommonJS syntax - Exception)
+const { fontFamily } = require('tailwindcss/defaultTheme') // Example if needed
 
-export default {
+module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -74,6 +74,9 @@ export default {
   theme: {
     extend: {
       // Our theme configuration
+      // fontFamily: {
+      //   sans: ['Inter var', ...fontFamily.sans], // Example
+      // },
     },
   },
   darkMode: 'class',
@@ -82,7 +85,7 @@ export default {
     require('@tailwindcss/typography'),
     require('@tailwindcss/aspect-ratio'),
   ],
-} satisfies Config
+}
 ```
 
 ### CSS Import
@@ -114,9 +117,9 @@ Tailwind CSS v3.4 maintains excellent browser compatibility while introducing mo
 
 While we prefer pure ESM for all configuration, Tailwind CSS v3.4 works well with our established pattern:
 
-1. **Configuration Files**: Pure TypeScript ESM (tailwind.config.ts) ✅
-2. **PostCSS Configuration**: Pure ESM (postcss.config.mjs) ✅
-3. **Plugin Requirements**: Standard Node.js modules, imported with ESM ✅
+1. **Configuration Files**: CommonJS (`tailwind.config.cjs`) - Exception for build tool ✅
+2. **PostCSS Configuration**: CommonJS (`postcss.config.cjs`) - Exception for build tool ✅
+3. **Plugin Requirements**: Standard Node.js modules, imported with `require()` in `.cjs` files ✅
 
 ## Plugins and Extensions
 
