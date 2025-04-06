@@ -6,7 +6,7 @@ import React, {
   type ReactNode,
 } from "react";
 
-import type { ThemeMode } from "../../domain/types/theme";
+import type { ThemeMode } from "../../domain/types/theme"; // Already type-only
 
 // Define ThemeSettings interface for visualization settings
 interface ThemeSettings {

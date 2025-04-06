@@ -1,4 +1,4 @@
-import eslint from 'eslint';
+// import eslint from 'eslint'; // Removed unused import TS6133
 import tseslint from 'typescript-eslint';
 import sonarjsPlugin from 'eslint-plugin-sonarjs';
 import reactPlugin from 'eslint-plugin-react';

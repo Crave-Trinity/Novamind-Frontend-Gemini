@@ -2,7 +2,7 @@
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
-import { resolve } from 'path';
+// import { resolve } from 'path'; // Removed unused import TS6133
 
 // https://vitest.dev/config/
 export default defineConfig({
