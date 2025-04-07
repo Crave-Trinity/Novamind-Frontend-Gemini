@@ -6,19 +6,21 @@
  */
 
 import { describe, it, expectTypeOf } from 'vitest';
-import {
-  RiskLevel,
+import type {
   RiskAssessment,
   DomainRisk,
   ContributingFactor,
   ProtectiveFactor,
   NeuralRiskCorrelate,
-  RiskTimelineEvent,
-  BiometricRiskAlert,
   RiskVisualizationSettings,
   RiskAssessmentState,
-  RiskTimelineState,
-  ProcessedRiskTimeline,
+} from '@domain/types/clinical/risk';
+import {
+  RiskLevel,
+  // Removed unused: RiskTimelineEvent,
+  // Removed unused: BiometricRiskAlert,
+  // Removed unused: RiskTimelineState,
+  // Removed unused: ProcessedRiskTimeline,
 } from '@domain/types/clinical/risk';
 
 describe('Risk type definitions', () => {

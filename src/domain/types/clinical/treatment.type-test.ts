@@ -6,18 +6,18 @@
  */
 
 import { describe, it, expectTypeOf } from 'vitest';
-import {
+import type {
   TreatmentType,
   TreatmentResponseRequest,
   TreatmentDetails,
   ClinicalPredictionData,
   GeneticPredictionData,
   BiomarkerData,
-  NeuroimagingFeatures,
   TreatmentPredictionVisualizationSettings,
   TreatmentPredictionState,
   TreatmentComparisonState,
 } from '@domain/types/clinical/treatment';
+// Removed unused import: NeuroimagingFeatures
 
 describe('Treatment type definitions', () => {
   it('TreatmentType has correct literal union types', () => {
@@ -149,50 +149,38 @@ describe('Treatment type definitions', () => {
   });
 
   it('TreatmentPredictionState has correct discriminated union', () => {
-    // Test the idle state
-    expectTypeOf<TreatmentPredictionState>().toMatchTypeOf<{
-      status: 'idle';
-    }>();
+    // Test each state variant explicitly
+    type IdlePredState = Extract<TreatmentPredictionState, { status: 'idle' }>;
+    expectTypeOf<IdlePredState>().toHaveProperty('status').toEqualTypeOf<'idle'>();
 
-    // Test the loading state
-    expectTypeOf<TreatmentPredictionState>().toMatchTypeOf<{
-      status: 'loading';
-    }>();
+    type LoadingPredState = Extract<TreatmentPredictionState, { status: 'loading' }>;
+    expectTypeOf<LoadingPredState>().toHaveProperty('status').toEqualTypeOf<'loading'>();
 
-    // Test the error state
-    expectTypeOf<TreatmentPredictionState>().toMatchTypeOf<{
-      status: 'error';
-      error: Error;
-    }>();
+    type ErrorPredState = Extract<TreatmentPredictionState, { status: 'error' }>;
+    expectTypeOf<ErrorPredState>().toHaveProperty('status').toEqualTypeOf<'error'>();
+    expectTypeOf<ErrorPredState>().toHaveProperty('error').toEqualTypeOf<Error>();
 
-    // Test the success state
-    expectTypeOf<TreatmentPredictionState>().toMatchTypeOf<{
-      status: 'success';
-      prediction: any;
-    }>();
+    type SuccessPredState = Extract<TreatmentPredictionState, { status: 'success' }>;
+    expectTypeOf<SuccessPredState>().toHaveProperty('status').toEqualTypeOf<'success'>();
+    // Cannot test prediction type precisely without importing TreatmentResponsePrediction
+    expectTypeOf<SuccessPredState>().toHaveProperty('prediction');
   });
 
   it('TreatmentComparisonState has correct discriminated union', () => {
-    // Test the idle state
-    expectTypeOf<TreatmentComparisonState>().toMatchTypeOf<{
-      status: 'idle';
-    }>();
+    // Test each state variant explicitly
+    type IdleCompState = Extract<TreatmentComparisonState, { status: 'idle' }>;
+    expectTypeOf<IdleCompState>().toHaveProperty('status').toEqualTypeOf<'idle'>();
 
-    // Test the loading state
-    expectTypeOf<TreatmentComparisonState>().toMatchTypeOf<{
-      status: 'loading';
-    }>();
+    type LoadingCompState = Extract<TreatmentComparisonState, { status: 'loading' }>;
+    expectTypeOf<LoadingCompState>().toHaveProperty('status').toEqualTypeOf<'loading'>();
 
-    // Test the error state
-    expectTypeOf<TreatmentComparisonState>().toMatchTypeOf<{
-      status: 'error';
-      error: Error;
-    }>();
+    type ErrorCompState = Extract<TreatmentComparisonState, { status: 'error' }>;
+    expectTypeOf<ErrorCompState>().toHaveProperty('status').toEqualTypeOf<'error'>();
+    expectTypeOf<ErrorCompState>().toHaveProperty('error').toEqualTypeOf<Error>();
 
-    // Test the success state
-    expectTypeOf<TreatmentComparisonState>().toMatchTypeOf<{
-      status: 'success';
-      comparison: any;
-    }>();
+    type SuccessCompState = Extract<TreatmentComparisonState, { status: 'success' }>;
+    expectTypeOf<SuccessCompState>().toHaveProperty('status').toEqualTypeOf<'success'>();
+    // Cannot test comparison type precisely without importing TreatmentComparisonResult
+    expectTypeOf<SuccessCompState>().toHaveProperty('comparison');
   });
 });

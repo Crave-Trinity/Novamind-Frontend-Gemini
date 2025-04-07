@@ -7,9 +7,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'; // Import afterEach
-import React from 'react';
+// Removed unused React import
 import { screen, cleanup } from '@testing-library/react'; // Import cleanup (waitFor comes from test-utils)
-import { renderWithProviders, waitFor } from '@test/test-utils.unified';
+import { renderWithProviders } from '@test/test-utils.unified'; // Removed unused waitFor
 
 // Mock the component under test directly to bypass internal complexities
 vi.mock('@presentation/templates/BrainModelContainer', () => ({

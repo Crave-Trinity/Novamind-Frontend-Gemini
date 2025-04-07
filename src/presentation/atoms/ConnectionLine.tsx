@@ -4,19 +4,10 @@
  */
 
 import React, { useRef, useMemo, useEffect } from 'react';
-import { useFrame, extend } from '@react-three/fiber'; // Ensure fiber is imported
+import { useFrame } from '@react-three/fiber'; // Removed unused extend
 import * as THREE from 'three';
-import {
-  Vector3,
-  Line,
-  BufferGeometry,
-  NormalBufferAttributes,
-  Material,
-  Object3DEventMap,
-  LineBasicMaterial,
-  LineDashedMaterial,
-} from 'three'; // Import Vector3 from three
-import { ThemeSettings } from '@domain/types/brain/visualization';
+// Named imports removed, using THREE namespace import above
+import type { ThemeSettings } from '@domain/types/brain/visualization';
 // Neural-safe prop definition with explicit typing
 interface ConnectionLineProps {
   // Connection endpoints
@@ -64,7 +55,7 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
   startPosition,
   endPosition,
   id,
-  connectingRegions,
+  connectingRegions: _connectingRegions, // Renamed and prefixed as unused
   color,
   thickness = 0.05,
   opacity = 0.75,
@@ -241,6 +232,7 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
   // Render the connection
   return dashed ? (
     <line
+      // @ts-expect-error R3F type conflict: TS incorrectly expects SVGLineElement ref
       ref={lineRef}
       geometry={geometry}
       onClick={handleClick}
@@ -259,6 +251,7 @@ const ConnectionLine: React.FC<ConnectionLineProps> = ({
     </line>
   ) : (
     <line
+      // @ts-expect-error R3F type conflict: TS incorrectly expects SVGLineElement ref
       ref={lineRef}
       geometry={geometry}
       onClick={handleClick}

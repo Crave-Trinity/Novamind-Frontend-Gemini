@@ -12,9 +12,9 @@ import { vi } from 'vitest';
 /**
  * Create mock implementation for a specific controller
  */
-function createMockForController(controllerPath: string): Record<string, any> {
+function createMockForController(_controllerPath: string): Record<string, any> { // Prefixed unused parameter
   // Extract controller name from path
-  const controllerName = controllerPath.split('/').pop() || '';
+  // Removed unused _controllerName variable
 
   // Generic mock implementation for any neural controller
   const mockImplementation = () => {

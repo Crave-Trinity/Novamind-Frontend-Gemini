@@ -31,6 +31,8 @@ vi.mock('@infrastructure/api/ApiClient', () => {
         riskFactor: 0.2,
         clinicalSignificance: 'normal',
         tissueType: 'gray',
+        volume: 1500,
+        activity: 0.5,
       },
     ],
     connections: [
@@ -39,7 +41,7 @@ vi.mock('@infrastructure/api/ApiClient', () => {
         sourceId: 'test-region',
         targetId: 'other-region',
         strength: 0.7,
-        type: 'structural',
+        type: 'excitatory',
         directionality: 'bidirectional',
         activityLevel: 0.6,
         pathwayLength: 10,
@@ -51,13 +53,14 @@ vi.mock('@infrastructure/api/ApiClient', () => {
       patientId: 'test-patient',
       scanDate: new Date().toISOString(),
       scanType: 'fMRI',
-      resolution: '2mm',
+      resolution: { x: 2, y: 2, z: 2 },
       scannerModel: 'Test Scanner',
       contrastAgent: false,
       notes: 'Test scan',
       technician: 'Test Tech',
       processingMethod: 'standard',
       dataQualityScore: 0.9,
+      metadata: {}, // Added missing metadata property
     },
     version: '1.0.0',
     timestamp: new Date().toISOString(),
@@ -77,36 +80,9 @@ vi.mock('@infrastructure/api/ApiClient', () => {
 
 console.log('[SETUP] Starting test file execution');
 
-// Create test wrapper with fresh QueryClient for each test
-const createTestQueryClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        cacheTime: 0,
-        gcTime: 0,
-        staleTime: 0,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-      },
-    },
-    logger: {
-      log: console.log,
-      warn: console.warn,
-      error: console.error,
-    },
-  });
+// Removed unused function: createTestQueryClient
 
-const createWrapper = () => {
-  console.log('[SETUP] Creating wrapper function');
-  const testQueryClient = createTestQueryClient();
-
-  return ({ children }: { children: React.ReactNode }) => {
-    console.log('[WRAPPER] Rendering QueryClientProvider');
-    return React.createElement(QueryClientProvider, { client: testQueryClient }, children);
-  };
-};
+// Removed unused createWrapper function
 
 console.log('[SETUP] Test setup complete');
 

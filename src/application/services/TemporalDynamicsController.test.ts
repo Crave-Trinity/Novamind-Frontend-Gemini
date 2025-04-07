@@ -3,10 +3,10 @@
  * useTemporalDynamicsController testing with quantum precision
  */
 
-import { describe, it, expect, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react'; // Import renderHook and act
+import { describe, it, expect } from 'vitest'; // Removed unused: vi
+import { renderHook } from '@testing-library/react'; // Removed unused: act
 
-import { useTemporalDynamicsController } from '@application/controllers/TemporalDynamicsController';
+import { useTemporalDynamicsController } from '@application/services/TemporalDynamicsController'; // Corrected import path
 // Import necessary types if needed for config or assertions
 // Example: import { TemporalConfig, TimeScale } from '@application/controllers/TemporalDynamicsController';
 

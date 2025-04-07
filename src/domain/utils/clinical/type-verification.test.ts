@@ -4,9 +4,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { ClinicalTypeVerifier } from '@domain/utils/clinical/type-verification.ts'; // Add .ts extension
+import { ClinicalTypeVerifier } from '@domain/utils/clinical/type-verification.ts'; // Removed unused BrainTypeVerifier (assuming it was here)
 import { RiskLevel } from '@domain/types/clinical/risk';
-import {
+import type {
   Patient,
   Symptom,
   Diagnosis,
@@ -16,7 +16,7 @@ import {
   Treatment,
   TreatmentResponse,
 } from '@domain/types/clinical/patient'; // Import necessary types
-import { TypeVerificationError } from '@domain/utils/shared/type-verification';
+// Removed unused import: import { TypeVerificationError } from '@domain/utils/shared/type-verification';
 
 describe('Clinical type verification', () => {
   const verifierInstance = new ClinicalTypeVerifier(); // Instantiate the class

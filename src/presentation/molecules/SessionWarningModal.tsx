@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState, useCallback } from 'react'; // Removed unused React
+// Removed unused useNavigate import
 import { useAuth } from '@application/hooks/useAuth';
-import { auditLogService, AuditEventType } from '@infrastructure/clients/auditLogClient';
+import { auditLogClient, AuditEventType } from '@infrastructure/clients/auditLogClient'; // Corrected import name
 
 interface SessionWarningModalProps {
   /**
@@ -32,7 +32,7 @@ const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
 }) => {
   // Get authentication state from context
   const { isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
+  // Removed unused navigate variable
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
@@ -100,7 +100,7 @@ const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
     resetTimers();
 
     // Log session extension for HIPAA compliance
-    auditLogService.log(AuditEventType.USER_LOGIN, {
+    auditLogClient.log(AuditEventType.USER_LOGIN, { // Corrected usage
       action: 'session_extended',
       details: 'User extended session after inactivity warning',
       result: 'success',
@@ -113,7 +113,7 @@ const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
     setShowModal(false);
 
     // Log session timeout for HIPAA compliance
-    auditLogService.log(AuditEventType.USER_TIMEOUT, {
+    auditLogClient.log(AuditEventType.USER_TIMEOUT, { // Corrected usage
       action: 'session_timeout',
       details: 'User session expired due to inactivity',
       result: 'success',

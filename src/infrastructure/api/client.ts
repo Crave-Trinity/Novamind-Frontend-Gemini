@@ -1,19 +1,20 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ApiResponse, ApiError, AuditLog } from '@domain/types/common';
+import type { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios from 'axios'; // Removed unused AxiosResponse
+import type { ApiResponse, ApiError, AuditLog } from '@domain/types/common';
 
 export class ApiClient {
   private client: AxiosInstance;
   private auditLogs: AuditLog[] = [];
 
   constructor(
-    baseURL: string,
-    private apiKey: string
+    baseURL: string
+    // Removed unused apiKey parameter
   ) {
     this.client = axios.create({
       baseURL,
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': apiKey,
+        // 'X-API-Key': apiKey, // Removed header using unused apiKey
       },
     });
 

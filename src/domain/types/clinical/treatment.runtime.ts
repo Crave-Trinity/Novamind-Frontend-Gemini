@@ -12,7 +12,7 @@ import type {
   ClinicalPredictionData,
   GeneticPredictionData,
   BiomarkerData,
-  NeuroimagingFeatures,
+  // Removed unused: NeuroimagingFeatures,
   TreatmentResponsePrediction,
   TreatmentComparisonResult,
 } from '@domain/types/clinical/treatment';

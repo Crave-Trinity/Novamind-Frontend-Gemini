@@ -1,9 +1,5 @@
-import {
-  BrainModel,
-  ModelSource,
-  NeuralPathway,
-  BrainRegion, // Import BrainRegion type
-} from '@domain/models/brain/BrainModel';
+import type { BrainModel, NeuralConnection, BrainRegion } from '@domain/types/brain/models'; // Corrected path and type name
+// Removed import for ModelSource as it's not exported
 
 /**
  * Mock API Client for development & testing
@@ -15,59 +11,62 @@ export class MockApiClient {
    * @param patientId The ID of the patient
    * @returns A sample brain model
    */
-  async getBrainModel(patientId = 'demo-patient'): Promise<ReturnType<typeof BrainModel>> {
+  async getBrainModel(patientId = 'demo-patient'): Promise<BrainModel> { // Use imported BrainModel type
     // Return static, simplified mock data for faster tests
     const staticRegions: BrainRegion[] = [
       {
         id: 'frontal-lobe',
         name: 'Frontal Lobe',
-        description: 'desc',
-        coordinates: [0, 20, 10],
-        position: [0, 20, 10],
-        size: 5,
-        scale: 1.67,
+        // Removed description as it's not in BrainRegion type
+        // Removed coordinates as it's not in BrainRegion type
+        position: { x: 0, y: 20, z: 10 }, // Corrected format
+        // Removed size as it's not in BrainRegion type
+        // Removed scale as it's not in BrainRegion type
         color: '#ff6b6b',
         volume: 250,
-        significance: 0.7,
+        activityLevel: 0.6, // Added missing property
+        isActive: true, // Added missing property
+        hemisphereLocation: 'central', // Added missing property
+        dataConfidence: 0.9, // Added missing property
+        activity: 0.6, // Added missing property (potentially redundant with activityLevel)
+        // Removed significance as it's not in BrainRegion type
         connections: ['parietal-lobe'],
-        functions: ['cognition'],
-        data: {
-          activity: 0.6,
-          anomalies: [],
-          volumes: { current: 250, expected: 275, percentile: 70 },
-        },
+        // Removed functions as it's not in BrainRegion type
+        // Removed data property as it's not in BrainRegion type
       },
       {
         id: 'parietal-lobe',
         name: 'Parietal Lobe',
-        description: 'desc',
-        coordinates: [0, 10, 20],
-        position: [0, 10, 20],
-        size: 4,
-        scale: 1.33,
+        // Removed description as it's not in BrainRegion type
+        // Removed coordinates as it's not in BrainRegion type
+        position: { x: 0, y: 10, z: 20 }, // Corrected format
+        // Removed size as it's not in BrainRegion type
+        // Removed scale as it's not in BrainRegion type
         color: '#64748b',
         volume: 200,
-        significance: 0.5,
+        activityLevel: 0.4, // Added missing property
+        isActive: false, // Added missing property
+        hemisphereLocation: 'left', // Added missing property
+        dataConfidence: 0.85, // Added missing property
+        activity: 0.4, // Added missing property (potentially redundant with activityLevel)
+        // Removed significance as it's not in BrainRegion type
         connections: ['frontal-lobe'],
-        functions: ['sensory'],
-        data: {
-          activity: 0.4,
-          anomalies: [],
-          volumes: { current: 200, expected: 220, percentile: 50 },
-        },
+        // Removed functions as it's not in BrainRegion type
+        // Removed data property as it's not in BrainRegion type
       },
       // Add more static regions if needed for specific tests, but keep it minimal
     ];
 
-    const staticPathways: NeuralPathway[] = [
+    const staticConnections: NeuralConnection[] = [ // Use correct type name
       {
         id: 'path-1',
         sourceId: 'frontal-lobe',
         targetId: 'parietal-lobe',
         strength: 0.8,
         type: 'excitatory',
-        significance: 0.8,
-        isActive: true,
+        directionality: 'bidirectional', // Added missing property
+        activityLevel: 0.7, // Added missing property
+        dataConfidence: 0.8, // Added missing property
       },
       // Add more static pathways if needed
     ];
@@ -76,14 +75,21 @@ export class MockApiClient {
       id: `model-${patientId}-${Date.now()}`,
       patientId: patientId,
       regions: staticRegions,
-      pathways: staticPathways,
+      connections: staticConnections, // Renamed property
       timestamp: new Date().toISOString(),
-      metadata: {
-        modelVersion: '1.2.3',
-        confidenceScore: 0.89,
-        dataQuality: 0.95,
-        source: ModelSource.SIMULATION,
+      // Removed metadata property as it's not in BrainModel type
+      scan: { // Added missing scan property
+        id: `scan-${patientId}-${Date.now()}`,
+        patientId: patientId,
+        scanDate: new Date().toISOString(),
+        scanType: 'fMRI',
+        resolution: { x: 1, y: 1, z: 1 },
+        metadata: {},
+        dataQualityScore: 0.95,
       },
+      version: 'mock-1.0', // Added missing version property
+      processingLevel: 'analyzed', // Added missing processingLevel property
+      lastUpdated: new Date().toISOString(), // Added missing lastUpdated property
     };
   }
 

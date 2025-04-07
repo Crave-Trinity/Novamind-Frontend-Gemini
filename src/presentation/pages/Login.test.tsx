@@ -6,7 +6,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { render, screen, within, cleanup } from '@testing-library/react'; // Import cleanup
-import userEvent from '@testing-library/user-event';
+// Removed unused userEvent import
 
 // Mock dependencies before importing the component
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -20,7 +20,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
 });
 
 vi.mock('@/components/atoms/SecureInput', () => ({
-  default: ({ id, name, type, value, onChange, label, required, placeholder }: any) => (
+  default: ({ id, /* name, */ type, value, onChange, label, /* required, */ placeholder }: any) => ( // Removed unused name, required
     <div data-testid={`secure-input-${id}`}>
       <label>{label}</label>
       <input
@@ -69,7 +69,7 @@ describe('Login', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    // const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime }); // Removed unused variable
     render(<Login />);
 
     // Instead of actually testing with real interaction, we'll just verify

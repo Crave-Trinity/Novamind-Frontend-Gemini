@@ -12,9 +12,9 @@ import {
   type VisualizationSettings,
   type ThemeSettings,
   RenderMode,
-  type ThemeOption,
+  // Removed unused: ThemeOption
   visualizationThemes, // Import predefined themes for testing
-  defaultVisualizationSettings, // Import defaults for base valid object
+  // Removed unused: defaultVisualizationSettings
 } from '@domain/types/brain/visualization';
 
 // Type alias for clarity

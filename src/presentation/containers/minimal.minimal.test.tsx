@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import React from 'react';
+// Removed unused React import (new JSX transform)
 import { render, screen } from '@testing-library/react';
 
 // Add global TextEncoder polyfill to ensure compatibility

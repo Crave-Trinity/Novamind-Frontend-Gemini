@@ -4,14 +4,20 @@
  * with neuropsychiatric precision and temporal dynamics
  */
 
-import React, { useRef, useMemo, useState, useCallback } from 'react';
-import { useThree, useFrame } from '@react-three/fiber';
+import React, { useRef, useMemo, useCallback } from 'react'; // Removed unused useEffect, useState
+// Removed unused useThree import
+// @ts-ignore: TS2305 - Module '"@react-three/drei"' has no exported member 'Line'/'Html'/'Text'/'Billboard'. (Likely type/config issue)
 import { Line, Html, Text, Billboard } from '@react-three/drei';
-import { Vector3, Group, Color, MathUtils } from 'three';
+import type { Group } from 'three'; // Removed unused Mesh type import
+import { Vector3, Color, MathUtils } from 'three'; // Added Color import
+// Removed unused useSpring import
 
 // Domain types
-import { TreatmentResponsePrediction, TreatmentEfficacy } from '@domain/types/clinical/treatment';
-import { BrainRegion } from '@domain/types/brain/models';
+import type {
+  TreatmentResponsePrediction,
+  TreatmentEfficacy,
+} from '@domain/types/clinical/treatment';
+import type { BrainRegion } from '@domain/types/brain/models';
 
 /**
  * Neural-safe projection point type
@@ -103,6 +109,8 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
 }) => {
   // Refs
   const groupRef = useRef<Group>(null);
+  // Removed unused planeRef
+  // Removed unused planeRef
 
   // Create region lookup map for efficiency
   const regionMap = useMemo(() => {
@@ -117,7 +125,7 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
   const processedPredictions = useMemo(() => {
     return predictions.map((prediction) => {
       // Determine color based on efficacy
-      const color = getEfficacyColor(prediction.efficacy, colorMap);
+      const color = getEfficacyColor(prediction.efficacy ?? 'low', colorMap); // Added default value
 
       // Determine if this treatment is selected
       const isSelected = selectedTreatmentId === prediction.treatmentId;
@@ -178,7 +186,7 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
         if (showConfidenceIntervals && day > 0) {
           // Calculate confidence interval based on confidence level
           // Lower confidence = wider interval
-          const interval = (1 - prediction.confidenceLevel) * y * 0.6;
+          const interval = (1 - (prediction.confidenceLevel ?? 1)) * y * 0.6; // Added default value
 
           confidenceAreaPoints.push(
             new Vector3(x, y + interval, 0),
@@ -235,7 +243,7 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
       const points: Vector3[] = [];
       const confidencePoints: Vector3[][] = [];
 
-      temporalProjections.timeSeries.forEach((point, i) => {
+      temporalProjections.timeSeries.forEach((point, _i) => { // Prefixed unused i
         // Map x position (time)
         const x = MathUtils.mapLinear(
           point.dayOffset,
@@ -475,7 +483,7 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
       )}
 
       {/* Render treatment predictions */}
-      {processedPredictions.map((prediction, i) => {
+      {processedPredictions.map((prediction, _i) => { // Prefixed unused i
         // Line opacity based on selection state
         const opacity = prediction.isSelected ? 1 : selectedTreatmentId ? 0.4 : 0.8;
 
@@ -607,7 +615,7 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
                       anchorX="right"
                       anchorY="middle"
                     >
-                      {impact.region.name}: {Math.round(impact.impactLevel * 100)}%
+                      {impact.region.name}: {Math.round(impact.impactStrength * 100)}% {/* Corrected impactLevel to impactStrength */}
                     </Text>
                   </group>
                 );
@@ -644,7 +652,7 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
                     <div>
                       <div style={{ opacity: 0.8, marginBottom: '0.25rem' }}>Expected Response</div>
                       <div style={{ fontWeight: 'bold', color: prediction.color }}>
-                        {formatResponsePercentage(prediction.efficacy)}
+                        {formatResponsePercentage(prediction.efficacy ?? 'low')} {/* Added default value */}
                       </div>
                     </div>
 
@@ -666,12 +674,12 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
                     <div>
                       <div style={{ opacity: 0.8, marginBottom: '0.25rem' }}>Confidence</div>
                       <div style={{ fontWeight: 'bold' }}>
-                        {Math.round(prediction.confidenceLevel * 100)}%
+                        {Math.round((prediction.confidenceLevel ?? 1) * 100)}% {/* Added default value */}
                       </div>
                     </div>
                   </div>
 
-                  {prediction.sideEffects && (
+                  {prediction.sideEffectRisks && prediction.sideEffectRisks.length > 0 && ( // Corrected property name and added length check
                     <div
                       style={{
                         fontSize: '0.8rem',
@@ -680,22 +688,11 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
                       }}
                     >
                       <span style={{ opacity: 0.7 }}>Potential side effects:</span>{' '}
-                      {prediction.sideEffects}
+                      {prediction.sideEffectRisks.map(risk => risk.effect).join(', ')} {/* Corrected property name and display logic */}
                     </div>
                   )}
 
-                  {prediction.contraindications && (
-                    <div
-                      style={{
-                        fontSize: '0.8rem',
-                        opacity: 0.9,
-                        marginTop: '0.5rem',
-                      }}
-                    >
-                      <span style={{ opacity: 0.7 }}>Contraindications:</span>{' '}
-                      {prediction.contraindications}
-                    </div>
-                  )}
+                  {/* Removed contraindications section as property doesn't exist */}
                 </div>
               </Html>
             )}

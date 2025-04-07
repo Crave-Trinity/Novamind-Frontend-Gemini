@@ -3,8 +3,9 @@
  * Core domain entities for brain visualization with quantum-level type safety
  */
 
-import { Vector3 as ImportedVector3, SafeArray } from '@domain/types/shared/common'; // Import Vector3 with alias
-import type { Vector3 } from '@domain/types/common';
+import type { Vector3 as ImportedVector3 } from '@domain/types/shared/common';
+import { SafeArray } from '@domain/types/shared/common'; // Import Vector3 with alias
+// Removed conflicting import of Vector3
 
 // Define Vector3 locally if needed, or ensure it's correctly imported and used
 // Assuming Vector3 should be the imported one, remove local declaration if present

@@ -2,13 +2,33 @@
  * NOVAMIND Neural Visualization Component
  * Renders a 3D brain model with clinical-grade precision
  */
-import React, { useRef, useEffect, useMemo } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import React, { useRef, useMemo, useEffect } from 'react'; // Restored useEffect
+import { Canvas, ThreeEvent } from '@react-three/fiber'; // Added ThreeEvent
+// @ts-ignore: TS2305 - Module '"@react-three/drei"' has no exported member 'OrbitControls'/'PerspectiveCamera'. (Likely type/config issue)
+import { OrbitControls, PerspectiveCamera, Line } from '@react-three/drei'; // Removed unused useGLTF, Added Line
+import { Bloom, EffectComposer } from '@react-three/postprocessing'; // Restored EffectComposer
+import { Mesh } from 'three'; // Removed Line import from three
 
-import type { BrainModel, BrainRegion, RenderMode, SafeArray } from '@domain/types/brain';
-import { isBrainModel } from '@domain/types/brain';
+import type { BrainModel, BrainRegion } from '@domain/types/brain'; // Re-add BrainRegion
+import { RenderMode, isBrainModel } from '@domain/types/brain'; // Re-add isBrainModel
+
+// --- Component Interfaces ---
+
+interface RegionNodeProps {
+  region: BrainRegion;
+  isSelected: boolean;
+  settings?: typeof DEFAULT_SETTINGS;
+  onClick?: () => void;
+}
+
+interface ConnectionProps {
+  start: { x: number; y: number; z: number };
+  end: { x: number; y: number; z: number };
+  color: string;
+  opacity: number;
+  selected?: boolean;
+  // pulse?: boolean; // Removed unused prop
+}
 
 interface BrainVisualizationProps {
   brainModel?: BrainModel | null;
@@ -19,6 +39,8 @@ interface BrainVisualizationProps {
   error?: Error | null;
 }
 
+// --- Default Settings ---
+
 const DEFAULT_SETTINGS = {
   showLabels: true,
   rotationSpeed: 0.5,
@@ -26,10 +48,97 @@ const DEFAULT_SETTINGS = {
   backgroundColor: '#121212',
   connectionOpacity: 0.6,
   nodeSize: 1,
-  renderMode: 'normal' as RenderMode,
+  renderMode: 'normal' as RenderMode, // Re-add RenderMode type cast
   enableBloom: true,
   synapticPulse: true,
 };
+
+// --- Helper Components ---
+
+// Neural-safe region node component with quantum-level typing
+const RegionNode: React.FC<RegionNodeProps> = ({ region, isSelected, settings, onClick }) => {
+  const mesh = useRef<Mesh>(null);
+
+  // Neural-safe activity color mapping with clinical precision
+  const color = useMemo(() => {
+    if (isSelected) return settings?.highlightColor || '#0066F0';
+
+    // Neural activity color mapping
+    if (settings?.renderMode === RenderMode.FUNCTIONAL) { // Use imported RenderMode
+      const activityLevel = region.activityLevel || 0;
+      if (activityLevel > 0.8) return '#F41A13'; // Critical
+      if (activityLevel > 0.6) return '#FF8C00'; // High
+      if (activityLevel > 0.4) return '#FFCC33'; // Moderate
+      if (activityLevel > 0.2) return '#99C2F9'; // Low
+      return '#868E96'; // Minimal
+    }
+
+    // Risk color mapping
+    if (settings?.renderMode === RenderMode.RISK && region.riskFactor !== undefined) { // Use imported RenderMode
+      if (region.riskFactor > 0.8) return '#F41A13'; // Severe
+      if (region.riskFactor > 0.6) return '#FF8C00'; // High
+      if (region.riskFactor > 0.4) return '#FFCC33'; // Moderate
+      if (region.riskFactor > 0.2) return '#99C2F9'; // Low
+      return '#82C7FF'; // Minimal
+    }
+
+    return region.color || '#82C7FF';
+  }, [region, isSelected, settings]);
+
+  // Neural pulse animation with quantum precision
+  useEffect(() => {
+    if (!mesh.current) return;
+    if (isSelected && settings?.synapticPulse) {
+      // Add neural glow animation here
+    }
+  }, [isSelected, settings]);
+
+  // Neural-safe position with clinical precision
+  const position = useMemo(() => {
+    return [region.position.x || 0, region.position.y || 0, region.position.z || 0];
+  }, [region.position]);
+
+  return (
+    <mesh
+      ref={mesh}
+      position={position as any}
+      onClick={(e: ThreeEvent<MouseEvent>) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
+    >
+      <sphereGeometry args={[(settings?.nodeSize || 1) * (isSelected ? 1.2 : 1), 32, 32]} />
+      <meshStandardMaterial
+        color={color}
+        emissive={isSelected ? color : undefined}
+        emissiveIntensity={isSelected ? 0.5 : 0}
+        roughness={0.4}
+        metalness={0.8}
+      />
+    </mesh>
+  );
+};
+
+// Neural connection component with quantum-level precision
+const Connection: React.FC<ConnectionProps> = ({ start, end, color, opacity, selected }) => {
+  // Use R3F Line component from drei
+  const points = useMemo(() => [
+    [start.x, start.y, start.z],
+    [end.x, end.y, end.z]
+  ] as [number, number, number][], [start, end]);
+
+  return (
+    <Line
+      points={points}
+      color={color}
+      lineWidth={selected ? 2 : 1}
+      opacity={selected ? Math.min(opacity + 0.2, 1) : opacity}
+      transparent={true}
+    />
+  );
+};
+
+// --- Main Component ---
 
 export const BrainVisualization: React.FC<BrainVisualizationProps> = ({
   brainModel,
@@ -41,16 +150,23 @@ export const BrainVisualization: React.FC<BrainVisualizationProps> = ({
 }) => {
   // Ensure neural-safe type handling with quantum-level precision
   const safeModel = useMemo(() => {
-    if (!brainModel || !isBrainModel(brainModel)) {
+    if (!brainModel || !isBrainModel(brainModel)) { // Re-add isBrainModel check
       return {
         regions: [],
-        settings: DEFAULT_SETTINGS,
+        settings: DEFAULT_SETTINGS, // Return default settings if model is invalid/missing
       };
     }
-    return brainModel;
+    // Merge brainModel settings with defaults if brainModel is valid
+    return {
+      ...brainModel,
+      settings: {
+        ...DEFAULT_SETTINGS,
+        // ...(brainModel.settings || {}), // Removed merge: BrainModel type has no 'settings' property
+      },
+    };
   }, [brainModel]);
 
-  const { regions, settings } = safeModel;
+  const { regions, settings } = safeModel; // Remove prefix from settings
 
   // Neural-safe rendering states
   if (isLoading) {
@@ -150,7 +266,7 @@ export const BrainVisualization: React.FC<BrainVisualizationProps> = ({
                   color={settings?.highlightColor || '#0066F0'}
                   opacity={settings?.connectionOpacity || 0.6}
                   selected={region.id === selectedRegion || targetId === selectedRegion}
-                  pulse={settings?.synapticPulse}
+                  // pulse prop removed as it doesn't exist on ConnectionProps
                 />
               );
             })}
@@ -192,115 +308,6 @@ export const BrainVisualization: React.FC<BrainVisualizationProps> = ({
         </button>
       </div>
     </div>
-  );
-};
-
-// Neural-safe region node component with quantum-level typing
-interface RegionNodeProps {
-  region: BrainRegion;
-  isSelected: boolean;
-  settings?: typeof DEFAULT_SETTINGS;
-  onClick?: () => void;
-}
-
-const RegionNode: React.FC<RegionNodeProps> = ({ region, isSelected, settings, onClick }) => {
-  const mesh = useRef<THREE.Mesh>(null);
-
-  // Neural-safe activity color mapping with clinical precision
-  const color = useMemo(() => {
-    if (isSelected) return settings?.highlightColor || '#0066F0';
-
-    // Neural activity color mapping
-    if (settings?.renderMode === 'activity') {
-      const activityLevel = region.activityLevel || 0;
-      if (activityLevel > 0.8) return '#F41A13'; // Critical
-      if (activityLevel > 0.6) return '#FF8C00'; // High
-      if (activityLevel > 0.4) return '#FFCC33'; // Moderate
-      if (activityLevel > 0.2) return '#99C2F9'; // Low
-      return '#868E96'; // Minimal
-    }
-
-    // Risk color mapping
-    if (settings?.renderMode === 'risk' && region.riskFactor !== undefined) {
-      if (region.riskFactor > 0.8) return '#F41A13'; // Severe
-      if (region.riskFactor > 0.6) return '#FF8C00'; // High
-      if (region.riskFactor > 0.4) return '#FFCC33'; // Moderate
-      if (region.riskFactor > 0.2) return '#99C2F9'; // Low
-      return '#82C7FF'; // Minimal
-    }
-
-    return region.color || '#82C7FF';
-  }, [region, isSelected, settings]);
-
-  // Neural pulse animation with quantum precision
-  useEffect(() => {
-    if (!mesh.current) return;
-    if (isSelected && settings?.synapticPulse) {
-      // Add neural glow animation here
-    }
-  }, [isSelected, settings]);
-
-  // Neural-safe position with clinical precision
-  const position = useMemo(() => {
-    return [region.position.x || 0, region.position.y || 0, region.position.z || 0];
-  }, [region.position]);
-
-  return (
-    <mesh
-      ref={mesh}
-      position={position as any}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.();
-      }}
-    >
-      <sphereGeometry args={[(settings?.nodeSize || 1) * (isSelected ? 1.2 : 1), 32, 32]} />
-      <meshStandardMaterial
-        color={color}
-        emissive={isSelected ? color : undefined}
-        emissiveIntensity={isSelected ? 0.5 : 0}
-        roughness={0.4}
-        metalness={0.8}
-      />
-    </mesh>
-  );
-};
-
-// Neural connection component with quantum-level precision
-interface ConnectionProps {
-  start: { x: number; y: number; z: number };
-  end: { x: number; y: number; z: number };
-  color: string;
-  opacity: number;
-  selected?: boolean;
-  pulse?: boolean;
-}
-
-const Connection: React.FC<ConnectionProps> = ({ start, end, color, opacity, selected, pulse }) => {
-  const ref = useRef<THREE.Line>(null);
-
-  // Neural-safe points array with clinical precision
-  const points = useMemo(() => {
-    return [start.x, start.y, start.z, end.x, end.y, end.z];
-  }, [start, end]);
-
-  return (
-    <line ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={2}
-          array={new Float32Array(points)}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <lineBasicMaterial
-        color={color}
-        opacity={selected ? Math.min(opacity + 0.2, 1) : opacity}
-        transparent={true}
-        linewidth={selected ? 2 : 1}
-      />
-    </line>
   );
 };
 

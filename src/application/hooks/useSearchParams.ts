@@ -4,11 +4,9 @@
  * Uses react-router-dom v6+ hooks
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import {
   useSearchParams as useReactRouterSearchParams,
-  useNavigate,
-  useLocation,
 } from 'react-router-dom';
 
 // Define the structure for the state object if needed (example)
@@ -32,8 +30,7 @@ interface UseSearchParamsReturn {
 
 export function useSearchParams(): UseSearchParamsReturn {
   const [searchParams, setSearchParams] = useReactRouterSearchParams();
-  const navigate = useNavigate();
-  const location = useLocation();
+  // Removed unused variables: navigate, location
 
   const getParam = useCallback(
     (key: string): string | null => {

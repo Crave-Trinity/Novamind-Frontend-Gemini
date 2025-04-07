@@ -4,7 +4,7 @@
  * with neuropsychiatric precision and HIPAA compliance
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Domain types
@@ -43,11 +43,11 @@ interface UseClinicalContextReturn {
 
   // Methods
   refreshClinicalData: (patientId: string) => Promise<void>;
-  fetchSymptomMappings: () => Promise<Result<SymptomNeuralMapping[]>>;
-  fetchDiagnosisMappings: () => Promise<Result<DiagnosisNeuralMapping[]>>;
-  fetchTreatmentMappings: () => Promise<Result<TreatmentNeuralMapping[]>>;
-  fetchRiskAssessment: (patientId: string) => Promise<Result<RiskAssessment>>;
-  fetchTreatmentPredictions: (patientId: string) => Promise<Result<TreatmentResponsePrediction[]>>;
+  fetchSymptomMappings: () => Promise<Result<SymptomNeuralMapping[], Error>>; // Added error type
+  fetchDiagnosisMappings: () => Promise<Result<DiagnosisNeuralMapping[], Error>>; // Added error type
+  fetchTreatmentMappings: () => Promise<Result<TreatmentNeuralMapping[], Error>>; // Added error type
+  fetchRiskAssessment: (patientId: string) => Promise<Result<RiskAssessment, Error>>; // Added error type
+  fetchTreatmentPredictions: (patientId: string) => Promise<Result<TreatmentResponsePrediction[], Error>>; // Added error type
 }
 
 /**
@@ -224,7 +224,7 @@ export function useClinicalContext(patientId?: string): UseClinicalContextReturn
   );
 
   // Explicit fetch methods for individual data types
-  const fetchSymptomMappings = useCallback(async (): Promise<Result<SymptomNeuralMapping[]>> => {
+  const fetchSymptomMappings = useCallback(async (): Promise<Result<SymptomNeuralMapping[], Error>> => { // Added error type
     try {
       const result = await clinicalService.fetchSymptomMappings();
 
@@ -245,7 +245,7 @@ export function useClinicalContext(patientId?: string): UseClinicalContextReturn
   }, [queryClient]);
 
   const fetchDiagnosisMappings = useCallback(async (): Promise<
-    Result<DiagnosisNeuralMapping[]>
+    Result<DiagnosisNeuralMapping[], Error> // Added error type
   > => {
     try {
       const result = await clinicalService.fetchDiagnosisMappings();
@@ -267,7 +267,7 @@ export function useClinicalContext(patientId?: string): UseClinicalContextReturn
   }, [queryClient]);
 
   const fetchTreatmentMappings = useCallback(async (): Promise<
-    Result<TreatmentNeuralMapping[]>
+    Result<TreatmentNeuralMapping[], Error> // Added error type
   > => {
     try {
       const result = await clinicalService.fetchTreatmentMappings();
@@ -289,7 +289,7 @@ export function useClinicalContext(patientId?: string): UseClinicalContextReturn
   }, [queryClient]);
 
   const fetchRiskAssessment = useCallback(
-    async (patientId: string): Promise<Result<RiskAssessment>> => {
+    async (patientId: string): Promise<Result<RiskAssessment, Error>> => { // Added error type
       try {
         const result = await clinicalService.fetchRiskAssessment(patientId);
 
@@ -312,7 +312,7 @@ export function useClinicalContext(patientId?: string): UseClinicalContextReturn
   );
 
   const fetchTreatmentPredictions = useCallback(
-    async (patientId: string): Promise<Result<TreatmentResponsePrediction[]>> => {
+    async (patientId: string): Promise<Result<TreatmentResponsePrediction[], Error>> => { // Added error type
       try {
         const result = await clinicalService.fetchTreatmentPredictions(patientId);
 

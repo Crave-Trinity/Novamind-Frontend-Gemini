@@ -4,11 +4,13 @@
  * with mathematical precision and quantum-level type safety
  */
 
-import { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+import type { BrainRegion } from '@domain/types/brain/models';
+// Removed unused import: NeuralConnection
 import { RiskLevel } from '@domain/types/clinical/risk';
-import { Diagnosis, Symptom } from '@domain/types/clinical/patient';
-import { TreatmentType } from '@domain/types/clinical/treatment';
-import { SafeArray, Result, success, failure } from '@domain/types/shared/common'; // Use correct alias
+import type { Diagnosis, Symptom } from '@domain/types/clinical/patient';
+import type { TreatmentType } from '@domain/types/clinical/treatment';
+import type { Result } from '@domain/types/shared/common';
+import { SafeArray, success, failure } from '@domain/types/shared/common'; // Use correct alias
 
 /**
  * Clinical-to-Neural Mapping Definitions
@@ -107,7 +109,7 @@ export function calculateNeuralActivation(
   activeSymptoms: Symptom[],
   diagnosisMappings?: DiagnosisNeuralMapping[],
   activeDiagnoses?: Diagnosis[]
-): Result<Map<string, number>> {
+): Result<Map<string, number>, Error> { // Added error type
   try {
     // Create a safe wrapper for our inputs
     const safeRegions = new SafeArray(regions);
@@ -193,7 +195,7 @@ export function calculateNeuralActivation(
 export function mapSymptomsToRegions(
   symptomMappings: SymptomNeuralMapping[],
   activeSymptoms: Symptom[]
-): Result<Map<string, Symptom[]>> {
+): Result<Map<string, Symptom[]>, Error> { // Added error type
   try {
     const safeSymptomMappings = new SafeArray(symptomMappings);
     const safeActiveSymptoms = new SafeArray(activeSymptoms);
@@ -235,7 +237,7 @@ export function mapSymptomsToRegions(
 export function mapDiagnosesToRegions(
   diagnosisMappings: DiagnosisNeuralMapping[],
   activeDiagnoses: Diagnosis[]
-): Result<Map<string, Diagnosis[]>> {
+): Result<Map<string, Diagnosis[]>, Error> { // Added error type
   try {
     const safeDiagnosisMappings = new SafeArray(diagnosisMappings);
     const safeActiveDiagnoses = new SafeArray(activeDiagnoses);
@@ -275,12 +277,12 @@ export function mapDiagnosesToRegions(
 
 // Calculate treatment impact on neural regions
 export function calculateTreatmentImpact(
-  regions: BrainRegion[],
+  _regions: BrainRegion[], // Prefixed unused parameter
   treatmentMappings: TreatmentNeuralMapping[],
   treatmentIds: string[]
-): Result<NeuralImpactRating> {
+): Result<NeuralImpactRating, Error> { // Added error type
   try {
-    const safeRegions = new SafeArray(regions);
+    // Removed unused variable: _safeRegions
     const safeTreatmentMappings = new SafeArray(treatmentMappings);
     const safeTreatmentIds = new SafeArray(treatmentIds);
 

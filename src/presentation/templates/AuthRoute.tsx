@@ -10,7 +10,7 @@ import { checkAuthStatus } from '@application/utils/authUtils'; // Import from n
  */
 const AuthRoute: React.FC = () => {
   // Use the utility function to determine auth status
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(checkAuthStatus());
+  const [isAuthenticated] = useState<boolean>(checkAuthStatus()); // Removed unused setIsAuthenticated
   const location = useLocation();
 
   // In production, this would check tokens properly

@@ -153,7 +153,8 @@ class MockWebGLRenderingContext {
   drawArrays() {}
   drawElements() {}
 
-  getExtension(extensionName: string) { // Add mock getExtension
+  getExtension(extensionName: string) {
+    // Add mock getExtension
     if (extensionName === 'WEBGL_lose_context') {
       return { loseContext: fn() }; // Mock the lose context extension
     }

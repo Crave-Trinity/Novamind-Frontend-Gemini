@@ -1,4 +1,4 @@
-import React from 'react';
+// Removed unused React import
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -31,13 +31,14 @@ describe('ThemeProvider', () => {
       value: {
         getItem: mockGetItem,
         setItem: mockSetItem,
-        clear: vi.fn(() => { // Add clear method to local mock
+        clear: vi.fn(() => {
+          // Add clear method to local mock
           mockGetItem.mockReturnValue(null); // Simulate clearing by resetting getItem
           // Note: This doesn't perfectly replicate clearing the internal store
           // used by the global mock, but should satisfy the interface for this test file.
         }),
       },
-      configurable: true // Ensure configurable for cleanup/restore
+      configurable: true, // Ensure configurable for cleanup/restore
     });
 
     // Setup matchMedia mock for each test

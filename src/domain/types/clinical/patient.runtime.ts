@@ -8,7 +8,7 @@
 import type {
   Patient,
   PatientDemographics,
-  ClinicalData,
+  // Removed unused: ClinicalData
   Diagnosis,
   Symptom,
   Medication,

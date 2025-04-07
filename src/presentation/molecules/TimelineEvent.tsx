@@ -17,21 +17,21 @@ import {
   TooltipTrigger,
 } from '@presentation/atoms/Tooltip';
 // Collapsible import removed as component doesn't exist at this path
-import Card from '@presentation/atoms/Card'; // Corrected to default import
+// Removed unused import: import Card from '@presentation/atoms/Card';
 
 // Icons
-import { ChevronDown, ChevronRight, Clock, Brain, Activity } from 'lucide-react';
+import { ChevronDown, Clock, Brain } from 'lucide-react'; // Removed unused icons
 
 // Domain types
 // Corrected path for clinical event types
-import {
+import type {
   ClinicalEvent,
-  ClinicalEventType,
   TreatmentEvent,
   SymptomEvent,
   DiagnosisEvent,
   AssessmentEvent,
 } from '@domain/types/clinical/events';
+// Removed unused import: import { ClinicalEventType } from '@domain/types/clinical/events';
 
 /**
  * Props with neural-safe typing
@@ -313,7 +313,7 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
       default:
         return (
           <div className="space-y-2 mt-2">
-            {event.details && <p className="text-xs text-slate-600">{event.details}</p>}
+            {(event as any).details && <p className="text-xs text-slate-600">{(event as any).details}</p>} {/* Cast event to any for default case */}
           </div>
         );
     }

@@ -1,5 +1,6 @@
-import axios, { AxiosRequestConfig } from 'axios';
-import { IApiClient } from '@api/IApiClient';
+import type { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
+import type { IApiClient } from '@api/IApiClient';
 import { mockApi } from '@api/mockApi';
 
 /**
@@ -86,7 +87,7 @@ export class EnhancedMockApiClient implements IApiClient {
   /**
    * Generic GET request
    */
-  public async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  public async get<T>(url: string, _config?: AxiosRequestConfig): Promise<T> { // Prefixed unused config
     // Log the request attempt
     if (this.auditLogsEnabled) {
       this.logActivity('api_request', { method: 'GET', url });
@@ -96,7 +97,7 @@ export class EnhancedMockApiClient implements IApiClient {
     await this.simulateNetworkDelay();
 
     // Extract resource name from URL for mock data lookup
-    const resourceType = url.split('/')[1];
+    // Removed unused variable: const _resourceType = url.split('/')[1];
 
     // Return appropriate mock data based on the URL
     let result: any;
@@ -128,7 +129,7 @@ export class EnhancedMockApiClient implements IApiClient {
   /**
    * Generic POST request
    */
-  public async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  public async post<T>(url: string, data?: any, _config?: AxiosRequestConfig): Promise<T> { // Prefixed unused config
     // Log the request attempt
     if (this.auditLogsEnabled) {
       this.logActivity('api_request', {
@@ -171,7 +172,7 @@ export class EnhancedMockApiClient implements IApiClient {
   /**
    * Generic PUT request
    */
-  public async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  public async put<T>(url: string, data?: any, _config?: AxiosRequestConfig): Promise<T> { // Prefixed unused config
     // Log the request attempt
     if (this.auditLogsEnabled) {
       this.logActivity('api_request', {
@@ -197,7 +198,7 @@ export class EnhancedMockApiClient implements IApiClient {
   /**
    * Generic DELETE request
    */
-  public async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  public async delete<T>(url: string, _config?: AxiosRequestConfig): Promise<T> { // Prefixed unused config
     // Log the request attempt
     if (this.auditLogsEnabled) {
       this.logActivity('api_request', { method: 'DELETE', url });

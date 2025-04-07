@@ -7,17 +7,14 @@ import {
   validateData, // Using the generic validator
   isRiskPredictionRequest,
   isRiskPredictionResponse,
-  isTreatmentResponseRequest,
-  isTreatmentResponseResponse,
+  // isTreatmentResponseRequest, // Removed unused
+  // isTreatmentResponseResponse, // Removed unused
   // Import other guards as they are defined
 } from '@api/XGBoostService.runtime';
-import {
-  RiskPredictionRequest,
-  RiskPredictionResponse,
-  TreatmentResponseRequest,
-  TreatmentResponseResponse,
-  // Import other interfaces as needed
-} from '@api/XGBoostService';
+import type { RiskPredictionRequest, RiskPredictionResponse } from '@api/XGBoostService';
+// Removed unused imports: TreatmentResponseRequest, TreatmentResponseResponse
+// Import other interfaces as needed
+// } from '@api/XGBoostService'; // Commented out empty import block
 
 // --- Mock Data ---
 

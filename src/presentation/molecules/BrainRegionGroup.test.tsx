@@ -4,12 +4,13 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 
-import { screen, fireEvent } from '@testing-library/react'; // render is imported from unified utils
-import React from 'react';
-import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react'; // render is imported from unified utils, removed unused fireEvent
+// Removed unused React import (new JSX transform)
+// Removed unused userEvent import
 import BrainRegionGroup from './BrainRegionGroup'; // Assuming default export
 import { render } from '@test/test-utils.unified'; // Import the unified render
-import { RenderMode, ThemeOption } from '@domain/types/brain/visualization'; // Import RenderMode and ThemeOption
+import type { ThemeOption } from '@domain/types/brain/visualization';
+import { RenderMode } from '@domain/types/brain/visualization'; // Import RenderMode and ThemeOption
 
 // Removed local R3F mock
 
@@ -57,7 +58,7 @@ describe('BrainRegionGroup', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+    // Removed unused variable: const user = userEvent.setup();
     render(<BrainRegionGroup {...mockProps} />); // Use the unified render
 
     // Simulate user interactions

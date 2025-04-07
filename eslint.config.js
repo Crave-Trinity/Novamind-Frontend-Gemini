@@ -9,7 +9,7 @@ export default tseslint.config(
   {
     // Custom rules and overrides
     rules: {
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }], // Changed to warn initially to avoid breaking changes, can be 'error' later
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }], // Set to error to enable autofixing
       '@typescript-eslint/consistent-type-imports': 'error',
       // Add any other project-specific rules here
     },

@@ -2,13 +2,13 @@
  * NOVAMIND Neural Test Suite
  * NotFound testing with quantum precision
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest'; // Removed unused vi import
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react'; // Removed unused fireEvent import
 import { MemoryRouter } from 'react-router-dom';
-import userEvent from '@testing-library/user-event';
-import NotFound from '@/pages/NotFound'; // Assuming default export
-import { renderWithProviders } from '@test/test-utils.tsx';
+// Removed unused userEvent import
+import NotFound from '@presentation/pages/NotFound'; // Corrected import path
+// Removed unused and incorrect renderWithProviders import
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Assuming no specific props are required for NotFound page
@@ -27,7 +27,7 @@ describe('NotFound', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+    // const user = userEvent.setup(); // Removed unused variable
     render(
       <MemoryRouter>
         <NotFound {...mockProps} />

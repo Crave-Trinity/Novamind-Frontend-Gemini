@@ -3,7 +3,7 @@
  * Provides state management and data fetching for 3D brain visualization
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { Vector3 } from '@domain/types/shared/common'; // Use type import
 import type { BrainRegion, BrainModel, NeuralConnection } from '@domain/types/brain/models'; // Use type import

@@ -10,7 +10,7 @@ import type { BiometricStream } from '@domain/types/biometric/streams';
 const getStreamMetadata = async (
   patientId: string,
   streamIds: string[]
-): Promise<Result<BiometricStream[]>> => {
+): Promise<Result<BiometricStream[], Error>> => { // Added error type
   console.log(`Fetching metadata for patient ${patientId}, streams: ${streamIds.join(', ')}`);
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 100));
@@ -38,7 +38,7 @@ const calculateStreamCorrelations = async (
   patientId: string,
   streamIds: string[],
   timeWindowMinutes: number
-): Promise<Result<Map<string, number>>> => {
+): Promise<Result<Map<string, number>, Error>> => { // Added error type
   console.log(
     `Calculating correlations for patient ${patientId}, streams: ${streamIds.join(', ')}, window: ${timeWindowMinutes} mins`
   );

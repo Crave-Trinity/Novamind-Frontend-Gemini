@@ -4,10 +4,10 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 
-import React from 'react'; // Import React
+// Removed unused React import
 import { render, screen, waitFor } from '@test/test-utils.unified'; // Use unified render and import waitFor
-import userEvent from '@testing-library/user-event';
-import BrainVisualizationPage from '@/pages/BrainVisualizationPage'; // Assuming default export
+// Removed unused userEvent import
+import BrainVisualizationPage from '@presentation/pages/BrainVisualizationPage'; // Corrected import path
 // import { renderWithProviders } from "@test/test-utils.tsx"; // Use unified render instead
 
 // Mock the child component that uses R3F heavily
@@ -42,7 +42,7 @@ describe('BrainVisualizationPage', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+    // const user = userEvent.setup(); // Removed unused variable
     render(<BrainVisualizationPage {...mockProps} />); // Use unified render
 
     // Simulate user interactions

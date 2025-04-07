@@ -159,12 +159,12 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
   devicePerformanceClass = 'medium',
 }) => {
   // Get THREE.js camera
-  const { camera, gl, scene } = useThree();
+  const { camera } = useThree(); // Removed unused gl, scene
 
   // Performance tracking
   const fpsBufferSize = 60; // Track FPS over 60 frames (1 second at 60fps)
   const fpsBuffer = useRef<number[]>([]);
-  const frameCount = useRef(0);
+  // Removed unused ref: const frameCount = useRef(0);
   const lastFrameTime = useRef(performance.now());
   const lastFPSUpdateTime = useRef(performance.now());
   const averageFPS = useRef(60);

@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest'; // Removed unused vi import
-import React from 'react';
+// Removed unused React import
 import { screen, within } from '@testing-library/react'; // Import within
 import { renderWithProviders } from '@test/test-utils.unified'; // Import unified render
 

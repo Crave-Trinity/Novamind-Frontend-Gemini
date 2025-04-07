@@ -3,11 +3,10 @@
  * Ensures input data conforms to expected domain types.
  */
 
-import { Result, Ok, Err } from 'ts-results';
+import type { Result } from 'ts-results';
+import { Ok, Err } from 'ts-results';
+import type { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
 import {
-  BrainModel,
-  BrainRegion,
-  NeuralConnection,
   isBrainModel, // Re-use domain guard
   isBrainRegion, // Re-use domain guard
   isNeuralConnection, // Re-use domain guard

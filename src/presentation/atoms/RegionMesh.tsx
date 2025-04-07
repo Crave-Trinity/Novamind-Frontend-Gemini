@@ -5,9 +5,9 @@
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
-import { ThemeSettings } from '@domain/types/brain/visualization';
-import { Vector3 } from 'three'; // Import Vector3 from three
+import type * as THREE from 'three';
+import type { ThemeSettings } from '@domain/types/brain/visualization';
+// Removed unused import: import { Vector3 } from 'three';
 
 // Neural-safe prop definition with explicit typing
 interface RegionMeshProps {

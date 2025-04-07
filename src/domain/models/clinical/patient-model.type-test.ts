@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expectTypeOf } from 'vitest';
-import {
+import type {
   PatientDemographics,
   ClinicalHistory,
   Medication,

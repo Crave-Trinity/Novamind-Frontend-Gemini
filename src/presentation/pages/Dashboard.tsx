@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auditLogService, AuditEventType } from '@infrastructure/clients/auditLogClient';
-import LoadingIndicator from '@atoms/LoadingIndicator';
+import { auditLogClient, AuditEventType } from '@infrastructure/clients/auditLogClient'; // Corrected import name
+// Removed unused LoadingIndicator import
 
 interface PatientCard {
   id: string;
@@ -70,7 +70,7 @@ const Dashboard: React.FC = () => {
   const handleViewBrain = useCallback(
     (patientId: string) => {
       // Log for HIPAA compliance
-      auditLogService.log(AuditEventType.PATIENT_RECORD_VIEW, {
+      auditLogClient.log(AuditEventType.PATIENT_RECORD_VIEW, { // Corrected usage
         action: 'navigate_to_brain_visualization',
         resourceId: patientId,
         resourceType: 'patient',

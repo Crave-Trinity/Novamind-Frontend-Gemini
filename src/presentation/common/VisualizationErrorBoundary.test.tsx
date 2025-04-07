@@ -2,13 +2,11 @@
  * NOVAMIND Neural Test Suite
  * VisualizationErrorBoundary testing with quantum precision
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react'; // Added missing React import
-import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import VisualizationErrorBoundary from './VisualizationErrorBoundary'; // Assuming default export
-import { renderWithProviders } from '@test/test-utils.tsx';
+// import { renderWithProviders } from '@test/test-utils.tsx'; // Removed unused import
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for VisualizationErrorBoundary
@@ -26,7 +24,7 @@ describe('VisualizationErrorBoundary', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+    // Removed unused variable: const user = userEvent.setup();
     render(<VisualizationErrorBoundary {...mockProps} />);
 
     // Simulate user interactions

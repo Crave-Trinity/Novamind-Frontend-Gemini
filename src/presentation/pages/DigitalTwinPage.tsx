@@ -27,9 +27,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@presentation/atoms/Tooltip'; // Assuming this path is correct
-import { Badge } from '@presentation/atoms/Badge'; // Assuming this path is correct
+// Removed unused Badge import
 import { Card } from '@/components/ui/card'; // Correct path
-import { Separator } from '@/components/ui/separator'; // Correct path
+// Removed unused Separator import
 import { ScrollArea } from '@/components/ui/scroll-area'; // Correct path
 
 // Layout components
@@ -44,9 +44,9 @@ import {
   List,
   Database,
   DownloadCloud,
-  Share2,
-  Printer,
-  Layers,
+  // Share2, // Removed unused icon
+  // Printer, // Removed unused icon
+  // Layers, // Removed unused icon
   Maximize,
   PanelLeft,
   PanelRight,
@@ -54,11 +54,11 @@ import {
 
 // Services
 // import { patientService } from "@application/services/patientService"; // Module missing, likely clinicalService
-import { clinicalService } from '@application/services/clinical/clinical.service'; // Use correct service
+// Removed unused clinicalService import
 
 // Domain types
 // import { Patient } from "@domain/types/patient/patient"; // Module missing, likely clinical/patient
-import { Patient } from '@domain/types/clinical/patient'; // Correct path
+import type { Patient } from '@domain/types/clinical/patient'; // Correct path
 
 // Placeholder for missing components
 const PlaceholderPanel: React.FC<{ title: string }> = ({ title }) => (
@@ -73,12 +73,7 @@ const DigitalTwinSettings = () => <PlaceholderPanel title="Digital Twin Settings
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="h-screen flex flex-col">{children}</div>
 ); // Basic Layout Placeholder
-const PageHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
-  <div className="mb-4">
-    <h1 className="text-2xl font-bold">{title}</h1>
-    {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
-  </div>
-);
+// Removed unused PageHeader component
 
 /**
  * Digital Twin Page component - primary integration point for all neural visualization
@@ -195,18 +190,10 @@ export const DigitalTwinPage: React.FC = () => {
     console.log('Export action triggered');
   }, []);
 
-  // Handle region selection
-  const handleRegionSelect = useCallback((regionId: string | null) => {
-    // Allow null
-    // Handled by visualization coordinator (currently commented out)
-    console.log('Region selected:', regionId);
-  }, []);
+  // Removed unused handleRegionSelect function
 
   // Handle visualization error
-  const handleVisualizationError = useCallback((error: Error) => {
-    console.error('Visualization error:', error);
-    setError(`Visualization error: ${error.message}`);
-  }, []);
+  // Removed unused handleVisualizationError function
 
   // If loading
   if (loading) {

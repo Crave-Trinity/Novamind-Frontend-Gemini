@@ -3,8 +3,8 @@
  * Replaced with minimal test to prevent hanging from useFrame animation loop
  */
 
-import React from 'react';
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
+// Removed unused React import
+import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Removed unused ThreeMocks, memoryMonitor
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { DigitalTwinPage } from './DigitalTwinPage';
@@ -24,7 +24,7 @@ vi.mock('@react-three/fiber', () => ({
     },
     scene: {},
   }),
-  Canvas: ({ children }) => <div data-testid="mock-canvas">{children}</div>,
+  Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="mock-canvas">{children}</div>, // Added type for children
 }));
 
 // Mock Three.js

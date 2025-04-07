@@ -20,7 +20,7 @@ export const brainModelService = {
   /**
    * Fetch brain model by scan ID
    */
-  fetchBrainModel: async (scanId: string): Promise<Result<BrainModel>> => {
+  fetchBrainModel: async (scanId: string): Promise<Result<BrainModel, Error>> => { // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<BrainModel>(`${BRAIN_MODEL_ENDPOINT}/${scanId}`, {
@@ -80,7 +80,7 @@ export const brainModelService = {
     scanType?: string,
     limit: number = 10,
     offset: number = 0
-  ): Promise<Result<{ models: BrainModel[]; total: number }>> => {
+  ): Promise<Result<{ models: BrainModel[]; total: number }, Error>> => { // Added error type
     try {
       // Build query parameters
       const params: Record<string, string | number> = { limit, offset };
@@ -151,7 +151,7 @@ export const brainModelService = {
     scanId: string,
     regionId: string,
     updates: Partial<BrainRegion>
-  ): Promise<Result<BrainRegion>> => {
+  ): Promise<Result<BrainRegion, Error>> => { // Added error type
     try {
       // API request
       const response = await axios.patch<BrainRegion>(
@@ -212,7 +212,7 @@ export const brainModelService = {
     scanId: string,
     connectionId: string,
     updates: Partial<NeuralConnection>
-  ): Promise<Result<NeuralConnection>> => {
+  ): Promise<Result<NeuralConnection, Error>> => { // Added error type
     try {
       // API request
       const response = await axios.patch<NeuralConnection>(
@@ -279,7 +279,7 @@ export const brainModelService = {
       category: 'clinical' | 'research' | 'technical';
       visibility: 'private' | 'team' | 'organization';
     }
-  ): Promise<Result<{ id: string; createdAt: string }>> => {
+  ): Promise<Result<{ id: string; createdAt: string }, Error>> => { // Added error type
     try {
       // API request
       const response = await axios.post<{ id: string; createdAt: string }>(
@@ -337,7 +337,7 @@ export const brainModelService = {
    * Generate a brain model from clinical data (mock implementation)
    * In a real system, this would call a server-side AI model
    */
-  generateModel: async (patientId: string): Promise<Result<{ scanId: string; status: string }>> => {
+  generateModel: async (patientId: string): Promise<Result<{ scanId: string; status: string }, Error>> => { // Added error type
     try {
       // API request
       const response = await axios.post<{ scanId: string; status: string }>(
@@ -397,12 +397,15 @@ export const brainModelService = {
   checkGenerationStatus: async (
     generationId: string
   ): Promise<
-    Result<{
-      status: string;
-      progress: number;
-      scanId?: string;
-      error?: string;
-    }>
+    Result<
+      {
+        status: string;
+        progress: number;
+        scanId?: string;
+        error?: string;
+      },
+      Error // Added error type
+    >
   > => {
     try {
       // API request
@@ -459,7 +462,7 @@ export const brainModelService = {
   /**
    * Fetch baseline neural activity for a patient
    */
-  getBaselineActivity: async (patientId: string): Promise<Result<any>> => {
+  getBaselineActivity: async (patientId: string): Promise<Result<any, Error>> => { // Added error type
     // Using 'any' for baseline type for now
     try {
       // Define the correct endpoint for baseline activity

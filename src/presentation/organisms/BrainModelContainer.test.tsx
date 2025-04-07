@@ -3,7 +3,7 @@
  * Replaced with minimal test to prevent hanging from useFrame animation loop
  */
 
-import React from 'react';
+import React from 'react'; // Re-added React import for mock implementation
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@test/test-utils.unified'; // Use unified render
 import BrainModelContainer from './BrainModelContainer'; // Use default import
@@ -80,7 +80,7 @@ vi.mock('@react-spring/three', () => ({
   animated: new Proxy(
     {},
     {
-      get: (target, prop) => {
+      get: (_target, prop) => { // Prefixed unused target parameter
         const MockAnimatedComponent = React.forwardRef(
           ({ children, ...props }: React.PropsWithChildren<any>, ref: any) =>
             React.createElement(
@@ -168,7 +168,7 @@ vi.mock('next-themes', () => ({
 }));
 
 // Import Vector3 *after* vi.mock('three', ...)
-import { Vector3 } from 'three';
+// Removed unused Vector3 import
 
 // Minimal test to verify component can be imported
 describe('BrainModelContainer', () => {

@@ -1,5 +1,5 @@
-import { BrainModel, BrainRegion, NeuralConnection } from '../models/brain.model';
-import { UUID, PaginationParams, PaginatedResponse } from '../types/common';
+import type { BrainModel, BrainRegion, NeuralConnection } from '../models/brain.model';
+import type { UUID, PaginationParams, PaginatedResponse } from '../types/common';
 
 export interface IBrainService {
   // Brain Model Operations

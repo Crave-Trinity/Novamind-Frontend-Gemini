@@ -3,16 +3,19 @@
  * ClinicalMetricCard testing with quantum precision
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest'; // Removed unused vi
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react'; // Restored render, removed unused fireEvent
+// Removed unused userEvent import
 import { ClinicalMetricCard } from './ClinicalMetricsCard';
-import { renderWithProviders } from '@test/test-utils';
+// Removed incorrect import: import { renderWithProviders } from '@test/test-utils';
 
 // Mock data with clinical precision
 const mockProps = {
-  // Add component props here
+  title: 'Test Metric',
+  value: 7,
+  maxValue: 10,
+  severity: 'moderate' as const, // Added required props
 };
 
 describe('ClinicalMetricCard', () => {
@@ -24,7 +27,7 @@ describe('ClinicalMetricCard', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+    // Removed unused variable: const user = userEvent.setup();
     render(<ClinicalMetricCard {...mockProps} />);
 
     // Simulate user interactions

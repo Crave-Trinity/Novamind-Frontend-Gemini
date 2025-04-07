@@ -192,11 +192,13 @@ export function isPatientModel(value: unknown): value is PatientModel {
     typeof patient.firstName === 'string' &&
     typeof patient.lastName === 'string' &&
     patient.dateOfBirth instanceof Date &&
-    patient.contactInformation &&
-    typeof patient.contactInformation === 'object' &&
-    patient.demographics &&
+    typeof patient.contactInformation === 'object' && // Ensure contactInformation is a non-null object
+    patient.contactInformation !== null &&
+    typeof patient.demographics === 'object' && // Ensure demographics is a non-null object
+    patient.demographics !== null &&
     isPatientDemographics(patient.demographics) &&
-    patient.clinicalHistory &&
+    typeof patient.clinicalHistory === 'object' && // Ensure clinicalHistory is a non-null object
+    patient.clinicalHistory !== null &&
     isClinicalHistory(patient.clinicalHistory) &&
     Array.isArray(patient.medications) &&
     patient.medications.every(isMedication) &&

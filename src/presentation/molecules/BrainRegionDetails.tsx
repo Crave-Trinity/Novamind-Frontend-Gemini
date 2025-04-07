@@ -5,10 +5,11 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
-import { Patient, Symptom, Diagnosis } from '@domain/types/clinical/patient';
-import { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
-import {
+import type { BrainModel } from '@domain/types/brain/models';
+// Removed unused BrainRegion type import
+import type { Patient, Symptom, Diagnosis } from '@domain/types/clinical/patient';
+import type { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
+import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
 } from '@domain/models/brain/mapping/brain-mapping'; // Corrected import path
@@ -43,7 +44,7 @@ interface BrainRegionDetailsProps {
 const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
   regionId,
   brainModel,
-  patient,
+  patient: _patient, // Prefixed unused variable
   symptoms,
   diagnoses,
   treatmentPredictions,
@@ -563,7 +564,7 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
                   <ul className="list-disc list-inside text-xs text-gray-300 space-y-1">
                     {effect.mechanisms.map((mech, mechIndex) => (
                       <li key={mechIndex}>
-                        {mech.description} (Target: {mech.neurotransmitter || 'N/A'})
+                        {mech.impactDescription} {/* Removed non-existent neurotransmitter */}
                       </li>
                     ))}
                   </ul>

@@ -5,14 +5,13 @@
  * with HIPAA-compliant security practices.
  */
 
-import {
+import type {
   AuthResult,
   LoginCredentials,
   User,
-  UserRole,
-  Permission,
   SessionVerification,
 } from '@domain/types/auth/auth';
+import { UserRole, Permission } from '@domain/types/auth/auth';
 import { auditLogClient, AuditEventType } from './auditLogClient';
 
 /**
@@ -68,9 +67,8 @@ class AuthClient {
         // Log successful login with audit service
         auditLogClient.log(AuditEventType.USER_LOGIN, {
           userId: user.id,
-          email: user.email,
-          timestamp: Date.now(),
-          details: 'User login successful',
+          timestamp: new Date(), // Use Date object
+          details: `User login successful for ${user.email}`, // Include email in details
         });
 
         return {
@@ -82,20 +80,19 @@ class AuthClient {
 
       // Log failed login attempt
       auditLogClient.log(AuditEventType.UNAUTHORIZED_ACCESS_ATTEMPT, {
-        email: credentials.email,
-        timestamp: Date.now(),
-        details: 'Login failed: Invalid credentials',
+        timestamp: new Date(), // Use Date object
+        details: `Login failed for ${credentials.email}: Invalid credentials`, // Include email in details
       });
 
       return {
         success: false,
         error: 'Invalid email or password',
       };
-    } catch (error) {
+    } catch (_error) { // Prefixed unused error variable
       // Log error
       auditLogClient.log(AuditEventType.SYSTEM_ERROR, {
         errorCode: 'LoginError',
-        errorMessage: error.message,
+        errorMessage: (_error as Error).message, // Use prefixed variable
         details: 'Exception during login attempt',
       });
 
@@ -112,8 +109,8 @@ class AuthClient {
   async logout(): Promise<void> {
     // Log logout action
     auditLogClient.log(AuditEventType.USER_LOGOUT, {
-      userId: this.currentUser?.id,
-      timestamp: Date.now(),
+      userId: this.getCurrentUser()?.id, // Call method instead of accessing property
+      timestamp: new Date(), // Use Date object
       details: 'User logged out',
     });
 

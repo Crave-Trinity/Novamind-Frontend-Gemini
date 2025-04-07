@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { IApiClient } from '@api/IApiClient';
+import type { IApiClient } from '@api/IApiClient';
 
 describe('IApiClient', () => {
   it('processes data with mathematical precision', () => {

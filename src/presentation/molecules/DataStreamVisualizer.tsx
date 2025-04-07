@@ -4,13 +4,16 @@
  * with HIPAA-compliant multi-dimensional correlation analysis
  */
 
-import React, { useRef, useMemo, useState, useEffect, useCallback } from 'react';
-import { useThree, useFrame } from '@react-three/fiber';
-import { Line, Html, Text, Billboard } from '@react-three/drei';
-import { Vector3, Group, Color, MathUtils } from 'three';
+import React, { useRef, useMemo, useState, useCallback } from 'react'; // Removed unused useEffect
+// Removed unused useFrame import
+// @ts-ignore: TS2305 - Module '"@react-three/drei"' has no exported member 'Line'/'Html'/'Billboard'/'Text'. (Likely type/config issue)
+import { Line, Html, Billboard, Text } from '@react-three/drei'; // Re-added Text, suppressed errors
+import type { Group } from 'three';
+import { Vector3, MathUtils } from 'three'; // Removed unused Color
 
 // Domain types
-import { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+import type { BrainRegion } from '@domain/types/brain/models';
+// Removed unused import: import { NeuralConnection } from '@domain/types/brain/models';
 
 /**
  * Neural-safe data point type
@@ -21,7 +24,7 @@ export interface DataPoint {
   label?: string;
   confidence?: number; // 0.0-1.0
   anomaly?: boolean;
-  trend?: 'increasing' | 'decreasing' | 'stable';
+  // trend?: 'increasing' | 'decreasing' | 'stable'; // Removed unused property
 }
 
 /**
@@ -36,7 +39,7 @@ export interface DataStream {
   normalRange?: [number, number];
   criticalThresholds?: [number, number];
   relatedRegionIds?: string[];
-  relatedSymptomIds?: string[];
+  // relatedSymptomIds?: string[]; // Removed unused property
   clinicalSignificance: number; // 0.0-1.0
   visualProperties?: {
     color?: string;
@@ -73,7 +76,7 @@ interface DataStreamVisualizerProps {
   )[];
   interactable?: boolean;
   onStreamSelect?: (streamId: string) => void;
-  onTimeRangeChange?: (range: { start: number; end: number }) => void;
+  onTimeRangeChange?: (range: { start: number; end: number }) => void; // Restored prop
   colorMap?: {
     physiological: string;
     behavioral: string;
@@ -125,7 +128,7 @@ const CATEGORY_CONFIG = {
  */
 export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
   dataStreams,
-  regions,
+  regions: _regions, // Prefixed unused variable
   timeRange,
   width = 10,
   height = 6,
@@ -140,7 +143,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
   categoryFilter,
   interactable = true,
   onStreamSelect,
-  onTimeRangeChange,
+  onTimeRangeChange, // Restored prop in destructuring
   colorMap = {
     physiological: '#ef4444', // Red
     behavioral: '#3b82f6', // Blue
@@ -164,14 +167,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  // Create region lookup map for efficiency
-  const regionMap = useMemo(() => {
-    const map = new Map<string, BrainRegion>();
-    regions.forEach((region) => {
-      map.set(region.id, region);
-    });
-    return map;
-  }, [regions]);
+  // Removed unused regionMap calculation
 
   // Filter and sort data streams
   const processedStreams = useMemo(() => {
@@ -526,7 +522,7 @@ export const DataStreamVisualizer: React.FC<DataStreamVisualizerProps> = ({
   const formatTimestamp = useCallback(
     (timestamp: number): string => {
       const date = new Date(timestamp);
-      const now = new Date();
+      // Removed unused 'now' variable
 
       // Format based on time range
       const timespan = effectiveTimeRange.end - effectiveTimeRange.start;

@@ -2,8 +2,8 @@
  * NOVAMIND Neural-Safe Visualization Type Definitions
  * Brain visualization types with quantum-level type safety
  */
-import { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
-import type { Color, Vector3 } from '../common';
+import type { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+import type { Color, Vector3 } from '../common'; // Assuming '../common' resolves correctly
 
 // Digital Twin visualization modes with clinical precision
 export enum RenderMode {
@@ -64,6 +64,13 @@ export interface VisualizationSettings {
   // Performance settings
   maxVisibleRegions: number;
   levelOfDetail: 'low' | 'medium' | 'high' | 'dynamic';
+  // Added missing properties based on VisualizationControls usage
+  activityThreshold?: number;
+  showInactiveRegions?: boolean;
+  enableDepthOfField?: boolean;
+  showRegionCount?: boolean; // Added for completeness, was in reset
+  showLegend?: boolean;
+  performanceMode?: 'quality' | 'balanced' | 'performance';
 }
 
 // Theme settings with sensory precision
@@ -303,7 +310,8 @@ export function isValidRenderMode(mode: unknown): mode is RenderMode {
   return typeof mode === 'string' && Object.values(RenderMode).includes(mode as RenderMode);
 }
 
-export interface BrainVisualizationSettings {
+// Renamed to avoid conflict and clarify scope
+export interface InternalBrainVisualizationSettings {
   // Camera settings
   cameraPosition: Vector3;
   cameraTarget: Vector3;
@@ -357,7 +365,7 @@ export interface ConnectionHighlight {
 }
 
 export interface VisualizationState {
-  settings: BrainVisualizationSettings;
+  settings: InternalBrainVisualizationSettings; // Use renamed interface
   highlightedRegions: RegionHighlight[];
   highlightedConnections: ConnectionHighlight[];
   isRotating: boolean;
@@ -370,7 +378,7 @@ export interface BrainVisualizationProps {
     regions: BrainRegion[];
     connections: NeuralConnection[];
   };
-  settings?: Partial<BrainVisualizationSettings>;
+  settings?: Partial<VisualizationSettings>; // Use the primary settings interface
   onRegionClick?: (region: BrainRegion) => void;
   onConnectionClick?: (connection: NeuralConnection) => void;
   highlightedRegions?: RegionHighlight[];

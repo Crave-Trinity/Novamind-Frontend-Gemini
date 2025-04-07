@@ -6,7 +6,8 @@
  */
 
 import { describe, it, expectTypeOf } from 'vitest';
-import { RiskLevel, getRiskLevelColor } from '@domain/types/clinical/risk-level';
+import type { RiskLevel } from '@domain/types/clinical/risk-level';
+import { getRiskLevelColor } from '@domain/types/clinical/risk-level';
 
 describe('RiskLevel type definitions', () => {
   it('RiskLevel has correct literal union types', () => {

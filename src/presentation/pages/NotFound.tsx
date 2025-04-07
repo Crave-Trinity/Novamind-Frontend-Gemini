@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
-import { auditLogService, AuditEventType } from '@infrastructure/clients/auditLogClient'; // Use correct alias
+import { auditLogClient, AuditEventType } from '@infrastructure/clients/auditLogClient'; // Corrected import name
 
 /**
  * 404 Not Found page
@@ -15,7 +15,7 @@ const NotFound: React.FC = () => {
 
   // Log the 404 event
   useEffect(() => {
-    auditLogService.log(AuditEventType.SYSTEM_ERROR, {
+    auditLogClient.log(AuditEventType.SYSTEM_ERROR, { // Corrected usage
       action: 'not_found',
       details: `Attempted to navigate to ${location.pathname}`,
       result: 'failure',

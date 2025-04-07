@@ -9,6 +9,8 @@ const minimalScan: BrainScan = {
   scanDate: new Date().toISOString(),
   scanType: 'fMRI',
   dataQualityScore: 0.9,
+  resolution: { x: 1, y: 1, z: 1 }, // Added default resolution
+  metadata: {}, // Added default metadata
 };
 const minimalBrainModel: BrainModel = {
   id: 'mock-model-id',

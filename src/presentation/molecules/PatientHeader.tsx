@@ -4,25 +4,20 @@
  * with HIPAA-compliant data presentation and type-safe operations
  */
 
-import React, { useMemo } from 'react';
+import React from 'react'; // Removed unused useMemo
 import { motion } from 'framer-motion';
 
 // UI components
 import Avatar from '@presentation/atoms/Avatar'; // Corrected to default import
 import { Badge } from '@presentation/atoms/Badge';
-import Button from '@presentation/atoms/Button'; // Corrected to default import
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@presentation/atoms/Tooltip';
+// Removed unused Button import
+// Removed unused Tooltip imports
 
 // Icons
-import { AlertTriangle, User, Calendar, Clock, FileText, Activity } from 'lucide-react';
+import { User, Calendar, FileText } from 'lucide-react'; // Removed unused icons
 
 // Domain types
-import { Patient } from '@domain/types/clinical/patient'; // Corrected path
+import type { Patient } from '@domain/types/clinical/patient'; // Corrected path
 
 /**
  * Props with neural-safe typing
@@ -63,7 +58,7 @@ const formatDate = (date: Date): string => {
 export const PatientHeader: React.FC<PatientHeaderProps> = ({
   patient,
   compact = false,
-  showRiskLevel = true,
+  showRiskLevel: _showRiskLevel = true, // Prefixed unused variable
   showLastUpdate = true,
   className = '',
 }) => {

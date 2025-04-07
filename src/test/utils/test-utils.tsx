@@ -75,42 +75,36 @@ export function toHaveBeenCalledOnceWith(
   };
 }
 
-export function toHaveBeenCalledAfter(
-  received: ReturnType<typeof vi.fn>,
-  other: ReturnType<typeof vi.fn>
-) {
-  if (received.mock.calls.length === 0) {
-    return {
-      pass: false,
-      message: () =>
-        `expected function to have been called after other function, but it was never called`,
-    };
-  }
-
-  if (other.mock.calls.length === 0) {
-    return {
-      pass: false,
-      message: () =>
-        `expected function to have been called after other function, but other function was never called`,
-    };
-  }
-
-  // Vitest doesn't have invocationCallOrder, so we need to check timestamps
-  const receivedTime = received.mock.invocationResults[0].timestamp;
-  const otherTime = other.mock.invocationResults[0].timestamp;
-  const pass = receivedTime > otherTime;
-
-  return {
-    pass,
-    message: () =>
-      pass
-        ? `expected function not to have been called after other function`
-        : `expected function to have been called after other function`,
-  };
-}
+// Commenting out toHaveBeenCalledAfter due to Vitest mock API differences
+// export function toHaveBeenCalledAfter(
+//   received: ReturnType<typeof vi.fn>,
+//   other: ReturnType<typeof vi.fn>
+// ) {
+//   // Implementation needs rework for Vitest - mock.results doesn't have timestamp
+//   // Check call order using mock.calls array index if necessary
+//   const receivedCallIndex = received.mock.calls.length > 0 ? received.mock.invocationCallOrder[0] : -1; // Fictional property
+//   const otherCallIndex = other.mock.calls.length > 0 ? other.mock.invocationCallOrder[0] : -1; // Fictional property
+//
+//   if (receivedCallIndex === -1) {
+//     return { pass: false, message: () => `expected function to have been called after other function, but it was never called` };
+//   }
+//   if (otherCallIndex === -1) {
+//     return { pass: false, message: () => `expected function to have been called after other function, but other function was never called` };
+//   }
+//
+//   const pass = receivedCallIndex > otherCallIndex;
+//
+//   return {
+//     pass,
+//     message: () =>
+//       pass
+//         ? `expected function not to have been called after other function`
+//         : `expected function to have been called after other function`,
+//   };
+// }
 
 // Test data generators based on our domain types
-import type { BrainModel, BrainRegion, BrainScan, NeuralConnection, Patient } from '@domain/types';
+import type { /* BrainModel, BrainRegion, */ BrainScan, /* NeuralConnection, */ Patient } from '@domain/types'; // Removed unused types
 
 export const createTestPatient = (): Patient => ({
   id: 'test-patient',

@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
+// Removed unused React import
 import { render, screen } from '@testing-library/react';
 
 // These mocks must come BEFORE importing the component

@@ -1,5 +1,6 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { auditLogService, AuditEventType } from '@infrastructure/clients/auditLogClient';
+import type { ErrorInfo, ReactNode } from 'react';
+import { Component } from 'react';
+import { auditLogClient, AuditEventType } from '@infrastructure/clients/auditLogClient';
 
 interface ErrorBoundaryProps {
   /**
@@ -62,7 +63,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     const sanitizedStack = ErrorBoundary.sanitizeErrorMessage(errorInfo.componentStack || '');
 
     // Log error in a HIPAA-compliant way
-    auditLogService.log(AuditEventType.SYSTEM_ERROR, {
+    auditLogClient.log(AuditEventType.SYSTEM_ERROR, {
       action: 'client_error',
       errorMessage: ErrorBoundary.sanitizeErrorMessage(error.message),
       details: `Component Stack: ${sanitizedStack.substring(0, 200)}...`,

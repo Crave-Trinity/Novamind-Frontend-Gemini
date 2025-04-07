@@ -4,13 +4,13 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react'; // Added missing React import
-import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react'; // Removed unused render, fireEvent
+// Removed unused React import
+// Removed unused userEvent import
 import BrainModelViewer from '@pages/BrainModelViewer'; // Assuming default export
 import { renderWithProviders } from '@test/test-utils.unified';
 import { RenderMode } from '@domain/types/brain/visualization'; // Import for mock
-import { BrainRegion } from '@domain/models/brain/brain-model'; // Import for mock
+// Removed unused BrainRegion import
 
 // Mock hooks used by the component
 vi.mock('@application/hooks/useTheme', () => ({
@@ -76,7 +76,7 @@ describe('BrainModelViewer', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+    // const user = userEvent.setup(); // Removed unused variable
     renderWithProviders(<BrainModelViewer {...mockProps} />); // Use renderWithProviders
 
     // Simulate user interactions

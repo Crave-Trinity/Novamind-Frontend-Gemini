@@ -50,7 +50,7 @@ export function isSymptom(obj: unknown): obj is Symptom {
  * @param field - Optional field name for error context
  * @returns A Result with the validated Symptom or an error
  */
-export function validateSymptom(obj: unknown, field?: string): Result<Symptom> {
+export function validateSymptom(obj: unknown, field?: string): Result<Symptom, TypeVerificationError> { // Added error type
   if (!obj || typeof obj !== 'object') {
     return failure(
       new TypeVerificationError('Invalid Symptom: expected an object', 'Symptom', typeof obj, field)
@@ -209,7 +209,7 @@ export function isDiagnosis(obj: unknown): obj is Diagnosis {
  * @param field - Optional field name for error context
  * @returns A Result with the validated Diagnosis or an error
  */
-export function validateDiagnosis(obj: unknown, field?: string): Result<Diagnosis> {
+export function validateDiagnosis(obj: unknown, field?: string): Result<Diagnosis, TypeVerificationError> { // Added error type
   if (!obj || typeof obj !== 'object') {
     return failure(
       new TypeVerificationError(
@@ -334,7 +334,7 @@ export function isTreatment(obj: unknown): obj is Treatment {
  * @param field - Optional field name for error context
  * @returns A Result with the validated Treatment or an error
  */
-export function validateTreatment(obj: unknown, field?: string): Result<Treatment> {
+export function validateTreatment(obj: unknown, field?: string): Result<Treatment, TypeVerificationError> { // Added error type
   if (!obj || typeof obj !== 'object') {
     return failure(
       new TypeVerificationError(
@@ -456,7 +456,7 @@ export function isRiskAssessment(obj: unknown): obj is RiskAssessment {
  * @param field - Optional field name for error context
  * @returns A Result with the validated RiskAssessment or an error
  */
-export function validateRiskAssessment(obj: unknown, field?: string): Result<RiskAssessment> {
+export function validateRiskAssessment(obj: unknown, field?: string): Result<RiskAssessment, TypeVerificationError> { // Added error type
   if (!obj || typeof obj !== 'object') {
     return failure(
       new TypeVerificationError(
@@ -639,10 +639,10 @@ export function isTreatmentResponsePrediction(obj: unknown): obj is TreatmentRes
  * @param field - Optional field name for error context
  * @returns A Result with the validated TreatmentResponsePrediction or an error
  */
-export function validateTreatmentResponsePrediction(
+export function validateTreatmentResponsePrediction( // Added error type
   obj: unknown,
   field?: string
-): Result<TreatmentResponsePrediction> {
+): Result<TreatmentResponsePrediction, TypeVerificationError> { // Added error type
   if (!obj || typeof obj !== 'object') {
     return failure(
       new TypeVerificationError(
@@ -841,57 +841,15 @@ function isValidDate(dateString: string): boolean {
   return !isNaN(Date.parse(dateString));
 }
 
-/**
- * Validates if a severity string is valid
- * @param severity - The severity string to validate
- * @returns A boolean indicating if the string is a valid severity
- */
-function isValidSeverity(severity: string): boolean {
-  return ['mild', 'moderate', 'severe'].includes(severity.toLowerCase());
-}
+// Removed unused function: isValidSeverity
 
-/**
- * Validates if a diagnosis status string is valid
- * @param status - The status string to validate
- * @returns A boolean indicating if the string is a valid diagnosis status
- */
-function isValidDiagnosisStatus(status: string): boolean {
-  return ['active', 'remission', 'resolved', 'relapse'].includes(status.toLowerCase());
-}
+// Removed unused function: isValidDiagnosisStatus
 
-/**
- * Validates if a treatment type string is valid
- * @param type - The type string to validate
- * @returns A boolean indicating if the string is a valid treatment type
- */
-function isValidTreatmentType(type: string): boolean {
-  return [
-    'medication',
-    'psychotherapy',
-    'neurostimulation',
-    'neurofeedback',
-    'behavioral',
-    'cognitive',
-  ].includes(type.toLowerCase());
-}
+// Removed unused function: isValidTreatmentType
 
-/**
- * Validates if a treatment status string is valid
- * @param status - The status string to validate
- * @returns A boolean indicating if the string is a valid treatment status
- */
-function isValidTreatmentStatus(status: string): boolean {
-  return ['active', 'completed', 'discontinued', 'planned'].includes(status.toLowerCase());
-}
+// Removed unused function: isValidTreatmentStatus
 
-/**
- * Validates if an assessment type string is valid
- * @param type - The type string to validate
- * @returns A boolean indicating if the string is a valid assessment type
- */
-function isValidAssessmentType(type: string): boolean {
-  return ['automated', 'clinician', 'hybrid'].includes(type.toLowerCase());
-}
+// Removed unused function: isValidAssessmentType
 
 /**
  * Validates if a risk level string is valid

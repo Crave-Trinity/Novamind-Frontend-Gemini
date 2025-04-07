@@ -7,8 +7,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react'; // Import renderHook and act
 
 import useNeuroSyncOrchestrator, {
-  type NeuroSyncState,
-} from '@application/orchestrators/NeuroSyncOrchestrator'; // Use correct alias
+  // Removed unused: NeuroSyncState
+} from '@application/services/NeuroSyncOrchestrator'; // Corrected path
 
 // Mock services (basic mocks, replace with more specific mocks if needed)
 // Mock services FIRST
@@ -66,8 +66,8 @@ import { biometricService } from '@application/services/biometricService';
 import { temporalService } from '@application/services/temporal';
 import type { BrainModel, BrainScan } from '@domain/types/brain/models'; // Import correct BrainModel interface and BrainScan
 import type { TemporalDynamics } from '@domain/types/temporal/dynamics';
-import type { Result } from '@domain/types/shared/common'; // Import Result type
-import type { BiometricAlert, BiometricStream } from '@domain/types/biometric/streams'; // Import Biometric types
+// Removed unused type import: Result
+import type { BiometricStream } from '@domain/types/biometric/streams'; // Removed unused: BiometricAlert
 
 describe('useNeuroSyncOrchestrator', () => {
   const mockPatientId = 'patient-123';
@@ -82,6 +82,8 @@ describe('useNeuroSyncOrchestrator', () => {
       scanDate: new Date().toISOString(),
       scanType: 'fMRI',
       dataQualityScore: 0.9,
+      resolution: { x: 1, y: 1, z: 1 }, // Added default resolution
+      metadata: {}, // Added default metadata
     };
     const minimalBrainModel: BrainModel = {
       id: 'mock-init-id',

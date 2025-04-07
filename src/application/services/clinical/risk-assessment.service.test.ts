@@ -3,9 +3,9 @@
  * RiskAssessmentService testing with quantum precision
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest'; // Removed unused: vi
 import { RiskAssessmentService } from '@services/clinical/risk-assessment.service.ts'; // Use @services alias and add .ts
-import { RiskLevel } from '@domain/types/clinical/risk'; // Correct path for RiskLevel
+// Removed unused import: RiskLevel
 
 describe('RiskAssessmentService', () => {
   let riskAssessmentService: RiskAssessmentService;

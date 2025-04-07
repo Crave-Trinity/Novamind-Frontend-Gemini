@@ -20,14 +20,14 @@ type ConfidenceLevel = any;
 type SymptomTrajectory = any;
 type TreatmentOutcome = any;
 type RelapsePrediction = any;
-type TimeseriesDataPoint = any;
+// Removed unused type: TimeseriesDataPoint
 
 // Import existing types from correct locations
 import type { RiskAssessment } from '@domain/types/clinical/risk';
 import { Result, type Result as ResultType, success, failure } from '@domain/types/shared/common'; // Corrected path
 
 // Services
-import { clinicalService } from '@application/services/clinical/clinical.service'; // Corrected path
+// Removed unused import: clinicalService
 // NOTE: Prediction methods seem missing from clinicalService, using placeholders below.
 
 /**
@@ -76,22 +76,14 @@ export function useClinicalPredictionController(patientId: string) {
   // Generate predictions for symptoms with type-safe error handling
   const predictSymptomTrajectories = useCallback(
     async (
-      symptomIds: string[],
-      predictionHorizon?: number
-    ): Promise<ResultType<Map<string, SymptomTrajectory>>> => {
+      _symptomIds: string[], // Prefixed unused parameter
+      _predictionHorizon?: number // Prefixed unused parameter
+    ): Promise<ResultType<Map<string, SymptomTrajectory>, Error>> => { // Added error type
       try {
-        const horizon = predictionHorizon || state.predictionHorizon;
+        // Removed unused _horizon variable
 
         // Configure prediction parameters
-        const predictionParams = {
-          patientId,
-          symptomIds,
-          horizon,
-          includeBiomarkers: state.includeBiomarkers,
-          includeEnvironmentalFactors: state.includeEnvironmentalFactors,
-          models: state.activeModels,
-          aggregationMethod: state.aggregationMethod,
-        };
+        // Removed unused _predictionParams
 
         // TODO: Implement actual service call when available
         // const result = await clinicalService.predictSymptomTrajectories(predictionParams);
@@ -174,22 +166,14 @@ export function useClinicalPredictionController(patientId: string) {
   // Generate predictions for treatment outcomes
   const predictTreatmentOutcomes = useCallback(
     async (
-      treatmentIds: string[],
-      predictionHorizon?: number
-    ): Promise<ResultType<Map<string, TreatmentOutcome>>> => {
+      _treatmentIds: string[], // Prefixed unused parameter
+      _predictionHorizon?: number // Prefixed unused parameter
+    ): Promise<ResultType<Map<string, TreatmentOutcome>, Error>> => { // Added error type
       try {
-        const horizon = predictionHorizon || state.predictionHorizon;
+        // Removed unused _horizon variable
 
         // Configure prediction parameters
-        const predictionParams = {
-          patientId,
-          treatmentIds,
-          horizon,
-          includeBiomarkers: state.includeBiomarkers,
-          includeEnvironmentalFactors: state.includeEnvironmentalFactors,
-          models: state.activeModels,
-          aggregationMethod: state.aggregationMethod,
-        };
+        // Removed unused _predictionParams
 
         // TODO: Implement actual service call when available
         // const result = await clinicalService.predictTreatmentOutcomes(predictionParams);
@@ -271,22 +255,14 @@ export function useClinicalPredictionController(patientId: string) {
   // Predict risk of relapse
   const predictRelapse = useCallback(
     async (
-      disorderIds: string[],
-      predictionHorizon?: number
-    ): Promise<ResultType<RelapsePrediction[]>> => {
+      _disorderIds: string[], // Prefixed unused parameter
+      _predictionHorizon?: number // Prefixed unused parameter
+    ): Promise<ResultType<RelapsePrediction[], Error>> => { // Added error type
       try {
-        const horizon = predictionHorizon || state.predictionHorizon;
+        // Removed unused _horizon variable
 
         // Configure prediction parameters
-        const predictionParams = {
-          patientId,
-          disorderIds,
-          horizon,
-          includeBiomarkers: state.includeBiomarkers,
-          includeEnvironmentalFactors: state.includeEnvironmentalFactors,
-          models: state.activeModels,
-          aggregationMethod: state.aggregationMethod,
-        };
+        // Removed unused _predictionParams
 
         // TODO: Implement actual service call when available
         // const result = await clinicalService.predictRelapse(predictionParams);
@@ -360,17 +336,10 @@ export function useClinicalPredictionController(patientId: string) {
 
   // Assess clinical risks
   const assessRisks = useCallback(
-    async (riskFactors: string[]): Promise<ResultType<Map<string, RiskAssessment>>> => {
+    async (_riskFactors: string[]): Promise<ResultType<Map<string, RiskAssessment>, Error>> => { // Prefixed unused parameter, Added error type
       try {
         // Configure assessment parameters
-        const assessmentParams = {
-          patientId,
-          riskFactors,
-          includeBiomarkers: state.includeBiomarkers,
-          includeEnvironmentalFactors: state.includeEnvironmentalFactors,
-          models: state.activeModels,
-          aggregationMethod: state.aggregationMethod,
-        };
+        // Removed unused _assessmentParams
 
         // TODO: Implement actual service call when available
         // const result = await clinicalService.assessRisks(assessmentParams);
@@ -485,9 +454,9 @@ export function useClinicalPredictionController(patientId: string) {
   // Calculate prediction accuracy against actual outcomes
   const calculateAccuracy = useCallback(
     async (
-      predictionType: 'symptom' | 'treatment' | 'relapse' | 'risk',
-      timeframe: 'week' | 'month' | 'quarter' | 'year'
-    ): Promise<ResultType<PredictionAccuracy>> => {
+      _predictionType: 'symptom' | 'treatment' | 'relapse' | 'risk', // Prefixed unused parameter
+      _timeframe: 'week' | 'month' | 'quarter' | 'year' // Prefixed unused parameter
+    ): Promise<ResultType<PredictionAccuracy, Error>> => { // Added error type
       try {
         // TODO: Implement actual service call when available
         // const result = await clinicalService.calculateAccuracy({ /* ... params ... */ });
@@ -510,7 +479,7 @@ export function useClinicalPredictionController(patientId: string) {
     async <T extends PredictionResult>(
       results: T[],
       confidenceLevels: ConfidenceLevel[]
-    ): Promise<ResultType<T>> => {
+    ): Promise<ResultType<T, Error>> => { // Added error type
       try {
         if (results.length === 0) {
           return failure(new Error('No prediction results to combine')); // Corrected failure call
@@ -564,7 +533,7 @@ export function useClinicalPredictionController(patientId: string) {
   );
 
   // Get available prediction models
-  const getAvailableModels = useCallback(async (): Promise<Result<PredictionModel[]>> => {
+  const getAvailableModels = useCallback(async (): Promise<Result<PredictionModel[], Error>> => { // Added error type
     try {
       // TODO: Implement actual service call when available
       // const result = await clinicalService.getAvailableModels();

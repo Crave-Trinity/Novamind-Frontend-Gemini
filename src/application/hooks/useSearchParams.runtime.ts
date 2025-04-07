@@ -3,7 +3,8 @@
  * Ensures that search parameter structures conform to expected types at runtime.
  */
 
-import { Result, Ok, Err } from 'ts-results';
+import type { Result } from 'ts-results';
+import { Ok, Err } from 'ts-results';
 // TODO: Import specific domain types if search params represent domain entities
 // import { FilterCriteria } from '../../domain/types/search'; // Example type
 // import { ValidationError } from '@domain/errors/validation'; // Assuming a custom error type

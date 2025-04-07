@@ -13,7 +13,7 @@ import {
 import type {
   ClinicalPredictionData, // Domain type
   GeneticPredictionData,
-  TreatmentType, // Keep if needed for mock data, but use string literals for values
+  // Removed unused: TreatmentType
 } from '@domain/types/clinical/treatment';
 import type {
   TreatmentResponseRequest, // DTO type

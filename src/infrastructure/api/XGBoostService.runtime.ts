@@ -3,21 +3,15 @@
  * Ensures data conforms to the expected structures defined in XGBoostService.ts.
  */
 
-import { Result, Ok, Err } from 'ts-results';
-import {
+import type { Result } from 'ts-results';
+import { Ok, Err } from 'ts-results';
+import type {
   RiskPredictionRequest,
   RiskPredictionResponse,
   TreatmentResponseRequest,
   TreatmentResponseResponse,
-  OutcomePredictionRequest,
-  OutcomePredictionResponse,
-  FeatureImportanceRequest,
-  FeatureImportanceResponse,
-  DigitalTwinIntegrationRequest,
-  DigitalTwinIntegrationResponse,
-  ModelInfoRequest,
-  ModelInfoResponse,
-} from '@api/XGBoostService'; // Import interfaces from the service file
+} from '@api/XGBoostService';
+// Removed unused import block for OutcomePredictionResponse, FeatureImportanceRequest, etc.
 
 // --- Type Guards for Request Interfaces ---
 

@@ -52,7 +52,7 @@ export function isBrainModel(obj: unknown): obj is BrainModel {
  * @param field - Optional field name for error context
  * @returns A Result with the validated BrainModel or an error
  */
-export function validateBrainModel(obj: unknown, field?: string): Result<BrainModel> {
+export function validateBrainModel(obj: unknown, field?: string): Result<BrainModel, ValidationError> { // Added error type
   if (!obj || typeof obj !== 'object') {
     return failure(
       new ValidationError(
@@ -177,7 +177,7 @@ export function isBrainRegion(obj: unknown): obj is BrainRegion {
  * @param field - Optional field name for error context
  * @returns A Result with the validated BrainRegion or an error
  */
-export function validateBrainRegion(obj: unknown, field?: string): Result<BrainRegion> {
+export function validateBrainRegion(obj: unknown, field?: string): Result<BrainRegion, ValidationError> { // Added error type
   if (!obj || typeof obj !== 'object') {
     return failure(
       new ValidationError(
@@ -270,7 +270,7 @@ export function isNeuralConnection(obj: unknown): obj is NeuralConnection {
  * @param field - Optional field name for error context
  * @returns A Result with the validated NeuralConnection or an error
  */
-export function validateNeuralConnection(obj: unknown, field?: string): Result<NeuralConnection> {
+export function validateNeuralConnection(obj: unknown, field?: string): Result<NeuralConnection, ValidationError> { // Added error type
   if (!obj || typeof obj !== 'object') {
     return failure(
       new ValidationError(

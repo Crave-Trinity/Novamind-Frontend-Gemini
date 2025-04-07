@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
+import React from 'react'; // Re-added React import for type usage
 import { screen, within } from '@testing-library/react'; // Import within
 import { renderWithProviders } from '@test/test-utils.unified'; // Import unified render
 
@@ -21,7 +21,7 @@ vi.mock('next-themes', () => ({
 
 // Mock Three.js and React Three Fiber
 vi.mock('@react-three/fiber', () => ({
-  Canvas: ({ children }) => <div data-testid="mock-canvas">{children}</div>,
+  Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="mock-canvas">{children}</div>, // Added type for children
   useFrame: vi.fn(),
   useThree: vi.fn(() => ({
     camera: { position: { set: vi.fn() }, lookAt: vi.fn() },
@@ -87,7 +87,7 @@ vi.mock('@tanstack/react-query', () => ({
     isLoading: false,
     error: null,
   })),
-  QueryClientProvider: ({ children }) => <div>{children}</div>,
+  QueryClientProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>, // Added type for children
   QueryClient: vi.fn(() => ({
     invalidateQueries: vi.fn(),
   })),

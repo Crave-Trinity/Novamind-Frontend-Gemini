@@ -3,13 +3,13 @@
  * Replaced with minimal test to prevent hanging from useFrame animation loop
  */
 
-import React from 'react';
+import React from 'react'; // Re-added React import for mock implementation
 import { describe, it, expect, vi } from 'vitest'; // Remove beforeEach, afterEach
 import { render, screen } from '@test/test-utils.unified'; // Use unified render
 import { SymptomRegionMappingVisualizer } from './SymptomRegionMappingVisualizer';
-import { BrainRegion } from '@domain/types/brain/models';
-import { Symptom } from '@domain/types/clinical/patient';
-import { SymptomNeuralMapping } from '@domain/models/brain/mapping/brain-mapping'; // Corrected import path
+import type { BrainRegion } from '@domain/types/brain/models';
+import type { Symptom } from '@domain/types/clinical/patient';
+import type { SymptomNeuralMapping } from '@domain/models/brain/mapping/brain-mapping'; // Corrected import path
 // Remove WebGL mock imports
 // Import Vector3 *after* vi.mock('three', ...)
 // import { Vector3 } from 'three';
@@ -43,16 +43,11 @@ vi.mock('three', async (importOriginal) => {
 
   // Define MockQuadraticBezierCurve3 class
   class MockQuadraticBezierCurve3 {
-    constructor(v0?: MockVector3, v1?: MockVector3, v2?: MockVector3) {}
+    constructor(_v0?: MockVector3, _v1?: MockVector3, _v2?: MockVector3) {} // Prefixed unused parameters
     getPoints = vi.fn(() => [new MockVector3(), new MockVector3()]);
   }
 
-  // Mock Group as a functional component rendering a div
-  const MockGroup = ({ children, ...props }: React.PropsWithChildren<any>) => (
-    <div data-testid="mock-group" {...props}>
-      {children}
-    </div>
-  );
+  // Removed unused MockGroup component definition
 
   // Now define the return object using the defined mocks
   return {
@@ -102,7 +97,7 @@ vi.mock('@react-spring/three', () => ({
   animated: new Proxy(
     {},
     {
-      get: (target, prop) => {
+      get: (_target, prop) => { // Prefixed unused target parameter
         const MockAnimatedComponent = React.forwardRef(
           ({ children, ...props }: React.PropsWithChildren<any>, ref: any) =>
             React.createElement(
@@ -134,6 +129,8 @@ const mockRegions: BrainRegion[] = [
     isActive: true,
     hemisphereLocation: 'left',
     dataConfidence: 0.9,
+    volume: 1500, // Added mock volume
+    activity: 0.6, // Added mock activity (can be same as activityLevel or different)
   }, // Removed metadata
   {
     id: 'r2',
@@ -145,6 +142,8 @@ const mockRegions: BrainRegion[] = [
     isActive: true,
     hemisphereLocation: 'left',
     dataConfidence: 0.8,
+    volume: 3000, // Added mock volume
+    activity: 0.3, // Added mock activity
   }, // Removed metadata
 ];
 const mockSymptoms: Symptom[] = [

@@ -1,4 +1,5 @@
-import React, { ButtonHTMLAttributes, forwardRef } from 'react';
+import type { ButtonHTMLAttributes } from 'react';
+import React, { forwardRef } from 'react';
 import cn from 'classnames';
 
 export type ButtonVariant =

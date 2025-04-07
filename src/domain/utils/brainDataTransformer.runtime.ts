@@ -3,18 +3,18 @@
  * Ensures input data conforms to expected domain types.
  */
 
-import { Result, Ok, Err } from 'ts-results';
+import type { Result } from 'ts-results';
+import { Ok, Err } from 'ts-results';
+import type { BrainModel, BrainRegion } from '@domain/types/brain/models';
 import {
-  BrainModel,
-  BrainRegion,
-  NeuralConnection,
+  // Removed unused NeuralConnection
   isBrainModel, // Re-use existing guard from domain
   isBrainRegion, // Re-use existing guard from domain
 } from '@domain/types/brain/models';
+import type { ThemeSettings } from '@domain/types/brain/visualization';
 import {
-  ThemeSettings,
   RenderMode,
-  isValidTheme, // Assuming this exists or needs creation
+  // Removed unused isValidTheme
   isValidRenderMode, // Re-use existing guard from domain
   visualizationThemes, // Import themes for validation if needed
 } from '@domain/types/brain/visualization';

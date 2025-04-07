@@ -3,6 +3,10 @@
  * Brain Model Visualization Types with quantum-level type safety
  */
 
+// Removed conflicting/incorrect external type imports.
+// Import ONLY RenderMode as it might be needed by remaining code (though its factory is removed).
+// import { RenderMode } from '@domain/types/brain/visualization'; // Commented out as factories using it are removed
+
 // Neural-safe vector type
 export interface Vector3 {
   x: number;
@@ -16,11 +20,29 @@ export interface BrainRegion {
   name: string;
   position: Vector3;
   color: string;
-  connections: string[];
-  activityLevel: number;
-  volumeMl?: number;
-  isActive: boolean;
-  riskFactor?: number;
+  connections: string[]; // IDs of connected regions
+  activityLevel: number; // Normalized activity level
+  volumeMl?: number; // Optional volume
+  isActive: boolean; // Is the region currently active/relevant
+  riskFactor?: number; // Optional associated risk factor
+  // Added missing properties based on usage in factories/validators if needed
+  hemisphereLocation?: 'left' | 'right' | 'central' | 'other';
+  dataConfidence?: number;
+  volume?: number; // Potentially redundant with volumeMl, clarify usage
+  activity?: number; // Potentially redundant with activityLevel, clarify usage
+  description?: string;
+  functions?: string[];
+  size?: number;
+  scale?: number;
+  data?: { // Nested data structure seen in BrainModel factory usage
+    activity: number;
+    anomalies: string[];
+    volumes: {
+      current: number;
+      expected: number;
+      percentile: number;
+    };
+  };
 }
 
 // Comprehensive brain model with neural-safe typing
@@ -32,16 +54,34 @@ export interface BrainModel {
   patients?: string[];
   modelType?: string;
   anatomicalCoordinates?: Coordinate[];
+  // Removed settings property from interface
+  // Added missing properties based on factory/validator usage if needed
+  version?: number | string; // Allow string or number based on different usages seen
+  patientId?: string;
+  scanDate?: Date | string; // Allow Date or string
+  isTemplate?: boolean;
+  metadata?: any; // Use 'any' for now, refine if specific structure is known
+  lastUpdated?: Date | string;
+  createdBy?: string;
+  updatedBy?: string;
+  scan?: any; // Use 'any' for now as BrainScan interface is removed
 }
 
+// Neural connection between regions
 export interface Connection {
   id: string;
-  sourceId: string;
-  targetId: string;
-  strength: number;
-  type: string;
-  isActive: boolean;
-  color: string;
+  sourceId: string; // Reverted back from sourceRegionId
+  targetId: string; // Reverted back from targetRegionId
+  strength: number; // Connection strength/weight
+  type: 'excitatory' | 'inhibitory' | string; // Allow specific types or general string
+  isActive: boolean; // Is the connection currently active
+  color?: string; // Optional color
+  connectionType?: string; // Optional specific type (e.g., 'structural', 'functional')
+  // Added missing properties based on factory/validator usage if needed
+  directionality?: 'unidirectional' | 'bidirectional';
+  activityLevel?: number;
+  pathwayLength?: number;
+  dataConfidence?: number;
 }
 
 export interface Coordinate {
@@ -143,7 +183,7 @@ export class SafeArray<T> {
 }
 
 // Custom implementation of NeuralVisualizationError class
-export class NeuralVisualizationError extends Error implements NeuralVisualizationErrorInterface {
+export class NeuralVisualizationError extends Error { // Confirmed unimplemented interface is removed
   code: string;
   severity: 'warning' | 'error' | 'fatal';
   component?: string;
@@ -205,156 +245,29 @@ export const Vector3Factory = {
   },
 };
 
-/**
- * Create BrainScan with defaults
- */
-export const BrainScan = {
-  create(data: Partial<BrainScan> = {}): BrainScan {
-    // Neural-safe properties with strict null handling
-    const scan: BrainScan = {
-      patientId: data.patientId || 'unknown',
-      scanDate: data.scanDate || new Date().toISOString(),
-      scanType: data.scanType || 'MRI',
-    };
-
-    // Handle optional properties with type safety
-    if (data.notes !== undefined) scan.notes = data.notes;
-    if (data.technician !== undefined) scan.technician = data.technician;
-
-    return scan;
-  },
-};
-
-/**
- * Create visualization settings with defaults
- */
-export const VisualizationSettings = {
-  create(data: Partial<VisualizationSettings> = {}): VisualizationSettings {
-    return {
-      showLabels: data.showLabels ?? true,
-      rotationSpeed: data.rotationSpeed ?? 0.5,
-      highlightColor: data.highlightColor || '#FF5733',
-      backgroundColor: data.backgroundColor || '#121212',
-      connectionOpacity: data.connectionOpacity ?? 0.7,
-      nodeSize: data.nodeSize ?? 1,
-      renderMode: data.renderMode ?? RenderMode.NORMAL,
-      enableBloom: data.enableBloom ?? true,
-      synapticPulse: data.synapticPulse ?? true,
-    };
-  },
-};
-
-/**
- * Create patient metadata with defaults
- */
-export const PatientMetadata = {
-  create(data: Partial<PatientMetadata> = {}): PatientMetadata {
-    // Neural-safe properties with strict null handling
-    const metadata: PatientMetadata = {
-      id: data.id || `patient-${Math.random().toString(36).substring(2, 9)}`,
-      age: data.age ?? 35,
-      biologicalSex: data.biologicalSex || 'other',
-    };
-
-    // Handle optional properties with type safety
-    if (data.diagnosis !== undefined) metadata.diagnosis = data.diagnosis;
-    if (data.medications !== undefined) metadata.medications = data.medications;
-    if (data.riskLevel !== undefined) metadata.riskLevel = data.riskLevel;
-
-    return metadata;
-  },
-};
-
-/**
- * Create medication with defaults
- */
-export const Medication = {
-  create(data: Partial<Medication> = {}): Medication {
-    // Neural-safe properties with strict null handling
-    const medication: Medication = {
-      name: data.name || 'Unknown Medication',
-      dosage: data.dosage || '0mg',
-      frequency: data.frequency || 'daily',
-      startDate: data.startDate || new Date().toISOString(),
-    };
-
-    // Handle optional properties with type safety
-    if (data.endDate !== undefined) medication.endDate = data.endDate;
-    if (data.adherence !== undefined) medication.adherence = data.adherence;
-
-    return medication;
-  },
-};
-
-/**
- * Create treatment response with defaults
- */
-export const TreatmentResponse = {
-  create(data: Partial<TreatmentResponse> = {}): TreatmentResponse {
-    // Neural-safe properties with strict null handling
-    const response: TreatmentResponse = {
-      treatmentId: data.treatmentId || `treatment-${Math.random().toString(36).substring(2, 9)}`,
-      treatmentName: data.treatmentName || 'Unknown Treatment',
-      responseProbability: data.responseProbability ?? 0.75,
-      timeToEffect: data.timeToEffect ?? 14,
-      sideEffectRisk: data.sideEffectRisk ?? 0.15,
-      confidenceInterval: data.confidenceInterval || [0.65, 0.85],
-    };
-
-    // Handle optional properties with type safety
-    if (data.neuroplasticityImpact !== undefined) {
-      response.neuroplasticityImpact = data.neuroplasticityImpact;
-    }
-
-    return response;
-  },
-};
-
-/**
- * Create activity time series with defaults
- */
-export const ActivityTimeSeries = {
-  create(data: Partial<ActivityTimeSeries> = {}): ActivityTimeSeries {
-    return {
-      regionId: data.regionId || 'unknown',
-      timestamps: data.timestamps || [Date.now()],
-      values: data.values || [0],
-    };
-  },
-};
+// Removed external factory functions (BrainScanFactory, VisualizationSettingsFactory, etc.)
 
 /**
  * Brain processor function that converts raw data to a neurologically-valid model
  */
-export const BrainModel = (data: any = {}): BrainModelData => {
+export const BrainModelFactory = (data: any = {}): BrainModel => {
   // Generate a default processed model with clinical precision
-  const defaultModel: BrainModelData = {
-    regions: [],
-    settings: {
-      showLabels: true,
-      rotationSpeed: 0.5,
-      highlightColor: '#FF5733',
-      backgroundColor: '#121212',
-      connectionOpacity: 0.7,
-      nodeSize: 1,
-      renderMode: RenderMode.NORMAL,
-      enableBloom: true,
-      synapticPulse: true,
-    },
+  const defaultModel: BrainModel = {
+    id: data.id || `model-${Date.now()}`,
+    name: data.name || 'Default Brain Model',
+    regions: [], // Initialize regions
+    connections: [], // Initialize connections
   };
 
   // Process regions if provided
   const processedRegions = Array.isArray(data.regions)
-    ? data.regions.map((r: any) => BrainRegion.create(r))
+    ? data.regions.map((r: any) => BrainRegion.create(r)) // Use the local BrainRegion factory
     : [];
 
   return {
     ...defaultModel,
     ...data,
     regions: processedRegions,
-    settings: {
-      ...defaultModel.settings,
-      ...(data.settings || {}),
-    },
+    // Removed settings property assignment
   };
 };

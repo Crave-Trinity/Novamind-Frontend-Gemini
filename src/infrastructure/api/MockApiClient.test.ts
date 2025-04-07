@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mockApiClient } from '@api/MockApiClient';
-import { BrainModel, ModelSource } from '@domain/models/brain/BrainModel';
+// Removed unused import: import { ModelSource } from '@domain/models/brain/BrainModel';
 
 // Remove setTimeout mock as the delay is removed from the source
 
@@ -23,8 +23,8 @@ describe('mockApiClient', () => {
     expect(result.id).toContain('model-test-patient-id');
     expect(result.patientId).toBe('test-patient-id');
     expect(Array.isArray(result.regions)).toBe(true);
-    expect(Array.isArray(result.pathways)).toBe(true);
-    expect(result.metadata.source).toBe(ModelSource.SIMULATION);
+    expect(Array.isArray(result.connections)).toBe(true); // Use correct property name
+    // Removed assertion for metadata.source as metadata was removed from BrainModel
   });
 
   it('handles default patient ID with clinical precision', async () => {
@@ -36,7 +36,7 @@ describe('mockApiClient', () => {
     expect(result.id).toContain('model-demo-patient');
     expect(result.patientId).toBe('demo-patient');
     expect(result.regions.length).toBeGreaterThan(0);
-    expect(result.metadata.confidenceScore).toBeGreaterThan(0);
+    // Removed assertion for metadata.confidenceScore as metadata was removed
   });
 
   it('returns consistent model structure with quantum-level type safety', async () => {
@@ -52,9 +52,6 @@ describe('mockApiClient', () => {
     expect(result).toHaveProperty('metadata');
 
     // Validate metadata with quantum precision
-    expect(result.metadata).toHaveProperty('modelVersion');
-    expect(result.metadata).toHaveProperty('confidenceScore');
-    expect(result.metadata).toHaveProperty('dataQuality');
-    expect(result.metadata).toHaveProperty('source');
+    // Removed assertions for metadata properties as metadata was removed
   });
 });

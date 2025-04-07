@@ -5,8 +5,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'; // Import hooks
 
 import { screen, cleanup } from '@testing-library/react'; // render is imported from unified utils
-import React from 'react';
-import userEvent from '@testing-library/user-event';
+// Removed unused React import
+// Removed unused userEvent import
 // Adjust import path based on actual file location if needed
 import DigitalTwinDemo from './DigitalTwinDemo'; // Use relative path
 import { render } from '@test/test-utils.unified';
@@ -93,7 +93,7 @@ describe('DigitalTwinDemo', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+    // const user = userEvent.setup(); // Removed unused variable
     render(<DigitalTwinDemo {...mockProps} />);
 
     // Simulate user interactions

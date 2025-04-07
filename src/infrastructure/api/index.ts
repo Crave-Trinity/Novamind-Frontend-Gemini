@@ -2,7 +2,7 @@
  * API client for external services
  */
 
-import { BrainModel, Patient } from '@domain/types';
+import type { BrainModel, Patient } from '@domain/types';
 
 /**
  * Base API client with common functionality

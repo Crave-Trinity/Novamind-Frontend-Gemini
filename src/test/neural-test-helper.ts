@@ -430,12 +430,10 @@ export function registerNeuralMocks() {
     if (!window.IntersectionObserver) {
       // Create a minimal implementation that satisfies TypeScript
       class MockIntersectionObserver {
-        private callback: IntersectionObserverCallback;
-        private options: IntersectionObserverInit | undefined;
+        // Removed unused private members _callback and _options
 
-        constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
-          this.callback = callback;
-          this.options = options;
+        constructor() {
+          // Removed unused callback and options parameters
         }
 
         observe(_target: Element): void {

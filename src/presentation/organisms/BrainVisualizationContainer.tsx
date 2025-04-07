@@ -5,43 +5,37 @@
  */
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { BrowserRouter, useNavigate } from 'react-router-dom';
+// Removed unused BrowserRouter, useNavigate imports
 import { useTheme } from 'next-themes';
-import { useQuery, useMutation } from '@tanstack/react-query';
+// Removed unused useQuery import
 
 // Domain types
-import { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+import type { BrainModel, BrainRegion } from '@domain/types/brain/models';
+// Removed unused NeuralConnection import
+import type { VisualizationSettings } from '@domain/types/brain/visualization';
 import {
   RenderMode,
-  VisualizationSettings,
-  ThemeOption, // Import ThemeOption
-  defaultVisualizationSettings, // Import defaults
+  // Removed unused ThemeOption import
+  // Removed unused defaultVisualizationSettings import
 } from '@domain/types/brain/visualization';
-import {
-  SafeArray,
-  Result,
-  success,
-  failure,
-  VisualizationState,
-  NeuralError,
-} from '@domain/types/shared/common';
-import { Diagnosis, Symptom, Patient } from '@domain/types/clinical/patient';
-import {
-  TreatmentResponsePrediction,
-  NeuralImpactRating,
-  TreatmentType,
-} from '@domain/types/clinical/treatment'; // Import NeuralImpactRating
-import { RiskAssessment } from '@domain/types/clinical/risk';
+import type { VisualizationState } from '@domain/types/shared/common';
+import { SafeArray, NeuralError } from '@domain/types/shared/common'; // Removed unused Result, success, failure
+import type { Diagnosis, Symptom } from '@domain/types/clinical/patient';
+// Removed unused Patient import
+import type { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
+// Removed unused NeuralImpactRating, TreatmentType imports
+import type { RiskAssessment } from '@domain/types/clinical/risk';
 
 // Domain models
-import {
-  calculateNeuralActivation,
-  mapSymptomsToRegions,
-  mapDiagnosesToRegions,
-  calculateTreatmentImpact,
+import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
+} from '@domain/models/brain/mapping/brain-mapping';
+import {
+  calculateNeuralActivation,
+  // Removed unused mapSymptomsToRegions, mapDiagnosesToRegions imports
+  calculateTreatmentImpact,
 } from '@domain/models/brain/mapping/brain-mapping';
 
 // Application hooks
@@ -57,11 +51,12 @@ import RegionSelectionPanel from '@presentation/molecules/RegionSelectionPanel';
 import VisualizationControls from '@presentation/molecules/VisualizationControls';
 import ClinicalDataOverlay from '@presentation/molecules/ClinicalDataOverlay';
 import BrainRegionDetails from '@presentation/molecules/BrainRegionDetails';
-import LoadingIndicator from '@presentation/atoms/LoadingIndicator';
+// Removed unused LoadingIndicator import
 
 // Common components
-import AdaptiveLOD, { DetailConfig } from '@presentation/common/AdaptiveLOD'; // Import DetailConfig only
-import PerformanceMonitor, { PerformanceMetrics } from '@presentation/common/PerformanceMonitor'; // Import PerformanceMetrics type
+import AdaptiveLOD /*, { DetailConfig } */ from '@presentation/common/AdaptiveLOD'; // Removed unused DetailConfig import
+// Removed unused PerformanceMetrics import
+import PerformanceMonitor from '@presentation/common/PerformanceMonitor'; // Import PerformanceMetrics type
 import VisualizationErrorBoundary from '@presentation/common/VisualizationErrorBoundary';
 import LoadingFallback from '@presentation/common/LoadingFallback';
 
@@ -117,8 +112,8 @@ const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerP
   initialSelectedRegionId,
   initialRenderMode = RenderMode.ANATOMICAL,
   initialSelectedRegions = [],
-  readOnly = false, // Use prop
-  showClinicalData = true, // Use prop
+  // readOnly = false, // Removed unused prop from destructuring
+  // showClinicalData = true, // Removed unused prop from destructuring
   showControls = true,
   height = '100%',
   width = '100%',
@@ -129,7 +124,7 @@ const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerP
   enableRegionSelection = true,
   highPerformanceMode = false,
 }) => {
-  const navigate = useNavigate();
+  // Removed unused navigate variable
   const { getParam, setParam } = useSearchParams();
   const { theme } = useTheme();
 
@@ -174,15 +169,15 @@ const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerP
     initialSelectedRegionId || null
   );
   const [showDetails, setShowDetails] = useState<boolean>(!!initialSelectedRegionId);
-  const [detailMode, setDetailMode] = useState<DetailMode>(DetailMode.AUTO);
-  const [forceDetailLevel, setForceDetailLevel] = useState<
+  const [detailMode] = useState<DetailMode>(DetailMode.AUTO); // Removed unused setDetailMode
+  const [forceDetailLevel] = useState< // Removed unused setForceDetailLevel
     'low' | 'medium' | 'high' | 'dynamic' | undefined
   >(undefined);
-  const [showPerformanceStats, setShowPerformanceStats] = useState(false);
-  const [performanceMetrics, setPerformanceMetrics] = useState<any>(null); // Consider defining a proper type
-  const [showRegionLabels, setShowRegionLabels] = useState(true);
+  const [showPerformanceStats, _setShowPerformanceStats] = useState(false); // Reverted prefix on state variable, kept on setter
+  const [_performanceMetrics] = useState<any>(null); // Removed unused setPerformanceMetrics
+  const [_showRegionLabels] = useState(true); // Removed unused state setter setShowRegionLabels
   const [errorState, setErrorState] = useState<Error | null>(null);
-  const [isReady, setIsReady] = useState(false);
+  const [_isReady, setIsReady] = useState(false); // Prefixed unused state variable
 
   const isLoading = isModelLoading || isPatientLoading || isClinicalLoading;
   const loadingProgress = useMemo(() => {
@@ -375,33 +370,13 @@ const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerP
     setActiveRegionId(null);
   }, []);
 
-  const handlePerformanceUpdate = useCallback((metrics: PerformanceMetrics) => {
-    // Use defined type
-    setPerformanceMetrics(metrics);
-  }, []);
 
-  const handlePerformanceWarning = useCallback(
-    (metrics: PerformanceMetrics, level: 'warning' | 'critical') => {
-      // Use defined type
-      if (level === 'critical' && detailMode === DetailMode.AUTO) {
-        setForceDetailLevel('low');
-      }
-    },
-    [detailMode]
-  );
 
   const handleVisualizationError = useCallback((error: Error) => {
     setErrorState(error);
     console.error('NOVAMIND Visualization Error:', error);
   }, []);
 
-  const handleErrorRecovery = useCallback(() => {
-    setErrorState(null);
-    setDetailMode(DetailMode.PERFORMANCE);
-    setForceDetailLevel('low');
-    if (scanId) fetchBrainModel(scanId);
-    return { success: true, value: true };
-  }, [scanId, fetchBrainModel]);
 
   const currentDetailLevel = useMemo(() => {
     return forceDetailLevel ?? detailModeMap[detailMode] ?? 'dynamic';
@@ -423,7 +398,7 @@ const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerP
           // adaptiveMode={...} // If needed
           // etc.
         >
-          {(detailConfig) => (
+          {(_detailConfig) => ( // Prefixed unused parameter
             <>
               {/* Explicitly check for non-null data for type safety */}
               {visualizationState.status === 'success' && visualizationState.data !== null && (

@@ -3,9 +3,9 @@
  * transformBrainData testing with quantum precision
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
-import { transformBrainData } from '@/utils/brainDataTransformer';
+import { transformBrainData } from '@domain/utils/brainDataTransformer'; // Corrected path alias
 
 describe('transformBrainData', () => {
   it('processes data with mathematical precision', () => {

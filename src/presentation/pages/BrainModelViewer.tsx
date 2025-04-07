@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react'; // Removed unused useCallback
 
-import { useTheme } from '@application/hooks/useTheme'; // Correct path
+// Removed unused useTheme import
 import { useBrainVisualization } from '@hooks/useBrainVisualization';
-import { BrainRegion } from '@domain/models/brain/brain-model';
-import { RenderMode } from '@domain/types/brain/visualization'; // Keep this correct import
+import type { BrainRegion } from '@domain/types/brain/models'; // Corrected import path
+import type { RenderMode } from '@domain/types/brain/visualization'; // Keep this correct import
 // Remove potentially conflicting import if it exists elsewhere
 import Button from '@presentation/atoms/Button';
 
@@ -22,27 +22,22 @@ interface BrainModelViewerProps {
  */
 const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
   patientId = 'default',
-  height = '600px',
-  width = '100%',
+  // height = '600px', // Removed unused prop
+  // width = '100%', // Removed unused prop
   autoRotate = false,
-  showControls = true,
-  initialRegionId,
+  // showControls = true, // Removed unused prop
+  // initialRegionId, // Removed unused prop
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<BrainRegion[]>([]);
-  const { theme } = useTheme();
+  // const [searchQuery] = useState(''); // Removed unused state variable
+  // Removed unused searchResults state
 
   const {
     brainModel,
     isLoading,
     error,
-    activeRegions,
-    viewState,
     highlightRegion,
     focusOnRegion,
     setRenderMode,
-    visibleRegions,
-    visiblePathways,
     resetVisualization,
   } = useBrainVisualization({
     patientId,
@@ -50,7 +45,7 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
     highlightActiveRegions: true,
   });
 
-  const [selectedRegion, setSelectedRegion] = useState<BrainRegion | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<BrainRegion | null>(null); // Use correct BrainRegion type from models.ts
   const [viewMode, setViewMode] = useState<RenderMode>('anatomical' as RenderMode);
   const [highlights, setHighlights] = useState<string[]>([]);
 
@@ -62,9 +57,9 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
 
   // Handle region selection
   const handleRegionSelect = (regionId: string) => {
-    const region = brainModel?.regions.find((r: BrainRegion) => r.id === regionId);
+    const region = brainModel?.regions.find((r) => r.id === regionId);
     if (region) {
-      setSelectedRegion(region);
+      setSelectedRegion(region || null); // Ensure null is passed if region is undefined
       highlightRegion(regionId);
       focusOnRegion(regionId);
     }
@@ -88,90 +83,14 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
     setRenderMode(mode);
   };
 
-  // Filter function to find regions by criteria
-  const filterRegions = (criteria: string) => {
-    return brainModel?.regions.filter((r: BrainRegion) => {
-      const searchLower = criteria.toLowerCase();
-      return (
-        r.name.toLowerCase().includes(searchLower) ||
-        (r.description && r.description.toLowerCase().includes(searchLower))
-      );
-    });
-  };
+  // Removed unused filterRegions function
 
-  // Get connections for a region
-  const getConnectionsForRegion = (regionId: string) => {
-    const region = brainModel?.regions.find((r: BrainRegion) => r.id === regionId);
-    return region?.connections || [];
-  };
+  // Removed unused getConnectionsForRegion function
+  // Removed unused getBrainRegions function
 
-  // Get brain regions
-  const getBrainRegions = () => {
-    if (!brainModel || !brainModel.regions) {
-      return [];
-    }
+  // Removed unused RegionConnections component
 
-    const filteredRegions = brainModel.regions.filter((r: BrainRegion) => {
-      if (!searchQuery) {
-        return true;
-      }
-      return r.name.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-
-    return filteredRegions;
-  };
-
-  // Selected region's connections
-  const RegionConnections = () => {
-    if (!selectedRegion || !selectedRegion.connections) {
-      return null;
-    }
-
-    return (
-      <div className="mt-4">
-        <h4 className="mb-2 text-sm font-medium">Connected Regions</h4>
-        <div className="flex flex-wrap gap-2">
-          {selectedRegion.connections.map((connectionId: string, index: number) => {
-            const targetRegion = brainModel?.regions.find(
-              (r: BrainRegion) => r.id === connectionId
-            );
-            return targetRegion ? (
-              <button
-                key={index}
-                onClick={() => handleRegionSelect(targetRegion.id)}
-                className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800 transition-colors hover:bg-blue-200"
-              >
-                {targetRegion.name}
-              </button>
-            ) : null;
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  // Region button component
-  const RegionButton = ({
-    region,
-    isActive,
-    onClick,
-  }: {
-    region: BrainRegion;
-    isActive: boolean;
-    onClick: () => void;
-  }) => (
-    <button
-      onClick={onClick}
-      className={`mb-2 flex w-full items-center rounded-md px-3 py-2 text-left transition-colors ${
-        isActive
-          ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
-          : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'
-      }`}
-    >
-      <div className="mr-3 h-3 w-3 rounded-full" style={{ backgroundColor: region.color }}></div>
-      <span className={`text-sm ${isActive ? 'font-medium' : ''}`}>{region.name}</span>
-    </button>
-  );
+  // Removed unused RegionButton component
 
   return (
     <div className="flex h-full flex-col">
@@ -238,7 +157,7 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
               <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-blue-900/5 to-purple-900/5 dark:from-blue-900/20 dark:to-purple-900/20">
                 <div className="text-center">
                   <div className="mb-4 text-xl font-medium text-neutral-400 dark:text-neutral-500">
-                    {brainModel ? brainModel.name : 'Brain Model Visualization'}
+                    {brainModel ? `Brain Model: ${brainModel.id}` : 'Brain Model Visualization'} // Use brainModel.id instead of name
                   </div>
                   <div className="text-sm text-neutral-500 dark:text-neutral-400">
                     Three.js component would render here
@@ -251,7 +170,7 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                 <div className="absolute bottom-4 left-4 right-4 flex flex-wrap justify-center">
                   <div className="rounded-lg bg-black/30 px-4 py-2 text-xs text-white backdrop-blur-sm">
                     {highlights.map((regionId) => {
-                      const region = brainModel.regions.find((r: BrainRegion) => r.id === regionId);
+                      const region = brainModel.regions.find((r) => r.id === regionId); // Removed explicit type
                       return region ? (
                         <span
                           key={region.id}
@@ -373,7 +292,7 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                 {selectedRegion.name}
               </h2>
               <p className="mb-4 mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                {selectedRegion.description || 'No description available.'}
+                {selectedRegion.clinicalSignificance || 'No clinical significance noted.'} {/* Use clinicalSignificance */}
               </p>
 
               {/* Region Metrics */}
@@ -385,13 +304,13 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                     <div
                       className="h-2 rounded-full bg-blue-600"
                       style={{
-                        width: `${selectedRegion.data?.activity || 0}%`,
+                        width: `${selectedRegion.activityLevel * 100 || 0}%`, // Use activityLevel (assuming 0-1 range)
                       }}
                     ></div>
                   </div>
                   <div className="mt-1 flex justify-between text-xs">
                     <span>0%</span>
-                    <span>{selectedRegion.data?.activity || 0}%</span>
+                    <span>{Math.round(selectedRegion.activityLevel * 100) || 0}%</span> {/* Use activityLevel */}
                     <span>100%</span>
                   </div>
                 </div>
@@ -401,10 +320,10 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                   <h3 className="mb-1 text-xs font-medium text-neutral-500">Volume</h3>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">
-                      {selectedRegion.data?.volumes?.current || selectedRegion.size} cm³
+                      {selectedRegion.volume || selectedRegion.volumeMl || 'N/A'} cm³ {/* Use volume or volumeMl */}
                     </span>
                     <span className="text-xs text-neutral-500">
-                      {selectedRegion.data?.volumes?.percentile || 50}th percentile
+                      {/* Removed percentile as it's not available */}
                     </span>
                   </div>
                 </div>
@@ -428,30 +347,7 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                   </div>
                 </div>
 
-                {/* Associated Conditions */}
-                {selectedRegion.data?.anomalies && selectedRegion.data.anomalies.length > 0 && (
-                  <div>
-                    <h3 className="mb-2 text-xs font-medium text-neutral-500">
-                      Associated Anomalies
-                    </h3>
-                    <div className="space-y-1">
-                      {selectedRegion.data.anomalies.map(
-                        // Type is now string[]
-                        (
-                          condition: string,
-                          index: number // Type annotation is correct
-                        ) => (
-                          <div
-                            key={index}
-                            className="rounded bg-red-50 px-2 py-1 text-xs text-red-800 dark:bg-red-900/20 dark:text-red-300"
-                          >
-                            {condition}
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
+                {/* Associated Conditions - Removed as 'anomalies' property doesn't exist */}
               </div>
 
               <Button variant="outline" size="sm" fullWidth onClick={handleResetView}>
@@ -486,7 +382,7 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                     Available Regions
                   </h4>
                   <div className="grid grid-cols-2 gap-2">
-                    {brainModel.regions.map((region: BrainRegion) => (
+                    {brainModel.regions.map((region) => ( // Removed explicit type
                       <div
                         key={region.id}
                         className="cursor-pointer truncate rounded border border-neutral-200 bg-white px-2 py-1.5 text-xs text-neutral-800 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"

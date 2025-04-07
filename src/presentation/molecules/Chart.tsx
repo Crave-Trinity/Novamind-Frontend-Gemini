@@ -31,10 +31,11 @@ interface ChartProps {
 export const Chart: React.FC<ChartProps> = ({
   type,
   data,
-  options = {},
+  // options = {}, // Removed unused prop from destructuring
   height = 300,
   width,
   className = '',
+  // Removed unused ...rest parameter
 }) => {
   // In a real implementation, this would use a charting library like Chart.js
   // For now, we'll create a mockup that looks like a chart

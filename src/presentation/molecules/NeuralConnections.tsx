@@ -5,12 +5,15 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
+// @ts-ignore: TS2305 - Module '"@react-three/drei"' has no exported member 'Line'. (Likely type/config issue)
 import { Line } from '@react-three/drei';
-import * as THREE from 'three';
+// Removed unused THREE import
 import ConnectionLine from '@presentation/atoms/ConnectionLine';
-import { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
-import { ThemeSettings, RenderMode } from '@domain/types/brain/visualization';
-import { SafeArray, Vector3 } from '@domain/types/shared/common';
+import type { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+import type { ThemeSettings } from '@domain/types/brain/visualization';
+import { RenderMode } from '@domain/types/brain/visualization';
+import type { Vector3 } from '@domain/types/shared/common';
+import { SafeArray } from '@domain/types/shared/common';
 
 // Neural-safe prop definition with explicit typing
 interface NeuralConnectionsProps {
@@ -65,7 +68,7 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
   animated = true,
   animationSpeed = 1,
   useDashedLines = false,
-  directionIndicators = true,
+  directionIndicators: _directionIndicators = true, // Prefixed unused variable
   onConnectionClick,
   onConnectionHover,
 }) => {
@@ -324,7 +327,7 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
             dashGap={0.1}
             strength={conn.strength}
             // Use 'directionality' property for flow direction
-            flowDirection={conn.directionality === 'bidirectional' ? 'bidirectional' : 'forward'}
+            // Removed duplicate flowDirection prop
             activityLevel={getConnectionActivity(conn)}
             animated={animated && renderMode !== RenderMode.ANATOMICAL}
             animationSpeed={animationSpeed}

@@ -5,15 +5,17 @@
  * This module provides runtime validation for the Risk interfaces.
  */
 
-import {
-  RiskLevel,
+import type {
   RiskAssessment,
   DomainRisk,
   ContributingFactor,
   ProtectiveFactor,
-  NeuralRiskCorrelate,
-  RiskTimelineEvent,
-  BiometricRiskAlert,
+} from '@domain/types/clinical/risk';
+import {
+  RiskLevel,
+  // Removed unused: NeuralRiskCorrelate,
+  // Removed unused: RiskTimelineEvent,
+  // Removed unused: BiometricRiskAlert,
 } from '@domain/types/clinical/risk';
 
 /**

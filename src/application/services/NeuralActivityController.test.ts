@@ -5,9 +5,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks } from '@test/webgl'; // Removed memoryMonitor
+import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Removed unused ThreeMocks
 
-import * as Controller from '@/application/controllers/NeuralActivityController';
+import * as Controller from '@application/services/NeuralActivityController'; // Corrected import path
 
 // Minimal mocks for any dependencies
 vi.mock('@/application/services/brain/brain-model.service', () => ({

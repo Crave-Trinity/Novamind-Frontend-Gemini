@@ -2,12 +2,13 @@
  * NOVAMIND Neural-Safe Service Layer
  * Clinical Service - Handles retrieval and processing of clinical data.
  */
-import { Result, success, failure } from '@domain/types/shared/common';
-import { BiometricAlert } from '@domain/types/biometric/streams';
+import type { Result } from '@domain/types/shared/common';
+import { success, failure } from '@domain/types/shared/common';
+import type { BiometricAlert } from '@domain/types/biometric/streams';
 
 // Placeholder implementation - replace with actual logic
 
-const submitBiometricAlert = async (alert: BiometricAlert): Promise<Result<void>> => {
+const submitBiometricAlert = async (alert: BiometricAlert): Promise<Result<void, Error>> => { // Added error type
   console.log(`Submitting biometric alert: ${alert.id} for patient ${alert.patientId}`);
   // Simulate API call to submit alert to clinical system
   await new Promise((resolve) => setTimeout(resolve, 150));

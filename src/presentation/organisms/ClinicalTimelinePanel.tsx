@@ -4,17 +4,14 @@
  * with HIPAA-compliant event tracking and neural correlations
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useCallback, useMemo } from 'react'; // Removed unused useEffect
 
 // UI components
 // Correct import paths for Shadcn components
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 // Import named export from correct Shadcn path
 import { Button } from '@/components/ui/button';
 import { Badge } from '@presentation/atoms/Badge';
 import Card from '@presentation/atoms/Card'; // Use default import
-import { Separator } from '@/components/ui/separator'; // Correct import path
 // Correct import path for Shadcn component
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -24,41 +21,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'; // Correct import path
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@presentation/atoms/Tooltip';
 
 // Icons
 import {
   Calendar,
-  Clock,
-  ArrowUp,
-  ArrowDown,
+  // Clock, // Removed unused icon
+  // ArrowUp, // Removed unused icon
+  // ArrowDown, // Removed unused icon
   Activity,
   Pill,
   FileText,
   Brain,
   ListFilter,
-  ChevronRight,
-  ChevronLeft,
+  // ChevronRight, // Removed unused icon (was used by ArrowRight helper)
+  // ChevronLeft, // Removed unused icon
   AlertTriangle,
 } from 'lucide-react';
 
 // Services
-import { clinicalService } from '@application/services/clinicalService';
-import { temporalService } from '@application/services/temporal/temporal.service'; // Correct filename
 
 // Domain types
+import type { ClinicalEventType } from '@domain/types/clinical/events';
 import {
-  ClinicalEvent,
-  ClinicalEventType,
-  TreatmentEvent,
-  SymptomEvent,
-  DiagnosisEvent,
-  AssessmentEvent,
+  ClinicalEvent, // Re-added import
+  // TreatmentEvent, // Removed unused import
+  // SymptomEvent, // Removed unused import
+  // DiagnosisEvent, // Removed unused import
+  // AssessmentEvent, // Removed unused import
 } from '@domain/types/clinical/events';
 // import {
 //   StateTransition, // Type missing
@@ -67,7 +56,6 @@ import {
 
 // Timeline subcomponents
 import { TimelineEvent } from '@presentation/molecules/TimelineEvent';
-import { NeuralCorrelationBadge } from '@presentation/atoms/NeuralCorrelationBadge';
 
 /**
  * Props with neural-safe typing
@@ -90,10 +78,10 @@ const eventTypeColorMap: Record<ClinicalEventType, string> = {
   diagnosis: 'border-purple-400 bg-purple-50',
   therapy: 'border-green-400 bg-green-50',
   assessment: 'border-indigo-400 bg-indigo-50',
-  labResult: 'border-slate-400 bg-slate-50',
-  hospitalVisit: 'border-red-400 bg-red-50',
-  clinicVisit: 'border-teal-400 bg-teal-50',
-  transition: 'border-pink-400 bg-pink-50',
+  // hospitalVisit: 'border-red-400 bg-red-50', // Invalid key
+  // clinicVisit: 'border-teal-400 bg-teal-50', // Invalid key
+  // transition: 'border-pink-400 bg-pink-50', // Invalid key
+  lifestyle: 'border-gray-400 bg-gray-50', // Added missing key
 };
 
 /**
@@ -105,16 +93,13 @@ const eventTypeIconMap: Record<ClinicalEventType, React.ReactNode> = {
   diagnosis: <FileText className="h-4 w-4" />,
   therapy: <Brain className="h-4 w-4" />,
   assessment: <FileText className="h-4 w-4" />,
-  labResult: <FileText className="h-4 w-4" />,
-  hospitalVisit: <AlertTriangle className="h-4 w-4" />,
-  clinicVisit: <Calendar className="h-4 w-4" />,
-  transition: <ArrowRight className="h-4 w-4" />,
+  // hospitalVisit: <AlertTriangle className="h-4 w-4" />, // Invalid key
+  // clinicVisit: <Calendar className="h-4 w-4" />, // Invalid key
+  // transition: <ArrowRight className="h-4 w-4" />, // Invalid key
+  lifestyle: <Activity className="h-4 w-4" />, // Added missing key (using Activity as placeholder)
 };
 
-// ArrowRight component for the icon map
-function ArrowRight(props: any) {
-  return <ChevronRight {...props} />;
-}
+// Removed unused ArrowRight function
 
 /**
  * Format date with clinical precision
@@ -130,24 +115,19 @@ const formatDate = (date: Date): string => {
 /**
  * Format time with clinical precision
  */
-const formatTime = (date: Date): string => {
-  return new Date(date).toLocaleTimeString(undefined, {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
+// Removed unused formatTime function
 
 /**
  * Clinical Timeline Panel - Organism component for visualizing clinical events
  * with neuropsychiatric temporal analysis and neural correlations
  */
 export const ClinicalTimelinePanel: React.FC<ClinicalTimelinePanelProps> = ({
-  patientId,
+  // patientId, // Removed unused prop
   className = '',
   initialTimeRange = 'month',
   showFilters = true,
-  highlightTransitions = true,
-  compact = false,
+  // highlightTransitions = true, // Removed unused prop
+  // compact = false, // Removed unused prop
 }) => {
   // Timeline state
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'quarter' | 'year' | 'all'>(
@@ -155,16 +135,16 @@ export const ClinicalTimelinePanel: React.FC<ClinicalTimelinePanelProps> = ({
   );
   const [filteredTypes, setFilteredTypes] = useState<ClinicalEventType[]>([]);
   // Use 'any' temporarily as ClinicalEvent type is missing
-  const [events, setEvents] = useState<any[]>([]);
+  const [events] = useState<ClinicalEvent[]>([]); // Use correct type, remove unused setEvents
   // Use 'any' temporarily as StateTransition type is missing
-  const [transitions, setTransitions] = useState<any[]>([]);
+  const [transitions] = useState<any[]>([]); // Remove unused setTransitions
   // Use 'any' temporarily as ClinicalEvent type is missing
-  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<ClinicalEvent | null>(null); // Use correct type
 
   // UI state
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('timeline');
+  const [loading] = useState<boolean>(true); // Remove unused setLoading
+  const [error] = useState<string | null>(null); // Remove unused setError
+  // const [activeTab, setActiveTab] = useState<string>('timeline'); // Removed unused state
 
   // Load timeline data
   // Temporarily comment out data fetching useEffect due to missing types/services
@@ -195,16 +175,16 @@ export const ClinicalTimelinePanel: React.FC<ClinicalTimelinePanelProps> = ({
     }
 
     // Use 'any' for event type temporarily
-    return events.filter((event: any) => filteredTypes.includes(event.type));
+    return events.filter((event: ClinicalEvent) => filteredTypes.includes(event.type)); // Use correct type
   }, [events, filteredTypes]);
 
   // Group events by date
   const eventsByDate = useMemo(() => {
     // Use 'any' for event type temporarily
-    const grouped: Record<string, any[]> = {};
+    const grouped: Record<string, ClinicalEvent[]> = {}; // Use correct type
 
     // Use 'any' for event type temporarily
-    filteredEvents.forEach((event: any) => {
+    filteredEvents.forEach((event: ClinicalEvent) => { // Use correct type
       const dateKey = formatDate(new Date(event.date));
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
@@ -244,7 +224,7 @@ export const ClinicalTimelinePanel: React.FC<ClinicalTimelinePanelProps> = ({
   // Handle event selection
   const handleEventClick = useCallback(
     // Use 'any' for event type temporarily
-    (event: any) => {
+    (event: ClinicalEvent) => { // Use correct type
       setSelectedEvent(event === selectedEvent ? null : event);
     },
     [selectedEvent]
@@ -253,7 +233,7 @@ export const ClinicalTimelinePanel: React.FC<ClinicalTimelinePanelProps> = ({
   // Check if a date has transitions
   // Temporarily comment out transition logic due to missing types
   const hasTransitionOnDate = useCallback(
-    (dateStr: string) => {
+    (_dateStr: string) => { // Prefix unused parameter
       // const date = new Date(dateStr);
       // const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       // return transitions.some((transition: any) => { // Use 'any' temporarily
@@ -397,8 +377,8 @@ export const ClinicalTimelinePanel: React.FC<ClinicalTimelinePanelProps> = ({
                       event={event}
                       isSelected={selectedEvent?.id === event.id}
                       onClick={() => handleEventClick(event)}
-                      colorClass={eventTypeColorMap[event.type]}
-                      icon={eventTypeIconMap[event.type]}
+                      colorClass={eventTypeColorMap[event.type as ClinicalEventType]} // Add type assertion
+                      icon={eventTypeIconMap[event.type as ClinicalEventType]} // Add type assertion
                       showTime={true}
                     />
                   ))}

@@ -23,7 +23,7 @@ export interface MemoryReport {
 }
 
 let mockContext: any = null;
-let memoryMonitoring = {
+const memoryMonitoring = {
   enabled: false,
   allocatedObjects: new Map<string, any[]>(),
   disposedObjects: new Map<string, any[]>(),
@@ -144,17 +144,17 @@ function createMockWebGLContext(): any {
 const originalThreeClasses: Record<string, any> = {};
 
 function mockThreeJSClasses(): void {
-  const target = THREE || globalThis.THREE || {};
-  if (!globalThis.THREE && target === globalThis.THREE) {
+  const target = THREE || (globalThis as any).THREE || {}; // Added type assertion
+  if (!(globalThis as any).THREE && target === (globalThis as any).THREE) { // Added type assertions
     console.warn('THREE not found globally. Mocks might be incomplete.');
     // Avoid assigning {} to prevent TS errors
-  } else if (!THREE && !globalThis.THREE) {
+  } else if (!THREE && !(globalThis as any).THREE) { // Added type assertion
     console.warn('THREE not found globally or via import. Mocks might fail.');
     // Avoid assigning {} to prevent TS errors
   }
 
   const mockClass = (className: string, mockImplementation: (...args: any[]) => any) => {
-    const currentTarget = THREE || globalThis.THREE;
+    const currentTarget = THREE || (globalThis as any).THREE; // Added type assertion
     if (!currentTarget) {
       console.error(`Cannot mock THREE.${className}: THREE namespace not found.`);
       return;
@@ -166,7 +166,7 @@ function mockThreeJSClasses(): void {
   };
 
   // Mock WebGLRenderer
-  mockClass('WebGLRenderer', (...args: any[]) =>
+  mockClass('WebGLRenderer', (..._args: any[]) => // Prefixed unused args
     trackAllocation('WebGLRenderer', {
       domElement: document.createElement('canvas'),
       render: vi.fn(),
@@ -183,7 +183,7 @@ function mockThreeJSClasses(): void {
   );
 
   // Mock PerspectiveCamera
-  mockClass('PerspectiveCamera', (...args: any[]) => {
+  mockClass('PerspectiveCamera', (..._args: any[]) => { // Prefixed unused args
     const position = {
       x: 0,
       y: 0,
@@ -205,7 +205,7 @@ function mockThreeJSClasses(): void {
   });
 
   // Mock BufferGeometry
-  mockClass('BufferGeometry', (...args: any[]) =>
+  mockClass('BufferGeometry', (..._args: any[]) => // Prefixed unused args
     trackAllocation('BufferGeometry', {
       attributes: {},
       setIndex: vi.fn(),
@@ -219,7 +219,7 @@ function mockThreeJSClasses(): void {
   );
 
   // Mock Material (base)
-  mockClass('Material', (...args: any[]) =>
+  mockClass('Material', (..._args: any[]) => // Prefixed unused args
     trackAllocation('Material', {
       dispose: vi.fn(function (this: any) {
         trackDisposal('Material', this);
@@ -230,7 +230,7 @@ function mockThreeJSClasses(): void {
   );
 
   // Mock MeshStandardMaterial
-  mockClass('MeshStandardMaterial', (...args: any[]) =>
+  mockClass('MeshStandardMaterial', (..._args: any[]) => // Prefixed unused args
     trackAllocation('MeshStandardMaterial', {
       color: { set: vi.fn(), isColor: true },
       emissive: { set: vi.fn(), isColor: true },
@@ -246,7 +246,7 @@ function mockThreeJSClasses(): void {
   );
 
   // Mock MeshBasicMaterial (inherits from Material)
-  mockClass('MeshBasicMaterial', (...args: any[]) =>
+  mockClass('MeshBasicMaterial', (..._args: any[]) => // Prefixed unused args
     trackAllocation('MeshBasicMaterial', {
       color: { set: vi.fn(), isColor: true },
       needsUpdate: false,
@@ -259,7 +259,7 @@ function mockThreeJSClasses(): void {
   );
 
   // Mock Scene
-  mockClass('Scene', (...args: any[]) =>
+  mockClass('Scene', (..._args: any[]) => // Prefixed unused args
     trackAllocation('Scene', {
       add: vi.fn(),
       remove: vi.fn(),
@@ -270,7 +270,7 @@ function mockThreeJSClasses(): void {
   );
 
   // Mock Mesh
-  mockClass('Mesh', (...args: any[]) =>
+  mockClass('Mesh', (..._args: any[]) => // Prefixed unused args
     trackAllocation('Mesh', {
       position: { x: 0, y: 0, z: 0, set: vi.fn() },
       rotation: { x: 0, y: 0, z: 0, set: vi.fn() },
@@ -283,7 +283,7 @@ function mockThreeJSClasses(): void {
 }
 
 function restoreThreeJSClasses(): void {
-  const target = THREE || globalThis.THREE;
+  const target = THREE || (globalThis as any).THREE; // Added type assertion
   if (!target) return;
   for (const className in originalThreeClasses) {
     if (target[className]) target[className] = originalThreeClasses[className];

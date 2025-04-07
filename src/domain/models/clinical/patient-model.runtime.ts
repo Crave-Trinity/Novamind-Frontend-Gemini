@@ -240,11 +240,13 @@ export const PatientModelValidator = {
       typeof patient.firstName === 'string' &&
       typeof patient.lastName === 'string' &&
       patient.dateOfBirth instanceof Date &&
-      patient.contactInformation &&
-      typeof patient.contactInformation === 'object' &&
-      patient.demographics &&
+      typeof patient.contactInformation === 'object' && // Ensure contactInformation is a non-null object
+      patient.contactInformation !== null &&
+      typeof patient.demographics === 'object' && // Ensure demographics is a non-null object
+      patient.demographics !== null &&
       PatientDemographicsValidator.isValid(patient.demographics) &&
-      patient.clinicalHistory &&
+      typeof patient.clinicalHistory === 'object' && // Ensure clinicalHistory is a non-null object
+      patient.clinicalHistory !== null &&
       ClinicalHistoryValidator.isValid(patient.clinicalHistory) &&
       Array.isArray(patient.medications) &&
       patient.medications.every(MedicationValidator.isValid) &&

@@ -3,8 +3,8 @@
  * Replaced with minimal test to prevent hanging from useFrame animation loop
  */
 
-import React from 'react'; // Revert React import
-import { describe, it, expect, vi } from 'vitest';
+// import React from 'react'; // Revert React import - Removed unused import
+import { describe, it, expect } from 'vitest';
 import RegionMesh from './RegionMesh'; // Use default import
 
 // Removed local R3F mock

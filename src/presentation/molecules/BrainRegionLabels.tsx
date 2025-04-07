@@ -4,10 +4,11 @@
  */
 
 import React, { useMemo } from 'react';
+// @ts-ignore: TS2305 - Module '"@react-three/drei"' has no exported member 'Html'. (Likely type/config issue)
 import { Html } from '@react-three/drei';
-import { BrainRegion } from '@domain/types/brain/models';
-import { ThemeSettings } from '@domain/types/brain/visualization';
-import { SafeArray, Vector3 } from '@domain/types/shared/common';
+import type { BrainRegion } from '@domain/types/brain/models';
+import type { ThemeSettings } from '@domain/types/brain/visualization';
+import { SafeArray } from '@domain/types/shared/common'; // Removed unused Vector3
 
 // Neural-safe prop definition with explicit typing
 interface BrainRegionLabelsProps {
@@ -51,7 +52,7 @@ const BrainRegionLabels: React.FC<BrainRegionLabelsProps> = ({
   maxLabels = 30,
   symptomMapping = {},
   diagnosisMapping = {},
-  themeSettings,
+  themeSettings: _themeSettings, // Prefixed unused variable
   onLabelClick,
 }) => {
   // Safe array wrappers for null safety

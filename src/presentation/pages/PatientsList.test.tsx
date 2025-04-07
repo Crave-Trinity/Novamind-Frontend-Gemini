@@ -3,9 +3,10 @@
  * PatientsList testing with quantum precision
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import type { Mock } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+// Removed unused React import
+import { screen } from '@testing-library/react'; // Removed unused render, fireEvent
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@test/test-utils.unified'; // Use unified render
 import * as ReactQuery from '@tanstack/react-query'; // Import for mocking useQuery
@@ -31,7 +32,8 @@ vi.mock('react-router-dom', async (importOriginal) => {
 
 // Import the REAL component
 import PatientsList from './PatientsList';
-import { PatientModel, createPatientModel } from '@domain/models/clinical/patient-model'; // Import PatientModel and factory
+import type { PatientModel } from '@domain/models/clinical/patient-model';
+import { createPatientModel } from '@domain/models/clinical/patient-model'; // Import PatientModel and factory
 
 // Mock data
 // Use PatientModel and createPatientModel factory

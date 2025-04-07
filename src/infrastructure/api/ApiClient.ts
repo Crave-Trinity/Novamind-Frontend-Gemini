@@ -1,8 +1,9 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
 
 import { mockApi } from '@api/mockApi';
 import { validateApiResponse } from '@api/ApiClient.runtime'; // Import the validator
-import { Result, Ok, Err } from 'ts-results'; // Import Result types if needed for error handling
+// Removed unused Result, Ok, Err imports
 // Flag to toggle between mock and real API
 const USE_MOCK_API = true;
 
@@ -279,7 +280,7 @@ export class ApiClient {
     return this.get<any>(`/patients/${patientId}/risk-assessment`);
   }
 
-  private handleMockResponse<T>(url: string, data?: any): T {
+  private handleMockResponse<T>(url: string, _data?: any): T {
     // Implement mock response logic here
     // For example:
     if (url === '/auth/login') {

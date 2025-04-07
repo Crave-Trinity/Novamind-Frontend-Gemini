@@ -3,15 +3,16 @@
  * TemporalService - Placeholder for temporal data operations
  */
 
-import { Result, success } from '@/domain/types/shared/common';
-import { TemporalDynamics } from '@/domain/types/temporal/dynamics';
+import type { Result } from '@/domain/types/shared/common';
+import { success } from '@/domain/types/shared/common';
+import type { TemporalDynamics } from '@/domain/types/temporal/dynamics';
 
 // Placeholder implementation
 export const temporalService = {
   getTemporalDynamics: async (
     patientId: string,
     timeScale: string
-  ): Promise<Result<TemporalDynamics>> => {
+  ): Promise<Result<TemporalDynamics, Error>> => { // Added error type
     console.warn(
       `TemporalService.getTemporalDynamics called for ${patientId} with scale ${timeScale}, returning mock data.`
     );

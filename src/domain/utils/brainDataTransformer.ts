@@ -1,22 +1,21 @@
 // Corrected import paths based on domain structure
-import {
+import type {
   BrainRegion,
   NeuralConnection,
   BrainModel,
   BrainScan,
-  isBrainRegion,
-  isNeuralConnection,
-  isBrainModel,
 } from '@domain/types/brain/models';
-import { Vector3 } from '@domain/types/shared/common'; // Correct: Import Vector3 from common.ts
-import { ThemeSettings, RenderMode, isValidRenderMode } from '@domain/types/brain/visualization';
+import { isBrainRegion, isNeuralConnection } from '@domain/types/brain/models';
+import type { Vector3 } from '@domain/types/shared/common'; // Correct: Import Vector3 from common.ts
+import { RenderMode } from '@domain/types/brain/visualization';
 import {
   validateBrainModelData,
   validateBrainRegionArray,
   validateRenderMode,
   validateThemeSettings,
-} from '@/utils/brainDataTransformer.runtime'; // Import validators
-import { Result, Ok, Err } from 'ts-results';
+} from '@domain/utils/brainDataTransformer.runtime'; // Corrected path alias
+import type { Result } from 'ts-results';
+import { Ok, Err } from 'ts-results';
 
 // Use BrainModel directly
 type BrainData = BrainModel;
@@ -259,6 +258,8 @@ export function generateMockBrainData(): BrainModel {
       hemisphereLocation: 'central',
       tissueType: 'gray',
       dataConfidence: 0.9,
+      volume: 1500, // Added missing property
+      activity: 0.8, // Added missing property
     },
     {
       id: 'amyg',
@@ -271,6 +272,8 @@ export function generateMockBrainData(): BrainModel {
       hemisphereLocation: 'left',
       tissueType: 'gray',
       dataConfidence: 0.85,
+      volume: 800, // Added missing property
+      activity: 0.6, // Added missing property
     },
     {
       id: 'hipp',
@@ -283,6 +286,8 @@ export function generateMockBrainData(): BrainModel {
       hemisphereLocation: 'left',
       tissueType: 'gray',
       dataConfidence: 0.88,
+      volume: 1200, // Added missing property
+      activity: 0.5, // Added missing property
     },
     {
       id: 'thal',
@@ -295,6 +300,8 @@ export function generateMockBrainData(): BrainModel {
       hemisphereLocation: 'central',
       tissueType: 'white',
       dataConfidence: 0.92,
+      volume: 600, // Added missing property
+      activity: 0.7, // Added missing property
     },
     {
       id: 'cere',
@@ -307,6 +314,8 @@ export function generateMockBrainData(): BrainModel {
       hemisphereLocation: 'central',
       tissueType: 'gray',
       dataConfidence: 0.95,
+      volume: 1800, // Added missing property
+      activity: 0.6, // Added missing property
     },
   ];
 
@@ -316,7 +325,7 @@ export function generateMockBrainData(): BrainModel {
       sourceId: 'pfc',
       targetId: 'hipp',
       strength: 0.8,
-      type: 'functional',
+      type: 'excitatory', // Corrected type
       directionality: 'bidirectional',
       activityLevel: 0.7,
       dataConfidence: 0.8,
@@ -326,7 +335,7 @@ export function generateMockBrainData(): BrainModel {
       sourceId: 'pfc',
       targetId: 'amyg',
       strength: 0.6,
-      type: 'structural',
+      type: 'inhibitory', // Corrected type
       directionality: 'unidirectional',
       activityLevel: 0.3,
       dataConfidence: 0.9,
@@ -336,7 +345,7 @@ export function generateMockBrainData(): BrainModel {
       sourceId: 'amyg',
       targetId: 'hipp',
       strength: 0.9,
-      type: 'functional',
+      type: 'excitatory', // Corrected type
       directionality: 'bidirectional',
       activityLevel: 0.8,
       dataConfidence: 0.85,
@@ -346,7 +355,7 @@ export function generateMockBrainData(): BrainModel {
       sourceId: 'thal',
       targetId: 'cere',
       strength: 0.7,
-      type: 'structural',
+      type: 'inhibitory', // Corrected type
       directionality: 'unidirectional',
       activityLevel: 0.5,
       dataConfidence: 0.9,
@@ -358,6 +367,8 @@ export function generateMockBrainData(): BrainModel {
     patientId: 'DEMO-123',
     scanDate: '2025-03-29T10:00:00Z',
     scanType: 'fMRI',
+    resolution: { x: 1, y: 1, z: 1 }, // Added missing property
+    metadata: {}, // Added missing property
     dataQualityScore: 0.95,
   };
 

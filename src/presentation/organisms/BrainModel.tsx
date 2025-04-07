@@ -1,9 +1,9 @@
 import React, { useRef, useEffect, useMemo, useState } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 // @ts-ignore - Types will be handled by overrides in package.json
 import { Instance, Instances } from '@react-three/drei';
-import * as THREE from 'three';
-import { createNeuralGlowUniforms, updateTimeUniform, setActiveState } from '@shaders/neuralGlow';
+import { Color, ShaderMaterial, AdditiveBlending, Group, Clock } from 'three'; // Import specific members, removed unused Vector3, Quaternion, Matrix4
+import { createNeuralGlowUniforms, updateTimeUniform } from '@shaders/neuralGlow'; // Removed unused setActiveState
 
 /**
  * Neural node data structure with 3D location and clinical metadata
@@ -80,7 +80,7 @@ const NeuralNodeInstance: React.FC<{
     <Instance
       position={node.position}
       scale={scaleFactor}
-      color={new THREE.Color(...node.color)}
+      color={new Color(...node.color)}
       onClick={onClick}
     />
   );
@@ -104,16 +104,16 @@ const BrainModel: React.FC<BrainModelProps> = ({
   autoRotate = true,
 }) => {
   // Reference to the entire brain model for rotations
-  const brainRef = useRef<THREE.Group>(null);
+  const brainRef = useRef<Group>(null);
 
   // References for shader materials
-  const shaderMaterialRef = useRef<THREE.ShaderMaterial>(null);
+  const shaderMaterialRef = useRef<ShaderMaterial>(null);
 
   // Shader clock
-  const clockRef = useRef<THREE.Clock>(new THREE.Clock());
+  const clockRef = useRef<Clock>(new Clock());
 
   // Access Three.js scene
-  const { scene } = useThree();
+  // Removed unused scene from useThree
 
   // State to track loaded nodes for progressive loading
   const [loadedNodeCount, setLoadedNodeCount] = useState(0);
@@ -179,15 +179,15 @@ const BrainModel: React.FC<BrainModelProps> = ({
       false // Not active by default
     );
 
-    return new THREE.ShaderMaterial({
+    return new ShaderMaterial({
       vertexShader,
       fragmentShader,
       uniforms,
       transparent: true,
-      blending: THREE.AdditiveBlending,
+      blending: AdditiveBlending,
       depthWrite: false,
     });
-  }, []);
+  }, []); // Corrected dependency array
 
   // Handle animation frame updates
   useFrame(() => {

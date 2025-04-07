@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion'; // Removed unused AnimatePresence
 
 // Neural visualization coordinator
 // import { useVisualizationCoordinator } from "@application/coordinators/NeuralVisualizationCoordinator"; // Module missing
@@ -13,7 +13,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 // UI components
 // Correct import paths for Shadcn components
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider'; // Correct path
 import { Button } from '@/components/ui/button'; // Correct path and named import
 import {
   Select,
@@ -29,7 +28,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@presentation/atoms/Tooltip'; // Assuming this path is correct
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'; // Correct path
 import { Badge } from '@presentation/atoms/Badge'; // Assuming this path is correct
 import {
   Card,
@@ -49,12 +47,12 @@ import {
   Calendar,
   Layers,
   Eye,
-  EyeOff,
+  // EyeOff, // Removed unused icon again
   RotateCcw,
-  Zap,
-  Maximize,
+  // Zap, // Removed unused icon again
+  // Maximize, // Removed unused icon again
   Minimize,
-  ChevronRight,
+  // ChevronRight, // Removed unused icon again
   Settings,
   Save,
   Download,
@@ -68,8 +66,8 @@ import {
 type PlaceholderTimeScale = 'momentary' | 'hourly' | 'daily' | 'weekly' | 'monthly';
 // import { NeuralTransform } from "@domain/types/neural/transforms"; // Assuming this might be missing too, comment out for now
 // Import types needed for placeholder state
-import { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
-import { ActivationLevel } from '@domain/types/brain/activity';
+import type { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+import type { ActivationLevel } from '@domain/types/brain/activity';
 import { RenderMode } from '@domain/types/brain/visualization'; // Import RenderMode
 
 /**

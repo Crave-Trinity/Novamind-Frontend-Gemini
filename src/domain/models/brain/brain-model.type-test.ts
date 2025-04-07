@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expectTypeOf } from 'vitest';
-import { BrainModel, BrainRegion, NeuralConnection } from '@models/brain/brain-model';
+import type { BrainModel, BrainRegion, NeuralConnection } from '@models/brain/brain-model';
 
 describe('BrainModel type definitions', () => {
   it('BrainRegion has correct structure', () => {

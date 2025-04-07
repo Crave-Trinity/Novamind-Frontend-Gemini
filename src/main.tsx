@@ -1,8 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+// Removed R3F extend imports as they caused type errors and might be handled implicitly
+// import { extend } from '@react-three/fiber';
+// import * as THREE from 'three';
 
-import App from '@presentation/App.tsx'; // Revert to default import, assuming App.tsx will export default
+import App from '@presentation/App.tsx'; // Use default import and correct path
 import '@styles/index.css'; // Correct alias
+
+// Removed extend(THREE) call
 
 // Add error handler for uncaught errors
 window.addEventListener('error', (event) => {

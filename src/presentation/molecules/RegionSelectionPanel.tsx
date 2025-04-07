@@ -4,8 +4,8 @@
  * with clinical precision and anatomical organization
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { BrainRegion } from '@domain/types/brain/models';
+import React, { useState, useMemo, useEffect } from 'react'; // Removed unused useCallback
+import type { BrainRegion } from '@domain/types/brain/models';
 import { SafeArray } from '@domain/types/shared/common';
 
 // Define neural-safe props
@@ -22,31 +22,7 @@ interface RegionSelectionPanelProps {
   className?: string;
 }
 
-// Anatomical grouping categories
-type AnatomicalGroup =
-  | 'frontal'
-  | 'parietal'
-  | 'temporal'
-  | 'occipital'
-  | 'subcortical'
-  | 'cerebellum'
-  | 'brainstem'
-  | 'other';
-
-// Functional grouping categories
-type FunctionalGroup =
-  | 'motor'
-  | 'sensory'
-  | 'vision'
-  | 'language'
-  | 'memory'
-  | 'emotion'
-  | 'executive'
-  | 'default_mode'
-  | 'salience'
-  | 'attention'
-  | 'reward'
-  | 'other';
+// Removed unused AnatomicalGroup and FunctionalGroup types
 
 /**
  * RegionSelectionPanel - Molecular component for region selection interface

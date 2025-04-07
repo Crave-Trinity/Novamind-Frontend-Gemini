@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { brainTypeVerifier, BrainTypeVerifier } from '@domain/utils/brain/type-verification.ts'; // Add .ts extension
+import { brainTypeVerifier } from '@domain/utils/brain/type-verification.ts'; // Removed unused BrainTypeVerifier
 import { RenderMode } from '@domain/types/brain/visualization';
 import { TypeVerificationError } from '@domain/utils/shared/type-verification';
 

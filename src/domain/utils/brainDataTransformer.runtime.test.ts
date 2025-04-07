@@ -9,9 +9,10 @@ import {
   validateRenderMode,
   validateThemeSettings,
   isThemeSettings, // Import guard for direct testing
-} from '@/utils/brainDataTransformer.runtime';
-import { BrainModel, BrainRegion, ThemeSettings, RenderMode } from '@domain/types/brain'; // Assuming index export in domain/types/brain
-import { generateMockBrainData } from '@/utils/brainDataTransformer'; // For valid data
+} from '@domain/utils/brainDataTransformer.runtime'; // Corrected path alias
+import type { BrainRegion } from '@domain/types/brain';
+import { RenderMode } from '@domain/types/brain'; // Removed unused BrainModel, ThemeSettings
+import { generateMockBrainData } from '@domain/utils/brainDataTransformer'; // Corrected path alias
 import { visualizationThemes } from '@domain/types/brain/visualization'; // For valid theme settings
 
 // --- Mock Data ---
@@ -40,7 +41,7 @@ const mockInvalidThemeSettings = {
   backgroundColor: 123, // Wrong type
 };
 
-const mockValidRenderMode = RenderMode.ANATOMICAL;
+// Removed unused mockValidRenderMode variable
 const mockInvalidRenderMode = 'invalid-mode';
 
 describe('brainDataTransformer Runtime Validation', () => {

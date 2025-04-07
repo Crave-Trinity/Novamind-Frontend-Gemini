@@ -1,8 +1,9 @@
-import React from 'react';
+// Removed unused React import (implicit with new JSX transform)
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { ThemeProvider, useTheme } from './ThemeProvider';
+import { ThemeProvider } from './ThemeProvider';
+import { useTheme } from '@application/hooks/useTheme'; // Corrected import path
 
 // Test component that uses the theme
 function TestComponent() {

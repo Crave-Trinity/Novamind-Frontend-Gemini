@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion'; // Removed unused AnimatePresence
 
 // Neural visualization coordinator
 // import { useVisualizationCoordinator } from "@application/coordinators/NeuralVisualizationCoordinator"; // Module missing
@@ -29,36 +29,36 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'; // Correct path
-import { ScrollArea } from '@/components/ui/scroll-area'; // Correct path
+// Removed unused ScrollArea import
 import { Progress } from '@/components/ui/progress'; // Correct path
 
 // Icons
 import {
   BarChart,
-  Activity, // Pulse replaced by Activity
-  Brain,
-  Calendar,
-  ArrowUp,
-  ArrowDown,
+  // Activity, // Removed unused icon
+  // Brain, // Removed unused icon
+  // Calendar, // Removed unused icon
+  // ArrowUp, // Removed unused icon
+  // ArrowDown, // Removed unused icon
   AlertTriangle,
   Minimize,
-  Maximize,
+  // Maximize, // Removed unused icon
   BrainCircuit,
   Clock,
-  Settings, // Added missing icon
-  Save, // Added missing icon
-  Download, // Added missing icon
+  // Settings, // Removed unused icon
+  // Save, // Removed unused icon
+  // Download, // Removed unused icon
   HelpCircle, // Added missing icon
-  Eye, // Added missing icon
-  EyeOff, // Added missing icon
-  RotateCcw, // Added missing icon
-  Zap, // Added missing icon
-  Layers, // Added missing icon
+  // Eye, // Removed unused icon
+  // EyeOff, // Removed unused icon
+  // RotateCcw, // Removed unused icon
+  // Zap, // Removed unused icon
+  // Layers, // Removed unused icon
 } from 'lucide-react';
 
 // Domain types
 import { ActivationLevel } from '@domain/types/brain/activity';
-import { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models'; // Import types for placeholder state
+import type { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models'; // Import types for placeholder state
 import { RenderMode } from '@domain/types/brain/visualization'; // Import RenderMode for placeholder state
 import {} from // CriticalTransitionIndicator, // Type missing
 // TemporalPattern, // Type missing
@@ -89,13 +89,7 @@ interface ClinicalMetricsPanelProps {
 /**
  * Neural-safe activation level to color mapping
  */
-const activationLevelColorMap: Record<ActivationLevel, string> = {
-  [ActivationLevel.NONE]: 'bg-slate-600', // Map NONE to baseline color
-  [ActivationLevel.LOW]: 'bg-blue-600', // Map LOW to suppressed color
-  [ActivationLevel.MEDIUM]: 'bg-green-600', // Add MEDIUM mapping (e.g., green)
-  [ActivationLevel.HIGH]: 'bg-amber-600', // Map HIGH to elevated color
-  [ActivationLevel.EXTREME]: 'bg-red-600', // Map EXTREME to hyperactive color
-};
+// Removed unused activationLevelColorMap variable
 
 /**
  * ClinicalMetricsPanel - Organism component for displaying clinical metrics
@@ -104,8 +98,8 @@ const activationLevelColorMap: Record<ActivationLevel, string> = {
 export const ClinicalMetricsPanel: React.FC<ClinicalMetricsPanelProps> = ({
   className = '',
   compact = false,
-  showMinimap = false,
-  showConfidenceIntervals = true,
+  // showMinimap = false, // Removed unused prop
+  // showConfidenceIntervals = true, // Removed unused prop
 }) => {
   // Access visualization coordinator
   // const { state } = useVisualizationCoordinator(); // Commented out - hook missing

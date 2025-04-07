@@ -20,7 +20,8 @@ export const BrainRegionValidator = {
     return (
       typeof region.id === 'string' &&
       typeof region.name === 'string' &&
-      region.position &&
+      typeof region.position === 'object' && // Ensure position is a non-null object
+      region.position !== null &&
       typeof region.position.x === 'number' &&
       typeof region.position.y === 'number' &&
       typeof region.position.z === 'number' &&

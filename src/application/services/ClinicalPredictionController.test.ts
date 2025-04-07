@@ -3,10 +3,10 @@
  * useClinicalPredictionController testing with quantum precision
  */
 
-import { describe, it, expect, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react'; // Import renderHook and act
+import { describe, it, expect } from 'vitest'; // Removed unused: vi
+import { renderHook } from '@testing-library/react'; // Removed unused: act
 
-import { useClinicalPredictionController } from '@application/controllers/ClinicalPredictionController';
+import { useClinicalPredictionController } from '@application/services/ClinicalPredictionController'; // Corrected import path
 // Import necessary types and mocks if needed for the hook's logic
 // Example: import { PredictionState } from '@application/controllers/ClinicalPredictionController';
 

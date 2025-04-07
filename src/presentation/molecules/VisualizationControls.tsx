@@ -5,7 +5,8 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { RenderMode, VisualizationSettings } from '@domain/types/brain/visualization';
+import type { VisualizationSettings } from '@domain/types/brain/visualization';
+import { RenderMode } from '@domain/types/brain/visualization';
 
 // Neural-safe prop definition with explicit typing
 interface VisualizationControlsProps {
@@ -58,12 +59,12 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
       onSettingsChange({
         activityThreshold: 0.2,
         showInactiveRegions: true,
-        enableBloom: true,
         enableDepthOfField: false,
-        showLabels: true,
         showRegionCount: true,
         showLegend: true,
-        backgroundColor: '#000000',
+        enableBloom: true, // Valid property
+        showLabels: true, // Valid property
+        backgroundColor: '#000000', // Valid property
       });
     }
   }, [onSettingsChange]);

@@ -2,14 +2,14 @@
  * NOVAMIND Neural Test Suite
  * ClinicalDataOverlay testing with quantum precision
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest'; // Removed unused vi
 
-import { screen, fireEvent } from '@testing-library/react'; // render is imported from unified utils
-import React from 'react';
-import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react'; // render is imported from unified utils, removed unused fireEvent
+// Removed unused React import (new JSX transform)
+// Removed unused userEvent import
 import ClinicalDataOverlay from './ClinicalDataOverlay'; // Assuming default export
 import { render } from '@test/test-utils.unified'; // Import the unified render
-import { BrainModel } from '@domain/types/brain/models'; // Import BrainModel
+import type { BrainModel } from '@domain/types/brain/models'; // Import BrainModel
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for ClinicalDataOverlay
@@ -25,6 +25,8 @@ const mockBrainModel: BrainModel = {
     patientId: 'test-patient-123',
     scanDate: new Date().toISOString(),
     scanType: 'fMRI',
+    resolution: { x: 1, y: 1, z: 1 }, // Added mock resolution
+    metadata: { acquisitionTime: '10:00 AM' }, // Added mock metadata
     dataQualityScore: 0.85,
   },
   timestamp: new Date().toISOString(),
@@ -54,7 +56,7 @@ describe('ClinicalDataOverlay', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+    // Removed unused variable: const user = userEvent.setup();
     render(<ClinicalDataOverlay {...mockProps} />); // Use the unified render
 
     // Simulate user interactions

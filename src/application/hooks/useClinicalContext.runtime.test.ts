@@ -14,7 +14,6 @@ import {
 import { type RiskAssessment, RiskLevel } from '@domain/types/clinical/risk'; // Already correct
 import type {
   TreatmentResponsePrediction,
-  TreatmentType, // Already type-only
 } from '@domain/types/clinical/treatment';
 import type {
   SymptomNeuralMapping,

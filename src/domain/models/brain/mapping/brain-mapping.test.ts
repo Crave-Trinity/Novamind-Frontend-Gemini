@@ -3,17 +3,17 @@
  * calculateNeuralActivation testing with quantum precision
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest'; // Removed unused: vi
 
 import { calculateNeuralActivation } from '@domain/models/brain/mapping/brain-mapping.ts'; // Correct alias and add .ts
 // Import necessary types
-import { BrainRegion } from '@domain/types/brain/models';
-import { Symptom, Diagnosis } from '@domain/types/clinical/patient';
-import {
+import type { BrainRegion } from '@domain/types/brain/models';
+import type { Symptom, Diagnosis } from '@domain/types/clinical/patient';
+import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
-  NeuralActivationPattern,
-} from '@domain/models/brain/mapping/brain-mapping.ts'; // Correct alias and add .ts
+} from '@domain/models/brain/mapping/brain-mapping.ts';
+// Removed unused import: NeuralActivationPattern
 describe('calculateNeuralActivation', () => {
   // --- Mock Data ---
   const mockRegions: BrainRegion[] = [

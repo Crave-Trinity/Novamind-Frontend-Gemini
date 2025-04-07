@@ -6,7 +6,8 @@
 
 import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Vector3, Color, ShaderMaterial, Mesh, DoubleSide } from 'three';
+import type { Mesh } from 'three';
+import { Vector3, Color, ShaderMaterial, DoubleSide } from 'three';
 import { useSpring, animated } from '@react-spring/three';
 
 // Import types
@@ -156,26 +157,28 @@ export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
   });
 
   // Create unified shader material with precise clinical parameters
-  const shaderMaterial = useMemo(() => {
-    return new ShaderMaterial({
-      uniforms: {
-        baseColor: { value: baseColorObj },
-        activeColor: { value: activeColorObj },
-        time: { value: 0 },
-        activityLevel: { value: 0 },
-        opacity: { value: opacity },
-        pulsePeriod: { value: pulsePeriod },
-        waveSpeed: { value: waveSpeed },
-        waveAmplitude: { value: waveAmplitude },
-        glowIntensity: { value: glowIntensity },
-      },
-      vertexShader: activityShader.vertexShader,
-      fragmentShader: activityShader.fragmentShader,
-      transparent: true,
-      side: DoubleSide, // Visible from both sides
-      depthWrite: false, // Prevent Z-fighting with brain region
-    });
-  }, [baseColorObj, activeColorObj, opacity, pulsePeriod, waveSpeed, waveAmplitude, glowIntensity]);
+  // Define shader parameters separately
+  const shaderParameters = useMemo(() => ({
+    uniforms: {
+      baseColor: { value: baseColorObj },
+      activeColor: { value: activeColorObj },
+      time: { value: 0 },
+      activityLevel: { value: 0 },
+      opacity: { value: opacity },
+      pulsePeriod: { value: pulsePeriod },
+      waveSpeed: { value: waveSpeed },
+      waveAmplitude: { value: waveAmplitude },
+      glowIntensity: { value: glowIntensity },
+    },
+    vertexShader: activityShader.vertexShader,
+    fragmentShader: activityShader.fragmentShader,
+    transparent: true,
+    side: DoubleSide, // Visible from both sides
+    depthWrite: false, // Prevent Z-fighting with brain region
+  }), [baseColorObj, activeColorObj, opacity, pulsePeriod, waveSpeed, waveAmplitude, glowIntensity]);
+
+  // Create the material instance (optional if only using R3F component)
+  // const shaderMaterial = useMemo(() => new ShaderMaterial(shaderParameters), [shaderParameters]);
 
   // Update material when activity level changes
   useEffect(() => {
@@ -205,7 +208,7 @@ export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
       scale={derivedScale.clone().multiplyScalar(1.1)} // Slightly larger than the region
     >
       <sphereGeometry args={[1, 32, 32]} />
-      <shaderMaterial ref={materialRef} args={[shaderMaterial]} attach="material" />
+      <shaderMaterial ref={materialRef} args={[shaderParameters]} attach="material" />
     </animated.mesh>
   );
 };

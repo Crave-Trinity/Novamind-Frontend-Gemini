@@ -3,27 +3,26 @@
  * Implements chunked loading to avoid UI freezes with large datasets
  */
 
-import {
+import type {
   BrainModel, // Use BrainModel
   BrainRegion,
   NeuralConnection,
-  isBrainRegion, // Import guards
-  isNeuralConnection,
-  isBrainModel,
-} from '@domain/types/brain/models'; // Corrected import path
+} from '@domain/types/brain/models';
+// Removed unused imports: isBrainRegion, isNeuralConnection, isBrainModel
 import {
   validateBrainModelData,
   validateBrainRegionArray,
   validateNeuralConnectionArray,
   validateProgressCallback,
-} from '@/utils/progressiveLoader.runtime'; // Import validators
-import { Result, Ok, Err } from 'ts-results';
+} from '@domain/utils/progressiveLoader.runtime'; // Corrected path alias
+import type { Result } from 'ts-results';
+import { Ok, Err } from 'ts-results';
 
 // Use BrainModel directly
 type BrainData = BrainModel;
 
 // Type for progress callback
-type ProgressCallback = (percent: number) => void;
+// Removed unused type: type ProgressCallback = (percent: number) => void;
 
 /**
  * Load brain regions progressively in chunks

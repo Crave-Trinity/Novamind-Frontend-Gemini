@@ -5,15 +5,17 @@
  */
 
 import axios from 'axios';
-import { Result, success, failure, SafeArray } from '@domain/types/shared/common';
-import {
+import type { Result } from '@domain/types/shared/common';
+import { success, failure } from '@domain/types/shared/common'; // Removed unused SafeArray
+import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
 } from '@domain/models/brain/mapping/brain-mapping';
-import { RiskAssessment, RiskLevel } from '@domain/types/clinical/risk';
-import { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
-import { Symptom, Diagnosis, Treatment } from '@domain/types/clinical/patient';
+import type { RiskAssessment } from '@domain/types/clinical/risk';
+// Removed unused import: RiskLevel
+import type { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
+import type { Symptom, Diagnosis, Treatment } from '@domain/types/clinical/patient';
 
 // API endpoints
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.novamind.io';
@@ -27,7 +29,7 @@ export const clinicalService = {
   /**
    * Fetch neural mappings for symptoms
    */
-  fetchSymptomMappings: async (): Promise<Result<SymptomNeuralMapping[]>> => {
+  fetchSymptomMappings: async (): Promise<Result<SymptomNeuralMapping[], Error>> => { // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<SymptomNeuralMapping[]>(
@@ -82,7 +84,7 @@ export const clinicalService = {
   /**
    * Fetch neural mappings for diagnoses
    */
-  fetchDiagnosisMappings: async (): Promise<Result<DiagnosisNeuralMapping[]>> => {
+  fetchDiagnosisMappings: async (): Promise<Result<DiagnosisNeuralMapping[], Error>> => { // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<DiagnosisNeuralMapping[]>(
@@ -137,7 +139,7 @@ export const clinicalService = {
   /**
    * Fetch neural mappings for treatments
    */
-  fetchTreatmentMappings: async (): Promise<Result<TreatmentNeuralMapping[]>> => {
+  fetchTreatmentMappings: async (): Promise<Result<TreatmentNeuralMapping[], Error>> => { // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<TreatmentNeuralMapping[]>(
@@ -193,7 +195,7 @@ export const clinicalService = {
    * Fetch risk assessment for a patient
    * HIPAA-compliant with secure PHI handling
    */
-  fetchRiskAssessment: async (patientId: string): Promise<Result<RiskAssessment>> => {
+  fetchRiskAssessment: async (patientId: string): Promise<Result<RiskAssessment, Error>> => { // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<RiskAssessment>(
@@ -253,7 +255,7 @@ export const clinicalService = {
    */
   fetchTreatmentPredictions: async (
     patientId: string
-  ): Promise<Result<TreatmentResponsePrediction[]>> => {
+  ): Promise<Result<TreatmentResponsePrediction[], Error>> => { // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<TreatmentResponsePrediction[]>(
@@ -313,7 +315,7 @@ export const clinicalService = {
    * Fetch symptoms for a patient
    * HIPAA-compliant with secure PHI handling
    */
-  fetchPatientSymptoms: async (patientId: string): Promise<Result<Symptom[]>> => {
+  fetchPatientSymptoms: async (patientId: string): Promise<Result<Symptom[], Error>> => { // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<Symptom[]>(
@@ -371,7 +373,7 @@ export const clinicalService = {
    * Fetch diagnoses for a patient
    * HIPAA-compliant with secure PHI handling
    */
-  fetchPatientDiagnoses: async (patientId: string): Promise<Result<Diagnosis[]>> => {
+  fetchPatientDiagnoses: async (patientId: string): Promise<Result<Diagnosis[], Error>> => { // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<Diagnosis[]>(
@@ -431,7 +433,7 @@ export const clinicalService = {
    * Fetch treatments for a patient
    * HIPAA-compliant with secure PHI handling
    */
-  fetchPatientTreatments: async (patientId: string): Promise<Result<Treatment[]>> => {
+  fetchPatientTreatments: async (patientId: string): Promise<Result<Treatment[], Error>> => { // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<Treatment[]>(
@@ -495,7 +497,7 @@ export const clinicalService = {
     patientId: string,
     symptomId: string,
     updates: Partial<Symptom>
-  ): Promise<Result<Symptom>> => {
+  ): Promise<Result<Symptom, Error>> => { // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.patch<Symptom>(
@@ -559,14 +561,17 @@ export const clinicalService = {
     predictionId: string,
     detailLevel: 'basic' | 'detailed' | 'technical' = 'detailed'
   ): Promise<
-    Result<{
-      algorithmName: string;
-      description: string;
-      factorsConsidered: string[];
-      confidenceLevel: number;
-      limitations: string[];
-      references: string[];
-    }>
+    Result<
+      {
+        algorithmName: string;
+        description: string;
+        factorsConsidered: string[];
+        confidenceLevel: number;
+        limitations: string[];
+        references: string[];
+      },
+      Error // Added error type
+    >
   > => {
     try {
       // API request
@@ -633,15 +638,18 @@ export const clinicalService = {
     treatmentIds: string[],
     projectionDuration: number // in days
   ): Promise<
-    Result<{
-      projectionId: string;
-      timeSeries: Array<{
-        dayOffset: number;
-        date: string;
-        metrics: Record<string, number>;
-        confidenceIntervals: Record<string, [number, number]>;
-      }>;
-    }>
+    Result<
+      {
+        projectionId: string;
+        timeSeries: Array<{
+          dayOffset: number;
+          date: string;
+          metrics: Record<string, number>;
+          confidenceIntervals: Record<string, [number, number]>;
+        }>;
+      },
+      Error // Added error type
+    >
   > => {
     try {
       // API request

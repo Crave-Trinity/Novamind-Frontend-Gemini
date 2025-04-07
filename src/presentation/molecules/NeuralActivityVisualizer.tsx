@@ -4,21 +4,23 @@
  * with clinical precision and temporal dynamics
  */
 
-import React, { useRef, useMemo, useEffect, useState } from 'react';
-import { useFrame, useThree, extend } from '@react-three/fiber';
-import { Sphere, Line, Text, useTexture, shaderMaterial } from '@react-three/drei';
-import { Vector3, Color, ShaderMaterial, Mesh, IUniform, Group, Event } from 'three';
-import { useSpring, animated } from '@react-spring/three';
+import React, { useRef, useMemo, useEffect, useState } from 'react'; // Re-added useRef, useEffect, useState
+import { useFrame, extend, ThreeEvent } from '@react-three/fiber'; // Added ThreeEvent
+// @ts-ignore: TS2305 - Module '"@react-three/drei"' has no exported member 'Sphere'/'Line'/'Text'/'shaderMaterial'. (Likely type/config issue)
+import { Sphere, Line, Text, shaderMaterial } from '@react-three/drei'; // Removed unused useTexture
+import type { ShaderMaterial, Mesh, Group, Event } from 'three';
+import { Vector3, Color } from 'three'; // Removed unused IUniform
+import { useSpring } from '@react-spring/three'; // Removed unused animated
 
 // Domain types
-import {
+import type {
   NeuralActivityState,
-  ActivationLevel,
   TemporalActivationSequence,
   NeuralActivationPattern,
 } from '@domain/types/brain/activity';
-import { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
-import { Vector3 as DomainVector3 } from '@domain/types/shared/common'; // Corrected path
+import { ActivationLevel } from '@domain/types/brain/activity';
+import type { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+import type { Vector3 as DomainVector3 } from '@domain/types/shared/common'; // Corrected path
 
 /**
  * Neural-safe adapter to convert domain Vector3 to Three.js Vector3
@@ -130,7 +132,7 @@ const ActivityNode: React.FC<ActivityNodeProps> = ({
   position,
   scale,
   activityLevel,
-  activationLevel,
+  activationLevel: _activationLevel, // Prefixed unused variable
   pulseSpeed = 1.5,
   baseColor = '#1e293b',
   activeColor = '#ef4444',
@@ -157,17 +159,17 @@ const ActivityNode: React.FC<ActivityNodeProps> = ({
   });
 
   // Animation for pulsing effect
-  useFrame((state) => {
+  useFrame((_state) => { // state is unused
     if (materialRef.current) {
       // Update uniforms
-      materialRef.current.uniforms.time.value = state.clock.getElapsedTime();
+      materialRef.current.uniforms.time.value = _state.clock.getElapsedTime(); // state is unused
       materialRef.current.uniforms.activityLevel.value = springActivity.get();
       materialRef.current.uniforms.pulsePeriod.value = pulseSpeed;
     }
 
     // Scale node based on activity level for better visibility
     if (meshRef.current) {
-      const baseScale = scale;
+      // Removed unused baseScale variable
       const activityScale = scale * (1 + springActivity.get() * 0.2);
       meshRef.current.scale.setScalar(activityScale);
     }
@@ -182,7 +184,7 @@ const ActivityNode: React.FC<ActivityNodeProps> = ({
         ref={meshRef}
         data-testid="neural-node"
         data-color={activeColor}
-        onClick={(event) => onClick && onClick(event, '', 'region')}
+        onClick={(event: ThreeEvent<MouseEvent>) => onClick && onClick(event, '', 'region')}
       >
         <Sphere args={[1, 32, 32]} /> {/* Use Sphere from drei import */}
         {/* Use PascalCase for extended components and ignore TS error */}
@@ -257,7 +259,7 @@ const ActivityFlow: React.FC<ActivityFlowProps> = ({
   });
 
   // Animation for flow effect
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => { // state is unused
     // Update progress for flow animation
     progress.current = (progress.current + delta * flowSpeed * springActivity.get()) % 1;
   });
@@ -396,7 +398,7 @@ export const NeuralActivityVisualizer: React.FC<NeuralActivityVisualizerProps> =
   },
   flowColor = '#3b82f6',
   maxVisibleActivities = 100,
-  enableTemporalSmoothing = true,
+  enableTemporalSmoothing: _enableTemporalSmoothing = true, // Prefixed unused variable
   onActivityNodeClick,
 }) => {
   // Refs

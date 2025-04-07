@@ -3,7 +3,7 @@
  *
  * These utilities provide a consistent approach to mocking across the testing system
  */
-import { MockFunction } from './mock-types';
+import type { MockFunction } from './mock-types';
 
 /**
  * Create a mock function with a consistent interface

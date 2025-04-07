@@ -4,9 +4,9 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react'; // Added missing React import
-import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react'; // Removed unused render, fireEvent
+// Removed unused React import
+// Removed unused userEvent import
 import { NeuralControlPanel } from './NeuralControlPanel'; // Corrected to named import
 import { renderWithProviders } from '@test/test-utils.unified'; // Correct import path
 
@@ -50,7 +50,7 @@ describe('NeuralControlPanel', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+    // const user = userEvent.setup(); // Removed unused variable
     renderWithProviders(<NeuralControlPanel {...mockProps} />); // Use renderWithProviders
 
     // Simulate user interactions

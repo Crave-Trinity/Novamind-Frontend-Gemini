@@ -6,7 +6,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Sphere, Html, useTexture } from '@react-three/drei';
+// @ts-ignore: TS2305 - Module '"@react-three/drei"' has no exported member 'Sphere'/'Html'. (Likely type/config issue)
+import { Sphere, Html } from '@react-three/drei'; // Removed unused useTexture
+import * as THREE from 'three'; // Added back THREE namespace import
 import { Vector3, Color, MathUtils } from 'three';
 
 /**
@@ -51,7 +53,7 @@ const NeuralPulse: React.FC<{
   const t = useRef(Math.random() * Math.PI * 2);
 
   // Update animation
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => { // state is unused
     if (sphereRef.current && materialRef.current) {
       // Update pulse animation
       t.current += delta * speed;
@@ -144,7 +146,7 @@ const NeuralConnections: React.FC<{
   }, [nodeCount, connectionDensity]);
 
   // Animation cycle
-  useFrame((state, delta) => {
+  useFrame((_state, _delta) => { // state and delta are unused
     lineRefs.current.forEach((line, index) => {
       if (line && connections.current[index]) {
         // Periodically change active state
@@ -189,17 +191,15 @@ const NeuralConnections: React.FC<{
           <line
             key={`connection-${i}`}
             ref={(el) => {
-              if (el) lineRefs.current[i] = el;
+              // Cast el to any due to R3F/TS type conflict
+              if (el) lineRefs.current[i] = el as any;
             }}
           >
             <bufferGeometry attach="geometry">
               <bufferAttribute
                 attach="attributes-position"
-                array={
-                  new Float32Array([fromPos.x, fromPos.y, fromPos.z, toPos.x, toPos.y, toPos.z])
-                }
-                count={2}
-                itemSize={3}
+                args={[new Float32Array([fromPos.x, fromPos.y, fromPos.z, toPos.x, toPos.y, toPos.z]), 3]} // Pass array and itemSize via args
+                count={2} // Keep count separate if needed, or remove if inferred by args
               />
             </bufferGeometry>
             <lineBasicMaterial
@@ -226,7 +226,7 @@ const BrainLoadingAnimation: React.FC<{
   const groupRef = useRef<THREE.Group>(null);
 
   // Animate rotation
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => { // state is unused
     if (groupRef.current) {
       groupRef.current.rotation.y += delta * 0.2;
     }

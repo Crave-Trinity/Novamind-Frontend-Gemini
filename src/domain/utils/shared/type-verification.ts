@@ -3,7 +3,8 @@
  * Common type verification utilities with quantum-level precision
  */
 
-import { Result, NeuralError } from '@domain/types/shared/common'; // Corrected path
+import type { Result } from '@domain/types/shared/common';
+import { NeuralError } from '@domain/types/shared/common'; // Corrected path
 
 /**
  * Type Verification Error with clinical precision
@@ -96,7 +97,7 @@ export class TypeVerifier {
     typeName: string,
     typeCheck: (val: unknown) => boolean,
     field?: string
-  ): Result<T> {
+  ): Result<T, TypeVerificationError> {
     if (typeCheck(value)) {
       return {
         success: true,
@@ -124,7 +125,7 @@ export class TypeVerifier {
   /**
    * Verify that a value is a string
    */
-  verifyString(value: unknown, field?: string): Result<string> {
+  verifyString(value: unknown, field?: string): Result<string, TypeVerificationError> {
     return this.verifyType<string>(
       value,
       'string',
@@ -136,7 +137,7 @@ export class TypeVerifier {
   /**
    * Verify that a value is a string or undefined/null
    */
-  verifyOptionalString(value: unknown, field?: string): Result<string | undefined> {
+  verifyOptionalString(value: unknown, field?: string): Result<string | undefined, TypeVerificationError> {
     if (value === undefined || value === null) {
       return { success: true, value: undefined };
     }
@@ -148,7 +149,7 @@ export class TypeVerifier {
   /**
    * Verify that a value is a number
    */
-  verifyNumber(value: unknown, field?: string): Result<number> {
+  verifyNumber(value: unknown, field?: string): Result<number, TypeVerificationError> {
     return this.verifyType<number>(
       value,
       'number',
@@ -160,7 +161,7 @@ export class TypeVerifier {
   /**
    * Verify that a value is a boolean
    */
-  verifyBoolean(value: unknown, field?: string): Result<boolean> {
+  verifyBoolean(value: unknown, field?: string): Result<boolean, TypeVerificationError> {
     return this.verifyType<boolean>(
       value,
       'boolean',
@@ -174,19 +175,19 @@ export class TypeVerifier {
    */
   verifyArray<T = unknown>(
     value: unknown,
-    itemVerifier?: (item: unknown, index: number) => Result<T>,
+    itemVerifier?: (item: unknown, index: number) => Result<T, TypeVerificationError>,
     field?: string
-  ): Result<T[]> {
+  ): Result<T[], TypeVerificationError> {
     // First check if it's an array
     const arrayResult = this.verifyType<unknown[]>(value, 'array', Array.isArray, field);
 
     if (!arrayResult.success) {
-      return arrayResult as Result<T[]>;
+      return arrayResult as Result<T[], TypeVerificationError>;
     }
 
     // If no item verifier is provided, just return the array
     if (!itemVerifier) {
-      return arrayResult as Result<T[]>;
+      return arrayResult as Result<T[], TypeVerificationError>;
     }
 
     // Verify each item
@@ -234,7 +235,7 @@ export class TypeVerifier {
   verifyObject<T extends Record<string, unknown> = Record<string, unknown>>(
     value: unknown,
     field?: string
-  ): Result<T> {
+  ): Result<T, TypeVerificationError> {
     return this.verifyType<T>(
       value,
       'object',
@@ -251,10 +252,10 @@ export class TypeVerifier {
     value: unknown,
     allowedValues: readonly T[],
     field?: string
-  ): Result<T> {
+  ): Result<T, TypeVerificationError> {
     const stringResult = this.verifyString(value, field);
     if (!stringResult.success) {
-      return stringResult as Result<T>; // Keep the original error message
+      return stringResult as Result<T, TypeVerificationError>; // Keep the original error message
     }
 
     const stringValue = stringResult.value;

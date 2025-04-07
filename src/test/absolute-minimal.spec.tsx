@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import React from 'react';
+// Removed unused React import again
 import { render, screen } from '@testing-library/react';
 
 // A minimal component with no dependencies

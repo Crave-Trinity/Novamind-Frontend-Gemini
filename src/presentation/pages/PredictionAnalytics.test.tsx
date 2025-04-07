@@ -3,7 +3,7 @@
  * Replaced with minimal test to prevent hanging from useFrame animation loop
  */
 
-import React from 'react';
+// Removed unused React import
 import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Remove non-existent imports
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -24,7 +24,7 @@ vi.mock('@react-three/fiber', () => ({
     },
     scene: {},
   }),
-  Canvas: ({ children }) => <div data-testid="mock-canvas">{children}</div>,
+  Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="mock-canvas">{children}</div>, // Added type for children
 }));
 
 // Mock Three.js

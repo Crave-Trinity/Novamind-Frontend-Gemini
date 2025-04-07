@@ -2,7 +2,7 @@
  * NOVAMIND Neural-Safe Risk Assessment Types
  * Clinical risk assessment with quantum-level type safety
  */
-import { Vector3, SafeArray } from '@domain/types/shared/common';
+import { SafeArray } from '@domain/types/shared/common'; // Removed unused Vector3
 
 // Risk level with clinical precision
 export enum RiskLevel {

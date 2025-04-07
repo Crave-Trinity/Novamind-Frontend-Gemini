@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AxiosRequestConfig } from 'axios';
+// Removed unused import: AxiosRequestConfig
 
 import { apiClient } from '@api/ApiClient';
 
@@ -20,7 +20,7 @@ vi.mock('./ApiClient', async (importOriginal) => {
 vi.mock('./mockApi', () => ({
   mockApi: {
     // Mock API methods with neural-safe precision
-    get: vi.fn().mockImplementation((url) => {
+    get: vi.fn().mockImplementation((url: string) => { // Added type annotation
       console.log(`[Mock API Test] GET ${url}`);
 
       if (url.includes('/patients')) {
@@ -54,7 +54,7 @@ apiClient['handleMockResponse'] = function <T>(url: string, data?: any): T {
 
   try {
     // Try the original implementation first
-    return originalHandleMockResponse.call(this, url, data);
+    return originalHandleMockResponse.call(this, url, data) as T; // Assert return type
   } catch (error) {
     console.log(`[Mock Test] Falling back to test implementation`);
     // If original throws, provide test-specific implementations

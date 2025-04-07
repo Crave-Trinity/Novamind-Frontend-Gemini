@@ -5,14 +5,14 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import type { ValidationError } from '@services/brain/brain-model.service.runtime.ts';
 import {
   isBrainModel,
   validateBrainModel,
   isBrainRegion,
   validateBrainRegion,
   isNeuralConnection,
-  validateNeuralConnection,
-  ValidationError, // Import the custom error type
+  validateNeuralConnection, // Import the custom error type
 } from '@services/brain/brain-model.service.runtime.ts'; // Use @services alias
 import type { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
 

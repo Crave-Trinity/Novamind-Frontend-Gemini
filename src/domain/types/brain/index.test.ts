@@ -3,27 +3,16 @@
  * index testing with quantum precision
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest'; // Removed unused: vi
 
-import { index } from '@domain/types/brain/index';
+import * as index from '@domain/types/brain/index'; // Use namespace import
 
 // Mock data with clinical precision
-const mockData = {
-  // Add appropriate mock data for this specific type
-  id: 'test-id',
-  name: 'test-name',
-  value: 42,
-  active: true,
-  timestamp: new Date().toISOString(),
-  metadata: {
-    version: '1.0',
-    source: 'unit-test',
-  },
-};
+// Removed unused _mockData variable
 describe('index', () => {
   it('processes data with mathematical precision', () => {
     // Arrange test data
-    const testData = {};
+    // Removed unused _testData variable
 
     // Act
     // Replaced function call with object access
@@ -39,7 +28,7 @@ describe('index', () => {
 
   it('handles edge cases with clinical precision', () => {
     // Test edge cases
-    const edgeCaseData = {};
+    // Removed unused _edgeCaseData variable
 
     // Act
     // Replaced function call with object access

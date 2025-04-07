@@ -3,7 +3,7 @@
  * Replaced with minimal test to prevent hanging from useFrame animation loop
  */
 
-import React from 'react';
+import React from 'react'; // Re-added React import for type usage
 import { describe, it, expect, vi } from 'vitest';
 // Correct the import to use the default export
 import BrainVisualizationContainerInternal from './BrainVisualizationContainer';
@@ -23,7 +23,7 @@ vi.mock('@react-three/fiber', () => ({
     },
     scene: {},
   }),
-  Canvas: ({ children }) => <div data-testid="mock-canvas">{children}</div>,
+  Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="mock-canvas">{children}</div>, // Added type for children
 }));
 
 // Mock Three.js

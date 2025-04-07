@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query'; // Removed unused useQuery
 
-import { RiskAssessment } from '@domain/types/clinical/risk';
-import { xgboostService, RiskPredictionRequest } from '@api/XGBoostService';
+import type { RiskAssessment } from '@domain/types/clinical/risk';
+import type { RiskPredictionRequest } from '@api/XGBoostService';
+import { xgboostService } from '@api/XGBoostService';
 import Button from '@presentation/atoms/Button';
 
 interface RiskAssessmentPanelProps {
@@ -46,7 +47,7 @@ const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
   const {
     mutate: predictRisk,
     isPending: isPredicting,
-    error: predictionError,
+    // error: predictionError, // Removed unused variable
     data: predictionResult,
     reset: resetPrediction,
   } = useMutation({

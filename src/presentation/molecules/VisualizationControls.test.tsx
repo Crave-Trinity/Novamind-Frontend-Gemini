@@ -2,13 +2,13 @@
  * NOVAMIND Neural Test Suite
  * VisualizationControls testing with quantum precision
  */
-import React from 'react'; // Add React import for JSX
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+// Removed unused React import (new JSX transform)
+import { describe, it, expect, vi } from 'vitest'; // Removed unused beforeEach, afterEach
 // Removed duplicate WebGL mock imports, keep setup/cleanup if needed, but likely handled globally or by test-utils
 // import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl';
 // Removed beforeEach import
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen } from '@testing-library/react'; // Removed unused render, fireEvent
 import userEvent from '@testing-library/user-event';
 import VisualizationControls from './VisualizationControls';
 import { renderWithProviders } from '@test/test-utils.unified'; // Correct import path

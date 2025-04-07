@@ -2,11 +2,11 @@
  * NOVAMIND Neural Test Suite
  * Dashboard testing with quantum precision
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest'; // Removed unused vi import
 
-import { screen, fireEvent } from '@testing-library/react';
+import { screen } from '@testing-library/react'; // Removed unused fireEvent import
 // Remove MemoryRouter import, it's provided by renderWithProviders
-import userEvent from '@testing-library/user-event';
+// Removed unused userEvent import
 import Dashboard from '@pages/Dashboard'; // Use correct alias
 import { renderWithProviders } from '@test/test-utils.unified.tsx'; // Use correct unified path
 
@@ -23,7 +23,7 @@ describe('Dashboard', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+    // const user = userEvent.setup(); // Removed unused variable
     renderWithProviders(<Dashboard {...mockProps} />); // Remove MemoryRouter wrapper
 
     // Simulate user interactions

@@ -2,7 +2,7 @@
  * NOVAMIND Neural Test Suite
  * BrainRegionSelector test with clinical precision
  */
-import React from 'react';
+// Removed unused React import (new JSX transform)
 import { describe, it, expect, vi } from 'vitest'; // Added vi import
 import { render, screen } from '@testing-library/react';
 import BrainRegionSelector from './BrainRegionSelector';

@@ -9,11 +9,11 @@ import { useCallback, useEffect, useMemo } from 'react';
 // Domain types
 import {
   ActivationLevel, // Corrected name
-  type NeuralActivityState,
-  type NeuralStateTransition, // Import interface containing transitionType
+  // Removed unused: NeuralActivityState
+  // Removed unused: NeuralStateTransition
   // NeuralFrequencyBand, // Not defined in activity.ts
 } from '@domain/types/brain/activity';
-import type { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+// Removed unused import: BrainRegion, NeuralConnection
 // import { SymptomNeuralMapping } from "@domain/types/clinical/mapping"; // Invalid path, type definition missing
 import { Result, type Result as ResultType, success, failure } from '@domain/types/shared/common'; // Corrected path
 
@@ -26,9 +26,9 @@ import { clinicalService } from '@application/services/clinical/clinical.service
 import type { NeuralTransform, NeuralFrequencyBand } from '@domain/types/neural/transforms';
 
 // Placeholders for missing/corrected types
-type NeuralTransitionType = NeuralStateTransition['transitionType']; // Extract from interface
+// Removed unused type: NeuralTransitionType
 // type NeuralFrequencyBand = any; // Now imported
-type SymptomNeuralMapping = any; // Placeholder
+// Removed unused type: SymptomNeuralMapping
 
 // Local NeuralTransform type removed - using imported domain type now
 
@@ -88,7 +88,7 @@ export function useNeuralActivityController(patientId: string) {
   const neuralState = useMemo(() => createInitialNeuralState(), []);
 
   // Load baseline activity for current patient
-  const loadBaselineActivity = useCallback(async (): Promise<Result<void>> => {
+  const loadBaselineActivity = useCallback(async (): Promise<Result<void, Error>> => { // Added error type
     if (neuralState.baselineLoaded) return success(undefined);
     // Removed remnant of useState logic
 
@@ -157,7 +157,7 @@ export function useNeuralActivityController(patientId: string) {
 
   // Apply neural transforms with mathematical precision
   const applyNeuralTransforms = useCallback(
-    (transforms: NeuralTransform[]): ResultType<void> => {
+    (transforms: NeuralTransform[]): ResultType<void, Error> => { // Added error type
       // Use ResultType
       try {
         const sortedTransforms = [...transforms].sort((a, b) =>
@@ -306,7 +306,7 @@ export function useNeuralActivityController(patientId: string) {
 
   // Generate symptom-driven neural transforms
   const generateSymptomTransforms = useCallback(
-    async (symptomIds: string[]): Promise<ResultType<NeuralTransform[]>> => {
+    async (symptomIds: string[]): Promise<ResultType<NeuralTransform[], Error>> => { // Added error type
       // Use ResultType
       try {
         const mappingsResult = await clinicalService.fetchSymptomMappings(); // Corrected method name
@@ -362,12 +362,12 @@ export function useNeuralActivityController(patientId: string) {
 
   // Generate medication-driven neural transforms
   const generateMedicationTransforms = useCallback(
-    async (medicationIds: string[]): Promise<ResultType<NeuralTransform[]>> => {
+    async (_medicationIds: string[]): Promise<ResultType<NeuralTransform[], Error>> => { // Prefixed unused parameter, Added error type
       // Use ResultType
       try {
         // TODO: Implement actual service call when available (getMedicationEffects doesn't exist on clinicalService)
         console.warn('getMedicationEffects service method not implemented.');
-        const medicationEffectsResult: Result<any> = failure(
+        const medicationEffectsResult: Result<any, Error> = failure( // Added error type
           new Error('Service method getMedicationEffects not implemented.')
         ); // Placeholder
 
@@ -418,7 +418,7 @@ export function useNeuralActivityController(patientId: string) {
 
   // Apply symptom-based activity changes
   const applySymptomActivity = useCallback(
-    async (symptomIds: string[]): Promise<ResultType<void>> => {
+    async (symptomIds: string[]): Promise<ResultType<void, Error>> => { // Added error type
       // Use ResultType
       try {
         const baselineResult = await loadBaselineActivity();
@@ -450,7 +450,7 @@ export function useNeuralActivityController(patientId: string) {
 
   // Apply medication-based activity changes
   const applyMedicationActivity = useCallback(
-    async (medicationIds: string[]): Promise<ResultType<void>> => {
+    async (medicationIds: string[]): Promise<ResultType<void, Error>> => { // Added error type
       // Use ResultType
       try {
         const baselineResult = await loadBaselineActivity();
@@ -481,7 +481,7 @@ export function useNeuralActivityController(patientId: string) {
   );
 
   // Reset to baseline state
-  const resetToBaseline = useCallback(async (): Promise<ResultType<void>> => {
+  const resetToBaseline = useCallback(async (): Promise<ResultType<void, Error>> => { // Added error type
     // Use ResultType
     try {
       neuralState.metrics.activationLevels.clear();

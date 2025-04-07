@@ -2,9 +2,9 @@
  * Brain Model Domain Types
  * Defines data structures for brain visualization
  */
-import { RenderMode as VisualizationRenderMode } from '@domain/types/brain/visualization'; // Import the correct enum
-import { Result } from '@domain/types/shared/common'; // Add missing Result import if needed by other parts
-import { Vector3 } from 'three'; // Assuming Vector3 is needed, keep import
+import type { RenderMode as VisualizationRenderMode } from '@domain/types/brain/visualization'; // Import the correct enum
+// Removed unused import: Result
+// Removed unused import: Vector3
 
 /*
  * Redundant RenderMode enum removed - using VisualizationRenderMode from types
@@ -132,7 +132,7 @@ export const BrainModel = (data: any = {}): BrainModelData => {
   // Process any available data with neural-safe verification
   if (Array.isArray(model.regions)) {
     // Ensure all regions have required fields
-    model.regions = model.regions.map((region) => ({
+    model.regions = model.regions.map((region: BrainRegion) => ({ // Added type annotation
       id: region.id || `region-${Math.random().toString(36).substr(2, 9)}`,
       name: region.name || 'Unnamed Region',
       description: region.description || '',

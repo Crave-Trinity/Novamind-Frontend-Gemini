@@ -1,34 +1,6 @@
-import { RiskLevel } from '../../../../domain/types/RiskLevel';
+import { RiskLevel } from '@domain/types/clinical/risk'; // Import enum itself
 
-/**
- * Type guard to ensure a string is a valid RiskLevel
- * @param value - String to check
- * @returns The value as a RiskLevel if valid
- */
-function asRiskLevel(value: string): RiskLevel {
-  // All possible risk level values
-  const validRiskLevels: RiskLevel[] = [
-    'minimal',
-    'low',
-    'moderate',
-    'high',
-    'critical',
-    'Minimal',
-    'Low',
-    'Moderate',
-    'High',
-    'Critical',
-    'Medium',
-  ];
-
-  if (validRiskLevels.includes(value as RiskLevel)) {
-    return value as RiskLevel;
-  }
-
-  // Default to 'minimal' if somehow an invalid value is provided
-  console.warn(`Invalid risk level: ${value}, defaulting to 'minimal'`);
-  return 'minimal';
-}
+// Removed unused asRiskLevel helper function
 
 /**
  * RiskAssessmentService provides methods for calculating and evaluating
@@ -46,11 +18,12 @@ export class RiskAssessmentService {
   } {
     let riskLevel: RiskLevel;
 
-    if (score >= 75) riskLevel = asRiskLevel('critical');
-    else if (score >= 50) riskLevel = asRiskLevel('high');
-    else if (score >= 25) riskLevel = asRiskLevel('moderate');
-    else if (score >= 10) riskLevel = asRiskLevel('low');
-    else riskLevel = asRiskLevel('minimal');
+    // Assign RiskLevel enum members directly
+    if (score >= 75) riskLevel = RiskLevel.SEVERE; // Assuming 'critical' maps to 'severe'
+    else if (score >= 50) riskLevel = RiskLevel.HIGH;
+    else if (score >= 25) riskLevel = RiskLevel.MODERATE;
+    else if (score >= 10) riskLevel = RiskLevel.LOW;
+    else riskLevel = RiskLevel.NONE; // Assuming 'minimal' maps to 'none'
 
     return {
       score,
@@ -69,11 +42,12 @@ export class RiskAssessmentService {
   } {
     let riskLevel: RiskLevel;
 
-    if (score >= 75) riskLevel = asRiskLevel('critical');
-    else if (score >= 50) riskLevel = asRiskLevel('high');
-    else if (score >= 25) riskLevel = asRiskLevel('moderate');
-    else if (score >= 10) riskLevel = asRiskLevel('low');
-    else riskLevel = asRiskLevel('minimal');
+    // Assign RiskLevel enum members directly
+    if (score >= 75) riskLevel = RiskLevel.SEVERE; // Assuming 'critical' maps to 'severe'
+    else if (score >= 50) riskLevel = RiskLevel.HIGH;
+    else if (score >= 25) riskLevel = RiskLevel.MODERATE;
+    else if (score >= 10) riskLevel = RiskLevel.LOW;
+    else riskLevel = RiskLevel.NONE; // Assuming 'minimal' maps to 'none'
 
     return {
       score,
@@ -103,11 +77,12 @@ export class RiskAssessmentService {
 
     let riskLevel: RiskLevel;
 
-    if (overallScore >= 75) riskLevel = asRiskLevel('critical');
-    else if (overallScore >= 50) riskLevel = asRiskLevel('high');
-    else if (overallScore >= 25) riskLevel = asRiskLevel('moderate');
-    else if (overallScore >= 10) riskLevel = asRiskLevel('low');
-    else riskLevel = asRiskLevel('minimal');
+    // Assign RiskLevel enum members directly
+    if (overallScore >= 75) riskLevel = RiskLevel.SEVERE; // Assuming 'critical' maps to 'severe'
+    else if (overallScore >= 50) riskLevel = RiskLevel.HIGH;
+    else if (overallScore >= 25) riskLevel = RiskLevel.MODERATE;
+    else if (overallScore >= 10) riskLevel = RiskLevel.LOW;
+    else riskLevel = RiskLevel.NONE; // Assuming 'minimal' maps to 'none'
 
     return {
       overallScore,

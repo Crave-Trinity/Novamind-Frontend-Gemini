@@ -3,10 +3,10 @@
  * Replaced with minimal test to prevent hanging from useFrame animation loop
  */
 
-import React from 'react';
+// Removed unused React import
 import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl/index'; // Explicitly point to index
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'; // Removed unused vi import
 import BrainModelContainer from './BrainModelContainer'; // Use default import
 
 // Removed local R3F mock

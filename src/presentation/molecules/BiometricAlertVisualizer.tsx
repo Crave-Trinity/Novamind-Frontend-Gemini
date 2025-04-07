@@ -4,13 +4,16 @@
  * with HIPAA-compliant clinical precision and priority management
  */
 
-import React, { useRef, useMemo, useState, useEffect, useCallback } from 'react';
-import { Html, useFrame } from '@react-three/fiber';
-import { Vector3, Group } from 'three';
-import { Text, Billboard } from '@react-three/drei';
+import React, { useRef, useMemo, useState, useCallback } from 'react'; // Removed unused useEffect
+import { useFrame } from '@react-three/fiber';
+import type { Group } from 'three';
+import * as THREE from 'three'; // Import THREE namespace
+import { Vector3 } from 'three';
+// @ts-ignore: TS2305 - Module '"@react-three/drei"' has no exported member 'Billboard'/'Html'. (Likely type/config issue)
+import { Billboard, Html } from '@react-three/drei'; // Consolidate Drei imports
 
 // Domain types
-import { BrainRegion } from '@domain/types/brain/models';
+import type { BrainRegion } from '@domain/types/brain/models';
 
 /**
  * Clinical alert with neural-safe typing
@@ -19,7 +22,7 @@ export interface ClinicalAlert {
   id: string;
   timestamp: number;
   message: string;
-  description?: string;
+  // description?: string; // Removed unused property
   sourceMetric: string;
   value: number;
   threshold: number;
@@ -27,7 +30,7 @@ export interface ClinicalAlert {
   category: 'physiological' | 'behavioral' | 'self-reported' | 'environmental' | 'treatment';
   relatedRegionIds?: string[];
   confidenceLevel: number; // 0.0-1.0
-  ruleId?: string;
+  // ruleId?: string; // Removed unused property
   isPatientSpecific: boolean;
   isAcknowledged: boolean;
   expiresAt?: number;
@@ -143,7 +146,7 @@ export const BiometricAlertVisualizer: React.FC<BiometricAlertVisualizerProps> =
 
   // Animation state
   const [pulseState, setPulseState] = useState<Map<string, number>>(new Map());
-  const animationFrameRef = useRef(0);
+  // Removed unused animationFrameRef
 
   // Create region lookup map for efficiency
   const regionMap = useMemo(() => {
@@ -211,7 +214,7 @@ export const BiometricAlertVisualizer: React.FC<BiometricAlertVisualizerProps> =
 
         if (region) {
           // Offset slightly above the region
-          position = region.position.clone().add(new Vector3(0, 1.5, 0));
+          position = new THREE.Vector3(region.position.x, region.position.y, region.position.z).clone().add(new Vector3(0, 1.5, 0)); // Convert to THREE.Vector3 before clone
         } else {
           // Fallback to floating position with index-based offset
           position = floatingPosition.clone().add(new Vector3(0, -index * 1.2, 0));
@@ -223,7 +226,7 @@ export const BiometricAlertVisualizer: React.FC<BiometricAlertVisualizerProps> =
 
         if (region) {
           // Offset slightly above the region
-          position = region.position.clone().add(new Vector3(0, 1.5, 0));
+          position = new THREE.Vector3(region.position.x, region.position.y, region.position.z).clone().add(new Vector3(0, 1.5, 0)); // Convert to THREE.Vector3 before clone
         } else {
           // Fallback to floating position with index-based offset
           position = floatingPosition.clone().add(new Vector3(0, -index * 1.2, 0));
@@ -240,7 +243,7 @@ export const BiometricAlertVisualizer: React.FC<BiometricAlertVisualizerProps> =
   }, [processedAlerts, alertPositionMode, regionMap, floatingPosition]);
 
   // Update pulse animation state
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => { // state is unused
     // Update pulse state for each alert
     const newPulseState = new Map<string, number>();
 

@@ -8,12 +8,9 @@ import {
   validateBrainRegionArray,
   validateNeuralConnectionArray,
   validateProgressCallback,
-  isBrainRegionArray, // Import guards for direct testing
-  isNeuralConnectionArray,
-  isProgressCallback,
-} from '@/utils/progressiveLoader.runtime';
-import { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
-import { generateMockBrainData } from '@/utils/brainDataTransformer'; // Use the corrected mock data generator
+} from '@domain/utils/progressiveLoader.runtime'; // Corrected path alias
+// Removed unused import: import { BrainModel, BrainRegion } from '@domain/types/brain/models';
+import { generateMockBrainData } from '@domain/utils/brainDataTransformer'; // Corrected path alias
 
 // --- Mock Data ---
 

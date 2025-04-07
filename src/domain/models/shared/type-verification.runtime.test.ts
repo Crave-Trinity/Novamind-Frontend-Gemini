@@ -10,11 +10,7 @@ import {
   assertPresent,
   assertString,
   assertNumber,
-  assertBoolean,
-  assertArray,
-  assertObject,
-  assertDate,
-  assertType,
+  // Removed unused: assertBoolean, assertArray, assertObject, assertDate, assertType
   asString,
   asNumber,
   asBoolean,
@@ -26,12 +22,12 @@ import {
   validatePresent,
   validateString,
   validateNumber,
-  validateBoolean,
-  validateArray,
+  // Removed unused: validateBoolean
+  // Removed unused: validateArray
   validateArrayOf,
-  validateObject,
-  validateDate,
-  validateType,
+  // Removed unused: validateObject
+  // Removed unused: validateDate
+  // Removed unused: validateType
   validateProperty,
   validateOneOf,
   createObjectValidator,

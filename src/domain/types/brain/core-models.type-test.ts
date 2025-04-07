@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expectTypeOf } from 'vitest';
-import {
+import type {
   BrainRegion,
   Vector3,
   Connection,
@@ -47,7 +47,7 @@ describe('Brain Core Models type definitions', () => {
     expectTypeOf<Connection>().toHaveProperty('strength').toEqualTypeOf<number>();
     expectTypeOf<Connection>().toHaveProperty('type').toEqualTypeOf<string>();
     expectTypeOf<Connection>().toHaveProperty('isActive').toEqualTypeOf<boolean>();
-    expectTypeOf<Connection>().toHaveProperty('color').toEqualTypeOf<string>();
+    expectTypeOf<Connection>().toHaveProperty('color').toEqualTypeOf<string | undefined>(); // Corrected to optional
   });
 
   it('BrainModel has correct structure', () => {

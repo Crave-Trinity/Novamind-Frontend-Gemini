@@ -6,7 +6,9 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest'; // Remove beforeEach, afterEach
 import { render, screen } from '@test/test-utils.unified'; // Use unified render
-import { BiometricAlertVisualizer, ClinicalAlert } from './BiometricAlertVisualizer'; // Import type too
+import type { ClinicalAlert } from './BiometricAlertVisualizer';
+import { BiometricAlertVisualizer } from './BiometricAlertVisualizer'; // Import type too
+import type { BrainRegion } from '@domain/types/brain/models'; // Added import for BrainRegion type
 // Remove WebGL mock imports
 // Import Vector3 *after* vi.mock('three', ...)
 // import { Vector3 } from 'three';
@@ -29,8 +31,8 @@ vi.mock('@react-three/fiber', () => ({
 }));
 
 // Mock Three.js more carefully
-vi.mock('three', async (importOriginal) => {
-  const actualThree = (await importOriginal()) as any;
+vi.mock('three', async () => { // Removed unused importOriginal
+  // Removed unused variable: const actualThree = (await importOriginal()) as any;
   // Define Vector3 as a mock class
   class MockVector3 {
     x: number;
@@ -134,11 +136,13 @@ const mockRegions: BrainRegion[] = [
     position: new Vector3(1, 0, 0),
     activityLevel: 0.6,
     connections: [],
-    metadata: {},
+    // metadata: {}, // Removed invalid property
     color: '#FF0000', // Added missing property
     isActive: true, // Added missing property
     hemisphereLocation: 'left', // Added missing property
     dataConfidence: 0.9, // Added missing property
+    volume: 1500, // Added missing property
+    activity: 0.6, // Added missing property (duplicate of activityLevel?)
   },
 ];
 

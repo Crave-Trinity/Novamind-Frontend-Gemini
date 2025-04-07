@@ -3,8 +3,8 @@
  * Replaced with minimal test to prevent hanging from useFrame animation loop
  */
 
-import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+// import React from 'react'; // Removed unused import
+import { describe, it, expect } from 'vitest'; // Removed unused vi
 import BrainModelViewer from './BrainModelViewer'; // Use default import
 
 // Removed local R3F mock

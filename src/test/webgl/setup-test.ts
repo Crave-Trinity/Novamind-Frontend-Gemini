@@ -5,7 +5,8 @@
  * It's designed to work with the WebGL mocking system defined in index.ts.
  */
 
-import { setupWebGLMocks, cleanupWebGLMocks, MemoryReport } from './index';
+import type { MemoryReport } from './index';
+import { setupWebGLMocks, cleanupWebGLMocks } from './index';
 import type { SetupOptions } from './types';
 
 /**

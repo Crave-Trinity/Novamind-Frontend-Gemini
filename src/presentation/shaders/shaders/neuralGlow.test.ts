@@ -3,7 +3,7 @@
  * createNeuralGlowUniforms testing with quantum precision
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest'; // Removed unused vi import
 
 import { createNeuralGlowUniforms } from '@shaders/neuralGlow.ts'; // Use @shaders alias and add .ts
 

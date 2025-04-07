@@ -7,8 +7,8 @@
 import { useCallback, useEffect, useMemo, useReducer } from 'react'; // Import useReducer
 
 // Domain types
-import type { BrainRegion, NeuralConnection, BrainModel } from '@/domain/types/brain/models';
-import { ActivationLevel, type NeuralActivityState } from '@/domain/types/brain/activity';
+import type { BrainModel } from '@/domain/types/brain/models'; // Removed unused BrainRegion, NeuralConnection
+// Removed unused import from @/domain/types/brain/activity
 import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
@@ -16,12 +16,12 @@ import type {
 import type { TreatmentResponsePrediction } from '@/domain/types/clinical/treatment';
 import type { BiometricAlert, BiometricStream } from '@/domain/types/biometric/streams';
 import type { TemporalDynamics } from '@/domain/types/temporal/dynamics'; // Revert to specific file, maybe index isn't picked up
-import { type Result, success, failure } from '@/domain/types/shared/common'; // Use @/ alias (already correct)
+// Removed unused import from @/domain/types/shared/common
 
 // Services
 import { brainModelService } from '@/application/services/brain/brain-model.service'; // Corrected path and added extension
 import { clinicalService } from '@application/services/clinical/clinical.service'; // Corrected path
-import { biometricService } from '@/application/services/biometricService';
+// Removed unused import: biometricService
 import { temporalService } from '@/application/services/temporal/temporal.service'; // Revert to specific file
 
 // Types for the orchestration state
@@ -337,7 +337,7 @@ export function useNeuroSyncOrchestrator(
     try {
       // Extract active symptoms from mappings (in production this would come from patient data)
       const activeSymptomIds = state.symptomMappings
-        .filter((mapping) => Math.random() > 0.5) // Simulated data for demo purposes
+        .filter((_mapping) => Math.random() > 0.5) // Prefixed unused parameter
         .map((mapping) => mapping.symptomId);
 
       // Calculate which regions should be active based on symptom mappings

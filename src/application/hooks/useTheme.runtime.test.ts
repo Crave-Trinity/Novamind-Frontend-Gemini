@@ -7,8 +7,7 @@ import { validateThemeSettings, validateThemeOption } from '@hooks/useTheme.runt
 // Import actual domain types and the theme definitions
 import {
   type ThemeSettings,
-  type ThemeOption, // Already type-only
-  isValidTheme,
+  // Removed unused: ThemeOption, isValidTheme
   visualizationThemes,
 } from '@domain/types/brain/visualization';
 

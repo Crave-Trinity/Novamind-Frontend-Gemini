@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  ThreeMocks,
+  // Removed unused ThreeMocks import
   MockScene,
   MockPerspectiveCamera,
   MockMesh,

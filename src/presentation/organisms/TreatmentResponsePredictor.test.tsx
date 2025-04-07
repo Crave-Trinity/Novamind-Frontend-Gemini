@@ -2,30 +2,24 @@
  * NOVAMIND Neural Test Suite
  * TreatmentResponsePredictor testing with quantum precision
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest'; // Removed unused vi import
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react'; // Added missing React import
-import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react'; // Removed unused render, fireEvent
+// Removed unused React import
+// Removed unused userEvent import
 import TreatmentResponsePredictor from './TreatmentResponsePredictor'; // Assuming default export
 import { renderWithProviders } from '@test/test-utils.unified'; // Correct import path
-import { DigitalTwinProfile, AssessmentScore } from '@domain/models/clinical/digital-twin-profile'; // Import profile and AssessmentScore
-import {
+import type { DigitalTwinProfile } from '@domain/models/clinical/digital-twin-profile';
+// Removed unused AssessmentScore import
+import type {
   PatientDemographics,
   ClinicalData,
   NeuralData,
   DataPermissions,
-  // Biomarker, // Removed import, type is 'any' in DigitalTwinProfile
-  Diagnosis,
-  MedicalHistoryItem,
-  Symptom,
-  Medication,
-  PsychometricAssessment,
-  TreatmentData, // Correctly import from patient
-  Treatment, // Correctly import from patient
-  TreatmentPlan, // Correctly import from patient
+  TreatmentData,
 } from '@domain/types/clinical/patient';
-import { RiskAssessment } from '@domain/types/clinical/risk'; // Correctly import from risk
+// Removed unused imports from @domain/types/clinical/patient
+// Removed unused RiskAssessment import
 // TreatmentResponse type is likely in treatment.ts, but not needed for this mock setup yet
 
 // Mock data with clinical precision
@@ -190,7 +184,7 @@ describe('TreatmentResponsePredictor', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+    // const user = userEvent.setup(); // Removed unused variable
     renderWithProviders(<TreatmentResponsePredictor {...mockProps} />); // Use renderWithProviders
 
     // Simulate user interactions

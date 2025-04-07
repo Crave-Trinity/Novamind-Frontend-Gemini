@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import React from 'react';
+// Removed unused React import
 import { screen, render } from '@testing-library/react'; // Import render
 import '@testing-library/jest-dom';
 import type { FC } from 'react';

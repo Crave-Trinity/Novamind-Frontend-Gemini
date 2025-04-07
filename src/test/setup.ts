@@ -70,7 +70,11 @@ const localStorageMock = (() => {
     },
   };
 })();
-Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true, configurable: true });
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
+  configurable: true,
+});
 
 // Mock sessionStorage
 const sessionStorageMock = (() => {
@@ -88,7 +92,11 @@ const sessionStorageMock = (() => {
     },
   };
 })();
-Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock, writable: true, configurable: true });
+Object.defineProperty(window, 'sessionStorage', {
+  value: sessionStorageMock,
+  writable: true,
+  configurable: true,
+});
 
 // Mock WebGL context (Simpler version from Incoming)
 const createMockWebGLContext = () => ({
@@ -198,7 +206,7 @@ vi.mock('framer-motion', async (importOriginal) => {
   const motionProxy = new Proxy(
     {},
     {
-      get: (target, prop) => {
+      get: (_target, prop) => { // Prefixed unused target
         const Component = ({
           children,
           ...props

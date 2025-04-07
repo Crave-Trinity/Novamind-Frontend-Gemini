@@ -10,15 +10,14 @@ import Stats from 'stats.js';
 
 // Domain types
 // Use relative path as alias seems problematic in tests
-import { Result, success, failure } from '../../domain/types/shared/common';
+// Removed unused Result, success, failure imports
 
 // Performance threshold constants
 const FRAME_RATE_WARNING = 45; // fps
 const FRAME_RATE_CRITICAL = 30; // fps
 const MEMORY_WARNING = 500; // MB
 const MEMORY_CRITICAL = 750; // MB
-const GPU_WARNING = 70; // % utilization
-const GPU_CRITICAL = 90; // % utilization
+// Removed unused GPU constants
 
 /**
  * Performance metrics with neural-safe typing
@@ -188,81 +187,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     }
   });
 
-  /**
-   * Get current performance assessment - Refactored Logic
-   */
-  const getPerformanceAssessment = (): Result<{
-    status: 'optimal' | 'good' | 'warning' | 'critical';
-    bottlenecks: string[];
-    recommendations: string[];
-  }> => {
-    try {
-      const bottlenecks: string[] = [];
-      const recommendations: string[] = [];
-      let currentStatus: 'optimal' | 'good' | 'warning' | 'critical' = 'optimal';
-
-      // Determine highest severity level based on thresholds
-      if (
-        metrics.fps <= FRAME_RATE_CRITICAL ||
-        metrics.memory >= MEMORY_CRITICAL ||
-        (metrics.gpuLoad && metrics.gpuLoad >= GPU_CRITICAL)
-      ) {
-        currentStatus = 'critical';
-      } else if (
-        metrics.fps <= FRAME_RATE_WARNING ||
-        metrics.memory >= MEMORY_WARNING ||
-        (metrics.gpuLoad && metrics.gpuLoad >= GPU_WARNING)
-      ) {
-        currentStatus = 'warning';
-      } else if (metrics.fps < 60) {
-        // Assuming 60 is optimal target
-        currentStatus = 'good';
-      }
-
-      // Add specific bottlenecks and recommendations based on thresholds hit
-      if (metrics.fps <= FRAME_RATE_CRITICAL) {
-        bottlenecks.push('Frame rate critically low');
-        recommendations.push(
-          'Reduce number of visible brain regions',
-          'Disable post-processing',
-          'Switch to performance mode'
-        );
-      } else if (metrics.fps <= FRAME_RATE_WARNING) {
-        bottlenecks.push('Frame rate below optimal');
-        recommendations.push('Consider reducing visual quality', 'Limit animated elements');
-      }
-
-      if (metrics.memory >= MEMORY_CRITICAL) {
-        bottlenecks.push('Memory usage critically high');
-        recommendations.push('Reduce texture resolution', 'Clear unused cached data');
-      } else if (metrics.memory >= MEMORY_WARNING) {
-        bottlenecks.push('Memory usage elevated');
-        recommendations.push('Monitor for memory leaks');
-      }
-
-      if (metrics.gpuLoad) {
-        if (metrics.gpuLoad >= GPU_CRITICAL) {
-          bottlenecks.push('GPU utilization critically high');
-          recommendations.push('Reduce shader complexity');
-        } else if (metrics.gpuLoad >= GPU_WARNING) {
-          bottlenecks.push('GPU utilization elevated');
-          recommendations.push('Consider simpler shaders');
-        }
-      }
-
-      return success({
-        status: currentStatus,
-        bottlenecks: [...new Set(bottlenecks)], // Remove duplicates
-        recommendations: [...new Set(recommendations)], // Remove duplicates
-      });
-    } catch (error) {
-      return failure(
-        new Error(
-          `Failed to assess performance: ${error instanceof Error ? error.message : String(error)}`
-        )
-      );
-    }
-  };
+  // Removed unused getPerformanceAssessment function
 
   return (
     <>

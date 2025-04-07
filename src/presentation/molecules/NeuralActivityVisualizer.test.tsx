@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { setupWebGLMocks, cleanupWebGLMocks, ThreeMocks, memoryMonitor } from '@test/webgl';
+import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Removed unused ThreeMocks, memoryMonitor
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NeuralActivityVisualizer } from './NeuralActivityVisualizer';
@@ -26,7 +26,7 @@ vi.mock('@react-three/fiber', () => ({
   }),
   // Add the extend function that's missing
   extend: vi.fn(),
-  Canvas: ({ children }) => <div data-testid="mock-canvas">{children}</div>,
+  Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="mock-canvas">{children}</div>, // Added type annotation
 }));
 
 // Mock Three.js

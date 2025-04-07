@@ -11,6 +11,8 @@ const mockBrainModel: BrainModel = {
     patientId: 'test-patient',
     scanDate: '2024-01-01T00:00:00.000Z',
     scanType: 'fMRI',
+    resolution: { x: 1, y: 1, z: 1 }, // Added missing property
+    metadata: {}, // Added missing property
     dataQualityScore: 1,
   },
   timestamp: '2024-01-01T00:00:00.000Z',

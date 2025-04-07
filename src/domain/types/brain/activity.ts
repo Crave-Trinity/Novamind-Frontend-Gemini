@@ -4,8 +4,8 @@
  * with clinical precision and mathematical integrity
  */
 
-import { Vector3 } from 'three';
-import { Result } from '@domain/types/shared/common';
+import type { Vector3 } from 'three';
+import type { Result } from '@domain/types/shared/common';
 
 /**
  * Neural activation level classifications
@@ -166,7 +166,7 @@ export function calculateActivationLevel(rawActivity: number): ActivationLevel {
 export function calculateClinicalSignificance(
   activationPattern: NeuralActivationPattern,
   patientRiskFactors: string[] = []
-): Result<number> {
+): Result<number, Error> { // Added error type
   // This would be a complex algorithm in practice
   // Simplified implementation for demonstration
 
@@ -205,6 +205,6 @@ export function calculateClinicalSignificance(
 
   return {
     success: true,
-    data: clinicalSignificance,
+    value: clinicalSignificance, // Correct property name for Result<T>
   };
 }

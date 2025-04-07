@@ -3,9 +3,10 @@
  * PatientProfile testing with quantum precision
  */
 import React from 'react'; // Import React
-import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest'; // Import Mock
-import { render, screen, cleanup } from '@testing-library/react'; // Import cleanup
-import userEvent from '@testing-library/user-event';
+import type { Mock } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'; // Import Mock
+import { screen, cleanup } from '@testing-library/react'; // Import cleanup, Removed unused render
+// Removed unused userEvent import
 import * as ReactRouterDom from 'react-router-dom'; // Import all for mocking
 
 // Mock dependencies before importing the component
@@ -24,7 +25,8 @@ import PatientProfile from '@presentation/pages/PatientProfile'; // Correct alia
 import { renderWithProviders } from '@test/test-utils.unified.tsx'; // Correct filename and keep alias
 
 // Mock audit log service
-vi.mock('@infrastructure/services/AuditLogService', () => ({ // Adjust path if needed
+vi.mock('@infrastructure/services/AuditLogService', () => ({
+  // Adjust path if needed
   auditLogService: {
     log: vi.fn(),
   },
@@ -69,7 +71,7 @@ describe('PatientProfile', () => {
   it('responds to user interaction with quantum precision', async () => {
     // Mock useParams for this test too
     (ReactRouterDom.useParams as Mock).mockReturnValue({ id: mockPatientId });
-    const user = userEvent.setup();
+    // const user = userEvent.setup(); // Removed unused variable
     renderWithProviders(<PatientProfile {...mockProps} />);
 
     // Wait for initial render/data load

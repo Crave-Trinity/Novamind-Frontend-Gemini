@@ -3,7 +3,7 @@
  * mockApi testing with quantum precision
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest'; // Removed unused vi
 
 // Create completely static mock values to avoid asynchronous issues
 const mockBrainModel = {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/application/utils/cn'; // Assuming utility exists
+import { cn } from '@/lib/utils'; // Corrected import path
 
 interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   src?: string | null;

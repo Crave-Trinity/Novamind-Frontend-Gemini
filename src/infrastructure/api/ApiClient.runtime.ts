@@ -3,16 +3,17 @@
  * Ensures data received from the API conforms to expected types.
  */
 
-import { Result, Ok, Err } from 'ts-results';
+import type { Result } from 'ts-results';
+import { Ok, Err } from 'ts-results';
 // Import domain types that represent API response structures if available
 // e.g., import { Patient } from '@domain/types/clinical/patient';
 
 // --- Placeholder Types (Replace with actual expected response types) ---
-type ApiLoginResponse = { success: boolean; token: string };
+// type _ApiLoginResponse = { success: boolean; token: string }; // Prefixed unused type - Removed unused
 type ApiPatient = { id: number | string; name: string /* ... other fields */ };
-type ApiBrainModel = { id: string /* ... other fields */ };
-type ApiPredictionResponse = { predictionId: string; score: number /* ... */ };
-type ApiRiskAssessment = { assessmentId: string; level: string /* ... */ };
+// type ApiBrainModel = { id: string /* ... other fields */ }; // Removed unused type
+// type _ApiPredictionResponse = { predictionId: string; score: number /* ... */ }; // Prefixed unused type - Removed unused
+// type _ApiRiskAssessment = { assessmentId: string; level: string /* ... */ }; // Prefixed unused type - Removed unused
 
 // --- Type Guards ---
 

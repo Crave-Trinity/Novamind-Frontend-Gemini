@@ -4,7 +4,8 @@
 import React from 'react';
 import { screen, act } from '@testing-library/react';
 import { useTheme } from '@application/hooks/useTheme'; // Correct import path for the hook
-import { vi, describe, it, expect, beforeEach, Mock } from 'vitest'; // Import vi, Mock, etc.
+import type { Mock } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest'; // Import vi, Mock, etc.
 import { renderWithProviders } from '@test/test-utils.unified';
 
 // Simple card component to test
@@ -74,10 +75,9 @@ describe('Card Component with Tailwind CSS', () => {
       themes: ['light', 'dark'],
     });
 
-    const { enableDarkMode } = renderWithProviders(
-      // Still use renderWithProviders for context setup
-      <Card title="Dark Mode Card" description="This is a dark mode test card" />,
-      { darkMode: true } // Optionally tell provider to start in dark mode if needed
+    renderWithProviders(
+      <Card title="Dark Mode Card" description="This is a dark mode test card" />
+      // Removed incomplete options object and unused variable destructuring
     );
 
     const card = screen.getByTestId('card');
@@ -130,7 +130,7 @@ describe('Card Component with Tailwind CSS', () => {
       setTheme('dark');
     });
     // Re-mock the return value to reflect the change for the next assertion
-    mockedUseTheme.mockReturnValue({
+    mockedUseTheme.mockReturnValue({ // Ensure consistent variable name
       theme: 'dark',
       setTheme: mockSetTheme,
       resolvedTheme: 'dark',
@@ -143,7 +143,7 @@ describe('Card Component with Tailwind CSS', () => {
     act(() => {
       setTheme('light');
     });
-    mockedUseTheme.mockReturnValue({
+    mockedUseTheme.mockReturnValue({ // Ensure consistent variable name
       theme: 'light',
       setTheme: mockSetTheme,
       resolvedTheme: 'light',

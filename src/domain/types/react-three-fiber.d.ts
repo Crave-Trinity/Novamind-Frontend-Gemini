@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { ReactThreeFiber } from '@react-three/fiber';
+import type * as THREE from 'three';
+import type { ReactThreeFiber } from '@react-three/fiber';
 
 // Extend the LineDashedMaterial type to include dashOffset
 declare module 'three' {

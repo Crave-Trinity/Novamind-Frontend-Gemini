@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Session management
   const [sessionExpiresAt, setSessionExpiresAt] = useState<number>(0);
-  const [showSessionWarning, setShowSessionWarning] = useState<boolean>(false);
+  const [_showSessionWarning, setShowSessionWarning] = useState<boolean>(false); // Prefixed unused variable
 
   /**
    * Initialize authentication state from storage

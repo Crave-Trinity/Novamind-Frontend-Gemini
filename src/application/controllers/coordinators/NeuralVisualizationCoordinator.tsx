@@ -21,11 +21,9 @@ import { useBiometricStreamController } from '@application/services/BiometricStr
 import { useTemporalDynamicsController } from '@application/services/TemporalDynamicsController'; // Corrected path
 
 // Domain types
-import type { BrainRegion, NeuralConnection, BrainModel } from '@domain/types/brain/models';
-import {
-  ActivationLevel, // Corrected import name
-  type NeuralActivityState,
-} from '@domain/types/brain/activity';
+import type { BrainModel } from '@domain/types/brain/models';
+import type { ActivationLevel } from '@domain/types/brain/activity';
+// Removed unused import: NeuralActivityState
 import type { SymptomNeuralMapping } from '@domain/models/brain/mapping/brain-mapping'; // Corrected path
 import type { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
 import type { BiometricAlert, BiometricStream } from '@domain/types/biometric/streams';

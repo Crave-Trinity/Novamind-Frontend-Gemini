@@ -3,10 +3,11 @@
  * Ensures that visualization settings and data structures conform to expected types at runtime.
  */
 
-import { Result, Ok, Err } from 'ts-results';
+import type { Result } from 'ts-results';
+import { Ok, Err } from 'ts-results';
 // Import relevant types and type guards from the domain
+import type { RenderMode } from '@domain/types/brain/visualization';
 import {
-  RenderMode,
   isValidRenderMode,
   // VisualizationSettings, // Only needed if validating the full settings object
 } from '@domain/types/brain/visualization';

@@ -3,9 +3,9 @@
  * AuthRoute testing with quantum precision
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest'; // Removed unused afterEach
+// Removed unused React import
+import { screen } from '@testing-library/react'; // Removed unused render
 import { renderWithProviders } from '@test/test-utils.unified'; // Import custom render
 
 // Mock react-router-dom components needed by AuthRoute

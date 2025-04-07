@@ -8,8 +8,8 @@
  * to create a complete testing environment for Three.js components.
  */
 
-import { MockFunction } from './mock-types';
-import { createMockFunction, fn } from './mock-utils';
+import type { MockFunction } from './mock-types';
+import { createMockFunction } from './mock-utils'; // Removed unused fn import
 
 // Type aliases for easier reference
 type Vector3Like = { x: number; y: number; z: number };
@@ -33,28 +33,24 @@ export class MockObject3D {
   matrix: any = { identity: () => {}, copy: () => {}, multiply: () => {} };
   matrixWorld: any = { identity: () => {}, copy: () => {}, multiply: () => {} };
 
-  add: MockFunction<(object: MockObject3D) => MockObject3D> = createMockFunction(
-    (object: MockObject3D) => {
-      this.children.push(object);
-      object.parent = this;
-      return this;
-    }
-  );
+  add = vi.fn().mockImplementation((object: MockObject3D): this => { // Direct mock assignment
+    this.children.push(object);
+    object.parent = this;
+    return this;
+  });
 
-  remove: MockFunction<(object: MockObject3D) => MockObject3D> = createMockFunction(
-    (object: MockObject3D) => {
-      const index = this.children.indexOf(object);
-      if (index !== -1) {
-        this.children.splice(index, 1);
-        object.parent = null;
-      }
-      return this;
+  remove = vi.fn().mockImplementation((object: MockObject3D): this => { // Direct mock assignment
+    const index = this.children.indexOf(object);
+    if (index !== -1) {
+      this.children.splice(index, 1);
+      object.parent = null;
     }
-  );
+    return this;
+  });
 
   updateMatrix: MockFunction<() => void> = createMockFunction(() => {});
   updateMatrixWorld: MockFunction<(force?: boolean) => void> = createMockFunction(() => {});
-  lookAt: MockFunction<(vector: Vector3Like) => void> = createMockFunction(() => {});
+  lookAt: MockFunction<(vector: Vector3Like) => void> = createMockFunction((_vector: Vector3Like) => {}); // Added parameter to match signature
   traverse: MockFunction<(callback: (object: MockObject3D) => void) => void> = createMockFunction(
     (callback) => {
       callback(this);
@@ -250,11 +246,10 @@ export class MockBufferGeometry {
   boundingSphere: any = null;
   userData: Record<string, any> = {};
 
-  setAttribute: MockFunction<(name: string, attribute: any) => MockBufferGeometry> =
-    createMockFunction((name, attribute) => {
-      this.attributes[name] = attribute;
-      return this;
-    });
+  setAttribute = vi.fn().mockImplementation((name: string, attribute: any): this => { // Direct mock assignment
+    this.attributes[name] = attribute;
+    return this;
+  });
 
   getAttribute: MockFunction<(name: string) => any> = createMockFunction((name) => {
     return this.attributes[name];
@@ -271,11 +266,10 @@ export class MockBufferGeometry {
     return new MockBufferGeometry();
   });
 
-  setFromPoints: MockFunction<(points: Vector3Like[]) => MockBufferGeometry> = createMockFunction(
-    () => {
-      return this;
-    }
-  );
+  setFromPoints = vi.fn().mockImplementation((_points: Vector3Like[]): this => { // Direct mock assignment
+    // Mock implementation, actual logic might vary
+    return this;
+  });
 }
 
 export class MockSphereGeometry extends MockBufferGeometry {
@@ -330,21 +324,21 @@ export class MockWebGLRenderer {
   gammaFactor = 2.0;
   info = { render: { calls: 0, triangles: 0, frame: 0 } };
 
-  constructor(parameters?: { antialias?: boolean; alpha?: boolean }) {
+  constructor(_parameters?: { antialias?: boolean; alpha?: boolean }) { // Prefixed unused parameters
     this.domElement = document.createElement('canvas');
     this.domElement.width = 800;
     this.domElement.height = 600;
   }
 
   setSize: MockFunction<(width: number, height: number, updateStyle?: boolean) => void> =
-    createMockFunction(() => {});
-  setPixelRatio: MockFunction<(value: number) => void> = createMockFunction(() => {});
+    createMockFunction((_width: number, _height: number, _updateStyle?: boolean) => {}); // Added parameters
+  setPixelRatio: MockFunction<(value: number) => void> = createMockFunction((_value: number) => {}); // Added parameter
   render: MockFunction<
     (scene: MockScene, camera: MockPerspectiveCamera | MockOrthographicCamera) => void
-  > = createMockFunction(() => {});
+  > = createMockFunction((_scene: MockScene, _camera: MockPerspectiveCamera | MockOrthographicCamera) => {}); // Added parameters
   dispose: MockFunction<() => void> = createMockFunction(() => {});
-  setClearColor: MockFunction<(color: any, alpha?: number) => void> = createMockFunction(() => {});
-  setRenderTarget: MockFunction<(renderTarget: any) => void> = createMockFunction(() => {});
+  setClearColor: MockFunction<(color: any, alpha?: number) => void> = createMockFunction((_color: any, _alpha?: number) => {}); // Added parameters
+  setRenderTarget: MockFunction<(renderTarget: any) => void> = createMockFunction((_renderTarget: any) => {}); // Added parameter
   clear: MockFunction<() => void> = createMockFunction(() => {});
 }
 
@@ -361,11 +355,11 @@ export class MockOrbitControls {
   enablePan: boolean = true;
   autoRotate: boolean = false;
 
-  constructor(camera: MockPerspectiveCamera | MockOrthographicCamera, domElement?: HTMLElement) {
+  constructor(_camera: MockPerspectiveCamera | MockOrthographicCamera, _domElement?: HTMLElement) { // Prefixed unused camera, domElement
     // Constructor takes camera and optional domElement
   }
 
-  update: MockFunction<() => boolean> = createMockFunction(() => true);
+  update = vi.fn().mockImplementation((): boolean => true); // Direct mock assignment, return boolean
   dispose: MockFunction<() => void> = createMockFunction(() => {});
 }
 

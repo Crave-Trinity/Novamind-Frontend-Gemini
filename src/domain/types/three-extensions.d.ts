@@ -3,8 +3,9 @@
  */
 
 declare module '@react-three/drei' {
-  import { FC, ReactNode, MutableRefObject, Ref } from 'react';
-  import { Object3D, Texture, Material, Mesh, Group, BufferGeometry, Camera, Color } from 'three';
+  import type { FC, ReactNode, MutableRefObject, Ref } from 'react';
+  import type { Object3D, Material, Mesh, Group, Camera, Color } from 'three';
+  import { Texture, BufferGeometry } from 'three';
   import { RootState } from '@react-three/fiber';
 
   export interface OrbitControlsProps {
@@ -92,8 +93,8 @@ declare module '@react-three/drei' {
 }
 
 declare module '@react-three/postprocessing' {
-  import { FC, ReactNode } from 'react';
-  import { Object3D } from 'three';
+  import type { FC, ReactNode } from 'react';
+  import type { Object3D } from 'three';
 
   interface OutlineProps {
     selection: Object3D[];

@@ -60,10 +60,10 @@ export interface Dimensions {
 }
 
 // Result pattern for neural-safe error handling
-export type Result<T, E = Error> = { success: true; value: T } | { success: false; error: E };
+export type Result<T, E> = { success: true; value: T } | { success: false; error: E }; // Removed default error type
 
 // Helper functions for Result pattern
-export const success = <T>(value: T): Result<T> => ({
+export const success = <T>(value: T): Result<T, never> => ({ // Specify 'never' for the error type
   success: true,
   value,
 });
@@ -299,8 +299,14 @@ export const Result = {
     return result.success === false;
   },
 
+  // Add constraint to E or ensure it's correctly passed through
   map<T, U, E>(result: Result<T, E>, fn: (value: T) => U): Result<U, E> {
-    return result.success ? success(fn(result.value)) : result; // Return the original failure result, preserving the error type E
+    if (Result.isSuccess(result)) {
+      return success(fn(result.value));
+    } else {
+      // Explicitly return the failure part, ensuring the error type E is preserved
+      return failure<E>(result.error);
+    }
   },
 
   flatMap<T, U, E>(result: Result<T, E>, fn: (value: T) => Result<U, E>): Result<U, E> {

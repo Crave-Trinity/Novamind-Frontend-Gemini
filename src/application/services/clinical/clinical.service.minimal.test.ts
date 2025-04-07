@@ -10,7 +10,7 @@ import axios from 'axios';
 import { clinicalService } from '@services/clinical/clinical.service.ts'; // Use @services alias and add .ts
 import type { SymptomNeuralMapping } from '@domain/models/brain/mapping/brain-mapping'; // Use type import
 import { type RiskAssessment, RiskLevel } from '@domain/types/clinical/risk'; // Import RiskLevel enum
-import type { TreatmentResponsePrediction } from '@domain/types/clinical/treatment'; // Use type import
+// Removed unused type import: TreatmentResponsePrediction
 import type { Symptom } from '@domain/types/clinical/patient'; // Use type import
 
 // Mock axios

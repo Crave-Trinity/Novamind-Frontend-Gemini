@@ -3,8 +3,8 @@ import { useParams } from 'react-router-dom';
 
 import LoadingIndicator from '@atoms/LoadingIndicator';
 import BrainVisualizationContainer from '@organisms/BrainVisualizationContainer';
-import { auditLogService, AuditEventType } from '@infrastructure/clients/auditLogClient';
-import { BrainRegion } from '@domain/types/brain/models'; // Import correct type
+import { auditLogClient, AuditEventType } from '@infrastructure/clients/auditLogClient'; // Corrected import name
+import type { BrainRegion } from '@domain/types/brain/models'; // Import correct type
 
 /**
  * BrainVisualizationPage
@@ -30,7 +30,7 @@ const BrainVisualizationPage: React.FC = () => {
   );
 
   useEffect(() => {
-    auditLogService.log(AuditEventType.BRAIN_MODEL_VIEW, {
+    auditLogClient.log(AuditEventType.BRAIN_MODEL_VIEW, { // Corrected usage
       resourceType: 'brainModel',
       action: 'view',
       result: 'success',
@@ -55,7 +55,7 @@ const BrainVisualizationPage: React.FC = () => {
             activityLevel: 0.75,
             isActive: true,
             hemisphereLocation: 'left',
-            dataConfidence: 0.9,
+            dataConfidence: 0.9, volume: 0, activity: 0, // Added missing properties
           },
           {
             id: 'amygdala',
@@ -66,7 +66,7 @@ const BrainVisualizationPage: React.FC = () => {
             activityLevel: 0.9,
             isActive: true,
             hemisphereLocation: 'left',
-            dataConfidence: 0.9,
+            dataConfidence: 0.9, volume: 0, activity: 0, // Added missing properties
           },
           {
             id: 'hippocampus',
@@ -77,7 +77,7 @@ const BrainVisualizationPage: React.FC = () => {
             activityLevel: 0.6,
             isActive: true,
             hemisphereLocation: 'right',
-            dataConfidence: 0.9,
+            dataConfidence: 0.9, volume: 0, activity: 0, // Added missing properties
           },
           {
             id: 'thalamus',
@@ -88,7 +88,7 @@ const BrainVisualizationPage: React.FC = () => {
             activityLevel: 0.5,
             isActive: true,
             hemisphereLocation: 'central',
-            dataConfidence: 0.9,
+            dataConfidence: 0.9, volume: 0, activity: 0, // Added missing properties
           },
           {
             id: 'striatum',
@@ -99,7 +99,7 @@ const BrainVisualizationPage: React.FC = () => {
             activityLevel: 0.4,
             isActive: true,
             hemisphereLocation: 'left',
-            dataConfidence: 0.9,
+            dataConfidence: 0.9, volume: 0, activity: 0, // Added missing properties
           },
         ];
 
@@ -108,7 +108,7 @@ const BrainVisualizationPage: React.FC = () => {
       } catch (err) {
         setError('Failed to load brain visualization data');
         console.error('Error fetching brain data:', err);
-        auditLogService.log(AuditEventType.SYSTEM_ERROR, {
+        auditLogClient.log(AuditEventType.SYSTEM_ERROR, { // Corrected usage
           resourceType: 'brainModel',
           errorCode: 'DATA_FETCH_ERROR',
           details: 'Failed to fetch brain model data',
@@ -135,7 +135,7 @@ const BrainVisualizationPage: React.FC = () => {
           return [...prev, regionId]; // Add to selection
         }
       });
-      auditLogService.log(AuditEventType.BRAIN_MODEL_VIEW, {
+      auditLogClient.log(AuditEventType.BRAIN_MODEL_VIEW, { // Corrected usage
         resourceType: 'brainRegion',
         resourceId: regionId,
         action: 'select',

@@ -6,32 +6,33 @@
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTheme } from 'next-themes';
-import { useQuery, useMutation } from '@tanstack/react-query';
+// Removed unused useQuery import
 
 // Domain types
-import { BrainModel, BrainRegion } from '@domain/types/brain/models';
-import { RenderMode, VisualizationSettings } from '@domain/types/brain/visualization';
+import type { BrainModel } from '@domain/types/brain/models';
+// Removed unused import: import { BrainRegion } from '@domain/types/brain/models';
+import type { VisualizationSettings } from '@domain/types/brain/visualization';
+import { RenderMode } from '@domain/types/brain/visualization';
+import type { VisualizationState } from '@domain/types/shared/common';
 import {
   SafeArray,
-  Result,
-  success,
-  failure,
-  VisualizationState,
+  // Removed unused Result, success, failure
   NeuralError, // Import NeuralError
 } from '@domain/types/shared/common';
-import { Diagnosis, Symptom, Patient } from '@domain/types/clinical/patient';
-import { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
-import { RiskAssessment } from '@domain/types/clinical/risk';
+import type { Diagnosis, Symptom } from '@domain/types/clinical/patient';
+// Removed unused import: import { Patient } from '@domain/types/clinical/patient';
+import type { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
+import type { RiskAssessment } from '@domain/types/clinical/risk';
 
 // Domain models
-import {
-  calculateNeuralActivation,
-  mapSymptomsToRegions,
-  mapDiagnosesToRegions,
-  calculateTreatmentImpact,
+import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
+} from '@domain/models/brain/mapping/brain-mapping';
+import {
+  calculateNeuralActivation,
+  calculateTreatmentImpact, // Re-added import
 } from '@domain/models/brain/mapping/brain-mapping'; // Correct path
 
 // Application hooks
@@ -102,7 +103,7 @@ const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
     symptoms,
     diagnoses,
     isLoading: isPatientLoading,
-    error: patientError,
+    error: _patientError, // Prefixed unused variable
   } = usePatientData(patientId);
 
   const {
@@ -430,7 +431,7 @@ function applyClinicialDataToBrainModel(
   symptomMappings: SymptomNeuralMapping[],
   diagnosisMappings: DiagnosisNeuralMapping[],
   treatmentMappings: TreatmentNeuralMapping[],
-  riskAssessment?: RiskAssessment,
+  _riskAssessment?: RiskAssessment, // Prefixed unused parameter
   treatmentPredictions?: TreatmentResponsePrediction[],
   renderMode: RenderMode = RenderMode.ANATOMICAL
 ): BrainModel {
@@ -504,7 +505,7 @@ function applyClinicialDataToBrainModel(
 
       // Apply region impacts
       enhancedModel.regions = enhancedModel.regions.map((region) => {
-        const regionImpact = impact.regionImpacts.find((ri) => ri.regionId === region.id);
+        const regionImpact = impact.regionImpacts.find((ri: { regionId: string; impact: string; magnitude: number; confidence: number }) => ri.regionId === region.id);
 
         if (!regionImpact) return region;
 
@@ -531,7 +532,7 @@ function applyClinicialDataToBrainModel(
       // Apply connection impacts
       enhancedModel.connections = enhancedModel.connections.map((conn) => {
         const connectionImpact = impact.connectionImpacts.find(
-          (ci) => ci.sourceId === conn.sourceId && ci.targetId === conn.targetId
+          (ci: { sourceId: string; targetId: string; impact: string; magnitude: number; confidence: number }) => ci.sourceId === conn.sourceId && ci.targetId === conn.targetId
         );
 
         if (!connectionImpact) return conn;

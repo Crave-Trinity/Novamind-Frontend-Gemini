@@ -12,7 +12,7 @@ import {
   cleanupWebGLAfterTest,
   runTestWithWebGL,
 } from '@test/webgl/setup-test.ts'; // Add .ts extension
-import React from 'react';
+// Removed unused React import
 // Import only the default export (the component)
 import BrainVisualization from '../BrainVisualization';
 import { renderWithProviders } from '@test/test-utils.unified'; // Import unified render
@@ -25,12 +25,12 @@ import { renderWithProviders } from '@test/test-utils.unified'; // Import unifie
 vi.mock('../BrainVisualization', () => ({
   // Define props based on the *actual* component signature
   default: ({
-    brainModel,
-    selectedRegion,
+    brainModel: _brainModel, // Prefixed unused variable
+    selectedRegion: _selectedRegion, // Prefixed unused variable
     onRegionSelect = () => {},
-    className = '',
-    isLoading = false,
-    error = null,
+    className: _className = '', // Prefixed unused variable
+    isLoading: _isLoading = false, // Prefixed unused variable
+    error: _error = null, // Prefixed unused variable
   }: {
     brainModel?: any | null;
     selectedRegion?: string | null;

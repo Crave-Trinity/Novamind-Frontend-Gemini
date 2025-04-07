@@ -4,18 +4,17 @@
  * with neuropsychiatric precision and clinical intelligence
  */
 
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { useSpring, animated } from '@react-spring/three';
-// Removed Html and Line imports from drei as they are not exported
-import { Vector3 as ThreeVector3, Color, QuadraticBezierCurve3 } from 'three'; // Import Vector3 with alias
+import React, { useEffect, useMemo } from 'react'; // Removed unused useState, useCallback
+// Removed unused imports: useSpring, animated, Line, Html
+import { Vector3 as ThreeVector3 } from 'three'; // Import Vector3 with alias, removed unused Color, QuadraticBezierCurve3
 // Domain types
-import {
+import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
 } from '@domain/models/brain/mapping/brain-mapping'; // Corrected import path
-import { BrainRegion } from '@domain/types/brain/models';
-import { Symptom, Diagnosis } from '@domain/types/clinical/patient';
-import { ActivationLevel } from '@domain/types/brain/activity';
+import type { BrainRegion } from '@domain/types/brain/models';
+import type { Symptom, Diagnosis } from '@domain/types/clinical/patient';
+// Removed unused import: import { ActivationLevel } from '@domain/types/brain/activity';
 
 /**
  * Props with neural-safe typing
@@ -118,7 +117,7 @@ function calculateMappingConnections(
         if (region) {
           // Determine connection properties
           // const isPrimary = activation.primaryEffect; // Removed: 'activation' is not defined here, 'primaryEffect' removed from type
-          const isPrimary = pattern.intensity > 0.7; // Use intensity as a proxy for primary effect for now, or remove isPrimary logic below
+          // Removed unused isPrimary variable
           const isSelectedRegion = selectedRegionId === region.id;
           const isHighlighted = isSelectedSymptom || isSelectedRegion;
 
@@ -194,7 +193,7 @@ function calculateMappingConnections(
         if (region) {
           // Determine connection properties
           // const isPrimary = activation.primaryEffect; // Removed: 'activation' is not defined here, 'primaryEffect' removed from type
-          const isPrimary = pattern.intensity > 0.7; // Use intensity as a proxy for primary effect for now, or remove isPrimary logic below
+          // Removed unused isPrimary variable
           const isSelectedRegion = selectedRegionId === region.id;
           const isHighlighted = isSelectedDiagnosis || isSelectedRegion;
 
@@ -247,19 +246,7 @@ function calculateMappingConnections(
   return connections;
 }
 
-/**
- * Calculate quadratic bezier points for smooth curves
- */
-function createCurvePoints(
-  start: ThreeVector3, // Use aliased type
-  end: ThreeVector3, // Use aliased type
-  control: ThreeVector3, // Use aliased type
-  segments: number = 20
-): ThreeVector3[] {
-  // Use aliased type
-  const curve = new QuadraticBezierCurve3(start, control, end);
-  return curve.getPoints(segments);
-}
+// Removed unused createCurvePoints function
 
 /**
  * SymptomRegionMappingVisualizer - Molecular component for mapping symptoms to brain regions
@@ -277,16 +264,16 @@ export const SymptomRegionMappingVisualizer: React.FC<SymptomRegionMappingVisual
   showSymptomLabels = true,
   showAllConnections = false,
   maxVisibleConnections = 100,
-  lineWidth = 2,
-  enableAnimation = true,
+  lineWidth: _lineWidth = 2, // Prefixed unused variable
+  enableAnimation: _enableAnimation = true, // Prefixed unused variable
   colorMap = {
     primary: '#ef4444',
     secondary: '#3b82f6',
     inactive: '#94a3b8',
     highlight: '#f97316',
   },
-  onSymptomSelect,
-  onRegionSelect,
+  onSymptomSelect: _onSymptomSelect, // Prefixed unused variable
+  onRegionSelect: _onRegionSelect, // Prefixed unused variable
 }) => {
   // Calculate all possible mapping connections
   const allConnections = useMemo(() => {
@@ -402,38 +389,22 @@ export const SymptomRegionMappingVisualizer: React.FC<SymptomRegionMappingVisual
     // For this implementation, we're keeping the default random positions
   }, [symptomGroups]);
 
-  // Handle symptom selection
-  const handleSymptomClick = useCallback(
-    (symptomId: string) => {
-      if (onSymptomSelect) {
-        onSymptomSelect(symptomId === selectedSymptomId ? null : symptomId);
-      }
-    },
-    [onSymptomSelect, selectedSymptomId]
-  );
+  // Removed unused handleSymptomClick function
 
   // Render the connections
   return (
     <group>
       {/* Render connections */}
-      {visibleConnections.map((conn) => {
+      {visibleConnections.map((_conn) => { // Prefixed unused variable
         // Generate curve points for smooth connections
-        const curvePoints = conn.controlPoint
-          ? createCurvePoints(conn.points[0], conn.points[1], conn.controlPoint)
-          : conn.points;
+        // Removed unused curvePoints variable calculation
 
         // Line thickness based on connection strength and selection state
-        const thickness = // Simplified thickness logic without isPrimary
-          lineWidth *
-          (conn.symptomId === selectedSymptomId || conn.regionId === selectedRegionId ? 1.5 : 1.0);
+        // Removed unused thickness variable calculation
 
         // Animation settings
-        const dashArray = enableAnimation
-          ? [0.1, 0.1] // Simplified dash array without isPrimary
-          : undefined;
-        const dashOffset = enableAnimation ? 0 : undefined;
-        const dashAnimateFrom = enableAnimation ? 0 : undefined;
-        const dashAnimateTo = enableAnimation ? 1 : undefined;
+        // Removed unused dashArray variable calculation
+        // Removed unused dashOffset, dashAnimateFrom, dashAnimateTo variables
 
         // Use explicit return null;
         return null;
@@ -441,20 +412,15 @@ export const SymptomRegionMappingVisualizer: React.FC<SymptomRegionMappingVisual
 
       {/* Render symptom/diagnosis labels */}
       {showSymptomLabels &&
-        symptomGroups.map((group) => {
-          const isSelected =
-            group.connections[0]?.symptomId === selectedSymptomId ||
-            group.connections[0]?.symptomId === selectedDiagnosisId;
+        symptomGroups.map((_group) => { // Prefixed unused variable
+          // Removed unused isSelected variable calculation
 
           // Selected items have higher opacity for better visibility
-          const opacity = isSelected ? 0.95 : 0.7;
+          // Removed unused opacity variable
 
           // Find a primary connection for determining color
-          const primaryConn = group.connections.find((c) => c.isPrimary) || group.connections[0];
-          const isActive =
-            primaryConn &&
-            (activeSymptoms.some((s) => s.id === primaryConn.symptomId) ||
-              activeDiagnoses.some((d) => d.id === primaryConn.symptomId));
+          // Removed unused primaryConn variable calculation
+          // Removed unused isActive variable calculation
 
           // Use explicit return null;
           return null;

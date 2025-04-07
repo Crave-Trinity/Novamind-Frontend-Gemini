@@ -8,10 +8,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   setupWebGLMocks,
   cleanupWebGLMocks,
-  CoreWebGLRenderer, // Import the mock class
-  MockWebGLTexture, // Import the mock class
-  MockWebGLGeometry, // Import the mock class
-  MockWebGLMaterial, // Import the mock class
+  // Removed unused mock class imports
 } from './mock-webgl'; // Keep setup/cleanup imports
 
 // Mock for 'three' moved to global setup (src/test/setup.ts)
@@ -159,8 +156,7 @@ describe('Three.js Component Integration', () => {
     // Instantiate using standard names - alias provides mocks
     // Instantiate using standard names - alias provides mocks
     const renderer = new WebGLRenderer();
-    const geometry = new BufferGeometry();
-    const material = new MeshBasicMaterial();
+    // Removed unused geometry and material variables
     // Need mock scene and camera for the render call
     const scene = new Scene();
     const camera = new PerspectiveCamera();

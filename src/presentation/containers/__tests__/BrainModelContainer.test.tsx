@@ -5,9 +5,9 @@
  * These tests follow a clean, modular approach for testing the neural visualization
  * components with proper isolation and reliability.
  */
-import React from 'react';
+// Removed unused React import
 import { describe, it, expect, beforeEach, vi } from 'vitest'; // Import vi
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react'; // Removed unused render
 import BrainModelContainer from '@organisms/BrainModelContainer.tsx'; // Use correct alias and add .tsx extension
 import { renderWithProviders } from '@test/test-utils.unified';
 
@@ -20,12 +20,7 @@ vi.mock('@react-three/drei', async (importOriginal) => {
   };
 });
 
-// Create simplified test data
-const mockBrainRegions = [
-  { id: 'prefrontal-cortex', name: 'Prefrontal Cortex', activity: 0.7 },
-  { id: 'amygdala', name: 'Amygdala', activity: 0.85 },
-  { id: 'hippocampus', name: 'Hippocampus', activity: 0.5 },
-];
+// Removed unused mockBrainRegions variable
 
 // Add the data-testid attribute to the test component wrapper
 // This test uses the root element of the BrainModelContainer by data-testid

@@ -3,12 +3,11 @@
  * Button testing with quantum precision
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import Button from './Button'; // Changed to default import
-import { renderWithProviders } from '@test/test-utils';
+// import { renderWithProviders } from '@test/test-utils'; // Removed unused import
 
 // Mock data with clinical precision
 const mockProps = {
@@ -24,7 +23,7 @@ describe('Button', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+    // Removed unused variable: const user = userEvent.setup();
     render(<Button {...mockProps} />);
 
     // Simulate user interactions

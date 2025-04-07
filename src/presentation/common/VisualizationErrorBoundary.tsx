@@ -4,10 +4,12 @@
  * with clinical precision error recovery
  */
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
+import { Component } from 'react';
 
 // Domain types
-import { Result, success, failure } from '@domain/types/common';
+import type { Result } from '@domain/types/shared/common'; // Corrected path
+// Removed unused success import
 
 /**
  * Error state with neural-safe typing
@@ -27,7 +29,7 @@ interface VisualizationErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode | ((error: Error, errorInfo: ErrorInfo, reset: () => void) => ReactNode);
   onError?: (error: Error, errorInfo: ErrorInfo, componentStack: string) => void;
-  onRecoveryAttempt?: () => Result<boolean>;
+  onRecoveryAttempt?: () => Result<boolean, Error>; // Added Error type argument
   logErrors?: boolean;
   maxErrorDepth?: number;
 }
@@ -120,9 +122,9 @@ export class VisualizationErrorBoundary extends Component<
 
     // Call custom recovery handler if provided
     if (this.props.onRecoveryAttempt) {
-      const result = this.props.onRecoveryAttempt();
+      const result: Result<boolean, Error> = this.props.onRecoveryAttempt(); // Added type annotation
 
-      if (result.success && result.data) {
+      if (result.success && result.value) { // Corrected property access from 'data' to 'value'
         // Reset error state on successful recovery
         this.resetErrorState();
       }

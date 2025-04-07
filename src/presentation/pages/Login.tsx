@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // import SecureInput from "@atoms/SecureInput"; // Assume this is a styled input, replace with standard input for now
-import { auditLogService, AuditEventType } from '@infrastructure/clients/auditLogClient'; // Use correct alias
+import { auditLogClient, AuditEventType } from '@infrastructure/clients/auditLogClient'; // Corrected import name
 
 /**
  * Login page component
@@ -48,7 +48,7 @@ const Login: React.FC = () => {
         // In a real implementation, this would call the auth API
         if (email === 'demo@novamind.com' && password === 'demo123') {
           // Log successful login attempt
-          auditLogService.log(AuditEventType.USER_LOGIN, {
+          auditLogClient.log(AuditEventType.USER_LOGIN, { // Corrected usage
             // Use correct enum member
             result: 'success',
             details: 'Login successful, MFA required',
@@ -58,7 +58,7 @@ const Login: React.FC = () => {
           setShowMFA(true);
         } else {
           // Log failed login attempt (no sensitive info in logs)
-          auditLogService.log(AuditEventType.UNAUTHORIZED_ACCESS_ATTEMPT, {
+          auditLogClient.log(AuditEventType.UNAUTHORIZED_ACCESS_ATTEMPT, { // Corrected usage
             // Use appropriate type
             result: 'failure',
             details: 'Invalid credentials',
@@ -97,7 +97,7 @@ const Login: React.FC = () => {
         // In a real implementation, this would verify the MFA code
         if (mfaCode === '123456') {
           // Log successful MFA verification
-          auditLogService.log(AuditEventType.USER_SESSION_VERIFY, {
+          auditLogClient.log(AuditEventType.USER_SESSION_VERIFY, { // Corrected usage
             // Use appropriate type
             result: 'success',
             details: 'MFA verification successful',
@@ -107,7 +107,7 @@ const Login: React.FC = () => {
           navigate('/');
         } else {
           // Log failed MFA attempt
-          auditLogService.log(AuditEventType.USER_SESSION_VERIFY, {
+          auditLogClient.log(AuditEventType.USER_SESSION_VERIFY, { // Corrected usage
             // Use appropriate type
             result: 'failure',
             details: 'Invalid MFA code',

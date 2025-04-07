@@ -1,4 +1,4 @@
-import { BrainModel } from '@models/BrainModel';
+import type { BrainModel } from '@domain/types/brain/models'; // Re-added import with correct path
 
 import { mockApiClient } from '@api/MockApiClient';
 
@@ -86,7 +86,7 @@ export const mockApi = {
    * Predict treatment response
    */
   predictTreatmentResponse: async (
-    patientId: string,
+    _patientId: string, // Prefixed unused parameter
     treatment: string
   ): Promise<TreatmentResponse> => {
     // Define outcomes with explicit types
@@ -133,7 +133,7 @@ export const mockApi = {
   /**
    * Get risk assessment
    */
-  getRiskAssessment: async (patientId: string): Promise<any> => {
+  getRiskAssessment: async (_patientId: string): Promise<any> => { // Prefixed unused parameter
     return {
       overallRisk: 0.65,
       components: [

@@ -3,9 +3,9 @@
  * initializeApp testing with quantum precision
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest'; // Removed unused vi
 
-import { initializeApp } from '@/app/initializeApp';
+// import { initializeApp } from './initializeApp'; // Use relative path - Removed unused import
 
 describe('initializeApp', () => {
   // TODO: Add meaningful tests for initializeApp

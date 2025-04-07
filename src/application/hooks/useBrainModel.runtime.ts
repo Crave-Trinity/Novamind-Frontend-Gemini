@@ -9,7 +9,6 @@ import { Ok, Err, type Result } from 'ts-results'; // Import Result as type
 import {
   type BrainModel,
   isBrainModel,
-  BrainRegion, // Keep as value (used in .every)
   isBrainRegion,
   type Connection, // Already type-only
 } from '@domain/types/brain/core-models';

@@ -13,7 +13,7 @@ import type {
 import type {
   ClinicalPredictionData, // Domain type, used for validateClinicalPredictionData
   GeneticPredictionData,
-  TreatmentType,
+  // Removed unused: TreatmentType
   // Add other nested types from treatment.ts if deeper validation is required
 } from '@domain/types/clinical/treatment';
 // import { ValidationError } from '@domain/errors/validation';
@@ -71,11 +71,7 @@ function isClinicalPredictionData(obj: unknown): obj is ClinicalPredictionData {
 }
 
 // Basic guard for GeneticPredictionData (can be expanded)
-function isGeneticPredictionData(obj: unknown): obj is GeneticPredictionData {
-  if (typeof obj !== 'object' || obj === null) return false;
-  // Since all fields are optional, just checking it's an object is a basic guard
-  return true;
-}
+// Removed unused function: isGeneticPredictionData
 
 // Updated guard for TreatmentResponseRequest DTO
 function isTreatmentResponseRequest(obj: unknown): obj is TreatmentResponseRequest {

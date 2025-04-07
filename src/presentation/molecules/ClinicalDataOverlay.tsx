@@ -4,10 +4,12 @@
  * with HIPAA-compliant data presentation and quantum-level precision
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
-import { BrainModel, BrainRegion } from '@domain/types/brain/models';
-import { Patient, Symptom, Diagnosis } from '@domain/types/clinical/patient';
-import { RiskAssessment, RiskLevel, RiskAssessmentOps } from '@domain/types/clinical/risk';
+import React, { useState, useMemo } from 'react'; // Removed unused useCallback
+import type { BrainModel } from '@domain/types/brain/models';
+// Removed unused BrainRegion type import
+import type { Patient, Symptom, Diagnosis } from '@domain/types/clinical/patient';
+import type { RiskAssessment } from '@domain/types/clinical/risk';
+import { RiskLevel, RiskAssessmentOps } from '@domain/types/clinical/risk';
 import { SafeArray } from '@domain/types/shared/common';
 
 // Neural-safe prop definition with explicit typing
@@ -109,33 +111,7 @@ const ClinicalDataOverlay: React.FC<ClinicalDataOverlayProps> = ({
     return riskAssessment ? RiskAssessmentOps.getRiskLevel(riskAssessment) : RiskLevel.UNKNOWN;
   }, [riskAssessment]);
 
-  // Risk domain to focus on - prioritize high risk domains
-  const priorityRiskDomain = useMemo(() => {
-    if (!riskAssessment) return null;
-
-    // Convert to array before sorting
-    const sortedDomains = new SafeArray(riskAssessment.domainRisks).toArray().sort((a, b) => {
-      // Sort by risk level (severe > high > moderate > low)
-      const riskScore = (level: RiskLevel): number => {
-        switch (level) {
-          case RiskLevel.SEVERE:
-            return 4;
-          case RiskLevel.HIGH:
-            return 3;
-          case RiskLevel.MODERATE:
-            return 2;
-          case RiskLevel.LOW:
-            return 1;
-          default:
-            return 0;
-        }
-      };
-      return riskScore(b.riskLevel) - riskScore(a.riskLevel);
-    });
-
-    // Access the sorted array directly
-    return sortedDomains.length > 0 ? sortedDomains[0] : null;
-  }, [riskAssessment]);
+  // Removed unused priorityRiskDomain calculation
 
   // Event handlers
   const handleTabChange = (tab: 'overview' | 'symptoms' | 'regions' | 'risk') => {

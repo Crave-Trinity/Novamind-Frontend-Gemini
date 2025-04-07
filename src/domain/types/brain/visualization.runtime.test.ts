@@ -16,7 +16,7 @@ import {
   ProcessedNeuralConnectionValidator,
 } from '@domain/types/brain/visualization.runtime';
 import {
-  RenderMode,
+  // Removed unused: RenderMode
   defaultVisualizationSettings,
   visualizationThemes,
 } from '@domain/types/brain/visualization';

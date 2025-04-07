@@ -1,7 +1,8 @@
-import { IBrainService } from '@domain/services/brain.service';
-import { BrainModel, BrainRegion, NeuralConnection } from '@domain/models/brain.model';
-import { UUID, PaginationParams, PaginatedResponse, ApiError } from '@domain/types/common';
-import { ApiClient } from '../api/client';
+import type { IBrainService } from '@domain/services/brain.service';
+import type { BrainModel, BrainRegion, NeuralConnection } from '@domain/models/brain.model';
+import type { UUID, PaginationParams, PaginatedResponse } from '@domain/types/common';
+// Removed unused import: ApiError
+import type { ApiClient } from '../api/client';
 
 export class BrainService implements IBrainService {
   constructor(private apiClient: ApiClient) {}
@@ -19,7 +20,7 @@ export class BrainService implements IBrainService {
     const response = await this.apiClient.get<PaginatedResponse<BrainModel>>('/brain-models', {
       params: { patientId, ...params },
     });
-    return response;
+    return response.data; // Return the data property from the ApiResponse
   }
 
   async createBrainModel(patientId: UUID, model: Omit<BrainModel, 'id'>): Promise<BrainModel> {

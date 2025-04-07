@@ -6,10 +6,11 @@
 
 // We'll export specific services from each subdirectory as they're needed
 // For now, we're just ensuring the export path exists
-export * from './clinical';
-export * from './brain';
-export * from './temporal';
-export * from './shared';
+// Removed potentially problematic re-exports; specific exports are used below.
+// export * from './clinical'; // Likely empty index.ts
+// export * from './brain'; // Likely empty index.ts
+export * from './temporal'; // Assuming this one is okay or will be fixed later
+// export * from './shared'; // Likely empty index.ts
 
 /**
  * NOVAMIND Application Services
@@ -32,11 +33,11 @@ export type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
-} from '@domain/models/brainMapping';
-export type { RiskAssessment, RiskFactor, RiskScore } from '@domain/types/clinical/risk';
+} from '@domain/models/brain/mapping/brain-mapping'; // Corrected path
+export type { RiskAssessment } from '@domain/types/clinical/risk'; // Removed non-existent RiskFactor, RiskScore
 export type {
   TreatmentResponsePrediction,
   TreatmentEfficacy,
 } from '@domain/types/clinical/treatment';
 export type { Symptom, Diagnosis, Treatment } from '@domain/types/clinical/patient';
-export type { RiskLevel } from '@domain/types/RiskLevel';
+export type { RiskLevel } from '@domain/types/clinical/risk'; // Corrected path

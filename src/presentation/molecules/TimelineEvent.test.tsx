@@ -2,20 +2,20 @@
  * NOVAMIND Neural Test Suite
  * TimelineEvent component testing with quantum precision
  */
-import React from 'react'; // Added React import
+// Removed unused React import (new JSX transform)
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl/index'; // Explicitly point to index
 import { TimelineEvent } from './TimelineEvent';
-import { renderWithProviders } from '@test/test-utils.unified';
+// Removed unused import: import { renderWithProviders } from '@test/test-utils.unified';
 // Import the necessary event types
-import {
-  ClinicalEvent,
+import type {
   SymptomEvent,
   TreatmentEvent,
   DiagnosisEvent,
   AssessmentEvent,
 } from '@domain/types/clinical/events';
+// Removed unused import: import { ClinicalEvent } from '@domain/types/clinical/events';
 
 // Setup WebGL mocks with memory monitoring - Moved outside describe block
 beforeEach(() => {

@@ -11,7 +11,8 @@ import {
   isTreatmentResponseRequest,
   isTreatmentResponseResponse /* import other guards */,
 } from '@api/XGBoostService.runtime';
-import { Result, Ok, Err } from 'ts-results'; // Import Result for error handling
+import type { Result } from 'ts-results';
+import { Ok, Err } from 'ts-results'; // Import Result for error handling
 // Types for XGBoost requests and responses
 export interface RiskPredictionRequest {
   patient_id: string;

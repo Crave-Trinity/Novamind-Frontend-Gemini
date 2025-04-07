@@ -12,6 +12,8 @@ const mockBrainModel: BrainModel = {
     scanDate: '2024-01-01T00:00:00.000Z',
     scanType: 'fMRI',
     dataQualityScore: 1,
+    resolution: { x: 1, y: 1, z: 1 }, // Added default resolution
+    metadata: {}, // Added default metadata
   },
   timestamp: '2024-01-01T00:00:00.000Z',
   version: '1.0.0',

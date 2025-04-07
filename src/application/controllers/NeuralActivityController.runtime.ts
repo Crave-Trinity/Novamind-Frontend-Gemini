@@ -3,9 +3,9 @@
  * Ensures that neural activity data and related parameters conform to expected types.
  */
 
-import { Result, Ok, Err } from 'ts-results';
+import type { Result } from 'ts-results';
+import { Ok, Err } from 'ts-results';
 import {
-  ActivationLevel,
   type NeuralStateTransition,
   // NeuralFrequencyBand, // Missing type
 } from '@domain/types/brain/activity';

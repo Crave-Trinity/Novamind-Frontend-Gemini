@@ -6,7 +6,8 @@
 
 import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Vector3, Color, ShaderMaterial, Mesh } from 'three';
+import type { Mesh } from 'three';
+import { Vector3, Color, ShaderMaterial } from 'three';
 import { useSpring, animated } from '@react-spring/three';
 
 // Custom shader for neural selection effect with clinical precision
@@ -116,24 +117,26 @@ export const RegionSelectionIndicator: React.FC<RegionSelectionIndicatorProps> =
   });
 
   // Create unified shader material with precise clinical parameters
-  const shaderMaterial = useMemo(() => {
-    return new ShaderMaterial({
-      uniforms: {
-        selectionColor: { value: selectionColor },
-        time: { value: 0 },
-        opacity: { value: 0.7 },
-        selectionStrength: { value: 0 },
-        rimPower: { value: rimPower },
-        rimIntensity: { value: rimIntensity },
-        pulseSpeed: { value: pulseSpeed },
-        pulseIntensity: { value: pulseIntensity },
-      },
-      vertexShader: selectionShader.vertexShader,
-      fragmentShader: selectionShader.fragmentShader,
-      transparent: true,
-      depthWrite: false, // Prevent Z-fighting with brain region
-    });
-  }, [selectionColor, rimPower, rimIntensity, pulseSpeed, pulseIntensity]);
+  // Define shader parameters separately
+  const shaderParameters = useMemo(() => ({
+    uniforms: {
+      selectionColor: { value: selectionColor },
+      time: { value: 0 },
+      opacity: { value: 0.7 },
+      selectionStrength: { value: 0 },
+      rimPower: { value: rimPower },
+      rimIntensity: { value: rimIntensity },
+      pulseSpeed: { value: pulseSpeed },
+      pulseIntensity: { value: pulseIntensity },
+    },
+    vertexShader: selectionShader.vertexShader,
+    fragmentShader: selectionShader.fragmentShader,
+    transparent: true,
+    depthWrite: false, // Prevent Z-fighting with brain region
+  }), [selectionColor, rimPower, rimIntensity, pulseSpeed, pulseIntensity]);
+
+  // Create the material instance (optional if only using R3F component)
+  // const shaderMaterial = useMemo(() => new ShaderMaterial(shaderParameters), [shaderParameters]);
 
   // Update material when selection state changes
   useEffect(() => {
@@ -162,7 +165,7 @@ export const RegionSelectionIndicator: React.FC<RegionSelectionIndicatorProps> =
       scale={derivedScale.clone().multiplyScalar(1.05)} // Slightly larger than the region
     >
       <sphereGeometry args={[1, 32, 32]} />
-      <shaderMaterial ref={materialRef} args={[shaderMaterial]} attach="material" />
+      <shaderMaterial ref={materialRef} args={[shaderParameters]} attach="material" />
     </animated.mesh>
   );
 };

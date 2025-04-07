@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react'; // Removed unused within import
+// Removed unused userEvent import
 import { ClinicalMetricsPanel } from './ClinicalMetricsPanel';
 import { renderWithProviders } from '@test/test-utils.unified'; // Import the correct render function
 
@@ -63,7 +63,7 @@ const mockMetrics = {
 };
 
 // Mock the hook calls
-const mockSetActiveMetric = vi.fn();
+// Removed unused mockSetActiveMetric variable
 const mockExportData = vi.fn();
 const mockToggleTimeframe = vi.fn();
 

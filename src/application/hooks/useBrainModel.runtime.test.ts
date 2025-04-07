@@ -8,8 +8,7 @@ import { validateBrainModelData } from '@hooks/useBrainModel.runtime';
 import {
   type BrainModel,
   BrainRegion, // Keep as value import (used for BrainRegion.create)
-  type Connection,
-  type Vector3,
+  // Removed unused types: Connection, Vector3
   // BrainRegionFactory does not exist, use BrainRegion.create
   // ConnectionFactory does not exist
 } from '@domain/types/brain/core-models';

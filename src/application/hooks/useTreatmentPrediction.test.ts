@@ -7,11 +7,7 @@ import { describe, it, expect, vi } from 'vitest';
 
 // Define all variables first, before any vi.mock() calls
 // This is important because vi.mock() calls are hoisted to the top of the file
-const mockTreatmentConfig = { treatmentType: 'ssri', details: {} };
-const mockPredictionResult = {
-  response_probability: 0.78,
-  confidence: 0.85,
-};
+// Removed unused variables: mockTreatmentConfig, mockPredictionResult
 
 // Now define the mocks
 vi.mock('react', () => ({

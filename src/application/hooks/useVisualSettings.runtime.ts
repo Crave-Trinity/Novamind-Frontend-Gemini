@@ -8,9 +8,9 @@ import { Ok, Err, type Result } from 'ts-results';
 import {
   type VisualizationSettings,
   type ThemeSettings,
-  type RenderMode, // Used only as type via isValidRenderMode
+  // Removed unused: RenderMode
   isValidRenderMode,
-  type ThemeOption, // Used only as type via isValidTheme
+  // Removed unused: ThemeOption
   isValidTheme,
 } from '@domain/types/brain/visualization';
 // import { ValidationError } from '@domain/errors/validation';

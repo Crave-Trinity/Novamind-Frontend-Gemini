@@ -14,10 +14,7 @@ import {
   assertObject,
   assertDate,
   assertType,
-  asString,
-  asNumber,
-  asBoolean,
-  asDate,
+  // Removed unused: asString, asNumber, asBoolean, asDate
 } from '@models/shared/type-verification';
 
 /**
@@ -95,7 +92,7 @@ export function validateArray(value: unknown, propertyPath?: string): boolean {
 /**
  * Validates a value is an array and all elements satisfy a type predicate
  */
-export function validateArrayOf<T>(
+export function validateArrayOf<_T>( // Prefixed unused type parameter
   value: unknown,
   elementValidator: (item: unknown) => boolean,
   propertyPath?: string
@@ -171,7 +168,7 @@ export function validateProperty(
 ): boolean {
   if (!validateObject(obj, propertyPath)) return false;
 
-  const path = propertyPath ? `${propertyPath}.${property}` : property;
+  // Removed unused variable: path
   const value = (obj as Record<string, unknown>)[property];
 
   // Directly return the boolean result of the validator.

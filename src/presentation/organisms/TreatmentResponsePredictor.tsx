@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { useTreatmentPrediction } from '@hooks/useTreatmentPrediction';
-import { DigitalTwinProfile } from '@domain/models/clinical/digital-twin-profile';
+import type { DigitalTwinProfile } from '@domain/models/clinical/digital-twin-profile';
 import Button from '@presentation/atoms/Button';
 
 interface TreatmentResponsePredictorProps {
@@ -40,7 +40,7 @@ const TreatmentResponsePredictor: React.FC<TreatmentResponsePredictorProps> = ({
     predictionResult,
     featureImportance,
     isPredicting,
-    isLoadingFeatures,
+    // isLoadingFeatures, // Removed unused variable
     predictionError,
     updateTreatmentConfig,
     predictTreatmentResponse,

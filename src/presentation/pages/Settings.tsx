@@ -2,7 +2,7 @@ import React, { useState } from 'react'; // Removed unused useEffect
 
 // Import components from index files for better organization following clean architecture
 import { useTheme } from '@hooks/useTheme'; // Correct hook path
-import { ThemeOption } from '@/types/theme'; // Revert to original correct alias
+import { ThemeMode } from '@domain/types/theme'; // Changed from type-only import
 import { DocumentTitle, Card, Button } from '@presentation/atoms';
 import { Header } from '@presentation/molecules';
 import MainLayout from '@presentation/templates/MainLayout';
@@ -36,7 +36,7 @@ const Settings: React.FC = () => {
 
   // Theme toggle handler
   const handleThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const themeValue = e.target.value as ThemeOption; // Use ThemeOption
+    const themeValue = e.target.value as ThemeMode; // Use ThemeMode type
     setTheme(themeValue);
   };
 

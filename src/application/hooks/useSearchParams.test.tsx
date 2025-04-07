@@ -5,10 +5,9 @@
 
 import React, { type PropsWithChildren } from 'react'; // Already correct
 import { describe, it, expect, vi, type Mock } from 'vitest'; // Already correct
-import { renderHook } from '@testing-library/react'; // Keep single import
+import { renderHook } from '@testing-library/react'; // Removed unused render, screen, fireEvent
 import {
   MemoryRouter,
-  useLocation,
   useSearchParams as useReactRouterSearchParams,
 } from 'react-router-dom'; // Keep single import
 import { useSearchParams } from '@hooks/useSearchParams'; // Import the custom hook
@@ -40,7 +39,7 @@ describe('useSearchParams', () => {
   // Re-enabled suite
   it('processes data with mathematical precision', () => {
     // Arrange test data
-    const testData = {};
+    // Removed unused variable: testData
 
     // Mock the original useSearchParams return value for this test
     // Mock the original useSearchParams return value for this test
@@ -60,7 +59,7 @@ describe('useSearchParams', () => {
 
   it('handles edge cases with clinical precision', () => {
     // Test edge cases
-    const edgeCaseData = {};
+    // Removed unused variable: edgeCaseData
 
     // Mock the original useSearchParams return value for empty search
     (useReactRouterSearchParams as Mock).mockReturnValue([

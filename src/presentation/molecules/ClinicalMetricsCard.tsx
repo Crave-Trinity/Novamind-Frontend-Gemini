@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { AssessmentScore } from '@domain/models/clinical/digital-twin-profile';
+import type { AssessmentScore } from '@domain/models/clinical/digital-twin-profile';
 
 interface ClinicalMetricProps {
   title: string;

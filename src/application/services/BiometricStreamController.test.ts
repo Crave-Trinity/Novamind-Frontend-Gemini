@@ -8,13 +8,13 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { biometricService } from '@application/services/biometricService';
 import { useBiometricStreamController } from '@application/services/BiometricStreamController'; // Corrected path
 import {
-  type BiometricDataPoint, // Already correct
-  type BiometricAlert, // Already correct
+  // Removed unused: BiometricDataPoint
+  // Removed unused: BiometricAlert
   type BiometricStream, // Already correct
   // BiometricType,
   // AlertPriority,
 } from '../../domain/types/biometric/streams';
-import { type Result, success, failure } from '../../domain/types/shared/common'; // Already correct
+import { type Result, success } from '../../domain/types/shared/common'; // Removed unused: failure
 
 // Mock the biometricService
 vi.mock('@application/services/biometricService', () => ({
@@ -59,15 +59,7 @@ const mockStreamMetadata: BiometricStream[] = [
     lastDataPointTimestamp: new Date(),
   },
 ];
-const mockDataPoint: BiometricDataPoint = {
-  id: 'dp-hr-1',
-  streamId: 'stream-hr',
-  timestamp: new Date(),
-  value: 75,
-  type: 'heartRate',
-  source: 'wearable',
-  quality: 'high',
-};
+// Removed unused variable: mockDataPoint
 
 // Mock WebSocket connection
 class MockWebSocket {
@@ -106,10 +98,10 @@ class MockWebSocket {
   }
 }
 
-let lastMockWebSocketInstance: MockWebSocket | null = null;
+// Removed unused variable: lastMockWebSocketInstance
 global.WebSocket = vi.fn().mockImplementation((url: string) => {
-  const instance = new MockWebSocket(url);
-  lastMockWebSocketInstance = instance;
+  const instance = new MockWebSocket(url); // Removed assignment to unused lastMockWebSocketInstance
+  // Removed assignment to non-existent variable: lastMockWebSocketInstance
   return instance;
 }) as any;
 
@@ -120,12 +112,12 @@ describe.skip('BiometricStreamController (Rebuilt)', () => {
   const mockedBiometricService = biometricService as Mocked<typeof biometricService>;
 
   beforeEach(() => {
-    lastMockWebSocketInstance = null;
+    // Removed assignment to non-existent variable: lastMockWebSocketInstance
     vi.clearAllMocks();
 
     // Default dynamic mock for getStreamMetadata
     mockedBiometricService.getStreamMetadata.mockImplementation(
-      async (patientId: string, streamIds?: string[]): Promise<Result<BiometricStream[]>> => {
+      async (_patientId: string, streamIds?: string[]): Promise<Result<BiometricStream[], Error>> => { // Prefixed unused patientId, Added error type
         const streamsToReturn =
           streamIds && streamIds.length > 0
             ? mockStreamMetadata.filter((meta) => streamIds.includes(meta.id))

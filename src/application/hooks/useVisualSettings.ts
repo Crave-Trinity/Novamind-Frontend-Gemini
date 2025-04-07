@@ -5,7 +5,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react'; // Add useMemo
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 // Import local useTheme hook derived from ThemeContext
 import { useTheme } from '@application/hooks/useTheme';
 
@@ -13,10 +13,10 @@ import { useTheme } from '@application/hooks/useTheme';
 import type {
   VisualizationSettings,
   ThemeSettings,
-  RenderMode,
+  // Removed unused: RenderMode
 } from '@domain/types/brain/visualization';
 // Assuming the path alias is correct, ensure the file exists and exports these
-import type { Result } from '@domain/types/shared/common'; // Removed unused success, failure
+// Removed unused type import: Result
 
 // Default theme settings
 const DEFAULT_THEME_SETTINGS: Record<string, ThemeSettings> = {

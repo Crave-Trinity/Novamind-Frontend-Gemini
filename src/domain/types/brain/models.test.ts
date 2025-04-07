@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
+import type {
   BrainRegion,
   NeuralConnection,
   BrainScan,
@@ -15,7 +15,7 @@ import {
   // 'undefined' is not a type to import
   // BrainModelOps is not used in these tests
 } from '@domain/types/brain/models'; // Corrected path
-import { Vector3 } from '@domain/types/shared/common'; // Import Vector3
+import type { Vector3 } from '@domain/types/shared/common'; // Import Vector3
 // ActivationLevel is not used here directly
 
 describe('models type definitions', () => {
@@ -34,6 +34,8 @@ describe('models type definitions', () => {
       isActive: true, // Added required property
       hemisphereLocation: 'left', // Added required property
       dataConfidence: 0.9, // Added required property
+      volume: 1500, // Added missing property
+      activity: 0.5, // Added missing property
     };
     expect(sampleRegion).toBeDefined();
     expect(sampleRegion.name).toBe('Prefrontal Cortex');
@@ -46,7 +48,7 @@ describe('models type definitions', () => {
       sourceId: 'r1', // Correct property name
       targetId: 'r2', // Correct property name
       strength: 0.8,
-      type: 'functional', // Correct literal type
+      type: 'excitatory', // Changed to valid type
       directionality: 'bidirectional', // Added required property
       activityLevel: 0.6, // Added required property
       dataConfidence: 0.85, // Added required property
@@ -63,6 +65,8 @@ describe('models type definitions', () => {
       scanDate: new Date().toISOString(), // Added required property
       scanType: 'fMRI', // Correct property name and type
       dataQualityScore: 0.95, // Added required property
+      resolution: { x: 1, y: 1, z: 1 }, // Added missing property
+      metadata: {}, // Added missing property
     };
     expect(sampleScan).toBeDefined();
     expect(sampleScan.scanType).toBe('fMRI'); // Correct property name
@@ -76,6 +80,8 @@ describe('models type definitions', () => {
       scanDate: new Date().toISOString(),
       scanType: 'fMRI',
       dataQualityScore: 0.95,
+      resolution: { x: 1, y: 1, z: 1 }, // Added missing property
+      metadata: {}, // Added missing property
     };
     // Test type usage based on models.ts definition
     const sampleModel: BrainModel = {

@@ -51,7 +51,7 @@ export async function createNeuralSafeMock<T extends Record<string, unknown>>(
     console.error(`Neural-safe mock error for ${modulePath}:`, error);
     // Return an empty proxy that won't throw errors
     return new Proxy({} as T, {
-      get: (target, prop) => {
+      get: (_target, prop) => { // Prefixed unused target
         // Return a no-op function for any method call
         if (typeof prop === 'string' && prop in mockImplementations) {
           return mockImplementations[prop as keyof T];
@@ -87,7 +87,7 @@ export function createNeuralServiceMock<T extends Record<string, unknown>>(
   mockMethods: Partial<T> = {}
 ): T {
   return new Proxy({} as T, {
-    get: (target, prop) => {
+    get: (_target, prop) => { // Prefixed unused target
       if (typeof prop === 'string' && prop in mockMethods) {
         return mockMethods[prop as keyof T];
       }

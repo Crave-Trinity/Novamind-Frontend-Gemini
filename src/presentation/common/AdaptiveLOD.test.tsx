@@ -3,7 +3,7 @@
  * Replaced with minimal test to prevent hanging from useFrame animation loop
  */
 
-import React from 'react';
+import React from 'react'; // Re-added for React.ReactNode type
 import { describe, it, expect, vi } from 'vitest';
 import { AdaptiveLOD } from './AdaptiveLOD';
 
@@ -22,7 +22,7 @@ vi.mock('@react-three/fiber', () => ({
     },
     scene: {},
   }),
-  Canvas: ({ children }) => <div data-testid="mock-canvas">{children}</div>,
+  Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="mock-canvas">{children}</div>,
 }));
 
 // Mock Three.js

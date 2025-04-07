@@ -3,24 +3,25 @@
  * Clinical-specific type verification utilities with quantum-level precision
  */
 
-import {
+import type {
   Patient,
+  // PatientDemographics, // Assuming this is exported from patient.ts - Removed unused
   Diagnosis,
   Symptom,
   Treatment,
   TreatmentResponse,
-  Medication, // Added import
-  PsychometricAssessment, // Added import
-  MedicalHistoryItem, // Added import
-} from '@domain/types/clinical/patient'; // Corrected path
-import { RiskLevel, RiskAssessment } from '@domain/types/clinical/risk'; // Corrected path
-import { Result } from '@domain/types/shared/common'; // Corrected path
+  Medication,
+  PsychometricAssessment, // Assuming this is exported from patient.ts
+  MedicalHistoryItem,
+} from '@domain/types/clinical/patient';
+import { RiskLevel } from '@domain/types/clinical/risk'; // Corrected path - Removed unused RiskAssessment
+import type { Result } from '@domain/types/shared/common'; // Corrected path
 import { TypeVerificationError } from '@domain/models/shared/type-verification'; // Error class only
 import {
   validateString,
   validateNumber,
   validateObject,
-  validateArray,
+  // validateArray, // Removed unused
   validateType,
   validateOneOf,
   validateArrayOf, // Use this for validating arrays of specific types
@@ -34,7 +35,7 @@ export class ClinicalTypeVerifier {
   /**
    * Verify that a value is a valid RiskLevel enum value
    */
-  verifyRiskLevel(level: unknown, field?: string): Result<RiskLevel> {
+  verifyRiskLevel(level: unknown, field?: string): Result<RiskLevel, TypeVerificationError> { // Added error type
     const validLevels = Object.values(RiskLevel);
 
     const isValid = validateType(
@@ -66,7 +67,7 @@ export class ClinicalTypeVerifier {
   /**
    * Verify that an object conforms to the Symptom interface
    */
-  verifySymptom(obj: unknown, field?: string): Result<Symptom> {
+  verifySymptom(obj: unknown, field?: string): Result<Symptom, TypeVerificationError> { // Added error type
     // Use direct validation function
     if (!validateObject(obj, field)) {
       return {
@@ -351,7 +352,7 @@ export class ClinicalTypeVerifier {
   /**
    * Verify that an object conforms to the Diagnosis interface
    */
-  verifyDiagnosis(obj: unknown, field?: string): Result<Diagnosis> {
+  verifyDiagnosis(obj: unknown, field?: string): Result<Diagnosis, TypeVerificationError> { // Added error type
     // Use direct validation function
     if (!validateObject(obj, field)) {
       return {
@@ -568,7 +569,7 @@ export class ClinicalTypeVerifier {
   /**
    * Verify that an object conforms to the Treatment interface
    */
-  verifyTreatment(obj: unknown, field?: string): Result<Treatment> {
+  verifyTreatment(obj: unknown, field?: string): Result<Treatment, TypeVerificationError> { // Added error type
     // Use direct validation function
     if (!validateObject(obj, field)) {
       return {
@@ -840,7 +841,7 @@ export class ClinicalTypeVerifier {
    * Verify that an object conforms to the Medication interface (placeholder)
    * TODO: Implement full verification based on Medication type definition
    */
-  verifyMedication(obj: unknown, field?: string): Result<Medication> {
+  verifyMedication(obj: unknown, field?: string): Result<Medication, TypeVerificationError> { // Added error type
     if (!validateObject(obj, field)) {
       return {
         success: false,
@@ -855,7 +856,7 @@ export class ClinicalTypeVerifier {
    * Verify that an object conforms to the PsychometricAssessment interface (placeholder)
    * TODO: Implement full verification based on PsychometricAssessment type definition
    */
-  verifyPsychometricAssessment(obj: unknown, field?: string): Result<PsychometricAssessment> {
+  verifyPsychometricAssessment(obj: unknown, field?: string): Result<PsychometricAssessment, TypeVerificationError> { // Added error type
     if (!validateObject(obj, field)) {
       return {
         success: false,
@@ -870,7 +871,7 @@ export class ClinicalTypeVerifier {
    * Verify that an object conforms to the MedicalHistoryItem interface (placeholder)
    * TODO: Implement full verification based on MedicalHistoryItem type definition
    */
-  verifyMedicalHistoryItem(obj: unknown, field?: string): Result<MedicalHistoryItem> {
+  verifyMedicalHistoryItem(obj: unknown, field?: string): Result<MedicalHistoryItem, TypeVerificationError> { // Added error type
     if (!validateObject(obj, field)) {
       return {
         success: false,
@@ -884,7 +885,7 @@ export class ClinicalTypeVerifier {
   /**
    * Verify that an object conforms to the TreatmentResponse interface
    */
-  verifyTreatmentResponse(obj: unknown, field?: string): Result<TreatmentResponse> {
+  verifyTreatmentResponse(obj: unknown, field?: string): Result<TreatmentResponse, TypeVerificationError> { // Added error type
     const baseField = field ?? 'TreatmentResponse';
     if (!validateObject(obj, baseField)) {
       return {
@@ -1117,7 +1118,7 @@ export class ClinicalTypeVerifier {
   /**
    * Verify that an object conforms to the Patient interface
    */
-  verifyPatient(obj: unknown, field?: string): Result<Patient> {
+  verifyPatient(obj: unknown, field?: string): Result<Patient, TypeVerificationError> { // Added error type
     const baseField = field ?? 'Patient';
     // Use direct validation function
     if (!validateObject(obj, baseField)) {

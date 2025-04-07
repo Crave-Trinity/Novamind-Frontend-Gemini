@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
-import { PatientModel, createPatientModel } from '@domain/models/clinical/patient-model'; // Ensure factory is imported
-import { RiskLevel } from '@domain/types/clinical/risk-level'; // Correct path
+import type { PatientModel } from '@domain/models/clinical/patient-model';
+import { createPatientModel } from '@domain/models/clinical/patient-model'; // Ensure factory is imported
+// Removed unused RiskLevel import
 import Button from '@presentation/atoms/Button';
 
 const PatientsList: React.FC = () => {
@@ -241,32 +242,7 @@ const PatientsList: React.FC = () => {
   };
 
   // Get risk level badge color - Updated to accept RiskLevel enum or string
-  const getRiskLevelColor = (
-    riskLevel: RiskLevel | string | undefined // Accept string for potential mock data issues
-  ) => {
-    // Handle potential string values from mock data if necessary, prioritize enum
-    const level =
-      typeof riskLevel === 'string' ? (riskLevel.toLowerCase() as RiskLevel) : riskLevel;
-
-    // Compare with enum string values
-    // Compare with enum string values
-    // Compare with enum string values
-    // Compare with enum string values
-    // Compare with enum string values
-    switch (level) {
-      case RiskLevel.HIGH:
-      case RiskLevel.SEVERE: // Group severe with high for color
-        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
-      case RiskLevel.MODERATE:
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
-      case RiskLevel.LOW:
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
-      case RiskLevel.NONE:
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'; // Added color for None
-      default: // Handles UNKNOWN or undefined
-        return 'bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-400';
-    }
-  };
+  // Removed unused getRiskLevelColor function
 
   return (
     <div className="flex h-full flex-col">

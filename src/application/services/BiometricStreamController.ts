@@ -14,14 +14,13 @@ import type {
   BiometricSource, // Already type-only
   BiometricType, // Already type-only
   AlertPriority, // Already type-only
-  AlertSource, // Already type-only
   BiometricThreshold, // Already type-only
 } from '@domain/types/biometric/streams';
 import { Result, type Result as ResultType, success, failure } from '@domain/types/shared/common'; // Already correct
 
 // Services
 import { biometricService } from '@application/services/biometricService'; // Revert to alias
-import { clinicalService } from '@application/services/clinicalService'; // Revert to alias
+// Removed unused import: clinicalService (Confirmed)
 
 /**
  * Neural-safe stream configuration with quantum precision
@@ -301,7 +300,7 @@ export function useBiometricStreamController(
 
   // Connect to biometric streams
   const connectStreams = useCallback(
-    async (streamIds?: string[]): Promise<ResultType<void>> => {
+    async (streamIds?: string[]): Promise<ResultType<void, Error>> => { // Added error type
       try {
         // Target streams (use provided or configured)
         const targetStreamIds = streamIds || config.streamIds;
@@ -351,7 +350,7 @@ export function useBiometricStreamController(
         const newActiveStreams = new Map<string, BiometricStream>();
         const newStreamData = new Map<string, BiometricDataPoint[]>();
 
-        streams.forEach((stream) => {
+        streams.forEach((stream: BiometricStream) => { // Added type annotation
           // Use the extracted 'streams' variable
           newActiveStreams.set(stream.id, stream);
           newStreamData.set(stream.id, []);
@@ -429,7 +428,7 @@ export function useBiometricStreamController(
   );
 
   // Disconnect from biometric streams
-  const disconnectStreams = useCallback((): ResultType<void> => {
+  const disconnectStreams = useCallback((): ResultType<void, Error> => { // Added error type
     try {
       // Close WebSocket connection
       if (wsRef.current) {
@@ -614,7 +613,7 @@ export function useBiometricStreamController(
   );
 
   // Acknowledge an alert
-  const acknowledgeAlert = useCallback((alertId: string): ResultType<void> => {
+  const acknowledgeAlert = useCallback((alertId: string): ResultType<void, Error> => { // Added error type
     try {
       setState((prevState) => {
         const alertIndex = prevState.alerts.findIndex((alert) => alert.id === alertId);
@@ -679,7 +678,7 @@ export function useBiometricStreamController(
   );
 
   // Calculate correlations between biometric streams
-  const calculateCorrelations = useCallback((): ResultType<Map<string, number>> => {
+  const calculateCorrelations = useCallback((): ResultType<Map<string, number>, Error> => { // Added error type
     try {
       // Get all stream IDs
       const streamIds = Array.from(state.activeStreams.keys());

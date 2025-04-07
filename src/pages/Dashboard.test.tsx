@@ -10,11 +10,13 @@ import userEvent from '@testing-library/user-event';
 import Dashboard from '@pages/Dashboard'; // Use correct alias
 import { renderWithProviders } from '@test/test-utils.unified.tsx'; // Use correct unified path
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Imported for mocking purposes
+// @ts-ignore: TS6133 - Unused import needed for vi.mock
 import { useNavigate } from 'react-router-dom'; // Import for mocking
 import type * as ReactRouterDom from 'react-router-dom'; // Type import for mocking
 
 // Mock audit log service
-vi.mock('@infrastructure/services/AuditLogService', () => ({ // Adjust path if needed
+vi.mock('@infrastructure/services/AuditLogService', () => ({
+  // Adjust path if needed
   auditLogService: {
     log: vi.fn(),
   },

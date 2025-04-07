@@ -4,7 +4,8 @@
  * NOTE: Domain types for predictions are missing/placeholders; validation is based on controller usage.
  */
 
-import { Result, Ok, Err } from 'ts-results';
+import type { Result } from 'ts-results';
+import { Ok, Err } from 'ts-results';
 import type { RiskAssessment } from '@domain/types/clinical/risk'; // Assuming this exists and is correct
 // import { ValidationError } from '@domain/errors/validation'; // If specific error types are defined
 

@@ -9,7 +9,7 @@ import {
   type ThemeSettings,
   type ThemeOption,
   isValidTheme,
-  visualizationThemes, // Import themes for validation if needed
+  // Removed unused: visualizationThemes
 } from '@domain/types/brain/visualization';
 // import { ValidationError } from '@domain/errors/validation';
 

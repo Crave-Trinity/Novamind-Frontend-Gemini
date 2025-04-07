@@ -4,14 +4,19 @@
  * with multi-scale pattern recognition and state transition precision
  */
 
-import React, { useRef, useMemo, useState, useEffect, useCallback } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import React, { useRef, useMemo, useState, useCallback } from 'react'; // Re-added useRef, removed unused useEffect
+// Removed unused useThree import
+// @ts-ignore: TS2305 - Module '"@react-three/drei"' has no exported member 'Line'/'Plane'/'Html'/'Text'. (Likely type/config issue)
 import { Line, Plane, Html, Text } from '@react-three/drei';
-import { Vector3, Color, Group, Mesh, MathUtils } from 'three';
-import { useSpring, animated } from '@react-spring/three';
+import type { Group, Mesh } from 'three';
+import { Vector3, MathUtils } from 'three'; // Removed unused Color
+// Removed unused imports: import { useSpring, animated } from '@react-spring/three';
 
 // Domain types
-import { NeuralStateTransition, TemporalActivationSequence } from '@domain/types/brain/activity';
+import type {
+  NeuralStateTransition,
+  TemporalActivationSequence,
+} from '@domain/types/brain/activity';
 
 /**
  * Props with neural-safe typing
@@ -78,7 +83,7 @@ export const TemporalDynamicsVisualizer: React.FC<TemporalDynamicsVisualizerProp
   timeRange,
   width = 10,
   height = 6,
-  depth = 2,
+  depth: _depth = 2, // Prefixed unused variable
   position = [0, 0, 0],
   rotation = [0, 0, 0],
   showGrid = true,
@@ -106,7 +111,7 @@ export const TemporalDynamicsVisualizer: React.FC<TemporalDynamicsVisualizerProp
   const planeRef = useRef<Mesh>(null);
 
   // Get scene context
-  const { camera } = useThree();
+  // Removed unused camera variable
 
   // Local state for zoom level
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -142,7 +147,7 @@ export const TemporalDynamicsVisualizer: React.FC<TemporalDynamicsVisualizerProp
       if (sequenceTimes.length > 0) {
         const seqStart = Math.min(...sequenceTimes);
         const seqEnd = Math.max(...sequenceTimes);
-        const seqDuration = seqEnd - seqStart;
+        // Removed unused seqDuration variable
 
         start = Math.min(start, seqStart);
         end = Math.max(end, seqEnd);

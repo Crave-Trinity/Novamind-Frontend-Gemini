@@ -2,14 +2,14 @@
  * NOVAMIND Neural Test Suite
  * PatientHeader testing with quantum precision
  */
-import React from 'react'; // Added React import
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+// Removed unused React import (new JSX transform)
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'; // Removed unused vi
+import { render, screen } from '@testing-library/react'; // Restored render, removed unused fireEvent
+// Removed unused userEvent import
 import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Keep WebGL setup
 import { PatientHeader } from './PatientHeader';
-import { renderWithProviders } from '@test/test-utils.unified';
-import { Patient } from '@domain/types/clinical/patient'; // Added import for Patient type
+// Removed unused renderWithProviders import
+import type { Patient } from '@domain/types/clinical/patient'; // Added import for Patient type
 
 // Setup WebGL mocks with memory monitoring - Moved outside describe block
 beforeEach(() => {
@@ -105,7 +105,7 @@ describe('PatientHeader', () => {
   });
 
   it('responds to user interaction with quantum precision', async () => {
-    const user = userEvent.setup();
+    // Removed unused variable: const user = userEvent.setup();
     render(<PatientHeader {...mockProps} />);
 
     // Simulate user interactions

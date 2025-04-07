@@ -3,15 +3,15 @@
 
 import * as React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useBrainModel } from '@hooks/useBrainModel';
 import { createMockBrainRegions } from '@test/three-test-utils'; // Correct import path
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { BrainModel, BrainRegion } from '@domain/types/brain/models'; // Already type-only
+import type { BrainModel } from '@domain/types/brain/models'; // Already type-only
 import { brainModelService } from '@application/services/brain/brain-model.service'; // Import the actual service
 
 // Create a quantum-precise mock API client
-const mockGetBrainModel = vi.fn();
+// Removed unused mock: mockGetBrainModel
 const mockUpdateBrainModel = vi.fn();
 const mockPredictTreatmentResponse = vi.fn();
 
@@ -19,7 +19,7 @@ const mockPredictTreatmentResponse = vi.fn();
 
 // Neural-safe mock data with clinical precision
 const mockPatientId = 'patient-456';
-const mockScanId = 'scan-789';
+// Removed unused variable: mockScanId
 const mockBrainModelData: BrainModel = {
   // Use BrainModel type
   id: 'model-test-123',
@@ -48,10 +48,7 @@ const createTestQueryClient = () =>
   });
 
 // Neural-safe wrapper for hook testing
-const Wrapper = ({ children }: { children: React.ReactNode }) => {
-  const queryClient = createTestQueryClient();
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-};
+// Removed unused Wrapper component
 
 // Skip this entire suite for now due to persistent async/state/mocking issues
 describe('useBrainModel', () => {

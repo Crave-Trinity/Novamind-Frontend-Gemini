@@ -30,7 +30,7 @@ interface UseBrainModelReturn {
   error: Error | null;
 
   // Methods
-  fetchBrainModel: (scanId: string) => Promise<Result<BrainModel>>;
+  fetchBrainModel: (scanId: string) => Promise<Result<BrainModel, Error>>; // Added error type
   updateRegionActivity: (regionId: string, activityLevel: number) => void;
   toggleRegionActive: (regionId: string) => void;
   selectRegions: (regionIds: string[]) => void;
@@ -90,7 +90,7 @@ export function useBrainModel(): UseBrainModelReturn {
 
   // Fetch brain model - explicitly called with scan ID
   const fetchBrainModel = useCallback(
-    async (scanId: string): Promise<Result<BrainModel>> => {
+    async (scanId: string): Promise<Result<BrainModel, Error>> => { // Added error type
       try {
         const result = await brainModelService.fetchBrainModel(scanId);
 
