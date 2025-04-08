@@ -1,151 +1,166 @@
-import React, { useState, useEffect, useMemo, useCallback, type ReactNode } from 'react'; // Added type modifier
-import { ThemeContext, type ThemeMode } from '@application/contexts/ThemeContext'; // Use type modifier
-import { auditLogClient, AuditEventType } from '@infrastructure/clients/auditLogClient'; // Use client import
+import React, { useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
+import { ThemeContext, type ThemeMode } from '@application/contexts/ThemeContext';
+import { auditLogClient, AuditEventType } from '@infrastructure/clients/auditLogClient';
 
 // Validate if a string is a valid theme mode
 const isValidTheme = (theme: string | null): theme is ThemeMode => {
   if (!theme) return false;
-
-  // Use the extended list of themes from HEAD version
   const validThemes: ThemeMode[] = [
-    'light',
-    'dark',
-    'system',
-    'clinical',
-    'sleek-dark',
-    'retro',
-    'wes',
+    'light', 'dark', 'system', 'clinical', 'sleek-dark', 'retro', 'wes'
   ];
   return validThemes.includes(theme as ThemeMode);
 };
 
 interface ThemeProviderProps {
   defaultTheme?: ThemeMode;
-  children: ReactNode; // Keep type usage
+  children: ReactNode;
 }
 
 /**
  * ThemeProvider component that manages theme state
- *
- * Provides theme context to the entire application and handles
- * theme persistence, system preference detection, and theme switching
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
-  defaultTheme = 'system', // Use default from HEAD
+  defaultTheme = 'system',
   children,
 }) => {
-  // Get initial theme from localStorage or use default
   const getInitialTheme = (): ThemeMode => {
-    const savedTheme = localStorage.getItem('theme');
-    return isValidTheme(savedTheme) ? savedTheme : defaultTheme;
+    try {
+        const savedTheme = localStorage.getItem('theme');
+        return isValidTheme(savedTheme) ? savedTheme : defaultTheme;
+    } catch (e) {
+        console.warn('[ThemeProvider] Failed to access localStorage:', e);
+        return defaultTheme;
+    }
   };
 
   const [mode, setMode] = useState<ThemeMode>(getInitialTheme());
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
-  // Detect system preference for dark mode
-  const prefersDarkMode = useMemo(() => {
-    try {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      return mediaQuery && typeof mediaQuery.matches === 'boolean' ? mediaQuery.matches : false;
-    } catch (e) {
-      console.warn('[ThemeProvider] window.matchMedia check failed:', e);
-      return false;
-    }
-  }, []);
+  // Function to determine the effective theme (light/dark) based on mode and system preference
+  const getEffectiveTheme = (currentMode: ThemeMode): 'light' | 'dark' => {
+      if (currentMode === 'system') {
+          try {
+              return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          } catch (e) {
+              console.warn('[ThemeProvider] matchMedia check failed during effective theme calculation:', e);
+              return 'light'; // Default to light on error
+          }
+      }
+      return currentMode === 'dark' || currentMode === 'sleek-dark' || currentMode === 'retro' || currentMode === 'wes' ? 'dark' : 'light';
+  };
 
-  // Apply theme to document
+  // State to store the currently *applied* theme ('light' or 'dark')
+  const [appliedTheme, setAppliedTheme] = useState<'light' | 'dark'>(() => getEffectiveTheme(getInitialTheme()));
+
+  // Effect to apply theme class and save preference
   useEffect(() => {
-    // Determine if dark mode should be active (logic from HEAD)
-    const shouldUseDark =
-      mode === 'dark' ||
-      (mode === 'system' && prefersDarkMode) ||
-      mode === 'sleek-dark' || // Include sleek-dark from HEAD logic
-      mode === 'retro' || // Include retro from HEAD logic
-      mode === 'wes'; // Include wes from HEAD logic
-
-    setIsDarkMode(shouldUseDark);
-
-    // Apply theme classes to document (logic from HEAD)
     const root = document.documentElement;
 
-    // Clear existing theme classes (use HEAD's list)
+    // Clear existing theme classes
     root.classList.remove(
-      'theme-light',
-      'theme-dark',
-      'theme-system',
-      'theme-clinical',
-      'theme-sleek-dark',
-      'theme-retro',
-      'theme-wes'
+      'theme-light', 'theme-dark', 'theme-system', 'theme-clinical',
+      'theme-sleek-dark', 'theme-retro', 'theme-wes'
     );
 
-    // Set dark/light mode
-    if (shouldUseDark) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
+    // Add specific theme class (only if not 'system')
+    if (mode !== 'system') {
+        root.classList.add(`theme-${mode}`);
     }
 
-    // Add specific theme class
-    root.classList.add(`theme-${mode}`);
+    // Save non-system theme preference to localStorage
+    try {
+        if (mode !== 'system') {
+            localStorage.setItem('theme', mode);
+        } else {
+            localStorage.removeItem('theme');
+        }
+    } catch (e) {
+         console.warn('[ThemeProvider] Failed to access localStorage:', e);
+    }
 
-    // Save theme preference to localStorage
-    localStorage.setItem('theme', mode);
+  }, [mode]);
 
-    // Log theme change for audit purposes (use auditLogService)
-    auditLogClient.log(AuditEventType.SYSTEM_CONFIG_CHANGE, {
-      // Use client
-      action: 'THEME_CHANGE',
-      details: `Theme changed to ${mode}`,
-      result: 'success',
-    });
-  }, [mode, prefersDarkMode]);
+  // Effect to handle dark/light class and update appliedTheme state
+   useEffect(() => {
+       const root = document.documentElement;
+       const effectiveTheme = getEffectiveTheme(mode); // Calculate based on current mode
+
+       const applyTheme = (themeToApply: 'light' | 'dark') => {
+           console.log(`[ThemeProvider] applyTheme called with: ${themeToApply}`); // Log theme application
+           root.classList.toggle('dark', themeToApply === 'dark');
+           root.classList.toggle('light', themeToApply === 'light'); // Explicitly set light class
+           setAppliedTheme(themeToApply); // Update internal state
+       };
+
+       if (mode === 'system') {
+           const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+           const handleChange = (e: MediaQueryListEvent | { matches: boolean }) => {
+               console.log(`[ThemeProvider] handleChange called. Event matches: ${e.matches}`); // Log listener call
+               applyTheme(e.matches ? 'dark' : 'light');
+           };
+
+           // Initial check & apply
+           applyTheme(mediaQuery.matches ? 'dark' : 'light');
+
+           // Setup listener
+           try {
+               mediaQuery.addEventListener('change', handleChange);
+           } catch (e) {
+               mediaQuery.addListener(handleChange); // Fallback
+           }
+           // Add polling mechanism for environments (e.g., Puppeteer) that may not reliably trigger media query events
+           // const pollInterval = setInterval(() => { // Temporarily disabled polling
+           //     const prefersDarkNow = window.matchMedia('(prefers-color-scheme: dark)').matches;
+           //     applyTheme(prefersDarkNow ? 'dark' : 'light');
+           // }, 100);
+
+           // Cleanup listener
+           return () => {
+               try {
+                   mediaQuery.removeEventListener('change', handleChange);
+               } catch (e) {
+                   mediaQuery.removeListener(handleChange);
+               }
+               // clearInterval(pollInterval); // Temporarily disabled polling cleanup
+           };
+       } else {
+           // Handle non-system themes
+           applyTheme(effectiveTheme);
+           // No listener needed for non-system themes
+           return () => {}; // Return empty cleanup function
+       }
+   }, [mode]); // Rerun when mode changes
+
 
   // Set theme callback
   const setTheme = useCallback((newTheme: ThemeMode) => {
     setMode(newTheme);
+     auditLogClient.log(AuditEventType.SYSTEM_CONFIG_CHANGE, {
+       action: 'THEME_CHANGE',
+       details: `Theme changed to ${newTheme}`,
+       result: 'success',
+     });
   }, []);
 
-  // Toggle between light and dark (use HEAD's logic)
+  // Toggle between light and dark
   const toggleTheme = useCallback(() => {
-    setMode((current) => {
-      // Simpler toggle logic adapted from HEAD
-      if (current === 'light' || current === 'clinical') {
-        return 'dark';
-      }
-      if (
-        current === 'dark' ||
-        current === 'sleek-dark' ||
-        current === 'retro' ||
-        current === 'wes'
-      ) {
-        return 'light';
-      }
-      if (current === 'system') {
-        return prefersDarkMode ? 'light' : 'dark';
-      }
-      return 'light'; // Default fallback
-    });
-  }, [prefersDarkMode]);
+      // Toggle based on the *applied* theme state
+      setMode(appliedTheme === 'dark' ? 'light' : 'dark');
+  }, [appliedTheme]); // Depend on appliedTheme state
 
-  // Context value with memoization for performance (include settings if needed by context type)
-  // NOTE: The original HEAD version didn't include 'settings' in the context value,
-  // but the ThemeContextType likely requires it. Assuming it's needed.
+  // Context value now uses the internal state for applied theme
   const contextValue = useMemo(
     () => ({
-      mode,
-      theme: isDarkMode ? ('dark' as const) : ('light' as const), // Keep simple theme property
-      isDarkMode,
+      mode, // The selected mode ('system', 'light', 'dark', etc.)
+      theme: appliedTheme, // Reflects applied theme state ('light' or 'dark')
+      isDarkMode: appliedTheme === 'dark', // Reflects applied theme state
       setTheme,
       toggleTheme,
-      // settings: {} // Placeholder - Needs actual theme settings logic if required by context
     }),
-    [mode, isDarkMode, setTheme, toggleTheme]
+    [mode, appliedTheme, setTheme, toggleTheme] // Depend on internal state
   );
 
   return (
-    // Cast needed if contextValue doesn't perfectly match ThemeContextType yet
-    <ThemeContext.Provider value={contextValue as any}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>
   );
 };

@@ -3,22 +3,60 @@
  * Brain-specific type verification utilities with quantum-level precision
  */
 
-import type { BrainModel, BrainRegion, Connection as NeuralConnection } from '@domain/types/brain/core-models'; // Renamed import to NeuralConnection
-import { RenderMode } from '@domain/types/brain/visualization'; // Removed unused VisualizationSettings
+import type { BrainModel, BrainRegion, NeuralConnection, BrainScan } from '@domain/types/brain/models'; // SSoT Import
+import { RenderMode } from '@domain/types/brain/visualization';
 import type { Vector3, Result } from '@domain/types/shared/common';
 import { typeVerifier, TypeVerificationError } from '@domain/utils/shared/type-verification';
+
+// --- Helper Methods for Optional Properties ---
+// Added directly to this class for simplicity, avoiding module augmentation issues.
+// These should ideally be in the base TypeVerifier, but adding here for now.
+
+function verifyOptionalString(value: unknown, field?: string): Result<string | undefined, TypeVerificationError> {
+  if (value === undefined || value === null) {
+    return { success: true, value: undefined };
+  }
+  // Use base verifier for the actual check
+  return typeVerifier.verifyString(value, field);
+}
+
+function verifyOptionalNumber(value: unknown, field?: string): Result<number | undefined, TypeVerificationError> {
+  if (value === undefined || value === null) {
+    return { success: true, value: undefined };
+  }
+  // Use base verifier for the actual check
+  return typeVerifier.verifyNumber(value, field);
+}
+
+function verifyOptionalBoolean(value: unknown, field?: string): Result<boolean | undefined, TypeVerificationError> {
+   if (value === undefined || value === null) {
+     return { success: true, value: undefined };
+   }
+   // Use base verifier for the actual check
+   return typeVerifier.verifyBoolean(value, field);
+ }
+
+function verifyOptionalEnum<T extends string>(value: unknown, allowedValues: readonly T[], field?: string): Result<T | undefined, TypeVerificationError> {
+    if (value === undefined || value === null) {
+      return { success: true, value: undefined };
+    }
+    // Use base verifier for the actual check
+    return typeVerifier.verifyEnum(value, allowedValues, field);
+  }
+
 
 /**
  * Brain model type verification utilities
  */
 export class BrainTypeVerifier {
+
   /**
    * Verify that a value is a valid Vector3
    */
-  verifyVector3(obj: unknown, field?: string): Result<Vector3, TypeVerificationError> { // Added error type
+  verifyVector3(obj: unknown, field?: string): Result<Vector3, TypeVerificationError> {
     const objResult = typeVerifier.verifyObject(obj, field);
     if (!objResult.success) {
-      return objResult as Result<Vector3, TypeVerificationError>; // Added error type
+      return objResult as Result<Vector3, TypeVerificationError>;
     }
 
     const object = objResult.value;
@@ -26,9 +64,9 @@ export class BrainTypeVerifier {
     const yResult = typeVerifier.verifyNumber(object.y, field ? `${field}.y` : 'y');
     const zResult = typeVerifier.verifyNumber(object.z, field ? `${field}.z` : 'z');
 
-    if (!xResult.success) return xResult as Result<Vector3, TypeVerificationError>; // Added error type
-    if (!yResult.success) return yResult as Result<Vector3, TypeVerificationError>; // Added error type
-    if (!zResult.success) return zResult as Result<Vector3, TypeVerificationError>; // Added error type
+    if (!xResult.success) return xResult as Result<Vector3, TypeVerificationError>;
+    if (!yResult.success) return yResult as Result<Vector3, TypeVerificationError>;
+    if (!zResult.success) return zResult as Result<Vector3, TypeVerificationError>;
 
     return {
       success: true,
@@ -47,9 +85,7 @@ export class BrainTypeVerifier {
     if (typeof value !== 'object' || value === null) {
       return fallback;
     }
-
     const obj = value as Record<string, unknown>;
-
     return {
       x: typeVerifier.safelyParseNumber(obj.x, fallback.x),
       y: typeVerifier.safelyParseNumber(obj.y, fallback.y),
@@ -60,82 +96,79 @@ export class BrainTypeVerifier {
   /**
    * Verify that a value is a valid RenderMode enum value
    */
-  verifyRenderMode(mode: unknown, field?: string): Result<RenderMode, TypeVerificationError> { // Added error type
+  verifyRenderMode(mode: unknown, field?: string): Result<RenderMode, TypeVerificationError> {
     const validModes = Object.values(RenderMode);
-
-    if (typeof mode === 'string' && validModes.includes(mode as RenderMode)) {
-      return {
-        success: true,
-        value: mode as RenderMode,
-      };
-    }
-
-    return {
-      success: false,
-      error: new TypeVerificationError(
-        `Invalid RenderMode`,
-        `one of [${validModes.join(', ')}]`,
-        typeof mode === 'object'
-          ? mode === null
-            ? 'null'
-            : Array.isArray(mode)
-              ? 'array'
-              : 'object'
-          : typeof mode,
-        field
-      ),
-    };
+    return typeVerifier.verifyEnum(mode, validModes, field);
   }
 
   /**
-   * Verify that an object conforms to the BrainRegion interface
+   * Verify that an object conforms to the BrainRegion interface (from SSoT)
    */
-  verifyBrainRegion(obj: unknown, field?: string): Result<BrainRegion, TypeVerificationError> { // Added error type
+  verifyBrainRegion(obj: unknown, field?: string): Result<BrainRegion, TypeVerificationError> {
     const objResult = typeVerifier.verifyObject(obj, field);
     if (!objResult.success) {
-      return objResult as Result<BrainRegion, TypeVerificationError>; // Added error type
+      return objResult as Result<BrainRegion, TypeVerificationError>;
     }
-
     const object = objResult.value;
 
-    // Verify required properties
+    // Verify required properties based on @domain/types/brain/models BrainRegion
     const idResult = typeVerifier.verifyString(object.id, field ? `${field}.id` : 'id');
-    if (!idResult.success) return idResult as Result<BrainRegion, TypeVerificationError>; // Added error type
+    if (!idResult.success) return idResult as Result<BrainRegion, TypeVerificationError>;
 
     const nameResult = typeVerifier.verifyString(object.name, field ? `${field}.name` : 'name');
-    if (!nameResult.success) return nameResult as Result<BrainRegion, TypeVerificationError>; // Added error type
+    if (!nameResult.success) return nameResult as Result<BrainRegion, TypeVerificationError>;
 
-    const positionResult = this.verifyVector3(
-      object.position,
-      field ? `${field}.position` : 'position'
-    );
-    if (!positionResult.success) return positionResult as Result<BrainRegion, TypeVerificationError>; // Added error type
+    const positionResult = this.verifyVector3(object.position, field ? `${field}.position` : 'position');
+    if (!positionResult.success) return positionResult as Result<BrainRegion, TypeVerificationError>;
 
     const colorResult = typeVerifier.verifyString(object.color, field ? `${field}.color` : 'color');
-    if (!colorResult.success) return colorResult as Result<BrainRegion, TypeVerificationError>; // Added error type
+    if (!colorResult.success) return colorResult as Result<BrainRegion, TypeVerificationError>;
 
-    const isActiveResult = typeVerifier.verifyBoolean(
-      object.isActive,
-      field ? `${field}.isActive` : 'isActive'
-    );
-    if (!isActiveResult.success) return isActiveResult as Result<BrainRegion, TypeVerificationError>; // Added error type
+    const connectionsResult = typeVerifier.verifyArray(object.connections, (item, i) => typeVerifier.verifyString(item, `${field}.connections[${i}]`), field ? `${field}.connections` : 'connections');
+    if (!connectionsResult.success) return connectionsResult as Result<BrainRegion, TypeVerificationError>;
 
-    const activityLevelResult = typeVerifier.verifyNumber(
-      object.activityLevel,
-      field ? `${field}.activityLevel` : 'activityLevel'
-    );
-    if (!activityLevelResult.success) return activityLevelResult as Result<BrainRegion, TypeVerificationError>; // Added error type
+    const hemisphereLocationResult = typeVerifier.verifyEnum(object.hemisphereLocation, ['left', 'right', 'central'] as const, field ? `${field}.hemisphereLocation` : 'hemisphereLocation');
+    if (!hemisphereLocationResult.success) return hemisphereLocationResult as Result<BrainRegion, TypeVerificationError>;
 
-    // Optional properties
-    const volumeMl =
-      object.volumeMl !== undefined
-        ? typeVerifier.safelyParseNumber(object.volumeMl, 0)
-        : undefined;
+    const dataConfidenceResult = typeVerifier.verifyNumber(object.dataConfidence, field ? `${field}.dataConfidence` : 'dataConfidence');
+    if (!dataConfidenceResult.success) return dataConfidenceResult as Result<BrainRegion, TypeVerificationError>;
+    if (dataConfidenceResult.value < 0 || dataConfidenceResult.value > 1) {
+      return { success: false, error: new TypeVerificationError('Expected dataConfidence between 0 and 1', 'number (0-1)', String(dataConfidenceResult.value), field ? `${field}.dataConfidence` : 'dataConfidence') };
+    }
 
-    const riskFactor =
-      object.riskFactor !== undefined
-        ? typeVerifier.safelyParseNumber(object.riskFactor, 0)
-        : undefined;
+    const activityLevelResult = typeVerifier.verifyNumber(object.activityLevel, field ? `${field}.activityLevel` : 'activityLevel');
+    if (!activityLevelResult.success) return activityLevelResult as Result<BrainRegion, TypeVerificationError>;
+    if (activityLevelResult.value < 0 || activityLevelResult.value > 1) {
+      return { success: false, error: new TypeVerificationError('Expected activityLevel between 0 and 1', 'number (0-1)', String(activityLevelResult.value), field ? `${field}.activityLevel` : 'activityLevel') };
+    }
+
+    const isActiveResult = typeVerifier.verifyBoolean(object.isActive, field ? `${field}.isActive` : 'isActive');
+    if (!isActiveResult.success) return isActiveResult as Result<BrainRegion, TypeVerificationError>;
+
+    const volumeResult = typeVerifier.verifyNumber(object.volume, field ? `${field}.volume` : 'volume');
+    if (!volumeResult.success) return volumeResult as Result<BrainRegion, TypeVerificationError>;
+    if (volumeResult.value < 0) return { success: false, error: new TypeVerificationError('Expected volume >= 0', 'number', String(volumeResult.value), field ? `${field}.volume` : 'volume') };
+
+    const activityResult = typeVerifier.verifyNumber(object.activity, field ? `${field}.activity` : 'activity');
+    if (!activityResult.success) return activityResult as Result<BrainRegion, TypeVerificationError>;
+    if (activityResult.value < 0 || activityResult.value > 1) {
+      return { success: false, error: new TypeVerificationError('Expected activity between 0 and 1', 'number (0-1)', String(activityResult.value), field ? `${field}.activity` : 'activity') };
+    }
+
+    // Optional properties from BrainRegion type
+    const volumeMlResult = verifyOptionalNumber(object.volumeMl, field ? `${field}.volumeMl` : 'volumeMl');
+    if (!volumeMlResult.success) return volumeMlResult as Result<BrainRegion, TypeVerificationError>;
+    const riskFactorResult = verifyOptionalNumber(object.riskFactor, field ? `${field}.riskFactor` : 'riskFactor');
+    if (!riskFactorResult.success) return riskFactorResult as Result<BrainRegion, TypeVerificationError>;
+    // Check range for optional riskFactor if present
+    if (riskFactorResult.value !== undefined && (riskFactorResult.value < 0 || riskFactorResult.value > 1)) {
+         return { success: false, error: new TypeVerificationError('Expected optional riskFactor between 0 and 1', 'number (0-1)', String(riskFactorResult.value), field ? `${field}.riskFactor` : 'riskFactor') };
+    }
+    const clinicalSignificanceResult = verifyOptionalString(object.clinicalSignificance, field ? `${field}.clinicalSignificance` : 'clinicalSignificance');
+    if (!clinicalSignificanceResult.success) return clinicalSignificanceResult as Result<BrainRegion, TypeVerificationError>;
+    const tissueTypeResult = verifyOptionalEnum(object.tissueType, ['gray', 'white'] as const, field ? `${field}.tissueType` : 'tissueType');
+    if (!tissueTypeResult.success) return tissueTypeResult as Result<BrainRegion, TypeVerificationError>;
+
 
     // Return verified brain region
     return {
@@ -145,105 +178,169 @@ export class BrainTypeVerifier {
         name: nameResult.value,
         position: positionResult.value,
         color: colorResult.value,
-        connections: Array.isArray(object.connections) ? object.connections.map(String) : [], // Use standard array check
-        isActive: isActiveResult.value,
+        connections: connectionsResult.value,
+        hemisphereLocation: hemisphereLocationResult.value,
+        dataConfidence: dataConfidenceResult.value,
         activityLevel: activityLevelResult.value,
-        volumeMl,
-        riskFactor,
+        isActive: isActiveResult.value,
+        volume: volumeResult.value,
+        activity: activityResult.value,
+        volumeMl: volumeMlResult.value,
+        riskFactor: riskFactorResult.value,
+        clinicalSignificance: clinicalSignificanceResult.value,
+        tissueType: tissueTypeResult.value,
       },
     };
   }
 
   /**
-   * Verify that an object conforms to the NeuralConnection interface
+   * Verify that an object conforms to the NeuralConnection interface (from SSoT)
    */
-  verifyNeuralConnection(obj: unknown, field?: string): Result<NeuralConnection, TypeVerificationError> { // Added error type
+  verifyNeuralConnection(obj: unknown, field?: string): Result<NeuralConnection, TypeVerificationError> {
     const objResult = typeVerifier.verifyObject(obj, field);
     if (!objResult.success) {
-      return objResult as Result<NeuralConnection, TypeVerificationError>; // Added error type
+      return objResult as Result<NeuralConnection, TypeVerificationError>;
     }
-
     const object = objResult.value;
 
-    // Verify required properties
+    // Verify required properties based on @domain/types/brain/models NeuralConnection
     const idResult = typeVerifier.verifyString(object.id, field ? `${field}.id` : 'id');
-    if (!idResult.success) return idResult as Result<NeuralConnection, TypeVerificationError>; // Added error type
+    if (!idResult.success) return idResult as Result<NeuralConnection, TypeVerificationError>;
 
-    const sourceRegionIdResult = typeVerifier.verifyString(
-      object.sourceRegionId,
-      field ? `${field}.sourceRegionId` : 'sourceRegionId'
-    );
-    if (!sourceRegionIdResult.success) return sourceRegionIdResult as Result<NeuralConnection, TypeVerificationError>; // Added error type
+    const sourceIdResult = typeVerifier.verifyString(object.sourceId, field ? `${field}.sourceId` : 'sourceId');
+    if (!sourceIdResult.success) return sourceIdResult as Result<NeuralConnection, TypeVerificationError>;
 
-    const targetRegionIdResult = typeVerifier.verifyString(
-      object.targetRegionId,
-      field ? `${field}.targetRegionId` : 'targetRegionId'
-    );
-    if (!targetRegionIdResult.success) return targetRegionIdResult as Result<NeuralConnection, TypeVerificationError>; // Added error type
+    const targetIdResult = typeVerifier.verifyString(object.targetId, field ? `${field}.targetId` : 'targetId');
+    if (!targetIdResult.success) return targetIdResult as Result<NeuralConnection, TypeVerificationError>;
 
-    const strengthResult = typeVerifier.verifyNumber(
-      object.strength,
-      field ? `${field}.strength` : 'strength'
-    );
-    if (!strengthResult.success) return strengthResult as Result<NeuralConnection, TypeVerificationError>; // Added error type
+    const strengthResult = typeVerifier.verifyNumber(object.strength, field ? `${field}.strength` : 'strength');
+    if (!strengthResult.success) return strengthResult as Result<NeuralConnection, TypeVerificationError>;
+    if (strengthResult.value < 0 || strengthResult.value > 1) {
+      return { success: false, error: new TypeVerificationError('Expected strength between 0 and 1', 'number (0-1)', String(strengthResult.value), field ? `${field}.strength` : 'strength') };
+    }
 
-    const isActiveResult = typeVerifier.verifyBoolean(
-      object.isActive,
-      field ? `${field}.isActive` : 'isActive'
-    );
-    if (!isActiveResult.success) return isActiveResult as Result<NeuralConnection, TypeVerificationError>; // Added error type
+    const typeEnumResult = typeVerifier.verifyEnum(object.type, ['excitatory', 'inhibitory'] as const, field ? `${field}.type` : 'type');
+    if (!typeEnumResult.success) return typeEnumResult as Result<NeuralConnection, TypeVerificationError>;
 
-    // Verify 'type' property
-    const typeResult = typeVerifier.verifyString(object.type, field ? `${field}.type` : 'type');
-    if (!typeResult.success) return typeResult as Result<NeuralConnection, TypeVerificationError>;
-    // Optional: Add stricter validation if 'type' should be specific literals like 'excitatory' | 'inhibitory'
-    // const validTypes = ['excitatory', 'inhibitory'];
-    // if (!validTypes.includes(typeResult.value)) {
-    //   return { success: false, error: new TypeVerificationError(...) };
-    // }
+    const directionalityResult = typeVerifier.verifyEnum(object.directionality, ['unidirectional', 'bidirectional'] as const, field ? `${field}.directionality` : 'directionality');
+    if (!directionalityResult.success) return directionalityResult as Result<NeuralConnection, TypeVerificationError>;
+
+    const activityLevelResult = typeVerifier.verifyNumber(object.activityLevel, field ? `${field}.activityLevel` : 'activityLevel');
+    if (!activityLevelResult.success) return activityLevelResult as Result<NeuralConnection, TypeVerificationError>;
+    if (activityLevelResult.value < 0 || activityLevelResult.value > 1) {
+      return { success: false, error: new TypeVerificationError('Expected activityLevel between 0 and 1', 'number (0-1)', String(activityLevelResult.value), field ? `${field}.activityLevel` : 'activityLevel') };
+    }
+
+    const dataConfidenceResult = typeVerifier.verifyNumber(object.dataConfidence, field ? `${field}.dataConfidence` : 'dataConfidence');
+    if (!dataConfidenceResult.success) return dataConfidenceResult as Result<NeuralConnection, TypeVerificationError>;
+    if (dataConfidenceResult.value < 0 || dataConfidenceResult.value > 1) {
+      return { success: false, error: new TypeVerificationError('Expected dataConfidence between 0 and 1', 'number (0-1)', String(dataConfidenceResult.value), field ? `${field}.dataConfidence` : 'dataConfidence') };
+    }
 
     // Optional properties
-    const connectionType =
-      object.connectionType !== undefined
-        ? typeVerifier.safelyParseString(object.connectionType, '')
-        : undefined;
-
-    const color =
-      object.color !== undefined ? typeVerifier.safelyParseString(object.color, '') : undefined;
+    const pathwayLengthResult = verifyOptionalNumber(object.pathwayLength, field ? `${field}.pathwayLength` : 'pathwayLength');
+    if (!pathwayLengthResult.success) return pathwayLengthResult as Result<NeuralConnection, TypeVerificationError>;
 
     // Return verified neural connection
     return {
       success: true,
       value: {
         id: idResult.value,
-        sourceId: sourceRegionIdResult.value, // Correct property name
-        targetId: targetRegionIdResult.value, // Correct property name
+        sourceId: sourceIdResult.value,
+        targetId: targetIdResult.value,
         strength: strengthResult.value,
-        isActive: isActiveResult.value,
-        type: typeResult.value, // Add verified type property
-        connectionType,
-        color,
+        type: typeEnumResult.value,
+        directionality: directionalityResult.value,
+        activityLevel: activityLevelResult.value,
+        dataConfidence: dataConfidenceResult.value,
+        pathwayLength: pathwayLengthResult.value,
       },
     };
   }
 
   /**
-   * Verify that an object conforms to the BrainModel interface
+   * Verify that an object conforms to the BrainScan interface (from SSoT)
    */
-  verifyBrainModel(obj: unknown, field?: string): Result<BrainModel, TypeVerificationError> { // Added error type
+   verifyBrainScan(obj: unknown, field?: string): Result<BrainScan, TypeVerificationError> {
     const objResult = typeVerifier.verifyObject(obj, field);
     if (!objResult.success) {
-      return objResult as Result<BrainModel, TypeVerificationError>; // Added error type
+      return objResult as Result<BrainScan, TypeVerificationError>;
     }
-
     const object = objResult.value;
 
     // Verify required properties
     const idResult = typeVerifier.verifyString(object.id, field ? `${field}.id` : 'id');
-    if (!idResult.success) return idResult as Result<BrainModel, TypeVerificationError>; // Added error type
+    if (!idResult.success) return idResult as Result<BrainScan, TypeVerificationError>;
 
-    const nameResult = typeVerifier.verifyString(object.name, field ? `${field}.name` : 'name');
-    if (!nameResult.success) return nameResult as Result<BrainModel, TypeVerificationError>; // Added error type
+    const patientIdResult = typeVerifier.verifyString(object.patientId, field ? `${field}.patientId` : 'patientId');
+    if (!patientIdResult.success) return patientIdResult as Result<BrainScan, TypeVerificationError>;
+
+    const scanDateResult = typeVerifier.verifyString(object.scanDate, field ? `${field}.scanDate` : 'scanDate');
+    if (!scanDateResult.success) return scanDateResult as Result<BrainScan, TypeVerificationError>;
+    // TODO: Add ISO date format validation if needed
+
+    const scanTypeResult = typeVerifier.verifyEnum(object.scanType, ['fMRI', 'MRI', 'CT', 'PET'] as const, field ? `${field}.scanType` : 'scanType');
+    if (!scanTypeResult.success) return scanTypeResult as Result<BrainScan, TypeVerificationError>;
+
+    const resolutionResult = this.verifyVector3(object.resolution, field ? `${field}.resolution` : 'resolution');
+    if (!resolutionResult.success) return resolutionResult as Result<BrainScan, TypeVerificationError>;
+
+    const metadataResult = typeVerifier.verifyObject(object.metadata, field ? `${field}.metadata` : 'metadata');
+    if (!metadataResult.success) return metadataResult as Result<BrainScan, TypeVerificationError>;
+
+    const dataQualityScoreResult = typeVerifier.verifyNumber(object.dataQualityScore, field ? `${field}.dataQualityScore` : 'dataQualityScore');
+    if (!dataQualityScoreResult.success) return dataQualityScoreResult as Result<BrainScan, TypeVerificationError>;
+    if (dataQualityScoreResult.value < 0 || dataQualityScoreResult.value > 1) {
+      return { success: false, error: new TypeVerificationError('Expected dataQualityScore between 0 and 1', 'number (0-1)', String(dataQualityScoreResult.value), field ? `${field}.dataQualityScore` : 'dataQualityScore') };
+    }
+
+    // Optional properties - Safe access
+    const scannerModelResult = verifyOptionalString(object.scannerModel, field ? `${field}.scannerModel` : 'scannerModel');
+    const contrastAgentResult = verifyOptionalBoolean(object.contrastAgent, field ? `${field}.contrastAgent` : 'contrastAgent');
+    const notesResult = verifyOptionalString(object.notes, field ? `${field}.notes` : 'notes');
+    const technicianResult = verifyOptionalString(object.technician, field ? `${field}.technician` : 'technician');
+    const processingMethodResult = verifyOptionalString(object.processingMethod, field ? `${field}.processingMethod` : 'processingMethod');
+
+    // Check success before accessing value for optional fields
+    if (!scannerModelResult.success) return scannerModelResult as Result<BrainScan, TypeVerificationError>;
+    if (!contrastAgentResult.success) return contrastAgentResult as Result<BrainScan, TypeVerificationError>;
+    if (!notesResult.success) return notesResult as Result<BrainScan, TypeVerificationError>;
+    if (!technicianResult.success) return technicianResult as Result<BrainScan, TypeVerificationError>;
+    if (!processingMethodResult.success) return processingMethodResult as Result<BrainScan, TypeVerificationError>;
+
+    return {
+      success: true,
+      value: {
+        id: idResult.value,
+        patientId: patientIdResult.value,
+        scanDate: scanDateResult.value,
+        scanType: scanTypeResult.value,
+        resolution: resolutionResult.value,
+        metadata: metadataResult.value,
+        dataQualityScore: dataQualityScoreResult.value,
+        scannerModel: scannerModelResult.value,
+        contrastAgent: contrastAgentResult.value,
+        notes: notesResult.value,
+        technician: technicianResult.value,
+        processingMethod: processingMethodResult.value,
+      },
+    };
+  } // End of verifyBrainScan method
+
+
+  /**
+   * Verify that an object conforms to the BrainModel interface (from SSoT)
+   */
+  verifyBrainModel(obj: unknown, field?: string): Result<BrainModel, TypeVerificationError> {
+    const objResult = typeVerifier.verifyObject(obj, field);
+    if (!objResult.success) {
+      return objResult as Result<BrainModel, TypeVerificationError>;
+    }
+    const object = objResult.value;
+
+    // Verify required properties based on @domain/types/brain/models BrainModel
+    const idResult = typeVerifier.verifyString(object.id, field ? `${field}.id` : 'id');
+    if (!idResult.success) return idResult as Result<BrainModel, TypeVerificationError>;
 
     // Verify regions array
     const regionsResult = typeVerifier.verifyArray(
@@ -252,7 +349,7 @@ export class BrainTypeVerifier {
         this.verifyBrainRegion(region, field ? `${field}.regions[${index}]` : `regions[${index}]`),
       field ? `${field}.regions` : 'regions'
     );
-    if (!regionsResult.success) return regionsResult as Result<BrainModel, TypeVerificationError>; // Added error type
+    if (!regionsResult.success) return regionsResult as Result<BrainModel, TypeVerificationError>;
 
     // Verify connections array
     const connectionsResult = typeVerifier.verifyArray(
@@ -264,63 +361,60 @@ export class BrainTypeVerifier {
         ),
       field ? `${field}.connections` : 'connections'
     );
-    if (!connectionsResult.success) return connectionsResult as Result<BrainModel, TypeVerificationError>; // Added error type
+    if (!connectionsResult.success) return connectionsResult as Result<BrainModel, TypeVerificationError>;
 
-    // Verify version
-    const versionResult = typeVerifier.verifyNumber(
-      object.version,
-      field ? `${field}.version` : 'version'
-    );
-    if (!versionResult.success) return versionResult as Result<BrainModel, TypeVerificationError>; // Added error type
+    // Verify version (string)
+    const versionResult = typeVerifier.verifyString(object.version, field ? `${field}.version` : 'version');
+    if (!versionResult.success) return versionResult as Result<BrainModel, TypeVerificationError>;
+
+    // Verify other required fields from @domain/types/brain/models BrainModel
+    const patientIdResult = typeVerifier.verifyString(object.patientId, field ? `${field}.patientId` : 'patientId');
+    if (!patientIdResult.success) return patientIdResult as Result<BrainModel, TypeVerificationError>;
+
+    const timestampResult = typeVerifier.verifyString(object.timestamp, field ? `${field}.timestamp` : 'timestamp');
+    if (!timestampResult.success) return timestampResult as Result<BrainModel, TypeVerificationError>;
+    // TODO: Add ISO date format validation if needed
+
+    const processingLevelResult = typeVerifier.verifyEnum(object.processingLevel, ['raw', 'filtered', 'normalized', 'analyzed'] as const, field ? `${field}.processingLevel` : 'processingLevel');
+    if (!processingLevelResult.success) return processingLevelResult as Result<BrainModel, TypeVerificationError>;
+
+    const lastUpdatedResult = typeVerifier.verifyString(object.lastUpdated, field ? `${field}.lastUpdated` : 'lastUpdated');
+    if (!lastUpdatedResult.success) return lastUpdatedResult as Result<BrainModel, TypeVerificationError>;
+    // TODO: Add ISO date format validation if needed
+
+    // Verify scan object (deeper validation)
+    const scanResult = this.verifyBrainScan(object.scan, field ? `${field}.scan` : 'scan');
+    if (!scanResult.success) return scanResult as Result<BrainModel, TypeVerificationError>;
 
     // Optional properties
-    const patientId =
-      object.patientId !== undefined
-        ? typeVerifier.safelyParseString(object.patientId, '')
-        : undefined;
-
-    const scanDate =
-      object.scanDate !== undefined
-        ? new Date(typeVerifier.safelyParseString(object.scanDate, ''))
-        : undefined;
-
-    const modelType =
-      object.modelType !== undefined
-        ? typeVerifier.safelyParseString(object.modelType, '')
-        : undefined;
-
-    const isTemplate =
-      object.isTemplate !== undefined
-        ? typeVerifier.safelyParseBoolean(object.isTemplate, false)
-        : undefined;
-
-    const metadata =
-      object.metadata !== undefined && typeof object.metadata === 'object'
-        ? (object.metadata as Record<string, unknown>)
-        : undefined;
+    const algorithmVersionResult = verifyOptionalString(object.algorithmVersion, field ? `${field}.algorithmVersion` : 'algorithmVersion');
+     if (!algorithmVersionResult.success) return algorithmVersionResult as Result<BrainModel, TypeVerificationError>;
 
     // Return verified brain model
     return {
       success: true,
       value: {
         id: idResult.value,
-        name: nameResult.value,
         regions: regionsResult.value,
         connections: connectionsResult.value,
         version: versionResult.value,
-        patientId,
-        scanDate,
-        modelType,
-        isTemplate,
-        metadata,
+        patientId: patientIdResult.value,
+        scan: scanResult.value,
+        timestamp: timestampResult.value,
+        processingLevel: processingLevelResult.value,
+        lastUpdated: lastUpdatedResult.value,
+        algorithmVersion: algorithmVersionResult.value,
       },
     };
-  }
+  } // End of verifyBrainModel method
+
+
+  // --- Assertion Methods ---
 
   /**
    * Assert that a value is a valid Vector3
    */
-  assertVector3(value: unknown, field?: string): asserts value is Vector3 {
+   assertVector3(value: unknown, field?: string): asserts value is Vector3 {
     const result = this.verifyVector3(value, field);
     if (!result.success) {
       throw result.error;
@@ -330,7 +424,7 @@ export class BrainTypeVerifier {
   /**
    * Assert that a value is a valid RenderMode
    */
-  assertRenderMode(value: unknown, field?: string): asserts value is RenderMode {
+   assertRenderMode(value: unknown, field?: string): asserts value is RenderMode {
     const result = this.verifyRenderMode(value, field);
     if (!result.success) {
       throw result.error;
@@ -340,7 +434,7 @@ export class BrainTypeVerifier {
   /**
    * Assert that an object is a BrainRegion
    */
-  assertBrainRegion(value: unknown, field?: string): asserts value is BrainRegion {
+   assertBrainRegion(value: unknown, field?: string): asserts value is BrainRegion {
     const result = this.verifyBrainRegion(value, field);
     if (!result.success) {
       throw result.error;
@@ -350,23 +444,33 @@ export class BrainTypeVerifier {
   /**
    * Assert that an object is a NeuralConnection
    */
-  assertNeuralConnection(value: unknown, field?: string): asserts value is NeuralConnection {
+   assertNeuralConnection(value: unknown, field?: string): asserts value is NeuralConnection {
     const result = this.verifyNeuralConnection(value, field);
     if (!result.success) {
       throw result.error;
     }
   }
 
+   /**
+    * Assert that an object is a BrainScan
+    */
+   assertBrainScan(value: unknown, field?: string): asserts value is BrainScan {
+     const result = this.verifyBrainScan(value, field);
+     if (!result.success) {
+       throw result.error;
+     }
+   }
+
   /**
    * Assert that an object is a BrainModel
    */
-  assertBrainModel(value: unknown, field?: string): asserts value is BrainModel {
+   assertBrainModel(value: unknown, field?: string): asserts value is BrainModel {
     const result = this.verifyBrainModel(value, field);
     if (!result.success) {
       throw result.error;
     }
   }
-}
+} // End of BrainTypeVerifier class
 
 // Export singleton instance for easy usage
 export const brainTypeVerifier = new BrainTypeVerifier();

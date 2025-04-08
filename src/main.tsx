@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom/client';
 // import * as THREE from 'three';
 
 import App from '@presentation/App.tsx'; // Use default import and correct path
+import { ThemeProvider } from './application/providers/ThemeProvider';
 import '@styles/index.css'; // Correct alias
 
 // Removed extend(THREE) call
@@ -24,7 +25,9 @@ const rootElement = document.getElementById('root');
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
-      <App />
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
     </React.StrictMode>
   );
 } else {

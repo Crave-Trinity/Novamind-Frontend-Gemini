@@ -9,7 +9,8 @@ import React, { useMemo, useCallback } from 'react';
 // Removed unused THREE import
 import RegionMesh from '@presentation/atoms/RegionMesh';
 import type { BrainRegion } from '@domain/types/brain/models';
-import type { ThemeSettings } from '@domain/types/brain/visualization';
+// import type { ThemeSettings } from '@domain/types/brain/visualization'; // Removed
+import type { VisualizationSettings } from '@domain/types/brain/visualization'; // Added
 import { RenderMode } from '@domain/types/brain/visualization';
 import { SafeArray } from '../../domain/types/shared/common'; // Use relative path
 // @ts-ignore: TS2305 - Module '"@react-three/drei"' has no exported member 'Html'. (Likely type/config issue)
@@ -24,7 +25,7 @@ interface BrainRegionGroupProps {
 
   // Visualization settings
   renderMode: RenderMode;
-  themeSettings: ThemeSettings;
+  visualizationSettings: VisualizationSettings; // Changed prop name
   instancedRendering?: boolean;
   highPerformanceMode?: boolean;
 
@@ -58,7 +59,7 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
   groupId: _groupId, // Prefixed unused variable
   groupName: _groupName, // Prefixed unused variable
   renderMode,
-  themeSettings,
+  visualizationSettings, // Changed prop name
   instancedRendering: _instancedRendering = true, // Prefixed unused variable
   highPerformanceMode = false,
   selectedRegionIds,
@@ -123,16 +124,33 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
 
       // Apply render mode-specific coloring
       if (renderMode === RenderMode.FUNCTIONAL) {
-        // TODO: Implement proper color scaling based on activityLevel and themeSettings
-        // Placeholder: Use active color if above threshold, otherwise inactive
-        return region.activityLevel >= activityThreshold
-          ? themeSettings.activeRegionColor
-          : themeSettings.regionBaseColor; // Use base color for inactive
+        // Use activityColorScale from visualizationSettings
+        const scale = visualizationSettings.activityColorScale || ['#3498DB', '#F1C40F', '#E74C3C']; // Default scale
+        const activity = region.activityLevel;
+        if (activity > 0.7) return scale[2]; // High
+        if (activity > 0.4) return scale[1]; // Medium
+        if (activity > activityThreshold) return scale[0]; // Low (above threshold)
+        return visualizationSettings.regionBaseColor || '#808080'; // Inactive color
       }
 
-      return baseColor;
+      // Use selection/highlight colors from settings if applicable
+      if (safeSelectedIds.includes(region.id) && visualizationSettings.selectionColor) {
+        return visualizationSettings.selectionColor;
+      }
+      if (safeHighlightedIds.includes(region.id) && visualizationSettings.highlightColor) {
+        return visualizationSettings.highlightColor;
+      }
+
+      return baseColor || visualizationSettings.regionBaseColor || '#FFFFFF'; // Fallback
     },
-    [groupColor, renderMode, themeSettings, activityThreshold]
+    [
+      groupColor,
+      renderMode,
+      visualizationSettings, // Correct dependency
+      activityThreshold,
+      safeSelectedIds,
+      safeHighlightedIds,
+    ]
   );
 
   // Determine the region size based on various factors
@@ -273,10 +291,10 @@ const BrainRegionGroup: React.FC<BrainRegionGroupProps> = ({
             isHighlighted={safeHighlightedIds.includes(region.id)}
             activityLevel={region.activityLevel}
             pulseEnabled={renderMode !== RenderMode.ANATOMICAL}
-            themeSettings={themeSettings}
+            visualizationSettings={visualizationSettings} // Pass the correct prop down
             onClick={handleRegionClick}
             onHover={handleRegionHover}
-            opacity={groupOpacity ?? 0.9} // Provide default value
+            opacity={groupOpacity ?? visualizationSettings.regionOpacity ?? 0.9} // Use setting or default
           />
         );
       })}

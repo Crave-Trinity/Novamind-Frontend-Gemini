@@ -7,6 +7,8 @@
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
+// Import the exported mock list from test-utils
+import { darkSchemeMediaQueryList } from './test-utils.unified';
 
 // ==== DOM Environment Setup ====
 // Log startup message
@@ -93,6 +95,8 @@ export const tailwindHelper = {
     if (typeof document !== 'undefined' && document.documentElement) {
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');
+      // Trigger the matchMedia mock update
+      darkSchemeMediaQueryList._triggerChange(true);
       return true;
     }
     return false;
@@ -102,6 +106,8 @@ export const tailwindHelper = {
     if (typeof document !== 'undefined' && document.documentElement) {
       document.documentElement.classList.remove('dark');
       document.documentElement.classList.add('light');
+      // Trigger the matchMedia mock update
+      darkSchemeMediaQueryList._triggerChange(false);
       return true;
     }
     return false;

@@ -309,12 +309,14 @@ export const ClinicalMetricsPanel: React.FC<ClinicalMetricsPanelProps> = ({
   // Expanded state - full metrics panel
   return (
     <motion.div
-      className={`${className}`}
+      // className={className} // Remove from motion.div
+      data-testid="clinical-metrics-panel-motion-wrapper" // Keep a testid if needed for the wrapper
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="w-[320px] bg-slate-800/90 backdrop-blur-md text-white border-slate-700">
+      {/* Pass className to the Card component */}
+      <Card className={`w-[320px] bg-slate-800/90 backdrop-blur-md text-white border-slate-700 ${className}`}>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-md flex items-center gap-2">

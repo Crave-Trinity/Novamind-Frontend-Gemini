@@ -3,9 +3,9 @@
  * RiskAssessmentService testing with quantum precision
  */
 
-import { describe, it, expect, beforeEach } from 'vitest'; // Removed unused: vi
+import { describe, it, expect, beforeEach } from 'vitest';
 import { RiskAssessmentService } from '@services/clinical/risk-assessment.service.ts'; // Use @services alias and add .ts
-// Removed unused import: RiskLevel
+import { RiskLevel } from '@domain/types/clinical/risk'; // Import the enum
 
 describe('RiskAssessmentService', () => {
   let riskAssessmentService: RiskAssessmentService;
@@ -17,31 +17,31 @@ describe('RiskAssessmentService', () => {
   describe('calculateDepressionRiskLevel', () => {
     it('correctly calculates critical risk level', () => {
       const result = riskAssessmentService.calculateDepressionRiskLevel(80);
-      expect(result.riskLevel).toBe('critical');
+      expect(result.riskLevel).toBe(RiskLevel.SEVERE);
       expect(result.score).toBe(80);
     });
 
     it('correctly calculates high risk level', () => {
       const result = riskAssessmentService.calculateDepressionRiskLevel(60);
-      expect(result.riskLevel).toBe('high');
+      expect(result.riskLevel).toBe(RiskLevel.HIGH);
       expect(result.score).toBe(60);
     });
 
     it('correctly calculates moderate risk level', () => {
       const result = riskAssessmentService.calculateDepressionRiskLevel(30);
-      expect(result.riskLevel).toBe('moderate');
+      expect(result.riskLevel).toBe(RiskLevel.MODERATE);
       expect(result.score).toBe(30);
     });
 
     it('correctly calculates low risk level', () => {
       const result = riskAssessmentService.calculateDepressionRiskLevel(15);
-      expect(result.riskLevel).toBe('low');
+      expect(result.riskLevel).toBe(RiskLevel.LOW);
       expect(result.score).toBe(15);
     });
 
     it('correctly calculates minimal risk level', () => {
       const result = riskAssessmentService.calculateDepressionRiskLevel(5);
-      expect(result.riskLevel).toBe('minimal');
+      expect(result.riskLevel).toBe(RiskLevel.NONE);
       expect(result.score).toBe(5);
     });
   });
@@ -49,19 +49,19 @@ describe('RiskAssessmentService', () => {
   describe('calculateAnxietyRiskLevel', () => {
     it('correctly calculates critical risk level', () => {
       const result = riskAssessmentService.calculateAnxietyRiskLevel(85);
-      expect(result.riskLevel).toBe('critical');
+      expect(result.riskLevel).toBe(RiskLevel.SEVERE);
       expect(result.score).toBe(85);
     });
 
     it('correctly calculates high risk level', () => {
       const result = riskAssessmentService.calculateAnxietyRiskLevel(55);
-      expect(result.riskLevel).toBe('high');
+      expect(result.riskLevel).toBe(RiskLevel.HIGH);
       expect(result.score).toBe(55);
     });
 
     it('correctly calculates moderate risk level', () => {
       const result = riskAssessmentService.calculateAnxietyRiskLevel(35);
-      expect(result.riskLevel).toBe('moderate');
+      expect(result.riskLevel).toBe(RiskLevel.MODERATE);
       expect(result.score).toBe(35);
     });
   });
@@ -76,7 +76,7 @@ describe('RiskAssessmentService', () => {
         socialSupportScore: 20,
       });
 
-      expect(result.riskLevel).toBe('critical');
+      expect(result.riskLevel).toBe(RiskLevel.SEVERE);
       expect(result.overallScore).toBeGreaterThan(75);
     });
 
@@ -89,7 +89,7 @@ describe('RiskAssessmentService', () => {
         socialSupportScore: 40,
       });
 
-      expect(result.riskLevel).toBe('high');
+      expect(result.riskLevel).toBe(RiskLevel.HIGH);
       expect(result.overallScore).toBeGreaterThanOrEqual(50);
       expect(result.overallScore).toBeLessThan(75);
     });
@@ -103,7 +103,7 @@ describe('RiskAssessmentService', () => {
         socialSupportScore: 70,
       });
 
-      expect(result.riskLevel).toBe('moderate');
+      expect(result.riskLevel).toBe(RiskLevel.MODERATE);
       expect(result.overallScore).toBeGreaterThanOrEqual(25);
       expect(result.overallScore).toBeLessThan(50);
     });

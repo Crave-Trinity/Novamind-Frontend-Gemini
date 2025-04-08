@@ -1,4 +1,4 @@
-import { ApiClient } from '@api/ApiClient';
+import { ApiClient } from '@api/apiClient'; // Corrected casing
 import { EnhancedMockApiClient } from '@api/EnhancedMockApiClient';
 import type { IApiClient } from '@api/IApiClient';
 

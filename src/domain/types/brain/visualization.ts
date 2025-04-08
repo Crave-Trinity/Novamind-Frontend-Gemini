@@ -32,6 +32,7 @@ export interface VisualizationSettings {
   inactiveRegionOpacity: number;
   highlightColor: string;
   selectionColor: string;
+  regionBaseColor?: string; // Added
 
   // Connection visualization
   showConnections: boolean;
@@ -39,6 +40,9 @@ export interface VisualizationSettings {
   connectionThickness: number;
   connectionColorMapping: 'strength' | 'type' | 'activity';
   minConnectionStrength: number;
+  connectionBaseColor?: string; // Added
+  excitatoryConnectionColor?: string; // Added
+  inhibitoryConnectionColor?: string; // Added
 
   // Animation settings
   enableRotation: boolean;
@@ -196,13 +200,16 @@ export const defaultVisualizationSettings: VisualizationSettings = {
   inactiveRegionOpacity: 0.6,
   highlightColor: '#F06464',
   selectionColor: '#3CCFCF',
+  regionBaseColor: '#6E64F0', // Added default (using dark theme's base)
 
   showConnections: true,
   connectionOpacity: 0.7,
   connectionThickness: 1,
   connectionColorMapping: 'strength',
   minConnectionStrength: 0.2,
-
+  connectionBaseColor: '#888888', // Added default
+  excitatoryConnectionColor: '#FF8C00', // Added default (e.g., orange)
+  inhibitoryConnectionColor: '#1E90FF', // Added default (e.g., dodger blue)
   enableRotation: true,
   rotationSpeed: 0.5,
   enablePulsation: true,

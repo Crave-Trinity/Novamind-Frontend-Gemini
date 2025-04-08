@@ -5,69 +5,79 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import type { ValidationError } from '@services/brain/brain-model.service.runtime.ts';
+// Import from the implementation file, assuming exports are now correct
+// Import only the functions needed for the tests
 import {
   isBrainModel,
   validateBrainModel,
   isBrainRegion,
   validateBrainRegion,
   isNeuralConnection,
-  validateNeuralConnection, // Import the custom error type
-} from '@services/brain/brain-model.service.runtime.ts'; // Use @services alias
-import type { BrainModel, BrainRegion, NeuralConnection } from '@domain/types/brain/models';
+  validateNeuralConnection,
+} from './brain-model.service.runtime'; // Use relative path
+// Removed unused import: ValidationError
+// Import SSoT types for mocks
+import type { BrainModel, BrainRegion, NeuralConnection, BrainScan } from '@domain/types/brain/models';
+import type { Vector3 } from '@/domain/types/shared/common'; // Import Vector3 from shared
 
 describe('BrainModelService Runtime Validation', () => {
+
+  // --- Define Valid Mocks based on SSoT ---
+  const validPosition: Vector3 = { x: 0, y: 0, z: 0 };
+  const validResolution: Vector3 = { x: 1, y: 1, z: 1 };
+
+  const validRegion: BrainRegion = {
+    id: 'region-1',
+    name: 'Prefrontal Cortex',
+    position: validPosition,
+    color: '#FF0000',
+    connections: ['connection-1'],
+    hemisphereLocation: 'left',
+    dataConfidence: 0.9,
+    activityLevel: 0.8,
+    isActive: true,
+    volume: 100,
+    activity: 0.5,
+  };
+
+  const validConnection: NeuralConnection = {
+    id: 'connection-1',
+    sourceId: 'region-1',
+    targetId: 'region-2',
+    strength: 0.7,
+    type: 'excitatory',
+    directionality: 'unidirectional',
+    activityLevel: 0.6,
+    dataConfidence: 0.85,
+  };
+
+   const validScan: BrainScan = {
+     id: 'scan-test',
+     patientId: 'patient-test',
+     scanDate: new Date().toISOString(),
+     scanType: 'fMRI',
+     dataQualityScore: 0.9,
+     resolution: validResolution,
+     metadata: { acquisitionTime: 300 },
+   };
+
+  const validModel: BrainModel = {
+    id: 'model-123',
+    regions: [validRegion],
+    connections: [validConnection],
+    version: '1.0.0',
+    patientId: 'patient-test',
+    scan: validScan,
+    timestamp: new Date().toISOString(),
+    processingLevel: 'raw',
+    lastUpdated: new Date().toISOString(),
+  };
+
+
+  // --- Tests ---
+
   describe('isBrainModel', () => {
     it('returns true for valid BrainModel objects', () => {
-      // Create a minimal valid BrainRegion first
-      const validRegion: BrainRegion = {
-        id: 'region-1',
-        name: 'Prefrontal Cortex',
-        position: { x: 0, y: 0, z: 0 },
-        color: '#FF0000',
-        connections: ['connection-1'],
-        hemisphereLocation: 'left',
-        dataConfidence: 0.9,
-        activityLevel: 0.8,
-        isActive: true,
-        volume: 100, // Added missing property
-        activity: 0.5, // Added missing property
-      };
-      // Create a minimal valid NeuralConnection
-      const validConnection: NeuralConnection = {
-        id: 'connection-1',
-        sourceId: 'region-1',
-        targetId: 'region-2', // Assuming region-2 exists elsewhere or is mocked
-        strength: 0.7,
-        type: 'excitatory', // Use valid type ('excitatory' or 'inhibitory')
-        directionality: 'unidirectional', // Added required property
-        activityLevel: 0.6, // Added required property
-        dataConfidence: 0.85, // Added required property
-        // Color removed correctly
-      };
-      // Create a minimal valid BrainModel using the above
-      const validModel: BrainModel = {
-        id: 'model-123',
-        // Removed name as it's not part of BrainModel type
-        // Name removed correctly
-        regions: [validRegion],
-        connections: [validConnection],
-        version: '1', // Version should be string
-        patientId: 'patient-test', // Added required
-        scan: {
-          id: 'scan-test',
-          patientId: 'patient-test',
-          scanDate: new Date().toISOString(),
-          scanType: 'fMRI',
-          dataQualityScore: 0.9,
-          resolution: { x: 1, y: 1, z: 1 }, // Corrected type to Vector3-like object
-          metadata: { acquisitionTime: 300 }, // Added missing property
-        },
-        timestamp: new Date().toISOString(), // Added required
-        processingLevel: 'raw', // Added required
-        lastUpdated: new Date().toISOString(), // Added required
-      };
-
       expect(isBrainModel(validModel)).toBe(true);
     });
 
@@ -80,104 +90,20 @@ describe('BrainModelService Runtime Validation', () => {
     });
 
     it('returns false for objects missing required properties', () => {
-      // Missing id
-      expect(
-        isBrainModel({
-          name: 'Test Model',
-          regions: [],
-          connections: [],
-          version: 1,
-        })
-      ).toBe(false);
-
-      // Missing name
-      expect(
-        isBrainModel({
-          id: 'model-123',
-          regions: [],
-          connections: [],
-          version: 1,
-        })
-      ).toBe(false);
-
-      // Missing regions
-      expect(
-        isBrainModel({
-          id: 'model-123',
-          name: 'Test Model',
-          connections: [],
-          version: 1,
-        })
-      ).toBe(false);
-
-      // Missing connections
-      expect(
-        isBrainModel({
-          id: 'model-123',
-          name: 'Test Model',
-          regions: [],
-          version: 1,
-        })
-      ).toBe(false);
-
-      // Missing version
-      expect(
-        isBrainModel({
-          id: 'model-123',
-          name: 'Test Model',
-          regions: [],
-          connections: [],
-        })
-      ).toBe(false);
+      expect(isBrainModel({ ...validModel, id: undefined })).toBe(false);
+      expect(isBrainModel({ ...validModel, patientId: undefined })).toBe(false);
+      expect(isBrainModel({ ...validModel, regions: undefined })).toBe(false);
+      expect(isBrainModel({ ...validModel, connections: undefined })).toBe(false);
+      expect(isBrainModel({ ...validModel, version: undefined })).toBe(false);
+      expect(isBrainModel({ ...validModel, scan: undefined })).toBe(false);
+      expect(isBrainModel({ ...validModel, timestamp: undefined })).toBe(false);
+      expect(isBrainModel({ ...validModel, processingLevel: undefined })).toBe(false);
+      expect(isBrainModel({ ...validModel, lastUpdated: undefined })).toBe(false);
     });
   });
 
   describe('validateBrainModel', () => {
     it('returns success for valid BrainModel objects', () => {
-      // Re-use the valid model definition from the previous test (corrected)
-      const validRegion: BrainRegion = {
-        id: 'region-1',
-        name: 'Prefrontal Cortex',
-        position: { x: 0, y: 0, z: 0 },
-        color: '#FF0000',
-        connections: ['connection-1'],
-        hemisphereLocation: 'left',
-        dataConfidence: 0.9,
-        activityLevel: 0.8,
-        isActive: true,
-        volume: 100, // Added missing property
-        activity: 0.5, // Added missing property
-      };
-      const validConnection: NeuralConnection = {
-        id: 'connection-1',
-        sourceId: 'region-1',
-        targetId: 'region-2',
-        strength: 0.7,
-        type: 'inhibitory', // Use valid type ('excitatory' or 'inhibitory')
-        directionality: 'unidirectional',
-        activityLevel: 0.6,
-        dataConfidence: 0.85,
-      }; // Corrected mock
-      const validModel: BrainModel = {
-        id: 'model-123',
-        regions: [validRegion],
-        connections: [validConnection],
-        version: '1',
-        patientId: 'patient-test',
-        scan: {
-          id: 'scan-test',
-          patientId: 'patient-test',
-          scanDate: new Date().toISOString(),
-          scanType: 'fMRI',
-          dataQualityScore: 0.9,
-          resolution: { x: 1, y: 1, z: 1 }, // Corrected type to Vector3-like object
-          metadata: { acquisitionTime: 300 }, // Added missing property
-        },
-        timestamp: new Date().toISOString(),
-        processingLevel: 'raw',
-        lastUpdated: new Date().toISOString(),
-      }; // Corrected mock
-
       const result = validateBrainModel(validModel);
       expect(result.success).toBe(true);
       if (result.success) expect(result.value).toEqual(validModel);
@@ -190,89 +116,47 @@ describe('BrainModelService Runtime Validation', () => {
 
       const undefinedResult = validateBrainModel(undefined);
       expect(undefinedResult.success).toBe(false);
-      if (!undefinedResult.success)
-        expect(undefinedResult.error?.message).toContain('Invalid BrainModel');
+      if (!undefinedResult.success) expect(undefinedResult.error?.message).toContain('Invalid BrainModel');
 
       const stringResult = validateBrainModel('string');
       expect(stringResult.success).toBe(false);
-      if (!stringResult.success)
-        expect(stringResult.error?.message).toContain('Invalid BrainModel');
+      if (!stringResult.success) expect(stringResult.error?.message).toContain('Invalid BrainModel');
     });
 
     it('returns failure for objects with invalid regions', () => {
-      const modelWithInvalidRegion = {
-        id: 'model-123',
-        name: 'Test Model',
-        regions: [
-          {
-            id: 'region-1',
-            // Missing name property
-            activityLevel: 0.8,
-            isActive: true,
-          },
-        ],
-        connections: [],
-        version: 1,
-      };
-
+      const invalidRegion = { ...validRegion, name: 123 }; // Invalid name type
+      const modelWithInvalidRegion = { ...validModel, regions: [invalidRegion] };
       const result = validateBrainModel(modelWithInvalidRegion);
       expect(result.success).toBe(false);
-      if (!result.success) expect(result.error?.message).toContain('invalid region');
+      if (!result.success) expect(result.error?.field).toBe('regions[0].name');
     });
 
     it('returns failure for objects with invalid connections', () => {
-      const modelWithInvalidConnection = {
-        id: 'model-123',
-        name: 'Test Model',
-        regions: [
-          {
-            id: 'region-1',
-            name: 'Prefrontal Cortex',
-            activityLevel: 0.8,
-            isActive: true,
-          },
-        ],
-        connections: [
-          {
-            id: 'connection-1',
-            // Missing sourceId property
-            targetId: 'region-2',
-            strength: 0.7,
-            type: 'excitatory',
-            active: true,
-          },
-        ],
-        version: 1,
-      };
-
+       const invalidConnection = { ...validConnection, sourceId: null }; // Invalid sourceId type
+       const modelWithInvalidConnection = { ...validModel, connections: [invalidConnection] };
       const result = validateBrainModel(modelWithInvalidConnection);
       expect(result.success).toBe(false);
-      if (!result.success) expect(result.error?.message).toContain('invalid connection');
+      if (!result.success) expect(result.error?.field).toBe('connections[0].sourceId');
     });
 
+     it('returns failure for objects with invalid scan', () => {
+        const invalidScan = { ...validScan, scanType: 'INVALID' }; // Invalid scanType
+        const modelWithInvalidScan = { ...validModel, scan: invalidScan };
+       const result = validateBrainModel(modelWithInvalidScan);
+       expect(result.success).toBe(false);
+       if (!result.success) expect(result.error?.field).toBe('scan.scanType');
+     });
+
     it('includes the field path in error messages when provided', () => {
-      const result = validateBrainModel({}, 'testField');
+      const result = validateBrainModel({}, 'testField'); // Empty object is invalid
       expect(result.success).toBe(false);
-      if (!result.success) expect((result.error as ValidationError)?.field).toBe('testField.id'); // Use imported ValidationError for cast
+      // No need to cast result.error if ValidationError is not imported/used for casting
+      if (!result.success) expect(result.error?.field).toBe('testField.id');
     });
   });
 
   describe('isBrainRegion', () => {
     it('returns true for valid BrainRegion objects', () => {
-      const validRegion: BrainRegion = {
-        id: 'region-1',
-        name: 'Prefrontal Cortex',
-        position: { x: 0, y: 0, z: 0 },
-        color: '#FF0000',
-        connections: [],
-        hemisphereLocation: 'left',
-        dataConfidence: 0.9,
-        activityLevel: 0.8,
-        isActive: true,
-        volume: 100, // Added missing property
-        activity: 0.5, // Added missing property
-      };
-
       expect(isBrainRegion(validRegion)).toBe(true);
     });
 
@@ -284,60 +168,22 @@ describe('BrainModelService Runtime Validation', () => {
     });
 
     it('returns false for objects missing required properties', () => {
-      // Missing id
-      expect(
-        isBrainRegion({
-          name: 'Prefrontal Cortex',
-          activityLevel: 0.8,
-          isActive: true,
-        })
-      ).toBe(false);
-
-      // Missing name
-      expect(
-        isBrainRegion({
-          id: 'region-1',
-          activityLevel: 0.8,
-          isActive: true,
-        })
-      ).toBe(false);
-
-      // Missing activityLevel
-      expect(
-        isBrainRegion({
-          id: 'region-1',
-          name: 'Prefrontal Cortex',
-          isActive: true,
-        })
-      ).toBe(false);
-
-      // Missing isActive
-      expect(
-        isBrainRegion({
-          id: 'region-1',
-          name: 'Prefrontal Cortex',
-          activityLevel: 0.8,
-        })
-      ).toBe(false);
+      expect(isBrainRegion({ ...validRegion, id: undefined })).toBe(false);
+      expect(isBrainRegion({ ...validRegion, name: undefined })).toBe(false);
+      expect(isBrainRegion({ ...validRegion, position: undefined })).toBe(false);
+      expect(isBrainRegion({ ...validRegion, color: undefined })).toBe(false);
+      expect(isBrainRegion({ ...validRegion, connections: undefined })).toBe(false);
+      expect(isBrainRegion({ ...validRegion, hemisphereLocation: undefined })).toBe(false);
+      expect(isBrainRegion({ ...validRegion, dataConfidence: undefined })).toBe(false);
+      expect(isBrainRegion({ ...validRegion, activityLevel: undefined })).toBe(false);
+      expect(isBrainRegion({ ...validRegion, isActive: undefined })).toBe(false);
+      expect(isBrainRegion({ ...validRegion, volume: undefined })).toBe(false);
+      expect(isBrainRegion({ ...validRegion, activity: undefined })).toBe(false);
     });
   });
 
   describe('validateBrainRegion', () => {
     it('returns success for valid BrainRegion objects', () => {
-      const validRegion: BrainRegion = {
-        id: 'region-1',
-        name: 'Prefrontal Cortex',
-        position: { x: 0, y: 0, z: 0 },
-        color: '#FF0000',
-        connections: [],
-        hemisphereLocation: 'left',
-        dataConfidence: 0.9,
-        activityLevel: 0.8,
-        isActive: true,
-        volume: 100, // Added missing property
-        activity: 0.5, // Added missing property
-      };
-
       const result = validateBrainRegion(validRegion);
       expect(result.success).toBe(true);
       if (result.success) expect(result.value).toEqual(validRegion);
@@ -350,38 +196,28 @@ describe('BrainModelService Runtime Validation', () => {
     });
 
     it('returns failure for objects with invalid activityLevel', () => {
-      const regionWithInvalidActivityLevel = {
-        id: 'region-1',
-        name: 'Prefrontal Cortex',
-        activityLevel: 1.5, // Above the valid range (0-1)
-        isActive: true,
-      };
-
+      const regionWithInvalidActivityLevel = { ...validRegion, activityLevel: 1.5 }; // Above 1
       const result = validateBrainRegion(regionWithInvalidActivityLevel);
       expect(result.success).toBe(false);
-      if (!result.success) expect(result.error?.message).toContain('activityLevel');
+      if (!result.success) expect(result.error?.message).toContain('Expected activityLevel between 0 and 1');
     });
 
+     it('returns failure for objects with invalid hemisphereLocation', () => {
+       const regionWithInvalidHemisphere = { ...validRegion, hemisphereLocation: 'middle' as any }; // Invalid enum
+       const result = validateBrainRegion(regionWithInvalidHemisphere);
+       expect(result.success).toBe(false);
+       if (!result.success) expect(result.error?.message).toContain('Expected hemisphereLocation to be one of');
+     });
+
     it('includes the field path in error messages when provided', () => {
-      const result = validateBrainRegion({}, 'parentField');
+      const result = validateBrainRegion({}, 'parentField'); // Empty object is invalid
       expect(result.success).toBe(false);
-      if (!result.success) expect((result.error as ValidationError)?.field).toBe('parentField.id'); // Use imported ValidationError for cast
+      if (!result.success) expect(result.error?.field).toBe('parentField.id');
     });
   });
 
   describe('isNeuralConnection', () => {
     it('returns true for valid NeuralConnection objects', () => {
-      const validConnection: NeuralConnection = {
-        id: 'connection-1',
-        sourceId: 'region-1',
-        targetId: 'region-2',
-        strength: 0.7,
-        type: 'excitatory', // Use valid type ('excitatory' or 'inhibitory')
-        directionality: 'unidirectional',
-        activityLevel: 0.6,
-        dataConfidence: 0.85,
-      }; // Corrected mock
-
       expect(isNeuralConnection(validConnection)).toBe(true);
     });
 
@@ -393,43 +229,19 @@ describe('BrainModelService Runtime Validation', () => {
     });
 
     it('returns false for objects missing required properties', () => {
-      // Missing id
-      expect(
-        isNeuralConnection({
-          sourceId: 'region-1',
-          targetId: 'region-2',
-          strength: 0.7,
-          type: 'excitatory',
-          active: true,
-        })
-      ).toBe(false);
-
-      // Missing sourceId
-      expect(
-        isNeuralConnection({
-          id: 'connection-1',
-          targetId: 'region-2',
-          strength: 0.7,
-          type: 'excitatory',
-          active: true,
-        })
-      ).toBe(false);
+      expect(isNeuralConnection({ ...validConnection, id: undefined })).toBe(false);
+      expect(isNeuralConnection({ ...validConnection, sourceId: undefined })).toBe(false);
+      expect(isNeuralConnection({ ...validConnection, targetId: undefined })).toBe(false);
+      expect(isNeuralConnection({ ...validConnection, strength: undefined })).toBe(false);
+      expect(isNeuralConnection({ ...validConnection, type: undefined })).toBe(false);
+      expect(isNeuralConnection({ ...validConnection, directionality: undefined })).toBe(false);
+      expect(isNeuralConnection({ ...validConnection, activityLevel: undefined })).toBe(false);
+      expect(isNeuralConnection({ ...validConnection, dataConfidence: undefined })).toBe(false);
     });
   });
 
   describe('validateNeuralConnection', () => {
     it('returns success for valid NeuralConnection objects', () => {
-      const validConnection: NeuralConnection = {
-        id: 'connection-1',
-        sourceId: 'region-1',
-        targetId: 'region-2',
-        strength: 0.7,
-        type: 'inhibitory', // Use valid type ('excitatory' or 'inhibitory')
-        directionality: 'unidirectional',
-        activityLevel: 0.6,
-        dataConfidence: 0.85,
-      }; // Corrected mock
-
       const result = validateNeuralConnection(validConnection);
       expect(result.success).toBe(true);
       if (result.success) expect(result.value).toEqual(validConnection);
@@ -438,47 +250,34 @@ describe('BrainModelService Runtime Validation', () => {
     it('returns failure for non-object values', () => {
       const nullResult = validateNeuralConnection(null);
       expect(nullResult.success).toBe(false);
-      if (!nullResult.success)
-        expect(nullResult.error?.message).toContain('Invalid NeuralConnection');
+      if (!nullResult.success) expect(nullResult.error?.message).toContain('Invalid NeuralConnection');
     });
 
     it('returns failure for objects with invalid strength', () => {
-      const connectionWithInvalidStrength = {
-        id: 'connection-1',
-        sourceId: 'region-1',
-        targetId: 'region-2',
-        strength: 1.5, // Above the valid range (0-1)
-        type: 'excitatory',
-        active: true,
-      };
-
+      const connectionWithInvalidStrength = { ...validConnection, strength: 1.5 }; // Above 1
       const result = validateNeuralConnection(connectionWithInvalidStrength);
       expect(result.success).toBe(false);
-      if (!result.success) expect(result.error?.message).toContain('strength');
+      if (!result.success) expect(result.error?.message).toContain('Expected strength between 0 and 1');
     });
 
     it('returns failure for objects with invalid type', () => {
-      const connectionWithInvalidType = {
-        id: 'connection-1',
-        sourceId: 'region-1',
-        targetId: 'region-2',
-        strength: 0.7,
-        type: 'invalid-type' as any, // Not a valid connection type - cast to any for test
-        directionality: 'unidirectional',
-        activityLevel: 0.6,
-        dataConfidence: 0.85,
-      };
-
+      const connectionWithInvalidType = { ...validConnection, type: 'invalid-type' as any };
       const result = validateNeuralConnection(connectionWithInvalidType);
       expect(result.success).toBe(false);
-      if (!result.success) expect(result.error?.message).toContain('type');
+      if (!result.success) expect(result.error?.message).toContain('Expected type \'excitatory\' or \'inhibitory\' for type');
     });
 
+     it('returns failure for objects with invalid directionality', () => {
+       const connectionWithInvalidDir = { ...validConnection, directionality: 'one-way' as any };
+       const result = validateNeuralConnection(connectionWithInvalidDir);
+       expect(result.success).toBe(false);
+       if (!result.success) expect(result.error?.message).toContain('Expected directionality to be one of');
+     });
+
     it('includes the field path in error messages when provided', () => {
-      const result = validateNeuralConnection({}, 'connectionField');
+      const result = validateNeuralConnection({}, 'connectionField'); // Empty object is invalid
       expect(result.success).toBe(false);
-      if (!result.success)
-        expect((result.error as ValidationError)?.field).toBe('connectionField.id'); // Use imported ValidationError for cast
+      if (!result.success) expect(result.error?.field).toBe('connectionField.id');
     });
   });
 });

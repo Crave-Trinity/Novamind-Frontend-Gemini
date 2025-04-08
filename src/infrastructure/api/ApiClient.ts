@@ -5,7 +5,7 @@ import { mockApi } from '@api/mockApi';
 import { validateApiResponse } from '@api/ApiClient.runtime'; // Import the validator
 // Removed unused Result, Ok, Err imports
 // Flag to toggle between mock and real API
-const USE_MOCK_API = true;
+const USE_MOCK_API = false; // Disable mock API
 
 import type { BrainModel } from '@domain/types/brain/models';
 

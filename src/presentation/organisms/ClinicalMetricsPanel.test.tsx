@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen } from '@testing-library/react'; // Removed unused within import
+import { screen, waitFor } from '@testing-library/react'; // Import waitFor
 // Removed unused userEvent import
 import { ClinicalMetricsPanel } from './ClinicalMetricsPanel';
 import { renderWithProviders } from '@test/test-utils.unified'; // Import the correct render function
@@ -105,11 +105,22 @@ describe('ClinicalMetricsPanel', () => {
 
   // it("displays loading state..." ) // Removed loading state test - relies on internal state/props
 
-  it('applies custom class name with mathematical precision', () => {
+  it('applies custom class name with mathematical precision', async () => { // Make the test function async
     const { container } = renderWithProviders(<ClinicalMetricsPanel {...mockProps} />);
 
     // The first child div of the container should have the class (motion.div)
-    expect(container.firstChild).toHaveClass('custom-panel-class');
+    // Use container.children[0] as it might be more reliable than firstChild
+    // Use getByTestId for reliable selection
+    // Use findByTestId to handle potential async rendering from framer-motion
+    // Revert to checking className on the container's child, wrap in waitFor for animation
+    // console.log('ClinicalMetricsPanel DOM before waitFor:', container.innerHTML); // Optional: Keep log for debugging
+    // Now that className is passed to Card, wait for the Card's rendered div element using a more specific query
+    await waitFor(() => {
+      // Query for the div element that should have the base Card classes AND the custom class
+      const cardElement = container.querySelector('div.rounded-xl.border.shadow');
+      expect(cardElement).not.toBeNull(); // Ensure the element is found
+      expect(cardElement).toHaveClass('custom-panel-class');
+    });
   });
 
   // it("handles error states...") // Removed error state test - relies on internal state/props

@@ -142,8 +142,9 @@ export class TypeVerifier {
       return { success: true, value: undefined };
     }
     const result = this.verifyString(value, field);
-    // We explicitly allow undefined here, so map success to undefined value
-    return result.success ? result : { success: true, value: undefined };
+    // If verifyString succeeds, return its result.
+    // If it fails, it means the value was present but not a string, which is an error.
+    return result;
   }
 
   /**
@@ -168,6 +169,26 @@ export class TypeVerifier {
       (val): val is boolean => typeof val === 'boolean',
       field
     );
+  }
+
+  /**
+   * Verify that a value is a boolean or undefined/null
+   */
+  verifyOptionalBoolean(value: unknown, field?: string): Result<boolean | undefined, TypeVerificationError> {
+    if (value === undefined || value === null) {
+      return { success: true, value: undefined };
+    }
+    // Use verifyBoolean for the actual check
+    const result = this.verifyBoolean(value, field);
+    // If verifyBoolean succeeds, return its result.
+    // If it fails, it means the value was present but not a boolean, which is an error for optional boolean.
+    // However, the logic in brain/type-verification was treating failure as success with undefined.
+    // Let's stick to the stricter interpretation: if present, must be boolean.
+    // If the previous logic is desired, this should return { success: true, value: undefined } on failure.
+    // For now, assume strict checking:
+    return result;
+     // If the previous, more lenient logic was intended (treat non-boolean as undefined):
+     // return result.success ? result : { success: true, value: undefined };
   }
 
   /**

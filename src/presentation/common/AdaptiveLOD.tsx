@@ -4,11 +4,10 @@
  * with performance-optimized neural rendering
  */
 
-import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
-import { useThree, useFrame } from '@react-three/fiber';
-import { Vector3 } from 'three';
+import React, { useEffect, useState, useRef, useMemo, useCallback, createContext, useContext } from 'react'; // Added createContext, useContext
+// R3F imports fully removed
 
-// Performance thresholds
+// Performance thresholds (Keep for now, logic removed)
 const FPS_THRESHOLD_HIGH = 55; // Maintain high detail above this FPS
 const FPS_THRESHOLD_MEDIUM = 35; // Maintain medium detail above this FPS
 const FPS_RECOVERY_DELAY = 2000; // Wait time before increasing detail
@@ -40,6 +39,7 @@ export interface DetailConfig {
   showLabels: boolean; // Show region labels
   labelDensity: number; // Density of labels (0-1)
   physicsFidelity: number; // Physics simulation fidelity (0-1)
+  minConnectionStrength?: number; // Added missing property
 }
 
 /**
@@ -65,6 +65,7 @@ const defaultDetailConfigs: Record<DetailLevelString, DetailConfig> = {
     showLabels: true,
     labelDensity: 1.0,
     physicsFidelity: 1.0,
+    minConnectionStrength: 0.2, // Added default value
   },
   medium: {
     level: 'medium',
@@ -83,6 +84,7 @@ const defaultDetailConfigs: Record<DetailLevelString, DetailConfig> = {
     showLabels: true,
     labelDensity: 0.8,
     physicsFidelity: 0.8,
+    minConnectionStrength: 0.3, // Added default value
   },
   low: {
     level: 'low',
@@ -101,9 +103,10 @@ const defaultDetailConfigs: Record<DetailLevelString, DetailConfig> = {
     showLabels: true,
     labelDensity: 0.5,
     physicsFidelity: 0.6,
+    minConnectionStrength: 0.4, // Added default value
   },
   dynamic: {
-    // Add dynamic config - using 'high' as a base for now
+    // Add dynamic config - using 'medium' as a base for now
     level: 'dynamic',
     segmentDetail: 32,
     maxVisibleRegions: 1000,
@@ -120,6 +123,7 @@ const defaultDetailConfigs: Record<DetailLevelString, DetailConfig> = {
     showLabels: true,
     labelDensity: 0.8,
     physicsFidelity: 0.8,
+    minConnectionStrength: 0.3, // Added default value
   },
   // Removed "minimal" and "ultra" config blocks
 };
@@ -127,12 +131,28 @@ const defaultDetailConfigs: Record<DetailLevelString, DetailConfig> = {
 /**
  * Props with neural-safe typing
  */
+
+// Create Context for DetailConfig
+interface DetailContextProps {
+  detailConfig: DetailConfig;
+}
+const DetailContext = createContext<DetailContextProps | null>(null);
+
+export const useDetailConfig = () => {
+  const context = useContext(DetailContext);
+  if (!context) {
+    throw new Error('useDetailConfig must be used within an AdaptiveLOD provider');
+  }
+  return context.detailConfig;
+};
+
 interface AdaptiveLODProps {
   initialDetailLevel?: DetailLevelString;
   detailConfigs?: Partial<Record<DetailLevelString, Partial<DetailConfig>>>;
   adaptiveMode?: 'auto' | 'manual' | 'hybrid';
   onDetailLevelChange?: (newLevel: DetailLevelString, config: DetailConfig) => void;
-  children: (detailConfig: DetailConfig) => React.ReactNode;
+  // children: (detailConfig: DetailConfig) => React.ReactNode; // Remove render prop
+  children: React.ReactNode; // Add normal children prop
   forceDetailLevel?: DetailLevelString;
   distanceBasedLOD?: boolean;
   cameraPositionInfluence?: number;
@@ -158,19 +178,17 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
   regionDensityInfluence = 0.3,
   devicePerformanceClass = 'medium',
 }) => {
-  // Get THREE.js camera
-  const { camera } = useThree(); // Removed unused gl, scene
+  // R3F hook usage fully removed
 
-  // Performance tracking
-  const fpsBufferSize = 60; // Track FPS over 60 frames (1 second at 60fps)
+  // Performance tracking (Refs kept, logic removed)
+  const fpsBufferSize = 60;
   const fpsBuffer = useRef<number[]>([]);
   // Removed unused ref: const frameCount = useRef(0);
   const lastFrameTime = useRef(performance.now());
   const lastFPSUpdateTime = useRef(performance.now());
-  const averageFPS = useRef(60);
+  const averageFPS = useRef(60); // Default FPS
 
   // LOD control state
-  // Use string literal type for state
   const [detailLevel, setDetailLevel] = useState<DetailLevelString>(initialDetailLevel);
   const lastDetailChangeTime = useRef(performance.now());
   const canIncreaseDetail = useRef(true);
@@ -213,33 +231,16 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
     return configs;
   }, [detailConfigs, devicePerformanceClass]);
 
-  // Current detail configuration
+  // Current detail configuration - Use forced level or initial level
   const currentConfig = useMemo(() => {
-    return mergedConfigs[detailLevel];
-  }, [mergedConfigs, detailLevel]);
+    const levelToUse = forceDetailLevel ?? detailLevel;
+    return mergedConfigs[levelToUse];
+  }, [mergedConfigs, detailLevel, forceDetailLevel]);
 
-  // Calculate camera distance factor for LOD (if enabled)
-  const calculateCameraDistanceFactor = useCallback(() => {
-    if (!distanceBasedLOD) return 1.0;
+  // Camera distance factor calculation fully removed
 
-    // Calculate distance from camera to scene center
-    const distanceToCenter = camera.position.distanceTo(new Vector3(0, 0, 0));
-
-    // Base distance thresholds (adjustable based on scene scale)
-    const closeDistance = 10;
-    const farDistance = 50;
-
-    // Normalize distance between 0 and 1
-    const distanceFactor =
-      1.0 -
-      Math.min(
-        1.0,
-        Math.max(0, (distanceToCenter - closeDistance) / (farDistance - closeDistance))
-      );
-
-    // Scale by the camera position influence
-    return 1.0 - distanceFactor * cameraPositionInfluence;
-  }, [camera, distanceBasedLOD, cameraPositionInfluence]);
+  // Calculate region density factor (Does not use R3F hooks)
+  // Note: This block seems to be duplicated/incorrectly placed from the previous diff, removing it.
 
   // Calculate region density factor
   const calculateRegionDensityFactor = useCallback(() => {
@@ -259,104 +260,14 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
     return densityFactor * regionDensityInfluence;
   }, [regionCount, regionDensityInfluence]);
 
-  // Performance update function
-  const updatePerformance = useCallback(() => {
-    const now = performance.now();
-    const deltaTime = now - lastFrameTime.current;
-    lastFrameTime.current = now;
+  // Performance update function fully removed
 
-    // Calculate current FPS
-    const currentFPS = 1000 / deltaTime;
+  // useFrame call fully removed
 
-    // Add to FPS buffer (capped to buffer size)
-    if (fpsBuffer.current.length >= fpsBufferSize) {
-      fpsBuffer.current.shift();
-    }
-    fpsBuffer.current.push(currentFPS);
+  // Handle forced detail level changes
+  // Note: This block seems to be duplicated/incorrectly placed from the previous diff, removing it.
 
-    // Update average every second
-    if (now - lastFPSUpdateTime.current > 1000) {
-      // Calculate average FPS from buffer
-      const sum = fpsBuffer.current.reduce((a, b) => a + b, 0);
-      averageFPS.current = sum / fpsBuffer.current.length;
-      lastFPSUpdateTime.current = now;
-
-      // Only allow detail increases after recovery delay
-      if (!canIncreaseDetail.current && now - lastDetailChangeTime.current > FPS_RECOVERY_DELAY) {
-        canIncreaseDetail.current = true;
-      }
-    }
-
-    // Check for detail level changes in auto or hybrid modes
-    if ((adaptiveMode === 'auto' || adaptiveMode === 'hybrid') && !forceDetailLevel) {
-      let newLevel: DetailLevelString = detailLevel; // Use string literal type
-
-      // Check if performance is too low for current detail level
-      if (averageFPS.current < FPS_THRESHOLD_MEDIUM) {
-        // Step down detail aggressively
-        // Adjust logic to exclude ultra/minimal
-        if (detailLevel === 'high') newLevel = 'medium';
-        else if (detailLevel === 'medium') newLevel = 'low';
-        // Cannot go lower than "low" in adaptive mode based on FPS
-
-        canIncreaseDetail.current = false;
-      }
-      // Check if performance is extremely good and we can increase detail
-      else if (averageFPS.current > FPS_THRESHOLD_HIGH && canIncreaseDetail.current) {
-        // Step up detail conservatively
-        // Adjust logic to exclude ultra/minimal
-        if (detailLevel === 'low') newLevel = 'medium';
-        else if (detailLevel === 'medium') newLevel = 'high';
-        // Cannot go higher than "high" in adaptive mode based on FPS
-      }
-
-      // Apply additional LOD factors in hybrid mode
-      if (adaptiveMode === 'hybrid') {
-        const distanceFactor = calculateCameraDistanceFactor();
-        const densityFactor = calculateRegionDensityFactor();
-        const combinedFactor = Math.max(distanceFactor, densityFactor);
-
-        // Use combined factor to potentially adjust level more aggressively
-        if (combinedFactor > 0.8 && detailLevel !== 'low') {
-          // Check against new lowest level 'low'
-          // Potentially reduce detail one more level when combined factors are high
-          if (newLevel !== detailLevel) {
-            // Already changing levels, consider more aggressive reduction
-            const levels: DetailLevelString[] = ['high', 'medium', 'low']; // Use adjusted levels
-            const currentIndex = levels.indexOf(newLevel);
-            if (currentIndex < levels.length - 1) {
-              // Ensure we don't go below 'low'
-              newLevel = levels[currentIndex + 1];
-            }
-          }
-        }
-      }
-
-      // Apply detail level change if needed
-      if (newLevel !== detailLevel) {
-        setDetailLevel(newLevel);
-        lastDetailChangeTime.current = now;
-
-        // Notify via callback
-        if (onDetailLevelChange) {
-          onDetailLevelChange(newLevel, mergedConfigs[newLevel]);
-        }
-      }
-    }
-  }, [
-    detailLevel,
-    adaptiveMode,
-    forceDetailLevel,
-    onDetailLevelChange,
-    mergedConfigs,
-    calculateCameraDistanceFactor,
-    calculateRegionDensityFactor,
-  ]);
-
-  // Update on each frame
-  useFrame(() => {
-    updatePerformance();
-  });
+  // useFrame call fully removed
 
   // Handle forced detail level changes
   useEffect(() => {
@@ -404,8 +315,14 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
     mergedConfigs,
   ]);
 
-  // Return children with current config
-  return <>{children(currentConfig)}</>;
+  // Provide the config via context
+  const contextValue = useMemo(() => ({ detailConfig: currentConfig }), [currentConfig]);
+
+  return (
+    <DetailContext.Provider value={contextValue}>
+      {children}
+    </DetailContext.Provider>
+  );
 };
 
 export default AdaptiveLOD;

@@ -214,6 +214,8 @@ const BrainVisualizationPage: React.FC = () => {
         <div className="h-96 overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800 md:col-span-2">
           {/* Pass necessary props; container likely gets data via context or hooks */}
           <BrainVisualizationContainer
+            scanId={id || 'DEMO_SCAN_001'} // Provide scanId from param or default for demo
+            patientId={id} // Pass patientId if available from route param
             onRegionSelect={handleRegionSelect}
             // Remove invalid props: brainData, activeRegions, viewMode
           />

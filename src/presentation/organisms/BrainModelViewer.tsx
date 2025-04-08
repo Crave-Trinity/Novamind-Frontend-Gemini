@@ -8,15 +8,18 @@ import React, { useRef, useMemo, useEffect } from 'react'; // Removed unused use
 import { Canvas, useFrame, useThree } from '@react-three/fiber'; // Added useFrame
 import {
   OrbitControls,
-  // ContactShadows, // Restored import - Commented out due to TS2305
-  // BakeShadows, // Restored import - Commented out due to TS2305
-  // useContextBridge, // Restored import - Commented out due to TS2305
+  // ContactShadows, // Still commented out due to potential TS issues
+  // BakeShadows, // Still commented out due to potential TS issues
+  // useContextBridge, // Removed - Not available in this version
 } from '@react-three/drei';
 import { Vector3 } from 'three'; // Removed unused Color, ShaderMaterial, AdditiveBlending, Group, Clock, Quaternion, Matrix4
 import { Bloom, /* DepthOfField, */ EffectComposer } from '@react-three/postprocessing'; // Restored EffectComposer, Commented out DepthOfField due to TS2305
 import { KernelSize } from 'postprocessing'; // Restored import
-// Use relative path to ensure the correct context instance is imported
-import { ThemeContext } from '../../application/contexts/ThemeProvider';
+// Removed ThemeContext import as useContextBridge is unavailable
+// import { ThemeContext } from '../../application/contexts/ThemeProvider';
+
+// Import AdaptiveLOD and related types/hooks
+import AdaptiveLOD, { useDetailConfig, DetailLevelString } from '@presentation/common/AdaptiveLOD'; // Added imports
 
 // Import molecular components
 import BrainRegionGroup from '@presentation/molecules/BrainRegionGroup';
@@ -133,8 +136,9 @@ const CameraController: React.FC<{
 const Brain3DScene: React.FC<{
   brainModel: BrainModel;
   renderMode: RenderMode;
-  themeSettings: ThemeSettings; // Use the actual ThemeSettings type
-  visualizationSettings: VisualizationSettings; // Pass merged settings
+  visualizationSettings: VisualizationSettings; // Add settings prop
+  // themeSettings: ThemeSettings; // Removed - Handled differently
+  // visualizationSettings prop removed
   selectedRegionIds: string[];
   highlightedRegionIds: string[];
   highPerformanceMode: boolean;
@@ -147,8 +151,9 @@ const Brain3DScene: React.FC<{
 }> = ({
   brainModel,
   renderMode,
-  themeSettings,
-  visualizationSettings, // Receive merged settings
+  visualizationSettings, // Add settings prop
+  // themeSettings, // Removed
+  // visualizationSettings prop removed
   selectedRegionIds,
   highlightedRegionIds,
   highPerformanceMode,
@@ -159,6 +164,9 @@ const Brain3DScene: React.FC<{
   onConnectionClick,
   onConnectionHover,
 }) => {
+  // Use the context hook to get detail config
+  const detailConfig = useDetailConfig();
+
   const safeRegions = brainModel.regions || [];
   const safeConnections = brainModel.connections || [];
 
@@ -200,12 +208,13 @@ const Brain3DScene: React.FC<{
         connections={safeConnections}
         regions={safeRegions}
         renderMode={renderMode}
-        themeSettings={themeSettings} // Pass theme settings
+        visualizationSettings={visualizationSettings} // Pass settings down
+        // themeSettings={themeSettings} // Removed
         // visualizationSettings prop removed
         highPerformanceMode={highPerformanceMode}
         selectedRegionIds={selectedRegionIds}
         highlightedRegionIds={highlightedRegionIds}
-        minimumStrength={visualizationSettings.minConnectionStrength} // Use setting
+        minimumStrength={detailConfig.minConnectionStrength ?? 0.1} // Uncommented: Use context value
         filterByActivity={renderMode === RenderMode.FUNCTIONAL}
         animated={renderMode !== RenderMode.ANATOMICAL}
         // useDashedLines={themeSettings.useDashedConnections} // Property missing
@@ -222,7 +231,8 @@ const Brain3DScene: React.FC<{
           groupId={group.groupId}
           groupName={group.groupName}
           renderMode={renderMode}
-          themeSettings={themeSettings} // Pass theme settings
+          visualizationSettings={visualizationSettings} // Pass settings down
+          // themeSettings={themeSettings} // Removed
           // visualizationSettings prop removed
           instancedRendering={!highPerformanceMode && group.regions.length > 20}
           highPerformanceMode={highPerformanceMode}
@@ -230,7 +240,7 @@ const Brain3DScene: React.FC<{
           highlightedRegionIds={highlightedRegionIds}
           activityThreshold={activityThreshold}
           showInactiveRegions={showInactiveRegions}
-          showLabels={visualizationSettings.showLabels} // Use setting
+          showLabels={detailConfig.showLabels ?? true} // Uncommented: Use context value
           // Pass callbacks conditionally
           {...(onRegionClick && { onRegionClick })}
           {...(onRegionHover && { onRegionHover })}
@@ -292,13 +302,11 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
   onLoadComplete,
   onError,
 }) => {
-  // Get theme settings from context
-  const { settings: contextThemeSettings } = React.useContext(ThemeContext);
-  // const ContextBridge = useContextBridge(ThemeContext); // Temporarily commented out due to import issues
-  const ContextBridge = ({ children }: { children: React.ReactNode }) => <>{children}</>; // Placeholder
+  // Removed ThemeContext and useContextBridge usage
+  const ContextBridge = ({ children }: { children: React.ReactNode }) => <>{children}</>; // Keep placeholder for now
 
-  // Use theme settings from context
-  const themeSettings = contextThemeSettings;
+  // Removed themeSettings from context
+  const themeSettings = {}; // Placeholder - theme settings might need to be passed as props now
 
   // Merge incoming visualization settings with defaults and props
   const settings: VisualizationSettings = useMemo(() => {
@@ -382,7 +390,12 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
     </div>
   );
 
-  const renderVisualization = (model: BrainModel) => (
+  const renderVisualization = (model: BrainModel) => {
+    // Determine the detail level to pass to AdaptiveLOD
+    // This could be based on props or internal logic
+    const currentDetailLevel: DetailLevelString = highPerformanceMode ? 'low' : 'high'; // Example logic
+
+    return (
     <Canvas
       style={{ background: backgroundColor || settings.backgroundColor }} // Use settings bg
       camera={{ position: cameraPosition, fov: cameraFov }}
@@ -393,7 +406,7 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
         logarithmicDepthBuffer: !highPerformanceMode, // Use direct prop
       }}
     >
-      <ContextBridge>
+      {/* <ContextBridge> */} {/* Removed ContextBridge */}
         {/* Lighting - Use settings from merged object */}
         <ambientLight intensity={0.5} /> {/* Using default intensity */}
         <directionalLight
@@ -408,12 +421,19 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
           initialPosition={cameraPosition}
         />
 
-        {/* Brain model visualization */}
-        <Brain3DScene
-          brainModel={model}
-          renderMode={settings.renderMode} // Use merged setting
-          themeSettings={themeSettings as any} // Re-add 'as any' cast temporarily
-          visualizationSettings={settings} // Pass merged settings
+        {/* Wrap scene content in AdaptiveLOD */}
+        <AdaptiveLOD
+          forceDetailLevel={currentDetailLevel} // Pass the determined detail level
+          // Pass other AdaptiveLOD props if needed
+        >
+          {/* Brain model visualization - Now inside AdaptiveLOD */}
+          <Brain3DScene
+            brainModel={model}
+            renderMode={settings.renderMode} // Use merged setting
+            visualizationSettings={settings} // Pass merged settings down
+            // themeSettings={themeSettings as any} // Removed - theme settings need to be handled differently
+            // visualizationSettings is no longer needed here, will be accessed via context
+            // visualizationSettings={settings}
           selectedRegionIds={selectedRegionIds}
           highlightedRegionIds={combinedHighlightedRegions}
           highPerformanceMode={highPerformanceMode} // Pass prop directly
@@ -425,8 +445,9 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
           {...(onConnectionClick && { onConnectionClick })}
           {...(onConnectionHover && { onConnectionHover })}
         />
+       </AdaptiveLOD> {/* Correctly close AdaptiveLOD */}
 
-        {/* Post-processing effects - Use settings and direct props */}
+        {/* Post-processing effects */}
         {!highPerformanceMode && (settings.enableBloom || enableDepthOfFieldProp) ? (
           <EffectComposer>
             <>
@@ -454,10 +475,10 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
             </>
           </EffectComposer>
         ) : null}
-      </ContextBridge>
+      {/* </ContextBridge> */} {/* Removed ContextBridge */}
     </Canvas>
   );
-
+ }; // Add missing closing brace for renderVisualization function
   // Handle state-based rendering
   const renderContent = () => {
     switch (visualizationState.status) {
@@ -533,6 +554,6 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
       )}
     </div>
   );
-};
+}; // Add missing closing brace for BrainModelViewer component
 
 export default React.memo(BrainModelViewer);

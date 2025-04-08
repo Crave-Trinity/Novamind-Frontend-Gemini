@@ -1,7 +1,9 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Example router setup
-import Dashboard from '@pages/Dashboard'; // Example page import
+import Dashboard from '@pages/Dashboard';
+import BrainVisualizationPage from '@pages/BrainVisualizationPage'; // Import the visualization page
+import NotFound from '@pages/NotFound'; // Import the NotFound page
 import '@styles/index.css'; // Correct alias
 
 // Create a client
@@ -23,7 +25,12 @@ const App: React.FC = () => {
         {/* Basic Router Setup - Adjust routes as needed */}
         <Routes>
           <Route path="/" element={<Dashboard />} />
-          {/* Add other routes here */}
+          {/* Specific demo route */}
+          <Route path="/brain-visualization/demo" element={<BrainVisualizationPage />} />
+          {/* Parameterized route for specific patient IDs */}
+          <Route path="/brain-visualization/:patientId" element={<BrainVisualizationPage />} />
+          {/* Catch-all route for 404 */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </QueryClientProvider>

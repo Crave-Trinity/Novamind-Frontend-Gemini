@@ -6,7 +6,8 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import type * as THREE from 'three';
-import type { ThemeSettings } from '@domain/types/brain/visualization';
+// import type { ThemeSettings } from '@domain/types/brain/visualization'; // Removed
+import type { VisualizationSettings } from '@domain/types/brain/visualization'; // Added
 // Removed unused import: import { Vector3 } from 'three';
 
 // Neural-safe prop definition with explicit typing
@@ -34,8 +35,8 @@ interface RegionMeshProps {
   emissive?: string;
   emissiveIntensity?: number;
 
-  // Theme settings
-  themeSettings: ThemeSettings;
+  // Visualization settings (contains theme defaults)
+  visualizationSettings: VisualizationSettings; // Changed prop name
 
   // Interaction callbacks
   onClick?: (id: string) => void;
@@ -62,7 +63,7 @@ const RegionMesh: React.FC<RegionMeshProps> = ({
   renderQuality = 'high',
   emissive,
   emissiveIntensity,
-  themeSettings,
+  visualizationSettings, // Changed prop name
   onClick,
   onHover,
 }) => {
@@ -90,24 +91,24 @@ const RegionMesh: React.FC<RegionMeshProps> = ({
   // Calculate visual parameters based on props
   const visualParams = useCallback(() => {
     let regionColor = color;
-    const regionEmissive = emissive || themeSettings.regionBaseColor; // Use const as it's not reassigned here
+    // Use visualizationSettings for defaults
+    const regionEmissive = emissive || visualizationSettings.regionBaseColor || '#FFFFFF';
     let regionEmissiveIntensity = emissiveIntensity || 0.2;
     let regionOpacity = opacity;
 
-    // Apply active state visual enhancement
+    // Apply active state visual enhancement (use visualizationSettings for colors)
     if (isActive) {
-      regionColor = themeSettings.activeRegionColor;
+      // regionColor = visualizationSettings.activeRegionColor || '#F06464'; // Use activeRegionColor if defined
       regionEmissiveIntensity = 0.5;
     }
 
-    // Apply selection visual enhancement
+    // Apply selection visual enhancement (use visualizationSettings for colors)
     if (isSelected) {
-      // regionEmissive =
-      //   themeSettings.selectionColor || themeSettings.accentColor; // Temporarily comment out due to themeSettings type issue
+      regionColor = visualizationSettings.selectionColor || '#3CCFCF'; // Use selectionColor
       regionEmissiveIntensity = 0.7;
     }
 
-    // Apply highlight visual enhancement
+    // Apply highlight visual enhancement (use visualizationSettings for colors)
     if (isHighlighted || hovered) {
       regionEmissiveIntensity = 0.6;
       regionOpacity = 1.0;
@@ -128,7 +129,7 @@ const RegionMesh: React.FC<RegionMeshProps> = ({
     isSelected,
     isHighlighted,
     hovered,
-    themeSettings,
+    visualizationSettings, // Changed dependency
   ]);
 
   // Update material properties when visual parameters change
@@ -155,11 +156,11 @@ const RegionMesh: React.FC<RegionMeshProps> = ({
     meshRef.current.scale.set(scale, scale, scale);
 
     // Optional glow effect through emissive intensity modulation
-    if (materialRef.current && themeSettings.glowIntensity > 0) {
-      const params = visualParams();
-      const glowPulse = Math.sin(time * 1.5) * 0.2 * themeSettings.glowIntensity;
-      materialRef.current.emissiveIntensity = params.emissiveIntensity + glowPulse;
-    }
+    // if (materialRef.current && visualizationSettings.glowIntensity > 0) { // Check if glowIntensity exists on VisualizationSettings
+    //   const params = visualParams();
+    //   const glowPulse = Math.sin(time * 1.5) * 0.2 * visualizationSettings.glowIntensity;
+    //   materialRef.current.emissiveIntensity = params.emissiveIntensity + glowPulse;
+    // }
   });
 
   // Event handlers with type safety
@@ -194,11 +195,11 @@ const RegionMesh: React.FC<RegionMeshProps> = ({
       <sphereGeometry args={[1, segments, segments]} />
       <meshStandardMaterial
         ref={materialRef}
-        color={color}
-        emissive={emissive || themeSettings.regionBaseColor}
-        emissiveIntensity={emissiveIntensity || 0.2}
+        color={color} // Base color is set directly
+        emissive={visualParams().emissive} // Use calculated emissive
+        emissiveIntensity={visualParams().emissiveIntensity} // Use calculated intensity
         transparent={true}
-        opacity={opacity}
+        opacity={visualParams().opacity} // Use calculated opacity
         roughness={0.4}
         metalness={0.2}
       />

@@ -1,0 +1,12 @@
+/**
+ * NOVAMIND Neural Test Suite
+ * BrainRegionLabels testing - Minimal existence check
+ */
+import { describe, it, expect } from 'vitest';
+import BrainRegionLabels from './BrainRegionLabels'; // Assuming default export
+
+describe.skip('BrainRegionLabels (Minimal)', () => { // Skip R3F component tests in Vitest
+  it('exists as a module', () => {
+    expect(BrainRegionLabels).toBeDefined();
+  });
+});

@@ -54,7 +54,7 @@ src/
 
 ## Path Aliases (`tsconfig.json`)
 
-Consistent path aliases are configured in `tsconfig.json` and automatically used by Vite via `vite-tsconfig-paths` to enforce architectural boundaries and simplify imports:
+Consistent path aliases are configured in `tsconfig.json`. While `vite-tsconfig-paths` is intended for automatic resolution, issues were encountered. Currently, aliases are defined explicitly within `config/vite.config.ts`'s `resolve.alias` array to ensure correct resolution by the Vite dev server and build process. This enforces architectural boundaries and simplifies imports:
 
 ```json
 // tsconfig.json (paths section)

@@ -47,11 +47,16 @@ describe('mockApiClient', () => {
     expect(result).toHaveProperty('id');
     expect(result).toHaveProperty('patientId');
     expect(result).toHaveProperty('regions');
-    expect(result).toHaveProperty('pathways');
+    expect(result).toHaveProperty('connections'); // Correct property name
     expect(result).toHaveProperty('timestamp');
-    expect(result).toHaveProperty('metadata');
+    expect(result).toHaveProperty('scan'); // Check for the required 'scan' object
+    expect(result.scan).toHaveProperty('metadata'); // Check for metadata within scan
+    expect(result).toHaveProperty('version'); // Check for required version
+    expect(result).toHaveProperty('processingLevel'); // Check for required processingLevel
+    expect(result).toHaveProperty('lastUpdated'); // Check for required lastUpdated
 
     // Validate metadata with quantum precision
-    // Removed assertions for metadata properties as metadata was removed
+    // Assertions for metadata properties within scan object
+    expect(result.scan.metadata).toBeDefined();
   });
 });

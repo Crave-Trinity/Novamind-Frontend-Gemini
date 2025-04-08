@@ -65,6 +65,7 @@ vi.mock('three', async () => { // Removed unused importOriginal
 vi.mock('@react-three/drei', () => ({
   Text: vi.fn(({ children }) => <div data-testid="mock-drei-text">{children}</div>),
   Billboard: vi.fn(({ children }) => <div data-testid="mock-drei-billboard">{children}</div>),
+  Html: vi.fn(({ children }) => <div data-testid="mock-drei-html">{children}</div>), // Add mock for Html
   // Add other Drei mocks if needed
 }));
 

@@ -13,15 +13,34 @@ import assert from 'assert'; // Use ES Module import for assert
     });
     const page = await browser.newPage();
 
+    // Capture browser console logs and errors
+    page.on('console', msg => {
+        const type = msg.type().toUpperCase();
+        const text = msg.text();
+        // Log errors and warnings prominently
+        if (type === 'ERROR' || type === 'WARN') {
+            console.error(`[Browser Console - ${type}] ${text}`);
+        } else {
+            console.log(`[Browser Console - ${type}] ${text}`);
+        }
+    });
+    page.on('pageerror', err => {
+        console.error('[Browser Page Error]', err.toString());
+    });
+
     // Ensure the dev server is running (npm run dev)
-    const targetUrl = 'http://localhost:3000'; // Adjust if your dev port is different
+    const targetUrl = 'http://localhost:3000/brain-visualization/demo'; // Target the R3F page
 
     console.log(`[Puppeteer] Navigating to ${targetUrl}...`);
     await page.goto(targetUrl, { waitUntil: 'networkidle0' }); // Wait for network activity to cease
 
+    console.log('[Puppeteer] Waiting for R3F canvas element to appear...');
+    // Wait directly for the canvas element, giving it ample time
+    const canvasSelector = 'canvas';
+    await page.waitForSelector(canvasSelector, { timeout: 30000 }); // Wait up to 30 seconds for the canvas
+
     console.log('[Puppeteer] Checking for canvas element...');
     // Check if a canvas element associated with R3F exists
-    const canvasSelector = 'canvas'; // Adjust if a more specific selector is needed
     const canvasElement = await page.$(canvasSelector);
 
     if (canvasElement) {

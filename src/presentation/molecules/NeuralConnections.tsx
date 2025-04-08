@@ -10,7 +10,8 @@ import { Line } from '@react-three/drei';
 // Removed unused THREE import
 import ConnectionLine from '@presentation/atoms/ConnectionLine';
 import type { BrainRegion, NeuralConnection } from '@domain/types/brain/models';
-import type { ThemeSettings } from '@domain/types/brain/visualization';
+// import type { ThemeSettings } from '@domain/types/brain/visualization'; // Removed
+import type { VisualizationSettings } from '@domain/types/brain/visualization'; // Added
 import { RenderMode } from '@domain/types/brain/visualization';
 import type { Vector3 } from '@domain/types/shared/common';
 import { SafeArray } from '@domain/types/shared/common';
@@ -23,7 +24,7 @@ interface NeuralConnectionsProps {
 
   // Visualization settings
   renderMode: RenderMode;
-  themeSettings: ThemeSettings;
+  visualizationSettings: VisualizationSettings; // Changed prop name
   highPerformanceMode?: boolean;
   batchSize?: number; // For performance optimization
 
@@ -55,7 +56,7 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
   connections,
   regions,
   renderMode,
-  themeSettings,
+  visualizationSettings, // Changed prop name
   highPerformanceMode = false,
   batchSize = 100,
   selectedRegionIds,
@@ -251,40 +252,32 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
       // In functional mode, color by activity - Use placeholder scale logic
       if (renderMode === RenderMode.FUNCTIONAL) {
         const activity = getConnectionActivity(conn);
-        // Placeholder scale - replace with actual scale from VisualizationSettings when available
-        // Using theme colors as placeholders for activity scale
-        const scale = {
-          high: themeSettings.accentColor || '#FF0000',
-          medium: themeSettings.secondaryColor || '#FFA500',
-          low: themeSettings.primaryColor || '#FFFF00',
-          none: themeSettings.connectionBaseColor || '#808080',
-        };
+        // Use activityColorScale from visualizationSettings
+        const scale = visualizationSettings.activityColorScale || ['#3498DB', '#F1C40F', '#E74C3C']; // Default scale
 
-        if (activity > 0.7) return scale.high;
-        if (activity > 0.4) return scale.medium;
-        if (activity > 0.2) return scale.low;
-        return scale.none;
+        if (activity > 0.7) return scale[2]; // High activity color
+        if (activity > 0.4) return scale[1]; // Medium activity color
+        if (activity > 0.2) return scale[0]; // Low activity color
+        return visualizationSettings.connectionBaseColor || '#808080'; // Inactive color
       }
 
-      // In connectivity mode, color by connection type (structural, functional, effective)
-      // Using base color as placeholder since excitatory/inhibitory colors are not in ThemeSettings
+      // In connectivity mode, color by connection type
       if (renderMode === RenderMode.CONNECTIVITY) {
-        // TODO: Define appropriate colors based on conn.type ('structural', 'functional', 'effective')
-        return themeSettings.connectionBaseColor;
+        // Use excitatory/inhibitory colors if defined in settings
+        if (conn.type === 'excitatory' && visualizationSettings.excitatoryConnectionColor) {
+          return visualizationSettings.excitatoryConnectionColor;
+        }
+        if (conn.type === 'inhibitory' && visualizationSettings.inhibitoryConnectionColor) {
+          return visualizationSettings.inhibitoryConnectionColor;
+        }
+        // Fallback to base color
+        return visualizationSettings.connectionBaseColor || '#FFFFFF';
       }
 
-      // Default color
-      return themeSettings.connectionBaseColor;
+      // Default color (Anatomical)
+      return visualizationSettings.connectionBaseColor || '#FFFFFF';
     },
-    // Removed themeSettings from dependencies as specific color props are missing/placeholders used
-    [
-      renderMode,
-      getConnectionActivity,
-      themeSettings.accentColor,
-      themeSettings.secondaryColor,
-      themeSettings.primaryColor,
-      themeSettings.connectionBaseColor,
-    ]
+    [renderMode, getConnectionActivity, visualizationSettings] // Depend on visualizationSettings
   );
 
   // Use optimized batch rendering for high performance mode
@@ -295,7 +288,7 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
           <Line
             key={`batch-${batchIndex}`}
             points={points}
-            color={themeSettings.connectionBaseColor}
+            color={visualizationSettings.connectionBaseColor || '#FFFFFF'} // Use setting
             lineWidth={thickness * 100} // drei Line uses different scale
             opacity={opacity}
             transparent
@@ -335,7 +328,8 @@ const NeuralConnections: React.FC<NeuralConnectionsProps> = ({
             flowDirection={conn.directionality === 'bidirectional' ? 'bidirectional' : 'forward'}
             isActive={isConnectionActive(conn)}
             isHighlighted={isConnectionHighlighted(conn)}
-            themeSettings={themeSettings}
+            // themeSettings={themeSettings} // Removed prop
+            visualizationSettings={visualizationSettings} // Pass full settings
             onClick={handleConnectionClick}
             onHover={handleConnectionHover}
           />

@@ -26,6 +26,9 @@ import type { TreatmentResponsePrediction } from '@domain/types/clinical/treatme
 // Removed unused NeuralImpactRating, TreatmentType imports
 import type { RiskAssessment } from '@domain/types/clinical/risk';
 
+// Import DetailLevelString from AdaptiveLOD
+import { DetailLevelString } from '@presentation/common/AdaptiveLOD';
+
 // Domain models
 import type {
   SymptomNeuralMapping,
@@ -83,24 +86,7 @@ interface BrainVisualizationContainerProps {
 /**
  * Selectable detail modes for visualization
  */
-export enum DetailMode {
-  PERFORMANCE = 'performance',
-  BALANCED = 'balanced',
-  QUALITY = 'quality',
-  CLINICAL = 'clinical',
-  AUTO = 'auto',
-}
-
-/**
- * Map detail modes to detail levels
- */
-const detailModeMap: Record<DetailMode, 'low' | 'medium' | 'high' | 'dynamic'> = {
-  [DetailMode.PERFORMANCE]: 'low',
-  [DetailMode.BALANCED]: 'medium',
-  [DetailMode.QUALITY]: 'high',
-  [DetailMode.CLINICAL]: 'high',
-  [DetailMode.AUTO]: 'dynamic',
-};
+// Moved DetailMode enum and detailModeMap to AdaptiveLOD.tsx
 
 /**
  * BrainVisualizationContainer - Organism component for brain visualization
@@ -169,9 +155,10 @@ const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerP
     initialSelectedRegionId || null
   );
   const [showDetails, setShowDetails] = useState<boolean>(!!initialSelectedRegionId);
-  const [detailMode] = useState<DetailMode>(DetailMode.AUTO); // Removed unused setDetailMode
+  // Use DetailLevelString type from AdaptiveLOD. Initialize with a valid default.
+  const [detailMode] = useState<DetailLevelString>('high'); // Default to 'high' or use initialDetailLevel prop if added
   const [forceDetailLevel] = useState< // Removed unused setForceDetailLevel
-    'low' | 'medium' | 'high' | 'dynamic' | undefined
+    DetailLevelString | undefined // Use DetailLevelString type
   >(undefined);
   const [showPerformanceStats, _setShowPerformanceStats] = useState(false); // Reverted prefix on state variable, kept on setter
   const [_performanceMetrics] = useState<any>(null); // Removed unused setPerformanceMetrics
@@ -253,6 +240,14 @@ const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerP
     treatmentPredictions,
     renderMode,
   ]);
+
+  // Log visualization state changes
+  useEffect(() => {
+    console.log(`[BrainVisContainer] Visualization State: ${visualizationState.status}`);
+    if (visualizationState.status === 'error') {
+      console.error('[BrainVisContainer] Error:', visualizationState.error);
+    }
+  }, [visualizationState]);
 
   useEffect(() => {
     if (scanId) {
@@ -378,8 +373,13 @@ const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerP
   }, []);
 
 
+  // Import DetailLevelString from AdaptiveLOD if not already imported
+  // import { DetailLevelString } from '@presentation/common/AdaptiveLOD';
+
   const currentDetailLevel = useMemo(() => {
-    return forceDetailLevel ?? detailModeMap[detailMode] ?? 'dynamic';
+    // Use forceDetailLevel if provided, otherwise use detailMode (which should be DetailLevelString)
+    // The detailModeMap is now internal to AdaptiveLOD
+    return forceDetailLevel ?? detailMode ?? 'dynamic';
   }, [forceDetailLevel, detailMode]);
 
   // Render
@@ -398,10 +398,10 @@ const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerP
           // adaptiveMode={...} // If needed
           // etc.
         >
-          {(_detailConfig) => ( // Prefixed unused parameter
-            <>
-              {/* Explicitly check for non-null data for type safety */}
-              {visualizationState.status === 'success' && visualizationState.data !== null && (
+          {/* Remove the render prop function wrapper */}
+          <>
+            {/* Explicitly check for non-null data for type safety */}
+            {visualizationState.status === 'success' && visualizationState.data !== null && (
                 <BrainModelViewer
                   visualizationState={visualizationState as VisualizationState<BrainModel>} // Assert non-null data
                   renderMode={renderMode}
@@ -523,7 +523,7 @@ const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerP
                 </div>
               )}
             </>
-          )}
+          {/* Removed extraneous closing parenthesis */}
         </AdaptiveLOD>
       </VisualizationErrorBoundary>
     </div>

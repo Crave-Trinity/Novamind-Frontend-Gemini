@@ -54,7 +54,7 @@ describe('models type definitions', () => {
       dataConfidence: 0.85, // Added required property
     };
     expect(sampleConnection).toBeDefined();
-    expect(sampleConnection.type).toBe('functional');
+    expect(sampleConnection.type).toBe('excitatory'); // Correct assertion based on SSoT
   });
 
   it('exports BrainScan with correct structure', () => {
