@@ -90,30 +90,39 @@ export function useBrainModel(): UseBrainModelReturn {
 
   // Fetch brain model - explicitly called with scan ID
   const fetchBrainModel = useCallback(
-    async (scanId: string): Promise<Result<BrainModel, Error>> => { // Added error type
+    async (scanId: string): Promise<Result<BrainModel, Error>> => {
+      console.log(`[useBrainModel] fetchBrainModel called with scanId: ${scanId}`);
       try {
+        // The service call will be intercepted by Puppeteer's mock
         const result = await brainModelService.fetchBrainModel(scanId);
+        console.log('[useBrainModel] brainModelService.fetchBrainModel result:', result);
 
         if (result.success) {
           // Verify model integrity with domain utility
-          const verificationResult = brainTypeVerifier.verifyBrainModel(result.value); // Correct usage
+          const verificationResult = brainTypeVerifier.verifyBrainModel(result.value);
+          console.log('[useBrainModel] Verification result:', verificationResult);
 
           if (verificationResult.success) {
+            console.log('[useBrainModel] Verification successful. Updating query data...');
             // Update cache
-            // Use the base key for setting data after manual fetch
             queryClient.setQueryData([brainModelQueryKey], result.value);
+            console.log('[useBrainModel] Query data set. Refetching...');
             // Trigger refetch to update state
-            refetch();
-            return success(result.value); // Correct usage
+            await refetch(); // Ensure refetch completes if needed
+            console.log('[useBrainModel] Refetch complete. Returning success.');
+            return success(result.value);
           } else {
+            console.error('[useBrainModel] Type verification failed:', verificationResult.error);
             // Type verification failed
             return failure(verificationResult.error || new Error('Type verification failed'));
           }
         } else {
+          console.error('[useBrainModel] Service call failed:', result.error);
           // Service call failed
           return failure(result.error || new Error('Failed to fetch brain model'));
         }
       } catch (err) {
+        console.error('[useBrainModel] Unexpected error in fetchBrainModel:', err);
         // Unexpected error
         const error = err instanceof Error ? err : new Error('Unknown error fetching brain model');
         return failure(error);
