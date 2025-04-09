@@ -115,29 +115,38 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     // 3. Find and click the "Reset View" button using text content evaluation
     const resetButtonText = 'Reset View';
     try {
-      console.log(`[Puppeteer] Waiting for button containing text: "${resetButtonText}"...`);
-      
-      // Use waitForSelector with Puppeteer's text selector
-      const resetButtonSelector = `button ::-p-text(Reset View)`;
+      console.log('[Puppeteer] Waiting for Settings tab content panel to be active...');
+      // Wait for the specific TabsContent panel associated with "settings" to become active
+      const settingsPanelSelector = `div[role="tabpanel"][data-state="active"][aria-labelledby*="settings"]`; // More robust selector
+      // Fallback selector if aria-labelledby isn't reliable: `div[role="tabpanel"][data-state="active"]` and hope it's the right one.
       try {
-          await page.waitForSelector(resetButtonSelector, { timeout: 15000, visible: true }); // Wait for selector to be visible
+          await page.waitForSelector(settingsPanelSelector, { timeout: 15000, visible: true });
+          console.log('[Puppeteer] Settings tab panel is active. Proceeding to find Reset button.');
       } catch (waitError) {
-          console.error(`[Puppeteer] Failed waiting for selector: ${resetButtonSelector}`);
-          throw waitError; // Re-throw the specific wait error
+          console.error(`[Puppeteer] Failed waiting for Settings tab panel selector: ${settingsPanelSelector}`);
+           const screenshotPath = 'test-puppeteer/failure-screenshot-NeuralControlPanel-settings-panel.png';
+           await page.screenshot({ path: screenshotPath });
+           console.error(`[Puppeteer] Screenshot saved to ${screenshotPath}`);
+          throw waitError;
       }
-      
-      console.log(`[Puppeteer] Found button containing text: "${resetButtonText}". Clicking...`);
+
+      console.log(`[Puppeteer] Searching for button containing text: "${resetButtonText}" within the active panel...`);
       // Removed stray parenthesis and duplicate log from previous diff
 
-      // Click the button using the selector
-      const clicked = await page.evaluate((selector) => {
-          const button = document.querySelector(selector);
-          if (button) {
-              button.click();
+      // Click the button using page.evaluate, searching within the active settings panel
+      const clicked = await page.evaluate((panelSelector, text) => {
+          const activePanel = document.querySelector(panelSelector);
+          if (!activePanel) return false;
+
+          // Find the button within the active panel
+          const buttons = Array.from(activePanel.querySelectorAll('button'));
+          const resetButton = buttons.find(button => button.textContent?.includes(text));
+          if (resetButton) {
+              resetButton.click();
               return true;
           }
           return false;
-      }, resetButtonSelector);
+      }, settingsPanelSelector, resetButtonText); // Pass selector and text
 
       assert.ok(clicked, `❌ FAILURE: Button containing text "${resetButtonText}" not found or could not be clicked within the panel.`);
       console.log(`✅ SUCCESS: Found and clicked button containing text "${resetButtonText}".`);
