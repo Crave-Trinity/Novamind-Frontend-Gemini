@@ -28,7 +28,9 @@
     "test:puppeteer": "node test-puppeteer/r3f-basic.test.js",
     "test:puppeteer:brain-vis": "node test-puppeteer/BrainVisualizationPage.test.js",
     "test:puppeteer:theme": "node test-puppeteer/ThemeProvider.system.test.js",
-    "test:puppeteer:container": "node test-puppeteer/BrainModelContainer.test.js"
+    "test:puppeteer:container": "node test-puppeteer/BrainModelContainer.test.js",
+    "test:puppeteer:controls": "node test-puppeteer/NeuralControlPanel.test.js",
+    "test:puppeteer:all": "npm run test:puppeteer:theme && npm run test:puppeteer:container && npm run test:puppeteer:brain-vis && npm run test:puppeteer:controls && npm run test:puppeteer"
   },
   "dependencies": {
     "@alloc/quick-lru": "^5.2.0",

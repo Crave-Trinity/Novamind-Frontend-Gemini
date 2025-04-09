@@ -30,6 +30,10 @@ export default defineConfig(({ command, mode }) => {
       assetsDir: 'assets',
       sourcemap: true,
       rollupOptions: {
+         input: { // Add explicit inputs
+           main: path.resolve(__dirname, '../index.html'), // Default entry point
+           neuralControlPanelDemo: path.resolve(__dirname, '../neural-control-panel-demo.html') // New demo page at root
+         },
         output: {
           manualChunks: {
             'react-vendor': ['react', 'react-dom', 'react-router-dom'],

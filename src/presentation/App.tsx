@@ -1,9 +1,11 @@
-import React from 'react';
+ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Example router setup
 import Dashboard from '@pages/Dashboard';
 import BrainVisualizationPage from '@pages/BrainVisualizationPage'; // Import the visualization page
 import NotFound from '@pages/NotFound'; // Import the NotFound page
+import NeuralControlPanel from '@organisms/NeuralControlPanel'; // Import the component to test
+import ThemeProvider from '@application/contexts/ThemeProvider'; // Import ThemeProvider
 import '@styles/index.css'; // Correct alias
 
 // Create a client
@@ -29,6 +31,17 @@ const App: React.FC = () => {
           <Route path="/brain-visualization/demo" element={<BrainVisualizationPage />} />
           {/* Parameterized route for specific patient IDs */}
           <Route path="/brain-visualization/:patientId" element={<BrainVisualizationPage />} />
+          {/* Test route for NeuralControlPanel */}
+          <Route
+            path="/test/neural-control-panel"
+            element={
+              <ThemeProvider defaultTheme="dark"> {/* Wrap with ThemeProvider */}
+                <div className="p-4 bg-background text-foreground min-h-screen">
+                  <NeuralControlPanel />
+                </div>
+              </ThemeProvider>
+            }
+          />
           {/* Catch-all route for 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
