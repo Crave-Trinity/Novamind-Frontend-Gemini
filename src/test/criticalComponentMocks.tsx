@@ -1,4 +1,3 @@
-/* eslint-disable */
 /**
  * NOVAMIND Neural Test Framework
  * Critical Component Mocks with Quantum Precision
@@ -8,11 +7,9 @@ import React from 'react';
 import { vi } from 'vitest';
 
 // Mock Three.js with surgical precision
-// eslint-disable-next-line
 vi.mock('@react-three/fiber', () => ({
   Canvas: ({ children }: { children: React.ReactNode }) =>
     React.createElement('div', { 'data-testid': 'neural-canvas' }, children), // Replaced JSX with React.createElement
-// eslint-disable-next-line
   useThree: () => ({
     camera: { position: { set: vi.fn() }, lookAt: vi.fn() },
     gl: { setPixelRatio: vi.fn(), setSize: vi.fn() },
@@ -22,10 +19,8 @@ vi.mock('@react-three/fiber', () => ({
   extend: vi.fn(),
 }));
 
-// eslint-disable-next-line
 vi.mock('@react-three/drei', () => ({
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Sphere: ({ position, scale, color }: { position: any // eslint-disable-line @typescript-eslint/no-explicit-any; scale: any; color: any }) =>
+  Sphere: ({ position, scale, color }: { position: unknown; scale: unknown; color: unknown }) =>
     React.createElement(
       'div',
       {
@@ -37,12 +32,9 @@ vi.mock('@react-three/drei', () => ({
       'Node'
     ),
   Line: (
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-    { points: _points, color }: { points: any // eslint-disable-line @typescript-eslint/no-explicit-any; color: any } // Mark points as unused
+    { points: _points, color }: { points: unknown; color: unknown } // Mark points as unused
   ) => React.createElement('div', { 'data-testid': 'neural-line', 'data-color': color }, 'Line'),
-  // Removed extra comma causing syntax error
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Text: ({ children, color }: { children: React.ReactNode; color: any // eslint-disable-line @typescript-eslint/no-explicit-any }) =>
+  Text: ({ children, color }: { children: React.ReactNode; color: unknown }) =>
     React.createElement('div', { 'data-testid': 'neural-text', 'data-color': color }, children),
   Html: ({ children }: { children: React.ReactNode }) =>
     React.createElement('div', { 'data-testid': 'neural-html' }, children),
@@ -51,7 +43,6 @@ vi.mock('@react-three/drei', () => ({
 }));
 
 // Mock react-spring/three
-// eslint-disable-next-line
 vi.mock('@react-spring/three', () => ({
   useSpring: () => ({ position: [0, 0, 0], scale: [1, 1, 1] }),
   animated: {
@@ -63,7 +54,6 @@ vi.mock('@react-spring/three', () => ({
 }));
 
 // Mock Chart.js
-// eslint-disable-next-line
 vi.mock('chart.js', () => ({
   Chart: class {
     static register() {}
@@ -79,7 +69,6 @@ vi.mock('chart.js', () => ({
 }));
 
 // Mock react-chartjs-2
-// eslint-disable-next-line
 vi.mock('react-chartjs-2', () => ({
   Line: () => React.createElement('div', { 'data-testid': 'chart-line' }, 'Chart'),
   Bar: () => React.createElement('div', { 'data-testid': 'chart-bar' }, 'Chart'),
@@ -94,10 +83,8 @@ export const MockBrainVisualization = ({
   regions,
   connections,
 }: {
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  regions: any // eslint-disable-line @typescript-eslint/no-explicit-any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  connections: any // eslint-disable-line @typescript-eslint/no-explicit-any;
+  regions: Array<unknown> | { length?: number };
+  connections: Array<unknown> | { length?: number };
 }) =>
   React.createElement(
     'div',
@@ -110,10 +97,8 @@ export const MockTemporalVisualizer = ({
   timeRange,
   stateTransitions,
 }: {
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  timeRange: any // eslint-disable-line @typescript-eslint/no-explicit-any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  stateTransitions: any // eslint-disable-line @typescript-eslint/no-explicit-any;
+  timeRange: unknown;
+  stateTransitions: Array<unknown> | { length?: number };
 }) =>
   React.createElement(
     'div',
@@ -123,8 +108,7 @@ export const MockTemporalVisualizer = ({
   );
 
 export const MockClinicalDataDisplay = (
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  { data, colorMap: _colorMap }: { data: any // eslint-disable-line @typescript-eslint/no-explicit-any; colorMap: any } // Mark colorMap as unused
+  { data, colorMap: _colorMap }: { data: Array<unknown> | { length?: number }; colorMap: unknown } // Mark colorMap as unused
 ) =>
   React.createElement(
     'div',

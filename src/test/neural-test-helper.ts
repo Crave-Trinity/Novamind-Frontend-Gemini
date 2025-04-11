@@ -1,4 +1,3 @@
-/* eslint-disable */
 /**
  * NOVAMIND Neural Test Helper
  * Provides neural-safe mocking utilities with quantum precision
@@ -17,13 +16,12 @@ export function createNeuralSafeSpy<T extends object, K extends keyof T>(
   object: T,
   method: K,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  implementation?: (...args: any // eslint-disable-line @typescript-eslint/no-explicit-any[]) => any // Reverting to any for compatibility with mockImplementation
+  implementation?: (...args: any[]) => any
 ) {
   // Preserve original method for coverage instrumentation
   const originalMethod = object[method];
 
   // Create spy with quantum precision
-  // Keep 'as any' here as vi.spyOn has complex typing with generics that can be hard to satisfy perfectly
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const spy = vi.spyOn(object, method as any);
 
@@ -32,17 +30,16 @@ export function createNeuralSafeSpy<T extends object, K extends keyof T>(
     spy.mockImplementation(implementation);
   } else {
     // Use mockImplementation to ensure proper type safety
-// eslint-disable-next-line
     spy.mockImplementation((...args: unknown[]) => {
       // If original is a function, preserve its behavior for coverage
-// eslint-disable-next-line
       if (typeof originalMethod === 'function') {
         try {
           return originalMethod.apply(object, args);
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_error) {
-          // Mark error as unused - ESLint disable added
-          console.warn(`Neural-safe warning: Original method threw an error, using fallback mock`);
+        } catch (error) {
+          // Log error to help with debugging
+          console.warn(
+            `Neural-safe warning: Original method threw an error: ${error instanceof Error ? error.message : 'unknown error'}, using fallback mock`
+          );
           return undefined;
         }
       }
@@ -69,7 +66,6 @@ export function createNeuralServiceMock(
   const serviceMock: Record<string, unknown> = {};
 
   // Implement methods with quantum precision
-// eslint-disable-next-line
   Object.entries(methods).forEach(([methodName, implementation]) => {
     serviceMock[methodName] = vi.fn().mockImplementation(implementation);
   });
@@ -91,7 +87,6 @@ export function createNeuralComponentMock(
   console.log(`🧠 Creating neural-safe component mock: ${componentName}`);
 
   // Create default implementation with clinical precision
-// eslint-disable-next-line
   const defaultImplementation = (_props: Record<string, unknown>) => {
     // Mark props as unused
     console.log(`🧠 Rendering neural-safe mock component: ${componentName}`);
@@ -106,11 +101,9 @@ export function createNeuralComponentMock(
  * Creates comprehensive neural-safe mocks for Three.js and React Three Fiber
  * with proper coverage instrumentation
  */
-// eslint-disable-next-line
 export function createThreeJsMocks() {
   // Mock Three.js core objects with quantum precision
   const mockThree = {
-// eslint-disable-next-line
     Scene: vi.fn().mockImplementation(() => ({
       add: vi.fn(),
       remove: vi.fn(),
@@ -121,7 +114,6 @@ export function createThreeJsMocks() {
       overrideMaterial: null,
     })),
 
-// eslint-disable-next-line
     PerspectiveCamera: vi.fn().mockImplementation(() => ({
       position: { x: 0, y: 0, z: 5 },
       rotation: { x: 0, y: 0, z: 0 },
@@ -132,7 +124,6 @@ export function createThreeJsMocks() {
       near: 0.1,
     })),
 
-// eslint-disable-next-line
     WebGLRenderer: vi.fn().mockImplementation(() => ({
       setSize: vi.fn(),
       setPixelRatio: vi.fn(),
@@ -146,7 +137,6 @@ export function createThreeJsMocks() {
       dispose: vi.fn(),
     })),
 
-// eslint-disable-next-line
     Color: vi.fn().mockImplementation((_color) => ({
       // Mark color as unused
       r: 1,
@@ -155,7 +145,6 @@ export function createThreeJsMocks() {
       set: vi.fn(),
     })),
 
-// eslint-disable-next-line
     Vector3: vi.fn().mockImplementation((x = 0, y = 0, z = 0) => ({
       x,
       y,
@@ -169,7 +158,6 @@ export function createThreeJsMocks() {
       clone: vi.fn().mockReturnThis(),
     })),
 
-// eslint-disable-next-line
     Mesh: vi.fn().mockImplementation((geometry, material) => ({
       geometry,
       material,
@@ -181,7 +169,6 @@ export function createThreeJsMocks() {
       receiveShadow: false,
     })),
 
-// eslint-disable-next-line
     Group: vi.fn().mockImplementation(() => ({
       add: vi.fn(),
       remove: vi.fn(),
@@ -193,7 +180,6 @@ export function createThreeJsMocks() {
 
     BoxGeometry: vi.fn(),
     SphereGeometry: vi.fn(),
-// eslint-disable-next-line
     MeshStandardMaterial: vi.fn().mockImplementation(() => ({
       color: { r: 1, g: 1, b: 1 },
       metalness: 0,
@@ -201,13 +187,11 @@ export function createThreeJsMocks() {
       dispose: vi.fn(),
     })),
 
-// eslint-disable-next-line
     AmbientLight: vi.fn().mockImplementation(() => ({
       intensity: 1,
       color: { r: 1, g: 1, b: 1 },
     })),
 
-// eslint-disable-next-line
     DirectionalLight: vi.fn().mockImplementation(() => ({
       intensity: 1,
       color: { r: 1, g: 1, b: 1 },
@@ -215,7 +199,6 @@ export function createThreeJsMocks() {
       castShadow: false,
     })),
 
-// eslint-disable-next-line
     PointLight: vi.fn().mockImplementation(() => ({
       intensity: 1,
       color: { r: 1, g: 1, b: 1 },
@@ -225,7 +208,6 @@ export function createThreeJsMocks() {
       decay: 2,
     })),
 
-// eslint-disable-next-line
     SpotLight: vi.fn().mockImplementation(() => ({
       intensity: 1,
       color: { r: 1, g: 1, b: 1 },
@@ -237,7 +219,6 @@ export function createThreeJsMocks() {
       decay: 2,
     })),
 
-// eslint-disable-next-line
     Raycaster: vi.fn().mockImplementation(() => ({
       set: vi.fn(),
       setFromCamera: vi.fn(),
@@ -245,12 +226,10 @@ export function createThreeJsMocks() {
       intersectObjects: vi.fn().mockReturnValue([]),
     })),
 
-// eslint-disable-next-line
     TextureLoader: vi.fn().mockImplementation(() => ({
       load: vi.fn().mockReturnValue({}),
     })),
 
-// eslint-disable-next-line
     Clock: vi.fn().mockImplementation(() => ({
       getElapsedTime: vi.fn().mockReturnValue(0),
       getDelta: vi.fn().mockReturnValue(0.016),
@@ -278,7 +257,6 @@ export function createThreeJsMocks() {
 
   // Mock React Three Fiber hooks and components with quantum precision
   const mockReactThreeFiber = {
-// eslint-disable-next-line
     Canvas: vi.fn().mockImplementation(({ children }: { children: React.ReactNode }) => {
       return {
         type: 'div',
@@ -314,7 +292,6 @@ export function createThreeJsMocks() {
           },
           delta: number
         ) => void
-// eslint-disable-next-line
       ) => {
         // Call the callback once to simulate a frame
         if (callback) {
@@ -357,7 +334,7 @@ export function createThreeJsMocks() {
     TransformControls: vi.fn().mockImplementation(() => null),
     useHelper: vi.fn(),
     Html: vi.fn().mockImplementation(({ children }: { children: React.ReactNode }) => children),
-// eslint-disable-next-line
+
     Text: vi.fn().mockImplementation(({ children }: { children: React.ReactNode }) => ({
       type: 'div',
       props: { children },
@@ -410,7 +387,7 @@ export function createThreeJsMocks() {
 /**
  * Registers all necessary mocks for neural-safe testing with quantum precision
  */
-// eslint-disable-next-line
+
 export function registerNeuralMocks() {
   console.log('🧠 Registering neural-safe mocks with quantum precision');
 
@@ -488,14 +465,13 @@ export function registerNeuralMocks() {
     if (!window.requestAnimationFrame) {
       window.requestAnimationFrame = vi
         .fn()
-// eslint-disable-next-line
+
         .mockImplementation((callback: (time: number) => void) => {
           return setTimeout(() => callback(Date.now()), 0);
         });
     }
 
     if (!window.cancelAnimationFrame) {
-// eslint-disable-next-line
       window.cancelAnimationFrame = vi.fn().mockImplementation((id: number) => {
         clearTimeout(id);
       });
