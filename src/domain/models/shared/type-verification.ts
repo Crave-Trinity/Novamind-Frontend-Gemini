@@ -1,50 +1,63 @@
 /**
  * NOVAMIND Neural-Safe Type Verification
- * Type verification utilities with quantum-level precision
+ * Core implementation module with quantum-level type safety
  */
 
 /**
- * Custom error type for type verification failures
+ * Custom error class for type verification failures
+ * Provides detailed diagnostic information for debugging
  */
 export class TypeVerificationError extends Error {
-  constructor(
-    public readonly expectedType: string,
-    public readonly receivedValue: unknown,
-    public readonly propertyPath?: string
-  ) {
-    const path = propertyPath ? ` at ${propertyPath}` : '';
-    const receivedType = typeof receivedValue;
-    const receivedStr =
-      receivedValue === null ? 'null' : Array.isArray(receivedValue) ? 'array' : receivedType;
+  public readonly propertyPath?: string;
+  public readonly expectedType: string;
+  public readonly actualValue: unknown;
 
-    super(`Expected type '${expectedType}'${path}, but received '${receivedStr}'`);
+  constructor(
+    expectedType: string,
+    actualValue: unknown,
+    propertyPath?: string,
+    customMessage?: string
+  ) {
+    const path = propertyPath ? ` for '${propertyPath}'` : '';
+    const message = customMessage || 
+      `Expected ${expectedType}${path}, but received ${typeof actualValue === 'object' ? 
+        actualValue === null ? 'null' : JSON.stringify(actualValue).substring(0, 100) : 
+        String(actualValue)}`;
+    
+    super(message);
+    
     this.name = 'TypeVerificationError';
+    this.propertyPath = propertyPath;
+    this.expectedType = expectedType;
+    this.actualValue = actualValue;
+    
+    // Capture stack trace for better debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, TypeVerificationError);
+    }
   }
 }
 
 /**
- * Ensure a value is defined (not undefined)
+ * Asserts that a value is defined (not undefined)
  */
 export function assertDefined<T>(value: T | undefined, propertyPath?: string): asserts value is T {
   if (value === undefined) {
-    throw new TypeVerificationError('defined', value, propertyPath);
+    throw new TypeVerificationError('defined value', value, propertyPath);
   }
 }
 
 /**
- * Ensure a value is not null or undefined
+ * Asserts that a value is present (not null or undefined)
  */
-export function assertPresent<T>(
-  value: T | null | undefined,
-  propertyPath?: string
-): asserts value is T {
+export function assertPresent<T>(value: T | null | undefined, propertyPath?: string): asserts value is T {
   if (value === null || value === undefined) {
-    throw new TypeVerificationError('non-null', value, propertyPath);
+    throw new TypeVerificationError('non-null and defined value', value, propertyPath);
   }
 }
 
 /**
- * Ensure a value is a string
+ * Asserts that a value is a string
  */
 export function assertString(value: unknown, propertyPath?: string): asserts value is string {
   if (typeof value !== 'string') {
@@ -53,7 +66,7 @@ export function assertString(value: unknown, propertyPath?: string): asserts val
 }
 
 /**
- * Ensure a value is a number
+ * Asserts that a value is a number
  */
 export function assertNumber(value: unknown, propertyPath?: string): asserts value is number {
   if (typeof value !== 'number' || Number.isNaN(value)) {
@@ -62,7 +75,7 @@ export function assertNumber(value: unknown, propertyPath?: string): asserts val
 }
 
 /**
- * Ensure a value is a boolean
+ * Asserts that a value is a boolean
  */
 export function assertBoolean(value: unknown, propertyPath?: string): asserts value is boolean {
   if (typeof value !== 'boolean') {
@@ -71,31 +84,28 @@ export function assertBoolean(value: unknown, propertyPath?: string): asserts va
 }
 
 /**
- * Ensure a value is an array
+ * Asserts that a value is an array
  */
-export function assertArray<T = unknown>(
-  value: unknown,
-  propertyPath?: string
-): asserts value is T[] {
+export function assertArray(value: unknown, propertyPath?: string): asserts value is unknown[] {
   if (!Array.isArray(value)) {
     throw new TypeVerificationError('array', value, propertyPath);
   }
 }
 
 /**
- * Ensure a value is an object
+ * Asserts that a value is an object (not null, not an array)
  */
 export function assertObject(
   value: unknown,
   propertyPath?: string
 ): asserts value is Record<string, unknown> {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     throw new TypeVerificationError('object', value, propertyPath);
   }
 }
 
 /**
- * Ensure a value is a Date
+ * Asserts that a value is a Date
  */
 export function assertDate(value: unknown, propertyPath?: string): asserts value is Date {
   if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
@@ -104,7 +114,7 @@ export function assertDate(value: unknown, propertyPath?: string): asserts value
 }
 
 /**
- * Ensure a value matches a specific type guard
+ * Asserts that a value satisfies a type guard
  */
 export function assertType<T>(
   value: unknown,
@@ -118,56 +128,118 @@ export function assertType<T>(
 }
 
 /**
- * Safe type conversion: try to convert to string or return undefined
+ * Converts a potentially non-string value to a string
  */
-export function asString(value: unknown): string | undefined {
-  if (value === null || value === undefined) return undefined;
+export function asString(value: unknown, propertyPath?: string): string {
+  assertString(value, propertyPath);
+  return value;
+}
 
-  try {
-    return String(value);
-  } catch {
-    return undefined;
+/**
+ * Converts a potentially non-number value to a number
+ */
+export function asNumber(value: unknown, propertyPath?: string): number {
+  assertNumber(value, propertyPath);
+  return value;
+}
+
+/**
+ * Converts a potentially non-boolean value to a boolean
+ */
+export function asBoolean(value: unknown, propertyPath?: string): boolean {
+  assertBoolean(value, propertyPath);
+  return value;
+}
+
+/**
+ * Converts a potentially non-Date value to a Date
+ */
+export function asDate(value: unknown, propertyPath?: string): Date {
+  assertDate(value, propertyPath);
+  return value;
+}
+
+/**
+ * Type guard that checks if a value is one of a set of literal values
+ */
+export function isOneOf<T extends string | number>(
+  allowedValues: readonly T[]
+): (value: unknown) => value is T {
+  return (value: unknown): value is T => {
+    return typeof value === (typeof allowedValues[0]) && allowedValues.includes(value as T);
+  };
+}
+
+/**
+ * Type guard for checking optional values
+ */
+export function isOptional<T>(
+  typeGuard: (v: unknown) => v is T
+): (value: unknown) => value is T | undefined {
+  return (value: unknown): value is T | undefined => {
+    return value === undefined || typeGuard(value);
+  };
+}
+
+/**
+ * Type guard for checking nullable values
+ */
+export function isNullable<T>(
+  typeGuard: (v: unknown) => v is T
+): (value: unknown) => value is T | null {
+  return (value: unknown): value is T | null => {
+    return value === null || typeGuard(value);
+  };
+}
+
+/**
+ * Type guard for checking optional and nullable values
+ */
+export function isOptionalOrNullable<T>(
+  typeGuard: (v: unknown) => v is T
+): (value: unknown) => value is T | undefined | null {
+  return (value: unknown): value is T | undefined | null => {
+    return value === undefined || value === null || typeGuard(value);
+  };
+}
+
+/**
+ * Creates a type guard for arrays where all elements satisfy a type guard
+ */
+export function isArrayOf<T>(
+  elementTypeGuard: (v: unknown) => v is T
+): (value: unknown) => value is T[] {
+  return (value: unknown): value is T[] => {
+    if (!Array.isArray(value)) return false;
+    return value.every((item) => elementTypeGuard(item));
+  };
+}
+
+/**
+ * Creates a type guard for objects with specific properties
+ */
+export function isObjectWithProperties<T extends Record<string, unknown>>(
+  propertyTypeGuards: {
+    [K in keyof T]-?: (v: unknown) => v is T[K];
   }
-}
-
-/**
- * Safe type conversion: try to convert to number or return undefined
- */
-export function asNumber(value: unknown): number | undefined {
-  if (value === null || value === undefined) return undefined;
-
-  const num = Number(value);
-  return Number.isNaN(num) ? undefined : num;
-}
-
-/**
- * Safe type conversion: try to convert to boolean or return undefined
- */
-export function asBoolean(value: unknown): boolean | undefined {
-  if (value === null || value === undefined) return undefined;
-
-  if (typeof value === 'boolean') return value;
-  if (value === 'true' || value === '1' || value === 1) return true;
-  if (value === 'false' || value === '0' || value === 0) return false;
-
-  return undefined;
-}
-
-/**
- * Safe type conversion: try to convert to Date or return undefined
- */
-export function asDate(value: unknown): Date | undefined {
-  if (value === null || value === undefined) return undefined;
-
-  try {
-    if (value instanceof Date) return new Date(value);
-    if (typeof value === 'number' || typeof value === 'string') {
-      const date = new Date(value);
-      return Number.isNaN(date.getTime()) ? undefined : date;
+): (value: unknown) => value is T {
+  return (value: unknown): value is T => {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      return false;
     }
-  } catch {
-    return undefined;
-  }
 
-  return undefined;
+    const obj = value as Record<string, unknown>;
+    const properties = Object.keys(propertyTypeGuards) as Array<keyof T>;
+
+    for (const prop of properties) {
+      const propValue = obj[prop as string];
+      const typeGuard = propertyTypeGuards[prop];
+      
+      if (!typeGuard(propValue)) {
+        return false;
+      }
+    }
+
+    return true;
+  };
 }

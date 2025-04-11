@@ -8,10 +8,11 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react'; // Remove render
 import {
-  setupWebGLForTest,
-  cleanupWebGLAfterTest,
-  runTestWithWebGL,
-} from '@test/webgl/setup-test.ts'; // Add .ts extension
+  setupWebGLMocks as setupWebGLForTest,
+  cleanupWebGLMocks as cleanupWebGLAfterTest,
+  createMockCanvas,
+  mockAnimationFrame as runTestWithWebGL
+} from '@test/webgl/setup-test';
 // Removed unused React import
 // Import only the default export (the component)
 import BrainVisualization from '../BrainVisualization';

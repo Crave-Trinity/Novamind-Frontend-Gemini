@@ -1,146 +1,77 @@
 /**
- * NOVAMIND Neural Digital Twin
- * WebGL Testing Utilities
+ * WebGL/Three.js Test Setup Module
  * 
- * This module provides quantum-level utilities for testing Three.js and WebGL components
- * with mathematical elegance and architectural perfection.
+ * Comprehensive setup for WebGL and Three.js testing environment.
+ * This module initializes all necessary mocks and utilities needed for
+ * deterministic, memory-efficient testing of Three.js components.
+ * 
+ * Provides a clean API for test files to import and use.
  */
 
-import { vi } from 'vitest';
-import { render, RenderResult } from '@testing-library/react';
-import type { ReactElement } from 'react';
+import { setupWebGLMocks, cleanupWebGLMocks } from './mock-webgl';
 
-// Mock essential WebGL context and Three.js objects
-const mockWebGLContext = {
-  canvas: null as HTMLCanvasElement | null,
-  getContext: vi.fn().mockReturnValue({
-    getExtension: vi.fn().mockReturnValue({}),
-    getParameter: vi.fn().mockReturnValue({}),
-    getShaderPrecisionFormat: vi.fn().mockReturnValue({
-      precision: 1,
-      rangeMin: 1,
-      rangeMax: 1,
-    }),
-    createBuffer: vi.fn().mockReturnValue({}),
-    bindBuffer: vi.fn(),
-    bufferData: vi.fn(),
-    createShader: vi.fn().mockReturnValue({}),
-    shaderSource: vi.fn(),
-    compileShader: vi.fn(),
-    getShaderParameter: vi.fn().mockReturnValue(true),
-    createProgram: vi.fn().mockReturnValue({}),
-    attachShader: vi.fn(),
-    linkProgram: vi.fn(),
-    getProgramParameter: vi.fn().mockReturnValue(true),
-    useProgram: vi.fn(),
-    getUniformLocation: vi.fn().mockReturnValue({}),
-    uniform1f: vi.fn(),
-    uniform2f: vi.fn(),
-    uniform3f: vi.fn(),
-    uniform4f: vi.fn(),
-    uniformMatrix4fv: vi.fn(),
-    getAttribLocation: vi.fn().mockReturnValue(0),
-    enableVertexAttribArray: vi.fn(),
-    vertexAttribPointer: vi.fn(),
-    drawArrays: vi.fn(),
-    drawElements: vi.fn(),
-    clear: vi.fn(),
-    clearColor: vi.fn(),
-    clearDepth: vi.fn(),
-    disable: vi.fn(),
-    enable: vi.fn(),
-    blendFunc: vi.fn(),
-    depthFunc: vi.fn(),
-    viewport: vi.fn(),
-  }),
+// Automatically setup mocks when this module is imported
+setupWebGLMocks();
+
+// Create a global cleanup function for afterAll hooks
+global.cleanupWebGLMocksAfterAll = cleanupWebGLMocks;
+
+// Export everything from the mock-webgl module
+export * from './mock-webgl';
+
+// Custom helper functions for tests
+export const createMockCanvas = (): HTMLCanvasElement => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 800;
+  canvas.height = 600;
+  return canvas;
 };
 
-// Mock for requestAnimationFrame and cancelAnimationFrame
-let mockAnimationFrameId = 0;
-const mockRequestAnimationFrame = vi.fn((callback: FrameRequestCallback) => {
-  mockAnimationFrameId += 1;
-  setTimeout(() => callback(performance.now()), 0);
-  return mockAnimationFrameId;
-});
-
-const mockCancelAnimationFrame = vi.fn((id: number) => {
-  // noop implementation
-});
-
-/**
- * Setup WebGL mocks for testing
- * Sets up all necessary WebGL and Three.js mocks for testing
- */
-export function setupWebGLForTest() {
-  // Mock the canvas and WebGL context
-  const mockCanvas = document.createElement('canvas');
-  mockWebGLContext.canvas = mockCanvas;
+// Neural pattern data generator for visualization tests
+export const generateNeuralPatternData = (
+  regionCount: number = 10,
+  patternIntensity: number = 0.75
+): { regions: string[]; intensities: number[] } => {
+  const regions = Array.from({ length: regionCount }, (_, i) => `region-${i + 1}`);
+  const intensities = Array.from({ length: regionCount }, () => Math.random() * patternIntensity);
   
-  // Create spy for webgl context creation
-  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
-    (contextType: string) => {
-      if (contextType === 'webgl' || contextType === 'webgl2') {
-        return mockWebGLContext.getContext();
-      }
-      // Return 2D context for other cases
-      return document.createElement('canvas').getContext('2d');
+  return { regions, intensities };
+};
+
+// Function to mock a performant animation frame
+export const mockAnimationFrame = (callback: (time: number) => void): void => {
+  let frameCount = 0;
+  const maxFrames = 5; // Limit frames for test efficiency
+  
+  const runFrame = (timestamp: number): void => {
+    if (frameCount < maxFrames) {
+      callback(timestamp);
+      frameCount++;
+      requestAnimationFrame(runFrame);
     }
-  );
-
-  // Mock window.requestAnimationFrame
-  vi.spyOn(window, 'requestAnimationFrame').mockImplementation(mockRequestAnimationFrame);
+  };
   
-  // Mock window.cancelAnimationFrame
-  vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(mockCancelAnimationFrame);
-}
-
-/**
- * Clean up WebGL mocks after testing
- * Restores all mocked functions and performs memory cleanup
- */
-export function cleanupWebGLAfterTest() {
-  // Restore all mocks
-  vi.restoreAllMocks();
-  
-  // Clear canvas reference
-  mockWebGLContext.canvas = null;
-  
-  // Reset animation frame counter
-  mockAnimationFrameId = 0;
-}
-
-/**
- * Runs a test with WebGL mocking
- * @param ui React element to render
- * @param callback Test callback function
- */
-export async function runTestWithWebGL(
-  ui: ReactElement,
-  callback: (result: RenderResult) => Promise<void> | void
-): Promise<void> {
-  setupWebGLForTest();
-  try {
-    const renderResult = render(ui);
-    await callback(renderResult);
-  } finally {
-    cleanupWebGLAfterTest();
-  }
-}
-
-/**
- * WebGL Testing Config
- * Provides configuration for WebGL testing
- */
-export const webGLTestConfig = {
-  setupTimeout: 5000, // ms
-  renderTimeout: 1000, // ms
-  animationFrameLimit: 10, // Max number of animation frames to allow
-  memoryLimit: 100 * 1024 * 1024, // 100MB limit
+  requestAnimationFrame(runFrame);
 };
 
-// Export the mock objects for direct test manipulation if needed
-export const webGLMocks = {
-  context: mockWebGLContext,
-  requestAnimationFrame: mockRequestAnimationFrame,
-  cancelAnimationFrame: mockCancelAnimationFrame,
+// Helper to create mock shader materials
+export const createMockShaderMaterial = () => {
+  return {
+    uniforms: {
+      time: { value: 0 },
+      intensity: { value: 1.0 },
+      color: { value: { r: 1, g: 1, b: 1 } }
+    },
+    vertexShader: `void main() { gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `void main() { gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); }`,
+    dispose: () => {}
+  };
 };
+
+// Export default setup function for explicit initialization
+export default function setupTestEnvironment(): void {
+  setupWebGLMocks();
+  
+  // Return cleanup function
+  return cleanupWebGLMocks;
+}

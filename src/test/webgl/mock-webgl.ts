@@ -1,4 +1,3 @@
-/* eslint-disable */
 /**
  * WebGL/Three.js Mock for Testing Environment
  *
@@ -12,312 +11,304 @@
  */
 
 // Type for mock functions - compatible with test frameworks but not dependent on them
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type MockFunction<T extends (...args: any // eslint-disable-line @typescript-eslint/no-explicit-any[]) => any> = {
+// Define the generic mock function type with proper typing
+type MockFunction<T extends Function> = {
   (...args: Parameters<T>): ReturnType<T>;
   mockImplementation: (fn: T) => MockFunction<T>;
   mockReturnValue: (value: ReturnType<T>) => MockFunction<T>;
   mockReset: () => void;
   mock: {
     calls: Parameters<T>[][];
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-    results: { type: 'return' | 'throw'; value: any // eslint-disable-line @typescript-eslint/no-explicit-any }[];
+    results: { type: 'return' | 'throw'; value: unknown }[];
   };
 };
 
 // Create a minimal mock function implementation
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createMockFunction<T extends (...args: any // eslint-disable-line @typescript-eslint/no-explicit-any[]) => any>(
-  implementation?: T
-): MockFunction<T> {
-  const calls: Parameters<T>[][] = [];
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const results: { type: 'return' | 'throw'; value: any // eslint-disable-line @typescript-eslint/no-explicit-any }[] = [];
+function createMockFunction<T extends Function>(implementation?: T): MockFunction<T> {
+  const mockCalls: Parameters<T>[][] = [];
+  const mockResults: { type: 'return' | 'throw'; value: unknown }[] = [];
 
-// eslint-disable-next-line
-  const mockFn = ((...args: Parameters<T>): ReturnType<T> => {
-    calls.push([...args]);
+  // Default implementation that returns undefined
+  const defaultImplementation = (...args: Parameters<T>): ReturnType<T> => {
+    return undefined as unknown as ReturnType<T>;
+  };
+
+  // Create the main mock function
+  const mockFn = (...args: Parameters<T>): ReturnType<T> => {
+    mockCalls.push([...args]);
     try {
-      const result = implementation
-        ? implementation(...args)
-        : (undefined as unknown as ReturnType<T>);
-      results.push({ type: 'return', value: result });
+      const result = (currentImplementation || defaultImplementation)(...args);
+      mockResults.push({ type: 'return', value: result });
       return result;
     } catch (error) {
-      results.push({ type: 'throw', value: error });
+      mockResults.push({ type: 'throw', value: error });
       throw error;
     }
-  }) as MockFunction<T>;
-
-  mockFn.mock = { calls, results };
-
-// eslint-disable-next-line
-  mockFn.mockImplementation = (newImplementation: T) => {
-    implementation = newImplementation;
-    return mockFn;
   };
 
-// eslint-disable-next-line
-  mockFn.mockReturnValue = (value: ReturnType<T>) => {
-    implementation = (() => value) as unknown as T;
-    return mockFn;
+  // Current implementation (can be changed via mockImplementation)
+  let currentImplementation = implementation;
+
+  // Add required mock properties and methods
+  mockFn.mockImplementation = (fn: T): MockFunction<T> => {
+    currentImplementation = fn;
+    return mockFn as MockFunction<T>;
   };
 
-// eslint-disable-next-line
-  mockFn.mockReset = () => {
-    calls.length = 0;
-    results.length = 0;
+  mockFn.mockReturnValue = (value: ReturnType<T>): MockFunction<T> => {
+    currentImplementation = (() => value) as unknown as T;
+    return mockFn as MockFunction<T>;
   };
 
-  return mockFn;
+  mockFn.mockReset = (): void => {
+    mockCalls.length = 0;
+    mockResults.length = 0;
+    currentImplementation = implementation;
+  };
+
+  // Add mock property for tracking calls and results
+  mockFn.mock = {
+    calls: mockCalls,
+    results: mockResults,
+  };
+
+  return mockFn as MockFunction<T>;
 }
 
-// Create mock functions with our implementation
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const fn = <T extends (...args: any // eslint-disable-line @typescript-eslint/no-explicit-any[]) => any>(impl?: T) => createMockFunction<T>(impl);
+// WebGL constants
+export const WebGLConstants = {
+  DEPTH_TEST: 2929,
+  DEPTH_FUNC: 2932,
+  LEQUAL: 515,
+  BLEND: 3042,
+  SRC_ALPHA: 770,
+  ONE_MINUS_SRC_ALPHA: 771,
+  ARRAY_BUFFER: 34962,
+  ELEMENT_ARRAY_BUFFER: 34963,
+  STATIC_DRAW: 35044,
+  DYNAMIC_DRAW: 35048,
+  FRAGMENT_SHADER: 35632,
+  VERTEX_SHADER: 35633,
+  COMPILE_STATUS: 35713,
+  LINK_STATUS: 35714,
+  COLOR_BUFFER_BIT: 16384,
+  DEPTH_BUFFER_BIT: 256,
+  TRIANGLES: 4,
+};
 
-// Mock canvas getContext to return our fake WebGL context
-class MockWebGLRenderingContext {
-  canvas: HTMLCanvasElement;
-  drawingBufferWidth: number = 800;
-  drawingBufferHeight: number = 600;
+// Mock WebGL context implementation
+export class MockWebGLRenderingContext {
+  canvas: HTMLCanvasElement | null = null;
+  drawingBufferWidth = 800;
+  drawingBufferHeight = 600;
 
-  // Track resources for proper disposal
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private shaders: any // eslint-disable-line @typescript-eslint/no-explicit-any[] = [];
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private programs: any // eslint-disable-line @typescript-eslint/no-explicit-any[] = [];
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private buffers: any // eslint-disable-line @typescript-eslint/no-explicit-any[] = [];
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private textures: any // eslint-disable-line @typescript-eslint/no-explicit-any[] = [];
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private framebuffers: any // eslint-disable-line @typescript-eslint/no-explicit-any[] = [];
+  // Include WebGL constants
+  DEPTH_TEST = WebGLConstants.DEPTH_TEST;
+  DEPTH_FUNC = WebGLConstants.DEPTH_FUNC;
+  LEQUAL = WebGLConstants.LEQUAL;
+  BLEND = WebGLConstants.BLEND;
+  SRC_ALPHA = WebGLConstants.SRC_ALPHA;
+  ONE_MINUS_SRC_ALPHA = WebGLConstants.ONE_MINUS_SRC_ALPHA;
+  ARRAY_BUFFER = WebGLConstants.ARRAY_BUFFER;
+  ELEMENT_ARRAY_BUFFER = WebGLConstants.ELEMENT_ARRAY_BUFFER;
+  STATIC_DRAW = WebGLConstants.STATIC_DRAW;
+  DYNAMIC_DRAW = WebGLConstants.DYNAMIC_DRAW;
+  FRAGMENT_SHADER = WebGLConstants.FRAGMENT_SHADER;
+  VERTEX_SHADER = WebGLConstants.VERTEX_SHADER;
+  COMPILE_STATUS = WebGLConstants.COMPILE_STATUS;
+  LINK_STATUS = WebGLConstants.LINK_STATUS;
+  COLOR_BUFFER_BIT = WebGLConstants.COLOR_BUFFER_BIT;
+  DEPTH_BUFFER_BIT = WebGLConstants.DEPTH_BUFFER_BIT;
+  TRIANGLES = WebGLConstants.TRIANGLES;
+
+  // Mock resources - allow tracking for memory tests
+  private buffers: Record<string, unknown>[] = [];
+  private shaders: Record<string, unknown>[] = [];
+  private programs: Record<string, unknown>[] = [];
+  private textures: Record<string, unknown>[] = [];
+  private framebuffers: Record<string, unknown>[] = [];
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
   }
 
-  // Minimal WebGL API implementation - expand as needed
-  createShader() {
-    const shader = {};
-    this.shaders.push(shader);
-    return shader;
-  }
-
-  createProgram() {
-    const program = {};
-    this.programs.push(program);
-    return program;
-  }
-
-  createBuffer() {
-    const buffer = {};
-    this.buffers.push(buffer);
-    return buffer;
-  }
-
-  createTexture() {
-    const texture = {};
-    this.textures.push(texture);
-    return texture;
-  }
-
-  createFramebuffer() {
-    const framebuffer = {};
-    this.framebuffers.push(framebuffer);
-    return framebuffer;
-  }
-
-  // Stub remaining WebGL methods with no-ops
-  viewport() {}
-  clearColor() {}
-  clearDepth() {}
-  clear() {}
-  enable() {}
-  disable() {}
-  blendFunc() {}
-  depthFunc() {}
-  getParameter() {
-    return null;
-  }
-  getShaderParameter() {
-    return true;
-  }
-  getProgramParameter() {
-    return true;
-  }
-  getUniformLocation() {
-    return {};
-  }
-  getAttribLocation() {
-    return 0;
-  }
-  useProgram() {}
-  bindBuffer() {}
-  bindTexture() {}
-  bindFramebuffer() {}
-  pixelStorei() {}
-  uniformMatrix4fv() {}
-  uniform1i() {}
-  uniform1f() {}
-  uniform2f() {}
-  uniform3f() {}
-  uniform4f() {}
-  uniform3fv() {}
-  drawArrays() {}
-  drawElements() {}
-
-  getExtension(extensionName: string) {
+  // Mock method implementation with tracking
+  getExtension(extensionName: string): unknown {
     // Add mock getExtension
     if (extensionName === 'WEBGL_lose_context') {
-      return { loseContext: fn() }; // Mock the lose context extension
+      return {
+        loseContext: createMockFunction(),
+        restoreContext: createMockFunction(),
+      };
     }
     // Add other common extensions if needed by tests
     // e.g., OES_texture_float, ANGLE_instanced_arrays
     return null; // Return null for unmocked extensions
   }
 
-  // Cleanup method to prevent memory leaks
-  dispose() {
-    this.shaders = [];
-    this.programs = [];
-    this.buffers = [];
-    this.textures = [];
-    this.framebuffers = [];
+  // Core WebGL methods with consistent return values
+  getParameter(paramName: number): unknown {
+    return {};
   }
-}
 
-// Mock WebGL2 context - extends WebGL1 with additional features
-class MockWebGL2RenderingContext extends MockWebGLRenderingContext {
-  createVertexArray() {
+  getShaderPrecisionFormat(): { precision: number; rangeMin: number; rangeMax: number } {
+    return { precision: 1, rangeMin: 1, rangeMax: 1 };
+  }
+
+  // Buffer methods
+  createBuffer(): Record<string, unknown> {
+    const buffer = {};
+    this.buffers.push(buffer);
+    return buffer;
+  }
+
+  bindBuffer(): void {}
+  bufferData(): void {}
+
+  // Shader methods
+  createShader(): Record<string, unknown> {
+    const shader = {};
+    this.shaders.push(shader);
+    return shader;
+  }
+
+  shaderSource(): void {}
+  compileShader(): void {}
+  getShaderParameter(): boolean {
+    return true;
+  }
+
+  // Program methods
+  createProgram(): Record<string, unknown> {
+    const program = {};
+    this.programs.push(program);
+    return program;
+  }
+
+  attachShader(): void {}
+  linkProgram(): void {}
+  getProgramParameter(): boolean {
+    return true;
+  }
+  useProgram(): void {}
+
+  // Uniform methods
+  getUniformLocation(): Record<string, unknown> {
     return {};
   }
-  bindVertexArray() {}
-  createQuery() {
+  uniform1f(): void {}
+  uniform2f(): void {}
+  uniform3f(): void {}
+  uniform4f(): void {}
+  uniformMatrix4fv(): void {}
+
+  // Attribute methods
+  getAttribLocation(): number {
+    return 0;
+  }
+  enableVertexAttribArray(): void {}
+  vertexAttribPointer(): void {}
+
+  // Draw methods
+  drawArrays(): void {}
+  drawElements(): void {}
+  clear(): void {}
+  clearColor(): void {}
+  clearDepth(): void {}
+  disable(): void {}
+  enable(): void {}
+  blendFunc(): void {}
+  depthFunc(): void {}
+  viewport(): void {}
+
+  // WebGL2 methods
+  createVertexArray(): Record<string, unknown> {
     return {};
   }
-  beginQuery() {}
-  endQuery() {}
+  bindVertexArray(): void {}
+  createQuery(): Record<string, unknown> {
+    return {};
+  }
+  beginQuery(): void {}
+  endQuery(): void {}
 }
 
 // Store original method to restore later
 const originalGetContext = HTMLCanvasElement.prototype.getContext;
 
-// Patch HTMLCanvasElement to return our mock WebGL context
-// eslint-disable-next-line
-function patchCanvasGetContext() {
-  // Use type assertion to avoid TypeScript errors with explicit this type
+// Install mock globally
+export function setupWebGLMocks(): void {
+  // Override HTMLCanvasElement.prototype.getContext
   HTMLCanvasElement.prototype.getContext = function (
-    this: HTMLCanvasElement,
     contextType: string,
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...rest: any // eslint-disable-line @typescript-eslint/no-explicit-any[]
-  ) {
-    if (contextType === 'webgl' || contextType === 'experimental-webgl') {
-      return new MockWebGLRenderingContext(this) as unknown as WebGLRenderingContext;
+    contextAttributes?: Record<string, unknown>
+  ): unknown {
+    if (
+      contextType === 'webgl' ||
+      contextType === 'webgl2' ||
+      contextType === 'experimental-webgl'
+    ) {
+      return new MockWebGLRenderingContext(this);
     }
-    if (contextType === 'webgl2') {
-      return new MockWebGL2RenderingContext(this) as unknown as WebGL2RenderingContext;
-    }
-    return originalGetContext.call(this, contextType, ...rest);
-  } as typeof HTMLCanvasElement.prototype.getContext;
+    // Call original for other context types (e.g., '2d')
+    return originalGetContext.call(this, contextType, contextAttributes);
+  };
+
+  // Mock requestAnimationFrame for deterministic testing
+  let frameId = 0;
+  global.requestAnimationFrame = (callback: FrameRequestCallback): number => {
+    frameId += 1;
+    setTimeout(() => callback(performance.now()), 0);
+    return frameId;
+  };
+
+  global.cancelAnimationFrame = (): void => {
+    // No-op implementation
+  };
 }
 
-// Mock requestAnimationFrame for deterministic testing
-// eslint-disable-next-line
-function patchAnimationFrame() {
-// eslint-disable-next-line
-  window.requestAnimationFrame = fn((callback: FrameRequestCallback) => {
-    return setTimeout(() => callback(performance.now()), 16) as unknown as number;
-  });
-
-// eslint-disable-next-line
-  window.cancelAnimationFrame = fn((handle: number) => {
-    clearTimeout(handle);
-  });
+// Clean up mocks (restore original functions)
+export function cleanupWebGLMocks(): void {
+  HTMLCanvasElement.prototype.getContext = originalGetContext;
+  // @ts-ignore - We know this exists in test environments
+  delete global.requestAnimationFrame;
+  // @ts-ignore - We know this exists in test environments
+  delete global.cancelAnimationFrame;
 }
 
-// Mock matchMedia for responsive testing
-// eslint-disable-next-line
-function patchMatchMedia() {
-// eslint-disable-next-line
-  if (typeof window.matchMedia !== 'function') {
-// eslint-disable-next-line
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-// eslint-disable-next-line
-      value: fn().mockImplementation((query) => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: fn(),
-        removeListener: fn(),
-        addEventListener: fn(),
-        removeEventListener: fn(),
-        dispatchEvent: fn(),
-      })),
-    });
-  }
-}
-
-// Create and export Three.js specific mocks
-export class CoreWebGLRenderer {
+// Mock Three.js classes for WebGL-dependent tests
+export class MockWebGLRenderer {
   domElement: HTMLCanvasElement;
-  shadowMap = { enabled: false, type: 0 };
-  outputEncoding = 0;
-  toneMapping = 0;
-  toneMappingExposure = 1;
 
   constructor() {
     this.domElement = document.createElement('canvas');
   }
 
-  setSize() {}
-  setPixelRatio() {}
-  render() {}
-  dispose() {}
+  setSize(): void {}
+  setPixelRatio(): void {}
+  render(): void {}
+  dispose(): void {}
 }
 
 export class MockWebGLTexture {
-  dispose() {}
+  dispose(): void {}
 }
 
 export class MockWebGLGeometry {
-  dispose() {}
+  dispose(): void {}
 }
 
 export class MockWebGLMaterial {
-  dispose() {}
+  dispose(): void {}
 }
 
-// Set up global cleanup function for tests
-// eslint-disable-next-line
-export function cleanupWebGLMocks() {
-  // Reset the canvas getContext to original implementation
-  HTMLCanvasElement.prototype.getContext = originalGetContext;
+// Export a function to create mock objects for Three.js
+export function createThreeMock() {
+  return {
+    WebGLRenderer: MockWebGLRenderer,
+    Texture: MockWebGLTexture,
+    BufferGeometry: MockWebGLGeometry,
+    Material: MockWebGLMaterial,
+    // Add more Three.js classes as needed
+  };
 }
-
-// Helper function to initialize mocks for a test
-// eslint-disable-next-line
-export function setupWebGLMocks() {
-  patchCanvasGetContext();
-  patchAnimationFrame();
-  patchMatchMedia();
-
-  // Return a context for tests that need direct access
-  const canvas = document.createElement('canvas');
-  return canvas.getContext('webgl');
-}
-
-// Automatically apply mocks (can be disabled by importing and calling cleanup)
-setupWebGLMocks();
-
-export default {
-  setupWebGLMocks,
-  cleanupWebGLMocks,
-  CoreWebGLRenderer,
-  MockWebGLTexture,
-  MockWebGLGeometry,
-  MockWebGLMaterial,
-};
