@@ -48,7 +48,7 @@ module.exports = {
     'prettier/prettier': 'warn',
     'react/prop-types': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/no-unused-vars': ['warn', { 'argsIgnorePattern': '^_' }],
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
   },
   overrides: [
@@ -146,6 +146,6 @@ module.exports = {
     'build/',
     '.husky/',
     '.vscode/',
-    '.github/'
+    '.github/',
   ],
 };
