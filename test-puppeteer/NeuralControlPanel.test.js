@@ -1,4 +1,4 @@
-/* eslint-env node, browser */
+/* eslint-env node */
 import puppeteer from 'puppeteer';
 import assert from 'assert';
 import path from 'node:path'; // Import path module
@@ -72,6 +72,7 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
       // Use waitForFunction with document.evaluate, increased timeout
       await page.waitForFunction(
         (xpath) => {
+          /* eslint-env browser */
           const result = document.evaluate(
             xpath,
             document,
@@ -87,6 +88,7 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
 
       // Get the handle directly using evaluateHandle after waiting
       panelHandle = await page.evaluateHandle((xpath) => {
+        /* eslint-env browser */
         const result = document.evaluate(
           xpath,
           document,
@@ -100,9 +102,10 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
       if (panelHandle && panelHandle.asElement()) {
         // Check if a valid handle was returned
         // Attempt to find the Card parent for context
-        const cardElementHandle = await panelHandle.evaluateHandle((el) =>
-          el.closest('.w-\\[320px\\]')
-        );
+        const cardElementHandle = await panelHandle.evaluateHandle((el) => {
+          /* eslint-env browser */
+          return el.closest('.w-\\[320px\\]');
+        });
         // Use the card handle if found, otherwise stick with the title element handle
         panelHandle = cardElementHandle.asElement() ? cardElementHandle : panelHandle;
         console.log(
@@ -135,6 +138,7 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
 
     // 1. Click the 'Settings' tab using page.evaluate for reliability
     const clicked = await page.evaluate((text) => {
+      /* eslint-env browser */
       const buttons = document.querySelectorAll('button[role="tab"]');
       console.log(`[Browser Evaluate] Found ${buttons.length} tab buttons.`); // Log found buttons
       for (const button of buttons) {
@@ -158,6 +162,7 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
     // 2. Log DOM state after click attempt
     try {
       const tabsListHTML = await page.evaluate((selector) => {
+        /* eslint-env browser */
         const listElement = document.querySelector(selector);
         return listElement ? listElement.outerHTML : 'TabsList element not found';
       }, tabsListSelector);
@@ -176,6 +181,7 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
 
       // Optional: Verify again explicitly after wait succeeds (redundant but confirms)
       const isActive = await page.evaluate((xpath) => {
+        /* eslint-env browser */
         const result = document.evaluate(
           xpath,
           document,
@@ -260,6 +266,7 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
       // Click the button using page.evaluate, searching within the active settings panel
       const clicked = await page.evaluate(
         (selector, text) => {
+          /* eslint-env browser */
           const panel = document.querySelector(selector);
           if (!panel) return false;
           const buttons = Array.from(panel.querySelectorAll('button'));

@@ -1,4 +1,4 @@
-// test-puppeteer/ThemeProvider.system.test.js
+/* eslint-env node */
 import puppeteer from 'puppeteer';
 import assert from 'assert';
 
@@ -56,7 +56,10 @@ import assert from 'assert';
     });
 
     console.log('[Puppeteer] Asserting dark mode class is applied...');
-    const isDarkModeApplied = await page.$eval('html', (el) => el.classList.contains('dark'));
+    const isDarkModeApplied = await page.evaluate(() => {
+      /* eslint-env browser */
+      return document.documentElement.classList.contains('dark');
+    });
     assert.strictEqual(
       isDarkModeApplied,
       true,
@@ -87,7 +90,10 @@ import assert from 'assert';
     });
 
     console.log('[Puppeteer] Asserting dark mode class is removed...');
-    const isDarkModeStillApplied = await page.$eval('html', (el) => el.classList.contains('dark'));
+    const isDarkModeStillApplied = await page.evaluate(() => {
+      /* eslint-env browser */
+      return document.documentElement.classList.contains('dark');
+    });
     assert.strictEqual(
       isDarkModeStillApplied,
       false,

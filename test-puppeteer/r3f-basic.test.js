@@ -1,3 +1,4 @@
+/* eslint-env node */
 // test-puppeteer/r3f-basic.test.js
 import puppeteer from 'puppeteer';
 import assert from 'assert';
@@ -187,6 +188,7 @@ import assert from 'assert';
     }
 
     console.log('[Puppeteer] Basic R3F test finished successfully.');
+    console.log(`Node.js version: ${process.version}`);
   } catch (error) {
     console.error('[Puppeteer] Basic R3F test failed:', error);
     if (browser && page) {

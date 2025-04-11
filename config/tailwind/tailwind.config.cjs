@@ -45,7 +45,7 @@ module.exports = {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
         },
-        neural: {
+        neuralRamp: {
           50: 'oklch(0.97 0.025 290)',
           100: 'oklch(0.95 0.05 290)',
           200: 'oklch(0.9 0.075 290)',
