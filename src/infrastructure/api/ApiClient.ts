@@ -99,7 +99,7 @@ export class ApiClient {
   /**
    * POST request method
    */
-  public async post<T>(url: string, data?: any // eslint-disable-line @typescript-eslint/no-explicit-any, config?: AxiosRequestConfig): Promise<T> {
+  public async post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     // Use mock API if enabled
     if (USE_MOCK_API) {
       console.log(`[Mock API] POST ${url}`, data);
@@ -138,7 +138,7 @@ export class ApiClient {
   /**
    * PUT request method
    */
-  public async put<T>(url: string, data?: any // eslint-disable-line @typescript-eslint/no-explicit-any, config?: AxiosRequestConfig): Promise<T> {
+  public async put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     // Use mock API if enabled
     if (USE_MOCK_API) {
       console.log(`[Mock API] PUT ${url}`, data);
@@ -223,34 +223,40 @@ export class ApiClient {
    */
 
   // User authentication
-  public async login(email: string, password: string): Promise<any> {
+  public async login(
+    email: string,
+    password: string
+  ): Promise<{ token: string; user: unknown; success?: boolean }> {
     if (USE_MOCK_API) {
       console.log('[Mock API] Login attempt', { email });
       // Simulate login success for mock API
-      return { success: true, token: 'mock_token_123' };
+      return { success: true, token: 'mock_token_123', user: {} };
     }
 
-    const response = await this.post<any>('/auth/login', { email, password });
+    const response = await this.post<{ token: string; user: unknown }>('/auth/login', {
+      email,
+      password,
+    });
     this.setAuthToken(response.token);
     return response;
   }
 
   // Get all patients
-  public async getPatients(): Promise<any[]> {
+  public async getPatients(): Promise<unknown[]> {
     if (USE_MOCK_API) {
       return mockApi.getPatients();
     }
 
-    return this.get<any[]>('/patients');
+    return this.get<unknown[]>('/patients');
   }
 
   // Get patient by ID
-  public async getPatientById(patientId: string): Promise<any> {
+  public async getPatientById(patientId: string): Promise<unknown> {
     if (USE_MOCK_API) {
       return mockApi.getPatientById(patientId);
     }
 
-    return this.get<any>(`/patients/${patientId}`);
+    return this.get<unknown>(`/patients/${patientId}`);
   }
 
   // Get brain model
@@ -263,33 +269,41 @@ export class ApiClient {
   }
 
   // Predict treatment response
-  public async predictTreatmentResponse(patientId: string, treatmentData: any // eslint-disable-line @typescript-eslint/no-explicit-any): Promise<any> {
+  public async predictTreatmentResponse<T = unknown>(
+    patientId: string,
+    treatmentData: Record<string, unknown>
+  ): Promise<T> {
     if (USE_MOCK_API) {
-      return mockApi.predictTreatmentResponse(patientId, treatmentData.treatment);
+      // Type assertion for the mock API call
+      return mockApi.predictTreatmentResponse(patientId, treatmentData.treatment as string) as T;
     }
 
-    return this.post<any>(`/patients/${patientId}/predict-treatment`, treatmentData);
+    return this.post<T>(`/patients/${patientId}/predict-treatment`, treatmentData);
   }
 
   // Get risk assessment
-  public async getRiskAssessment(patientId: string): Promise<any> {
+  public async getRiskAssessment<T = unknown>(patientId: string): Promise<T> {
     if (USE_MOCK_API) {
-      return mockApi.getRiskAssessment(patientId);
+      return mockApi.getRiskAssessment(patientId) as T;
     }
 
-    return this.get<any>(`/patients/${patientId}/risk-assessment`);
+    return this.get<T>(`/patients/${patientId}/risk-assessment`);
   }
 
-  private handleMockResponse<T>(url: string, _data?: any // eslint-disable-line @typescript-eslint/no-explicit-any): T {
+  /**
+   * Handle mock API responses for testing and development
+   * @private
+   */
+  private handleMockResponse<T>(url: string, _data?: unknown): T {
     // Implement mock response logic here
     // For example:
     if (url === '/auth/login') {
-      return { success: true, token: 'mock_token_123' } as T;
+      return { success: true, token: 'mock_token_123' } as unknown as T;
     } else if (url === '/patients') {
       return [
         { id: 1, name: 'John Doe' },
         { id: 2, name: 'Jane Doe' },
-      ] as T;
+      ] as unknown as T;
     } else {
       throw new Error(`Mock API: Unknown endpoint ${url}`);
     }

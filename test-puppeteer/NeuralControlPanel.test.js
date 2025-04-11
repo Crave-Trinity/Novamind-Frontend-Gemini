@@ -31,7 +31,7 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
   let browser;
   let page;
   // Target the new demo page specifically created for this component
-  const targetUrl = 'http://localhost:3000/test/neural-control-panel'; // Target the new test route
+  const targetUrl = 'http://localhost:3001/test/neural-control-panel'; // Target the new test route
   const currentFilePath = fileURLToPath(import.meta.url);
   const currentDirPath = path.dirname(currentFilePath);
   const screenshotDir = path.join(currentDirPath, 'puppeteer-screenshots'); // Define screenshotDir here

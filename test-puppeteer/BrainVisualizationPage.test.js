@@ -16,7 +16,7 @@ import { setupApiMocking } from './utils/mockApi.js'; // Import the utility
     let page = await browser.newPage(); // Use let for potential reassignment if needed, though unlikely here
 
     // Ensure the dev server is running (npm run dev)
-    const targetUrl = 'http://localhost:3000/brain-visualization/demo'; // Target specific page
+    const targetUrl = 'http://localhost:3001/brain-visualization/demo'; // Target specific page
 
     console.log(`[Puppeteer] Navigating to ${targetUrl}...`);
     // --- Setup Event Listeners and Mocking BEFORE navigation ---

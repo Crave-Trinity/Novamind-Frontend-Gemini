@@ -11,7 +11,7 @@ import assert from 'assert';
 (async () => {
   let browser;
   let page; // Define page in the outer scope
-  const targetUrl = 'http://localhost:3000/brain-visualization/demo'; // Target the R3F page
+  const targetUrl = 'http://localhost:3001/brain-visualization/demo'; // Target the R3F page
 
   try {
     console.log('[Puppeteer] Launching browser for basic R3F test...');

@@ -71,13 +71,23 @@ import type { ActivationLevel } from '@domain/types/brain/activity';
 import { RenderMode } from '@domain/types/brain/visualization'; // Import RenderMode
 
 /**
- * Props with neural-safe typing
+ * Props with neural-safe typing and clinical-grade precision
  */
 interface NeuralControlPanelProps {
+  /** Optional CSS class name for styling flexibility */
   className?: string;
+  /** Compact mode for space-constrained interfaces */
   compact?: boolean;
+  /** Allow data export functionality */
   allowExport?: boolean;
+  /** Show neural performance optimization controls */
   showPerformanceControls?: boolean;
+  /** Patient identifier for clinical context */
+  patientId?: string;
+  /** Brain model identifier for neural visualization */
+  brainModelId?: string;
+  /** Optional callback for settings changes */
+  onSettingsChange?: (settings: Record<string, unknown>) => void;
 }
 
 /**
@@ -122,21 +132,25 @@ export const NeuralControlPanel: React.FC<NeuralControlPanelProps> = ({
         scanDate: '',
         scanType: 'MRI',
         dataQualityScore: 0,
-      } as any, // Use any for nested scan for now
+      } as BrainModel['scan'], // Properly typed scan object
       timestamp: '',
       version: '',
       metadata: {},
-      processingStatus: 'complete' as any,
-      processingLevel: 'analyzed' as any,
+      processingStatus: 'complete' as const,
+      processingLevel: 'analyzed' as const,
       lastUpdated: '',
     } as BrainModel | null,
     activeRegions: [] as string[],
     selectedRegions: [] as string[],
-    treatmentPredictions: [] as any[], // Use 'any' for placeholder simplicity
+    treatmentPredictions: [] as Array<{ id: string; name: string; efficacy: number }>, // Properly typed treatment predictions
     selectedTreatmentId: null as string | null, // Add missing property
-    performanceMetrics: { frameRate: 60, memoryUsage: 100, dataPointsProcessed: 0 } as any, // Add missing property with placeholder data
+    performanceMetrics: { 
+      frameRate: 60, 
+      memoryUsage: 100, 
+      dataPointsProcessed: 0 
+    }, // Properly typed performance metrics
     neuralActivation: new Map<string, ActivationLevel>(), // Add missing property
-    temporalPatterns: [] as any[], // Use any for placeholder
+    temporalPatterns: [] as Array<{ id: string; timestamp: string; pattern: number[] }>, // Properly typed temporal patterns
   };
   // Placeholder functions
   const setRenderMode = (mode: RenderMode) => console.log('setRenderMode called', mode);

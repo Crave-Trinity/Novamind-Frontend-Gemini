@@ -11,7 +11,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   let browser;
   let page; // Define page in the outer scope
   // Target a page where BrainModelContainer is expected to render, e.g., the demo page
-  const targetUrl = 'http://localhost:3000/brain-visualization/demo';
+  const targetUrl = 'http://localhost:3001/brain-visualization/demo';
 
   try {
     console.log('[Puppeteer] Launching browser for BrainModelContainer test...');

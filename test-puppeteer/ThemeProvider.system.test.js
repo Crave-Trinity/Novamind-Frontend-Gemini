@@ -6,7 +6,7 @@ import assert from 'assert';
 (async () => {
   let browser;
   let page; // Define page in the outer scope
-  const targetUrl = 'http://localhost:3000'; // Base URL where ThemeProvider is used
+  const targetUrl = 'http://localhost:3001'; // Base URL where ThemeProvider is used
 
   try {
     console.log('[Puppeteer] Launching browser for ThemeProvider system preference test...');

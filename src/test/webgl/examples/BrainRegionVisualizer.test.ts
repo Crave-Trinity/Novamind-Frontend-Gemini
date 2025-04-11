@@ -257,14 +257,19 @@ describe.skip('BrainRegionVisualizer', () => {
     expect(success).toBe(true);
 
     // Verify region is active in internal state
-    const scene = (visualizer as any).scene;
+    // Use a two-step type assertion pattern for accessing private properties in tests
+    // First cast to unknown to bypass TypeScript's type checking, then to the appropriate shape
+    const scene = (visualizer as unknown as { scene: { children: Array<{ userData: { regionName: string; active: boolean } }> } }).scene;
+    
+    // Find highlighted region with proper typing
     const highlightedRegion = Array.from(scene.children).find(
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (child: any // eslint-disable-line @typescript-eslint/no-explicit-any) => child.userData.regionName === 'amygdala'
-    ) as any; // Type assertion to avoid TS errors
+      (child) => child.userData.regionName === 'amygdala'
+    );
 
     expect(highlightedRegion).toBeDefined();
-    expect(highlightedRegion.userData.active).toBe(true);
+    if (highlightedRegion) {
+      expect(highlightedRegion.userData.active).toBe(true);
+    }
   });
 
 // eslint-disable-next-line

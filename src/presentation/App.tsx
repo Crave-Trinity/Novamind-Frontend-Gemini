@@ -36,10 +36,33 @@ const App: React.FC = () => {
             path="/test/neural-control-panel"
             element={
               <ThemeProvider defaultTheme="dark">
-                {' '}
-                {/* Wrap with ThemeProvider */}
                 <div className="p-4 bg-background text-foreground min-h-screen">
-                  <NeuralControlPanel />
+                  <h1 className="text-xl font-semibold mb-6">Neural Control Panel Test</h1>
+                  <NeuralControlPanel
+                    patientId="DEMO_PATIENT_001"
+                    brainModelId="DEMO_SCAN_001"
+                    onSettingsChange={(settings) => console.log('Settings changed:', settings)}
+                  />
+                </div>
+              </ThemeProvider>
+            }
+          />
+          
+          {/* Test route for BrainModelContainer */}
+          <Route
+            path="/brain-model-container/demo"
+            element={
+              <ThemeProvider defaultTheme="dark">
+                <div className="p-4 bg-background text-foreground min-h-screen">
+                  <h1 className="text-xl font-semibold mb-6">Brain Model Container Test</h1>
+                  <div className="h-[80vh] border border-gray-700 rounded-lg overflow-hidden">
+                    {/* Note: Using NeuralControlPanel temporarily until BrainModelContainer is fully implemented */}
+                    <NeuralControlPanel
+                      patientId="DEMO_PATIENT_001"
+                      brainModelId="DEMO_SCAN_001"
+                      onSettingsChange={(settings) => console.log('Settings changed:', settings)}
+                    />
+                  </div>
                 </div>
               </ThemeProvider>
             }
