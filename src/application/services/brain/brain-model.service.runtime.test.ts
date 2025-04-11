@@ -17,11 +17,15 @@ import {
 } from './brain-model.service.runtime'; // Use relative path
 // Removed unused import: ValidationError
 // Import SSoT types for mocks
-import type { BrainModel, BrainRegion, NeuralConnection, BrainScan } from '@domain/types/brain/models';
+import type {
+  BrainModel,
+  BrainRegion,
+  NeuralConnection,
+  BrainScan,
+} from '@domain/types/brain/models';
 import type { Vector3 } from '@/domain/types/shared/common'; // Import Vector3 from shared
 
 describe('BrainModelService Runtime Validation', () => {
-
   // --- Define Valid Mocks based on SSoT ---
   const validPosition: Vector3 = { x: 0, y: 0, z: 0 };
   const validResolution: Vector3 = { x: 1, y: 1, z: 1 };
@@ -51,15 +55,15 @@ describe('BrainModelService Runtime Validation', () => {
     dataConfidence: 0.85,
   };
 
-   const validScan: BrainScan = {
-     id: 'scan-test',
-     patientId: 'patient-test',
-     scanDate: new Date().toISOString(),
-     scanType: 'fMRI',
-     dataQualityScore: 0.9,
-     resolution: validResolution,
-     metadata: { acquisitionTime: 300 },
-   };
+  const validScan: BrainScan = {
+    id: 'scan-test',
+    patientId: 'patient-test',
+    scanDate: new Date().toISOString(),
+    scanType: 'fMRI',
+    dataQualityScore: 0.9,
+    resolution: validResolution,
+    metadata: { acquisitionTime: 300 },
+  };
 
   const validModel: BrainModel = {
     id: 'model-123',
@@ -72,7 +76,6 @@ describe('BrainModelService Runtime Validation', () => {
     processingLevel: 'raw',
     lastUpdated: new Date().toISOString(),
   };
-
 
   // --- Tests ---
 
@@ -116,11 +119,13 @@ describe('BrainModelService Runtime Validation', () => {
 
       const undefinedResult = validateBrainModel(undefined);
       expect(undefinedResult.success).toBe(false);
-      if (!undefinedResult.success) expect(undefinedResult.error?.message).toContain('Invalid BrainModel');
+      if (!undefinedResult.success)
+        expect(undefinedResult.error?.message).toContain('Invalid BrainModel');
 
       const stringResult = validateBrainModel('string');
       expect(stringResult.success).toBe(false);
-      if (!stringResult.success) expect(stringResult.error?.message).toContain('Invalid BrainModel');
+      if (!stringResult.success)
+        expect(stringResult.error?.message).toContain('Invalid BrainModel');
     });
 
     it('returns failure for objects with invalid regions', () => {
@@ -132,20 +137,20 @@ describe('BrainModelService Runtime Validation', () => {
     });
 
     it('returns failure for objects with invalid connections', () => {
-       const invalidConnection = { ...validConnection, sourceId: null }; // Invalid sourceId type
-       const modelWithInvalidConnection = { ...validModel, connections: [invalidConnection] };
+      const invalidConnection = { ...validConnection, sourceId: null }; // Invalid sourceId type
+      const modelWithInvalidConnection = { ...validModel, connections: [invalidConnection] };
       const result = validateBrainModel(modelWithInvalidConnection);
       expect(result.success).toBe(false);
       if (!result.success) expect(result.error?.field).toBe('connections[0].sourceId');
     });
 
-     it('returns failure for objects with invalid scan', () => {
-        const invalidScan = { ...validScan, scanType: 'INVALID' }; // Invalid scanType
-        const modelWithInvalidScan = { ...validModel, scan: invalidScan };
-       const result = validateBrainModel(modelWithInvalidScan);
-       expect(result.success).toBe(false);
-       if (!result.success) expect(result.error?.field).toBe('scan.scanType');
-     });
+    it('returns failure for objects with invalid scan', () => {
+      const invalidScan = { ...validScan, scanType: 'INVALID' }; // Invalid scanType
+      const modelWithInvalidScan = { ...validModel, scan: invalidScan };
+      const result = validateBrainModel(modelWithInvalidScan);
+      expect(result.success).toBe(false);
+      if (!result.success) expect(result.error?.field).toBe('scan.scanType');
+    });
 
     it('includes the field path in error messages when provided', () => {
       const result = validateBrainModel({}, 'testField'); // Empty object is invalid
@@ -199,15 +204,17 @@ describe('BrainModelService Runtime Validation', () => {
       const regionWithInvalidActivityLevel = { ...validRegion, activityLevel: 1.5 }; // Above 1
       const result = validateBrainRegion(regionWithInvalidActivityLevel);
       expect(result.success).toBe(false);
-      if (!result.success) expect(result.error?.message).toContain('Expected activityLevel between 0 and 1');
+      if (!result.success)
+        expect(result.error?.message).toContain('Expected activityLevel between 0 and 1');
     });
 
-     it('returns failure for objects with invalid hemisphereLocation', () => {
-       const regionWithInvalidHemisphere = { ...validRegion, hemisphereLocation: 'middle' as any }; // Invalid enum
-       const result = validateBrainRegion(regionWithInvalidHemisphere);
-       expect(result.success).toBe(false);
-       if (!result.success) expect(result.error?.message).toContain('Expected hemisphereLocation to be one of');
-     });
+    it('returns failure for objects with invalid hemisphereLocation', () => {
+      const regionWithInvalidHemisphere = { ...validRegion, hemisphereLocation: 'middle' as any }; // Invalid enum
+      const result = validateBrainRegion(regionWithInvalidHemisphere);
+      expect(result.success).toBe(false);
+      if (!result.success)
+        expect(result.error?.message).toContain('Expected hemisphereLocation to be one of');
+    });
 
     it('includes the field path in error messages when provided', () => {
       const result = validateBrainRegion({}, 'parentField'); // Empty object is invalid
@@ -250,29 +257,35 @@ describe('BrainModelService Runtime Validation', () => {
     it('returns failure for non-object values', () => {
       const nullResult = validateNeuralConnection(null);
       expect(nullResult.success).toBe(false);
-      if (!nullResult.success) expect(nullResult.error?.message).toContain('Invalid NeuralConnection');
+      if (!nullResult.success)
+        expect(nullResult.error?.message).toContain('Invalid NeuralConnection');
     });
 
     it('returns failure for objects with invalid strength', () => {
       const connectionWithInvalidStrength = { ...validConnection, strength: 1.5 }; // Above 1
       const result = validateNeuralConnection(connectionWithInvalidStrength);
       expect(result.success).toBe(false);
-      if (!result.success) expect(result.error?.message).toContain('Expected strength between 0 and 1');
+      if (!result.success)
+        expect(result.error?.message).toContain('Expected strength between 0 and 1');
     });
 
     it('returns failure for objects with invalid type', () => {
       const connectionWithInvalidType = { ...validConnection, type: 'invalid-type' as any };
       const result = validateNeuralConnection(connectionWithInvalidType);
       expect(result.success).toBe(false);
-      if (!result.success) expect(result.error?.message).toContain('Expected type \'excitatory\' or \'inhibitory\' for type');
+      if (!result.success)
+        expect(result.error?.message).toContain(
+          "Expected type 'excitatory' or 'inhibitory' for type"
+        );
     });
 
-     it('returns failure for objects with invalid directionality', () => {
-       const connectionWithInvalidDir = { ...validConnection, directionality: 'one-way' as any };
-       const result = validateNeuralConnection(connectionWithInvalidDir);
-       expect(result.success).toBe(false);
-       if (!result.success) expect(result.error?.message).toContain('Expected directionality to be one of');
-     });
+    it('returns failure for objects with invalid directionality', () => {
+      const connectionWithInvalidDir = { ...validConnection, directionality: 'one-way' as any };
+      const result = validateNeuralConnection(connectionWithInvalidDir);
+      expect(result.success).toBe(false);
+      if (!result.success)
+        expect(result.error?.message).toContain('Expected directionality to be one of');
+    });
 
     it('includes the field path in error messages when provided', () => {
       const result = validateNeuralConnection({}, 'connectionField'); // Empty object is invalid

@@ -27,7 +27,7 @@ import type { TreatmentResponsePrediction } from '@domain/types/clinical/treatme
 import type { RiskAssessment } from '@domain/types/clinical/risk';
 
 // Import DetailLevelString from AdaptiveLOD
-import { DetailLevelString } from '@presentation/common/AdaptiveLOD';
+import type { DetailLevelString } from '@presentation/common/AdaptiveLOD';
 
 // Domain models
 import type {
@@ -157,7 +157,8 @@ const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerP
   const [showDetails, setShowDetails] = useState<boolean>(!!initialSelectedRegionId);
   // Use DetailLevelString type from AdaptiveLOD. Initialize with a valid default.
   const [detailMode] = useState<DetailLevelString>('high'); // Default to 'high' or use initialDetailLevel prop if added
-  const [forceDetailLevel] = useState< // Removed unused setForceDetailLevel
+  const [forceDetailLevel] = useState<
+    // Removed unused setForceDetailLevel
     DetailLevelString | undefined // Use DetailLevelString type
   >(undefined);
   const [showPerformanceStats, _setShowPerformanceStats] = useState(false); // Reverted prefix on state variable, kept on setter
@@ -365,13 +366,10 @@ const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerP
     setActiveRegionId(null);
   }, []);
 
-
-
   const handleVisualizationError = useCallback((error: Error) => {
     setErrorState(error);
     console.error('NOVAMIND Visualization Error:', error);
   }, []);
-
 
   // Import DetailLevelString from AdaptiveLOD if not already imported
   // import { DetailLevelString } from '@presentation/common/AdaptiveLOD';
@@ -402,127 +400,127 @@ const BrainVisualizationContainerInternal: React.FC<BrainVisualizationContainerP
           <>
             {/* Explicitly check for non-null data for type safety */}
             {visualizationState.status === 'success' && visualizationState.data !== null && (
-                <BrainModelViewer
-                  visualizationState={visualizationState as VisualizationState<BrainModel>} // Assert non-null data
-                  renderMode={renderMode}
-                  theme={theme ?? 'clinical'}
-                  visualizationSettings={visualizationSettings}
-                  selectedRegionIds={selectedRegionIds}
-                  highlightedRegionIds={highlightedRegionIdsInternal}
-                  regionSearchQuery={regionSearchQuery}
-                  enableBloom={visualizationSettings?.enableBloom}
-                  highPerformanceMode={highPerformanceMode}
-                  showInactiveRegions={visualizationSettings?.inactiveRegionOpacity > 0}
-                  width="100%"
-                  height="100%"
-                  backgroundColor={activeThemeSettings?.backgroundColor || '#000000'}
-                  onRegionClick={handleViewerRegionClick} // Pass correct handler
-                  onRegionHover={handleViewerRegionHover} // Pass correct handler
-                  onConnectionClick={handleConnectionClick}
-                  // onReady prop doesn't exist on BrainModelViewerProps
-                  // Spread detailConfig if BrainModelViewer accepts these props
-                  // {...detailConfig}
-                />
-              )}
+              <BrainModelViewer
+                visualizationState={visualizationState as VisualizationState<BrainModel>} // Assert non-null data
+                renderMode={renderMode}
+                theme={theme ?? 'clinical'}
+                visualizationSettings={visualizationSettings}
+                selectedRegionIds={selectedRegionIds}
+                highlightedRegionIds={highlightedRegionIdsInternal}
+                regionSearchQuery={regionSearchQuery}
+                enableBloom={visualizationSettings?.enableBloom}
+                highPerformanceMode={highPerformanceMode}
+                showInactiveRegions={visualizationSettings?.inactiveRegionOpacity > 0}
+                width="100%"
+                height="100%"
+                backgroundColor={activeThemeSettings?.backgroundColor || '#000000'}
+                onRegionClick={handleViewerRegionClick} // Pass correct handler
+                onRegionHover={handleViewerRegionHover} // Pass correct handler
+                onConnectionClick={handleConnectionClick}
+                // onReady prop doesn't exist on BrainModelViewerProps
+                // Spread detailConfig if BrainModelViewer accepts these props
+                // {...detailConfig}
+              />
+            )}
 
-              {/* Loading State */}
-              {visualizationState.status === 'loading' && (
-                <LoadingFallback
-                  progress={loadingProgress}
-                  message="Loading Neural Model"
-                  height={height}
-                  theme={theme === 'dark' ? 'dark' : 'clinical'}
-                />
-              )}
-              {/* Error State */}
-              {visualizationState.status === 'error' && (
-                <div className="absolute inset-0 bg-black/80 z-30 flex items-center justify-center p-4">
-                  <div className="bg-gray-900 p-6 rounded-lg shadow-xl text-center">
-                    <h3 className="text-red-500 text-xl mb-2">Visualization Error</h3>
-                    <p className="text-gray-300 mb-4">{visualizationState.error.message}</p>
-                    <button
-                      onClick={() => {
-                        if (scanId) fetchBrainModel(scanId);
-                      }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    >
-                      Retry
-                    </button>
-                  </div>
+            {/* Loading State */}
+            {visualizationState.status === 'loading' && (
+              <LoadingFallback
+                progress={loadingProgress}
+                message="Loading Neural Model"
+                height={height}
+                theme={theme === 'dark' ? 'dark' : 'clinical'}
+              />
+            )}
+            {/* Error State */}
+            {visualizationState.status === 'error' && (
+              <div className="absolute inset-0 bg-black/80 z-30 flex items-center justify-center p-4">
+                <div className="bg-gray-900 p-6 rounded-lg shadow-xl text-center">
+                  <h3 className="text-red-500 text-xl mb-2">Visualization Error</h3>
+                  <p className="text-gray-300 mb-4">{visualizationState.error.message}</p>
+                  <button
+                    onClick={() => {
+                      if (scanId) fetchBrainModel(scanId);
+                    }}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Retry
+                  </button>
                 </div>
-              )}
+              </div>
+            )}
 
-              {showControls && (
-                <div className="absolute top-4 left-4 z-10">
-                  <VisualizationControls
-                    renderMode={renderMode}
-                    onRenderModeChange={handleRenderModeChange}
-                    visualizationSettings={visualizationSettings}
-                    onSettingsChange={handleSettingsChange}
-                    // Remove non-existent props: detailMode, onDetailModeChange, showPerformanceStats, onTogglePerformanceStats, showLabels, onToggleLabels
+            {showControls && (
+              <div className="absolute top-4 left-4 z-10">
+                <VisualizationControls
+                  renderMode={renderMode}
+                  onRenderModeChange={handleRenderModeChange}
+                  visualizationSettings={visualizationSettings}
+                  onSettingsChange={handleSettingsChange}
+                  // Remove non-existent props: detailMode, onDetailModeChange, showPerformanceStats, onTogglePerformanceStats, showLabels, onToggleLabels
+                />
+              </div>
+            )}
+
+            {enableRegionSelection &&
+              visualizationState.status === 'success' &&
+              visualizationState.data && (
+                <div className="absolute right-4 top-4 z-10 max-h-[calc(100%-2rem)] overflow-auto">
+                  <RegionSelectionPanel
+                    regions={visualizationState.data.regions}
+                    selectedRegionIds={selectedRegionIds}
+                    onRegionSelect={handlePanelRegionSelect}
+                    onRegionSearch={handleRegionSearch}
+                    searchQuery={regionSearchQuery}
                   />
                 </div>
               )}
 
-              {enableRegionSelection &&
-                visualizationState.status === 'success' &&
-                visualizationState.data && (
-                  <div className="absolute right-4 top-4 z-10 max-h-[calc(100%-2rem)] overflow-auto">
-                    <RegionSelectionPanel
-                      regions={visualizationState.data.regions}
-                      selectedRegionIds={selectedRegionIds}
-                      onRegionSelect={handlePanelRegionSelect}
-                      onRegionSearch={handleRegionSearch}
-                      searchQuery={regionSearchQuery}
-                    />
-                  </div>
-                )}
+            {enableClinicalOverlay &&
+              visualizationState.status === 'success' &&
+              visualizationState.data &&
+              patientData &&
+              riskAssessment && (
+                <div className="absolute bottom-4 left-4 right-4 z-10">
+                  <ClinicalDataOverlay
+                    patient={patientData}
+                    symptoms={activeSymptoms ?? []}
+                    diagnoses={activeDiagnoses ?? []}
+                    riskAssessment={riskAssessment}
+                    selectedRegionIds={selectedRegionIds}
+                    brainModel={visualizationState.data}
+                  />
+                </div>
+              )}
 
-              {enableClinicalOverlay &&
-                visualizationState.status === 'success' &&
-                visualizationState.data &&
-                patientData &&
-                riskAssessment && (
-                  <div className="absolute bottom-4 left-4 right-4 z-10">
-                    <ClinicalDataOverlay
+            {showDetails &&
+              activeRegionId &&
+              visualizationState.status === 'success' &&
+              visualizationState.data &&
+              patientData && (
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-20 flex items-center justify-center p-4">
+                  <div className="bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[90%] overflow-auto">
+                    <BrainRegionDetails
+                      regionId={activeRegionId}
+                      brainModel={visualizationState.data}
                       patient={patientData}
                       symptoms={activeSymptoms ?? []}
                       diagnoses={activeDiagnoses ?? []}
-                      riskAssessment={riskAssessment}
-                      selectedRegionIds={selectedRegionIds}
-                      brainModel={visualizationState.data}
+                      treatmentPredictions={treatmentPredictions ?? []}
+                      symptomMappings={symptomMappings ?? []}
+                      diagnosisMappings={diagnosisMappings ?? []}
+                      onClose={handleCloseDetails}
                     />
                   </div>
-                )}
-
-              {showDetails &&
-                activeRegionId &&
-                visualizationState.status === 'success' &&
-                visualizationState.data &&
-                patientData && (
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-20 flex items-center justify-center p-4">
-                    <div className="bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[90%] overflow-auto">
-                      <BrainRegionDetails
-                        regionId={activeRegionId}
-                        brainModel={visualizationState.data}
-                        patient={patientData}
-                        symptoms={activeSymptoms ?? []}
-                        diagnoses={activeDiagnoses ?? []}
-                        treatmentPredictions={treatmentPredictions ?? []}
-                        symptomMappings={symptomMappings ?? []}
-                        diagnosisMappings={diagnosisMappings ?? []}
-                        onClose={handleCloseDetails}
-                      />
-                    </div>
-                  </div>
-                )}
-
-              {showPerformanceStats && (
-                <div className="absolute bottom-4 right-4 z-10">
-                  <PerformanceMonitor /> {/* Remove non-existent onUpdate prop */}
                 </div>
               )}
-            </>
+
+            {showPerformanceStats && (
+              <div className="absolute bottom-4 right-4 z-10">
+                <PerformanceMonitor /> {/* Remove non-existent onUpdate prop */}
+              </div>
+            )}
+          </>
           {/* Removed extraneous closing parenthesis */}
         </AdaptiveLOD>
       </VisualizationErrorBoundary>

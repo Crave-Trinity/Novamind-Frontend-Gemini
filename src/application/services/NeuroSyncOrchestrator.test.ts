@@ -6,9 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react'; // Import renderHook and act
 
-import useNeuroSyncOrchestrator, {
-  // Removed unused: NeuroSyncState
-} from '@application/services/NeuroSyncOrchestrator'; // Corrected path
+import useNeuroSyncOrchestrator from '@application/services/NeuroSyncOrchestrator'; // Removed unused: NeuroSyncState // Corrected path
 
 // Mock services (basic mocks, replace with more specific mocks if needed)
 // Mock services FIRST

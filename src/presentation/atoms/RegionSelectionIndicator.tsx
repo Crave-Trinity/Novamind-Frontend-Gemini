@@ -6,8 +6,8 @@
 
 import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import type { Mesh } from 'three';
-import { Vector3, Color, ShaderMaterial } from 'three';
+import type { Mesh, ShaderMaterial } from 'three';
+import { Vector3, Color } from 'three';
 import { useSpring, animated } from '@react-spring/three';
 
 // Custom shader for neural selection effect with clinical precision
@@ -118,22 +118,25 @@ export const RegionSelectionIndicator: React.FC<RegionSelectionIndicatorProps> =
 
   // Create unified shader material with precise clinical parameters
   // Define shader parameters separately
-  const shaderParameters = useMemo(() => ({
-    uniforms: {
-      selectionColor: { value: selectionColor },
-      time: { value: 0 },
-      opacity: { value: 0.7 },
-      selectionStrength: { value: 0 },
-      rimPower: { value: rimPower },
-      rimIntensity: { value: rimIntensity },
-      pulseSpeed: { value: pulseSpeed },
-      pulseIntensity: { value: pulseIntensity },
-    },
-    vertexShader: selectionShader.vertexShader,
-    fragmentShader: selectionShader.fragmentShader,
-    transparent: true,
-    depthWrite: false, // Prevent Z-fighting with brain region
-  }), [selectionColor, rimPower, rimIntensity, pulseSpeed, pulseIntensity]);
+  const shaderParameters = useMemo(
+    () => ({
+      uniforms: {
+        selectionColor: { value: selectionColor },
+        time: { value: 0 },
+        opacity: { value: 0.7 },
+        selectionStrength: { value: 0 },
+        rimPower: { value: rimPower },
+        rimIntensity: { value: rimIntensity },
+        pulseSpeed: { value: pulseSpeed },
+        pulseIntensity: { value: pulseIntensity },
+      },
+      vertexShader: selectionShader.vertexShader,
+      fragmentShader: selectionShader.fragmentShader,
+      transparent: true,
+      depthWrite: false, // Prevent Z-fighting with brain region
+    }),
+    [selectionColor, rimPower, rimIntensity, pulseSpeed, pulseIntensity]
+  );
 
   // Create the material instance (optional if only using R3F component)
   // const shaderMaterial = useMemo(() => new ShaderMaterial(shaderParameters), [shaderParameters]);

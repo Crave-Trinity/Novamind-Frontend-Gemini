@@ -214,7 +214,9 @@ export const BiometricAlertVisualizer: React.FC<BiometricAlertVisualizerProps> =
 
         if (region) {
           // Offset slightly above the region
-          position = new THREE.Vector3(region.position.x, region.position.y, region.position.z).clone().add(new Vector3(0, 1.5, 0)); // Convert to THREE.Vector3 before clone
+          position = new THREE.Vector3(region.position.x, region.position.y, region.position.z)
+            .clone()
+            .add(new Vector3(0, 1.5, 0)); // Convert to THREE.Vector3 before clone
         } else {
           // Fallback to floating position with index-based offset
           position = floatingPosition.clone().add(new Vector3(0, -index * 1.2, 0));
@@ -226,7 +228,9 @@ export const BiometricAlertVisualizer: React.FC<BiometricAlertVisualizerProps> =
 
         if (region) {
           // Offset slightly above the region
-          position = new THREE.Vector3(region.position.x, region.position.y, region.position.z).clone().add(new Vector3(0, 1.5, 0)); // Convert to THREE.Vector3 before clone
+          position = new THREE.Vector3(region.position.x, region.position.y, region.position.z)
+            .clone()
+            .add(new Vector3(0, 1.5, 0)); // Convert to THREE.Vector3 before clone
         } else {
           // Fallback to floating position with index-based offset
           position = floatingPosition.clone().add(new Vector3(0, -index * 1.2, 0));
@@ -243,7 +247,8 @@ export const BiometricAlertVisualizer: React.FC<BiometricAlertVisualizerProps> =
   }, [processedAlerts, alertPositionMode, regionMap, floatingPosition]);
 
   // Update pulse animation state
-  useFrame((_state, delta) => { // state is unused
+  useFrame((_state, delta) => {
+    // state is unused
     // Update pulse state for each alert
     const newPulseState = new Map<string, number>();
 

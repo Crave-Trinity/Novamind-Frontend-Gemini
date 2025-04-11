@@ -166,7 +166,8 @@ export function calculateActivationLevel(rawActivity: number): ActivationLevel {
 export function calculateClinicalSignificance(
   activationPattern: NeuralActivationPattern,
   patientRiskFactors: string[] = []
-): Result<number, Error> { // Added error type
+): Result<number, Error> {
+  // Added error type
   // This would be a complex algorithm in practice
   // Simplified implementation for demonstration
 

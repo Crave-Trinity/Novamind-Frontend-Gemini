@@ -18,7 +18,12 @@ import { Button } from '@/components/ui/button'; // Correct path and named impor
 import { Badge } from '@presentation/atoms/Badge'; // Assuming this path is correct
 // Correct import path for Shadcn Card components
 import {
-  Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
 } from '@/components/ui/card'; // Path is now correct, re-added components for TS ignore
 import { ScrollArea } from '@/components/ui/scroll-area'; // Correct path
 import { Progress } from '@/components/ui/progress'; // Correct path
@@ -131,7 +136,8 @@ export const BiometricMonitorPanel: React.FC<BiometricMonitorPanelProps> = ({
   }, []);
 
   // Handle acknowledge alert
-  const handleAcknowledgeAlert = useCallback((_alertId: string) => { // Prefixed unused alertId
+  const handleAcknowledgeAlert = useCallback((_alertId: string) => {
+    // Prefixed unused alertId
     // Add type for alertId
     // acknowledgeAlert(alertId); // Commented out - acknowledgeAlert is not defined
   }, []); // Removed acknowledgeAlert dependency

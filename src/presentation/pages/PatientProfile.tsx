@@ -15,7 +15,8 @@ const PatientProfile: React.FC = () => {
   // Log PHI view for HIPAA compliance
   useEffect(() => {
     if (id) {
-      auditLogClient.log(AuditEventType.PATIENT_RECORD_VIEW, { // Corrected usage
+      auditLogClient.log(AuditEventType.PATIENT_RECORD_VIEW, {
+        // Corrected usage
         // Use correct type
         resourceType: 'patient',
         resourceId: id,
@@ -42,7 +43,8 @@ const PatientProfile: React.FC = () => {
 
   // Log brain model access when viewing that tab
   const handleBrainModelView = () => {
-    auditLogClient.log(AuditEventType.BRAIN_MODEL_VIEW, { // Corrected usage
+    auditLogClient.log(AuditEventType.BRAIN_MODEL_VIEW, {
+      // Corrected usage
       resourceType: 'brainModel',
       // patientId: id, // Remove invalid property
       action: 'view',

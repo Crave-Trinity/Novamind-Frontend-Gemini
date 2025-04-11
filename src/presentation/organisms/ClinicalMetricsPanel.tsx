@@ -316,7 +316,9 @@ export const ClinicalMetricsPanel: React.FC<ClinicalMetricsPanelProps> = ({
       transition={{ duration: 0.3 }}
     >
       {/* Pass className to the Card component */}
-      <Card className={`w-[320px] bg-slate-800/90 backdrop-blur-md text-white border-slate-700 ${className}`}>
+      <Card
+        className={`w-[320px] bg-slate-800/90 backdrop-blur-md text-white border-slate-700 ${className}`}
+      >
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-md flex items-center gap-2">

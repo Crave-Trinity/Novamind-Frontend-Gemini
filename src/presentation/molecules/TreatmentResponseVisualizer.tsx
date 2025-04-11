@@ -243,7 +243,8 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
       const points: Vector3[] = [];
       const confidencePoints: Vector3[][] = [];
 
-      temporalProjections.timeSeries.forEach((point, _i) => { // Prefixed unused i
+      temporalProjections.timeSeries.forEach((point, _i) => {
+        // Prefixed unused i
         // Map x position (time)
         const x = MathUtils.mapLinear(
           point.dayOffset,
@@ -483,7 +484,8 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
       )}
 
       {/* Render treatment predictions */}
-      {processedPredictions.map((prediction, _i) => { // Prefixed unused i
+      {processedPredictions.map((prediction, _i) => {
+        // Prefixed unused i
         // Line opacity based on selection state
         const opacity = prediction.isSelected ? 1 : selectedTreatmentId ? 0.4 : 0.8;
 
@@ -615,7 +617,8 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
                       anchorX="right"
                       anchorY="middle"
                     >
-                      {impact.region.name}: {Math.round(impact.impactStrength * 100)}% {/* Corrected impactLevel to impactStrength */}
+                      {impact.region.name}: {Math.round(impact.impactStrength * 100)}%{' '}
+                      {/* Corrected impactLevel to impactStrength */}
                     </Text>
                   </group>
                 );
@@ -652,7 +655,8 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
                     <div>
                       <div style={{ opacity: 0.8, marginBottom: '0.25rem' }}>Expected Response</div>
                       <div style={{ fontWeight: 'bold', color: prediction.color }}>
-                        {formatResponsePercentage(prediction.efficacy ?? 'low')} {/* Added default value */}
+                        {formatResponsePercentage(prediction.efficacy ?? 'low')}{' '}
+                        {/* Added default value */}
                       </div>
                     </div>
 
@@ -674,23 +678,26 @@ export const TreatmentResponseVisualizer: React.FC<TreatmentResponseVisualizerPr
                     <div>
                       <div style={{ opacity: 0.8, marginBottom: '0.25rem' }}>Confidence</div>
                       <div style={{ fontWeight: 'bold' }}>
-                        {Math.round((prediction.confidenceLevel ?? 1) * 100)}% {/* Added default value */}
+                        {Math.round((prediction.confidenceLevel ?? 1) * 100)}%{' '}
+                        {/* Added default value */}
                       </div>
                     </div>
                   </div>
 
-                  {prediction.sideEffectRisks && prediction.sideEffectRisks.length > 0 && ( // Corrected property name and added length check
-                    <div
-                      style={{
-                        fontSize: '0.8rem',
-                        opacity: 0.9,
-                        marginTop: '0.5rem',
-                      }}
-                    >
-                      <span style={{ opacity: 0.7 }}>Potential side effects:</span>{' '}
-                      {prediction.sideEffectRisks.map(risk => risk.effect).join(', ')} {/* Corrected property name and display logic */}
-                    </div>
-                  )}
+                  {prediction.sideEffectRisks &&
+                    prediction.sideEffectRisks.length > 0 && ( // Corrected property name and added length check
+                      <div
+                        style={{
+                          fontSize: '0.8rem',
+                          opacity: 0.9,
+                          marginTop: '0.5rem',
+                        }}
+                      >
+                        <span style={{ opacity: 0.7 }}>Potential side effects:</span>{' '}
+                        {prediction.sideEffectRisks.map((risk) => risk.effect).join(', ')}{' '}
+                        {/* Corrected property name and display logic */}
+                      </div>
+                    )}
 
                   {/* Removed contraindications section as property doesn't exist */}
                 </div>

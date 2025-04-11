@@ -34,7 +34,8 @@ export interface BrainRegion {
   functions?: string[];
   size?: number;
   scale?: number;
-  data?: { // Nested data structure seen in BrainModel factory usage
+  data?: {
+    // Nested data structure seen in BrainModel factory usage
     activity: number;
     anomalies: string[];
     volumes: {
@@ -183,7 +184,8 @@ export class SafeArray<T> {
 }
 
 // Custom implementation of NeuralVisualizationError class
-export class NeuralVisualizationError extends Error { // Confirmed unimplemented interface is removed
+export class NeuralVisualizationError extends Error {
+  // Confirmed unimplemented interface is removed
   code: string;
   severity: 'warning' | 'error' | 'fatal';
   component?: string;

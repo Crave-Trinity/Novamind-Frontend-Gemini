@@ -395,7 +395,8 @@ export const SymptomRegionMappingVisualizer: React.FC<SymptomRegionMappingVisual
   return (
     <group>
       {/* Render connections */}
-      {visibleConnections.map((_conn) => { // Prefixed unused variable
+      {visibleConnections.map((_conn) => {
+        // Prefixed unused variable
         // Generate curve points for smooth connections
         // Removed unused curvePoints variable calculation
 
@@ -412,7 +413,8 @@ export const SymptomRegionMappingVisualizer: React.FC<SymptomRegionMappingVisual
 
       {/* Render symptom/diagnosis labels */}
       {showSymptomLabels &&
-        symptomGroups.map((_group) => { // Prefixed unused variable
+        symptomGroups.map((_group) => {
+          // Prefixed unused variable
           // Removed unused isSelected variable calculation
 
           // Selected items have higher opacity for better visibility

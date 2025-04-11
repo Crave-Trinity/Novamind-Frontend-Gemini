@@ -505,7 +505,10 @@ function applyClinicialDataToBrainModel(
 
       // Apply region impacts
       enhancedModel.regions = enhancedModel.regions.map((region) => {
-        const regionImpact = impact.regionImpacts.find((ri: { regionId: string; impact: string; magnitude: number; confidence: number }) => ri.regionId === region.id);
+        const regionImpact = impact.regionImpacts.find(
+          (ri: { regionId: string; impact: string; magnitude: number; confidence: number }) =>
+            ri.regionId === region.id
+        );
 
         if (!regionImpact) return region;
 
@@ -532,7 +535,13 @@ function applyClinicialDataToBrainModel(
       // Apply connection impacts
       enhancedModel.connections = enhancedModel.connections.map((conn) => {
         const connectionImpact = impact.connectionImpacts.find(
-          (ci: { sourceId: string; targetId: string; impact: string; magnitude: number; confidence: number }) => ci.sourceId === conn.sourceId && ci.targetId === conn.targetId
+          (ci: {
+            sourceId: string;
+            targetId: string;
+            impact: string;
+            magnitude: number;
+            confidence: number;
+          }) => ci.sourceId === conn.sourceId && ci.targetId === conn.targetId
         );
 
         if (!connectionImpact) return conn;

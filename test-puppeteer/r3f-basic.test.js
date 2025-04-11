@@ -15,23 +15,23 @@ import assert from 'assert';
     console.log('[Puppeteer] Launching browser for basic R3F test...');
     browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'] // Common args for CI environments
+      args: ['--no-sandbox', '--disable-setuid-sandbox'], // Common args for CI environments
     });
     page = await browser.newPage(); // Assign to outer scope variable
 
     // --- Setup Event Listeners AFTER page is created ---
-    page.on('console', msg => {
-        const type = msg.type().toUpperCase();
-        const text = msg.text();
-        // Log errors and warnings prominently
-        if (type === 'ERROR' || type === 'WARN') {
-            console.error(`[Browser Console - ${type}] ${text}`);
-        } else {
-            console.log(`[Browser Console - ${type}] ${text}`);
-        }
+    page.on('console', (msg) => {
+      const type = msg.type().toUpperCase();
+      const text = msg.text();
+      // Log errors and warnings prominently
+      if (type === 'ERROR' || type === 'WARN') {
+        console.error(`[Browser Console - ${type}] ${text}`);
+      } else {
+        console.log(`[Browser Console - ${type}] ${text}`);
+      }
     });
-    page.on('pageerror', err => {
-        console.error('[Browser Page Error]', err.toString());
+    page.on('pageerror', (err) => {
+      console.error('[Browser Page Error]', err.toString());
     });
 
     // --- Mock API Response ---
@@ -47,7 +47,8 @@ import assert from 'assert';
         const mockBrainModel = {
           id: 'DEMO_SCAN_001', // Required: string
           patientId: 'DEMO_PATIENT', // Required: string
-          scan: { // Required: BrainScan object
+          scan: {
+            // Required: BrainScan object
             id: 'SCAN_123', // Required: string
             patientId: 'DEMO_PATIENT', // Required: string
             scanDate: nowISO, // Required: string (ISO format)
@@ -61,17 +62,82 @@ import assert from 'assert';
           processingLevel: 'analyzed', // Required: enum
           lastUpdated: nowISO, // Required: string (ISO format)
           version: '1.0.0', // Required: string
-          regions: [ // Required: BrainRegion[]
-             // Added 'activity' field matching 'activityLevel' as required by verifyBrainRegion
-             { id: 'prefrontal', name: 'Prefrontal Cortex', position: { x: 0, y: 2, z: 0 }, color: '#ff0000', connections: ['pfc-amy', 'pfc-hip'], activityLevel: 0.75, isActive: true, hemisphereLocation: 'left', dataConfidence: 0.9, volume: 100, activity: 0.75 },
-             { id: 'amygdala', name: 'Amygdala', position: { x: -0.5, y: 0, z: 0 }, color: '#00ff00', connections: ['pfc-amy', 'amy-hip'], activityLevel: 0.9, isActive: true, hemisphereLocation: 'left', dataConfidence: 0.9, volume: 50, activity: 0.9 },
-             { id: 'hippocampus', name: 'Hippocampus', position: { x: 0.5, y: 0, z: 0 }, color: '#0000ff', connections: ['pfc-hip', 'amy-hip'], activityLevel: 0.6, isActive: true, hemisphereLocation: 'right', dataConfidence: 0.9, volume: 75, activity: 0.6 },
+          regions: [
+            // Required: BrainRegion[]
+            // Added 'activity' field matching 'activityLevel' as required by verifyBrainRegion
+            {
+              id: 'prefrontal',
+              name: 'Prefrontal Cortex',
+              position: { x: 0, y: 2, z: 0 },
+              color: '#ff0000',
+              connections: ['pfc-amy', 'pfc-hip'],
+              activityLevel: 0.75,
+              isActive: true,
+              hemisphereLocation: 'left',
+              dataConfidence: 0.9,
+              volume: 100,
+              activity: 0.75,
+            },
+            {
+              id: 'amygdala',
+              name: 'Amygdala',
+              position: { x: -0.5, y: 0, z: 0 },
+              color: '#00ff00',
+              connections: ['pfc-amy', 'amy-hip'],
+              activityLevel: 0.9,
+              isActive: true,
+              hemisphereLocation: 'left',
+              dataConfidence: 0.9,
+              volume: 50,
+              activity: 0.9,
+            },
+            {
+              id: 'hippocampus',
+              name: 'Hippocampus',
+              position: { x: 0.5, y: 0, z: 0 },
+              color: '#0000ff',
+              connections: ['pfc-hip', 'amy-hip'],
+              activityLevel: 0.6,
+              isActive: true,
+              hemisphereLocation: 'right',
+              dataConfidence: 0.9,
+              volume: 75,
+              activity: 0.6,
+            },
           ],
-          connections: [ // Required: NeuralConnection[]
-             // Added missing required 'activityLevel' field
-             { id: 'pfc-amy', sourceId: 'prefrontal', targetId: 'amygdala', strength: 0.8, type: 'excitatory', directionality: 'unidirectional', dataConfidence: 0.85, activityLevel: 0.8 },
-             { id: 'pfc-hip', sourceId: 'prefrontal', targetId: 'hippocampus', strength: 0.7, type: 'excitatory', directionality: 'unidirectional', dataConfidence: 0.85, activityLevel: 0.7 },
-             { id: 'amy-hip', sourceId: 'amygdala', targetId: 'hippocampus', strength: 0.9, type: 'inhibitory', directionality: 'bidirectional', dataConfidence: 0.85, activityLevel: 0.75 },
+          connections: [
+            // Required: NeuralConnection[]
+            // Added missing required 'activityLevel' field
+            {
+              id: 'pfc-amy',
+              sourceId: 'prefrontal',
+              targetId: 'amygdala',
+              strength: 0.8,
+              type: 'excitatory',
+              directionality: 'unidirectional',
+              dataConfidence: 0.85,
+              activityLevel: 0.8,
+            },
+            {
+              id: 'pfc-hip',
+              sourceId: 'prefrontal',
+              targetId: 'hippocampus',
+              strength: 0.7,
+              type: 'excitatory',
+              directionality: 'unidirectional',
+              dataConfidence: 0.85,
+              activityLevel: 0.7,
+            },
+            {
+              id: 'amy-hip',
+              sourceId: 'amygdala',
+              targetId: 'hippocampus',
+              strength: 0.9,
+              type: 'inhibitory',
+              directionality: 'bidirectional',
+              dataConfidence: 0.85,
+              activityLevel: 0.75,
+            },
           ],
           // Optional fields can be added if needed
           // algorithmVersion: 'v2.1',
@@ -88,7 +154,6 @@ import assert from 'assert';
     });
     // --- End Mock API Response ---
     // --- End Event Listeners ---
-
 
     // Ensure the dev server is running (npm run dev)
     console.log(`[Puppeteer] Navigating to ${targetUrl}...`);
@@ -116,21 +181,23 @@ import assert from 'assert';
       const screenshotPath = 'test-puppeteer/failure-screenshot-r3f-basic.png';
       await page.screenshot({ path: screenshotPath });
       console.error(`[Puppeteer] Screenshot saved to ${screenshotPath}`);
-      throw new Error(`❌ FAILURE: Canvas element ('${canvasSelector}') not found on ${targetUrl}.`);
+      throw new Error(
+        `❌ FAILURE: Canvas element ('${canvasSelector}') not found on ${targetUrl}.`
+      );
     }
 
     console.log('[Puppeteer] Basic R3F test finished successfully.');
-
   } catch (error) {
     console.error('[Puppeteer] Basic R3F test failed:', error);
-    if (browser && page) { // Check if page exists before screenshot
-        try {
-            const screenshotPath = 'test-puppeteer/failure-screenshot-r3f-basic.png';
-            await page.screenshot({ path: screenshotPath });
-            console.error(`[Puppeteer] Screenshot saved to ${screenshotPath}`);
-        } catch (ssError) {
-            console.error('[Puppeteer] Failed to take screenshot:', ssError);
-        }
+    if (browser && page) {
+      // Check if page exists before screenshot
+      try {
+        const screenshotPath = 'test-puppeteer/failure-screenshot-r3f-basic.png';
+        await page.screenshot({ path: screenshotPath });
+        console.error(`[Puppeteer] Screenshot saved to ${screenshotPath}`);
+      } catch (ssError) {
+        console.error('[Puppeteer] Failed to take screenshot:', ssError);
+      }
     }
     process.exitCode = 1; // Indicate failure
   } finally {

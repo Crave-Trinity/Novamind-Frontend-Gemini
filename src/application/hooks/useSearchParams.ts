@@ -5,9 +5,7 @@
  */
 
 import { useCallback } from 'react';
-import {
-  useSearchParams as useReactRouterSearchParams,
-} from 'react-router-dom';
+import { useSearchParams as useReactRouterSearchParams } from 'react-router-dom';
 
 // Define the structure for the state object if needed (example)
 interface SearchState {

@@ -20,7 +20,9 @@ vi.mock('react-router-dom', async (importOriginal) => {
 });
 
 vi.mock('@/components/atoms/SecureInput', () => ({
-  default: ({ id, /* name, */ type, value, onChange, label, /* required, */ placeholder }: any) => ( // Removed unused name, required
+  default: (
+    { id, /* name, */ type, value, onChange, label, /* required, */ placeholder }: any // Removed unused name, required
+  ) => (
     <div data-testid={`secure-input-${id}`}>
       <label>{label}</label>
       <input

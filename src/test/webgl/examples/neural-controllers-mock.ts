@@ -12,7 +12,8 @@ import { vi } from 'vitest';
 /**
  * Create mock implementation for a specific controller
  */
-function createMockForController(_controllerPath: string): Record<string, any> { // Prefixed unused parameter
+function createMockForController(_controllerPath: string): Record<string, any> {
+  // Prefixed unused parameter
   // Extract controller name from path
   // Removed unused _controllerName variable
 

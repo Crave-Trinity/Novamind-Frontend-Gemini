@@ -124,11 +124,11 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
                 </div>
                 <div className="p-4">
                   <BrainVisualization
-                    // patientId={patientId} // Removed invalid prop
-                    // height={300} // Removed invalid prop
-                    // interactive={true} // Removed invalid prop
-                    // showLabels={false} // Removed invalid prop
-                    // onRegionClick={handleRegionClick} // Removed invalid prop
+                  // patientId={patientId} // Removed invalid prop
+                  // height={300} // Removed invalid prop
+                  // interactive={true} // Removed invalid prop
+                  // showLabels={false} // Removed invalid prop
+                  // onRegionClick={handleRegionClick} // Removed invalid prop
                   />
                 </div>
               </div>
@@ -178,18 +178,23 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
                         Current Treatments
                       </h4>
                       <div className="space-y-2">
-                        {profile.treatmentPlan.treatments.map((treatment: any, index: number) => ( // Added types
-                          <div
-                            key={index}
-                            className="flex items-center justify-between rounded bg-background-lighter p-2 dark:bg-background-card"
-                          >
-                            <div>
-                              <span className="font-medium capitalize">{treatment.type}</span>
-                              <p className="text-xs text-neutral-500">{treatment.details}</p>
+                        {profile.treatmentPlan.treatments.map(
+                          (
+                            treatment: any,
+                            index: number // Added types
+                          ) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between rounded bg-background-lighter p-2 dark:bg-background-card"
+                            >
+                              <div>
+                                <span className="font-medium capitalize">{treatment.type}</span>
+                                <p className="text-xs text-neutral-500">{treatment.details}</p>
+                              </div>
+                              <div className="text-xs text-neutral-500">{treatment.timeframe}</div>
                             </div>
-                            <div className="text-xs text-neutral-500">{treatment.timeframe}</div>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
                     </div>
 
@@ -226,11 +231,11 @@ const DigitalTwinDashboard: React.FC<DigitalTwinDashboardProps> = ({
               </div>
               <div className="p-4">
                 <BrainVisualization
-                  // patientId={patientId} // Removed invalid prop
-                  // height={600} // Removed invalid prop
-                  // interactive={true} // Removed invalid prop
-                  // showLabels={true} // Removed invalid prop
-                  // onRegionClick={handleRegionClick} // Removed invalid prop
+                // patientId={patientId} // Removed invalid prop
+                // height={600} // Removed invalid prop
+                // interactive={true} // Removed invalid prop
+                // showLabels={true} // Removed invalid prop
+                // onRegionClick={handleRegionClick} // Removed invalid prop
                 />
 
                 {/* Brain region details */}

@@ -22,7 +22,9 @@ describe('Neural Transforms type definitions', () => {
     expectTypeOf<NeuralTransform>().toHaveProperty('activationChange').toEqualTypeOf<number>();
     expectTypeOf<NeuralTransform>().toHaveProperty('transitionType');
     expectTypeOf<NeuralTransform>().toHaveProperty('frequencyBand');
-    expectTypeOf<NeuralTransform['frequencyBand']>().toEqualTypeOf<NeuralFrequencyBand | undefined>(); // Corrected expected type
+    expectTypeOf<NeuralTransform['frequencyBand']>().toEqualTypeOf<
+      NeuralFrequencyBand | undefined
+    >(); // Corrected expected type
     expectTypeOf<NeuralTransform>()
       .toHaveProperty('sourceTrigger')
       .toEqualTypeOf<'symptom' | 'medication' | 'stimulation' | 'baseline' | 'manual'>();

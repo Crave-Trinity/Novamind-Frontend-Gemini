@@ -19,7 +19,8 @@ export class RiskAssessmentService {
     let riskLevel: RiskLevel;
 
     // Assign RiskLevel enum members directly
-    if (score >= 75) riskLevel = RiskLevel.SEVERE; // Assuming 'critical' maps to 'severe'
+    if (score >= 75)
+      riskLevel = RiskLevel.SEVERE; // Assuming 'critical' maps to 'severe'
     else if (score >= 50) riskLevel = RiskLevel.HIGH;
     else if (score >= 25) riskLevel = RiskLevel.MODERATE;
     else if (score >= 10) riskLevel = RiskLevel.LOW;
@@ -43,7 +44,8 @@ export class RiskAssessmentService {
     let riskLevel: RiskLevel;
 
     // Assign RiskLevel enum members directly
-    if (score >= 75) riskLevel = RiskLevel.SEVERE; // Assuming 'critical' maps to 'severe'
+    if (score >= 75)
+      riskLevel = RiskLevel.SEVERE; // Assuming 'critical' maps to 'severe'
     else if (score >= 50) riskLevel = RiskLevel.HIGH;
     else if (score >= 25) riskLevel = RiskLevel.MODERATE;
     else if (score >= 10) riskLevel = RiskLevel.LOW;
@@ -78,7 +80,8 @@ export class RiskAssessmentService {
     let riskLevel: RiskLevel;
 
     // Assign RiskLevel enum members directly
-    if (overallScore >= 75) riskLevel = RiskLevel.SEVERE; // Assuming 'critical' maps to 'severe'
+    if (overallScore >= 75)
+      riskLevel = RiskLevel.SEVERE; // Assuming 'critical' maps to 'severe'
     else if (overallScore >= 50) riskLevel = RiskLevel.HIGH;
     else if (overallScore >= 25) riskLevel = RiskLevel.MODERATE;
     else if (overallScore >= 10) riskLevel = RiskLevel.LOW;

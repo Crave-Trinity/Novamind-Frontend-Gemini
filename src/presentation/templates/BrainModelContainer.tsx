@@ -89,7 +89,8 @@ const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
         setLoading(true);
 
         // Log data access for HIPAA compliance
-        auditLogClient.log(AuditEventType.PATIENT_RECORD_VIEW, { // Corrected usage again
+        auditLogClient.log(AuditEventType.PATIENT_RECORD_VIEW, {
+          // Corrected usage again
           action: 'load_brain_model',
           resourceId: patientId,
           resourceType: 'brain_visualization',
@@ -211,7 +212,8 @@ const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
         setLoading(false);
 
         // Log error for HIPAA compliance (without PHI)
-        auditLogClient.log(AuditEventType.SYSTEM_ERROR, { // Corrected usage again
+        auditLogClient.log(AuditEventType.SYSTEM_ERROR, {
+          // Corrected usage again
           action: 'load_brain_model_error',
           errorCode: 'DATA_LOAD_FAILURE',
           errorMessage: err instanceof Error ? err.message : 'Unknown error',
@@ -225,7 +227,8 @@ const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
     // Cleanup function
     return () => {
       // Log end of visualization session
-      auditLogClient.log(AuditEventType.PATIENT_RECORD_VIEW, { // Corrected usage again
+      auditLogClient.log(AuditEventType.PATIENT_RECORD_VIEW, {
+        // Corrected usage again
         action: 'close_brain_model',
         resourceId: patientId,
         resourceType: 'brain_visualization',
@@ -245,7 +248,8 @@ const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
 
       // Log for HIPAA compliance
       if (node) {
-        auditLogClient.log(AuditEventType.PATIENT_RECORD_VIEW, { // Corrected usage again
+        auditLogClient.log(AuditEventType.PATIENT_RECORD_VIEW, {
+          // Corrected usage again
           action: 'select_neural_node',
           resourceId: patientId,
           resourceType: 'neural_node',
@@ -263,7 +267,8 @@ const BrainModelContainer: React.FC<BrainModelContainerProps> = ({
       setHighlightedRegion(regionId === highlightedRegion ? undefined : regionId);
 
       // Log for HIPAA compliance
-      auditLogClient.log(AuditEventType.PATIENT_RECORD_VIEW, { // Corrected usage again
+      auditLogClient.log(AuditEventType.PATIENT_RECORD_VIEW, {
+        // Corrected usage again
         action: 'highlight_brain_region',
         resourceId: patientId,
         resourceType: 'brain_region',

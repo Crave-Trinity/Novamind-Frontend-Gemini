@@ -104,7 +104,10 @@ export function toHaveBeenCalledOnceWith(
 // }
 
 // Test data generators based on our domain types
-import type { /* BrainModel, BrainRegion, */ BrainScan, /* NeuralConnection, */ Patient } from '@domain/types'; // Removed unused types
+import type {
+  /* BrainModel, BrainRegion, */ BrainScan,
+  /* NeuralConnection, */ Patient,
+} from '@domain/types'; // Removed unused types
 
 export const createTestPatient = (): Patient => ({
   id: 'test-patient',

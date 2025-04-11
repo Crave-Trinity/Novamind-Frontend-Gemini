@@ -63,7 +63,8 @@ export interface Dimensions {
 export type Result<T, E> = { success: true; value: T } | { success: false; error: E }; // Removed default error type
 
 // Helper functions for Result pattern
-export const success = <T>(value: T): Result<T, never> => ({ // Specify 'never' for the error type
+export const success = <T>(value: T): Result<T, never> => ({
+  // Specify 'never' for the error type
   success: true,
   value,
 });

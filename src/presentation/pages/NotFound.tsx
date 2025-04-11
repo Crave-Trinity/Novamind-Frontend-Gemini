@@ -15,7 +15,8 @@ const NotFound: React.FC = () => {
 
   // Log the 404 event
   useEffect(() => {
-    auditLogClient.log(AuditEventType.SYSTEM_ERROR, { // Corrected usage
+    auditLogClient.log(AuditEventType.SYSTEM_ERROR, {
+      // Corrected usage
       action: 'not_found',
       details: `Attempted to navigate to ${location.pathname}`,
       result: 'failure',

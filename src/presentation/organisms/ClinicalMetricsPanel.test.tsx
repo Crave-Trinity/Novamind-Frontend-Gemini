@@ -105,7 +105,8 @@ describe('ClinicalMetricsPanel', () => {
 
   // it("displays loading state..." ) // Removed loading state test - relies on internal state/props
 
-  it('applies custom class name with mathematical precision', async () => { // Make the test function async
+  it('applies custom class name with mathematical precision', async () => {
+    // Make the test function async
     const { container } = renderWithProviders(<ClinicalMetricsPanel {...mockProps} />);
 
     // The first child div of the container should have the class (motion.div)

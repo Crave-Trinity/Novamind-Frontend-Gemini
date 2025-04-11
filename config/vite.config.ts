@@ -30,15 +30,20 @@ export default defineConfig(({ command, mode }) => {
       assetsDir: 'assets',
       sourcemap: true,
       rollupOptions: {
-         input: { // Add explicit inputs
-           main: path.resolve(__dirname, '../index.html'), // Default entry point
-           neuralControlPanelDemo: path.resolve(__dirname, '../neural-control-panel-demo.html') // New demo page at root
-         },
+        input: {
+          // Add explicit inputs
+          main: path.resolve(__dirname, '../index.html'), // Default entry point
+          neuralControlPanelDemo: path.resolve(__dirname, '../neural-control-panel-demo.html'), // New demo page at root
+        },
         output: {
           manualChunks: {
             'react-vendor': ['react', 'react-dom', 'react-router-dom'],
             'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
-            'ui-vendor': ['@radix-ui/react-icons', '@radix-ui/react-select', '@radix-ui/react-tabs'],
+            'ui-vendor': [
+              '@radix-ui/react-icons',
+              '@radix-ui/react-select',
+              '@radix-ui/react-tabs',
+            ],
           },
         },
       },
@@ -63,13 +68,12 @@ export default defineConfig(({ command, mode }) => {
       },
     },
     optimizeDeps: {
-      include: [
-        'react', 'react-dom', 'three', '@react-three/fiber', '@react-three/drei'
-      ],
-      exclude: ['@react-three/postprocessing', '@react-three/a11y']
+      include: ['react', 'react-dom', 'three', '@react-three/fiber', '@react-three/drei'],
+      exclude: ['@react-three/postprocessing', '@react-three/a11y'],
     },
     resolve: {
-      alias: [ // Use array format for aliases
+      alias: [
+        // Use array format for aliases
         { find: '@', replacement: path.resolve(__dirname, '../src') },
         { find: '@domain', replacement: path.resolve(__dirname, '../src/domain') },
         { find: '@application', replacement: path.resolve(__dirname, '../src/application') },
@@ -77,13 +81,25 @@ export default defineConfig(({ command, mode }) => {
         { find: '@presentation', replacement: path.resolve(__dirname, '../src/presentation') },
         { find: '@shared', replacement: path.resolve(__dirname, '../src/shared') },
         { find: '@atoms', replacement: path.resolve(__dirname, '../src/presentation/atoms') },
-        { find: '@molecules', replacement: path.resolve(__dirname, '../src/presentation/molecules') },
-        { find: '@organisms', replacement: path.resolve(__dirname, '../src/presentation/organisms') },
-        { find: '@templates', replacement: path.resolve(__dirname, '../src/presentation/templates') },
+        {
+          find: '@molecules',
+          replacement: path.resolve(__dirname, '../src/presentation/molecules'),
+        },
+        {
+          find: '@organisms',
+          replacement: path.resolve(__dirname, '../src/presentation/organisms'),
+        },
+        {
+          find: '@templates',
+          replacement: path.resolve(__dirname, '../src/presentation/templates'),
+        },
         { find: '@pages', replacement: path.resolve(__dirname, '../src/presentation/pages') },
         { find: '@hooks', replacement: path.resolve(__dirname, '../src/application/hooks') },
         { find: '@contexts', replacement: path.resolve(__dirname, '../src/application/contexts') },
-        { find: '@providers', replacement: path.resolve(__dirname, '../src/application/providers') },
+        {
+          find: '@providers',
+          replacement: path.resolve(__dirname, '../src/application/providers'),
+        },
         { find: '@stores', replacement: path.resolve(__dirname, '../src/application/stores') },
         { find: '@services', replacement: path.resolve(__dirname, '../src/application/services') },
         { find: '@clients', replacement: path.resolve(__dirname, '../src/infrastructure/clients') },

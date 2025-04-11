@@ -78,7 +78,8 @@ export function useClinicalPredictionController(patientId: string) {
     async (
       _symptomIds: string[], // Prefixed unused parameter
       _predictionHorizon?: number // Prefixed unused parameter
-    ): Promise<ResultType<Map<string, SymptomTrajectory>, Error>> => { // Added error type
+    ): Promise<ResultType<Map<string, SymptomTrajectory>, Error>> => {
+      // Added error type
       try {
         // Removed unused _horizon variable
 
@@ -168,7 +169,8 @@ export function useClinicalPredictionController(patientId: string) {
     async (
       _treatmentIds: string[], // Prefixed unused parameter
       _predictionHorizon?: number // Prefixed unused parameter
-    ): Promise<ResultType<Map<string, TreatmentOutcome>, Error>> => { // Added error type
+    ): Promise<ResultType<Map<string, TreatmentOutcome>, Error>> => {
+      // Added error type
       try {
         // Removed unused _horizon variable
 
@@ -257,7 +259,8 @@ export function useClinicalPredictionController(patientId: string) {
     async (
       _disorderIds: string[], // Prefixed unused parameter
       _predictionHorizon?: number // Prefixed unused parameter
-    ): Promise<ResultType<RelapsePrediction[], Error>> => { // Added error type
+    ): Promise<ResultType<RelapsePrediction[], Error>> => {
+      // Added error type
       try {
         // Removed unused _horizon variable
 
@@ -336,7 +339,8 @@ export function useClinicalPredictionController(patientId: string) {
 
   // Assess clinical risks
   const assessRisks = useCallback(
-    async (_riskFactors: string[]): Promise<ResultType<Map<string, RiskAssessment>, Error>> => { // Prefixed unused parameter, Added error type
+    async (_riskFactors: string[]): Promise<ResultType<Map<string, RiskAssessment>, Error>> => {
+      // Prefixed unused parameter, Added error type
       try {
         // Configure assessment parameters
         // Removed unused _assessmentParams
@@ -456,7 +460,8 @@ export function useClinicalPredictionController(patientId: string) {
     async (
       _predictionType: 'symptom' | 'treatment' | 'relapse' | 'risk', // Prefixed unused parameter
       _timeframe: 'week' | 'month' | 'quarter' | 'year' // Prefixed unused parameter
-    ): Promise<ResultType<PredictionAccuracy, Error>> => { // Added error type
+    ): Promise<ResultType<PredictionAccuracy, Error>> => {
+      // Added error type
       try {
         // TODO: Implement actual service call when available
         // const result = await clinicalService.calculateAccuracy({ /* ... params ... */ });
@@ -479,7 +484,8 @@ export function useClinicalPredictionController(patientId: string) {
     async <T extends PredictionResult>(
       results: T[],
       confidenceLevels: ConfidenceLevel[]
-    ): Promise<ResultType<T, Error>> => { // Added error type
+    ): Promise<ResultType<T, Error>> => {
+      // Added error type
       try {
         if (results.length === 0) {
           return failure(new Error('No prediction results to combine')); // Corrected failure call
@@ -533,7 +539,8 @@ export function useClinicalPredictionController(patientId: string) {
   );
 
   // Get available prediction models
-  const getAvailableModels = useCallback(async (): Promise<Result<PredictionModel[], Error>> => { // Added error type
+  const getAvailableModels = useCallback(async (): Promise<Result<PredictionModel[], Error>> => {
+    // Added error type
     try {
       // TODO: Implement actual service call when available
       // const result = await clinicalService.getAvailableModels();

@@ -87,7 +87,8 @@ export class EnhancedMockApiClient implements IApiClient {
   /**
    * Generic GET request
    */
-  public async get<T>(url: string, _config?: AxiosRequestConfig): Promise<T> { // Prefixed unused config
+  public async get<T>(url: string, _config?: AxiosRequestConfig): Promise<T> {
+    // Prefixed unused config
     // Log the request attempt
     if (this.auditLogsEnabled) {
       this.logActivity('api_request', { method: 'GET', url });
@@ -129,7 +130,8 @@ export class EnhancedMockApiClient implements IApiClient {
   /**
    * Generic POST request
    */
-  public async post<T>(url: string, data?: any, _config?: AxiosRequestConfig): Promise<T> { // Prefixed unused config
+  public async post<T>(url: string, data?: any, _config?: AxiosRequestConfig): Promise<T> {
+    // Prefixed unused config
     // Log the request attempt
     if (this.auditLogsEnabled) {
       this.logActivity('api_request', {
@@ -172,7 +174,8 @@ export class EnhancedMockApiClient implements IApiClient {
   /**
    * Generic PUT request
    */
-  public async put<T>(url: string, data?: any, _config?: AxiosRequestConfig): Promise<T> { // Prefixed unused config
+  public async put<T>(url: string, data?: any, _config?: AxiosRequestConfig): Promise<T> {
+    // Prefixed unused config
     // Log the request attempt
     if (this.auditLogsEnabled) {
       this.logActivity('api_request', {
@@ -198,7 +201,8 @@ export class EnhancedMockApiClient implements IApiClient {
   /**
    * Generic DELETE request
    */
-  public async delete<T>(url: string, _config?: AxiosRequestConfig): Promise<T> { // Prefixed unused config
+  public async delete<T>(url: string, _config?: AxiosRequestConfig): Promise<T> {
+    // Prefixed unused config
     // Log the request attempt
     if (this.auditLogsEnabled) {
       this.logActivity('api_request', { method: 'DELETE', url });

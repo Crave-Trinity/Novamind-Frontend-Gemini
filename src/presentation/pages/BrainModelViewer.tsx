@@ -157,7 +157,8 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
               <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-blue-900/5 to-purple-900/5 dark:from-blue-900/20 dark:to-purple-900/20">
                 <div className="text-center">
                   <div className="mb-4 text-xl font-medium text-neutral-400 dark:text-neutral-500">
-                    {brainModel ? `Brain Model: ${brainModel.id}` : 'Brain Model Visualization'} // Use brainModel.id instead of name
+                    {brainModel ? `Brain Model: ${brainModel.id}` : 'Brain Model Visualization'} //
+                    Use brainModel.id instead of name
                   </div>
                   <div className="text-sm text-neutral-500 dark:text-neutral-400">
                     Three.js component would render here
@@ -292,7 +293,8 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                 {selectedRegion.name}
               </h2>
               <p className="mb-4 mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                {selectedRegion.clinicalSignificance || 'No clinical significance noted.'} {/* Use clinicalSignificance */}
+                {selectedRegion.clinicalSignificance || 'No clinical significance noted.'}{' '}
+                {/* Use clinicalSignificance */}
               </p>
 
               {/* Region Metrics */}
@@ -310,7 +312,8 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                   </div>
                   <div className="mt-1 flex justify-between text-xs">
                     <span>0%</span>
-                    <span>{Math.round(selectedRegion.activityLevel * 100) || 0}%</span> {/* Use activityLevel */}
+                    <span>{Math.round(selectedRegion.activityLevel * 100) || 0}%</span>{' '}
+                    {/* Use activityLevel */}
                     <span>100%</span>
                   </div>
                 </div>
@@ -320,7 +323,8 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                   <h3 className="mb-1 text-xs font-medium text-neutral-500">Volume</h3>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">
-                      {selectedRegion.volume || selectedRegion.volumeMl || 'N/A'} cm³ {/* Use volume or volumeMl */}
+                      {selectedRegion.volume || selectedRegion.volumeMl || 'N/A'} cm³{' '}
+                      {/* Use volume or volumeMl */}
                     </span>
                     <span className="text-xs text-neutral-500">
                       {/* Removed percentile as it's not available */}
@@ -382,15 +386,19 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
                     Available Regions
                   </h4>
                   <div className="grid grid-cols-2 gap-2">
-                    {brainModel.regions.map((region) => ( // Removed explicit type
-                      <div
-                        key={region.id}
-                        className="cursor-pointer truncate rounded border border-neutral-200 bg-white px-2 py-1.5 text-xs text-neutral-800 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
-                        onClick={() => handleRegionSelect(region.id)}
-                      >
-                        {region.name}
-                      </div>
-                    ))}
+                    {brainModel.regions.map(
+                      (
+                        region // Removed explicit type
+                      ) => (
+                        <div
+                          key={region.id}
+                          className="cursor-pointer truncate rounded border border-neutral-200 bg-white px-2 py-1.5 text-xs text-neutral-800 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                          onClick={() => handleRegionSelect(region.id)}
+                        >
+                          {region.name}
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
               )}

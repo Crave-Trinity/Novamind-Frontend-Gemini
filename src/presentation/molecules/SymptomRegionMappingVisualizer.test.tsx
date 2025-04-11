@@ -97,7 +97,8 @@ vi.mock('@react-spring/three', () => ({
   animated: new Proxy(
     {},
     {
-      get: (_target, prop) => { // Prefixed unused target parameter
+      get: (_target, prop) => {
+        // Prefixed unused target parameter
         const MockAnimatedComponent = React.forwardRef(
           ({ children, ...props }: React.PropsWithChildren<any>, ref: any) =>
             React.createElement(

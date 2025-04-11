@@ -29,7 +29,8 @@ export const clinicalService = {
   /**
    * Fetch neural mappings for symptoms
    */
-  fetchSymptomMappings: async (): Promise<Result<SymptomNeuralMapping[], Error>> => { // Added error type
+  fetchSymptomMappings: async (): Promise<Result<SymptomNeuralMapping[], Error>> => {
+    // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<SymptomNeuralMapping[]>(
@@ -84,7 +85,8 @@ export const clinicalService = {
   /**
    * Fetch neural mappings for diagnoses
    */
-  fetchDiagnosisMappings: async (): Promise<Result<DiagnosisNeuralMapping[], Error>> => { // Added error type
+  fetchDiagnosisMappings: async (): Promise<Result<DiagnosisNeuralMapping[], Error>> => {
+    // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<DiagnosisNeuralMapping[]>(
@@ -139,7 +141,8 @@ export const clinicalService = {
   /**
    * Fetch neural mappings for treatments
    */
-  fetchTreatmentMappings: async (): Promise<Result<TreatmentNeuralMapping[], Error>> => { // Added error type
+  fetchTreatmentMappings: async (): Promise<Result<TreatmentNeuralMapping[], Error>> => {
+    // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<TreatmentNeuralMapping[]>(
@@ -195,7 +198,8 @@ export const clinicalService = {
    * Fetch risk assessment for a patient
    * HIPAA-compliant with secure PHI handling
    */
-  fetchRiskAssessment: async (patientId: string): Promise<Result<RiskAssessment, Error>> => { // Added error type
+  fetchRiskAssessment: async (patientId: string): Promise<Result<RiskAssessment, Error>> => {
+    // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<RiskAssessment>(
@@ -255,7 +259,8 @@ export const clinicalService = {
    */
   fetchTreatmentPredictions: async (
     patientId: string
-  ): Promise<Result<TreatmentResponsePrediction[], Error>> => { // Added error type
+  ): Promise<Result<TreatmentResponsePrediction[], Error>> => {
+    // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<TreatmentResponsePrediction[]>(
@@ -315,7 +320,8 @@ export const clinicalService = {
    * Fetch symptoms for a patient
    * HIPAA-compliant with secure PHI handling
    */
-  fetchPatientSymptoms: async (patientId: string): Promise<Result<Symptom[], Error>> => { // Added error type
+  fetchPatientSymptoms: async (patientId: string): Promise<Result<Symptom[], Error>> => {
+    // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<Symptom[]>(
@@ -373,7 +379,8 @@ export const clinicalService = {
    * Fetch diagnoses for a patient
    * HIPAA-compliant with secure PHI handling
    */
-  fetchPatientDiagnoses: async (patientId: string): Promise<Result<Diagnosis[], Error>> => { // Added error type
+  fetchPatientDiagnoses: async (patientId: string): Promise<Result<Diagnosis[], Error>> => {
+    // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<Diagnosis[]>(
@@ -433,7 +440,8 @@ export const clinicalService = {
    * Fetch treatments for a patient
    * HIPAA-compliant with secure PHI handling
    */
-  fetchPatientTreatments: async (patientId: string): Promise<Result<Treatment[], Error>> => { // Added error type
+  fetchPatientTreatments: async (patientId: string): Promise<Result<Treatment[], Error>> => {
+    // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.get<Treatment[]>(
@@ -497,7 +505,8 @@ export const clinicalService = {
     patientId: string,
     symptomId: string,
     updates: Partial<Symptom>
-  ): Promise<Result<Symptom, Error>> => { // Added error type
+  ): Promise<Result<Symptom, Error>> => {
+    // Added error type
     try {
       // API request with timeout and error handling
       const response = await axios.patch<Symptom>(

@@ -17,16 +17,16 @@ export default tseslint.config(
     files: ['src/**/*.ts', 'src/**/*.tsx'],
     // Specify files/directories to ignore
     ignores: [
-        'node_modules/**',
-        'dist/**',
-        'coverage/**',
-        'build-analysis/**',
-        'test-reports/**',
-        '*.config.js', // Ignore config files themselves
-        '*.config.ts',
-        '*.cjs',
-        'scripts/**',
-        'public/**'
-        ],
+      'node_modules/**',
+      'dist/**',
+      'coverage/**',
+      'build-analysis/**',
+      'test-reports/**',
+      '*.config.js', // Ignore config files themselves
+      '*.config.ts',
+      '*.cjs',
+      'scripts/**',
+      'public/**',
+    ],
   }
 );

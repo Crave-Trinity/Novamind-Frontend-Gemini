@@ -2,7 +2,8 @@ import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 // @ts-ignore - Types will be handled by overrides in package.json
 import { Instance, Instances } from '@react-three/drei';
-import { Color, ShaderMaterial, AdditiveBlending, Group, Clock } from 'three'; // Import specific members, removed unused Vector3, Quaternion, Matrix4
+import type { Group } from 'three';
+import { Color, ShaderMaterial, AdditiveBlending, Clock } from 'three'; // Import specific members, removed unused Vector3, Quaternion, Matrix4
 import { createNeuralGlowUniforms, updateTimeUniform } from '@shaders/neuralGlow'; // Removed unused setActiveState
 
 /**

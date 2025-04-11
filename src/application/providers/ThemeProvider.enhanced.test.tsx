@@ -28,17 +28,21 @@ describe('ThemeProvider (Enhanced Tests with renderWithProviders)', () => {
     matches: false, // Default to light
     media: '(prefers-color-scheme: dark)',
     onchange: null,
-    addListener: vi.fn((cb) => { // Deprecated
+    addListener: vi.fn((cb) => {
+      // Deprecated
       if (!localDarkSchemeListeners.includes(cb)) localDarkSchemeListeners.push(cb);
     }),
-    removeListener: vi.fn((cb) => { // Deprecated
+    removeListener: vi.fn((cb) => {
+      // Deprecated
       localDarkSchemeListeners = localDarkSchemeListeners.filter((l) => l !== cb);
     }),
     addEventListener: vi.fn((event, cb) => {
-       if (event === 'change' && cb && !localDarkSchemeListeners.includes(cb)) localDarkSchemeListeners.push(cb);
+      if (event === 'change' && cb && !localDarkSchemeListeners.includes(cb))
+        localDarkSchemeListeners.push(cb);
     }),
     removeEventListener: vi.fn((event, cb) => {
-       if (event === 'change') localDarkSchemeListeners = localDarkSchemeListeners.filter((l) => l !== cb);
+      if (event === 'change')
+        localDarkSchemeListeners = localDarkSchemeListeners.filter((l) => l !== cb);
     }),
     dispatchEvent: vi.fn((event: Event) => {
       if (event.type === 'change') localDarkSchemeListeners.forEach((l) => l(event));
@@ -69,7 +73,16 @@ describe('ThemeProvider (Enhanced Tests with renderWithProviders)', () => {
           return localDarkSchemeMediaQueryList;
         }
         // Return generic mock for others
-        return { matches: false, media: query, onchange: null, addListener: vi.fn(), removeListener: vi.fn(), addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn() };
+        return {
+          matches: false,
+          media: query,
+          onchange: null,
+          addListener: vi.fn(),
+          removeListener: vi.fn(),
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+          dispatchEvent: vi.fn(),
+        };
       }),
     });
 
@@ -97,7 +110,7 @@ describe('ThemeProvider (Enhanced Tests with renderWithProviders)', () => {
   it('toggles to dark mode via setTheme', async () => {
     const { isDarkMode } = renderWithProviders(<ThemeConsumerComponent />);
     await waitFor(() => {
-       expect(isDarkMode()).toBe(false); // Check initial state after render
+      expect(isDarkMode()).toBe(false); // Check initial state after render
     });
 
     await act(async () => {
@@ -137,7 +150,8 @@ describe('ThemeProvider (Enhanced Tests with renderWithProviders)', () => {
     });
   });
 
-  it.skip('uses system preference when theme is set to system', async () => { // Skip: JSDOM timing unreliable for matchMedia -> context update -> render assertion
+  it.skip('uses system preference when theme is set to system', async () => {
+    // Skip: JSDOM timing unreliable for matchMedia -> context update -> render assertion
     // Set initial system preference via the *local* mock before rendering
     // Wrap the initial trigger in act to ensure effects run before assertions
     await act(async () => {
@@ -159,9 +173,10 @@ describe('ThemeProvider (Enhanced Tests with renderWithProviders)', () => {
     expect(screen.getByTestId('theme-status')).toHaveTextContent('Current: dark');
   });
 
-  it.skip('updates theme when system preference changes while set to system', async () => { // Skip: JSDOM timing unreliable for matchMedia -> context update -> render assertion
+  it.skip('updates theme when system preference changes while set to system', async () => {
+    // Skip: JSDOM timing unreliable for matchMedia -> context update -> render assertion
     // Set initial system preference to light
-     localDarkSchemeMediaQueryList._triggerChange(false); // System prefers light
+    localDarkSchemeMediaQueryList._triggerChange(false); // System prefers light
 
     renderWithProviders(<ThemeConsumerComponent />);
 
@@ -179,7 +194,7 @@ describe('ThemeProvider (Enhanced Tests with renderWithProviders)', () => {
 
     // Simulate system preference changing to dark using the local mock helper BEFORE waiting, wrapped in act
     await act(async () => {
-       localDarkSchemeMediaQueryList._triggerChange(true); // Change to dark
+      localDarkSchemeMediaQueryList._triggerChange(true); // Change to dark
     });
     // Assert the mock state directly after triggering
     expect(localDarkSchemeMediaQueryList.matches).toBe(true);

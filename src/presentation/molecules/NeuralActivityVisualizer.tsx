@@ -5,7 +5,8 @@
  */
 
 import React, { useRef, useMemo, useEffect, useState } from 'react'; // Re-added useRef, useEffect, useState
-import { useFrame, extend, ThreeEvent } from '@react-three/fiber'; // Added ThreeEvent
+import type { ThreeEvent } from '@react-three/fiber';
+import { useFrame, extend } from '@react-three/fiber'; // Added ThreeEvent
 // @ts-ignore: TS2305 - Module '"@react-three/drei"' has no exported member 'Sphere'/'Line'/'Text'/'shaderMaterial'. (Likely type/config issue)
 import { Sphere, Line, Text, shaderMaterial } from '@react-three/drei'; // Removed unused useTexture
 import type { ShaderMaterial, Mesh, Group, Event } from 'three';
@@ -159,7 +160,8 @@ const ActivityNode: React.FC<ActivityNodeProps> = ({
   });
 
   // Animation for pulsing effect
-  useFrame((_state) => { // state is unused
+  useFrame((_state) => {
+    // state is unused
     if (materialRef.current) {
       // Update uniforms
       materialRef.current.uniforms.time.value = _state.clock.getElapsedTime(); // state is unused
@@ -259,7 +261,8 @@ const ActivityFlow: React.FC<ActivityFlowProps> = ({
   });
 
   // Animation for flow effect
-  useFrame((_state, delta) => { // state is unused
+  useFrame((_state, delta) => {
+    // state is unused
     // Update progress for flow animation
     progress.current = (progress.current + delta * flowSpeed * springActivity.get()) % 1;
   });

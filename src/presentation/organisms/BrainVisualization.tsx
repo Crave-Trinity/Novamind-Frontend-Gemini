@@ -3,11 +3,12 @@
  * Renders a 3D brain model with clinical-grade precision
  */
 import React, { useRef, useMemo, useEffect } from 'react'; // Restored useEffect
-import { Canvas, ThreeEvent } from '@react-three/fiber'; // Added ThreeEvent
+import type { ThreeEvent } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber'; // Added ThreeEvent
 // @ts-ignore: TS2305 - Module '"@react-three/drei"' has no exported member 'OrbitControls'/'PerspectiveCamera'. (Likely type/config issue)
 import { OrbitControls, PerspectiveCamera, Line } from '@react-three/drei'; // Removed unused useGLTF, Added Line
 import { Bloom, EffectComposer } from '@react-three/postprocessing'; // Restored EffectComposer
-import { Mesh } from 'three'; // Removed Line import from three
+import type { Mesh } from 'three'; // Removed Line import from three
 
 import type { BrainModel, BrainRegion } from '@domain/types/brain'; // Re-add BrainRegion
 import { RenderMode, isBrainModel } from '@domain/types/brain'; // Re-add isBrainModel
@@ -64,7 +65,8 @@ const RegionNode: React.FC<RegionNodeProps> = ({ region, isSelected, settings, o
     if (isSelected) return settings?.highlightColor || '#0066F0';
 
     // Neural activity color mapping
-    if (settings?.renderMode === RenderMode.FUNCTIONAL) { // Use imported RenderMode
+    if (settings?.renderMode === RenderMode.FUNCTIONAL) {
+      // Use imported RenderMode
       const activityLevel = region.activityLevel || 0;
       if (activityLevel > 0.8) return '#F41A13'; // Critical
       if (activityLevel > 0.6) return '#FF8C00'; // High
@@ -74,7 +76,8 @@ const RegionNode: React.FC<RegionNodeProps> = ({ region, isSelected, settings, o
     }
 
     // Risk color mapping
-    if (settings?.renderMode === RenderMode.RISK && region.riskFactor !== undefined) { // Use imported RenderMode
+    if (settings?.renderMode === RenderMode.RISK && region.riskFactor !== undefined) {
+      // Use imported RenderMode
       if (region.riskFactor > 0.8) return '#F41A13'; // Severe
       if (region.riskFactor > 0.6) return '#FF8C00'; // High
       if (region.riskFactor > 0.4) return '#FFCC33'; // Moderate
@@ -122,10 +125,14 @@ const RegionNode: React.FC<RegionNodeProps> = ({ region, isSelected, settings, o
 // Neural connection component with quantum-level precision
 const Connection: React.FC<ConnectionProps> = ({ start, end, color, opacity, selected }) => {
   // Use R3F Line component from drei
-  const points = useMemo(() => [
-    [start.x, start.y, start.z],
-    [end.x, end.y, end.z]
-  ] as [number, number, number][], [start, end]);
+  const points = useMemo(
+    () =>
+      [
+        [start.x, start.y, start.z],
+        [end.x, end.y, end.z],
+      ] as [number, number, number][],
+    [start, end]
+  );
 
   return (
     <Line
@@ -150,7 +157,8 @@ export const BrainVisualization: React.FC<BrainVisualizationProps> = ({
 }) => {
   // Ensure neural-safe type handling with quantum-level precision
   const safeModel = useMemo(() => {
-    if (!brainModel || !isBrainModel(brainModel)) { // Re-add isBrainModel check
+    if (!brainModel || !isBrainModel(brainModel)) {
+      // Re-add isBrainModel check
       return {
         regions: [],
         settings: DEFAULT_SETTINGS, // Return default settings if model is invalid/missing

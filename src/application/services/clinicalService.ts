@@ -8,7 +8,8 @@ import type { BiometricAlert } from '@domain/types/biometric/streams';
 
 // Placeholder implementation - replace with actual logic
 
-const submitBiometricAlert = async (alert: BiometricAlert): Promise<Result<void, Error>> => { // Added error type
+const submitBiometricAlert = async (alert: BiometricAlert): Promise<Result<void, Error>> => {
+  // Added error type
   console.log(`Submitting biometric alert: ${alert.id} for patient ${alert.patientId}`);
   // Simulate API call to submit alert to clinical system
   await new Promise((resolve) => setTimeout(resolve, 150));

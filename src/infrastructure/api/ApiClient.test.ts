@@ -3,112 +3,81 @@
  * apiClient testing with quantum precision
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-// Removed unused import: AxiosRequestConfig
-import { apiClient } from '@api/apiClient'; // Corrected casing, removed duplicate
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll, afterEach } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import { apiClient } from '@api/apiClient'; // Ensure correct path
 
-// Extract and modify USE_MOCK_API to ensure mock tests
-vi.mock('./ApiClient', async (importOriginal) => {
-  const actual = (await importOriginal()) as { apiClient: any };
-  // Force mock mode for testing
-  actual.apiClient.USE_MOCK_API = true;
-  return actual;
-});
+// Define MSW handlers for the API endpoints used in tests
+const handlers = [
+  http.get('/api/patients', () => {
+    console.log('[MSW] Mocking GET /api/patients');
+    return HttpResponse.json([
+      { id: 'patient-001', name: 'Quantum Patient Zero' },
+      { id: 'patient-002', name: 'Neural Patient Alpha' },
+    ]);
+  }),
 
-// Mock the mockApi implementation with clinical precision
-vi.mock('./mockApi', () => ({
-  mockApi: {
-    // Mock API methods with neural-safe precision
-    get: vi.fn().mockImplementation((url: string) => { // Added type annotation
-      console.log(`[Mock API Test] GET ${url}`);
+  http.post('/api/auth/login', async ({ request }) => {
+    console.log('[MSW] Mocking POST /api/auth/login');
+    const body = await request.json();
+    // You could add assertions on the body if needed
+    console.log('[MSW] Received login payload:', body);
+    return HttpResponse.json({ success: true, token: 'msw_mock_token_123' });
+  }),
 
-      if (url.includes('/patients')) {
-        return [{ id: 'demo-patient', name: 'Alex Johnson' }];
-      }
+  // Add other handlers as needed for different tests or endpoints
+];
 
-      return { success: true, data: {} };
-    }),
+// Setup the MSW server
+const server = setupServer(...handlers);
 
-    post: vi.fn().mockImplementation((url, data) => {
-      console.log(`[Mock API Test] POST ${url}`, data);
-      return { success: true, data: {} };
-    }),
-
-    getBrainModel: vi.fn().mockImplementation(() => ({
-      regions: [],
-      settings: { renderMode: 'normal' },
-    })),
-
-    getPatients: vi.fn().mockImplementation(() => []),
-    getPatientById: vi.fn().mockImplementation(() => ({})),
-    predictTreatmentResponse: vi.fn().mockImplementation(() => ({})),
-    getRiskAssessment: vi.fn().mockImplementation(() => ({})),
-  },
-}));
-
-// Strategic surgical patch for handleMockResponse to enable testing
-const originalHandleMockResponse = apiClient['handleMockResponse'];
-apiClient['handleMockResponse'] = function <T>(url: string, data?: any): T {
-  console.log(`[Mock Test] Handling mock response for: ${url}`);
-
-  try {
-    // Try the original implementation first
-    return originalHandleMockResponse.call(this, url, data) as T; // Assert return type
-  } catch (error) {
-    console.log(`[Mock Test] Falling back to test implementation`);
-    // If original throws, provide test-specific implementations
-    if (url === '/auth/login') {
-      return { success: true, token: 'mock_token_123' } as any;
-    } else if (url.includes('/patients')) {
-      return [
-        { id: 1, name: 'John Doe' },
-        { id: 2, name: 'Jane Doe' },
-      ] as any;
-    } else {
-      // For testing, return a safe fallback for any endpoint
-      return {
-        success: true,
-        data: {},
-        message: 'Neural test mock response',
-      } as any;
-    }
-  }
-};
+// Lifecycle hooks for MSW server
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' })); // Error on unhandled requests
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 describe('apiClient', () => {
   beforeEach(() => {
+    // Clear any potential spies or other mocks if necessary
     vi.clearAllMocks();
-
-    // Reset internal state for each test
-    (apiClient as any).USE_MOCK_API = true;
+    // Reset auth token if needed between tests, depends on ApiClient implementation
+    // apiClient.setAuthToken(null); // Example
   });
 
   it('processes GET requests with mathematical precision', async () => {
-    // Test with a known endpoint to ensure success
+    // No need to force USE_MOCK_API, MSW intercepts the real call
     const result = await apiClient.get('/patients');
 
-    // Assert with quantum verification
+    // Assert with quantum verification based on MSW handler response
     expect(result).toBeDefined();
     expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(2);
+    expect((result as any[])[0].id).toBe('patient-001');
   });
 
   it('processes POST requests with clinical precision', async () => {
-    // Test with authentication endpoint
     const payload = { username: 'neural-scientist', password: 'quantum-safe' };
 
     // Act with quantum precision
     const result = await apiClient.post('/auth/login', payload);
 
-    // Assert with clinical verification
+    // Assert with clinical verification based on MSW handler response
     expect(result).toBeDefined();
     expect((result as any).success).toBe(true);
+    expect((result as any).token).toBe('msw_mock_token_123');
   });
 
   it('supports neural authorization patterns', () => {
-    // Verify token-based auth mechanisms
-    apiClient.setAuthToken('neural-quantum-token');
+    // Test the setAuthToken method directly if needed
+    const testToken = 'neural-quantum-token';
+    apiClient.setAuthToken(testToken);
 
-    // Assert token is properly set
-    expect(apiClient).toBeDefined();
+    // Assertion depends on how ApiClient stores/uses the token.
+    // This might involve checking Axios instance headers if that's how it's implemented.
+    // For example (assuming default headers are accessible, might need adjustment):
+    // expect(apiClient.instance.defaults.headers.common['Authorization']).toBe(`Bearer ${testToken}`);
+    // Or simply verify the method doesn't throw
+    expect(() => apiClient.setAuthToken(testToken)).not.toThrow();
   });
 });

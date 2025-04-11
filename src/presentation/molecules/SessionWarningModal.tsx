@@ -100,7 +100,8 @@ const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
     resetTimers();
 
     // Log session extension for HIPAA compliance
-    auditLogClient.log(AuditEventType.USER_LOGIN, { // Corrected usage
+    auditLogClient.log(AuditEventType.USER_LOGIN, {
+      // Corrected usage
       action: 'session_extended',
       details: 'User extended session after inactivity warning',
       result: 'success',
@@ -113,7 +114,8 @@ const SessionWarningModal: React.FC<SessionWarningModalProps> = ({
     setShowModal(false);
 
     // Log session timeout for HIPAA compliance
-    auditLogClient.log(AuditEventType.USER_TIMEOUT, { // Corrected usage
+    auditLogClient.log(AuditEventType.USER_TIMEOUT, {
+      // Corrected usage
       action: 'session_timeout',
       details: 'User session expired due to inactivity',
       result: 'success',

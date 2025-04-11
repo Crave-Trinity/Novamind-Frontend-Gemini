@@ -8,7 +8,12 @@ import { brainTypeVerifier } from '@domain/utils/brain/type-verification.ts';
 import { RenderMode } from '@domain/types/brain/visualization';
 import { TypeVerificationError } from '@domain/utils/shared/type-verification';
 // Import SSoT types for mocks
-import type { BrainModel, BrainRegion, NeuralConnection, BrainScan } from '@domain/types/brain/models';
+import type {
+  BrainModel,
+  BrainRegion,
+  NeuralConnection,
+  BrainScan,
+} from '@domain/types/brain/models';
 
 describe('Brain type verification', () => {
   describe('verifyVector3', () => {
@@ -116,19 +121,19 @@ describe('Brain type verification', () => {
 
     it('verifies valid BrainRegion objects', () => {
       // Create a minimal valid region for this specific test
-       const minimalValidRegion: BrainRegion = {
-         id: 'region1',
-         name: 'Prefrontal Cortex',
-         position: { x: 10, y: 20, z: 30 },
-         color: '#FF0000',
-         connections: [],
-         hemisphereLocation: 'left',
-         dataConfidence: 0.9,
-         activityLevel: 0.8,
-         isActive: true,
-         volume: 1100,
-         activity: 0.7,
-       };
+      const minimalValidRegion: BrainRegion = {
+        id: 'region1',
+        name: 'Prefrontal Cortex',
+        position: { x: 10, y: 20, z: 30 },
+        color: '#FF0000',
+        connections: [],
+        hemisphereLocation: 'left',
+        dataConfidence: 0.9,
+        activityLevel: 0.8,
+        isActive: true,
+        volume: 1100,
+        activity: 0.7,
+      };
       const result = brainTypeVerifier.verifyBrainRegion(minimalValidRegion);
       expect(result.success).toBe(true);
       if (result.success) {
@@ -165,8 +170,8 @@ describe('Brain type verification', () => {
       const result = brainTypeVerifier.verifyBrainRegion(missingProps);
       expect(result.success).toBe(false);
       if (!result.success) {
-          // Expect error related to missing 'connections' or 'volume'
-          expect(result.error.field).toMatch(/connections|volume/);
+        // Expect error related to missing 'connections' or 'volume'
+        expect(result.error.field).toMatch(/connections|volume/);
       }
     });
 
@@ -186,15 +191,29 @@ describe('Brain type verification', () => {
       };
       const result = brainTypeVerifier.verifyBrainRegion(wrongTypes);
       expect(result.success).toBe(false);
-       if (!result.success) {
-           expect(result.error.field).toMatch(/id|isActive/);
-       }
+      if (!result.success) {
+        expect(result.error.field).toMatch(/id|isActive/);
+      }
     });
   });
 
   describe('verifyNeuralConnection', () => {
-     // Define a valid NeuralConnection mock based on SSoT
-     const validConnection: NeuralConnection = {
+    // Define a valid NeuralConnection mock based on SSoT
+    const validConnection: NeuralConnection = {
+      id: 'conn1',
+      sourceId: 'region1',
+      targetId: 'region2',
+      strength: 0.75,
+      type: 'excitatory',
+      directionality: 'unidirectional',
+      activityLevel: 0.65,
+      dataConfidence: 0.9,
+      pathwayLength: 15.5, // Optional included
+    };
+
+    it('verifies valid NeuralConnection objects', () => {
+      // Use a minimal version for this test
+      const minimalValidConnection: NeuralConnection = {
         id: 'conn1',
         sourceId: 'region1',
         targetId: 'region2',
@@ -203,14 +222,7 @@ describe('Brain type verification', () => {
         directionality: 'unidirectional',
         activityLevel: 0.65,
         dataConfidence: 0.9,
-        pathwayLength: 15.5, // Optional included
       };
-
-    it('verifies valid NeuralConnection objects', () => {
-       // Use a minimal version for this test
-       const minimalValidConnection: NeuralConnection = {
-         id: 'conn1', sourceId: 'region1', targetId: 'region2', strength: 0.75, type: 'excitatory', directionality: 'unidirectional', activityLevel: 0.65, dataConfidence: 0.9
-       };
       const result = brainTypeVerifier.verifyNeuralConnection(minimalValidConnection);
       expect(result.success).toBe(true);
       if (result.success) {
@@ -240,23 +252,46 @@ describe('Brain type verification', () => {
       };
       const result = brainTypeVerifier.verifyNeuralConnection(missingProps);
       expect(result.success).toBe(false);
-       if (!result.success) {
-           expect(result.error.field).toMatch(/strength|dataConfidence/);
-       }
+      if (!result.success) {
+        expect(result.error.field).toMatch(/strength|dataConfidence/);
+      }
     });
   });
 
   describe('verifyBrainModel', () => {
-     // Define valid mocks based on SSoT (@domain/types/brain/models.ts)
-     const validRegionMock: BrainRegion = {
-        id: 'region1', name: 'Region One', position: {x:0,y:0,z:0}, color: '#ff0000', connections: ['conn1'], hemisphereLocation: 'left', dataConfidence: 1, activityLevel: 1, isActive: true, volume: 1, activity: 1
-      };
-      const validConnectionMock: NeuralConnection = {
-        id: 'conn1', sourceId: 'region1', targetId: 'region2', strength: 1, type: 'excitatory', directionality: 'unidirectional', activityLevel: 1, dataConfidence: 1
-      };
-      const validScanMock: BrainScan = {
-          id: 'scan1', patientId: 'p1', scanDate: new Date().toISOString(), scanType: 'fMRI', resolution: {x:1,y:1,z:1}, metadata: { test: true }, dataQualityScore: 1.0
-      };
+    // Define valid mocks based on SSoT (@domain/types/brain/models.ts)
+    const validRegionMock: BrainRegion = {
+      id: 'region1',
+      name: 'Region One',
+      position: { x: 0, y: 0, z: 0 },
+      color: '#ff0000',
+      connections: ['conn1'],
+      hemisphereLocation: 'left',
+      dataConfidence: 1,
+      activityLevel: 1,
+      isActive: true,
+      volume: 1,
+      activity: 1,
+    };
+    const validConnectionMock: NeuralConnection = {
+      id: 'conn1',
+      sourceId: 'region1',
+      targetId: 'region2',
+      strength: 1,
+      type: 'excitatory',
+      directionality: 'unidirectional',
+      activityLevel: 1,
+      dataConfidence: 1,
+    };
+    const validScanMock: BrainScan = {
+      id: 'scan1',
+      patientId: 'p1',
+      scanDate: new Date().toISOString(),
+      scanType: 'fMRI',
+      resolution: { x: 1, y: 1, z: 1 },
+      metadata: { test: true },
+      dataQualityScore: 1.0,
+    };
 
     it('verifies valid BrainModel objects', () => {
       // Align with BrainModel from SSoT
@@ -264,8 +299,8 @@ describe('Brain type verification', () => {
         id: 'model1',
         regions: [validRegionMock],
         connections: [validConnectionMock],
-        version: "1.0",
-        patientId: "patient-xyz",
+        version: '1.0',
+        patientId: 'patient-xyz',
         scan: validScanMock,
         timestamp: new Date().toISOString(),
         processingLevel: 'raw',
@@ -287,20 +322,20 @@ describe('Brain type verification', () => {
         id: 'model1',
         regions: [validRegionMock],
         connections: [validConnectionMock],
-        version: "1.1-opt",
-        patientId: "patient-abc",
+        version: '1.1-opt',
+        patientId: 'patient-abc',
         scan: validScanMock,
         timestamp: new Date().toISOString(),
         processingLevel: 'filtered',
         lastUpdated: new Date().toISOString(),
         // Optional field being tested
-        algorithmVersion: "Novamind-v3",
+        algorithmVersion: 'Novamind-v3',
       };
 
       const result = brainTypeVerifier.verifyBrainModel(modelWithOptionals);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.value.algorithmVersion).toBe("Novamind-v3");
+        expect(result.value.algorithmVersion).toBe('Novamind-v3');
       } else {
         // Fail the test if verification didn't succeed unexpectedly
         expect(result.success).toBe(true); // This will intentionally fail if success is false
@@ -313,7 +348,7 @@ describe('Brain type verification', () => {
         regions: [],
         connections: [],
         // missing version
-        patientId: "patient-err",
+        patientId: 'patient-err',
         scan: validScanMock,
         timestamp: new Date().toISOString(),
         processingLevel: 'analyzed',
@@ -321,23 +356,24 @@ describe('Brain type verification', () => {
       };
       const result = brainTypeVerifier.verifyBrainModel(missingProps);
       expect(result.success).toBe(false);
-       if (!result.success) {
-           expect(result.error.field).toBe('version');
-       }
+      if (!result.success) {
+        expect(result.error.field).toBe('version');
+      }
     });
 
     it('fails when arrays contain invalid items', () => {
       const invalidItems = {
         id: 'model1',
         regions: [
-          { // Invalid region - missing name, position, etc.
+          {
+            // Invalid region - missing name, position, etc.
             id: 'region1',
             // ... other fields missing
           },
         ],
         connections: [validConnectionMock],
-        version: "2.0-invalid",
-        patientId: "patient-inv",
+        version: '2.0-invalid',
+        patientId: 'patient-inv',
         scan: validScanMock,
         timestamp: new Date().toISOString(),
         processingLevel: 'normalized',
@@ -345,21 +381,31 @@ describe('Brain type verification', () => {
       };
       const result = brainTypeVerifier.verifyBrainModel(invalidItems);
       expect(result.success).toBe(false);
-       if (!result.success) {
-           // Expect error related to the first invalid region
-           // Expect the error field to point to a missing required property within the first region (e.g., name)
-           // Check that the error field indicates an issue within the first region
-           expect(result.error.field).toMatch(/^regions\[0\]/);
-       }
+      if (!result.success) {
+        // Expect error related to the first invalid region
+        // Expect the error field to point to a missing required property within the first region (e.g., name)
+        // Check that the error field indicates an issue within the first region
+        expect(result.error.field).toMatch(/^regions\[0\]/);
+      }
     });
   });
 
   describe('assertion functions', () => {
     // Define valid mocks needed for assertion tests
-     const validRegionForAssert: BrainRegion = {
-        id: 'region1', name: 'Prefrontal Cortex', position: { x: 10, y: 20, z: 30 }, color: '#FF0000', connections: ['conn1'], hemisphereLocation: 'left', dataConfidence: 0.95, activityLevel: 0.8, isActive: true, volume: 1200.5, activity: 0.75
-      };
-      const invalidRegionForAssert = { id: 'region1' /* missing required fields */ };
+    const validRegionForAssert: BrainRegion = {
+      id: 'region1',
+      name: 'Prefrontal Cortex',
+      position: { x: 10, y: 20, z: 30 },
+      color: '#FF0000',
+      connections: ['conn1'],
+      hemisphereLocation: 'left',
+      dataConfidence: 0.95,
+      activityLevel: 0.8,
+      isActive: true,
+      volume: 1200.5,
+      activity: 0.75,
+    };
+    const invalidRegionForAssert = { id: 'region1' /* missing required fields */ };
 
     it('assertVector3 passes for valid Vector3', () => {
       expect(() => brainTypeVerifier.assertVector3({ x: 1, y: 2, z: 3 })).not.toThrow();

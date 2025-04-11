@@ -313,7 +313,10 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
       default:
         return (
           <div className="space-y-2 mt-2">
-            {(event as any).details && <p className="text-xs text-slate-600">{(event as any).details}</p>} {/* Cast event to any for default case */}
+            {(event as any).details && (
+              <p className="text-xs text-slate-600">{(event as any).details}</p>
+            )}{' '}
+            {/* Cast event to any for default case */}
           </div>
         );
     }

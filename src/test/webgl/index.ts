@@ -145,10 +145,12 @@ const originalThreeClasses: Record<string, any> = {};
 
 function mockThreeJSClasses(): void {
   const target = THREE || (globalThis as any).THREE || {}; // Added type assertion
-  if (!(globalThis as any).THREE && target === (globalThis as any).THREE) { // Added type assertions
+  if (!(globalThis as any).THREE && target === (globalThis as any).THREE) {
+    // Added type assertions
     console.warn('THREE not found globally. Mocks might be incomplete.');
     // Avoid assigning {} to prevent TS errors
-  } else if (!THREE && !(globalThis as any).THREE) { // Added type assertion
+  } else if (!THREE && !(globalThis as any).THREE) {
+    // Added type assertion
     console.warn('THREE not found globally or via import. Mocks might fail.');
     // Avoid assigning {} to prevent TS errors
   }
@@ -166,24 +168,29 @@ function mockThreeJSClasses(): void {
   };
 
   // Mock WebGLRenderer
-  mockClass('WebGLRenderer', (..._args: any[]) => // Prefixed unused args
-    trackAllocation('WebGLRenderer', {
-      domElement: document.createElement('canvas'),
-      render: vi.fn(),
-      setSize: vi.fn(),
-      setClearColor: vi.fn(),
-      clear: vi.fn(),
-      dispose: vi.fn(function (this: any) {
-        trackDisposal('WebGLRenderer', this);
-      }),
-      getContext: () => mockContext,
-      setPixelRatio: vi.fn(),
-      shadowMap: { enabled: false },
-    })
+  mockClass(
+    'WebGLRenderer',
+    (
+      ..._args: any[] // Prefixed unused args
+    ) =>
+      trackAllocation('WebGLRenderer', {
+        domElement: document.createElement('canvas'),
+        render: vi.fn(),
+        setSize: vi.fn(),
+        setClearColor: vi.fn(),
+        clear: vi.fn(),
+        dispose: vi.fn(function (this: any) {
+          trackDisposal('WebGLRenderer', this);
+        }),
+        getContext: () => mockContext,
+        setPixelRatio: vi.fn(),
+        shadowMap: { enabled: false },
+      })
   );
 
   // Mock PerspectiveCamera
-  mockClass('PerspectiveCamera', (..._args: any[]) => { // Prefixed unused args
+  mockClass('PerspectiveCamera', (..._args: any[]) => {
+    // Prefixed unused args
     const position = {
       x: 0,
       y: 0,
@@ -205,80 +212,104 @@ function mockThreeJSClasses(): void {
   });
 
   // Mock BufferGeometry
-  mockClass('BufferGeometry', (..._args: any[]) => // Prefixed unused args
-    trackAllocation('BufferGeometry', {
-      attributes: {},
-      setIndex: vi.fn(),
-      setAttribute: vi.fn(),
-      dispose: vi.fn(function (this: any) {
-        trackDisposal('BufferGeometry', this);
-      }), // Correctly defined dispose
-      computeVertexNormals: vi.fn(),
-      isBufferGeometry: true,
-    })
+  mockClass(
+    'BufferGeometry',
+    (
+      ..._args: any[] // Prefixed unused args
+    ) =>
+      trackAllocation('BufferGeometry', {
+        attributes: {},
+        setIndex: vi.fn(),
+        setAttribute: vi.fn(),
+        dispose: vi.fn(function (this: any) {
+          trackDisposal('BufferGeometry', this);
+        }), // Correctly defined dispose
+        computeVertexNormals: vi.fn(),
+        isBufferGeometry: true,
+      })
   );
 
   // Mock Material (base)
-  mockClass('Material', (..._args: any[]) => // Prefixed unused args
-    trackAllocation('Material', {
-      dispose: vi.fn(function (this: any) {
-        trackDisposal('Material', this);
-      }), // Correctly defined dispose
-      needsUpdate: false,
-      isMaterial: true,
-    })
+  mockClass(
+    'Material',
+    (
+      ..._args: any[] // Prefixed unused args
+    ) =>
+      trackAllocation('Material', {
+        dispose: vi.fn(function (this: any) {
+          trackDisposal('Material', this);
+        }), // Correctly defined dispose
+        needsUpdate: false,
+        isMaterial: true,
+      })
   );
 
   // Mock MeshStandardMaterial
-  mockClass('MeshStandardMaterial', (..._args: any[]) => // Prefixed unused args
-    trackAllocation('MeshStandardMaterial', {
-      color: { set: vi.fn(), isColor: true },
-      emissive: { set: vi.fn(), isColor: true },
-      roughness: 0.5,
-      metalness: 0.5,
-      isMeshStandardMaterial: true,
-      needsUpdate: false,
-      isMaterial: true,
-      dispose: vi.fn(function (this: any) {
-        trackDisposal('MeshStandardMaterial', this);
-      }), // Correctly defined dispose
-    })
+  mockClass(
+    'MeshStandardMaterial',
+    (
+      ..._args: any[] // Prefixed unused args
+    ) =>
+      trackAllocation('MeshStandardMaterial', {
+        color: { set: vi.fn(), isColor: true },
+        emissive: { set: vi.fn(), isColor: true },
+        roughness: 0.5,
+        metalness: 0.5,
+        isMeshStandardMaterial: true,
+        needsUpdate: false,
+        isMaterial: true,
+        dispose: vi.fn(function (this: any) {
+          trackDisposal('MeshStandardMaterial', this);
+        }), // Correctly defined dispose
+      })
   );
 
   // Mock MeshBasicMaterial (inherits from Material)
-  mockClass('MeshBasicMaterial', (..._args: any[]) => // Prefixed unused args
-    trackAllocation('MeshBasicMaterial', {
-      color: { set: vi.fn(), isColor: true },
-      needsUpdate: false,
-      isMaterial: true,
-      isMeshBasicMaterial: true,
-      dispose: vi.fn(function (this: any) {
-        trackDisposal('MeshBasicMaterial', this);
-      }), // Correctly defined dispose
-    })
+  mockClass(
+    'MeshBasicMaterial',
+    (
+      ..._args: any[] // Prefixed unused args
+    ) =>
+      trackAllocation('MeshBasicMaterial', {
+        color: { set: vi.fn(), isColor: true },
+        needsUpdate: false,
+        isMaterial: true,
+        isMeshBasicMaterial: true,
+        dispose: vi.fn(function (this: any) {
+          trackDisposal('MeshBasicMaterial', this);
+        }), // Correctly defined dispose
+      })
   );
 
   // Mock Scene
-  mockClass('Scene', (..._args: any[]) => // Prefixed unused args
-    trackAllocation('Scene', {
-      add: vi.fn(),
-      remove: vi.fn(),
-      children: [],
-      isScene: true,
-      background: null,
-    })
+  mockClass(
+    'Scene',
+    (
+      ..._args: any[] // Prefixed unused args
+    ) =>
+      trackAllocation('Scene', {
+        add: vi.fn(),
+        remove: vi.fn(),
+        children: [],
+        isScene: true,
+        background: null,
+      })
   );
 
   // Mock Mesh
-  mockClass('Mesh', (..._args: any[]) => // Prefixed unused args
-    trackAllocation('Mesh', {
-      position: { x: 0, y: 0, z: 0, set: vi.fn() },
-      rotation: { x: 0, y: 0, z: 0, set: vi.fn() },
-      scale: { x: 1, y: 1, z: 1, set: vi.fn() },
-      geometry: { dispose: vi.fn(), isBufferGeometry: true }, // Use mock geometry
-      material: { dispose: vi.fn(), isMaterial: true }, // Use mock material
-      isMesh: true,
-    })
+  mockClass(
+    'Mesh',
+    (
+      ..._args: any[] // Prefixed unused args
+    ) =>
+      trackAllocation('Mesh', {
+        position: { x: 0, y: 0, z: 0, set: vi.fn() },
+        rotation: { x: 0, y: 0, z: 0, set: vi.fn() },
+        scale: { x: 1, y: 1, z: 1, set: vi.fn() },
+        geometry: { dispose: vi.fn(), isBufferGeometry: true }, // Use mock geometry
+        material: { dispose: vi.fn(), isMaterial: true }, // Use mock material
+        isMesh: true,
+      })
   );
 }
 

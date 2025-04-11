@@ -19,7 +19,8 @@ import { KernelSize } from 'postprocessing'; // Restored import
 // import { ThemeContext } from '../../application/contexts/ThemeProvider';
 
 // Import AdaptiveLOD and related types/hooks
-import AdaptiveLOD, { useDetailConfig, DetailLevelString } from '@presentation/common/AdaptiveLOD'; // Added imports
+import type { DetailLevelString } from '@presentation/common/AdaptiveLOD';
+import AdaptiveLOD, { useDetailConfig } from '@presentation/common/AdaptiveLOD'; // Added imports
 
 // Import molecular components
 import BrainRegionGroup from '@presentation/molecules/BrainRegionGroup';
@@ -396,17 +397,17 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
     const currentDetailLevel: DetailLevelString = highPerformanceMode ? 'low' : 'high'; // Example logic
 
     return (
-    <Canvas
-      style={{ background: backgroundColor || settings.backgroundColor }} // Use settings bg
-      camera={{ position: cameraPosition, fov: cameraFov }}
-      dpr={[1, highPerformanceMode ? 1.5 : 2]} // Use direct prop
-      gl={{
-        antialias: !highPerformanceMode, // Use direct prop
-        alpha: true,
-        logarithmicDepthBuffer: !highPerformanceMode, // Use direct prop
-      }}
-    >
-      {/* <ContextBridge> */} {/* Removed ContextBridge */}
+      <Canvas
+        style={{ background: backgroundColor || settings.backgroundColor }} // Use settings bg
+        camera={{ position: cameraPosition, fov: cameraFov }}
+        dpr={[1, highPerformanceMode ? 1.5 : 2]} // Use direct prop
+        gl={{
+          antialias: !highPerformanceMode, // Use direct prop
+          alpha: true,
+          logarithmicDepthBuffer: !highPerformanceMode, // Use direct prop
+        }}
+      >
+        {/* <ContextBridge> */} {/* Removed ContextBridge */}
         {/* Lighting - Use settings from merged object */}
         <ambientLight intensity={0.5} /> {/* Using default intensity */}
         <directionalLight
@@ -414,13 +415,11 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
           intensity={1.0} // Using default intensity
           // color={settings.directionalLightColor} // Property missing
         />
-
         {/* Camera controller */}
         <CameraController
           {...(onCameraMove && { onCameraMove })}
           initialPosition={cameraPosition}
         />
-
         {/* Wrap scene content in AdaptiveLOD */}
         <AdaptiveLOD
           forceDetailLevel={currentDetailLevel} // Pass the determined detail level
@@ -434,19 +433,19 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
             // themeSettings={themeSettings as any} // Removed - theme settings need to be handled differently
             // visualizationSettings is no longer needed here, will be accessed via context
             // visualizationSettings={settings}
-          selectedRegionIds={selectedRegionIds}
-          highlightedRegionIds={combinedHighlightedRegions}
-          highPerformanceMode={highPerformanceMode} // Pass prop directly
-          activityThreshold={activityThreshold} // Pass prop directly
-          showInactiveRegions={showInactiveRegions} // Pass prop directly
-          // Pass callbacks conditionally
-          {...(onRegionClick && { onRegionClick })}
-          {...(onRegionHover && { onRegionHover })}
-          {...(onConnectionClick && { onConnectionClick })}
-          {...(onConnectionHover && { onConnectionHover })}
-        />
-       </AdaptiveLOD> {/* Correctly close AdaptiveLOD */}
-
+            selectedRegionIds={selectedRegionIds}
+            highlightedRegionIds={combinedHighlightedRegions}
+            highPerformanceMode={highPerformanceMode} // Pass prop directly
+            activityThreshold={activityThreshold} // Pass prop directly
+            showInactiveRegions={showInactiveRegions} // Pass prop directly
+            // Pass callbacks conditionally
+            {...(onRegionClick && { onRegionClick })}
+            {...(onRegionHover && { onRegionHover })}
+            {...(onConnectionClick && { onConnectionClick })}
+            {...(onConnectionHover && { onConnectionHover })}
+          />
+        </AdaptiveLOD>{' '}
+        {/* Correctly close AdaptiveLOD */}
         {/* Post-processing effects */}
         {!highPerformanceMode && (settings.enableBloom || enableDepthOfFieldProp) ? (
           <EffectComposer>
@@ -475,10 +474,10 @@ const BrainModelViewer: React.FC<BrainModelViewerProps> = ({
             </>
           </EffectComposer>
         ) : null}
-      {/* </ContextBridge> */} {/* Removed ContextBridge */}
-    </Canvas>
-  );
- }; // Add missing closing brace for renderVisualization function
+        {/* </ContextBridge> */} {/* Removed ContextBridge */}
+      </Canvas>
+    );
+  }; // Add missing closing brace for renderVisualization function
   // Handle state-based rendering
   const renderContent = () => {
     switch (visualizationState.status) {

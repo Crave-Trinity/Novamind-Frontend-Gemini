@@ -109,7 +109,8 @@ export function calculateNeuralActivation(
   activeSymptoms: Symptom[],
   diagnosisMappings?: DiagnosisNeuralMapping[],
   activeDiagnoses?: Diagnosis[]
-): Result<Map<string, number>, Error> { // Added error type
+): Result<Map<string, number>, Error> {
+  // Added error type
   try {
     // Create a safe wrapper for our inputs
     const safeRegions = new SafeArray(regions);
@@ -195,7 +196,8 @@ export function calculateNeuralActivation(
 export function mapSymptomsToRegions(
   symptomMappings: SymptomNeuralMapping[],
   activeSymptoms: Symptom[]
-): Result<Map<string, Symptom[]>, Error> { // Added error type
+): Result<Map<string, Symptom[]>, Error> {
+  // Added error type
   try {
     const safeSymptomMappings = new SafeArray(symptomMappings);
     const safeActiveSymptoms = new SafeArray(activeSymptoms);
@@ -237,7 +239,8 @@ export function mapSymptomsToRegions(
 export function mapDiagnosesToRegions(
   diagnosisMappings: DiagnosisNeuralMapping[],
   activeDiagnoses: Diagnosis[]
-): Result<Map<string, Diagnosis[]>, Error> { // Added error type
+): Result<Map<string, Diagnosis[]>, Error> {
+  // Added error type
   try {
     const safeDiagnosisMappings = new SafeArray(diagnosisMappings);
     const safeActiveDiagnoses = new SafeArray(activeDiagnoses);
@@ -280,7 +283,8 @@ export function calculateTreatmentImpact(
   _regions: BrainRegion[], // Prefixed unused parameter
   treatmentMappings: TreatmentNeuralMapping[],
   treatmentIds: string[]
-): Result<NeuralImpactRating, Error> { // Added error type
+): Result<NeuralImpactRating, Error> {
+  // Added error type
   try {
     // Removed unused variable: _safeRegions
     const safeTreatmentMappings = new SafeArray(treatmentMappings);

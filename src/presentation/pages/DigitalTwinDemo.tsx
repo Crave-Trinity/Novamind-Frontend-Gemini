@@ -50,11 +50,11 @@ const DigitalTwinDemo: React.FC = () => {
               }
             >
               <BrainVisualization
-                // patientId={currentPatientId} // Removed invalid prop
-                // initialActiveRegions={activeRegions} // Removed invalid prop
-                // renderMode={renderMode} // Removed invalid prop
-                // onRegionClick={handleRegionToggle} // Removed invalid prop
-                // height="100%" // Removed invalid prop
+              // patientId={currentPatientId} // Removed invalid prop
+              // initialActiveRegions={activeRegions} // Removed invalid prop
+              // renderMode={renderMode} // Removed invalid prop
+              // onRegionClick={handleRegionToggle} // Removed invalid prop
+              // height="100%" // Removed invalid prop
               />
             </Suspense>
           </Card>
@@ -81,7 +81,8 @@ const DigitalTwinDemo: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Model Version</h3>
-                  <p>{brainModel?.version || 'N/A'}</p> {/* Use version instead of non-existent metadata.modelVersion */}
+                  <p>{brainModel?.version || 'N/A'}</p>{' '}
+                  {/* Use version instead of non-existent metadata.modelVersion */}
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Regions</h3>
@@ -89,7 +90,8 @@ const DigitalTwinDemo: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Neural Pathways</h3>
-                  <p>{brainModel?.connections?.length || 0} connections mapped</p> {/* Use connections instead of non-existent pathways */}
+                  <p>{brainModel?.connections?.length || 0} connections mapped</p>{' '}
+                  {/* Use connections instead of non-existent pathways */}
                 </div>
               </div>
             )}

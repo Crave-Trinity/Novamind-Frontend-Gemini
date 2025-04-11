@@ -40,7 +40,7 @@ window.ResizeObserver = vi.fn().mockImplementation(() => ({
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   configurable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false, // Default to false (light mode)
     media: query,
     onchange: null,
@@ -57,28 +57,52 @@ const localStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value.toString(); },
-    removeItem: (key: string) => { delete store[key]; },
-    clear: () => { store = {}; },
-    get length() { return Object.keys(store).length; },
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+    get length() {
+      return Object.keys(store).length;
+    },
     key: (index: number) => Object.keys(store)[index] || null,
   };
 })();
-Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true, configurable: true });
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
+  configurable: true,
+});
 
 // Mock sessionStorage
 const sessionStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value.toString(); },
-    removeItem: (key: string) => { delete store[key]; },
-    clear: () => { store = {}; },
-    get length() { return Object.keys(store).length; },
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+    get length() {
+      return Object.keys(store).length;
+    },
     key: (index: number) => Object.keys(store)[index] || null,
   };
 })();
-Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock, writable: true, configurable: true });
+Object.defineProperty(window, 'sessionStorage', {
+  value: sessionStorageMock,
+  writable: true,
+  configurable: true,
+});
 
 // --- Minimal WebGL Mock ---
 // Provide only the absolute minimum for non-R3F tests that might import related utils
@@ -91,18 +115,34 @@ HTMLCanvasElement.prototype.getContext = function (
   if (contextId === 'webgl' || contextId === 'webgl2' || contextId === 'experimental-webgl') {
     // Return a very basic object, or null if even this causes issues
     return {
-        canvas: this,
-        getParameter: vi.fn(),
-        getExtension: vi.fn(() => null),
-        // Add other methods *only if* explicitly required by non-R3F code paths
+      canvas: this,
+      getParameter: vi.fn(),
+      getExtension: vi.fn(() => null),
+      // Add other methods *only if* explicitly required by non-R3F code paths
     } as unknown as RenderingContext | null;
   } else if (contextId === '2d') {
-     return { // Basic 2D mock
-         canvas: this, fillRect: vi.fn(), clearRect: vi.fn(), getImageData: vi.fn(() => ({ data: new Uint8ClampedArray(0) })),
-         putImageData: vi.fn(), createImageData: vi.fn(() => ({ data: new Uint8ClampedArray(0) })), setTransform: vi.fn(),
-         drawImage: vi.fn(), save: vi.fn(), fillText: vi.fn(), restore: vi.fn(), beginPath: vi.fn(), moveTo: vi.fn(),
-         lineTo: vi.fn(), closePath: vi.fn(), stroke: vi.fn(), translate: vi.fn(), scale: vi.fn(), rotate: vi.fn(),
-     } as unknown as CanvasRenderingContext2D;
+    return {
+      // Basic 2D mock
+      canvas: this,
+      fillRect: vi.fn(),
+      clearRect: vi.fn(),
+      getImageData: vi.fn(() => ({ data: new Uint8ClampedArray(0) })),
+      putImageData: vi.fn(),
+      createImageData: vi.fn(() => ({ data: new Uint8ClampedArray(0) })),
+      setTransform: vi.fn(),
+      drawImage: vi.fn(),
+      save: vi.fn(),
+      fillText: vi.fn(),
+      restore: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      closePath: vi.fn(),
+      stroke: vi.fn(),
+      translate: vi.fn(),
+      scale: vi.fn(),
+      rotate: vi.fn(),
+    } as unknown as CanvasRenderingContext2D;
   }
   if (typeof originalGetContext === 'function') {
     return Function.prototype.call.call(originalGetContext, this, contextId, options);
@@ -110,7 +150,6 @@ HTMLCanvasElement.prototype.getContext = function (
   return null;
 } as typeof HTMLCanvasElement.prototype.getContext;
 // --- End WebGL Mock ---
-
 
 // Cleanup after each test
 afterEach(() => {
@@ -127,7 +166,12 @@ beforeAll(() => {
   const originalConsoleError = console.error;
   console.error = (...args) => {
     // Suppress specific React 18 warning
-    if (typeof args[0] === 'string' && args[0].includes('Warning: ReactDOM.render is no longer supported')) { return; }
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('Warning: ReactDOM.render is no longer supported')
+    ) {
+      return;
+    }
     // Suppress Radix UI warnings if needed
     // if (typeof args[0] === 'string' && args[0].includes('radix-ui')) { return; }
     originalConsoleError.call(console, ...args);
@@ -140,11 +184,25 @@ import type * as FramerMotion from 'framer-motion';
 // Mock framer-motion (Keep simplified version)
 vi.mock('framer-motion', async (importOriginal) => {
   const actual = (await importOriginal()) as typeof FramerMotion;
-  const proxy = new Proxy({}, { get: (_target, prop) => ({ children }: { children?: React.ReactNode }) => React.createElement(prop as string, {}, children) });
+  const proxy = new Proxy(
+    {},
+    {
+      get:
+        (_target, prop) =>
+        ({ children }: { children?: React.ReactNode }) =>
+          React.createElement(prop as string, {}, children),
+    }
+  );
   return {
-    __esModule: true, ...actual, motion: proxy, AnimatePresence: ({ children }: { children?: React.ReactNode }) => React.createElement(React.Fragment, null, children),
-    useReducedMotion: () => false, useScroll: () => ({ scrollYProgress: { onChange: vi.fn(), get: () => 0 } }),
-    useSpring: () => ({ onChange: vi.fn(), get: () => 0 }), useTransform: () => ({ onChange: vi.fn(), get: () => 0 }),
+    __esModule: true,
+    ...actual,
+    motion: proxy,
+    AnimatePresence: ({ children }: { children?: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    useReducedMotion: () => false,
+    useScroll: () => ({ scrollYProgress: { onChange: vi.fn(), get: () => 0 } }),
+    useSpring: () => ({ onChange: vi.fn(), get: () => 0 }),
+    useTransform: () => ({ onChange: vi.fn(), get: () => 0 }),
   };
 });
 

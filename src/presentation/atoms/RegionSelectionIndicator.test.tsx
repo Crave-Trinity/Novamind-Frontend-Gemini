@@ -44,7 +44,8 @@ vi.mock('three', async (importOriginal) => {
   return {
     __esModule: true, // Ensure ES module treatment
     Vector3: MockVector3, // Export the mock class
-    Color: vi.fn().mockImplementation((_color) => ({ // Prefixed unused parameter
+    Color: vi.fn().mockImplementation((_color) => ({
+      // Prefixed unused parameter
       set: vi.fn(),
       // Add other methods/properties if needed
     })),
@@ -66,7 +67,8 @@ vi.mock('@react-spring/three', () => ({
   animated: new Proxy(
     {},
     {
-      get: (_target, prop) => { // Prefixed unused target parameter
+      get: (_target, prop) => {
+        // Prefixed unused target parameter
         // Restore forwardRef to handle refs passed to animated components
         const MockAnimatedComponent = React.forwardRef(
           ({ children, ...props }: React.PropsWithChildren<any>, ref: any) => {

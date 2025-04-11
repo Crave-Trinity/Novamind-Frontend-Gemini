@@ -24,7 +24,9 @@ vi.mock('@react-three/fiber', () => ({
     },
     scene: {},
   }),
-  Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="mock-canvas">{children}</div>, // Added type for children
+  Canvas: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="mock-canvas">{children}</div>
+  ), // Added type for children
 }));
 
 // Mock Three.js

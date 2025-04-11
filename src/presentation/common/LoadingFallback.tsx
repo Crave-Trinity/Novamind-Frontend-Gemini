@@ -53,7 +53,8 @@ const NeuralPulse: React.FC<{
   const t = useRef(Math.random() * Math.PI * 2);
 
   // Update animation
-  useFrame((_state, delta) => { // state is unused
+  useFrame((_state, delta) => {
+    // state is unused
     if (sphereRef.current && materialRef.current) {
       // Update pulse animation
       t.current += delta * speed;
@@ -146,7 +147,8 @@ const NeuralConnections: React.FC<{
   }, [nodeCount, connectionDensity]);
 
   // Animation cycle
-  useFrame((_state, _delta) => { // state and delta are unused
+  useFrame((_state, _delta) => {
+    // state and delta are unused
     lineRefs.current.forEach((line, index) => {
       if (line && connections.current[index]) {
         // Periodically change active state
@@ -198,7 +200,10 @@ const NeuralConnections: React.FC<{
             <bufferGeometry attach="geometry">
               <bufferAttribute
                 attach="attributes-position"
-                args={[new Float32Array([fromPos.x, fromPos.y, fromPos.z, toPos.x, toPos.y, toPos.z]), 3]} // Pass array and itemSize via args
+                args={[
+                  new Float32Array([fromPos.x, fromPos.y, fromPos.z, toPos.x, toPos.y, toPos.z]),
+                  3,
+                ]} // Pass array and itemSize via args
                 count={2} // Keep count separate if needed, or remove if inferred by args
               />
             </bufferGeometry>
@@ -226,7 +231,8 @@ const BrainLoadingAnimation: React.FC<{
   const groupRef = useRef<THREE.Group>(null);
 
   // Animate rotation
-  useFrame((_state, delta) => { // state is unused
+  useFrame((_state, delta) => {
+    // state is unused
     if (groupRef.current) {
       groupRef.current.rotation.y += delta * 0.2;
     }

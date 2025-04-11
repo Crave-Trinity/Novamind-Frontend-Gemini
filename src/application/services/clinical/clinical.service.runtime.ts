@@ -50,7 +50,11 @@ export function isSymptom(obj: unknown): obj is Symptom {
  * @param field - Optional field name for error context
  * @returns A Result with the validated Symptom or an error
  */
-export function validateSymptom(obj: unknown, field?: string): Result<Symptom, TypeVerificationError> { // Added error type
+export function validateSymptom(
+  obj: unknown,
+  field?: string
+): Result<Symptom, TypeVerificationError> {
+  // Added error type
   if (!obj || typeof obj !== 'object') {
     return failure(
       new TypeVerificationError('Invalid Symptom: expected an object', 'Symptom', typeof obj, field)
@@ -209,7 +213,11 @@ export function isDiagnosis(obj: unknown): obj is Diagnosis {
  * @param field - Optional field name for error context
  * @returns A Result with the validated Diagnosis or an error
  */
-export function validateDiagnosis(obj: unknown, field?: string): Result<Diagnosis, TypeVerificationError> { // Added error type
+export function validateDiagnosis(
+  obj: unknown,
+  field?: string
+): Result<Diagnosis, TypeVerificationError> {
+  // Added error type
   if (!obj || typeof obj !== 'object') {
     return failure(
       new TypeVerificationError(
@@ -334,7 +342,11 @@ export function isTreatment(obj: unknown): obj is Treatment {
  * @param field - Optional field name for error context
  * @returns A Result with the validated Treatment or an error
  */
-export function validateTreatment(obj: unknown, field?: string): Result<Treatment, TypeVerificationError> { // Added error type
+export function validateTreatment(
+  obj: unknown,
+  field?: string
+): Result<Treatment, TypeVerificationError> {
+  // Added error type
   if (!obj || typeof obj !== 'object') {
     return failure(
       new TypeVerificationError(
@@ -456,7 +468,11 @@ export function isRiskAssessment(obj: unknown): obj is RiskAssessment {
  * @param field - Optional field name for error context
  * @returns A Result with the validated RiskAssessment or an error
  */
-export function validateRiskAssessment(obj: unknown, field?: string): Result<RiskAssessment, TypeVerificationError> { // Added error type
+export function validateRiskAssessment(
+  obj: unknown,
+  field?: string
+): Result<RiskAssessment, TypeVerificationError> {
+  // Added error type
   if (!obj || typeof obj !== 'object') {
     return failure(
       new TypeVerificationError(
@@ -642,7 +658,8 @@ export function isTreatmentResponsePrediction(obj: unknown): obj is TreatmentRes
 export function validateTreatmentResponsePrediction( // Added error type
   obj: unknown,
   field?: string
-): Result<TreatmentResponsePrediction, TypeVerificationError> { // Added error type
+): Result<TreatmentResponsePrediction, TypeVerificationError> {
+  // Added error type
   if (!obj || typeof obj !== 'object') {
     return failure(
       new TypeVerificationError(

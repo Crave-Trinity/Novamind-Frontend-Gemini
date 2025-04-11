@@ -10,7 +10,7 @@ import { setupApiMocking } from './utils/mockApi.js'; // Import the utility
     console.log('[Puppeteer] Launching browser for BrainVisualizationPage test...');
     browser = await puppeteer.launch({
       headless: true, // Run in headless mode (no visible browser window)
-      args: ['--no-sandbox', '--disable-setuid-sandbox'] // Common args for CI environments
+      args: ['--no-sandbox', '--disable-setuid-sandbox'], // Common args for CI environments
     });
     let page = await browser.newPage(); // Use let for potential reassignment if needed, though unlikely here
 
@@ -19,8 +19,10 @@ import { setupApiMocking } from './utils/mockApi.js'; // Import the utility
 
     console.log(`[Puppeteer] Navigating to ${targetUrl}...`);
     // --- Setup Event Listeners and Mocking BEFORE navigation ---
-    page.on('console', msg => console.log(`[Browser Console - ${msg.type().toUpperCase()}] ${msg.text()}`));
-    page.on('pageerror', err => console.error('[Browser Page Error]', err.toString()));
+    page.on('console', (msg) =>
+      console.log(`[Browser Console - ${msg.type().toUpperCase()}] ${msg.text()}`)
+    );
+    page.on('pageerror', (err) => console.error('[Browser Page Error]', err.toString()));
 
     // Use the centralized mocking utility
     await setupApiMocking(page);
@@ -42,17 +44,17 @@ import { setupApiMocking } from './utils/mockApi.js'; // Import the utility
       // - Check canvas dimensions
       // - Execute script in browser context to interact with Three.js scene (page.evaluate)
       // - Take screenshots (page.screenshot) for visual inspection
-
     } else {
       // Take screenshot on failure for debugging
       const screenshotPath = 'test-puppeteer/failure-screenshot-BrainVisualizationPage.png';
       await page.screenshot({ path: screenshotPath });
       console.error(`[Puppeteer] Screenshot saved to ${screenshotPath}`);
-      throw new Error(`❌ FAILURE: Canvas element ('${canvasSelector}') not found on ${targetUrl}.`);
+      throw new Error(
+        `❌ FAILURE: Canvas element ('${canvasSelector}') not found on ${targetUrl}.`
+      );
     }
 
     console.log('[Puppeteer] BrainVisualizationPage test finished successfully.');
-
   } catch (error) {
     console.error('[Puppeteer] BrainVisualizationPage test failed:', error);
     process.exitCode = 1; // Indicate failure

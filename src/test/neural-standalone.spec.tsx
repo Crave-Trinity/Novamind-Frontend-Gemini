@@ -106,15 +106,20 @@ beforeAll(() => {
       unobserve = vi.fn();
       disconnect = vi.fn();
       takeRecords = vi.fn(() => []);
-      constructor(public callback: IntersectionObserverCallback, public options?: IntersectionObserverInit) {}
+      constructor(
+        public callback: IntersectionObserverCallback,
+        public options?: IntersectionObserverInit
+      ) {}
     };
 
     // Mock requestAnimationFrame
     // Corrected requestAnimationFrame mock signature
-    window.requestAnimationFrame = vi.fn().mockImplementation((callback: FrameRequestCallback): number => {
-      // Return a number as expected by cancelAnimationFrame
-      return window.setTimeout(() => callback(performance.now()), 16); // Use performance.now and simulate ~60fps
-    });
+    window.requestAnimationFrame = vi
+      .fn()
+      .mockImplementation((callback: FrameRequestCallback): number => {
+        // Return a number as expected by cancelAnimationFrame
+        return window.setTimeout(() => callback(performance.now()), 16); // Use performance.now and simulate ~60fps
+      });
 
     // Mock cancelAnimationFrame
     // Corrected cancelAnimationFrame mock signature
@@ -129,27 +134,57 @@ beforeAll(() => {
     HTMLCanvasElement.prototype.getContext = function (
       contextId: string,
       _options?: any // Prefixed unused options
-    ): any { // Use 'any' return type initially for flexibility
+    ): any {
+      // Use 'any' return type initially for flexibility
       if (contextId === 'webgl' || contextId === 'webgl2') {
         // Return a basic mock WebGL context
         return {
-          clear: vi.fn(), viewport: vi.fn(), enable: vi.fn(), disable: vi.fn(), createShader: vi.fn(() => ({})),
-          shaderSource: vi.fn(), compileShader: vi.fn(), getShaderParameter: vi.fn(() => true), createProgram: vi.fn(() => ({})),
-          attachShader: vi.fn(), linkProgram: vi.fn(), getProgramParameter: vi.fn(() => true), useProgram: vi.fn(),
-          createBuffer: vi.fn(() => ({})), bindBuffer: vi.fn(), bufferData: vi.fn(), getAttribLocation: vi.fn(() => 0),
-          vertexAttribPointer: vi.fn(), enableVertexAttribArray: vi.fn(), getUniformLocation: vi.fn(() => ({})),
-          uniformMatrix4fv: vi.fn(), drawArrays: vi.fn(),
+          clear: vi.fn(),
+          viewport: vi.fn(),
+          enable: vi.fn(),
+          disable: vi.fn(),
+          createShader: vi.fn(() => ({})),
+          shaderSource: vi.fn(),
+          compileShader: vi.fn(),
+          getShaderParameter: vi.fn(() => true),
+          createProgram: vi.fn(() => ({})),
+          attachShader: vi.fn(),
+          linkProgram: vi.fn(),
+          getProgramParameter: vi.fn(() => true),
+          useProgram: vi.fn(),
+          createBuffer: vi.fn(() => ({})),
+          bindBuffer: vi.fn(),
+          bufferData: vi.fn(),
+          getAttribLocation: vi.fn(() => 0),
+          vertexAttribPointer: vi.fn(),
+          enableVertexAttribArray: vi.fn(),
+          getUniformLocation: vi.fn(() => ({})),
+          uniformMatrix4fv: vi.fn(),
+          drawArrays: vi.fn(),
           // Add other necessary WebGL methods used by your code
         } as unknown as WebGLRenderingContext; // Cast via unknown
       }
       if (contextId === '2d') {
-         return {
-           fillRect: vi.fn(), clearRect: vi.fn(), getImageData: vi.fn(() => ({ data: new Uint8ClampedArray(0) })),
-           putImageData: vi.fn(), createImageData: vi.fn(() => ({ data: new Uint8ClampedArray(0) })), setTransform: vi.fn(),
-           drawImage: vi.fn(), save: vi.fn(), fillText: vi.fn(), restore: vi.fn(), beginPath: vi.fn(), moveTo: vi.fn(),
-           lineTo: vi.fn(), closePath: vi.fn(), stroke: vi.fn(), strokeRect: vi.fn(), measureText: vi.fn(() => ({ width: 0 })),
-           // Add other necessary 2D context methods
-         } as unknown as CanvasRenderingContext2D; // Cast via unknown
+        return {
+          fillRect: vi.fn(),
+          clearRect: vi.fn(),
+          getImageData: vi.fn(() => ({ data: new Uint8ClampedArray(0) })),
+          putImageData: vi.fn(),
+          createImageData: vi.fn(() => ({ data: new Uint8ClampedArray(0) })),
+          setTransform: vi.fn(),
+          drawImage: vi.fn(),
+          save: vi.fn(),
+          fillText: vi.fn(),
+          restore: vi.fn(),
+          beginPath: vi.fn(),
+          moveTo: vi.fn(),
+          lineTo: vi.fn(),
+          closePath: vi.fn(),
+          stroke: vi.fn(),
+          strokeRect: vi.fn(),
+          measureText: vi.fn(() => ({ width: 0 })),
+          // Add other necessary 2D context methods
+        } as unknown as CanvasRenderingContext2D; // Cast via unknown
       }
       if (contextId === 'bitmaprenderer') {
         return {
@@ -157,10 +192,10 @@ beforeAll(() => {
           // Add other necessary bitmaprenderer context methods
         } as unknown as ImageBitmapRenderingContext; // Cast via unknown
       }
-       // Fallback to original for other context types if needed, but typically return null for mocks
-       // if (originalGetContext) {
-       //   return originalGetContext.call(this, contextId, options);
-       // }
+      // Fallback to original for other context types if needed, but typically return null for mocks
+      // if (originalGetContext) {
+      //   return originalGetContext.call(this, contextId, options);
+      // }
       return null; // Return null for unsupported contexts
     };
   }

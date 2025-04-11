@@ -2,7 +2,7 @@ import React, { useState } from 'react'; // Removed unused useEffect
 
 // Import components from index files for better organization following clean architecture
 import { useTheme } from '@hooks/useTheme'; // Correct hook path
-import { ThemeMode } from '@domain/types/theme'; // Changed from type-only import
+import type { ThemeMode } from '@domain/types/theme'; // Changed from type-only import
 import { DocumentTitle, Card, Button } from '@presentation/atoms';
 import { Header } from '@presentation/molecules';
 import MainLayout from '@presentation/templates/MainLayout';

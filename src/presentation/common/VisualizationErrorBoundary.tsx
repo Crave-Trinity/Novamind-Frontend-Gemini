@@ -124,7 +124,8 @@ export class VisualizationErrorBoundary extends Component<
     if (this.props.onRecoveryAttempt) {
       const result: Result<boolean, Error> = this.props.onRecoveryAttempt(); // Added type annotation
 
-      if (result.success && result.value) { // Corrected property access from 'data' to 'value'
+      if (result.success && result.value) {
+        // Corrected property access from 'data' to 'value'
         // Reset error state on successful recovery
         this.resetErrorState();
       }

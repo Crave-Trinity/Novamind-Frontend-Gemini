@@ -137,7 +137,10 @@ export class TypeVerifier {
   /**
    * Verify that a value is a string or undefined/null
    */
-  verifyOptionalString(value: unknown, field?: string): Result<string | undefined, TypeVerificationError> {
+  verifyOptionalString(
+    value: unknown,
+    field?: string
+  ): Result<string | undefined, TypeVerificationError> {
     if (value === undefined || value === null) {
       return { success: true, value: undefined };
     }
@@ -174,7 +177,10 @@ export class TypeVerifier {
   /**
    * Verify that a value is a boolean or undefined/null
    */
-  verifyOptionalBoolean(value: unknown, field?: string): Result<boolean | undefined, TypeVerificationError> {
+  verifyOptionalBoolean(
+    value: unknown,
+    field?: string
+  ): Result<boolean | undefined, TypeVerificationError> {
     if (value === undefined || value === null) {
       return { success: true, value: undefined };
     }
@@ -187,8 +193,8 @@ export class TypeVerifier {
     // If the previous logic is desired, this should return { success: true, value: undefined } on failure.
     // For now, assume strict checking:
     return result;
-     // If the previous, more lenient logic was intended (treat non-boolean as undefined):
-     // return result.success ? result : { success: true, value: undefined };
+    // If the previous, more lenient logic was intended (treat non-boolean as undefined):
+    // return result.success ? result : { success: true, value: undefined };
   }
 
   /**

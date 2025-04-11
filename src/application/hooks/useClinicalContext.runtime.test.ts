@@ -12,9 +12,7 @@ import {
   validateTreatmentMappingArray,
 } from '@hooks/useClinicalContext.runtime';
 import { type RiskAssessment, RiskLevel } from '@domain/types/clinical/risk'; // Already correct
-import type {
-  TreatmentResponsePrediction,
-} from '@domain/types/clinical/treatment';
+import type { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
 import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,

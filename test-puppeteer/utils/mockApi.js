@@ -6,11 +6,14 @@ import { fileURLToPath } from 'url'; // Import necessary function
 /**
  * Sets up Puppeteer request interception to mock API responses.
  * Currently mocks the DEMO_SCAN_001 brain model endpoint.
- * 
+ *
  * @param {import('puppeteer').Page} page - The Puppeteer page object.
  * @param {string} [mockDataPath='../../src/test/mocks/api/brainModelDemo.json'] - Relative path to the mock data JSON file.
  */
-export async function setupApiMocking(page, mockDataPath = '../../src/test/mocks/api/brainModelDemo.json') {
+export async function setupApiMocking(
+  page,
+  mockDataPath = '../../src/test/mocks/api/brainModelDemo.json'
+) {
   console.log('[Puppeteer Mock Util] Setting up API request interception...');
 
   // Resolve the absolute path to the mock data file relative to this utility file using ES Module syntax
@@ -24,7 +27,10 @@ export async function setupApiMocking(page, mockDataPath = '../../src/test/mocks
     mockBrainModel = JSON.parse(mockDataContent);
     console.log(`[Puppeteer Mock Util] Successfully loaded mock data from: ${absoluteMockPath}`);
   } catch (error) {
-    console.error(`[Puppeteer Mock Util] Failed to load or parse mock data from ${absoluteMockPath}:`, error);
+    console.error(
+      `[Puppeteer Mock Util] Failed to load or parse mock data from ${absoluteMockPath}:`,
+      error
+    );
     throw new Error(`Could not load mock data for API mocking: ${error.message}`);
   }
 
@@ -43,14 +49,16 @@ export async function setupApiMocking(page, mockDataPath = '../../src/test/mocks
           body: JSON.stringify(mockBrainModel),
         });
       } else {
-        console.error(`[Puppeteer Mock Util] Mock data not loaded for ${url}. Responding with error.`);
+        console.error(
+          `[Puppeteer Mock Util] Mock data not loaded for ${url}. Responding with error.`
+        );
         interceptedRequest.respond({
           status: 500,
           contentType: 'application/json',
           body: JSON.stringify({ error: 'Mock data unavailable' }),
         });
       }
-    } 
+    }
     // Add other endpoints to mock here using else if blocks
     // else if (url.endsWith('/api/some-other-endpoint')) { ... }
     else {

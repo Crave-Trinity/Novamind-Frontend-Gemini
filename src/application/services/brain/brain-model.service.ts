@@ -299,7 +299,9 @@ export const brainModelService = {
    * Generate a brain model from clinical data (mock implementation)
    * In a real system, this would call a server-side AI model
    */
-  generateModel: async (patientId: string): Promise<Result<{ scanId: string; status: string }, Error>> => {
+  generateModel: async (
+    patientId: string
+  ): Promise<Result<{ scanId: string; status: string }, Error>> => {
     try {
       // API request using apiClient
       const data = await apiClient.post<{ scanId: string; status: string }>(

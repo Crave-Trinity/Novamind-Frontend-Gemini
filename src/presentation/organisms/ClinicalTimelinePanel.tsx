@@ -42,7 +42,7 @@ import {
 
 // Domain types
 import type { ClinicalEventType } from '@domain/types/clinical/events';
-import {
+import type {
   ClinicalEvent, // Re-added import
   // TreatmentEvent, // Removed unused import
   // SymptomEvent, // Removed unused import
@@ -184,7 +184,8 @@ export const ClinicalTimelinePanel: React.FC<ClinicalTimelinePanelProps> = ({
     const grouped: Record<string, ClinicalEvent[]> = {}; // Use correct type
 
     // Use 'any' for event type temporarily
-    filteredEvents.forEach((event: ClinicalEvent) => { // Use correct type
+    filteredEvents.forEach((event: ClinicalEvent) => {
+      // Use correct type
       const dateKey = formatDate(new Date(event.date));
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
@@ -224,7 +225,8 @@ export const ClinicalTimelinePanel: React.FC<ClinicalTimelinePanelProps> = ({
   // Handle event selection
   const handleEventClick = useCallback(
     // Use 'any' for event type temporarily
-    (event: ClinicalEvent) => { // Use correct type
+    (event: ClinicalEvent) => {
+      // Use correct type
       setSelectedEvent(event === selectedEvent ? null : event);
     },
     [selectedEvent]
@@ -233,7 +235,8 @@ export const ClinicalTimelinePanel: React.FC<ClinicalTimelinePanelProps> = ({
   // Check if a date has transitions
   // Temporarily comment out transition logic due to missing types
   const hasTransitionOnDate = useCallback(
-    (_dateStr: string) => { // Prefix unused parameter
+    (_dateStr: string) => {
+      // Prefix unused parameter
       // const date = new Date(dateStr);
       // const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       // return transitions.some((transition: any) => { // Use 'any' temporarily

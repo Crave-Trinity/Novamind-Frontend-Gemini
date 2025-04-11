@@ -88,7 +88,8 @@ class AuthClient {
         success: false,
         error: 'Invalid email or password',
       };
-    } catch (_error) { // Prefixed unused error variable
+    } catch (_error) {
+      // Prefixed unused error variable
       // Log error
       auditLogClient.log(AuditEventType.SYSTEM_ERROR, {
         errorCode: 'LoginError',

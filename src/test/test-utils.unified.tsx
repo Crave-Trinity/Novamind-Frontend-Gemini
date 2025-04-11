@@ -24,17 +24,19 @@ export const darkSchemeMediaQueryList = {
   matches: false, // Default to light
   media: '(prefers-color-scheme: dark)',
   onchange: null,
-  addListener: vi.fn((cb) => { // Deprecated
+  addListener: vi.fn((cb) => {
+    // Deprecated
     if (!darkSchemeListeners.includes(cb)) darkSchemeListeners.push(cb);
   }),
-  removeListener: vi.fn((cb) => { // Deprecated
+  removeListener: vi.fn((cb) => {
+    // Deprecated
     darkSchemeListeners = darkSchemeListeners.filter((l) => l !== cb);
   }),
   addEventListener: vi.fn((event, cb) => {
-     if (event === 'change' && cb && !darkSchemeListeners.includes(cb)) darkSchemeListeners.push(cb);
+    if (event === 'change' && cb && !darkSchemeListeners.includes(cb)) darkSchemeListeners.push(cb);
   }),
   removeEventListener: vi.fn((event, cb) => {
-     if (event === 'change') darkSchemeListeners = darkSchemeListeners.filter((l) => l !== cb);
+    if (event === 'change') darkSchemeListeners = darkSchemeListeners.filter((l) => l !== cb);
   }),
   dispatchEvent: vi.fn((event: Event) => {
     if (event.type === 'change') darkSchemeListeners.forEach((l) => l(event));
@@ -53,25 +55,32 @@ const originalMatchMedia = window.matchMedia;
 // Define the mock implementation function separately
 // Export the implementation function if needed elsewhere, though likely not
 export const matchMediaMockImplementation = (query: string) => {
-    if (query === '(prefers-color-scheme: dark)') {
-      // Reset listeners and matches state for each call to window.matchMedia
-      // This ensures tests get a fresh state when they query, but the underlying object persists
-      darkSchemeListeners = [];
-      darkSchemeMediaQueryList.matches = false; // Default to light unless overridden
-      // Allow tests to override initial matches via setup (less common now)
+  if (query === '(prefers-color-scheme: dark)') {
+    // Reset listeners and matches state for each call to window.matchMedia
+    // This ensures tests get a fresh state when they query, but the underlying object persists
+    darkSchemeListeners = [];
+    darkSchemeMediaQueryList.matches = false; // Default to light unless overridden
+    // Allow tests to override initial matches via setup (less common now)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((globalThis as any).__vitest_matchMedia_matches !== undefined) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((globalThis as any).__vitest_matchMedia_matches !== undefined) {
-           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-           darkSchemeMediaQueryList.matches = (globalThis as any).__vitest_matchMedia_matches;
-           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-           delete (globalThis as any).__vitest_matchMedia_matches;
-      }
-      return darkSchemeMediaQueryList; // Return the persistent instance
+      darkSchemeMediaQueryList.matches = (globalThis as any).__vitest_matchMedia_matches;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (globalThis as any).__vitest_matchMedia_matches;
     }
-    // Return a generic, non-functional mock for other queries
-    return {
-      matches: false, media: query, onchange: null, addListener: vi.fn(), removeListener: vi.fn(), addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn()
-    };
+    return darkSchemeMediaQueryList; // Return the persistent instance
+  }
+  // Return a generic, non-functional mock for other queries
+  return {
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  };
 };
 
 // Apply the mock before tests using renderWithProviders run
@@ -81,7 +90,6 @@ Object.defineProperty(window, 'matchMedia', {
   value: vi.fn().mockImplementation(matchMediaMockImplementation),
 });
 // --- End matchMedia Mock ---
-
 
 // Create a query client instance for tests with specific settings
 const testQueryClient = new QueryClient({
@@ -137,20 +145,19 @@ export function renderWithProviders(
     ...options
   }: ExtendedRenderOptions = {}
 ) {
-   // Apply the robust mock specifically when this function is called
-   // This ensures it overrides the global mock from setup.ts only for these tests
-   Object.defineProperty(window, 'matchMedia', {
-     writable: true,
-     configurable: true,
-     value: vi.fn().mockImplementation(matchMediaMockImplementation),
-   });
+  // Apply the robust mock specifically when this function is called
+  // This ensures it overrides the global mock from setup.ts only for these tests
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    configurable: true,
+    value: vi.fn().mockImplementation(matchMediaMockImplementation),
+  });
 
-   // Reset the mock state before each render using this utility
-   darkSchemeListeners = [];
-   darkSchemeMediaQueryList.matches = darkMode; // Set initial state based on darkMode prop if provided
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-   delete (globalThis as any).__vitest_matchMedia_matches; // Clear any global override
-
+  // Reset the mock state before each render using this utility
+  darkSchemeListeners = [];
+  darkSchemeMediaQueryList.matches = darkMode; // Set initial state based on darkMode prop if provided
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  delete (globalThis as any).__vitest_matchMedia_matches; // Clear any global override
 
   // Apply dark mode class directly if darkMode prop is true (might conflict with ThemeProvider, use with caution)
   // Consider removing this if ThemeProvider handles it reliably based on defaultTheme
@@ -170,7 +177,8 @@ export function renderWithProviders(
   return {
     ...renderResult,
     isDarkMode: () => darkSchemeMediaQueryList.matches, // Read from the mock instance
-    triggerSystemThemeChange: (matches: boolean) => darkSchemeMediaQueryList._triggerChange(matches), // Expose the trigger
+    triggerSystemThemeChange: (matches: boolean) =>
+      darkSchemeMediaQueryList._triggerChange(matches), // Expose the trigger
     // Deprecating direct tailwind helpers from return if ThemeProvider is reliable - RE-ENABLED FOR NOW TO FIX TESTS
     enableDarkMode: tailwindHelper.enableDarkMode,
     disableDarkMode: tailwindHelper.disableDarkMode,

@@ -70,7 +70,8 @@ const Dashboard: React.FC = () => {
   const handleViewBrain = useCallback(
     (patientId: string) => {
       // Log for HIPAA compliance
-      auditLogClient.log(AuditEventType.PATIENT_RECORD_VIEW, { // Corrected usage
+      auditLogClient.log(AuditEventType.PATIENT_RECORD_VIEW, {
+        // Corrected usage
         action: 'navigate_to_brain_visualization',
         resourceId: patientId,
         resourceType: 'patient',

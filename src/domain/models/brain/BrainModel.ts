@@ -132,7 +132,8 @@ export const BrainModel = (data: any = {}): BrainModelData => {
   // Process any available data with neural-safe verification
   if (Array.isArray(model.regions)) {
     // Ensure all regions have required fields
-    model.regions = model.regions.map((region: BrainRegion) => ({ // Added type annotation
+    model.regions = model.regions.map((region: BrainRegion) => ({
+      // Added type annotation
       id: region.id || `region-${Math.random().toString(36).substr(2, 9)}`,
       name: region.name || 'Unnamed Region',
       description: region.description || '',

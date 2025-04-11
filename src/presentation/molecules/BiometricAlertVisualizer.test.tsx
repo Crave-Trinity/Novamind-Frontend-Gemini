@@ -31,7 +31,8 @@ vi.mock('@react-three/fiber', () => ({
 }));
 
 // Mock Three.js more carefully
-vi.mock('three', async () => { // Removed unused importOriginal
+vi.mock('three', async () => {
+  // Removed unused importOriginal
   // Removed unused variable: const actualThree = (await importOriginal()) as any;
   // Define Vector3 as a mock class
   class MockVector3 {

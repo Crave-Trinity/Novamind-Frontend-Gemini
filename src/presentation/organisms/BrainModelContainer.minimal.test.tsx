@@ -21,7 +21,9 @@ vi.mock('next-themes', () => ({
 
 // Mock Three.js and React Three Fiber
 vi.mock('@react-three/fiber', () => ({
-  Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="mock-canvas">{children}</div>, // Added type for children
+  Canvas: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="mock-canvas">{children}</div>
+  ), // Added type for children
   useFrame: vi.fn(),
   useThree: vi.fn(() => ({
     camera: { position: { set: vi.fn() }, lookAt: vi.fn() },

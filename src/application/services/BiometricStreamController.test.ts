@@ -117,7 +117,11 @@ describe.skip('BiometricStreamController (Rebuilt)', () => {
 
     // Default dynamic mock for getStreamMetadata
     mockedBiometricService.getStreamMetadata.mockImplementation(
-      async (_patientId: string, streamIds?: string[]): Promise<Result<BiometricStream[], Error>> => { // Prefixed unused patientId, Added error type
+      async (
+        _patientId: string,
+        streamIds?: string[]
+      ): Promise<Result<BiometricStream[], Error>> => {
+        // Prefixed unused patientId, Added error type
         const streamsToReturn =
           streamIds && streamIds.length > 0
             ? mockStreamMetadata.filter((meta) => streamIds.includes(meta.id))

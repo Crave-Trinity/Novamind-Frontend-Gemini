@@ -20,7 +20,7 @@ vi.mock('@react-three/fiber', () => ({
 }));
 
 vi.mock('@react-three/drei', () => ({
-  Sphere: ({ position, scale, color }: { position: any, scale: any, color: any }) =>
+  Sphere: ({ position, scale, color }: { position: any; scale: any; color: any }) =>
     React.createElement(
       'div',
       {
@@ -32,12 +32,13 @@ vi.mock('@react-three/drei', () => ({
       'Node'
     ),
   Line: (
-    { points: _points, color }: { points: any, color: any } // Mark points as unused
+    { points: _points, color }: { points: any; color: any } // Mark points as unused
   ) => React.createElement('div', { 'data-testid': 'neural-line', 'data-color': color }, 'Line'),
   // Removed extra comma causing syntax error
-  Text: ({ children, color }: { children: React.ReactNode, color: any }) =>
+  Text: ({ children, color }: { children: React.ReactNode; color: any }) =>
     React.createElement('div', { 'data-testid': 'neural-text', 'data-color': color }, children),
-  Html: ({ children }: { children: React.ReactNode }) => React.createElement('div', { 'data-testid': 'neural-html' }, children),
+  Html: ({ children }: { children: React.ReactNode }) =>
+    React.createElement('div', { 'data-testid': 'neural-html' }, children),
   useTexture: () => ({ map: {} }),
   shaderMaterial: () => ({}),
 }));
@@ -79,7 +80,13 @@ vi.mock('react-chartjs-2', () => ({
 export const MockNeuralComponent = ({ children }: { children: React.ReactNode }) =>
   React.createElement('div', { 'data-testid': 'neural-component' }, children);
 
-export const MockBrainVisualization = ({ regions, connections }: { regions: any, connections: any }) =>
+export const MockBrainVisualization = ({
+  regions,
+  connections,
+}: {
+  regions: any;
+  connections: any;
+}) =>
   React.createElement(
     'div',
     { 'data-testid': 'brain-visualization' },
@@ -87,7 +94,13 @@ export const MockBrainVisualization = ({ regions, connections }: { regions: any,
     React.createElement('div', null, `Connections: ${connections?.length || 0}`)
   );
 
-export const MockTemporalVisualizer = ({ timeRange, stateTransitions }: { timeRange: any, stateTransitions: any }) =>
+export const MockTemporalVisualizer = ({
+  timeRange,
+  stateTransitions,
+}: {
+  timeRange: any;
+  stateTransitions: any;
+}) =>
   React.createElement(
     'div',
     { 'data-testid': 'temporal-visualizer' },
@@ -96,7 +109,7 @@ export const MockTemporalVisualizer = ({ timeRange, stateTransitions }: { timeRa
   );
 
 export const MockClinicalDataDisplay = (
-  { data, colorMap: _colorMap }: { data: any, colorMap: any } // Mark colorMap as unused
+  { data, colorMap: _colorMap }: { data: any; colorMap: any } // Mark colorMap as unused
 ) =>
   React.createElement(
     'div',

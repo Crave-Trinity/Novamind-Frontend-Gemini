@@ -130,7 +130,8 @@ describe('Card Component with Tailwind CSS', () => {
       setTheme('dark');
     });
     // Re-mock the return value to reflect the change for the next assertion
-    mockedUseTheme.mockReturnValue({ // Ensure consistent variable name
+    mockedUseTheme.mockReturnValue({
+      // Ensure consistent variable name
       theme: 'dark',
       setTheme: mockSetTheme,
       resolvedTheme: 'dark',
@@ -143,7 +144,8 @@ describe('Card Component with Tailwind CSS', () => {
     act(() => {
       setTheme('light');
     });
-    mockedUseTheme.mockReturnValue({ // Ensure consistent variable name
+    mockedUseTheme.mockReturnValue({
+      // Ensure consistent variable name
       theme: 'light',
       setTheme: mockSetTheme,
       resolvedTheme: 'light',

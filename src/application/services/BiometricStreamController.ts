@@ -300,7 +300,8 @@ export function useBiometricStreamController(
 
   // Connect to biometric streams
   const connectStreams = useCallback(
-    async (streamIds?: string[]): Promise<ResultType<void, Error>> => { // Added error type
+    async (streamIds?: string[]): Promise<ResultType<void, Error>> => {
+      // Added error type
       try {
         // Target streams (use provided or configured)
         const targetStreamIds = streamIds || config.streamIds;
@@ -350,7 +351,8 @@ export function useBiometricStreamController(
         const newActiveStreams = new Map<string, BiometricStream>();
         const newStreamData = new Map<string, BiometricDataPoint[]>();
 
-        streams.forEach((stream: BiometricStream) => { // Added type annotation
+        streams.forEach((stream: BiometricStream) => {
+          // Added type annotation
           // Use the extracted 'streams' variable
           newActiveStreams.set(stream.id, stream);
           newStreamData.set(stream.id, []);
@@ -428,7 +430,8 @@ export function useBiometricStreamController(
   );
 
   // Disconnect from biometric streams
-  const disconnectStreams = useCallback((): ResultType<void, Error> => { // Added error type
+  const disconnectStreams = useCallback((): ResultType<void, Error> => {
+    // Added error type
     try {
       // Close WebSocket connection
       if (wsRef.current) {
@@ -613,7 +616,8 @@ export function useBiometricStreamController(
   );
 
   // Acknowledge an alert
-  const acknowledgeAlert = useCallback((alertId: string): ResultType<void, Error> => { // Added error type
+  const acknowledgeAlert = useCallback((alertId: string): ResultType<void, Error> => {
+    // Added error type
     try {
       setState((prevState) => {
         const alertIndex = prevState.alerts.findIndex((alert) => alert.id === alertId);
@@ -678,7 +682,8 @@ export function useBiometricStreamController(
   );
 
   // Calculate correlations between biometric streams
-  const calculateCorrelations = useCallback((): ResultType<Map<string, number>, Error> => { // Added error type
+  const calculateCorrelations = useCallback((): ResultType<Map<string, number>, Error> => {
+    // Added error type
     try {
       // Get all stream IDs
       const streamIds = Array.from(state.activeStreams.keys());

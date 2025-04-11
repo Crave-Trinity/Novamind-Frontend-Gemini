@@ -1,4 +1,4 @@
- import React from 'react';
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Example router setup
 import Dashboard from '@pages/Dashboard';
@@ -35,7 +35,9 @@ const App: React.FC = () => {
           <Route
             path="/test/neural-control-panel"
             element={
-              <ThemeProvider defaultTheme="dark"> {/* Wrap with ThemeProvider */}
+              <ThemeProvider defaultTheme="dark">
+                {' '}
+                {/* Wrap with ThemeProvider */}
                 <div className="p-4 bg-background text-foreground min-h-screen">
                   <NeuralControlPanel />
                 </div>

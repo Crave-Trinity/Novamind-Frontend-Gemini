@@ -12,7 +12,8 @@ export const temporalService = {
   getTemporalDynamics: async (
     patientId: string,
     timeScale: string
-  ): Promise<Result<TemporalDynamics, Error>> => { // Added error type
+  ): Promise<Result<TemporalDynamics, Error>> => {
+    // Added error type
     console.warn(
       `TemporalService.getTemporalDynamics called for ${patientId} with scale ${timeScale}, returning mock data.`
     );

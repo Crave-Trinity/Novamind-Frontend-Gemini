@@ -106,7 +106,8 @@ export function usePatientData(initialPatientId?: string): UsePatientDataReturn 
 
   // Fetch patient data explicitly (currently only fetches symptoms)
   const fetchPatientData = useCallback(
-    async (patientId: string): Promise<Result<Symptom[], Error>> => { // Added error type
+    async (patientId: string): Promise<Result<Symptom[], Error>> => {
+      // Added error type
       // Adjusted return type
       try {
         // Fetch symptoms instead of the full patient object
@@ -153,31 +154,36 @@ export function usePatientData(initialPatientId?: string): UsePatientDataReturn 
       throw new Error('updateSymptomSeverity not fully implemented in this hook version');
       // Placeholder: return {} as Patient;
     },
-    onSuccess: (_updatedPatient) => { // Prefixed unused parameter
+    onSuccess: (_updatedPatient) => {
+      // Prefixed unused parameter
       // Update cache logic needs rework
       // if (patient?.id) { queryClient.setQueryData([patientQueryKey, patient.id], updatedPatient); }
     },
   });
 
   const addSymptomMutation = useMutation<Patient, Error, Omit<Symptom, 'id'>>({
-    mutationFn: async (_symptomData) => { // Prefixed unused parameter
+    mutationFn: async (_symptomData) => {
+      // Prefixed unused parameter
       console.warn('addSymptomMutation needs rework - Patient object not available');
       throw new Error('addSymptom not fully implemented in this hook version');
       // Placeholder: return {} as Patient;
     },
-    onSuccess: (_updatedPatient) => { // Prefixed unused parameter
+    onSuccess: (_updatedPatient) => {
+      // Prefixed unused parameter
       // Update cache logic needs rework
       // if (patient?.id) { queryClient.setQueryData([patientQueryKey, patient.id], updatedPatient); }
     },
   });
 
   const removeSymptomMutation = useMutation<Patient, Error, string>({
-    mutationFn: async (_symptomId) => { // Prefixed unused parameter
+    mutationFn: async (_symptomId) => {
+      // Prefixed unused parameter
       console.warn('removeSymptomMutation needs rework - Patient object not available');
       throw new Error('removeSymptom not fully implemented in this hook version');
       // Placeholder: return {} as Patient;
     },
-    onSuccess: (_updatedPatient) => { // Prefixed unused parameter
+    onSuccess: (_updatedPatient) => {
+      // Prefixed unused parameter
       // Update cache logic needs rework
       // if (patient?.id) { queryClient.setQueryData([patientQueryKey, patient.id], updatedPatient); }
     },

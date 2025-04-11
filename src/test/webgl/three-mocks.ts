@@ -33,13 +33,15 @@ export class MockObject3D {
   matrix: any = { identity: () => {}, copy: () => {}, multiply: () => {} };
   matrixWorld: any = { identity: () => {}, copy: () => {}, multiply: () => {} };
 
-  add = vi.fn().mockImplementation((object: MockObject3D): this => { // Direct mock assignment
+  add = vi.fn().mockImplementation((object: MockObject3D): this => {
+    // Direct mock assignment
     this.children.push(object);
     object.parent = this;
     return this;
   });
 
-  remove = vi.fn().mockImplementation((object: MockObject3D): this => { // Direct mock assignment
+  remove = vi.fn().mockImplementation((object: MockObject3D): this => {
+    // Direct mock assignment
     const index = this.children.indexOf(object);
     if (index !== -1) {
       this.children.splice(index, 1);
@@ -50,7 +52,9 @@ export class MockObject3D {
 
   updateMatrix: MockFunction<() => void> = createMockFunction(() => {});
   updateMatrixWorld: MockFunction<(force?: boolean) => void> = createMockFunction(() => {});
-  lookAt: MockFunction<(vector: Vector3Like) => void> = createMockFunction((_vector: Vector3Like) => {}); // Added parameter to match signature
+  lookAt: MockFunction<(vector: Vector3Like) => void> = createMockFunction(
+    (_vector: Vector3Like) => {}
+  ); // Added parameter to match signature
   traverse: MockFunction<(callback: (object: MockObject3D) => void) => void> = createMockFunction(
     (callback) => {
       callback(this);
@@ -246,7 +250,8 @@ export class MockBufferGeometry {
   boundingSphere: any = null;
   userData: Record<string, any> = {};
 
-  setAttribute = vi.fn().mockImplementation((name: string, attribute: any): this => { // Direct mock assignment
+  setAttribute = vi.fn().mockImplementation((name: string, attribute: any): this => {
+    // Direct mock assignment
     this.attributes[name] = attribute;
     return this;
   });
@@ -266,7 +271,8 @@ export class MockBufferGeometry {
     return new MockBufferGeometry();
   });
 
-  setFromPoints = vi.fn().mockImplementation((_points: Vector3Like[]): this => { // Direct mock assignment
+  setFromPoints = vi.fn().mockImplementation((_points: Vector3Like[]): this => {
+    // Direct mock assignment
     // Mock implementation, actual logic might vary
     return this;
   });
@@ -324,7 +330,8 @@ export class MockWebGLRenderer {
   gammaFactor = 2.0;
   info = { render: { calls: 0, triangles: 0, frame: 0 } };
 
-  constructor(_parameters?: { antialias?: boolean; alpha?: boolean }) { // Prefixed unused parameters
+  constructor(_parameters?: { antialias?: boolean; alpha?: boolean }) {
+    // Prefixed unused parameters
     this.domElement = document.createElement('canvas');
     this.domElement.width = 800;
     this.domElement.height = 600;
@@ -335,10 +342,16 @@ export class MockWebGLRenderer {
   setPixelRatio: MockFunction<(value: number) => void> = createMockFunction((_value: number) => {}); // Added parameter
   render: MockFunction<
     (scene: MockScene, camera: MockPerspectiveCamera | MockOrthographicCamera) => void
-  > = createMockFunction((_scene: MockScene, _camera: MockPerspectiveCamera | MockOrthographicCamera) => {}); // Added parameters
+  > = createMockFunction(
+    (_scene: MockScene, _camera: MockPerspectiveCamera | MockOrthographicCamera) => {}
+  ); // Added parameters
   dispose: MockFunction<() => void> = createMockFunction(() => {});
-  setClearColor: MockFunction<(color: any, alpha?: number) => void> = createMockFunction((_color: any, _alpha?: number) => {}); // Added parameters
-  setRenderTarget: MockFunction<(renderTarget: any) => void> = createMockFunction((_renderTarget: any) => {}); // Added parameter
+  setClearColor: MockFunction<(color: any, alpha?: number) => void> = createMockFunction(
+    (_color: any, _alpha?: number) => {}
+  ); // Added parameters
+  setRenderTarget: MockFunction<(renderTarget: any) => void> = createMockFunction(
+    (_renderTarget: any) => {}
+  ); // Added parameter
   clear: MockFunction<() => void> = createMockFunction(() => {});
 }
 
@@ -355,7 +368,8 @@ export class MockOrbitControls {
   enablePan: boolean = true;
   autoRotate: boolean = false;
 
-  constructor(_camera: MockPerspectiveCamera | MockOrthographicCamera, _domElement?: HTMLElement) { // Prefixed unused camera, domElement
+  constructor(_camera: MockPerspectiveCamera | MockOrthographicCamera, _domElement?: HTMLElement) {
+    // Prefixed unused camera, domElement
     // Constructor takes camera and optional domElement
   }
 

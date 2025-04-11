@@ -133,7 +133,8 @@ export const mockApi = {
   /**
    * Get risk assessment
    */
-  getRiskAssessment: async (_patientId: string): Promise<any> => { // Prefixed unused parameter
+  getRiskAssessment: async (_patientId: string): Promise<any> => {
+    // Prefixed unused parameter
     return {
       overallRisk: 0.65,
       components: [

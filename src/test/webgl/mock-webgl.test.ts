@@ -155,10 +155,10 @@ describe('Three.js Component Integration', () => {
     // For this specific test, use a direct, simple mock for WebGLRenderer
     // to avoid relying on the complex canvas.getContext mock for renderer instantiation.
     const mockRenderer = {
-        render: vi.fn(),
-        dispose: vi.fn(),
-        domElement: document.createElement('canvas'), // Provide a basic canvas element
-        shadowMap: { enabled: false } // Provide basic expected properties
+      render: vi.fn(),
+      dispose: vi.fn(),
+      domElement: document.createElement('canvas'), // Provide a basic canvas element
+      shadowMap: { enabled: false }, // Provide basic expected properties
     };
     // Removed unused geometry and material variables
     // Need mock scene and camera for the render call

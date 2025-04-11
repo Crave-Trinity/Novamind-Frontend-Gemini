@@ -4,7 +4,15 @@
  * with performance-optimized neural rendering
  */
 
-import React, { useEffect, useState, useRef, useMemo, useCallback, createContext, useContext } from 'react'; // Added createContext, useContext
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+  useCallback,
+  createContext,
+  useContext,
+} from 'react'; // Added createContext, useContext
 // R3F imports fully removed
 
 // Performance thresholds (Keep for now, logic removed)
@@ -318,11 +326,7 @@ export const AdaptiveLOD: React.FC<AdaptiveLODProps> = ({
   // Provide the config via context
   const contextValue = useMemo(() => ({ detailConfig: currentConfig }), [currentConfig]);
 
-  return (
-    <DetailContext.Provider value={contextValue}>
-      {children}
-    </DetailContext.Provider>
-  );
+  return <DetailContext.Provider value={contextValue}>{children}</DetailContext.Provider>;
 };
 
 export default AdaptiveLOD;

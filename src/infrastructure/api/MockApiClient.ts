@@ -11,7 +11,8 @@ export class MockApiClient {
    * @param patientId The ID of the patient
    * @returns A sample brain model
    */
-  async getBrainModel(patientId = 'demo-patient'): Promise<BrainModel> { // Use imported BrainModel type
+  async getBrainModel(patientId = 'demo-patient'): Promise<BrainModel> {
+    // Use imported BrainModel type
     // Return static, simplified mock data for faster tests
     const staticRegions: BrainRegion[] = [
       {
@@ -57,7 +58,8 @@ export class MockApiClient {
       // Add more static regions if needed for specific tests, but keep it minimal
     ];
 
-    const staticConnections: NeuralConnection[] = [ // Use correct type name
+    const staticConnections: NeuralConnection[] = [
+      // Use correct type name
       {
         id: 'path-1',
         sourceId: 'frontal-lobe',
@@ -78,7 +80,8 @@ export class MockApiClient {
       connections: staticConnections, // Renamed property
       timestamp: new Date().toISOString(),
       // Removed metadata property as it's not in BrainModel type
-      scan: { // Added missing scan property
+      scan: {
+        // Added missing scan property
         id: `scan-${patientId}-${Date.now()}`,
         patientId: patientId,
         scanDate: new Date().toISOString(),

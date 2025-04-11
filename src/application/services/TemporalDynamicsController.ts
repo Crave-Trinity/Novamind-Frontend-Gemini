@@ -129,7 +129,8 @@ export function useTemporalDynamicsController(
 
   // Load temporal dynamics for the given time scale
   const loadTemporalDynamics = useCallback(
-    async (timeScale: TimeScale): Promise<Result<TemporalDynamics, Error>> => { // Added error type
+    async (timeScale: TimeScale): Promise<Result<TemporalDynamics, Error>> => {
+      // Added error type
       try {
         setState((prevState) => ({
           ...prevState,
@@ -141,7 +142,8 @@ export function useTemporalDynamicsController(
 
         // TODO: Implement actual service call when temporalService is available
         console.warn('temporalService.getTemporalDynamics not implemented.');
-        const result: Result<any, Error> = failure( // Added error type
+        const result: Result<any, Error> = failure(
+          // Added error type
           new Error('Service method getTemporalDynamics not implemented.')
         );
 
@@ -214,7 +216,8 @@ export function useTemporalDynamicsController(
   );
 
   // Analyze patterns across all loaded time scales
-  const analyzePatterns = useCallback(async (): Promise<Result<TemporalPattern[], Error>> => { // Added error type
+  const analyzePatterns = useCallback(async (): Promise<Result<TemporalPattern[], Error>> => {
+    // Added error type
     try {
       const startTime = performance.now();
       setState((prevState) => ({
@@ -238,7 +241,8 @@ export function useTemporalDynamicsController(
 
       // TODO: Implement actual service call when temporalService is available
       console.warn('temporalService.analyzeTemporalPatterns not implemented.');
-      const result: Result<any, Error> = failure( // Added error type
+      const result: Result<any, Error> = failure(
+        // Added error type
         new Error('Service method analyzeTemporalPatterns not implemented.')
       );
 
@@ -286,7 +290,8 @@ export function useTemporalDynamicsController(
   }, [patientId, state.dynamicsData, config]);
 
   // Detect state transitions
-  const detectTransitions = useCallback(async (): Promise<Result<StateTransition[], Error>> => { // Added error type
+  const detectTransitions = useCallback(async (): Promise<Result<StateTransition[], Error>> => {
+    // Added error type
     try {
       const startTime = performance.now();
       setState((prevState) => ({
@@ -297,7 +302,8 @@ export function useTemporalDynamicsController(
 
       // TODO: Implement actual service call when temporalService is available
       console.warn('temporalService.detectStateTransitions not implemented.');
-      const result: Result<any, Error> = failure( // Added error type
+      const result: Result<any, Error> = failure(
+        // Added error type
         new Error('Service method detectStateTransitions not implemented.')
       );
 
@@ -361,7 +367,8 @@ export function useTemporalDynamicsController(
 
   // Extract features from temporal data
   const extractFeatures = useCallback(
-    async (_metricIds: string[]): Promise<Result<Record<string, TemporalFeature[]>, Error>> => { // Prefixed unused parameter, Added error type
+    async (_metricIds: string[]): Promise<Result<Record<string, TemporalFeature[]>, Error>> => {
+      // Prefixed unused parameter, Added error type
       try {
         const startTime = performance.now();
         setState((prevState) => ({
@@ -372,7 +379,8 @@ export function useTemporalDynamicsController(
 
         // TODO: Implement actual service call when temporalService is available
         console.warn('temporalService.extractTemporalFeatures not implemented.');
-        const result: Result<any, Error> = failure( // Added error type
+        const result: Result<any, Error> = failure(
+          // Added error type
           new Error('Service method extractTemporalFeatures not implemented.')
         );
 
@@ -418,7 +426,10 @@ export function useTemporalDynamicsController(
   );
 
   // Correlate temporal patterns with clinical events
-  const correlateWithClinicalEvents = useCallback(async (): Promise<Result<TemporalPattern[], Error>> => { // Added error type
+  const correlateWithClinicalEvents = useCallback(async (): Promise<
+    Result<TemporalPattern[], Error>
+  > => {
+    // Added error type
     try {
       const startTime = performance.now();
       setState((prevState) => ({
@@ -429,7 +440,8 @@ export function useTemporalDynamicsController(
 
       // TODO: Implement actual service call when temporalService is available
       console.warn('temporalService.correlatePatternsWithEvents not implemented.');
-      const result: Result<any, Error> = failure( // Added error type
+      const result: Result<any, Error> = failure(
+        // Added error type
         new Error('Service method correlatePatternsWithEvents not implemented.')
       );
 
@@ -479,7 +491,8 @@ export function useTemporalDynamicsController(
 
   // Configure temporal analysis parameters
   const configureTemporalAnalysis = useCallback(
-    (_cfg: Partial<TemporalConfig>) => { // Prefixed unused parameter
+    (_cfg: Partial<TemporalConfig>) => {
+      // Prefixed unused parameter
       // Removed unused _newConfig variable
       console.warn(
         'configureTemporalAnalysis only updates local config, not used by other callbacks unless config is managed by state.'

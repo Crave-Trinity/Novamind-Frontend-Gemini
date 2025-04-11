@@ -42,21 +42,46 @@ beforeAll(() => {
 
     // Mock ResizeObserver
     // Mock ResizeObserver: Provide expected methods and potentially call callback
-    window.ResizeObserver = vi.fn().mockImplementation((callback: ResizeObserverCallback) => { // Added type annotation
+    window.ResizeObserver = vi.fn().mockImplementation((callback: ResizeObserverCallback) => {
+      // Added type annotation
       const observer = {
         observe: vi.fn((element) => {
           // Immediately invoke callback with mock data if a callback is provided
           // This might be necessary for hooks like react-use-measure
           if (callback) {
             // Define a default mock rect, adjust if needed
-            const mockRect: DOMRectReadOnly = { width: 100, height: 100, top: 0, left: 0, bottom: 100, right: 100, x: 0, y: 0, toJSON: () => ({ x: 0, y: 0, width: 100, height: 100, top: 0, left: 0, bottom: 100, right: 100 }) }; // Added missing properties and type
-            callback([{
-              target: element,
-              contentRect: mockRect,
-              borderBoxSize: [{ inlineSize: 100, blockSize: 100 }], // Mock value
-              contentBoxSize: [{ inlineSize: 100, blockSize: 100 }], // Mock value
-              devicePixelContentBoxSize: [{ inlineSize: 100, blockSize: 100 }] // Mock value
-            }], observer);
+            const mockRect: DOMRectReadOnly = {
+              width: 100,
+              height: 100,
+              top: 0,
+              left: 0,
+              bottom: 100,
+              right: 100,
+              x: 0,
+              y: 0,
+              toJSON: () => ({
+                x: 0,
+                y: 0,
+                width: 100,
+                height: 100,
+                top: 0,
+                left: 0,
+                bottom: 100,
+                right: 100,
+              }),
+            }; // Added missing properties and type
+            callback(
+              [
+                {
+                  target: element,
+                  contentRect: mockRect,
+                  borderBoxSize: [{ inlineSize: 100, blockSize: 100 }], // Mock value
+                  contentBoxSize: [{ inlineSize: 100, blockSize: 100 }], // Mock value
+                  devicePixelContentBoxSize: [{ inlineSize: 100, blockSize: 100 }], // Mock value
+                },
+              ],
+              observer
+            );
           }
         }),
         unobserve: vi.fn(),

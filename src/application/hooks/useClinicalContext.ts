@@ -47,7 +47,9 @@ interface UseClinicalContextReturn {
   fetchDiagnosisMappings: () => Promise<Result<DiagnosisNeuralMapping[], Error>>; // Added error type
   fetchTreatmentMappings: () => Promise<Result<TreatmentNeuralMapping[], Error>>; // Added error type
   fetchRiskAssessment: (patientId: string) => Promise<Result<RiskAssessment, Error>>; // Added error type
-  fetchTreatmentPredictions: (patientId: string) => Promise<Result<TreatmentResponsePrediction[], Error>>; // Added error type
+  fetchTreatmentPredictions: (
+    patientId: string
+  ) => Promise<Result<TreatmentResponsePrediction[], Error>>; // Added error type
 }
 
 /**
@@ -224,7 +226,10 @@ export function useClinicalContext(patientId?: string): UseClinicalContextReturn
   );
 
   // Explicit fetch methods for individual data types
-  const fetchSymptomMappings = useCallback(async (): Promise<Result<SymptomNeuralMapping[], Error>> => { // Added error type
+  const fetchSymptomMappings = useCallback(async (): Promise<
+    Result<SymptomNeuralMapping[], Error>
+  > => {
+    // Added error type
     try {
       const result = await clinicalService.fetchSymptomMappings();
 
@@ -289,7 +294,8 @@ export function useClinicalContext(patientId?: string): UseClinicalContextReturn
   }, [queryClient]);
 
   const fetchRiskAssessment = useCallback(
-    async (patientId: string): Promise<Result<RiskAssessment, Error>> => { // Added error type
+    async (patientId: string): Promise<Result<RiskAssessment, Error>> => {
+      // Added error type
       try {
         const result = await clinicalService.fetchRiskAssessment(patientId);
 
@@ -312,7 +318,8 @@ export function useClinicalContext(patientId?: string): UseClinicalContextReturn
   );
 
   const fetchTreatmentPredictions = useCallback(
-    async (patientId: string): Promise<Result<TreatmentResponsePrediction[], Error>> => { // Added error type
+    async (patientId: string): Promise<Result<TreatmentResponsePrediction[], Error>> => {
+      // Added error type
       try {
         const result = await clinicalService.fetchTreatmentPredictions(patientId);
 
