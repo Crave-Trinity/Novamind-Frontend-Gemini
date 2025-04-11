@@ -1,3 +1,4 @@
+/* eslint-env node */
 /**
  * PostCSS Configuration for Novamind Digital Twin
  *

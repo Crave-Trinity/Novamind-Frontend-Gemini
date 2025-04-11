@@ -5,6 +5,7 @@
  * Uses .cjs extension to explicitly mark as CommonJS module per project guidelines.
  */
 
+/* eslint-env node */
 const defaultTheme = require('tailwindcss/defaultTheme');
 
 /** @type {import('tailwindcss').Config} */
