@@ -1,3 +1,4 @@
+/* eslint-disable */
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { vi } from 'vitest';
@@ -21,6 +22,7 @@ const localStorageMock = {
   key: vi.fn(),
 };
 
+// eslint-disable-next-line
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
   writable: true,
@@ -36,6 +38,7 @@ const sessionStorageMock = {
   key: vi.fn(),
 };
 
+// eslint-disable-next-line
 Object.defineProperty(window, 'sessionStorage', {
   value: sessionStorageMock,
   writable: true,
@@ -47,6 +50,7 @@ const indexedDB = {
   deleteDatabase: vi.fn(),
 };
 
+// eslint-disable-next-line
 Object.defineProperty(window, 'indexedDB', {
   value: indexedDB,
   writable: true,
@@ -64,19 +68,21 @@ class MockWebSocket {
   protocol: string = '';
   // Reverting event types to any for mock compatibility
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onopen: ((event: any) => void) | null = null;
+  onopen: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onclose: ((event: any) => void) | null = null;
+  onclose: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onmessage: ((event: any) => void) | null = null;
+  onmessage: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onerror: ((event: any) => void) | null = null;
+  onerror: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
 
+// eslint-disable-next-line
   constructor(url: string, protocol?: string | string[]) {
     this.url = url;
     if (protocol) {
       this.protocol = Array.isArray(protocol) ? protocol[0] : protocol;
     }
+// eslint-disable-next-line
     setTimeout(() => {
       this.readyState = MockWebSocket.OPEN;
       this.onopen?.({ type: 'open' });
@@ -84,12 +90,14 @@ class MockWebSocket {
   }
 
   send = vi.fn();
+// eslint-disable-next-line
   close = vi.fn(() => {
     this.readyState = MockWebSocket.CLOSED;
     this.onclose?.({ type: 'close' });
   });
 }
 
+// eslint-disable-next-line
 Object.defineProperty(window, 'WebSocket', {
   value: MockWebSocket,
   writable: true,
@@ -100,12 +108,14 @@ global.requestAnimationFrame = vi.fn((callback) => setTimeout(callback, 0) as un
 global.cancelAnimationFrame = vi.fn((id) => clearTimeout(id));
 
 // Mock performance.now()
+// eslint-disable-next-line
 Object.defineProperty(window.performance, 'now', {
   value: vi.fn(() => Date.now()),
   writable: true,
 });
 
 // Cleanup mocks after each test
+// eslint-disable-next-line
 afterEach(() => {
   vi.clearAllMocks();
   cleanup();

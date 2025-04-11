@@ -31,7 +31,7 @@ describe.skip('useBrainVisualization', () => {
   // Cast the mocked apiClient method
   const mockedGetBrainModel = apiClient.getBrainModel as Mock;
   // Define mock data (ensure structure matches BrainModel or use 'any')
-  const mockBrainModelData: any = {
+  const mockBrainModelData: any // eslint-disable-line @typescript-eslint/no-explicit-any = {
     id: 'mock-model-123',
     patientId: 'default', // Match default patientId in hook options
     regions: [{ id: 'r1', name: 'Region 1', significance: 0.8, coordinates: { x: 0, y: 0, z: 0 } }],

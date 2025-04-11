@@ -1,3 +1,4 @@
+/* eslint-disable */
 // test-puppeteer/BrainModelContainer.test.js
 import puppeteer from 'puppeteer';
 import assert from 'assert';

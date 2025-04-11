@@ -62,7 +62,7 @@ describe('useTheme', () => {
 
   // Use 'any' for the spy variable type due to persistent inference issues
   // No spy needed if using wrapper
-  // let useContextSpy: any;
+  // let useContextSpy: any // eslint-disable-line @typescript-eslint/no-explicit-any;
 
   beforeEach(() => {
     // Reset mocks

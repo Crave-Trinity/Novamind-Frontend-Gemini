@@ -206,5 +206,67 @@ vi.mock('framer-motion', async (importOriginal) => {
   };
 });
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface MockWebGLRenderingContext extends WebGLRenderingContext { }
+
+// Mock WebGLRenderingContext partially
+vi.mock('three', async (importOriginal) => {
+    const three = await importOriginal<typeof import('three')>();
+    return {
+        ...three,
+        WebGLRenderingContext: vi.fn().mockImplementation(() => ({
+            getExtension: vi.fn(),
+            getParameter: vi.fn(),
+            createShader: vi.fn(() => ({})),
+            shaderSource: vi.fn(),
+            compileShader: vi.fn(),
+            getShaderParameter: vi.fn((shader, pname) => {
+                if (pname === WebGLRenderingContext.COMPILE_STATUS) {
+                    return true;
+                }
+                return null;
+            }),
+            attachShader: vi.fn(),
+            linkProgram: vi.fn(),
+            getProgramParameter: vi.fn((program, pname) => {
+                if (pname === WebGLRenderingContext.LINK_STATUS) {
+                    return true;
+                }
+                return null;
+            }),
+            createProgram: vi.fn(() => ({})),
+            // Add other methods as needed by tests
+            viewport: vi.fn(),
+            clearColor: vi.fn(),
+            clear: vi.fn(),
+            enable: vi.fn(),
+            depthFunc: vi.fn(),
+            cullFace: vi.fn(),
+            frontFace: vi.fn(),
+            bindBuffer: vi.fn(),
+            createBuffer: vi.fn(() => ({})),
+            bufferData: vi.fn(),
+            vertexAttribPointer: vi.fn(),
+            enableVertexAttribArray: vi.fn(),
+            drawArrays: vi.fn(),
+            drawElements: vi.fn(),
+            useProgram: vi.fn(),
+            getUniformLocation: vi.fn(() => ({})),
+            uniformMatrix4fv: vi.fn(),
+            uniform1i: vi.fn(),
+            uniform1f: vi.fn(),
+            uniform2f: vi.fn(),
+            uniform3f: vi.fn(),
+            uniform4f: vi.fn(),
+            activeTexture: vi.fn(),
+            bindTexture: vi.fn(),
+            createTexture: vi.fn(() => ({})),
+            texParameteri: vi.fn(),
+            texImage2D: vi.fn(),
+            pixelStorei: vi.fn(),
+        }) as MockWebGLRenderingContext),
+    };
+});
+
 // --- Setup Complete ---
 console.log('[TEST SETUP] Global setup complete (with simplified mocks).');

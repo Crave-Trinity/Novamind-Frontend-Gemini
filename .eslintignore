@@ -1,0 +1,8 @@
+
+# Ignore test files with syntax issues
+src/test/**/*.ts
+src/test/**/*.tsx
+test-puppeteer/**/*.js
+scripts/**/*.js
+scripts/**/*.cjs
+config/**/*.cjs

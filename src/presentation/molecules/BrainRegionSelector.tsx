@@ -9,7 +9,7 @@ export interface BrainRegionSelectorProps {
   height?: number;
   position?: [number, number, number];
   rotation?: [number, number, number];
-  [key: string]: any;
+  [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any;
 }
 
 const BrainRegionSelector: React.FC<BrainRegionSelectorProps> = ({

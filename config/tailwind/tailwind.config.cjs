@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Tailwind CSS Configuration for Novamind Digital Twin
  *

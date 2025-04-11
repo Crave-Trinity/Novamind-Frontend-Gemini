@@ -44,7 +44,7 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
 
   // Handle setting changes with type safety
   const handleSettingChange = useCallback(
-    (key: keyof VisualizationSettings, value: any) => {
+    (key: keyof VisualizationSettings, value: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
       if (onSettingsChange) {
         onSettingsChange({ [key]: value });
       }

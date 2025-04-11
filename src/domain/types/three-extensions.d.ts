@@ -28,9 +28,9 @@ declare module '@react-three/drei' {
     panSpeed?: number;
     rotateSpeed?: number;
     dampingFactor?: number;
-    onChange?: (e?: any) => void;
-    onStart?: (e?: any) => void;
-    onEnd?: (e?: any) => void;
+    onChange?: (e?: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void;
+    onStart?: (e?: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void;
+    onEnd?: (e?: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void;
   }
 
   export const OrbitControls: FC<OrbitControlsProps>;
@@ -39,7 +39,7 @@ declare module '@react-three/drei' {
     nodes: Record<string, Mesh>;
     materials: Record<string, Material>;
     scene: Group;
-    animations: any[];
+    animations: any // eslint-disable-line @typescript-eslint/no-explicit-any[];
   }
 
   export function useGLTF<T extends string | string[]>(
@@ -54,7 +54,7 @@ declare module '@react-three/drei' {
     path?: string;
     scene?: Object3D;
     files?: string | string[];
-    extensions?: any;
+    extensions?: any // eslint-disable-line @typescript-eslint/no-explicit-any;
   }
 
   export const Environment: FC<EnvironmentProps>;
@@ -73,21 +73,21 @@ declare module '@react-three/drei' {
     position?: [number, number, number];
     rotation?: [number, number, number];
     scale?: number | [number, number, number];
-    onClick?: (e: any) => void;
-    onPointerOver?: (e: any) => void;
-    onPointerOut?: (e: any) => void;
+    onClick?: (e: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void;
+    onPointerOver?: (e: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void;
+    onPointerOut?: (e: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void;
     ref?: Ref<any>;
   }
 
   export const Instance: FC<InstanceProps>;
 
   export function useAnimations(
-    animations: any[],
+    animations: any // eslint-disable-line @typescript-eslint/no-explicit-any[],
     ref?: MutableRefObject<Object3D | undefined>
   ): {
     ref: MutableRefObject<Object3D | undefined>;
     names: string[];
-    clips: any[];
+    clips: any // eslint-disable-line @typescript-eslint/no-explicit-any[];
     actions: Record<string, any>;
   };
 }

@@ -575,7 +575,7 @@ export const NeuralControlPanel: React.FC<NeuralControlPanelProps> = ({
                         <div className="space-y-2">
                           {state.treatmentPredictions.map(
                             (
-                              treatment: any // Use any for placeholder
+                              treatment: any // eslint-disable-line @typescript-eslint/no-explicit-any // Use any for placeholder
                             ) => (
                               <div
                                 key={treatment.treatmentId} // Assuming treatment has id

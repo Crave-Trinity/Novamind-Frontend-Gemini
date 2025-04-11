@@ -99,7 +99,7 @@ export class ApiClient {
   /**
    * POST request method
    */
-  public async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  public async post<T>(url: string, data?: any // eslint-disable-line @typescript-eslint/no-explicit-any, config?: AxiosRequestConfig): Promise<T> {
     // Use mock API if enabled
     if (USE_MOCK_API) {
       console.log(`[Mock API] POST ${url}`, data);
@@ -138,7 +138,7 @@ export class ApiClient {
   /**
    * PUT request method
    */
-  public async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  public async put<T>(url: string, data?: any // eslint-disable-line @typescript-eslint/no-explicit-any, config?: AxiosRequestConfig): Promise<T> {
     // Use mock API if enabled
     if (USE_MOCK_API) {
       console.log(`[Mock API] PUT ${url}`, data);
@@ -263,7 +263,7 @@ export class ApiClient {
   }
 
   // Predict treatment response
-  public async predictTreatmentResponse(patientId: string, treatmentData: any): Promise<any> {
+  public async predictTreatmentResponse(patientId: string, treatmentData: any // eslint-disable-line @typescript-eslint/no-explicit-any): Promise<any> {
     if (USE_MOCK_API) {
       return mockApi.predictTreatmentResponse(patientId, treatmentData.treatment);
     }
@@ -280,7 +280,7 @@ export class ApiClient {
     return this.get<any>(`/patients/${patientId}/risk-assessment`);
   }
 
-  private handleMockResponse<T>(url: string, _data?: any): T {
+  private handleMockResponse<T>(url: string, _data?: any // eslint-disable-line @typescript-eslint/no-explicit-any): T {
     // Implement mock response logic here
     // For example:
     if (url === '/auth/login') {

@@ -71,7 +71,7 @@ vi.mock('@react-spring/three', () => ({
         // Prefixed unused target parameter
         // Restore forwardRef to handle refs passed to animated components
         const MockAnimatedComponent = React.forwardRef(
-          ({ children, ...props }: React.PropsWithChildren<any>, ref: any) => {
+          ({ children, ...props }: React.PropsWithChildren<any>, ref: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
             // Render a simple div for testing, passing the ref if provided
             return React.createElement(
               'div',

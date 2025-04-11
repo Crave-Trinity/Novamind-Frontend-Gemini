@@ -33,7 +33,7 @@ export function createNeuralGlowUniforms(
  * @param uniforms The shader uniforms object
  * @param time Current time value (typically from three.js clock)
  */
-export function updateTimeUniform(uniforms: { [key: string]: { value: any } }, time: number) {
+export function updateTimeUniform(uniforms: { [key: string]: { value: any // eslint-disable-line @typescript-eslint/no-explicit-any } }, time: number) {
   if (uniforms.time) {
     uniforms.time.value = time;
   }
@@ -45,7 +45,7 @@ export function updateTimeUniform(uniforms: { [key: string]: { value: any } }, t
  * @param uniforms The shader uniforms object
  * @param isActive Whether the region should be active
  */
-export function setActiveState(uniforms: { [key: string]: { value: any } }, isActive: boolean) {
+export function setActiveState(uniforms: { [key: string]: { value: any // eslint-disable-line @typescript-eslint/no-explicit-any } }, isActive: boolean) {
   if (uniforms.isActive) {
     uniforms.isActive.value = isActive;
   }

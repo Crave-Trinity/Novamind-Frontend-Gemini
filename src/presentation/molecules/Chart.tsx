@@ -18,7 +18,7 @@ interface ChartData {
 interface ChartProps {
   type: 'bar' | 'line' | 'pie' | 'doughnut' | 'radar' | 'polarArea';
   data: ChartData;
-  options?: any;
+  options?: any; // eslint-disable-line @typescript-eslint/no-explicit-any;
   height?: number;
   width?: number;
   className?: string;

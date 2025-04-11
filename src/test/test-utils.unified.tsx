@@ -50,7 +50,7 @@ export const darkSchemeMediaQueryList = {
 };
 
 // Store the original matchMedia to restore it later if needed (though setup.ts handles global)
-const originalMatchMedia = window.matchMedia;
+// Removed unused variable 'originalMatchMedia'
 
 // Define the mock implementation function separately
 // Export the implementation function if needed elsewhere, though likely not

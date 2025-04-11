@@ -32,7 +32,7 @@ vi.mock('../BrainVisualization', () => ({
     isLoading: _isLoading = false, // Prefixed unused variable
     error: _error = null, // Prefixed unused variable
   }: {
-    brainModel?: any | null;
+    brainModel?: any; // eslint-disable-line @typescript-eslint/no-explicit-any | null;
     selectedRegion?: string | null;
     onRegionSelect?: (regionId: string) => void;
     className?: string;

@@ -151,7 +151,7 @@ const BrainRegionDetails: React.FC<BrainRegionDetailsProps> = ({
 
         const relevantMechanisms = neurobiologicalMechanisms.filter(
           (
-            mechanism: any // Add type assertion or guard if needed
+            mechanism: any // eslint-disable-line @typescript-eslint/no-explicit-any // Add type assertion or guard if needed
           ) => new SafeArray(mechanism?.relevantRegions).includes(regionId)
         );
 

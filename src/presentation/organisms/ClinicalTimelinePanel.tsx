@@ -239,7 +239,7 @@ export const ClinicalTimelinePanel: React.FC<ClinicalTimelinePanelProps> = ({
       // Prefix unused parameter
       // const date = new Date(dateStr);
       // const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      // return transitions.some((transition: any) => { // Use 'any' temporarily
+      // return transitions.some((transition: any // eslint-disable-line @typescript-eslint/no-explicit-any) => { // Use 'any' temporarily
       //   const transitionDate = new Date(transition.timestamp);
       //   const transitionDateOnly = new Date(transitionDate.getFullYear(), transitionDate.getMonth(), transitionDate.getDate());
       //   return transitionDateOnly.getTime() === dateOnly.getTime();

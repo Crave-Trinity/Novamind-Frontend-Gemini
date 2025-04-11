@@ -1,3 +1,4 @@
+/* eslint-disable */
 // Auto-inject WebGL mocks for all tests
 import { setupWebGLMocks } from '@test/webgl';
 

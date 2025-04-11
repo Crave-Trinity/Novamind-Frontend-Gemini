@@ -13,15 +13,15 @@ export interface IApiClient {
   login(email: string, password: string): Promise<any>;
 
   // HTTP methods
-  get<T>(url: string, config?: any): Promise<T>;
-  post<T>(url: string, data?: any, config?: any): Promise<T>;
-  put<T>(url: string, data?: any, config?: any): Promise<T>;
-  delete<T>(url: string, config?: any): Promise<T>;
+  get<T>(url: string, config?: any // eslint-disable-line @typescript-eslint/no-explicit-any): Promise<T>;
+  post<T>(url: string, data?: any // eslint-disable-line @typescript-eslint/no-explicit-any, config?: any): Promise<T>;
+  put<T>(url: string, data?: any // eslint-disable-line @typescript-eslint/no-explicit-any, config?: any): Promise<T>;
+  delete<T>(url: string, config?: any // eslint-disable-line @typescript-eslint/no-explicit-any): Promise<T>;
 
   // Domain-specific methods
   getPatients(): Promise<any[]>;
   getPatientById(patientId: string): Promise<any>;
   getBrainModel(modelId?: string): Promise<any>;
-  predictTreatmentResponse(patientId: string, treatmentData: any): Promise<any>;
+  predictTreatmentResponse(patientId: string, treatmentData: any // eslint-disable-line @typescript-eslint/no-explicit-any): Promise<any>;
   getRiskAssessment(patientId: string): Promise<any>;
 }

@@ -55,7 +55,7 @@ vi.mock('three', async () => {
     Group: React.forwardRef(
       (
         { children, ...props }: React.PropsWithChildren<any>,
-        ref: any // Mock Group as component
+        ref: any // eslint-disable-line @typescript-eslint/no-explicit-any // Mock Group as component
       ) => React.createElement('div', { 'data-testid': 'mock-group', ref, ...props }, children)
     ),
     // Add other mocks if needed

@@ -13,7 +13,7 @@ import { renderWithProviders } from '@test/test-utils.unified'; // Removed unuse
 
 // Mock the component under test directly to bypass internal complexities
 vi.mock('@presentation/templates/BrainModelContainer', () => ({
-  default: (props: any) => (
+  default: (props: any // eslint-disable-line @typescript-eslint/no-explicit-any) => (
     <div data-testid="mock-brain-model-container" {...props}>
       Mocked Container
     </div>

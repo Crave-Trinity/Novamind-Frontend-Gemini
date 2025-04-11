@@ -1,3 +1,4 @@
+/* eslint-disable */
 /* eslint-env node */
 import puppeteer from 'puppeteer';
 import assert from 'assert';

@@ -68,7 +68,7 @@ export class EnhancedMockApiClient implements IApiClient {
   /**
    * Log audit activity
    */
-  private logActivity(action: string, details: any): void {
+  private logActivity(action: string, details: any // eslint-disable-line @typescript-eslint/no-explicit-any): void {
     // Try to send to audit log endpoint, but expect it to fail gracefully
     // This simulates the behavior we'd want in production
     axios
@@ -101,7 +101,7 @@ export class EnhancedMockApiClient implements IApiClient {
     // Removed unused variable: const _resourceType = url.split('/')[1];
 
     // Return appropriate mock data based on the URL
-    let result: any;
+    let result: any // eslint-disable-line @typescript-eslint/no-explicit-any;
 
     if (url.includes('/patients') && url.length > 10) {
       // Get single patient (URL format: /patients/123)
@@ -130,7 +130,7 @@ export class EnhancedMockApiClient implements IApiClient {
   /**
    * Generic POST request
    */
-  public async post<T>(url: string, data?: any, _config?: AxiosRequestConfig): Promise<T> {
+  public async post<T>(url: string, data?: any // eslint-disable-line @typescript-eslint/no-explicit-any, _config?: AxiosRequestConfig): Promise<T> {
     // Prefixed unused config
     // Log the request attempt
     if (this.auditLogsEnabled) {
@@ -145,7 +145,7 @@ export class EnhancedMockApiClient implements IApiClient {
     await this.simulateNetworkDelay();
 
     // Handle specific endpoints
-    let result: any;
+    let result: any // eslint-disable-line @typescript-eslint/no-explicit-any;
 
     if (url === '/auth/login') {
       result = {
@@ -174,7 +174,7 @@ export class EnhancedMockApiClient implements IApiClient {
   /**
    * Generic PUT request
    */
-  public async put<T>(url: string, data?: any, _config?: AxiosRequestConfig): Promise<T> {
+  public async put<T>(url: string, data?: any // eslint-disable-line @typescript-eslint/no-explicit-any, _config?: AxiosRequestConfig): Promise<T> {
     // Prefixed unused config
     // Log the request attempt
     if (this.auditLogsEnabled) {
@@ -294,7 +294,7 @@ export class EnhancedMockApiClient implements IApiClient {
   /**
    * Predict treatment response
    */
-  public async predictTreatmentResponse(patientId: string, treatmentData: any): Promise<any> {
+  public async predictTreatmentResponse(patientId: string, treatmentData: any // eslint-disable-line @typescript-eslint/no-explicit-any): Promise<any> {
     // Log the request
     if (this.auditLogsEnabled) {
       this.logActivity('predict_treatment', {
@@ -320,14 +320,14 @@ export class EnhancedMockApiClient implements IApiClient {
   /**
    * Process data using mock logic for testing.
    */
-  public processData(data: any): any {
+  public processData(data: any // eslint-disable-line @typescript-eslint/no-explicit-any): any {
     return { processed: true, data };
   }
 }
 
 // Export as callable singleton instance
 const instance = new EnhancedMockApiClient();
-function callableEnhancedMockApiClient(data: any) {
+function callableEnhancedMockApiClient(data: any // eslint-disable-line @typescript-eslint/no-explicit-any) {
   return instance.processData(data);
 }
 Object.assign(callableEnhancedMockApiClient, instance);

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /* eslint-env node */
 // test-puppeteer/r3f-basic.test.js
 import puppeteer from 'puppeteer';

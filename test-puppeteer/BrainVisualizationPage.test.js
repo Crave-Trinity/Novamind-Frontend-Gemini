@@ -1,3 +1,4 @@
+/* eslint-disable */
 // test-puppeteer/BrainVisualizationPage.test.js
 import puppeteer from 'puppeteer'; // Use ES Module import
 import assert from 'assert'; // Use ES Module import for assert

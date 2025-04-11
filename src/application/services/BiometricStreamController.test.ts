@@ -63,10 +63,10 @@ const mockStreamMetadata: BiometricStream[] = [
 
 // Mock WebSocket connection
 class MockWebSocket {
-  onopen: ((event: any) => void) | null = null;
-  onclose: ((event: any) => void) | null = null;
-  onmessage: ((event: any) => void) | null = null;
-  onerror: ((event: any) => void) | null = null;
+  onopen: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
+  onclose: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
+  onmessage: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
+  onerror: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
   readyState: number = 0; // Start as CONNECTING
 
   constructor(public url: string) {
@@ -86,12 +86,12 @@ class MockWebSocket {
     }
   });
   // Helper methods for tests
-  simulateMessage(data: any) {
+  simulateMessage(data: any // eslint-disable-line @typescript-eslint/no-explicit-any) {
     if (this.onmessage) {
       this.onmessage({ data: typeof data === 'string' ? data : JSON.stringify(data) });
     }
   }
-  simulateError(errorData: any) {
+  simulateError(errorData: any // eslint-disable-line @typescript-eslint/no-explicit-any) {
     if (this.onerror) {
       this.onerror(errorData);
     }

@@ -430,7 +430,7 @@ export const ClinicalMetricsPanel: React.FC<ClinicalMetricsPanelProps> = ({
                       <div className="space-y-2">
                         {activationMetrics.topActiveRegions.map(
                           (
-                            region: any // Use any temporarily
+                            region: any // eslint-disable-line @typescript-eslint/no-explicit-any // Use any temporarily
                           ) => (
                             <div key={region.id} className="flex items-center justify-between">
                               <span className="text-xs text-white truncate max-w-[70%]">
