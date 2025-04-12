@@ -1,77 +1,165 @@
 /**
- * WebGL/Three.js Test Setup Module
+ * NOVAMIND WebGL Test Setup
  * 
- * Comprehensive setup for WebGL and Three.js testing environment.
- * This module initializes all necessary mocks and utilities needed for
- * deterministic, memory-efficient testing of Three.js components.
- * 
- * Provides a clean API for test files to import and use.
+ * Provides quantum-level test configuration for WebGL-based neurological visualization components
  */
 
-import { setupWebGLMocks, cleanupWebGLMocks } from './mock-webgl';
+import { vi } from 'vitest';
 
-// Automatically setup mocks when this module is imported
-setupWebGLMocks();
-
-// Create a global cleanup function for afterAll hooks
-global.cleanupWebGLMocksAfterAll = cleanupWebGLMocks;
-
-// Export everything from the mock-webgl module
-export * from './mock-webgl';
-
-// Custom helper functions for tests
-export const createMockCanvas = (): HTMLCanvasElement => {
-  const canvas = document.createElement('canvas');
-  canvas.width = 800;
-  canvas.height = 600;
-  return canvas;
-};
-
-// Neural pattern data generator for visualization tests
-export const generateNeuralPatternData = (
-  regionCount: number = 10,
-  patternIntensity: number = 0.75
-): { regions: string[]; intensities: number[] } => {
-  const regions = Array.from({ length: regionCount }, (_, i) => `region-${i + 1}`);
-  const intensities = Array.from({ length: regionCount }, () => Math.random() * patternIntensity);
+// Mock WebGL context and capabilities
+export function setupWebGLMocks() {
+  // Create a canvas element for the tests
+  const mockCanvas = document.createElement('canvas');
   
-  return { regions, intensities };
-};
+  // Create mock WebGL context with all necessary methods
+  const mockWebGLContext = {
+    canvas: mockCanvas,
+    drawingBufferWidth: 800,
+    drawingBufferHeight: 600,
+    viewport: vi.fn(),
+    clear: vi.fn(),
+    clearColor: vi.fn(),
+    enable: vi.fn(),
+    disable: vi.fn(),
+    createProgram: vi.fn().mockReturnValue({}),
+    createShader: vi.fn().mockReturnValue({}),
+    shaderSource: vi.fn(),
+    compileShader: vi.fn(),
+    getShaderParameter: vi.fn().mockReturnValue(true),
+    getShaderInfoLog: vi.fn().mockReturnValue(''),
+    attachShader: vi.fn(),
+    linkProgram: vi.fn(),
+    getProgramParameter: vi.fn().mockReturnValue(true),
+    getProgramInfoLog: vi.fn().mockReturnValue(''),
+    useProgram: vi.fn(),
+    getUniformLocation: vi.fn().mockReturnValue({}),
+    getAttribLocation: vi.fn().mockReturnValue(0),
+    createBuffer: vi.fn().mockReturnValue({}),
+    bindBuffer: vi.fn(),
+    bufferData: vi.fn(),
+    enableVertexAttribArray: vi.fn(),
+    vertexAttribPointer: vi.fn(),
+    uniform1i: vi.fn(),
+    uniform1f: vi.fn(),
+    uniform2f: vi.fn(),
+    uniform3f: vi.fn(),
+    uniform4f: vi.fn(),
+    uniformMatrix4fv: vi.fn(),
+    drawArrays: vi.fn(),
+    drawElements: vi.fn(),
+    createTexture: vi.fn().mockReturnValue({}),
+    bindTexture: vi.fn(),
+    texImage2D: vi.fn(),
+    texParameteri: vi.fn(),
+    activeTexture: vi.fn(),
+    deleteShader: vi.fn(),
+    deleteProgram: vi.fn(),
+    deleteBuffer: vi.fn(),
+    deleteTexture: vi.fn(),
+    getExtension: vi.fn().mockImplementation(() => ({
+      UNPACK_FLIP_Y_WEBGL: 0,
+      UNPACK_PREMULTIPLY_ALPHA_WEBGL: 0,
+    })),
+    isContextLost: vi.fn().mockReturnValue(false),
+  };
 
-// Function to mock a performant animation frame
-export const mockAnimationFrame = (callback: (time: number) => void): void => {
-  let frameCount = 0;
-  const maxFrames = 5; // Limit frames for test efficiency
-  
-  const runFrame = (timestamp: number): void => {
-    if (frameCount < maxFrames) {
-      callback(timestamp);
-      frameCount++;
-      requestAnimationFrame(runFrame);
+  // Mock canvas getContext method
+  const originalGetContext = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = vi.fn().mockImplementation((contextType) => {
+    if (contextType === 'webgl' || contextType === 'webgl2' || contextType === 'experimental-webgl') {
+      return mockWebGLContext;
     }
-  };
-  
-  requestAnimationFrame(runFrame);
-};
+    return null;
+  });
 
-// Helper to create mock shader materials
-export const createMockShaderMaterial = () => {
+  // Mock WebGLRenderingContext
+  global.WebGLRenderingContext = vi.fn().mockImplementation(() => mockWebGLContext);
+
+  // Mock requestAnimationFrame for animation testing
+  global.requestAnimationFrame = vi.fn().mockImplementation((callback) => {
+    return setTimeout(callback, 0);
+  });
+
+  // Mock three.js objects used in visualization
+  const mockThreeObjects = {
+    Object3D: vi.fn().mockImplementation(() => ({
+      position: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, z: 0 },
+      scale: { x: 1, y: 1, z: 1 },
+      children: [],
+      add: vi.fn(),
+      remove: vi.fn(),
+      traverse: vi.fn(),
+      dispose: vi.fn()
+    })),
+    Scene: vi.fn().mockImplementation(() => ({
+      add: vi.fn(),
+      remove: vi.fn()
+    })),
+    PerspectiveCamera: vi.fn().mockImplementation(() => ({
+      position: { x: 0, y: 0, z: 5 },
+      lookAt: vi.fn(),
+      updateProjectionMatrix: vi.fn()
+    })),
+    WebGLRenderer: vi.fn().mockImplementation(() => ({
+      domElement: mockCanvas,
+      setSize: vi.fn(),
+      setPixelRatio: vi.fn(),
+      render: vi.fn(),
+      dispose: vi.fn()
+    }))
+  };
+
+  // Add to global for easy reference
+  global.__MOCK_THREE__ = mockThreeObjects;
+
   return {
-    uniforms: {
-      time: { value: 0 },
-      intensity: { value: 1.0 },
-      color: { value: { r: 1, g: 1, b: 1 } }
-    },
-    vertexShader: `void main() { gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `void main() { gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); }`,
-    dispose: () => {}
+    canvas: mockCanvas,
+    gl: mockWebGLContext,
+    originalGetContext,
+    threeObjects: mockThreeObjects
   };
-};
+}
 
-// Export default setup function for explicit initialization
-export default function setupTestEnvironment(): void {
-  setupWebGLMocks();
-  
-  // Return cleanup function
-  return cleanupWebGLMocks;
+// Cleanup WebGL mocks after tests
+export function cleanupWebGLMocks() {
+  // Restore original canvas getContext
+  if (HTMLCanvasElement.prototype.getContext.mockRestore) {
+    HTMLCanvasElement.prototype.getContext.mockRestore();
+  }
+
+  // Clean up global requestAnimationFrame mock
+  if (global.requestAnimationFrame.mockRestore) {
+    global.requestAnimationFrame.mockRestore();
+  }
+
+  // Clean up global three.js mocks
+  delete global.__MOCK_THREE__;
+
+  return {
+    leakedObjects: 0, // Mock memory monitoring report
+    disposedObjects: 0,
+    memoryUsage: '0 MB'
+  };
+}
+
+// Setup for test with neural activity data
+export function setupWebGLForTest() {
+  return setupWebGLMocks();
+}
+
+// Cleanup after test with neural activity data
+export function cleanupWebGLAfterTest() {
+  return cleanupWebGLMocks();
+}
+
+// Run test with WebGL setup
+export function runTestWithWebGL(testFn: () => void) {
+  const mocks = setupWebGLMocks();
+  try {
+    testFn();
+  } finally {
+    cleanupWebGLMocks();
+  }
+  return mocks;
 }

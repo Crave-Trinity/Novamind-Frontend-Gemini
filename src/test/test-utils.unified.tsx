@@ -1,81 +1,95 @@
 /**
- * NOVAMIND Neural Digital Twin
- * Unified Test Utilities
- * 
- * This module provides quantum-level test utilities that support
- * all testing scenarios with architectural perfection.
+ * NOVAMIND Unified Test Utilities
  */
 
-import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from '@application/providers/ThemeProvider';
+import React, { type ReactElement, type ReactNode } from 'react';
+import { render, type RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
+import { vi } from 'vitest';
+import { ThemeProvider } from '../application/contexts/ThemeContext';
+import { UserProvider } from '../application/contexts/UserContext';
+import { VisualizationProvider } from '../application/contexts/VisualizationContext';
+import DataContext from '../application/contexts/DataContext';
 
-// Create a pristine QueryClient for each test
-const createTestQueryClient = () => new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      cacheTime: 0,
-      staleTime: 0,
-      refetchOnWindowFocus: false,
-    },
-    mutations: {
-      retry: false,
-    },
-  },
-});
+// Default mock data context for tests
+const mockDataContextValue = {
+  patientData: null,
+  brainModels: [],
+  isLoadingPatient: false,
+  isLoadingModels: false,
+  patientError: null,
+  modelsError: null,
+  refreshPatientData: vi.fn(),
+  refreshBrainModels: vi.fn(),
+};
 
-// Interface for extended render options
-interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
-  route?: string;
-  initialTheme?: 'light' | 'dark' | 'system' | 'clinical' | 'retro';
-  queryClient?: QueryClient;
+// Create a fresh QueryClient for each test
+function createTestQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false, // Disable retries for tests
+        staleTime: Infinity, // Prevent automatic refetching
+      },
+    },
+  });
 }
 
 /**
- * Renders a component with all providers needed for testing
- * 
- * This is the quantum-level render function that guarantees
- * all components have the proper context providers for testing.
+ * AllTheProviders wraps the component under test with all necessary providers
  */
+interface AllTheProvidersProps {
+  children: ReactNode;
+  initialRoute?: string;
+  queryClient?: QueryClient;
+  mockDataContext?: typeof mockDataContextValue;
+}
+
+const AllTheProviders: React.FC<AllTheProvidersProps> = ({
+  children,
+  initialRoute = '/',
+  queryClient = createTestQueryClient(),
+  mockDataContext = mockDataContextValue,
+}) => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="dark"> 
+        <UserProvider>
+          <VisualizationProvider>
+            <DataContext.Provider value={mockDataContext}>
+              <MemoryRouter initialEntries={[initialRoute]}>
+                {children}
+              </MemoryRouter>
+            </DataContext.Provider>
+          </VisualizationProvider>
+        </UserProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
+
+/**
+ * Custom render function that wraps the component under test with all necessary providers
+ */
+interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+  initialRoute?: string;
+  queryClient?: QueryClient;
+  mockDataContext?: typeof mockDataContextValue;
+}
+
 export function renderWithProviders(
   ui: ReactElement,
   {
-    route = '/',
-    initialTheme = 'clinical',
-    queryClient = createTestQueryClient(),
+    initialRoute,
+    queryClient,
+    mockDataContext,
     ...renderOptions
   }: ExtendedRenderOptions = {}
 ) {
-  // Update history and set proper route
-  window.history.pushState({}, 'Test page', route);
+  return render(ui, { wrapper: AllTheProviders as React.ComponentType, ...renderOptions });
+};
 
-  // Provider wrapper with proper nesting order
-  function Wrapper({ children }: { children: React.ReactNode }) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <ThemeProvider defaultTheme={initialTheme}>
-            {children}
-          </ThemeProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
-    );
-  }
-
-  // Return enhanced render result with additional helper methods
-  return {
-    ...render(ui, { wrapper: Wrapper, ...renderOptions }),
-    // Additional helper methods:
-    // Rerender with same providers
-    rerender: (rerenderUi: ReactElement) => 
-      render(rerenderUi, { wrapper: Wrapper, ...renderOptions }),
-    // Get the queryClient for direct manipulation
-    queryClient,
-  };
-}
-
-// Export everything from test libraries
+// Export everything from testing-library for convenience
 export * from '@testing-library/react';
+export { createTestQueryClient, mockDataContextValue };

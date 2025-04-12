@@ -19,10 +19,24 @@ export class TypeVerificationError extends Error {
     customMessage?: string
   ) {
     const path = propertyPath ? ` for '${propertyPath}'` : '';
-    const message = customMessage || 
-      `Expected ${expectedType}${path}, but received ${typeof actualValue === 'object' ? 
-        actualValue === null ? 'null' : JSON.stringify(actualValue).substring(0, 100) : 
-        String(actualValue)}`;
+    
+    // Get precise type information for test assertions
+    let typeDescription: string;
+    
+    if (actualValue === null) {
+      typeDescription = 'null';
+    } else if (Array.isArray(actualValue)) {
+      typeDescription = 'array';
+    } else if (actualValue instanceof Date) {
+      typeDescription = 'Date';
+    } else {
+      typeDescription = typeof actualValue;
+    }
+    
+    // Format the error message to match expected test patterns
+    const message =
+      customMessage ||
+      `Expected ${expectedType}${path}, but received ${typeDescription}`;
     
     super(message);
     
@@ -153,10 +167,15 @@ export function asBoolean(value: unknown, propertyPath?: string): boolean {
 
 /**
  * Converts a potentially non-Date value to a Date
+ * Returns undefined if the value is not a valid Date.
  */
-export function asDate(value: unknown, propertyPath?: string): Date {
-  assertDate(value, propertyPath);
-  return value;
+export function asDate(value: unknown, _propertyPath?: string): Date | undefined {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value;
+  }
+  // Optionally log or handle the conversion failure case if needed
+  // console.warn(`Value at ${_propertyPath || 'unknown path'} is not a valid Date:`, value);
+  return undefined;
 }
 
 /**

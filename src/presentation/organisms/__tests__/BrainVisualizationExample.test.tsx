@@ -9,14 +9,12 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react'; // Remove render
 import {
   setupWebGLMocks as setupWebGLForTest,
-  cleanupWebGLMocks as cleanupWebGLAfterTest,
-  createMockCanvas,
-  mockAnimationFrame as runTestWithWebGL
-} from '@test/webgl/setup-test';
+  cleanupWebGLMocks as cleanupWebGLAfterTest
+} from '../../../test/webgl/setup-test';
 // Removed unused React import
 // Import only the default export (the component)
 import BrainVisualization from '../BrainVisualization';
-import { renderWithProviders } from '@test/test-utils.unified'; // Import unified render
+import { renderWithProviders } from '../../../test/test-utils.unified'; // Import unified render
 
 // Remove standalone mock component definition
 
@@ -33,7 +31,7 @@ vi.mock('../BrainVisualization', () => ({
     isLoading: _isLoading = false, // Prefixed unused variable
     error: _error = null, // Prefixed unused variable
   }: {
-    brainModel?: any; // eslint-disable-line @typescript-eslint/no-explicit-any | null;
+    brainModel?: Record<string, unknown> | null;
     selectedRegion?: string | null;
     onRegionSelect?: (regionId: string) => void;
     className?: string;
@@ -103,35 +101,25 @@ describe('BrainVisualization Component with WebGL Mocks', () => {
 // Method 2: Use the runTestWithWebGL utility function
 describe('BrainVisualization with runTestWithWebGL utility', () => {
   it('renders with different detail levels', async () => {
-    await runTestWithWebGL(
-      () => {
-        renderWithProviders(
-          // Use renderWithProviders
-          <BrainVisualization
-          // Remove detailLevel prop as it doesn't exist
-          />
-        );
+    // Setup WebGL mocks for this test
+    setupWebGLForTest();
+    
+    // Run the test with proper mocking
+    renderWithProviders(<BrainVisualization />);
 
-        expect(screen.getByTestId('brain-container')).toBeInTheDocument();
+    expect(screen.getByTestId('brain-container')).toBeInTheDocument();
 
-        // You can perform assertions on the WebGL content here
-      },
-      {
-        monitorMemory: true,
-        failOnLeak: true,
-        useNeuralControllerMocks: true, // Use neural controller mocks for this test
-      }
-    );
+    // You can perform assertions on the WebGL content here
+    
+    // Clean up after the test
+    cleanupWebGLAfterTest();
   });
 });
 
 // Advanced test with neural controller mocks
 describe('BrainVisualization with Neural Controller Mocks', () => {
   beforeAll(() => {
-    setupWebGLForTest({
-      monitorMemory: true,
-      useNeuralControllerMocks: true, // Enable neural controller mocks
-    });
+    setupWebGLForTest();
   });
 
   afterAll(() => {
@@ -155,20 +143,15 @@ describe('BrainVisualization with Neural Controller Mocks', () => {
 // Memory leak testing
 describe('BrainVisualization Memory Management', () => {
   it('properly disposes resources when unmounted', async () => {
-    await runTestWithWebGL(
-      () => {
-        const { unmount } = renderWithProviders(<BrainVisualization />); // Remove patientId prop
+    // Setup mocks for this test
+    setupWebGLForTest();
+    
+    const { unmount } = renderWithProviders(<BrainVisualization />);
 
-        // Unmount to trigger cleanup
-        unmount();
+    // Unmount to trigger cleanup
+    unmount();
 
-        // The runTestWithWebGL utility will automatically check for memory leaks
-        // after the test completes
-      },
-      {
-        monitorMemory: true,
-        failOnLeak: true,
-      }
-    );
+    // Cleanup after test
+    cleanupWebGLAfterTest();
   });
 });

@@ -3,42 +3,50 @@
  * createNeuralGlowUniforms testing with quantum precision
  */
 
-import { describe, it, expect } from 'vitest'; // Removed unused vi import
-
-import { createNeuralGlowUniforms } from '@shaders/neuralGlow.ts'; // Use @shaders alias and add .ts
+import { describe, it, expect } from 'vitest';
+import { Color } from 'three';
+import { createNeuralGlowUniforms } from '../../../presentation/shaders/neuralGlow';
 
 describe('createNeuralGlowUniforms', () => {
   it('processes data with mathematical precision', () => {
     // Arrange test data - proper parameters for the function
-    const color: [number, number, number] = [0.5, 0.7, 0.9];
+    const baseColor = new Color(0x4287f5);
     const intensity = 1.2;
-    const isActive = true;
+    const pulseRate = 0.8;
 
     // Act
-    const result = createNeuralGlowUniforms(color, intensity, isActive);
+    const result = createNeuralGlowUniforms({
+      baseColor,
+      intensity,
+      pulseRate,
+    });
 
     // Assert
     expect(result).toBeDefined();
-    expect(result.color.value).toEqual(color);
+    expect(result.color.value).toEqual(baseColor);
     expect(result.intensity.value).toEqual(intensity);
-    expect(result.isActive.value).toBe(isActive);
-    expect(result.time.value).toEqual(0.0);
+    expect(result.pulseRate.value).toBe(pulseRate);
+    expect(result.time.value).toEqual(0);
   });
 
   it('handles edge cases with clinical precision', () => {
     // Test edge cases - zero intensity
-    const color: [number, number, number] = [0, 0, 0];
+    const baseColor = new Color(0x000000);
     const intensity = 0;
-    const isActive = false;
+    const noiseScale = 0.01;
 
     // Act
-    const result = createNeuralGlowUniforms(color, intensity, isActive);
+    const result = createNeuralGlowUniforms({
+      baseColor,
+      intensity,
+      noiseScale,
+    });
 
     // Assert
     expect(result).toBeDefined();
-    expect(result.color.value).toEqual([0, 0, 0]);
+    expect(result.color.value).toEqual(baseColor);
     expect(result.intensity.value).toEqual(0);
-    expect(result.isActive.value).toBe(false);
+    expect(result.noiseScale.value).toBe(0.01);
   });
 
   // Add more utility-specific tests

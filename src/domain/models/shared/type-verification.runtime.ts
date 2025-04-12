@@ -15,7 +15,7 @@ import {
   assertDate,
   assertType,
   // Removed unused: asString, asNumber, asBoolean, asDate
-} from '@models/shared/type-verification';
+} from './type-verification';
 
 /**
  * Validates a potentially undefined value is defined

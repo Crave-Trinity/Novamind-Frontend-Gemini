@@ -85,7 +85,7 @@ describe('ApiClient Runtime Validation', () => {
     });
 
     it('should handle unserializable data in error message', () => {
-      const circular: any; // eslint-disable-line @typescript-eslint/no-explicit-any = {};
+      const circular: any = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
       circular.self = circular;
       const result = validateApiResponse(circular, isApiPatient, 'Circular Data');
       expect(result.err).toBe(true);
