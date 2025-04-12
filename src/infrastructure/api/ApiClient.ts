@@ -3,9 +3,14 @@ import axios from 'axios';
 
 import { mockApi } from '@api/mockApi';
 import { validateApiResponse } from '@api/ApiClient.runtime'; // Import the validator
+import { ApiProxyService } from './ApiProxyService'; // Import API proxy for path mapping
 // Removed unused Result, Ok, Err imports
 // Flag to toggle between mock and real API
-const USE_MOCK_API = false; // Disable mock API
+const USE_MOCK_API = process.env.NODE_ENV === 'development' &&
+  (localStorage.getItem('use_mock_api') === 'true'); // Dynamic toggle based on environment
+
+// API version prefix
+const API_VERSION = 'v1';
 
 import type { BrainModel } from '@domain/types/brain/models';
 
@@ -177,29 +182,61 @@ export class ApiClient {
   /**
    * Generic request method
    */
-  // Updated request method to include runtime validation
+  // Updated request method to include runtime validation and path mapping
   private async request<T>(
     config: AxiosRequestConfig,
     // Optional: Pass the type guard for the expected response type T
     responseGuard?: (data: unknown) => data is T
   ): Promise<T> {
     try {
-      const response: AxiosResponse<unknown> = await this.instance.request(config); // Get raw response first
-
-      // Validate the response data if a guard is provided
-      if (responseGuard) {
-        const validationResult = validateApiResponse(
-          response.data,
-          responseGuard,
-          `API Response [${config.method} ${config.url}]`
-        );
-        if (validationResult.ok) {
-          return validationResult.val; // Return validated data
-        } else {
-          // Throw the validation error to be caught below
-          console.error(`API Response Validation Failed: ${validationResult.val.message}`);
-          throw validationResult.val;
+      // Apply path mapping for the URL
+      if (config.url) {
+        // Ensure URL has v1 prefix if not already present and not using mock API
+        if (!config.url.startsWith('/v1/') && !config.url.startsWith('v1/')) {
+          config.url = `v1/${config.url}`;
         }
+        
+        // Map the frontend path to the backend path
+        const mappedUrl = ApiProxyService.mapPath(config.url);
+        console.debug(`[ApiClient] Mapped URL: ${config.url} -> ${mappedUrl}`);
+        config.url = mappedUrl;
+      }
+      
+      // Transform request data if needed
+      if (config.data && config.url) {
+        config.data = ApiProxyService.mapRequestData(config.url, config.data);
+      }
+      
+      // Make the actual request with transformed path and data
+      const response: AxiosResponse<unknown> = await this.instance.request(config);
+      
+      // Transform response data
+      let transformedData = config.url
+        ? ApiProxyService.mapResponseData(config.url, response.data)
+        : response.data;
+      
+      // Standardize response format if needed
+      transformedData = ApiProxyService.standardizeResponse(transformedData);
+      
+      // Validate using the available ApiClient.runtime validator
+      // First create a minimal AxiosResponse
+      const axiosResponseForValidation: AxiosResponse = {
+        data: transformedData,
+        status: 200, // Assume success since we got here
+        statusText: 'OK',
+        headers: {},
+        config: config as any
+      };
+      
+      // Use the runtime validator
+      try {
+        const validatedResponse = validateApiResponse(axiosResponseForValidation);
+        return validatedResponse.data as T;
+      } catch (validationError) {
+        console.error(
+          `API Response Validation Failed: ${validationError instanceof Error ? validationError.message : String(validationError)}`
+        );
+        throw validationError;
       }
 
       // If no guard provided, return raw data (consider adding a warning or stricter policy)
@@ -244,7 +281,8 @@ export class ApiClient {
   // Get all patients
   public async getPatients(): Promise<unknown[]> {
     if (USE_MOCK_API) {
-      return mockApi.getPatients();
+      // Use searchPatients with empty string to get all patients
+      return mockApi.searchPatients("");
     }
 
     return this.get<unknown[]>('/patients');
@@ -253,7 +291,7 @@ export class ApiClient {
   // Get patient by ID
   public async getPatientById(patientId: string): Promise<unknown> {
     if (USE_MOCK_API) {
-      return mockApi.getPatientById(patientId);
+      return mockApi.getPatient(patientId);
     }
 
     return this.get<unknown>(`/patients/${patientId}`);
@@ -274,8 +312,25 @@ export class ApiClient {
     treatmentData: Record<string, unknown>
   ): Promise<T> {
     if (USE_MOCK_API) {
-      // Type assertion for the mock API call
-      return mockApi.predictTreatmentResponse(patientId, treatmentData.treatment as string) as T;
+      // Get the brain model for this patient first
+      const brainModels = await mockApi.getBrainModels(patientId);
+      if (brainModels.length === 0) {
+        throw new Error(`No brain models found for patient: ${patientId}`);
+      }
+      
+      // Use the first brain model to get treatment recommendations
+      const recommendations = await mockApi.getTreatmentRecommendations(brainModels[0].id);
+      
+      // Return synthetic response based on treatment recommendations
+      return {
+        patientId,
+        treatmentType: treatmentData.treatment,
+        efficacy: recommendations.find(r => r.name === treatmentData.treatment)?.efficacy || 0.5,
+        responseTime: Math.floor(Math.random() * 30) + 10, // 10-40 days
+        confidenceScore: Math.random() * 0.3 + 0.6, // 0.6-0.9
+        sideEffects: ['mild fatigue', 'headache', 'nausea'],
+        recommendedDuration: '8 weeks'
+      } as unknown as T;
     }
 
     return this.post<T>(`/patients/${patientId}/predict-treatment`, treatmentData);
@@ -284,7 +339,23 @@ export class ApiClient {
   // Get risk assessment
   public async getRiskAssessment<T = unknown>(patientId: string): Promise<T> {
     if (USE_MOCK_API) {
-      return mockApi.getRiskAssessment(patientId) as T;
+      // Get patient data
+      const patient = await mockApi.getPatient(patientId);
+      
+      // Generate synthetic risk assessment based on patient data
+      return {
+        patientId,
+        assessmentDate: new Date().toISOString(),
+        riskLevel: Math.random() > 0.7 ? 'high' : Math.random() > 0.4 ? 'medium' : 'low',
+        riskFactors: ['treatment history', 'assessment scores', 'neural patterns'],
+        confidence: 0.85,
+        recommendedActions: ['schedule follow-up', 'adjust treatment plan'],
+        neuralBiomarkers: {
+          prefrontalActivity: Math.random() * 0.5 + 0.3,
+          amygdalaRegulation: Math.random() * 0.5 + 0.3,
+          connectivityMetrics: Math.random() * 0.5 + 0.3
+        }
+      } as unknown as T;
     }
 
     return this.get<T>(`/patients/${patientId}/risk-assessment`);
