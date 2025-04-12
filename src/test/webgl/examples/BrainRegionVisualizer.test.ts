@@ -205,8 +205,8 @@ class BrainRegionVisualizer {
 }
 
 // eslint-disable-next-line
-describe.skip('BrainRegionVisualizer', () => {
-  // Re-skip due to persistent mock issues
+describe('BrainRegionVisualizer', () => {
+  // Tests enabled with enhanced WebGL mocks
   let container: HTMLDivElement;
   let visualizer: BrainRegionVisualizer;
 

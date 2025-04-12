@@ -4,7 +4,8 @@
  */
 // Removed unused React import (new JSX transform)
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithProviders } from '../../test/test-utils.unified';
 import { setupWebGLMocks, cleanupWebGLMocks } from '../../test/webgl/setup-test';
 import { TimelineEvent } from './TimelineEvent';
 // Removed unused import: import { renderWithProviders } from '@test/test-utils.unified';
@@ -127,7 +128,7 @@ describe('TimelineEvent', () => {
   it('renders symptom event with correct title and severity badge', () => {
     const handleClick = vi.fn();
 
-    render(
+    renderWithProviders(
       <TimelineEvent
         event={mockSymptomEvent as SymptomEvent} // Use correct type assertion
         isSelected={false}
@@ -143,7 +144,7 @@ describe('TimelineEvent', () => {
   it('renders medication event with correct dosage information', () => {
     const handleClick = vi.fn();
 
-    render(
+    renderWithProviders(
       <TimelineEvent
         event={mockMedicationEvent as TreatmentEvent} // Use correct type assertion
         isSelected={false}
@@ -158,7 +159,7 @@ describe('TimelineEvent', () => {
   it('shows expanded content when selected', () => {
     const handleClick = vi.fn();
 
-    render(
+    renderWithProviders(
       <TimelineEvent
         event={mockDiagnosisEvent as DiagnosisEvent} // Use correct type assertion
         isSelected={true}
@@ -182,7 +183,7 @@ describe('TimelineEvent', () => {
   it('displays neural correlation when showNeuralCorrelation is true', () => {
     const handleClick = vi.fn();
 
-    render(
+    renderWithProviders(
       <TimelineEvent
         event={mockAssessmentEvent as AssessmentEvent} // Use correct type assertion
         isSelected={true}
@@ -205,7 +206,7 @@ describe('TimelineEvent', () => {
   it('hides neural correlation when showNeuralCorrelation is false', () => {
     const handleClick = vi.fn();
 
-    render(
+    renderWithProviders(
       <TimelineEvent
         event={mockAssessmentEvent as AssessmentEvent} // Use correct type assertion
         isSelected={true}
@@ -221,7 +222,7 @@ describe('TimelineEvent', () => {
   it('calls onClick handler when clicked', () => {
     const handleClick = vi.fn();
 
-    render(
+    renderWithProviders(
       <TimelineEvent
         event={mockSymptomEvent as SymptomEvent} // Use correct type assertion
         isSelected={false}
@@ -236,7 +237,7 @@ describe('TimelineEvent', () => {
   it('applies custom color class when provided', () => {
     const handleClick = vi.fn();
 
-    render(
+    renderWithProviders(
       <TimelineEvent
         event={mockMedicationEvent as TreatmentEvent} // Use correct type assertion
         isSelected={false}
@@ -253,7 +254,7 @@ describe('TimelineEvent', () => {
   it('shows time by default and formats it correctly', () => {
     const handleClick = vi.fn();
 
-    render(
+    renderWithProviders(
       <TimelineEvent
         event={mockSymptomEvent as SymptomEvent} // Use correct type assertion
         isSelected={false}
@@ -269,7 +270,7 @@ describe('TimelineEvent', () => {
   it('hides time when showTime is false', () => {
     const handleClick = vi.fn();
 
-    render(
+    renderWithProviders(
       <TimelineEvent
         event={mockSymptomEvent as SymptomEvent} // Use correct type assertion
         isSelected={false}
@@ -285,7 +286,7 @@ describe('TimelineEvent', () => {
   it('applies selection highlight when isSelected is true', () => {
     const handleClick = vi.fn();
 
-    const { rerender } = render(
+    const { rerender } = renderWithProviders(
       <TimelineEvent
         event={mockSymptomEvent as SymptomEvent} // Use correct type assertion
         isSelected={false}
