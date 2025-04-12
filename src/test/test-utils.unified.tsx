@@ -11,9 +11,14 @@ import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 // Import contexts and their types
 import DataContext from '../application/contexts/DataContext';
-import ThemeContext, { ThemeMode, ThemeColor } from '../application/contexts/ThemeContext';
-import UserContext from '../application/contexts/UserContext';
-import VisualizationContext from '../application/contexts/VisualizationContext';
+import { ThemeContext } from '../application/contexts/ThemeContext';
+import { UserContext } from '../application/contexts/UserContext';
+import { VisualizationContext } from '../application/contexts/VisualizationContext';
+
+// Import types needed for the mocks
+import type { ThemeContextType } from '../application/contexts/ThemeContext';
+import type { UserContextType, UserRole } from '../application/contexts/UserContext';
+import type { VisualizationContextType, RenderMode } from '../application/contexts/VisualizationContext';
 
 // Default mock data context for tests
 const mockDataContextValue = {
@@ -47,10 +52,10 @@ const MockThemeProvider: React.FC<{ children: ReactNode; defaultTheme?: ThemeMod
   defaultTheme = 'dark'
 }) => {
   // Create a mock theme context that provides the necessary values
-  const themeContextValue = {
-    theme: defaultTheme as ThemeMode,
+  const themeContextValue: ThemeContextType = {
+    theme: defaultTheme,
     setTheme: vi.fn(),
-    colorScheme: 'blue' as ThemeColor,
+    colorScheme: 'blue',
     setColorScheme: vi.fn(),
     isDark: defaultTheme === 'dark',
     colors: {
@@ -109,12 +114,12 @@ const MockThemeProvider: React.FC<{ children: ReactNode; defaultTheme?: ThemeMod
  */
 const MockUserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Create a basic mock user context
-  const userContextValue = {
+  const userContextValue: UserContextType = {
     user: {
       id: 'test-user-id',
       name: 'Test User',
       email: 'test@example.com',
-      role: 'clinician',
+      role: 'clinician' as UserRole,
       organization: 'Test Hospital',
       preferences: {
         theme: 'clinical',
@@ -153,9 +158,9 @@ const MockUserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
  */
 const MockVisualizationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Mock visualization context values
-  const visualizationContextValue = {
+  const visualizationContextValue: VisualizationContextType = {
     settings: {
-      renderMode: 'standard',
+      renderMode: 'standard' as RenderMode,
       detailLevel: 'medium',
       showConnections: true,
       connectionThreshold: 0.3,
