@@ -10,6 +10,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    /* Linting */
+    "types": ["node", "vite/client", "vitest/globals"],
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -46,11 +48,11 @@
       "@shaders/*": ["src/presentation/shaders/*"],
       "@test/*": ["src/test/*"],
       "@config/*": ["config/*"]
-    },
-    "types": ["vitest/globals", "@testing-library/jest-dom"]
+    }
   },
   "include": [
     "src",
+    "src/test", // Explicitly include test directory
     "config",
     "*.ts",
     "*.tsx",

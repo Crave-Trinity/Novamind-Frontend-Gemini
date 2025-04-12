@@ -68,7 +68,8 @@ const AllTheProviders: React.FC<AllTheProvidersProps> = ({
 };
 
 /**
- * Custom render function that wraps the component under test with all necessary providers
+ * Custom render function that wraps the component under test with all necessary providers,
+ * allowing custom configuration per test.
  */
 interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   initialRoute?: string;
@@ -76,22 +77,36 @@ interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   mockDataContext?: typeof mockDataContextValue;
 }
 
+/**
+ * Custom render function that wraps the component under test with all necessary providers,
+ * allowing custom configuration per test.
+ */
 export const renderWithProviders = (
   ui: ReactElement,
   {
-    // Prefix unused variables as per lint rule
-    initialRoute: _initialRoute,
-    queryClient: _queryClient,
-    mockDataContext: _mockDataContext,
+    initialRoute,
+    queryClient,
+    mockDataContext,
     ...renderOptions
   }: ExtendedRenderOptions = {}
 ) => {
-  // Note: The wrapper itself now uses the default values from AllTheProviders
-  // if specific ones aren't passed to renderWithProviders.
-  return render(ui, { wrapper: AllTheProviders as React.ComponentType, ...renderOptions });
+  // Dynamically create the wrapper component for this render call,
+  // passing down the specified options or allowing AllTheProviders defaults.
+  const WrapperComponent: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <AllTheProviders
+      initialRoute={initialRoute} // Pass route from options, defaults in AllTheProviders if undefined
+      queryClient={queryClient}   // Pass client from options, defaults in AllTheProviders if undefined
+      mockDataContext={mockDataContext} // Pass data context from options, defaults in AllTheProviders if undefined
+    >
+      {children}
+    </AllTheProviders>
+  );
+
+  return render(ui, { wrapper: WrapperComponent, ...renderOptions });
 };
 
-// Export everything from testing-library for convenience
+// Re-export testing-library utilities for convenience
 export * from '@testing-library/react';
-// renderWithProviders is already exported above
+
+// Export other test utilities
 export { createTestQueryClient, mockDataContextValue };

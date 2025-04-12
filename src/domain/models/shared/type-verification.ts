@@ -284,7 +284,9 @@ export function isObjectWithProperties<T extends Record<string, unknown>>(
 /**
  * @param propertyPath Optional path for error messages
  */
-export function isNumber(value: unknown, propertyPath?: string): value is number {
+export function isNumber(
+  value: unknown, propertyPath?: string
+): value is number {
   if (typeof value !== 'number') {
     throw new TypeVerificationError('number', value, propertyPath);
   }
@@ -331,10 +333,8 @@ export function assertArrayOf<T>(
     throw new TypeVerificationError(`array of ${elementType}`, value, propertyPath);
   }
   for (let i = 0; i < value.length; i++) {
-    try {
-      assertType(value[i], (v) => typeof v === elementType, elementType, `${propertyPath}[${i}]`);
-    } catch (error) {
-      throw error;
+    if (typeof value[i] !== elementType) {
+      throw new TypeVerificationError(elementType, value[i], `${propertyPath ?? 'array'}[${i}]`);
     }
   }
 }
@@ -361,7 +361,11 @@ export function assertObjectWithProperties<T extends Record<string, unknown>>(
     const typeGuard = propertyTypeGuards[prop];
     
     if (!typeGuard(propValue)) {
-      throw new TypeVerificationError(`${String(prop)} is invalid`, value, propertyPath);
+      throw new TypeVerificationError(
+        `property '${String(prop)}'`, 
+        propValue,
+        `${propertyPath ?? 'object'}.${String(prop)}`
+      );
     }
   }
 }
