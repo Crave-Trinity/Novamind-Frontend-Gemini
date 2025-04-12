@@ -26,7 +26,11 @@ describe('ThemeProvider', () => {
   // Declare listener at describe scope
   let mediaQueryChangeListener: ((e: Partial<MediaQueryListEvent>) => void) | null = null;
   // Store the mock media query list instance to access _triggerChange
-  let mediaQueryListInstance: ReturnType<typeof window.matchMedia> | null = null;
+  // Define a custom type that extends MediaQueryList with our test helper method
+  type MockMediaQueryList = MediaQueryList & {
+    _triggerChange?: (matches: boolean) => void;
+  };
+  let mediaQueryListInstance: MockMediaQueryList | null = null;
 
   beforeEach(() => {
     // Reset mocks
@@ -105,7 +109,7 @@ describe('ThemeProvider', () => {
       },
     };
     // Store the instance for tests to call _triggerChange
-    mediaQueryListInstance = mockMediaQueryListObject as unknown as MediaQueryList;
+    mediaQueryListInstance = mockMediaQueryListObject as unknown as MockMediaQueryList;
 
     Object.defineProperty(window, 'matchMedia', {
       value: vi.fn().mockImplementation((query: string) => {
@@ -145,7 +149,7 @@ describe('ThemeProvider', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('theme')).toHaveTextContent('system');
+      expect(screen.getByTestId('theme').textContent).toBe('system');
       expect(document.documentElement.classList.contains('light')).toBe(true);
     });
     expect(document.documentElement.classList.contains('dark')).toBe(false);
@@ -162,7 +166,7 @@ describe('ThemeProvider', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('theme')).toHaveTextContent('system');
+      expect(screen.getByTestId('theme').textContent).toBe('system');
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
     expect(document.documentElement.classList.contains('light')).toBe(false);
@@ -178,7 +182,7 @@ describe('ThemeProvider', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('theme')).toHaveTextContent('dark');
+      expect(screen.getByTestId('theme').textContent).toBe('dark');
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
     expect(document.documentElement.classList.contains('light')).toBe(false);
@@ -196,7 +200,7 @@ describe('ThemeProvider', () => {
 
     // Initial state (system -> light)
     await waitFor(() => {
-      expect(screen.getByTestId('theme')).toHaveTextContent('system');
+      expect(screen.getByTestId('theme').textContent).toBe('system');
       expect(document.documentElement.classList.contains('light')).toBe(true);
     });
 
@@ -205,7 +209,7 @@ describe('ThemeProvider', () => {
       await userEvent.click(screen.getByText('Dark'));
     });
     await waitFor(() => {
-      expect(screen.getByTestId('theme')).toHaveTextContent('dark');
+      expect(screen.getByTestId('theme').textContent).toBe('dark');
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
     expect(document.documentElement.classList.contains('light')).toBe(false);
@@ -216,7 +220,7 @@ describe('ThemeProvider', () => {
       await userEvent.click(screen.getByText('Light'));
     });
     await waitFor(() => {
-      expect(screen.getByTestId('theme')).toHaveTextContent('light');
+      expect(screen.getByTestId('theme').textContent).toBe('light');
       expect(document.documentElement.classList.contains('light')).toBe(true);
     });
     expect(document.documentElement.classList.contains('dark')).toBe(false);
@@ -227,14 +231,14 @@ describe('ThemeProvider', () => {
       await userEvent.click(screen.getByText('System'));
     });
     await waitFor(() => {
-      expect(screen.getByTestId('theme')).toHaveTextContent('system');
+      expect(screen.getByTestId('theme').textContent).toBe('system');
       // Class should revert to system preference (light)
       expect(document.documentElement.classList.contains('light')).toBe(true);
     });
     expect(document.documentElement.classList.contains('dark')).toBe(false);
     // Assert setItem was called with 'system' (as per component logic)
     expect(mockSetItem).toHaveBeenCalledWith('theme', 'system');
-    // Assert removeItem was NOT called (as per component logic)
+    // The implementation doesn't call removeItem for system theme
     expect(window.localStorage.removeItem).not.toHaveBeenCalled();
   });
 
@@ -250,7 +254,7 @@ describe('ThemeProvider', () => {
 
     // Initial state (system -> dark)
     await waitFor(() => {
-      expect(screen.getByTestId('theme')).toHaveTextContent('system');
+      expect(screen.getByTestId('theme').textContent).toBe('system');
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
 
@@ -279,7 +283,7 @@ describe('ThemeProvider', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(false);
 
     // Theme state remains 'system'
-    expect(screen.getByTestId('theme')).toHaveTextContent('system');
+    expect(screen.getByTestId('theme').textContent).toBe('system');
     expect(document.documentElement.classList.contains('dark')).toBe(false);
 
     // Simulate system theme change back to dark
@@ -303,7 +307,7 @@ describe('ThemeProvider', () => {
     ); // Increase timeout slightly
 
     // Theme state remains 'system'
-    expect(screen.getByTestId('theme')).toHaveTextContent('system');
+    expect(screen.getByTestId('theme').textContent).toBe('system');
     expect(document.documentElement.classList.contains('light')).toBe(false);
   });
 
@@ -311,10 +315,13 @@ describe('ThemeProvider', () => {
     // Suppress console.error for this specific test
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    // Expecting a specific error message is more robust
-    expect(() => {
+    // Wrap in a function to capture the error
+    const renderWithoutProvider = () => {
       render(<TestComponent />);
-    }).toThrow('useTheme must be used within a ThemeProvider');
+    };
+
+    // Expecting a specific error message is more robust
+    expect(renderWithoutProvider).toThrow('useTheme must be used within a ThemeProvider');
 
     consoleError.mockRestore();
   });

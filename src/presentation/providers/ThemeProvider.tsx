@@ -32,7 +32,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
-  storageKey = 'ui-theme',
+  storageKey = 'theme',
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
@@ -58,9 +58,8 @@ export function ThemeProvider({
   }, [theme, systemTheme]);
 
   useEffect(() => {
-    if (theme !== 'system') {
-      localStorage.setItem(storageKey, theme);
-    }
+    // Always save theme selection to localStorage, regardless of whether it's 'system', 'light', or 'dark'
+    localStorage.setItem(storageKey, theme);
   }, [theme, storageKey]);
 
   useEffect(() => {
@@ -93,7 +92,7 @@ export function ThemeProvider({
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
   
-  if (context === undefined) {
+  if (!context || context === initialState) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
   

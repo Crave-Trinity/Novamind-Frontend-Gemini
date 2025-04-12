@@ -8,7 +8,7 @@
  * For production use, prefer MLApiClientEnhanced.
  */
 
-import { ApiClient } from './ApiClient';
+import { ApiClient } from './apiClient';
 
 export class MLApiClient {
   private apiClient: ApiClient;
@@ -150,3 +150,81 @@ export class MLApiClient {
   }
   
   /**
+   * End a digital twin session
+   */
+  async endDigitalTwinSession(sessionId: string, options?: any): Promise<any> {
+    const url = `/ml/mentalllama/sessions/${sessionId}/end`;
+    const params = {
+      session_id: sessionId,
+      options
+    };
+    
+    return this.apiClient.post(url, params);
+  }
+  
+  /**
+   * Get insights from a completed session
+   */
+  async getSessionInsights(sessionId: string, options?: any): Promise<any> {
+    const url = `/ml/mentalllama/sessions/${sessionId}/insights`;
+    const params = {
+      session_id: sessionId,
+      options
+    };
+    
+    if (options) {
+      return this.apiClient.post(url, params);
+    }
+    
+    return this.apiClient.get(url);
+  }
+  
+  /**
+   * Detect if text contains PHI (Protected Health Information)
+   */
+  async detectPHI(text: string, detectionLevel?: string): Promise<any> {
+    const url = '/ml/phi/detect';
+    const params = {
+      text,
+      detection_level: detectionLevel
+    };
+    
+    return this.apiClient.post(url, params);
+  }
+  
+  /**
+   * Redact PHI from text
+   */
+  async redactPHI(
+    text: string,
+    replacement?: string,
+    detectionLevel?: string
+  ): Promise<any> {
+    const url = '/ml/phi/redact';
+    const params = {
+      text,
+      replacement,
+      detection_level: detectionLevel
+    };
+    
+    return this.apiClient.post(url, params);
+  }
+  
+  /**
+   * Check ML service health
+   */
+  async checkMLHealth(): Promise<any> {
+    const url = '/ml/mentalllama/health';
+    
+    return this.apiClient.get(url);
+  }
+  
+  /**
+   * Check PHI detection service health
+   */
+  async checkPHIHealth(): Promise<any> {
+    const url = '/ml/phi/health';
+    
+    return this.apiClient.get(url);
+  }
+}

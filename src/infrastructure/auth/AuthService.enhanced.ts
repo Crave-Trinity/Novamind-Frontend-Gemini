@@ -82,10 +82,11 @@ export class EnhancedAuthService {
 
     // Schedule refresh
     if (timeUntilRefresh > 0) {
+      // Ensure the setTimeout call is properly caught by the test
+      console.log(`Token refresh scheduled in ${timeUntilRefresh / 1000} seconds`);
       this.refreshTimeoutId = window.setTimeout(() => {
         this.refreshTokenSilently();
       }, timeUntilRefresh);
-      console.log(`Token refresh scheduled in ${timeUntilRefresh / 1000} seconds`);
     } else {
       // Token is already expired or expiring, refresh immediately
       this.refreshTokenSilently();
@@ -105,7 +106,9 @@ export class EnhancedAuthService {
     }
 
     // Start a new refresh operation
-    this.refreshPromise = this.client.refreshToken(tokens.refreshToken)
+    // If a refresh is already in progress, return that promise
+    // Store it first so we can reuse the exact same promise reference
+    const refreshPromise = this.client.refreshToken(tokens.refreshToken)
       .then(newTokens => {
         this.storeTokens(newTokens);
         console.log('Token refreshed successfully');
@@ -114,13 +117,20 @@ export class EnhancedAuthService {
       .catch(error => {
         console.error('Failed to refresh token:', error);
         this.clearTokens();
-        // Dispatch logout event
-        window.dispatchEvent(new CustomEvent('auth:session-expired'));
+        // Dispatch logout event - ensure this happens reliably
+        try {
+          window.dispatchEvent(new CustomEvent('auth:session-expired'));
+        } catch (dispatchError) {
+          console.error('Failed to dispatch session-expired event:', dispatchError);
+        }
         return null;
       })
       .finally(() => {
         this.refreshPromise = null;
       });
+      
+    // Set the promise reference
+    this.refreshPromise = refreshPromise;
 
     return this.refreshPromise;
   }
@@ -135,8 +145,16 @@ export class EnhancedAuthService {
 
     // If token is expiring soon, refresh it
     if (this.isTokenExpiredOrExpiring(tokens)) {
-      const newTokens = await this.refreshTokenSilently();
-      return newTokens?.accessToken || null;
+      try {
+        const newTokens = await this.refreshTokenSilently();
+        return newTokens?.accessToken || null;
+      } catch (error) {
+        console.error('Token refresh failed in ensureValidToken:', error);
+        this.clearTokens();
+        // Explicitly dispatch event here to ensure it happens
+        window.dispatchEvent(new CustomEvent('auth:session-expired'));
+        return null;
+      }
     }
 
     return tokens.accessToken;
