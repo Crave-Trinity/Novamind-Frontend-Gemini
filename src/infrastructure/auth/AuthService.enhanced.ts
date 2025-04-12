@@ -9,7 +9,7 @@ export class EnhancedAuthService {
   private client: AuthApiClient;
   private tokenStorageKey = 'auth_tokens';
   private refreshPromise: Promise<AuthTokens | null> | null = null;
-  private refreshTimeoutId: number | null = null;
+  private refreshTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   constructor(baseUrl: string) {
     this.client = new AuthApiClient(baseUrl);
@@ -69,7 +69,7 @@ export class EnhancedAuthService {
   private setupRefreshTimeout(): void {
     // Clear any existing timeout
     if (this.refreshTimeoutId !== null) {
-      window.clearTimeout(this.refreshTimeoutId);
+      clearTimeout(this.refreshTimeoutId);
       this.refreshTimeoutId = null;
     }
 
@@ -84,7 +84,8 @@ export class EnhancedAuthService {
     if (timeUntilRefresh > 0) {
       // Ensure the setTimeout call is properly caught by the test
       console.log(`Token refresh scheduled in ${timeUntilRefresh / 1000} seconds`);
-      this.refreshTimeoutId = window.setTimeout(() => {
+      // Use direct setTimeout call to ensure it's properly mocked in tests
+      this.refreshTimeoutId = setTimeout(() => {
         this.refreshTokenSilently();
       }, timeUntilRefresh);
     } else {
@@ -105,10 +106,9 @@ export class EnhancedAuthService {
       return this.refreshPromise;
     }
 
-    // Start a new refresh operation
-    // If a refresh is already in progress, return that promise
-    // Store it first so we can reuse the exact same promise reference
-    const refreshPromise = this.client.refreshToken(tokens.refreshToken)
+    // Create and store the promise reference first before execution
+    // to ensure the same reference is returned for concurrent calls
+    this.refreshPromise = this.client.refreshToken(tokens.refreshToken)
       .then(newTokens => {
         this.storeTokens(newTokens);
         console.log('Token refreshed successfully');
@@ -117,20 +117,13 @@ export class EnhancedAuthService {
       .catch(error => {
         console.error('Failed to refresh token:', error);
         this.clearTokens();
-        // Dispatch logout event - ensure this happens reliably
-        try {
-          window.dispatchEvent(new CustomEvent('auth:session-expired'));
-        } catch (dispatchError) {
-          console.error('Failed to dispatch session-expired event:', dispatchError);
-        }
+        // Dispatch logout event without try-catch to ensure it propagates properly
+        window.dispatchEvent(new CustomEvent('auth:session-expired'));
         return null;
       })
       .finally(() => {
         this.refreshPromise = null;
       });
-      
-    // Set the promise reference
-    this.refreshPromise = refreshPromise;
 
     return this.refreshPromise;
   }
@@ -308,15 +301,20 @@ export class EnhancedAuthService {
    */
   async logout(): Promise<AuthState> {
     const tokens = this.getStoredTokens();
+    let error = null;
     
     try {
       if (tokens) {
         await this.client.logout();
       }
-    } catch (error) {
-      console.error('Logout API call failed, but proceeding with local logout:', error);
+    } catch (logoutError) {
+      console.error('Logout API call failed, but proceeding with local logout:', logoutError);
+      // Set error message to be returned in the state
+      error = 'Logout API call failed, but session was ended locally';
     } finally {
       this.clearTokens();
+      // Ensure we dispatch an event when logout happens (whether successful or not)
+      window.dispatchEvent(new CustomEvent('auth:logout-complete'));
     }
 
     return {
@@ -324,7 +322,7 @@ export class EnhancedAuthService {
       tokens: null,
       isAuthenticated: false,
       isLoading: false,
-      error: null,
+      error,
     };
   }
 
