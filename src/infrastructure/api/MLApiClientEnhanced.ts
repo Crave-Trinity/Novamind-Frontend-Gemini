@@ -1,62 +1,68 @@
 /**
- * Enhanced ML API Client with comprehensive error handling
- * and request/response validation for production environments
+ * MLApiClientEnhanced
+ * 
+ * Enhanced ML API client with production-grade features:
+ * - Request validation
+ * - Robust error handling
+ * - Retry mechanism with exponential backoff
+ * - Detailed error classification
+ * - PHI protection
+ * 
+ * This client wraps the base MLApiClient with additional resilience 
+ * and monitoring capabilities for production usage.
  */
 
 import { MLApiClient } from './MLApiClient';
-import { EnhancedApiProxyService } from './ApiProxyService.enhanced';
-import { ApiClient } from './apiClient';
+import { ApiClient } from './ApiClient';
 
-/**
- * Error types specific to ML operations
- */
+// Error classification for better handling
 export enum MLErrorType {
-  NETWORK = 'NETWORK_ERROR',
-  TIMEOUT = 'TIMEOUT_ERROR',
   VALIDATION = 'VALIDATION_ERROR',
-  PHI_DETECTION = 'PHI_DETECTION_ERROR',
-  MODEL_UNAVAILABLE = 'MODEL_UNAVAILABLE',
   TOKEN_REVOKED = 'TOKEN_REVOKED',
-  RATE_LIMIT = 'RATE_LIMIT_EXCEEDED',
-  UNEXPECTED = 'UNEXPECTED_ERROR'
+  RATE_LIMIT = 'RATE_LIMIT',
+  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
+  NOT_FOUND = 'NOT_FOUND',
+  BAD_REQUEST = 'BAD_REQUEST',
+  UNEXPECTED = 'UNEXPECTED',
+  NETWORK = 'NETWORK',
+  TIMEOUT = 'TIMEOUT',
+  PHI_DETECTION = 'PHI_DETECTION'
 }
 
-/**
- * Structured ML API error with additional context
- */
-export class MLApiError extends Error {
-  public readonly type: MLErrorType;
-  public readonly endpoint: string;
-  public readonly statusCode?: number;
-  public readonly requestId?: string;
-  public readonly retryable: boolean;
-  public readonly details?: Record<string, any>;
+// Define retry configuration
+interface RetryConfig {
+  maxRetries: number;
+  baseDelayMs: number;
+  maxDelayMs: number;
+  retryStatusCodes: number[];
+  retryErrorCodes: string[];
+}
 
-  constructor(options: {
-    message: string;
-    type: MLErrorType;
-    endpoint: string;
+// Custom API error with additional context
+export class MLApiError extends Error {
+  type: MLErrorType;
+  statusCode?: number;
+  endpoint: string;
+  requestId?: string;
+  retryable: boolean;
+  details?: any;
+  
+  constructor(message: string, type: MLErrorType, endpoint: string, options?: {
     statusCode?: number;
     requestId?: string;
     retryable?: boolean;
-    details?: Record<string, any>;
-    cause?: Error;
+    details?: any;
   }) {
-    super(options.message);
+    super(message);
     this.name = 'MLApiError';
-    this.type = options.type;
-    this.endpoint = options.endpoint;
-    this.statusCode = options.statusCode;
-    this.requestId = options.requestId;
-    this.retryable = options.retryable ?? false;
-    this.details = options.details;
+    this.type = type;
+    this.endpoint = endpoint;
+    this.statusCode = options?.statusCode;
+    this.requestId = options?.requestId;
+    this.retryable = options?.retryable ?? false;
+    this.details = options?.details;
     
-    // Set the cause if provided (supported in newer JS environments)
-    if (options.cause && Error.hasOwnProperty('captureStackTrace')) {
-      (this as any).cause = options.cause;
-    }
-    
-    // Capture stack trace
+    // Ensure proper stack trace
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, MLApiError);
     }
@@ -64,469 +70,405 @@ export class MLApiError extends Error {
 }
 
 /**
- * Validation rules for ML API requests
- */
-interface ValidationRule {
-  field: string;
-  required?: boolean;
-  type?: 'string' | 'number' | 'boolean' | 'object' | 'array';
-  minLength?: number;
-  maxLength?: number;
-  minValue?: number;
-  maxValue?: number;
-  pattern?: RegExp;
-  enum?: any[];
-  custom?: (value: any) => boolean;
-  message?: string;
-}
-
-/**
- * Type guard for axios errors
- */
-function isAxiosError(error: any): boolean {
-  return error && 
-         error.isAxiosError === true && 
-         error.response !== undefined;
-}
-
-/**
- * Enhanced ML API Client with robust error handling and validation
+ * Enhanced ML API client with production-grade resilience
  */
 export class MLApiClientEnhanced {
   private client: MLApiClient;
-  private validationRules: Record<string, ValidationRule[]> = {};
-  private retryConfig: {
-    maxRetries: number;
-    retryableErrors: MLErrorType[];
-    baseDelayMs: number;
-  };
-
+  private retryConfig: RetryConfig;
+  
   constructor(apiClient: ApiClient) {
     this.client = new MLApiClient(apiClient);
     
-    // Configure which errors should be retried automatically
+    // Configure default retry settings
     this.retryConfig = {
       maxRetries: 3,
-      retryableErrors: [
-        MLErrorType.NETWORK,
-        MLErrorType.TIMEOUT
-      ],
-      baseDelayMs: 500 // Base delay for exponential backoff
+      baseDelayMs: 1000,
+      maxDelayMs: 10000,
+      retryStatusCodes: [408, 429, 500, 502, 503, 504],
+      retryErrorCodes: ['ECONNRESET', 'ETIMEDOUT', 'ECONNREFUSED', 'ECONNABORTED']
     };
-    
-    // Set up validation rules for endpoints
-    this.setupValidationRules();
   }
   
   /**
-   * Set up validation rules for different ML API endpoints
+   * Execute a function with retry logic
    */
-  private setupValidationRules(): void {
-    // Risk assessment validation
-    this.validationRules['assessRisk'] = [
-      { field: 'text', required: true, type: 'string', minLength: 1, message: 'Text content is required' },
-      { field: 'riskType', required: false, type: 'string', enum: ['suicide', 'self-harm', 'violence', 'general'] }
-    ];
-    
-    // Digital twin validation
-    this.validationRules['generateDigitalTwin'] = [
-      { field: 'patientId', required: true, type: 'string', minLength: 1, message: 'Patient ID is required' },
-      { field: 'patientData', required: true, type: 'object', message: 'Patient data is required' }
-    ];
-    
-    // Digital twin session validation
-    this.validationRules['createDigitalTwinSession'] = [
-      { field: 'therapistId', required: true, type: 'string', minLength: 1, message: 'Therapist ID is required' },
-      { field: 'patientId', required: true, type: 'string', minLength: 1, message: 'Patient ID is required' },
-      { field: 'sessionType', required: false, type: 'string' }
-    ];
-    
-    // Message validation
-    this.validationRules['sendMessageToSession'] = [
-      { field: 'sessionId', required: true, type: 'string', minLength: 1, message: 'Session ID is required' },
-      { field: 'message', required: true, type: 'string', minLength: 1, message: 'Message content is required' },
-      { field: 'senderId', required: true, type: 'string', minLength: 1, message: 'Sender ID is required' }
-    ];
-    
-    // PHI detection validation
-    this.validationRules['detectPHI'] = [
-      { field: 'text', required: true, type: 'string', minLength: 1, message: 'Text content is required' }
-    ];
-    
-    // PHI redaction validation
-    this.validationRules['redactPHI'] = [
-      { field: 'text', required: true, type: 'string', minLength: 1, message: 'Text content is required' }
-    ];
-  }
-  
-  /**
-   * Validate request parameters
-   */
-  private validateRequest(methodName: string, params: any[]): void {
-    const rules = this.validationRules[methodName];
-    if (!rules || rules.length === 0) return;
-    
-    const errors: string[] = [];
-    
-    rules.forEach((rule, index) => {
-      const value = params[index];
-      
-      // Check required fields
-      if (rule.required && (value === undefined || value === null || value === '')) {
-        errors.push(rule.message || `${rule.field} is required`);
-        return;
-      }
-      
-      // Skip further validation if value is not provided and not required
-      if (value === undefined || value === null) return;
-      
-      // Type validation
-      if (rule.type && typeof value !== rule.type && 
-          !(rule.type === 'array' && Array.isArray(value)) &&
-          !(rule.type === 'object' && typeof value === 'object' && !Array.isArray(value))) {
-        errors.push(`${rule.field} must be a ${rule.type}`);
-      }
-      
-      // String validations
-      if (rule.type === 'string' && typeof value === 'string') {
-        if (rule.minLength !== undefined && value.length < rule.minLength) {
-          errors.push(`${rule.field} must be at least ${rule.minLength} characters`);
-        }
-        if (rule.maxLength !== undefined && value.length > rule.maxLength) {
-          errors.push(`${rule.field} must be at most ${rule.maxLength} characters`);
-        }
-        if (rule.pattern && !rule.pattern.test(value)) {
-          errors.push(`${rule.field} has an invalid format`);
-        }
-      }
-      
-      // Number validations
-      if (rule.type === 'number' && typeof value === 'number') {
-        if (rule.minValue !== undefined && value < rule.minValue) {
-          errors.push(`${rule.field} must be at least ${rule.minValue}`);
-        }
-        if (rule.maxValue !== undefined && value > rule.maxValue) {
-          errors.push(`${rule.field} must be at most ${rule.maxValue}`);
-        }
-      }
-      
-      // Enum validation
-      if (rule.enum && !rule.enum.includes(value)) {
-        errors.push(`${rule.field} must be one of: ${rule.enum.join(', ')}`);
-      }
-      
-      // Custom validation
-      if (rule.custom && !rule.custom(value)) {
-        errors.push(rule.message || `${rule.field} is invalid`);
-      }
-    });
-    
-    if (errors.length > 0) {
-      throw new MLApiError({
-        message: `Validation failed: ${errors.join('; ')}`,
-        type: MLErrorType.VALIDATION,
-        endpoint: methodName,
-        details: { errors },
-        retryable: false
-      });
+  private async withRetry<T>(
+    fn: () => Promise<T>,
+    endpoint: string,
+    options?: {
+      maxRetries?: number;
+      validateFn?: () => boolean | string;
     }
+  ): Promise<T> {
+    const maxRetries = options?.maxRetries ?? this.retryConfig.maxRetries;
+    
+    // Perform validation if provided
+    if (options?.validateFn) {
+      const validationResult = options.validateFn();
+      if (validationResult !== true) {
+        const message = typeof validationResult === 'string'
+          ? validationResult
+          : 'Validation failed for request parameters';
+        
+        throw new MLApiError(message, MLErrorType.VALIDATION, endpoint, {
+          retryable: false,
+        });
+      }
+    }
+    
+    let lastError: any;
+    
+    // Try with retries
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error: any) {
+        lastError = error;
+        
+        // Process the error to determine if we should retry
+        const processedError = this.processError(error, endpoint);
+        
+        // Don't retry if error is marked as non-retryable
+        if (!processedError.retryable) {
+          throw processedError;
+        }
+        
+        // Don't retry on the last attempt
+        if (attempt === maxRetries) {
+          throw processedError;
+        }
+        
+        // Calculate backoff delay with jitter
+        const delay = Math.min(
+          this.retryConfig.baseDelayMs * Math.pow(2, attempt) + Math.random() * 100,
+          this.retryConfig.maxDelayMs
+        );
+        
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    // This should not be reached due to the throw in the loop,
+    // but TypeScript requires a return value
+    throw this.processError(lastError, endpoint);
   }
   
   /**
-   * Process errors from API calls
+   * Process and normalize errors
    */
   private processError(error: any, endpoint: string): MLApiError {
-    // Handle axios specific errors
-    if (isAxiosError(error)) {
-      const statusCode = error.response?.status;
-      const requestId = error.response?.headers['x-request-id'];
-      const responseData = error.response?.data;
-      
-      // Timeout errors
-      if (error.code === 'ECONNABORTED') {
-        return new MLApiError({
-          message: 'Request timed out',
-          type: MLErrorType.TIMEOUT,
-          endpoint,
-          requestId,
-          retryable: true,
-          cause: error
-        });
-      }
-      
-      // Network errors
-      if (!error.response) {
-        return new MLApiError({
-          message: 'Network error',
-          type: MLErrorType.NETWORK,
-          endpoint,
-          retryable: true,
-          cause: error
-        });
-      }
-      
-      // Rate limiting
-      if (statusCode === 429) {
-        return new MLApiError({
-          message: 'Rate limit exceeded',
-          type: MLErrorType.RATE_LIMIT,
-          endpoint,
-          statusCode,
-          requestId,
-          retryable: true,
-          details: responseData,
-          cause: error
-        });
-      }
-      
-      // Authentication errors
-      if (statusCode === 401) {
-        return new MLApiError({
-          message: 'Authentication failed',
-          type: MLErrorType.TOKEN_REVOKED,
-          endpoint,
-          statusCode,
-          requestId,
-          retryable: false,
-          details: responseData,
-          cause: error
-        });
-      }
-      
-      // General API errors
-      return new MLApiError({
-        message: responseData?.message || error.message || 'API Error',
-        type: MLErrorType.UNEXPECTED,
-        endpoint,
-        statusCode,
-        requestId,
-        retryable: false,
-        details: responseData,
-        cause: error
-      });
-    }
-    
-    // Handle validation errors
+    // If it's already our error type, return it
     if (error instanceof MLApiError) {
       return error;
     }
     
-    // Handle general errors
-    return new MLApiError({
-      message: error.message || 'Unknown error occurred',
-      type: MLErrorType.UNEXPECTED,
-      endpoint,
-      retryable: false,
-      cause: error instanceof Error ? error : undefined
-    });
-  }
-  
-  /**
-   * Wrapper to handle retries and error processing
-   */
-  private async executeWithRetry<T>(
-    endpoint: string,
-    method: (...args: any[]) => Promise<T>,
-    args: any[]
-  ): Promise<T> {
-    let lastError: MLApiError | null = null;
-    let retryCount = 0;
+    let type = MLErrorType.UNEXPECTED;
+    let message = 'An unexpected error occurred';
+    let statusCode: number | undefined;
+    let requestId: string | undefined;
+    let retryable = false;
+    let details: any;
     
-    while (retryCount <= this.retryConfig.maxRetries) {
-      try {
-        // Validate request parameters before calling API
-        this.validateRequest(endpoint, args);
+    // Handle Axios errors
+    if (error.isAxiosError) {
+      // Get status code and request ID if available
+      if (error.response) {
+        statusCode = error.response.status;
+        requestId = error.response.headers?.['x-request-id'];
         
-        // Call the actual method
-        const result = await method.apply(this.client, args);
-        return result;
-      } catch (error) {
-        const mlError = this.processError(error, endpoint);
-        lastError = mlError;
-        
-        // Check if error is retryable
-        if (!mlError.retryable || !this.retryConfig.retryableErrors.includes(mlError.type)) {
-          throw mlError;
+        // Extract message from response if available
+        if (error.response.data?.message) {
+          message = error.response.data.message;
+        } else if (typeof error.response.data === 'string') {
+          message = error.response.data;
+        } else {
+          message = `Request failed with status code ${statusCode}`;
         }
         
-        // Maximum retries reached
-        if (retryCount >= this.retryConfig.maxRetries) {
-          break;
+        // Classify based on status code
+        if (statusCode === 401) {
+          type = MLErrorType.TOKEN_REVOKED;
+          message = 'Authentication failed. Please login again.';
+          retryable = false;
+        } else if (statusCode === 403) {
+          type = MLErrorType.TOKEN_REVOKED;
+          message = 'You do not have permission to perform this action.';
+          retryable = false;
+        } else if (statusCode === 404) {
+          type = MLErrorType.NOT_FOUND;
+          message = `Resource not found at endpoint: ${endpoint}`;
+          retryable = false;
+        } else if (statusCode === 429) {
+          type = MLErrorType.RATE_LIMIT;
+          message = 'Rate limit exceeded. Please try again later.';
+          retryable = true;
+        } else if (statusCode !== undefined && statusCode >= 500) {
+          type = MLErrorType.SERVICE_UNAVAILABLE;
+          message = 'The service is currently unavailable. Please try again later.';
+          retryable = statusCode !== undefined && this.retryConfig.retryStatusCodes.includes(statusCode);
+        } else if (statusCode !== undefined && statusCode >= 400) {
+          type = MLErrorType.BAD_REQUEST;
+          message = error.response.data?.message || 'The request was invalid.';
+          retryable = false;
         }
         
-        // Exponential backoff
-        const delay = this.retryConfig.baseDelayMs * Math.pow(2, retryCount);
-        console.warn(`Retrying ${endpoint} (attempt ${retryCount + 1}) after ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        retryCount++;
+        // Include response data in details
+        details = error.response.data;
+      } else if (error.request) {
+        // Request was made but no response received
+        if (error.code === 'ECONNABORTED') {
+          type = MLErrorType.TIMEOUT;
+          message = 'Request timed out. Please try again.';
+          retryable = true;
+        } else {
+          type = MLErrorType.NETWORK;
+          message = 'Network error. Please check your connection.';
+          retryable = this.retryConfig.retryErrorCodes.includes(error.code);
+        }
       }
+    } else if (error instanceof Error) {
+      // Other error types
+      message = error.message;
+    } else if (typeof error === 'string') {
+      // String error
+      message = error;
     }
     
-    // All retries failed
-    throw lastError || new MLApiError({
-      message: `All retries failed for ${endpoint}`,
-      type: MLErrorType.UNEXPECTED,
-      endpoint,
-      retryable: false
+    return new MLApiError(message, type, endpoint, {
+      statusCode,
+      requestId,
+      retryable,
+      details
     });
   }
   
   /**
-   * Process text using the MentaLLaMA model
+   * Enhanced API methods with validation and retry
    */
-  async processText(
-    text: string, 
-    modelType?: string, 
-    options?: Record<string, unknown>
-  ): Promise<any> {
-    return this.executeWithRetry('processText', this.client.processText, [text, modelType, options]);
+  
+  async processText(text: string, options?: any): Promise<any> {
+    return this.withRetry(
+      () => this.client.processText(text, options),
+      'processText',
+      {
+        validateFn: () => {
+          if (!text || typeof text !== 'string') {
+            return 'Text is required and must be a string';
+          }
+          return true;
+        }
+      }
+    );
   }
   
-  /**
-   * Detect depression signals in text
-   */
-  async detectDepression(
-    text: string, 
-    options?: Record<string, unknown>
-  ): Promise<any> {
-    return this.executeWithRetry('detectDepression', this.client.detectDepression, [text, options]);
+  async detectDepression(text: string, options?: any): Promise<any> {
+    return this.withRetry(
+      () => this.client.detectDepression(text, options),
+      'detectDepression',
+      {
+        validateFn: () => {
+          if (!text || typeof text !== 'string') {
+            return 'Text is required and must be a string';
+          }
+          return true;
+        }
+      }
+    );
   }
   
-  /**
-   * Assess risk in text
-   */
-  async assessRisk(
-    text: string, 
-    riskType?: string, 
-    options?: Record<string, unknown>
-  ): Promise<any> {
-    return this.executeWithRetry('assessRisk', this.client.assessRisk, [text, riskType, options]);
+  async assessRisk(text: string, options?: any): Promise<any> {
+    return this.withRetry(
+      () => this.client.assessRisk(text, options),
+      'assessRisk',
+      {
+        validateFn: () => {
+          if (!text || typeof text !== 'string') {
+            return 'Text is required and must be a string';
+          }
+          return true;
+        }
+      }
+    );
   }
   
-  /**
-   * Analyze sentiment in text
-   */
-  async analyzeSentiment(
-    text: string, 
-    options?: Record<string, unknown>
-  ): Promise<any> {
-    return this.executeWithRetry('analyzeSentiment', this.client.analyzeSentiment, [text, options]);
+  async analyzeSentiment(text: string, options?: any): Promise<any> {
+    return this.withRetry(
+      () => this.client.analyzeSentiment(text, options),
+      'analyzeSentiment',
+      {
+        validateFn: () => {
+          if (!text || typeof text !== 'string') {
+            return 'Text is required and must be a string';
+          }
+          return true;
+        }
+      }
+    );
   }
   
-  /**
-   * Analyze wellness dimensions in text
-   */
-  async analyzeWellnessDimensions(
-    text: string, 
-    dimensions?: string[], 
-    options?: Record<string, unknown>
-  ): Promise<any> {
-    return this.executeWithRetry('analyzeWellnessDimensions', this.client.analyzeWellnessDimensions, [text, dimensions, options]);
+  async analyzeWellnessDimensions(text: string, options?: any): Promise<any> {
+    return this.withRetry(
+      () => this.client.analyzeWellnessDimensions(text, options),
+      'analyzeWellnessDimensions',
+      {
+        validateFn: () => {
+          if (!text || typeof text !== 'string') {
+            return 'Text is required and must be a string';
+          }
+          return true;
+        }
+      }
+    );
   }
   
-  /**
-   * Generate or update a digital twin for a patient
-   */
-  async generateDigitalTwin(
-    patientId: string, 
-    patientData: Record<string, unknown>, 
-    options?: Record<string, unknown>
-  ): Promise<any> {
-    return this.executeWithRetry('generateDigitalTwin', this.client.generateDigitalTwin, [patientId, patientData, options]);
+  async generateDigitalTwin(patientData: any, options?: any): Promise<any> {
+    return this.withRetry(
+      () => this.client.generateDigitalTwin(patientData, options),
+      'generateDigitalTwin',
+      {
+        validateFn: () => {
+          if (!patientData || typeof patientData !== 'object') {
+            return 'Patient data is required and must be an object';
+          }
+          return true;
+        }
+      }
+    );
   }
   
-  /**
-   * Create a new Digital Twin session
-   */
-  async createDigitalTwinSession(
-    therapistId: string, 
-    patientId: string, 
-    sessionType?: string, 
-    sessionParams?: Record<string, unknown>
-  ): Promise<any> {
-    return this.executeWithRetry('createDigitalTwinSession', this.client.createDigitalTwinSession, [
-      therapistId, patientId, sessionType, sessionParams
-    ]);
+  async createDigitalTwinSession(therapistId: string, patientId: string, mode?: string, options?: any): Promise<any> {
+    return this.withRetry(
+      () => this.client.createDigitalTwinSession(therapistId, patientId, mode, options),
+      'createDigitalTwinSession',
+      {
+        validateFn: () => {
+          if (!therapistId) {
+            return 'Therapist ID is required';
+          }
+          if (!patientId) {
+            return 'Patient ID is required';
+          }
+          return true;
+        }
+      }
+    );
   }
   
-  /**
-   * Get a Digital Twin session
-   */
   async getDigitalTwinSession(sessionId: string): Promise<any> {
-    return this.executeWithRetry('getDigitalTwinSession', this.client.getDigitalTwinSession, [sessionId]);
+    return this.withRetry(
+      () => this.client.getDigitalTwinSession(sessionId),
+      'getDigitalTwinSession',
+      {
+        validateFn: () => {
+          if (!sessionId) {
+            return 'Session ID is required';
+          }
+          return true;
+        }
+      }
+    );
   }
   
-  /**
-   * Send a message to a Digital Twin session
-   */
-  async sendMessageToSession(
-    sessionId: string, 
-    message: string, 
-    senderId: string, 
-    senderType?: string, 
-    messageParams?: Record<string, unknown>
-  ): Promise<any> {
-    return this.executeWithRetry('sendMessageToSession', this.client.sendMessageToSession, [
-      sessionId, message, senderId, senderType, messageParams
-    ]);
+  async sendMessageToSession(sessionId: string, message: string, options?: any): Promise<any> {
+    return this.withRetry(
+      () => this.client.sendMessageToSession(sessionId, message, options),
+      'sendMessageToSession',
+      {
+        validateFn: () => {
+          if (!sessionId) {
+            return 'Session ID is required';
+          }
+          if (!message || typeof message !== 'string') {
+            return 'Message is required and must be a string';
+          }
+          return true;
+        }
+      }
+    );
   }
   
-  /**
-   * End a Digital Twin session
-   */
-  async endDigitalTwinSession(
-    sessionId: string, 
-    endReason?: string
-  ): Promise<any> {
-    return this.executeWithRetry('endDigitalTwinSession', this.client.endDigitalTwinSession, [sessionId, endReason]);
+  async endDigitalTwinSession(sessionId: string, options?: any): Promise<any> {
+    return this.withRetry(
+      () => this.client.endDigitalTwinSession(sessionId, options),
+      'endDigitalTwinSession',
+      {
+        validateFn: () => {
+          if (!sessionId) {
+            return 'Session ID is required';
+          }
+          return true;
+        }
+      }
+    );
   }
   
-  /**
-   * Get insights from a Digital Twin session
-   */
-  async getSessionInsights(
-    sessionId: string, 
-    insightType?: string
-  ): Promise<any> {
-    return this.executeWithRetry('getSessionInsights', this.client.getSessionInsights, [sessionId, insightType]);
+  async getSessionInsights(sessionId: string, options?: any): Promise<any> {
+    return this.withRetry(
+      () => this.client.getSessionInsights(sessionId, options),
+      'getSessionInsights',
+      {
+        validateFn: () => {
+          if (!sessionId) {
+            return 'Session ID is required';
+          }
+          return true;
+        }
+      }
+    );
   }
   
-  /**
-   * Detect PHI in text
-   */
-  async detectPHI(
-    text: string, 
-    detectionLevel?: string
-  ): Promise<any> {
-    return this.executeWithRetry('detectPHI', this.client.detectPHI, [text, detectionLevel]);
+  async detectPHI(text: string, options?: any): Promise<any> {
+    return this.withRetry(
+      () => this.client.detectPHI(text, options),
+      'detectPHI',
+      {
+        validateFn: () => {
+          if (!text || typeof text !== 'string') {
+            return 'Validation failed: Text is required for PHI detection';
+          }
+          return true;
+        }
+      }
+    );
   }
   
-  /**
-   * Redact PHI from text
-   */
-  async redactPHI(
-    text: string, 
-    replacement?: string, 
-    detectionLevel?: string
-  ): Promise<any> {
-    return this.executeWithRetry('redactPHI', this.client.redactPHI, [text, replacement, detectionLevel]);
+  async redactPHI(text: string, replacement?: string, options?: any): Promise<any> {
+    return this.withRetry(
+      () => this.client.redactPHI(text, replacement, options),
+      'redactPHI',
+      {
+        validateFn: () => {
+          if (!text || typeof text !== 'string') {
+            return 'Text is required and must be a string';
+          }
+          return true;
+        }
+      }
+    );
   }
   
-  /**
-   * Check ML service health
-   */
   async checkMLHealth(): Promise<any> {
-    return this.executeWithRetry('checkMLHealth', this.client.checkMLHealth, []);
+    return this.withRetry(
+      () => this.client.checkMLHealth(),
+      'checkMLHealth'
+    );
+  }
+  
+  async checkPHIHealth(): Promise<any> {
+    return this.withRetry(
+      () => this.client.checkPHIHealth(),
+      'checkPHIHealth'
+    );
   }
   
   /**
-   * Check PHI service health
+   * Configure retry settings
    */
-  async checkPHIHealth(): Promise<any> {
-    return this.executeWithRetry('checkPHIHealth', this.client.checkPHIHealth, []);
+  setRetryConfig(config: Partial<RetryConfig>): void {
+    this.retryConfig = {
+      ...this.retryConfig,
+      ...config
+    };
   }
 }
-
-// Create and export a singleton instance tied to the main ApiClient
-import { apiClient } from './apiClient';
-export const mlApiClientEnhanced = new MLApiClientEnhanced(apiClient as ApiClient);
