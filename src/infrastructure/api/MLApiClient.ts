@@ -20,79 +20,82 @@ export class MLApiClient {
   /**
    * Process text through the ML model
    */
-  async processText(text: string, options?: any): Promise<any> {
-    const url = '/ml/process';
-    const params = { text, ...options };
+  async processText(text: string, modelType?: string, options?: any): Promise<any> {
+    const url = '/ml/mentalllama/process';
+    const params = {
+      text,
+      model_type: modelType,
+      options
+    };
     
-    return this.apiClient.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(params)
-    });
+    return this.apiClient.post(url, params);
   }
   
   /**
    * Detect depression indicators in text
    */
   async detectDepression(text: string, options?: any): Promise<any> {
-    const url = '/ml/detect-depression';
-    const params = { text, ...options };
+    const url = '/ml/mentalllama/depression';
+    const params = {
+      text,
+      options
+    };
     
-    return this.apiClient.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(params)
-    });
+    return this.apiClient.post(url, params);
   }
   
   /**
    * Assess risk based on text input
    */
-  async assessRisk(text: string, options?: any): Promise<any> {
-    const url = '/ml/assess-risk';
-    const params = { text, ...options };
+  async assessRisk(text: string, riskType?: string, options?: any): Promise<any> {
+    const url = '/ml/mentalllama/risk';
+    const params = {
+      text,
+      risk_type: riskType,
+      options
+    };
     
-    return this.apiClient.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(params)
-    });
+    return this.apiClient.post(url, params);
   }
   
   /**
    * Analyze sentiment in text
    */
   async analyzeSentiment(text: string, options?: any): Promise<any> {
-    const url = '/ml/sentiment';
-    const params = { text, ...options };
+    const url = '/ml/mentalllama/sentiment';
+    const params = {
+      text,
+      options
+    };
     
-    return this.apiClient.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(params)
-    });
+    return this.apiClient.post(url, params);
   }
   
   /**
    * Analyze wellness dimensions from text
    */
-  async analyzeWellnessDimensions(text: string, options?: any): Promise<any> {
-    const url = '/ml/wellness-dimensions';
-    const params = { text, ...options };
+  async analyzeWellnessDimensions(text: string, dimensions?: string[], options?: any): Promise<any> {
+    const url = '/ml/mentalllama/wellness-dimensions';
+    const params = {
+      text,
+      dimensions,
+      options
+    };
     
-    return this.apiClient.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(params)
-    });
+    return this.apiClient.post(url, params);
   }
   
   /**
    * Generate a digital twin model based on patient data
    */
   async generateDigitalTwin(patientData: any, options?: any): Promise<any> {
-    const url = '/ml/generate-twin';
-    const params = { patient_data: patientData, ...options };
+    const url = '/ml/mentalllama/generate-twin';
+    const params = {
+      patient_data: patientData,
+      options
+    };
     
-    return this.apiClient.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(params)
-    });
+    return this.apiClient.post(url, params);
   }
   
   /**
@@ -101,32 +104,27 @@ export class MLApiClient {
   async createDigitalTwinSession(
     therapistId: string,
     patientId: string,
-    mode?: string,
-    options?: any
+    sessionType?: string,
+    sessionParams?: any
   ): Promise<any> {
-    const url = '/ml/sessions';
+    const url = '/ml/mentalllama/sessions';
     const params = {
       therapist_id: therapistId,
       patient_id: patientId,
-      mode,
-      ...options
+      session_type: sessionType,
+      session_params: sessionParams
     };
     
-    return this.apiClient.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(params)
-    });
+    return this.apiClient.post(url, params);
   }
   
   /**
    * Get session details by ID
    */
   async getDigitalTwinSession(sessionId: string): Promise<any> {
-    const url = `/ml/sessions/${sessionId}`;
+    const url = `/ml/mentalllama/sessions/${sessionId}`;
     
-    return this.apiClient.fetch(url, {
-      method: 'GET'
-    });
+    return this.apiClient.get(url);
   }
   
   /**
@@ -135,105 +133,20 @@ export class MLApiClient {
   async sendMessageToSession(
     sessionId: string,
     message: string,
-    options?: any
+    senderId?: string,
+    senderType?: string,
+    messageParams?: any
   ): Promise<any> {
-    const url = `/ml/sessions/${sessionId}/messages`;
+    const url = `/ml/mentalllama/sessions/${sessionId}/messages`;
     const params = {
+      session_id: sessionId,
       message,
-      ...options
+      sender_id: senderId,
+      sender_type: senderType,
+      message_params: messageParams
     };
     
-    return this.apiClient.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(params)
-    });
+    return this.apiClient.post(url, params);
   }
   
   /**
-   * End a digital twin session
-   */
-  async endDigitalTwinSession(sessionId: string, options?: any): Promise<any> {
-    const url = `/ml/sessions/${sessionId}/end`;
-    const params = { ...options };
-    
-    return this.apiClient.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(params)
-    });
-  }
-  
-  /**
-   * Get insights from a completed session
-   */
-  async getSessionInsights(sessionId: string, options?: any): Promise<any> {
-    const url = `/ml/sessions/${sessionId}/insights`;
-    const params = { ...options };
-    
-    if (Object.keys(params).length > 0) {
-      return this.apiClient.fetch(url, {
-        method: 'POST',
-        body: JSON.stringify(params)
-      });
-    }
-    
-    return this.apiClient.fetch(url, {
-      method: 'GET'
-    });
-  }
-  
-  /**
-   * Detect if text contains PHI (Protected Health Information)
-   */
-  async detectPHI(text: string, options?: any): Promise<any> {
-    const url = '/ml/phi/detect';
-    const params = { text, ...options };
-    
-    return this.apiClient.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(params)
-    });
-  }
-  
-  /**
-   * Redact PHI from text
-   */
-  async redactPHI(
-    text: string,
-    replacement?: string,
-    options?: any
-  ): Promise<any> {
-    const url = '/ml/phi/redact';
-    const params = {
-      text,
-      replacement,
-      ...options
-    };
-    
-    return this.apiClient.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(params)
-    });
-  }
-  
-  /**
-   * Check ML service health
-   */
-  async checkMLHealth(): Promise<any> {
-    const url = '/ml/health';
-    
-    return this.apiClient.fetch(url, {
-      method: 'GET'
-    });
-  }
-  
-  /**
-   * Check PHI detection service health
-   */
-  async checkPHIHealth(): Promise<any> {
-    const url = '/ml/phi/health';
-    
-    return this.apiClient.fetch(url, {
-      method: 'GET'
-    });
-  }
-}
