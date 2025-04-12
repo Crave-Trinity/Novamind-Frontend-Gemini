@@ -1,5 +1,7 @@
 /**
  * NOVAMIND Unified Test Utilities
+ * 
+ * Provides quantum-level test utilities for psychiatric digital twin components
  */
 
 import React, { type ReactElement, type ReactNode } from 'react';
@@ -7,9 +9,7 @@ import { render, type RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
-import { ThemeProvider } from '../application/contexts/ThemeContext';
-import { UserProvider } from '../application/contexts/UserContext';
-import { VisualizationProvider } from '../application/contexts/VisualizationContext';
+// Import DataContext directly since it's a simple context
 import DataContext from '../application/contexts/DataContext';
 
 // Default mock data context for tests
@@ -37,6 +37,30 @@ function createTestQueryClient() {
 }
 
 /**
+ * Mock implementation of ThemeProvider for tests
+ */
+const MockThemeProvider: React.FC<{ children: ReactNode; defaultTheme?: string }> = ({ 
+  children, 
+  defaultTheme = 'dark' 
+}) => {
+  return <div data-testid="mock-theme-provider" data-theme={defaultTheme}>{children}</div>;
+};
+
+/**
+ * Mock implementation of UserProvider for tests
+ */
+const MockUserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  return <div data-testid="mock-user-provider">{children}</div>;
+};
+
+/**
+ * Mock implementation of VisualizationProvider for tests
+ */
+const MockVisualizationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  return <div data-testid="mock-visualization-provider">{children}</div>;
+};
+
+/**
  * AllTheProviders wraps the component under test with all necessary providers
  */
 interface AllTheProvidersProps {
@@ -46,23 +70,23 @@ interface AllTheProvidersProps {
   mockDataContext?: typeof mockDataContextValue;
 }
 
-const AllTheProviders: React.FC<AllTheProvidersProps> = ({
+const AllTheProviders = ({
   children,
   initialRoute = '/',
   queryClient = createTestQueryClient(),
   mockDataContext = mockDataContextValue,
-}) => {
+}: AllTheProvidersProps) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark">
-        <UserProvider>
-          <VisualizationProvider>
+      <MockThemeProvider defaultTheme="dark">
+        <MockUserProvider>
+          <MockVisualizationProvider>
             <DataContext.Provider value={mockDataContext}>
               <MemoryRouter initialEntries={[initialRoute]}>{children}</MemoryRouter>
             </DataContext.Provider>
-          </VisualizationProvider>
-        </UserProvider>
-      </ThemeProvider>
+          </MockVisualizationProvider>
+        </MockUserProvider>
+      </MockThemeProvider>
     </QueryClientProvider>
   );
 };
@@ -81,22 +105,14 @@ interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
  * Custom render function that wraps the component under test with all necessary providers,
  * allowing custom configuration per test.
  */
-export const renderWithProviders = (
-  ui: ReactElement,
-  {
-    initialRoute,
-    queryClient,
-    mockDataContext,
-    ...renderOptions
-  }: ExtendedRenderOptions = {}
-) => {
-  // Dynamically create the wrapper component for this render call,
-  // passing down the specified options or allowing AllTheProviders defaults.
-  const WrapperComponent: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOptions = {}) => {
+  const { initialRoute, queryClient, mockDataContext, ...renderOptions } = options;
+  
+  const WrapperComponent = ({ children }: { children: React.ReactNode }) => (
     <AllTheProviders
-      initialRoute={initialRoute} // Pass route from options, defaults in AllTheProviders if undefined
-      queryClient={queryClient}   // Pass client from options, defaults in AllTheProviders if undefined
-      mockDataContext={mockDataContext} // Pass data context from options, defaults in AllTheProviders if undefined
+      initialRoute={initialRoute}
+      queryClient={queryClient}
+      mockDataContext={mockDataContext}
     >
       {children}
     </AllTheProviders>

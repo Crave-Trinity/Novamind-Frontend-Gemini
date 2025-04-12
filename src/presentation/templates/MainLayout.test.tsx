@@ -8,7 +8,7 @@ import { screen } from '@testing-library/react'; // render is imported from unif
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import MainLayout from './MainLayout'; // Assuming default export
-import { render } from '@test/test-utils.unified.tsx'; // Add .tsx extension
+import { render } from '../../test/test-utils.unified';
 
 // Mock data with clinical precision
 // Mock data with clinical precision - MainLayout requires children

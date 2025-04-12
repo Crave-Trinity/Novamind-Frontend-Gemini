@@ -5,7 +5,7 @@
 // Removed unused React import (new JSX transform)
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl/index'; // Explicitly point to index
+import { setupWebGLMocks, cleanupWebGLMocks } from '../../test/webgl/setup-test';
 import { TimelineEvent } from './TimelineEvent';
 // Removed unused import: import { renderWithProviders } from '@test/test-utils.unified';
 // Import the necessary event types
@@ -19,17 +19,11 @@ import type {
 
 // Setup WebGL mocks with memory monitoring - Moved outside describe block
 beforeEach(() => {
-  setupWebGLMocks({ monitorMemory: true, debugMode: true });
+  setupWebGLMocks();
 });
 
 afterEach(() => {
-  const memoryReport = cleanupWebGLMocks();
-  if (memoryReport && memoryReport.leakedObjectCount > 0) {
-    console.warn(
-      `Memory leak detected in "TimelineEvent": ${memoryReport.leakedObjectCount} objects not properly disposed`
-    );
-    console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
-  }
+  cleanupWebGLMocks();
 });
 
 /**

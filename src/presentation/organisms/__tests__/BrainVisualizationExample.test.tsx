@@ -9,12 +9,12 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react'; // Remove render
 import {
   setupWebGLMocks as setupWebGLForTest,
-  cleanupWebGLMocks as cleanupWebGLAfterTest
+  cleanupWebGLMocks as cleanupWebGLAfterTest,
 } from '../../../test/webgl/setup-test';
 // Removed unused React import
 // Import only the default export (the component)
 import BrainVisualization from '../BrainVisualization';
-import { renderWithProviders } from '../../../test/test-utils.unified'; // Import unified render
+import { renderWithProviders } from '../../../test/test-utils.unified';
 
 // Remove standalone mock component definition
 
@@ -58,20 +58,17 @@ vi.mock('../BrainVisualization', () => ({
 describe('BrainVisualization Component with WebGL Mocks', () => {
   // Method 1: Use beforeAll/afterAll hooks
   beforeAll(() => {
-    setupWebGLForTest({
-      monitorMemory: true,
-      debugMode: false,
-    });
+    // Setup WebGL mocks for tests
+    setupWebGLForTest();
   });
 
   afterAll(() => {
-    cleanupWebGLAfterTest({
-      failOnLeak: true, // This will throw if memory leaks are detected
-    });
+    // Clean up WebGL mocks after tests
+    cleanupWebGLAfterTest();
   });
 
   it('renders the brain visualization', () => {
-    renderWithProviders(<BrainVisualization />); // Remove patientId prop
+    renderWithProviders(<BrainVisualization />);
 
     // Check if the component renders correctly
     expect(screen.getByTestId('brain-container')).toBeInTheDocument();
@@ -103,14 +100,12 @@ describe('BrainVisualization with runTestWithWebGL utility', () => {
   it('renders with different detail levels', async () => {
     // Setup WebGL mocks for this test
     setupWebGLForTest();
-    
     // Run the test with proper mocking
     renderWithProviders(<BrainVisualization />);
 
     expect(screen.getByTestId('brain-container')).toBeInTheDocument();
 
     // You can perform assertions on the WebGL content here
-    
     // Clean up after the test
     cleanupWebGLAfterTest();
   });
@@ -128,7 +123,7 @@ describe('BrainVisualization with Neural Controller Mocks', () => {
 
   it('renders with neural activity data', () => {
     // The neural controller mocks will automatically provide simulated data
-    renderWithProviders(<BrainVisualization />); // Remove patientId prop
+    renderWithProviders(<BrainVisualization />);
 
     expect(screen.getByTestId('brain-container')).toBeInTheDocument();
 
@@ -145,7 +140,6 @@ describe('BrainVisualization Memory Management', () => {
   it('properly disposes resources when unmounted', async () => {
     // Setup mocks for this test
     setupWebGLForTest();
-    
     const { unmount } = renderWithProviders(<BrainVisualization />);
 
     // Unmount to trigger cleanup

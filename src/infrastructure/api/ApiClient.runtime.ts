@@ -161,6 +161,41 @@ export interface SecureApiParams {
   allowCaching?: boolean;
 }
 
+// Patient data interface for type guards
+export interface ApiPatient {
+  id: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string | Date;
+  gender?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Type guard to verify if an object conforms to the ApiPatient interface
+ * @param obj The object to check
+ * @returns True if the object is a valid ApiPatient
+ */
+export function isApiPatient(obj: unknown): obj is ApiPatient {
+  if (!obj || typeof obj !== 'object') return false;
+  const patient = obj as Partial<ApiPatient>;
+  return (
+    typeof patient.id === 'string' &&
+    typeof patient.firstName === 'string' &&
+    typeof patient.lastName === 'string' &&
+    (typeof patient.dateOfBirth === 'string' || patient.dateOfBirth instanceof Date)
+  );
+}
+
+/**
+ * Type guard to verify if an array contains ApiPatient objects
+ * @param arr The array to check
+ * @returns True if the array contains valid ApiPatient objects
+ */
+export function isApiPatientArray(arr: unknown): arr is ApiPatient[] {
+  return Array.isArray(arr) && arr.every((item) => isApiPatient(item));
+}
+
 // Exported combined validator for standard API responses
 export function validateStandardResponse<T>(
   response: AxiosResponse<T>,

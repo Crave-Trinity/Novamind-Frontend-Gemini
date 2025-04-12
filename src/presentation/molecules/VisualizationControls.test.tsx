@@ -11,7 +11,7 @@ import { describe, it, expect, vi } from 'vitest'; // Removed unused beforeEach,
 import { screen } from '@testing-library/react'; // Removed unused render, fireEvent
 import userEvent from '@testing-library/user-event';
 import VisualizationControls from './VisualizationControls';
-import { renderWithProviders } from '@test/test-utils.unified'; // Correct import path
+import { renderWithProviders } from '../../test/test-utils.unified';
 import { RenderMode } from '@domain/types/brain/visualization'; // Import RenderMode
 
 // Mock data with clinical precision including required props
