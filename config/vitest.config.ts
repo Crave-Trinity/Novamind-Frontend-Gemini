@@ -103,7 +103,7 @@ export default defineConfig({
       'src/**/*.test.{ts,tsx}',
       'src/**/*.spec.{ts,tsx}',
       'test/**/*.test.{ts,tsx}',
-      'test-puppeteer/**/*.test.{js,ts}', // Include Puppeteer tests
+      // Remove Puppeteer tests from Vitest runs as they use a different structure
     ],
     // Exclude patterns
     exclude: [
@@ -111,6 +111,7 @@ export default defineConfig({
       'dist/**/*',
       'coverage/**/*',
       'config/**/*', // Exclude config directory itself
+      'test-puppeteer/**/*', // Explicitly exclude Puppeteer tests from Vitest runs
     ],
   },
 });
