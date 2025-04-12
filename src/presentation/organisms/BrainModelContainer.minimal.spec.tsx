@@ -7,17 +7,25 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'; // Import afterEach
-// Removed unused React import
+// Using React for createElement
 import { screen, cleanup } from '@testing-library/react'; // Import cleanup (waitFor comes from test-utils)
-import { renderWithProviders } from '@test/test-utils.unified'; // Removed unused waitFor
+import { renderWithProviders } from '../../test/test-utils.unified'; // Removed unused waitFor
 
 // Mock the component under test directly to bypass internal complexities
+// Import React for createElement
+import React from 'react';
+
 vi.mock('@presentation/templates/BrainModelContainer', () => ({
-  default: (props: any // eslint-disable-line @typescript-eslint/no-explicit-any) => (
-    <div data-testid="mock-brain-model-container" {...props}>
-      Mocked Container
-    </div>
-  ),
+  default: function MockBrainModelContainer(props: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    return React.createElement(
+      'div',
+      { 
+        'data-testid': 'mock-brain-model-container', 
+        ...props 
+      },
+      'Mocked Container'
+    );
+  }
 }));
 
 // Import the component under test after mocking its dependencies
