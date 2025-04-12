@@ -99,7 +99,7 @@ describe('MLApiClientEnhanced', () => {
       mlApiClientMock.sendMessageToSession.mockResolvedValue({ message_id: '123' });
       
       // Attempt with missing sessionId
-      await expect(enhancedClient.sendMessageToSession('', 'Hello', 'sender-123')).rejects.toThrow('Session ID is required');
+      await expect(enhancedClient.sendMessageToSession('', 'Hello', 'sender-123')).rejects.toEqual('Session ID is required');
       
       // Attempt with missing message
       await expect(enhancedClient.sendMessageToSession('session-123', '', 'sender-123')).rejects.toThrow('Message content is required');
@@ -298,12 +298,12 @@ describe('MLApiClientEnhanced', () => {
     
     it('should not retry non-retryable errors', async () => {
       // Create a validation error
-      const validationError = new MLApiError({
-        message: 'Validation failed',
-        type: MLErrorType.VALIDATION,
-        endpoint: 'sendMessageToSession',
-        retryable: false
-      });
+      const validationError = new MLApiError(
+        'Validation failed',
+        MLErrorType.VALIDATION,
+        'sendMessageToSession',
+        { retryable: false }
+      );
       
       // Set up the mock to fail with a validation error
       mlApiClientMock.sendMessageToSession.mockRejectedValue(validationError);

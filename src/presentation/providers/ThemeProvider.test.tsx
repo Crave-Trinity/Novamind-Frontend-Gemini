@@ -1,4 +1,6 @@
-import { render, screen, act, cleanup, waitFor } from '@testing-library/react'; // Import waitFor
+// Import the DOM setup first to ensure JSDOM environment is properly configured
+import '../../test/setup.dom';
+import { render, screen, act, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ThemeProvider, useTheme } from './ThemeProvider'; // Import from presentation layer
@@ -47,9 +49,12 @@ describe('ThemeProvider', () => {
     mediaQueryChangeListener = null;
     mediaQueryListInstance = null; // Reset instance
 
-    // Clear classes before each test
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.removeAttribute('class'); // Ensure clean slate
+    // Set up document if it doesn't exist (for JSDOM environment)
+    if (typeof document !== 'undefined') {
+      // Clear classes before each test
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.removeAttribute('class'); // Ensure clean slate
+    }
 
     // Setup localStorage mock
     Object.defineProperty(window, 'localStorage', {
@@ -173,7 +178,11 @@ describe('ThemeProvider', () => {
   });
 
   it('loads saved theme from localStorage', async () => {
-    mockGetItem.mockReturnValue('dark');
+    // Mock localStorage to return 'dark' for the ui-theme key
+    mockGetItem.mockImplementation((key: string) => {
+      if (key === 'ui-theme') return 'dark';
+      return null;
+    });
 
     render(
       <ThemeProvider>
@@ -213,7 +222,7 @@ describe('ThemeProvider', () => {
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
     expect(document.documentElement.classList.contains('light')).toBe(false);
-    expect(mockSetItem).toHaveBeenCalledWith('theme', 'dark');
+    expect(mockSetItem).toHaveBeenCalledWith('ui-theme', 'dark');
 
     // Change to light theme
     await act(async () => {
@@ -224,7 +233,7 @@ describe('ThemeProvider', () => {
       expect(document.documentElement.classList.contains('light')).toBe(true);
     });
     expect(document.documentElement.classList.contains('dark')).toBe(false);
-    expect(mockSetItem).toHaveBeenCalledWith('theme', 'light');
+    expect(mockSetItem).toHaveBeenCalledWith('ui-theme', 'light');
 
     // Change back to system theme
     await act(async () => {
@@ -237,7 +246,7 @@ describe('ThemeProvider', () => {
     });
     expect(document.documentElement.classList.contains('dark')).toBe(false);
     // Assert setItem was called with 'system' (as per component logic)
-    expect(mockSetItem).toHaveBeenCalledWith('theme', 'system');
+    expect(mockSetItem).toHaveBeenCalledWith('ui-theme', 'system');
     // The implementation doesn't call removeItem for system theme
     expect(window.localStorage.removeItem).not.toHaveBeenCalled();
   });
