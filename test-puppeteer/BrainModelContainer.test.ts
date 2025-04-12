@@ -1,6 +1,6 @@
 /* eslint-disable */
-// test-puppeteer/BrainModelContainer.test.js
-import puppeteer from 'puppeteer';
+// test-puppeteer/BrainModelContainer.test.ts
+import puppeteer, { Browser, Page } from 'puppeteer';
 import assert from 'assert';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,11 +11,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Helper function to introduce delay
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
-(async () => {
-  let browser;
-  let page; // Define page in the outer scope
+(async (): Promise<void> => {
+  let browser: Browser | undefined;
+  let page: Page | undefined; // Define page in the outer scope
   // Target the static demo page
   const targetUrl = `file://${__dirname}/../public/brain-standalone-demo.html`;
 
@@ -72,8 +72,8 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     console.log('✅ SUCCESS: Canvas element found for BrainModelContainer.');
 
     // 3. (Optional) Evaluate basic properties of the canvas or scene
-    const canvasSize = await page.evaluate((selector) => {
-      const canvas = document.querySelector(selector);
+    const canvasSize = await page.evaluate((selector: string) => {
+      const canvas = document.querySelector(selector) as HTMLCanvasElement | null;
       return canvas ? { width: canvas.width, height: canvas.height } : null;
     }, canvasSelector);
 

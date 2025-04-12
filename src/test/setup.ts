@@ -37,28 +37,33 @@ if (typeof window !== 'undefined') {
   }));
 }
 
-// Mock ResizeObserver
-window.ResizeObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-}));
+// Only mock browser APIs if window exists
+if (typeof window !== 'undefined') {
+  // Mock ResizeObserver
+  window.ResizeObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  }));
+}
 
 // Mock window.matchMedia (Simple global version - needed for non-enhanced tests)
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  configurable: true,
-  value: vi.fn().mockImplementation((query) => ({
-    matches: false, // Default to false (light mode)
-    media: query,
-    onchange: null,
-    addListener: vi.fn(), // deprecated
-    removeListener: vi.fn(), // deprecated
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    configurable: true,
+    value: vi.fn().mockImplementation((query) => ({
+      matches: false, // Default to false (light mode)
+      media: query,
+      onchange: null,
+      addListener: vi.fn(), // deprecated
+      removeListener: vi.fn(), // deprecated
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+}
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -80,7 +85,9 @@ const localStorageMock = (() => {
     key: (index: number) => Object.keys(store)[index] || null,
   };
 })();
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+}
 
 // Mock sessionStorage (if needed)
 const sessionStorageMock = (() => {
@@ -102,11 +109,15 @@ const sessionStorageMock = (() => {
     key: (index: number) => Object.keys(store)[index] || null,
   };
 })();
-Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
+}
 
 // Mock URL.createObjectURL and revokeObjectURL
-window.URL.createObjectURL = vi.fn(() => 'mock-object-url');
-window.URL.revokeObjectURL = vi.fn();
+if (typeof window !== 'undefined' && window.URL) {
+  window.URL.createObjectURL = vi.fn(() => 'mock-object-url');
+  window.URL.revokeObjectURL = vi.fn();
+}
 
 // Mock CanvasRenderingContext2D methods (add more as needed)
 // This avoids errors when libraries try to use canvas methods in tests
@@ -161,26 +172,28 @@ const mockCanvasContext: Partial<CanvasRenderingContext2D> = {
 
 // Extend the prototype if necessary, or mock getContext
 // Mock HTMLCanvasElement.prototype.getContext to return our mock context
-Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
-  writable: true,
-  configurable: true,
-  value: vi.fn((contextId) => {
-    if (contextId === '2d') {
-      return mockCanvasContext;
-    }
-    // Return a basic WebGL mock if requested, handled by vi.mock('three', ...) below
-    if (contextId === 'webgl' || contextId === 'webgl2') {
-      // This will be overridden by the vi.mock('three', ...) below for more detail
-      // but provides a fallback.
-      return {
-        getParameter: vi.fn(),
-        getExtension: vi.fn(),
-        // Add minimal required methods if needed
-      };
-    }
-    return null; // Default case
-  }),
-});
+if (typeof window !== 'undefined' && typeof HTMLCanvasElement !== 'undefined') {
+  Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+    writable: true,
+    configurable: true,
+    value: vi.fn((contextId) => {
+      if (contextId === '2d') {
+        return mockCanvasContext;
+      }
+      // Return a basic WebGL mock if requested, handled by vi.mock('three', ...) below
+      if (contextId === 'webgl' || contextId === 'webgl2') {
+        // This will be overridden by the vi.mock('three', ...) below for more detail
+        // but provides a fallback.
+        return {
+          getParameter: vi.fn(),
+          getExtension: vi.fn(),
+          // Add minimal required methods if needed
+        };
+      }
+      return null; // Default case
+    }),
+  });
+}
 
 // --- Global Mocks ---
 

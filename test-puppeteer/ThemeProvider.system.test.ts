@@ -1,6 +1,6 @@
 /* eslint-disable */
 /* eslint-env node */
-import puppeteer from 'puppeteer';
+import puppeteer, { Browser, Page } from 'puppeteer';
 import assert from 'assert';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,9 +9,9 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-(async () => {
-  let browser;
-  let page; // Define page in the outer scope
+(async (): Promise<void> => {
+  let browser: Browser | undefined;
+  let page: Page | undefined; // Define page in the outer scope
   const targetUrl = `file://${__dirname}/../public/brain-standalone-demo.html`; // Use the static demo file instead
 
   try {
@@ -27,8 +27,6 @@ const __dirname = path.dirname(__filename);
     page.on('console', (msg) => {
       const type = msg.type().toUpperCase();
       const text = msg.text();
-      // Filter out less relevant logs if needed
-      // if (text.includes('some noise')) return;
       console.log(`[Browser Console - ${type}] ${text}`);
     });
     page.on('pageerror', (err) => {
@@ -45,7 +43,7 @@ const __dirname = path.dirname(__filename);
 
     // Verify emulation worked in browser context
     const prefersDark = await page.evaluate(
-      () => window.matchMedia('(prefers-color-scheme: dark)').matches
+      (): boolean => window.matchMedia('(prefers-color-scheme: dark)').matches
     );
     console.log(
       `[Puppeteer] Verified prefers-color-scheme: dark in browser context: ${prefersDark}`
@@ -58,10 +56,10 @@ const __dirname = path.dirname(__filename);
 
     console.log('[Puppeteer] Checking if the page exists and has rendered...');
     // Instead of checking for dark mode class, just verify the HTML has rendered properly
-    const bodyExists = await page.evaluate(() => !!document.body);
+    const bodyExists = await page.evaluate((): boolean => !!document.body);
     assert.ok(bodyExists, '❌ FAILURE: Page body does not exist');
     
-    const hasControls = await page.evaluate(() => !!document.querySelector('.controls'));
+    const hasControls = await page.evaluate((): boolean => !!document.querySelector('.controls'));
     assert.ok(hasControls, '❌ FAILURE: Controls section not found on page');
     
     console.log('✅ SUCCESS (Test 1): Page is rendered correctly with expected UI elements');
@@ -69,10 +67,10 @@ const __dirname = path.dirname(__filename);
     // --- Test 2: Clicking buttons instead of theme changes ---
     console.log('[Puppeteer] Finding and clicking Functional View button...');
     
-    const buttonClicked = await page.evaluate(() => {
+    const buttonClicked = await page.evaluate((): boolean => {
       const button = document.querySelector('button#functional');
       if (button) {
-        button.click();
+        (button as HTMLButtonElement).click();
         return true;
       }
       return false;

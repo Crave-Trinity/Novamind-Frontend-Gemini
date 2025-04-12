@@ -1,6 +1,6 @@
 /* eslint-disable */
-// test-puppeteer/BrainVisualizationPage.test.js
-import puppeteer from 'puppeteer'; // Use ES Module import
+// test-puppeteer/BrainVisualizationPage.test.ts
+import puppeteer, { Browser, Page } from 'puppeteer'; // Use ES Module import
 import assert from 'assert'; // Use ES Module import for assert
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,15 +11,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Self-executing async function
-(async () => {
-  let browser;
+(async (): Promise<void> => {
+  let browser: Browser | undefined;
   try {
     console.log('[Puppeteer] Launching browser for BrainVisualizationPage test...');
     browser = await puppeteer.launch({
       headless: true, // Run in headless mode (no visible browser window)
       args: ['--no-sandbox', '--disable-setuid-sandbox'], // Common args for CI environments
     });
-    let page = await browser.newPage(); // Use let for potential reassignment if needed, though unlikely here
+    let page: Page = await browser.newPage(); // Use let for potential reassignment if needed, though unlikely here
 
     // Use the static HTML file instead of requiring a dev server
     const targetUrl = `file://${__dirname}/../public/brain-standalone-demo.html`;

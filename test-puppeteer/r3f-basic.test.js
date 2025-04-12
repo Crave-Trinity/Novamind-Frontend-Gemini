@@ -3,6 +3,12 @@
 // test-puppeteer/r3f-basic.test.js
 import puppeteer from 'puppeteer';
 import assert from 'assert';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// Get the directory name equivalent to __dirname in CommonJS
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Helper function to introduce delay (if needed, currently unused)
 // const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -11,7 +17,7 @@ import assert from 'assert';
 (async () => {
   let browser;
   let page; // Define page in the outer scope
-  const targetUrl = 'http://localhost:3001/brain-visualization/demo'; // Target the R3F page
+  const targetUrl = `file://${__dirname}/../public/brain-standalone-demo.html`;
 
   try {
     console.log('[Puppeteer] Launching browser for basic R3F test...');
@@ -157,7 +163,7 @@ import assert from 'assert';
     // --- End Mock API Response ---
     // --- End Event Listeners ---
 
-    // Ensure the dev server is running (npm run dev)
+    // Using static HTML file instead of dev server
     console.log(`[Puppeteer] Navigating to ${targetUrl}...`);
     await page.goto(targetUrl, { waitUntil: 'networkidle0' }); // Wait for network activity to cease
 

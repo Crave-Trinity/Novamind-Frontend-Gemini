@@ -1,16 +1,20 @@
 /* eslint-disable */
 /* eslint-env node */
-import puppeteer from 'puppeteer';
+import puppeteer, { Browser, Page, ElementHandle } from 'puppeteer';
 import assert from 'assert';
-import path from 'node:path'; // Import path module
-import { fileURLToPath } from 'node:url'; // Import fileURLToPath for ES modules
-import { mkdir } from 'node:fs/promises'; // Import mkdir for creating directories
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { mkdir } from 'node:fs/promises';
 
 // Helper function to introduce delay
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Helper function to save failure screenshot
-const saveFailureScreenshot = async (page, screenshotDir, filename) => {
+const saveFailureScreenshot = async (
+  page: Page | undefined, 
+  screenshotDir: string, 
+  filename: string
+): Promise<void> => {
   if (!page) {
     console.error(
       '[Puppeteer] Cannot take screenshot: page object is undefined (browser likely failed to launch).'
@@ -23,13 +27,16 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
     await page.screenshot({ path: screenshotPath });
     console.error(`[Puppeteer] Screenshot saved to ${screenshotPath}`);
   } catch (ssError) {
-    console.error(`[Puppeteer] Failed to take or save screenshot: ${ssError.message}`);
+    console.error(`[Puppeteer] Failed to take or save screenshot: ${(ssError as Error).message}`);
   }
 };
 
-(async () => {
-  let browser;
-  let page;
+(async (): Promise<void> => {
+  let browser: Browser | undefined;
+  let page: Page | undefined;
+  // Get directory path for ES modules
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
   // Target the static demo HTML file
   const targetUrl = `file://${__dirname}/../public/brain-standalone-demo.html`;
   const currentFilePath = fileURLToPath(import.meta.url);
@@ -68,11 +75,11 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
     // 1. Check for the panel container by finding the controls section
     // Use a simpler XPath since the HTML structure is different
     const panelTitleXPath = "//div[contains(@class, 'controls')]";
-    let panelHandle = null;
+    let panelHandle: ElementHandle<Node> | null = null;
     try {
       // Use waitForFunction with document.evaluate, increased timeout
       await page.waitForFunction(
-        (xpath) => {
+        (xpath: string) => {
           /* eslint-env browser */
           const result = document.evaluate(
             xpath,
@@ -88,7 +95,7 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
       );
 
       // Get the handle directly using evaluateHandle after waiting
-      panelHandle = await page.evaluateHandle((xpath) => {
+      const handle = await page.evaluateHandle((xpath: string) => {
         /* eslint-env browser */
         const result = document.evaluate(
           xpath,
@@ -100,7 +107,9 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
         return result.singleNodeValue;
       }, panelTitleXPath);
 
-      if (panelHandle && panelHandle.asElement()) {
+      panelHandle = handle.asElement();
+
+      if (panelHandle) {
         // Check if a valid handle was returned
         // Attempt to find the Card parent for context
         const cardElementHandle = await panelHandle.evaluateHandle((el) => {
@@ -108,13 +117,16 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
           return el.closest('.w-\\[320px\\]');
         });
         // Use the card handle if found, otherwise stick with the title element handle
-        panelHandle = cardElementHandle.asElement() ? cardElementHandle : panelHandle;
+        const cardElement = cardElementHandle.asElement();
+        if (cardElement) {
+          panelHandle = cardElement;
+        }
         console.log(
           `✅ SUCCESS: Found NeuralControlPanel container via title XPath ('${panelTitleXPath}').`
         );
       } else {
         // Dispose of potentially invalid handle
-        if (panelHandle) await panelHandle.dispose();
+        if (handle) await handle.dispose();
         throw new Error('XPath matched no valid element after waiting.');
       }
     } catch (e) {
@@ -125,7 +137,7 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
         'failure-screenshot-NeuralControlPanel-container'
       );
       throw new Error(
-        `❌ FAILURE: NeuralControlPanel container could not be found via XPath ('${panelTitleXPath}') on ${targetUrl}. Error: ${e.message}`
+        `❌ FAILURE: NeuralControlPanel container could not be found via XPath ('${panelTitleXPath}') on ${targetUrl}. Error: ${(e as Error).message}`
       );
     }
 
@@ -137,8 +149,8 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
 
     console.log(`[Puppeteer] Searching for button containing text: "${buttonText}"...`);
 
-    // 1. Click the 'Settings' tab using page.evaluate for reliability
-    const clicked = await page.evaluate((text) => {
+    // Click the button using page.evaluate for reliability
+    const clicked = await page.evaluate((text: string) => {
       /* eslint-env browser */
       const buttons = document.querySelectorAll('button');
       console.log(`[Browser Evaluate] Found ${buttons.length} buttons.`); // Log found buttons
@@ -152,7 +164,7 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
       }
       console.log(`[Browser Evaluate] Target button with text "${text}" not found.`); // Log if not found
       return false;
-    }, settingsTabText);
+    }, buttonText); // FIXED: was incorrectly using settingsTabText variable that wasn't defined
 
     assert.ok(
       clicked,
@@ -162,14 +174,14 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
 
     // 2. Log DOM state after click attempt
     try {
-      const controlsHTML = await page.evaluate((selector) => {
+      const controlsHTML = await page.evaluate((selector: string) => {
         /* eslint-env browser */
         const controlsElement = document.querySelector(selector);
         return controlsElement ? controlsElement.outerHTML : 'Controls element not found';
       }, controlsSelector);
       console.log(`[Puppeteer] Controls outerHTML after click: ${controlsHTML}`);
     } catch (domError) {
-      console.error(`[Puppeteer] Error getting TabsList HTML: ${domError.message}`);
+      console.error(`[Puppeteer] Error getting TabsList HTML: ${(domError as Error).message}`);
     }
 
     // 3. Wait for the tab trigger to have the 'data-state="active"' attribute using waitForFunction with XPath
@@ -201,7 +213,7 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
       console.log(`✅ SUCCESS: Found expected UI elements in NeuralControlPanel.`);
     } catch (panelInteractionError) {
       console.error(
-        `[Puppeteer] Error during panel interaction: ${panelInteractionError.message}`
+        `[Puppeteer] Error during panel interaction: ${(panelInteractionError as Error).message}`
       ); // Log error message
       console.log(`[Puppeteer] Skipping CSS selector fallback and proceeding with test...`);
         
@@ -300,7 +312,7 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
       const errorMessage =
         e instanceof assert.AssertionError
           ? e.message
-          : `Error during UI verification: ${e.message}`;
+          : `Error during UI verification: ${(e as Error).message}`;
       throw new Error(`❌ FAILURE: ${errorMessage}`);
     }
 
@@ -308,7 +320,7 @@ const saveFailureScreenshot = async (page, screenshotDir, filename) => {
 
     console.log('[Puppeteer] NeuralControlPanel test finished successfully.');
   } catch (error) {
-    console.error(`[Puppeteer] NeuralControlPanel test failed: ${error.message}`);
+    console.error(`[Puppeteer] NeuralControlPanel test failed: ${(error as Error).message}`);
     await saveFailureScreenshot(page, screenshotDir, 'failure-screenshot-NeuralControlPanel');
     process.exitCode = 1; // Indicate failure
   } finally {
