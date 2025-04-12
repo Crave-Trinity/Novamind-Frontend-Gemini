@@ -102,7 +102,8 @@ export function useNeuralActivityController(patientId: string) {
       if (Result.isSuccess(result)) {
         // Assuming result.value has regionActivations and connectionStrengths arrays
         if (result.value && Array.isArray(result.value.regionActivations)) {
-          result.value.regionActivations.forEach((activation: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          result.value.regionActivations.forEach((activation: any) => {
             // Use 'any' for activation
             // Ensure activation.level is a valid ActivationLevel before setting
             const level = Object.values(ActivationLevel).includes(activation.level)
@@ -128,7 +129,8 @@ export function useNeuralActivityController(patientId: string) {
 
         // Initialize connection strengths
         if (result.value && Array.isArray(result.value.connectionStrengths)) {
-          result.value.connectionStrengths.forEach((connection: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          result.value.connectionStrengths.forEach((connection: any) => {
             // Use 'any' for connection
             neuralState.metrics.connectionStrengths.set(
               `${connection.sourceId}-${connection.targetId}`,

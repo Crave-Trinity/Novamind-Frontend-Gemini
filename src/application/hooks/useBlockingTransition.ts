@@ -146,9 +146,9 @@ export function useBatchedUpdates<T extends Record<string, any>>(initialState: T
    * @param key - State property key to update
    * @param value - New value for the property
    */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const queueUpdate = useCallback((key: keyof T, value: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
-// eslint-disable-next-line
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const queueUpdate = useCallback((key: keyof T, value: any) => {
+    // eslint-disable-next-line
     setPendingUpdates((prev) => ({
       ...prev,
       [key]: value,
@@ -179,9 +179,9 @@ export function useBatchedUpdates<T extends Record<string, any>>(initialState: T
    * Immediately applies a single update, bypassing the batch
    * Use only for critical updates that can't wait
    */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const applyImmediate = useCallback((key: keyof T, value: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
-// eslint-disable-next-line
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const applyImmediate = useCallback((key: keyof T, value: any) => {
+    // eslint-disable-next-line
     setState((prev) => ({
       ...prev,
       [key]: value,

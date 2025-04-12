@@ -104,7 +104,8 @@ export function useClinicalPredictionController(patientId: string) {
               const newConfidenceIntervals = new Map(prevState.confidenceIntervals);
 
               // Add each symptom trajectory to the maps
-              trajectories.forEach((trajectory: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              trajectories.forEach((trajectory: any) => {
                 // Use extracted value
                 // Add 'any' type for now
                 newSymptomTrajectories.set(trajectory.symptomId, trajectory);

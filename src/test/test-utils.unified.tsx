@@ -43,18 +43,63 @@ function createTestQueryClient() {
 /**
  * Mock implementation of ThemeProvider for tests
  */
-const MockThemeProvider: React.FC<{ children: ReactNode; defaultTheme?: string }> = ({ 
+interface MockThemeProviderProps {
+  children: ReactNode;
+  defaultTheme?: 'light' | 'dark' | 'system';
+  onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
+}
+
+const MockThemeProvider: React.FC<MockThemeProviderProps> = ({ 
   children,
-  defaultTheme = 'dark'
+  defaultTheme = 'dark',
+  onThemeChange
 }) => {
+  // Use state to track the current theme
+  const [theme, setThemeState] = React.useState<'light' | 'dark' | 'system'>(defaultTheme as 'light' | 'dark' | 'system');
+
+  // Apply theme to document element just like the real ThemeProvider would
+  React.useEffect(() => {
+    const applyThemeToDocument = (themeName: string) => {
+      // Remove all theme classes
+      document.documentElement.classList.remove('light', 'dark', 'system');
+      // Add the new theme class
+      document.documentElement.classList.add(themeName);
+      console.log(`[ThemeProvider] applyTheme called with: ${themeName}`);
+    };
+    
+    applyThemeToDocument(theme);
+  }, [theme]);
+
+  // Initialize with default theme
+  React.useEffect(() => {
+    setThemeState(defaultTheme);
+  }, [defaultTheme]);
+
+  // Enhanced setTheme function that actually updates the document and state
+  const setTheme = React.useCallback((newTheme: 'light' | 'dark' | 'system') => {
+    setThemeState(newTheme);
+    // Notify parent component if onThemeChange is provided
+    if (onThemeChange) {
+      onThemeChange(newTheme);
+    }
+    console.log(`[MockThemeProvider] Theme changed to: ${newTheme}`);
+  }, [onThemeChange]);
+
+  // Calculate derived values based on current theme
+  const isDark = theme === 'dark';
+  const mode = isDark ? 'dark' : 'light';
+
   // Create a mock theme context with all properties required by the ThemeContextType interface
   const themeContextValue = {
-    theme: defaultTheme,
-    setTheme: vi.fn(),
-    isDark: defaultTheme === 'dark',
-    mode: defaultTheme === 'dark' ? 'dark' : 'light', // This will be cast to ThemeMode enum value
-    isDarkMode: defaultTheme === 'dark',
-    toggleTheme: vi.fn(),
+    theme,
+    setTheme,
+    isDark,
+    mode, // This will be cast to ThemeMode enum value
+    isDarkMode: isDark,
+    toggleTheme: vi.fn(() => {
+      const newTheme = theme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+    }),
     colors: {
       primary: '#0062cc',
       secondary: '#3a86ff',
@@ -89,6 +134,7 @@ const MockThemeProvider: React.FC<{ children: ReactNode; defaultTheme?: string }
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (
     <ThemeContext.Provider value={themeContextValue as any}>
       <div data-testid="mock-theme-provider" data-theme={defaultTheme}>
@@ -184,6 +230,8 @@ interface AllTheProvidersProps {
   initialRoute?: string;
   queryClient?: QueryClient;
   mockDataContext?: typeof mockDataContextValue;
+  currentTheme?: 'light' | 'dark' | 'system';
+  setCurrentTheme?: React.Dispatch<React.SetStateAction<'light' | 'dark' | 'system'>>;
 }
 
 const AllTheProviders = ({
@@ -191,10 +239,15 @@ const AllTheProviders = ({
   initialRoute = '/',
   queryClient = createTestQueryClient(),
   mockDataContext = mockDataContextValue,
+  currentTheme = 'dark',
+  setCurrentTheme,
 }: AllTheProvidersProps) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <MockThemeProvider defaultTheme="dark">
+      <MockThemeProvider 
+        defaultTheme={currentTheme}
+        onThemeChange={setCurrentTheme ? (newTheme) => setCurrentTheme(newTheme) : undefined}
+      >
         <MockUserProvider>
           <MockVisualizationProvider>
             <DataContext.Provider value={mockDataContext}>
@@ -221,20 +274,71 @@ interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
  * Custom render function that wraps the component under test with all necessary providers,
  * allowing custom configuration per test.
  */
-export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOptions = {}) => {
-  const { initialRoute, queryClient, mockDataContext, ...renderOptions } = options;
-  
-  const WrapperComponent = ({ children }: { children: React.ReactNode }) => (
-    <AllTheProviders
-      initialRoute={initialRoute}
-      queryClient={queryClient}
-      mockDataContext={mockDataContext}
-    >
-      {children}
-    </AllTheProviders>
-  );
+interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+  initialRoute?: string;
+  queryClient?: QueryClient;
+  mockDataContext?: typeof mockDataContextValue;
+  defaultTheme?: 'light' | 'dark' | 'system';
+}
 
-  return render(ui, { wrapper: WrapperComponent, ...renderOptions });
+/**
+ * Custom render function that wraps the component under test with all necessary providers,
+ * and returns enhanced functions for theme testing.
+ */
+export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOptions = {}) => {
+  const { initialRoute, queryClient, mockDataContext, defaultTheme, ...renderOptions } = options;
+  
+  // Create a stateful wrapper that can track theme changes
+  const WrapperComponent = ({ children }: { children: React.ReactNode }) => {
+    // Get default theme from localStorage if available, otherwise use provided default or system
+    const getInitialTheme = (): 'light' | 'dark' | 'system' => {
+      // First check localStorage
+      const storedTheme = localStorage.getItem('theme');
+      if (storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'system') {
+        return storedTheme;
+      }
+      // Then use provided default or fallback to light (clinical UI default)
+      return (defaultTheme as 'light' | 'dark' | 'system') || 'light';
+    };
+    
+    // Initialize with appropriate theme
+    const [currentTheme, setCurrentTheme] = React.useState<'light' | 'dark' | 'system'>(getInitialTheme());
+    
+    // Apply theme class to document
+    React.useEffect(() => {
+      document.documentElement.classList.remove('light', 'dark', 'system');
+      document.documentElement.classList.add(currentTheme);
+    }, [currentTheme]);
+    
+    // Sync with localStorage
+    React.useEffect(() => {
+      localStorage.setItem('theme', currentTheme);
+    }, [currentTheme]);
+    
+    return (
+      <AllTheProviders
+        initialRoute={initialRoute}
+        queryClient={queryClient}
+        mockDataContext={mockDataContext}
+        currentTheme={currentTheme}
+        setCurrentTheme={setCurrentTheme}
+      >
+        {children}
+      </AllTheProviders>
+    );
+  };
+
+  // Render with our wrapper
+  const result = render(ui, { wrapper: WrapperComponent, ...renderOptions });
+  
+  // Helper function to check dark mode
+  const isDarkMode = () => document.documentElement.classList.contains('dark');
+  
+  // Return the standard render result plus our custom helpers
+  return {
+    ...result,
+    isDarkMode,
+  };
 };
 
 // Re-export testing-library utilities for convenience
