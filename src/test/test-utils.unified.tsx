@@ -47,26 +47,50 @@ const MockThemeProvider: React.FC<{ children: ReactNode; defaultTheme?: string }
   children,
   defaultTheme = 'dark'
 }) => {
-  // Create a simple mock theme context with minimal values needed for components
+  // Create a mock theme context with all properties required by the ThemeContextType interface
   const themeContextValue = {
     theme: defaultTheme,
     setTheme: vi.fn(),
     isDark: defaultTheme === 'dark',
+    mode: defaultTheme === 'dark' ? 'dark' : 'light', // This will be cast to ThemeMode enum value
+    isDarkMode: defaultTheme === 'dark',
+    toggleTheme: vi.fn(),
     colors: {
       primary: '#0062cc',
+      secondary: '#3a86ff',
+      accent: '#f72585',
       text: {
-        primary: '#202124'
+        primary: '#202124',
+        secondary: '#5f6368',
+        muted: '#80868b'
+      },
+      background: {
+        primary: defaultTheme === 'dark' ? '#121212' : '#ffffff',
+        secondary: defaultTheme === 'dark' ? '#1e1e1e' : '#f8f9fa'
       },
       neural: {
         active: '#ff5e5b',
         inactive: '#373737'
       }
     },
-    fontSize: 16
+    fontSize: 16,
+    spacing: {
+      xs: '0.25rem',
+      sm: '0.5rem',
+      md: '1rem',
+      lg: '1.5rem',
+      xl: '2rem'
+    },
+    borderRadius: {
+      sm: '0.125rem',
+      md: '0.25rem',
+      lg: '0.5rem',
+      full: '9999px'
+    }
   };
 
   return (
-    <ThemeContext.Provider value={themeContextValue}>
+    <ThemeContext.Provider value={themeContextValue as any}>
       <div data-testid="mock-theme-provider" data-theme={defaultTheme}>
         {children}
       </div>
@@ -84,11 +108,16 @@ const MockUserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       id: 'test-user-id',
       name: 'Test User',
       email: 'test@example.com',
-      role: 'clinician',
+      role: 'clinician', // This will be cast to UserRole
       organization: 'Test Hospital',
       preferences: {
         theme: 'clinical',
-        visualizationDefaults: { detailLevel: 'medium', colorScheme: 'clinical', annotationsVisible: true, timeScale: 1.0 },
+        visualizationDefaults: { 
+          detailLevel: 'medium', 
+          colorScheme: 'clinical', 
+          annotationsVisible: true, 
+          timeScale: 1.0,
+        },
         dashboardLayout: 'detailed'
       },
       lastLogin: new Date().toISOString()
@@ -104,7 +133,7 @@ const MockUserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={userContextValue}>
+    <UserContext.Provider value={userContextValue as any}>
       <div data-testid="mock-user-provider">{children}</div>
     </UserContext.Provider>
   );
@@ -117,15 +146,15 @@ const MockVisualizationProvider: React.FC<{ children: ReactNode }> = ({ children
   // Minimal mock visualization context values needed for tests
   const visualizationContextValue = {
     settings: {
-      renderMode: 'standard',
-      detailLevel: 'medium',
+      renderMode: 'standard', // This will be cast to RenderMode enum
+      detailLevel: 'medium',  // This will be cast to DetailLevel enum
       showConnections: true,
       connectionThreshold: 0.3,
       activationThreshold: 0.2,
       sliceView: false,
       highlightRegions: [],
       timeScale: 1.0,
-      colorMapping: 'clinical',
+      colorMapping: 'clinical', // This will be cast to ColorMapping enum
       transparencyLevel: 0.1,
       annotationsVisible: true,
       showClinicalMarkers: true
@@ -141,7 +170,7 @@ const MockVisualizationProvider: React.FC<{ children: ReactNode }> = ({ children
   };
 
   return (
-    <VisualizationContext.Provider value={visualizationContextValue}>
+    <VisualizationContext.Provider value={visualizationContextValue as any}>
       <div data-testid="mock-visualization-provider">{children}</div>
     </VisualizationContext.Provider>
   );
