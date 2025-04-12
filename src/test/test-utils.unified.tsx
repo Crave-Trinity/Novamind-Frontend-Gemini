@@ -54,7 +54,7 @@ const AllTheProviders: React.FC<AllTheProvidersProps> = ({
 }) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark"> 
+      <ThemeProvider defaultTheme="dark">
         <UserProvider>
           <VisualizationProvider>
             <DataContext.Provider value={mockDataContext}>
@@ -78,18 +78,22 @@ interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   mockDataContext?: typeof mockDataContextValue;
 }
 
-export function renderWithProviders(
+export const renderWithProviders = (
   ui: ReactElement,
   {
-    initialRoute,
-    queryClient,
-    mockDataContext,
+    // Prefix unused variables as per lint rule
+    initialRoute: _initialRoute,
+    queryClient: _queryClient,
+    mockDataContext: _mockDataContext,
     ...renderOptions
   }: ExtendedRenderOptions = {}
-) {
+) => {
+  // Note: The wrapper itself now uses the default values from AllTheProviders
+  // if specific ones aren't passed to renderWithProviders.
   return render(ui, { wrapper: AllTheProviders as React.ComponentType, ...renderOptions });
 };
 
 // Export everything from testing-library for convenience
 export * from '@testing-library/react';
+// renderWithProviders is already exported above
 export { createTestQueryClient, mockDataContextValue };

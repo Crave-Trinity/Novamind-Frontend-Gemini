@@ -19,10 +19,10 @@ export class TypeVerificationError extends Error {
     customMessage?: string
   ) {
     const path = propertyPath ? ` for '${propertyPath}'` : '';
-    
+
     // Get precise type information for test assertions
     let typeDescription: string;
-    
+
     if (actualValue === null) {
       typeDescription = 'null';
     } else if (Array.isArray(actualValue)) {
@@ -32,19 +32,19 @@ export class TypeVerificationError extends Error {
     } else {
       typeDescription = typeof actualValue;
     }
-    
+
     // Format the error message to match expected test patterns
     const message =
       customMessage ||
       `Expected ${expectedType}${path}, but received ${typeDescription}`;
-    
+
     super(message);
-    
+
     this.name = 'TypeVerificationError';
     this.propertyPath = propertyPath;
     this.expectedType = expectedType;
     this.actualValue = actualValue;
-    
+
     // Capture stack trace for better debugging
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, TypeVerificationError);
