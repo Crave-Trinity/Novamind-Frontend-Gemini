@@ -1,22 +1,76 @@
 /* eslint-disable */
 /* eslint-env node */
-// test-puppeteer/r3f-basic.test.js
-import puppeteer from 'puppeteer';
+// test-puppeteer/r3f-basic.test.ts
+import puppeteer, { Browser, Page } from 'puppeteer';
 import assert from 'assert';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+// Define types for the brain model data
+interface Vector3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
+interface BrainRegion {
+  id: string;
+  name: string;
+  position: Vector3;
+  color: string;
+  connections: string[];
+  activityLevel: number;
+  isActive: boolean;
+  hemisphereLocation: 'left' | 'right';
+  dataConfidence: number;
+  volume: number;
+  activity: number;
+}
+
+interface NeuralConnection {
+  id: string;
+  sourceId: string;
+  targetId: string;
+  strength: number;
+  type: 'excitatory' | 'inhibitory';
+  directionality: 'unidirectional' | 'bidirectional';
+  dataConfidence: number;
+  activityLevel: number;
+}
+
+interface BrainScan {
+  id: string;
+  patientId: string;
+  scanDate: string;
+  scanType: string;
+  resolution: Vector3;
+  metadata: Record<string, any>;
+  dataQualityScore: number;
+}
+
+interface BrainModel {
+  id: string;
+  patientId: string;
+  scan: BrainScan;
+  timestamp: string;
+  processingLevel: string;
+  lastUpdated: string;
+  version: string;
+  regions: BrainRegion[];
+  connections: NeuralConnection[];
+}
 
 // Get the directory name equivalent to __dirname in CommonJS
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Helper function to introduce delay (if needed, currently unused)
-// const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+// const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
 // Self-executing async function
-(async () => {
-  let browser;
-  let page; // Define page in the outer scope
+(async (): Promise<void> => {
+  let browser: Browser | undefined;
+  let page: Page | undefined; // Define page in the outer scope
   const targetUrl = `file://${__dirname}/../public/brain-standalone-demo.html`;
 
   try {
@@ -52,7 +106,7 @@ const __dirname = path.dirname(__filename);
         // Define the mock BrainModel data
         // Define the mock BrainModel data adhering to type verification rules
         const nowISO = new Date().toISOString();
-        const mockBrainModel = {
+        const mockBrainModel: BrainModel = {
           id: 'DEMO_SCAN_001', // Required: string
           patientId: 'DEMO_PATIENT', // Required: string
           scan: {
