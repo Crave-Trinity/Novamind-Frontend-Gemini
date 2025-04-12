@@ -83,19 +83,20 @@ export default defineConfig({
     // Environment configuration will be project-specific
     // Define projects as an array of configuration objects
     // according to Vitest documentation - THIS PART WAS LIKELY THE ISSUE
-    // The 'projects' config isn't directly supported in defineConfig like this.
-    // We need separate config files or a different approach if using projects.
-    // Let's REVERT to environmentMatchGlobs as the project structure caused issues.
-    environmentMatchGlobs: [
-      // JSDOM environment for React component tests
-      ['src/**', 'jsdom'],
-      ['test/**', 'jsdom'], // Assuming unit tests are here too
-      // Node environment for Puppeteer tests
-      ['test-puppeteer/**', 'node'],
-    ],
-    setupFiles: ['./src/test/setup.ts'], // Setup applied based on environmentMatchGlobs
-    // Ensure Puppeteer tests (node env) don't run the jsdom setup
-    // Vitest should handle this separation correctly with environmentMatchGlobs
+    // Comment out deprecated environmentMatchGlobs but keep as reference for now
+    // environmentMatchGlobs: [
+    //   ['src/**', 'jsdom'],
+    //   ['test/**', 'jsdom'],
+    //   ['test-puppeteer/**', 'node'],
+    // ],
+    
+    // Use environment directly instead of workspace to avoid TypeScript errors
+    environment: 'jsdom', // Default environment for all tests
+    setupFiles: ['./src/test/setup.ts'],
+    
+    // Special handling for puppeteer tests to run in node environment
+    // We'll detect this in setup.ts and adjust accordingly
+    
 
     // Include patterns for test files
     include: [

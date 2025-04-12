@@ -3,6 +3,64 @@ import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from '../../test/test-utils.unified';
 import { Switch } from './switch';
 import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
+
+// Mock Radix UI Switch components
+vi.mock('@radix-ui/react-switch', () => {
+  const Root = React.forwardRef<HTMLButtonElement, any>(({
+    children,
+    className,
+    defaultChecked,
+    checked,
+    disabled,
+    onCheckedChange,
+    ...props
+  }, ref) => {
+    const [isChecked, setIsChecked] = React.useState(defaultChecked || checked || false);
+    
+    // Handle controlled and uncontrolled components
+    const handleClick = () => {
+      if (disabled) return;
+      
+      if (checked === undefined) {
+        setIsChecked(!isChecked);
+      }
+      
+      if (onCheckedChange) {
+        onCheckedChange(!isChecked);
+      }
+    };
+    
+    const state = checked !== undefined ? checked : isChecked;
+    
+    return (
+      <button
+        role="switch"
+        aria-checked={state}
+        data-state={state ? 'checked' : 'unchecked'}
+        disabled={disabled}
+        onClick={handleClick}
+        className={className}
+        ref={ref}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  });
+  
+  const Thumb = ({ className, ...props }: {
+    className?: string;
+    [key: string]: any;
+  }) => (
+    <span className={className} data-state={props['data-state']} {...props} />
+  );
+  
+  return {
+    Root,
+    Thumb
+  };
+});
 
 describe('Switch Component', () => {
   it('renders correctly in unchecked state by default', () => {

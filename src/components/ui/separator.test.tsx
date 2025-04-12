@@ -19,10 +19,10 @@ describe('Separator Component', () => {
     expect(separator).toHaveClass('w-full');
     expect(separator).not.toHaveClass('h-full');
     expect(separator).not.toHaveClass('w-[1px]');
-    
     // Should be decorative by default
     expect(separator).toHaveAttribute('data-orientation', 'horizontal');
-    expect(separator).toHaveAttribute('aria-hidden', 'true');
+    // When decorative is true, it shouldn't have role="separator"
+    expect(separator).not.toHaveAttribute('role', 'separator');
   });
 
   it('renders with vertical orientation', () => {
