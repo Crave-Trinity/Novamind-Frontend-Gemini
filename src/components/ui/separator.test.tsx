@@ -112,3 +112,12 @@ describe('Separator Component', () => {
     );
     
     const horizontalSeparator = screen.getByTestId('horizontal-separator');
+    const verticalSeparator = screen.getByTestId('vertical-separator');
+    
+    expect(horizontalSeparator).toHaveClass('w-full');
+    expect(verticalSeparator).toHaveClass('h-full');
+    
+    expect(horizontalSeparator).toHaveAttribute('data-orientation', 'horizontal');
+    expect(verticalSeparator).toHaveAttribute('data-orientation', 'vertical');
+  });
+});
