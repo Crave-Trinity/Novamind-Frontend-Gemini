@@ -6,12 +6,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import React, { type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, act, waitFor } from '@testing-library/react'; // Import waitFor
-import { useBrainVisualization } from '@hooks/useBrainVisualization'; // Import the actual hook
-import { apiClient } from '@api/ApiClient'; // Import the actual dependency
+import { renderHook, waitFor } from '@testing-library/react'; // Removed unused 'act'
+import { useBrainVisualization } from '../hooks/useBrainVisualization'; // Use relative path
+import { apiClient } from '../../infrastructure/api/ApiClient'; // Use relative path
 
 // Mock the apiClient's getBrainModel method
-vi.mock('@api/ApiClient', () => ({
+vi.mock('../../infrastructure/api/ApiClient', () => ({
   apiClient: {
     getBrainModel: vi.fn(), // This is the function we will mock
     // Mock other apiClient methods if needed by the hook or its callees
@@ -31,7 +31,8 @@ describe.skip('useBrainVisualization', () => {
   // Cast the mocked apiClient method
   const mockedGetBrainModel = apiClient.getBrainModel as Mock;
   // Define mock data (ensure structure matches BrainModel or use 'any')
-  const mockBrainModelData: any // eslint-disable-line @typescript-eslint/no-explicit-any = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mockBrainModelData: any = {
     id: 'mock-model-123',
     patientId: 'default', // Match default patientId in hook options
     regions: [{ id: 'r1', name: 'Region 1', significance: 0.8, coordinates: { x: 0, y: 0, z: 0 } }],

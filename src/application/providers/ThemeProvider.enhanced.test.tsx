@@ -2,7 +2,7 @@
  * Enhanced ThemeProvider Test using renderWithProviders
  */
 import React from 'react';
-import { renderWithProviders, screen, act, waitFor } from '@test/test-utils.unified';
+import { renderWithProviders, screen, act, waitFor } from '../../test/test-utils.unified';
 import userEvent from '@testing-library/user-event';
 import { vi, afterEach, describe, it, expect, beforeEach } from 'vitest';
 import { useTheme } from '@application/hooks/useTheme';
