@@ -114,7 +114,8 @@ const saveFailureScreenshot = async (
         // Attempt to find the Card parent for context
         const cardElementHandle = await panelHandle.evaluateHandle((el) => {
           /* eslint-env browser */
-          return el.closest('.w-\\[320px\\]');
+          // Cast to HTMLElement to access closest method
+          return (el as HTMLElement).closest('.w-\\[320px\\]');
         });
         // Use the card handle if found, otherwise stick with the title element handle
         const cardElement = cardElementHandle.asElement();
