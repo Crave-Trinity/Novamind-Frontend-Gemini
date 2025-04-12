@@ -5,7 +5,7 @@
 // Removed unused React import (new JSX transform)
 import { describe, it, expect, vi } from 'vitest'; // Removed unused beforeEach, afterEach
 // Removed duplicate WebGL mock imports, keep setup/cleanup if needed, but likely handled globally or by test-utils
-// import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl';
+// import { setupWebGLMocks, cleanupWebGLMocks } from '../../test/webgl';
 // Removed beforeEach import
 
 import { screen } from '@testing-library/react'; // Removed unused render, fireEvent

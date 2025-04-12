@@ -9,7 +9,7 @@ import { screen, cleanup } from '@testing-library/react'; // render is imported 
 // Removed unused userEvent import
 // Adjust import path based on actual file location if needed
 import DigitalTwinDemo from './DigitalTwinDemo'; // Use relative path
-import { render } from '@test/test-utils.unified';
+import { render } from '../../test/test-utils.unified';
 import { RenderMode } from '@domain/types/brain/visualization'; // Import for mock
 
 // Mock the useBrainVisualization hook

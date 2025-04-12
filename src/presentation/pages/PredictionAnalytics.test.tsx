@@ -4,7 +4,7 @@
  */
 
 // Removed unused React import
-import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Remove non-existent imports
+import { setupWebGLMocks, cleanupWebGLMocks } from '../../test/webgl'; // Remove non-existent imports
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import PredictionAnalytics from './PredictionAnalytics'; // Use default import

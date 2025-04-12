@@ -8,7 +8,7 @@ import { screen } from '@testing-library/react'; // Removed unused render, fireE
 // Removed unused React import
 // Removed unused userEvent import
 import TreatmentResponsePredictor from './TreatmentResponsePredictor'; // Assuming default export
-import { renderWithProviders } from '@test/test-utils.unified'; // Correct import path
+import { renderWithProviders } from '../../test/test-utils.unified'; // Correct import path
 import type { DigitalTwinProfile } from '@domain/models/clinical/digital-twin-profile';
 // Removed unused AssessmentScore import
 import type {

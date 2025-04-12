@@ -8,7 +8,7 @@ import { screen } from '@testing-library/react'; // render is imported from unif
 // Removed unused React import (new JSX transform)
 // Removed unused userEvent import
 import { Chart } from './Chart';
-import { render } from '@test/test-utils.unified'; // Import the unified render
+import { render } from '../../test/test-utils.unified'; // Import the unified render
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for Chart

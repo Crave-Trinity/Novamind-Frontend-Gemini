@@ -5,7 +5,7 @@
 import { describe, it, expect, vi } from 'vitest';
 
 // Removed unused React import
-import { render, screen, waitFor } from '@test/test-utils.unified'; // Use unified render and import waitFor
+import { render, screen, waitFor } from '../../test/test-utils.unified'; // Use unified render and import waitFor
 // Removed unused userEvent import
 import BrainVisualizationPage from '@presentation/pages/BrainVisualizationPage'; // Corrected import path
 // import { renderWithProviders } from "@test/test-utils.tsx"; // Use unified render instead

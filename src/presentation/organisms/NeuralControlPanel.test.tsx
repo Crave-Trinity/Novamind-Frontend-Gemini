@@ -8,7 +8,7 @@ import { screen } from '@testing-library/react'; // Removed unused render, fireE
 // Removed unused React import
 // Removed unused userEvent import
 import { NeuralControlPanel } from './NeuralControlPanel'; // Corrected to named import
-import { renderWithProviders } from '@test/test-utils.unified'; // Correct import path
+import { renderWithProviders } from '../../test/test-utils.unified'; // Correct import path
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for NeuralControlPanel

@@ -8,7 +8,7 @@ import { screen } from '@testing-library/react'; // Removed unused render, fireE
 // Removed unused React import
 // Removed unused userEvent import
 import BrainModelViewer from '@pages/BrainModelViewer'; // Assuming default export
-import { renderWithProviders } from '@test/test-utils.unified';
+import { renderWithProviders } from '../../test/test-utils.unified';
 import { RenderMode } from '@domain/types/brain/visualization'; // Import for mock
 // Removed unused BrainRegion import
 

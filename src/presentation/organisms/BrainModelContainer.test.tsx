@@ -5,7 +5,7 @@
 
 import React from 'react'; // Re-added React import for mock implementation
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@test/test-utils.unified'; // Use unified render
+import { render, screen } from '../../test/test-utils.unified'; // Use unified render
 import BrainModelContainer from './BrainModelContainer'; // Use default import
 // Import Vector3 *after* vi.mock('three', ...)
 // import { Vector3 } from 'three';

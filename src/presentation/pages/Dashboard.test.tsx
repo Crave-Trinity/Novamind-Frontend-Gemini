@@ -8,7 +8,7 @@ import { screen } from '@testing-library/react'; // Removed unused fireEvent imp
 // Remove MemoryRouter import, it's provided by renderWithProviders
 // Removed unused userEvent import
 import Dashboard from '@pages/Dashboard'; // Use correct alias
-import { renderWithProviders } from '@test/test-utils.unified.tsx'; // Use correct unified path
+import { renderWithProviders } from '../../test/test-utils.unified.tsx'; // Use correct unified path
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Assuming no specific props are required for Dashboard page

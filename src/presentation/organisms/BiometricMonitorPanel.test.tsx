@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Removed unused ThreeMocks, memoryMonitor
+import { setupWebGLMocks, cleanupWebGLMocks } from '../../test/webgl'; // Removed unused ThreeMocks, memoryMonitor
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { BiometricMonitorPanel } from './BiometricMonitorPanel';

@@ -5,7 +5,7 @@
 
 // Removed unused React import (new JSX transform)
 import { describe, it, expect, vi } from 'vitest'; // Remove beforeEach, afterEach
-import { render, screen } from '@test/test-utils.unified'; // Use unified render
+import { render, screen } from '../../test/test-utils.unified'; // Use unified render
 import BrainVisualizationControls from './BrainVisualizationControls'; // Use default import
 // Remove WebGL mock imports
 

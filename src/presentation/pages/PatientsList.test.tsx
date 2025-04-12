@@ -8,7 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // Removed unused React import
 import { screen } from '@testing-library/react'; // Removed unused render, fireEvent
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders } from '@test/test-utils.unified'; // Use unified render
+import { renderWithProviders } from '../../test/test-utils.unified'; // Use unified render
 import * as ReactQuery from '@tanstack/react-query'; // Import for mocking useQuery
 import * as ReactRouterDom from 'react-router-dom'; // Import for mocking
 

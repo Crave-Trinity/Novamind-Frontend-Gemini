@@ -6,7 +6,7 @@
 import React from 'react';
 // Removed duplicate React import
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@test/test-utils.unified'; // Use unified render
+import { render, screen } from '../../test/test-utils.unified'; // Use unified render
 import { ActivityIndicator } from './ActivityIndicator';
 import { ActivationLevel } from '@domain/types/brain/activity';
 // Don't import from 'three' directly if mocking it below

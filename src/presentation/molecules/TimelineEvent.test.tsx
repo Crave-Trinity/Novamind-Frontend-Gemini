@@ -8,7 +8,7 @@ import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from '../../test/test-utils.unified';
 import { setupWebGLMocks, cleanupWebGLMocks } from '../../test/webgl/setup-test';
 import { TimelineEvent } from './TimelineEvent';
-// Removed unused import: import { renderWithProviders } from '@test/test-utils.unified';
+// Removed unused import: import { renderWithProviders } from '../../test/test-utils.unified';
 // Import the necessary event types
 import type {
   SymptomEvent,
