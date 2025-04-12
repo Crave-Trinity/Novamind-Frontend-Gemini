@@ -62,7 +62,7 @@ export class MockObject3D {
   ); // Added parameter to match signature
   traverse: MockFunction<(callback: (object: MockObject3D) => void) => void> = createMockFunction(
 // eslint-disable-next-line
-    (callback) => {
+    (callback: (object: MockObject3D) => void) => {
       callback(this);
       for (const child of this.children) {
         child.traverse(callback);
@@ -228,8 +228,7 @@ export class MockMaterial {
 
 export class MockMeshBasicMaterial extends MockMaterial {
   override type = 'MeshBasicMaterial';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  override color: any // eslint-disable-line @typescript-eslint/no-explicit-any = { r: 1, g: 1, b: 1, set: () => {} };
+  declare color: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   wireframe: boolean = false;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
   map: any // eslint-disable-line @typescript-eslint/no-explicit-any = null;
@@ -247,8 +246,7 @@ export class MockMeshStandardMaterial extends MockMaterial {
 
 export class MockLineBasicMaterial extends MockMaterial {
   override type = 'LineBasicMaterial';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  override color: any // eslint-disable-line @typescript-eslint/no-explicit-any = { r: 1, g: 1, b: 1, set: () => {} };
+  declare color: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   linewidth: number = 1;
 }
 
@@ -278,16 +276,14 @@ export class MockBufferGeometry {
   userData: Record<string, any> = {};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setAttribute = vi.fn().mockImplementation((name: string, attribute: any // eslint-disable-line @typescript-eslint/no-explicit-any): this => {
-    // Direct mock assignment
+  setAttribute = vi.fn().mockImplementation(function (this: MockBufferGeometry, name: string, attribute: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    // Use regular function for correct 'this' binding
     this.attributes[name] = attribute;
     return this;
   });
 
 // eslint-disable-next-line
-  getAttribute: MockFunction<(name: string) => any> = createMockFunction((name) => {
-    return this.attributes[name];
-  });
+  getAttribute: MockFunction<(name: string) => any> = createMockFunction((name) => this.attributes[name]);
 
 // eslint-disable-next-line
   dispose: MockFunction<() => void> = createMockFunction(() => {

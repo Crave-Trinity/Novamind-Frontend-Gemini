@@ -26,6 +26,7 @@ const commonResolve = {
     '@providers': path.resolve(projectRoot, 'src/application/providers'),
     '@stores': path.resolve(projectRoot, 'src/application/stores'),
     '@services': path.resolve(projectRoot, 'src/application/services'),
+    '@api': path.resolve(projectRoot, 'src/infrastructure/api'), // Add missing API alias
     '@clients': path.resolve(projectRoot, 'src/infrastructure/clients'),
     '@utils': path.resolve(projectRoot, 'src/shared/utils'),
     '@constants': path.resolve(projectRoot, 'src/shared/constants'),

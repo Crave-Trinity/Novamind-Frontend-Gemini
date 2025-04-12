@@ -58,9 +58,7 @@ const AllTheProviders: React.FC<AllTheProvidersProps> = ({
         <UserProvider>
           <VisualizationProvider>
             <DataContext.Provider value={mockDataContext}>
-              <MemoryRouter initialEntries={[initialRoute]}>
-                {children}
-              </MemoryRouter>
+              <MemoryRouter initialEntries={[initialRoute]}>{children}</MemoryRouter>
             </DataContext.Provider>
           </VisualizationProvider>
         </UserProvider>

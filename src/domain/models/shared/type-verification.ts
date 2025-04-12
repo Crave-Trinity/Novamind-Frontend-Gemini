@@ -109,10 +109,7 @@ export function assertArray(value: unknown, propertyPath?: string): asserts valu
 /**
  * Asserts that a value is an object (not null, not an array)
  */
-export function assertObject(
-  value: unknown,
-  propertyPath?: string
-): asserts value is Record<string, unknown> {
+export function assertObject(value: unknown, propertyPath?: string): asserts value is Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     throw new TypeVerificationError('object', value, propertyPath);
   }
@@ -143,38 +140,59 @@ export function assertType<T>(
 
 /**
  * Converts a potentially non-string value to a string
+ * @returns {string | undefined} The value as a string, or undefined if conversion is not possible.
  */
-export function asString(value: unknown, propertyPath?: string): string {
-  assertString(value, propertyPath);
-  return value;
+export function asString(value: unknown): string | undefined {
+  if (typeof value === 'string') {
+    return value;
+  }
+  // Implement coercion for number and boolean
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  // Return undefined for null, undefined, object, array, etc.
+  return undefined;
 }
 
 /**
  * Converts a potentially non-number value to a number
+ * @returns {number | undefined} The value as a number, or undefined if conversion is not possible or results in NaN.
  */
-export function asNumber(value: unknown, propertyPath?: string): number {
-  assertNumber(value, propertyPath);
-  return value;
+export function asNumber(value: unknown): number | undefined {
+  if (typeof value === 'number' && !Number.isNaN(value)) {
+    return value;
+  }
+  // Implement coercion for string
+  if (typeof value === 'string') {
+    const num = Number(value);
+    // Return undefined if string is empty or conversion fails (NaN)
+    return value.trim() === '' || Number.isNaN(num) ? undefined : num;
+  }
+  // Return undefined for other types
+  return undefined;
 }
 
 /**
  * Converts a potentially non-boolean value to a boolean
+ * @returns {boolean | undefined} The value as a boolean, or undefined if conversion is not possible.
  */
-export function asBoolean(value: unknown, propertyPath?: string): boolean {
-  assertBoolean(value, propertyPath);
-  return value;
+export function asBoolean(value: unknown): boolean | undefined {
+  // Perform check directly, return undefined on failure
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  return undefined;
 }
 
 /**
  * Converts a potentially non-Date value to a Date
- * Returns undefined if the value is not a valid Date.
+ * @returns {Date | undefined} The value as a Date object, or undefined if invalid.
  */
-export function asDate(value: unknown, _propertyPath?: string): Date | undefined {
+export function asDate(value: unknown): Date | undefined {
+  // Perform check directly, return undefined on failure
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
     return value;
   }
-  // Optionally log or handle the conversion failure case if needed
-  // console.warn(`Value at ${_propertyPath || 'unknown path'} is not a valid Date:`, value);
   return undefined;
 }
 
@@ -261,4 +279,89 @@ export function isObjectWithProperties<T extends Record<string, unknown>>(
 
     return true;
   };
+}
+
+/**
+ * @param propertyPath Optional path for error messages
+ */
+export function isNumber(value: unknown, propertyPath?: string): value is number {
+  if (typeof value !== 'number') {
+    throw new TypeVerificationError('number', value, propertyPath);
+  }
+  return true;
+}
+
+/**
+ * Asserts that a value is one of a set of literal values
+ */
+export function assertIsOneOf<T extends string | number | boolean>(
+  value: T | null | undefined,
+  allowedValues: readonly T[],
+  propertyPath?: string
+): asserts value is T {
+  if (value === null || value === undefined || !allowedValues.includes(value)) {
+    const expected = allowedValues.map((v) => `${typeof v}: ${v}`).join(', ');
+    throw new TypeVerificationError(`one of ${expected}`, value, propertyPath);
+  }
+}
+
+/**
+ * Asserts that a value is a string array
+ */
+export function assertStringArray(value: unknown, propertyPath?: string): asserts value is string[] {
+  if (!Array.isArray(value)) {
+    throw new TypeVerificationError('string[]', value, propertyPath);
+  }
+  for (let i = 0; i < value.length; i++) {
+    if (typeof value[i] !== 'string') {
+      throw new TypeVerificationError('string', value[i], `${propertyPath}[${i}]`);
+    }
+  }
+}
+
+/**
+ * Asserts that a value is an array of a specific type
+ */
+export function assertArrayOf<T>(
+  value: unknown,
+  elementType: string,
+  propertyPath?: string
+): asserts value is T[] {
+  if (!Array.isArray(value)) {
+    throw new TypeVerificationError(`array of ${elementType}`, value, propertyPath);
+  }
+  for (let i = 0; i < value.length; i++) {
+    try {
+      assertType(value[i], (v) => typeof v === elementType, elementType, `${propertyPath}[${i}]`);
+    } catch (error) {
+      throw error;
+    }
+  }
+}
+
+/**
+ * Asserts that a value is an object with specific properties
+ */
+export function assertObjectWithProperties<T extends Record<string, unknown>>(
+  value: unknown,
+  propertyTypeGuards: {
+    [K in keyof T]-?: (v: unknown) => v is T[K];
+  },
+  propertyPath?: string
+): asserts value is T {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new TypeVerificationError('object', value, propertyPath);
+  }
+
+  const obj = value as Record<string, unknown>;
+  const properties = Object.keys(propertyTypeGuards) as Array<keyof T>;
+
+  for (const prop of properties) {
+    const propValue = obj[prop as string];
+    const typeGuard = propertyTypeGuards[prop];
+    
+    if (!typeGuard(propValue)) {
+      throw new TypeVerificationError(`${String(prop)} is invalid`, value, propertyPath);
+    }
+  }
 }
