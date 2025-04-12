@@ -90,12 +90,15 @@ class MockWebSocket {
     }
   });
   // Helper methods for tests
-  simulateMessage(data: any // eslint-disable-line @typescript-eslint/no-explicit-any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  simulateMessage(data: any): void {
     if (this.onmessage) {
       this.onmessage({ data: typeof data === 'string' ? data : JSON.stringify(data) });
     }
   }
-  simulateError(errorData: any // eslint-disable-line @typescript-eslint/no-explicit-any) {
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  simulateError(errorData: any): void {
     if (this.onerror) {
       this.onerror(errorData);
     }

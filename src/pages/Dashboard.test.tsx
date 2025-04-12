@@ -8,7 +8,7 @@ import { screen, within } from '@testing-library/react'; // Added 'within' impor
 // Remove MemoryRouter import, it's provided by renderWithProviders
 import userEvent from '@testing-library/user-event';
 import Dashboard from '@pages/Dashboard'; // Use correct alias
-import { renderWithProviders } from '@test/test-utils.unified.tsx'; // Use correct unified path
+import { renderWithProviders } from '../test/test-utils.unified'; // Use correct unified path
 
 // @ts-expect-error: TS6133 - Unused import needed for vi.mock
 import type * as ReactRouterDom from 'react-router-dom'; // Type import for mocking

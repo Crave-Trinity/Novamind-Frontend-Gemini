@@ -4,7 +4,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest'; // Removed unused beforeEach, afterEach
 import { screen, act, waitFor } from '@testing-library/react'; // Import act and waitFor
-import { renderWithProviders } from '@test/test-utils.unified'; // Use correct import
+import { renderWithProviders } from './test-utils.unified'; // Use correct import
 
 // Sample component that uses Tailwind classes including dark mode variants
 const TailwindComponent: React.FC<{ title: string }> = ({ title }) => {
@@ -60,6 +60,10 @@ describe('Tailwind CSS Testing with Unified Setup', () => {
 
   it('can toggle dark mode during test execution', async () => {
     // Re-enabled
+    // Explicitly set light mode in localStorage before the test
+    localStorage.setItem('theme', 'light');
+    document.documentElement.classList.remove('dark', 'system');
+    document.documentElement.classList.add('light');
     const { isDarkMode, enableDarkMode, disableDarkMode } = renderWithProviders(
       <TailwindComponent title="Toggle Dark Mode Test" />
     );

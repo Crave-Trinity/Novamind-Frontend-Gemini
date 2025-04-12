@@ -328,6 +328,14 @@ export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOpt
     );
   };
 
+  // Only set light mode as default if there's no localStorage theme already set
+  const storedTheme = localStorage.getItem('theme');
+  if (!storedTheme) {
+    localStorage.removeItem('theme');
+    document.documentElement.classList.remove('dark', 'system');
+    document.documentElement.classList.add('light');
+  }
+
   // Render with our wrapper
   const result = render(ui, { wrapper: WrapperComponent, ...renderOptions });
   
@@ -338,6 +346,16 @@ export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOpt
   return {
     ...result,
     isDarkMode,
+    enableDarkMode: () => {
+      document.documentElement.classList.remove('light', 'system');
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    },
+    disableDarkMode: () => {
+      document.documentElement.classList.remove('dark', 'system');
+      document.documentElement.classList.add('light');
+      localStorage.setItem('theme', 'light');
+    },
   };
 };
 

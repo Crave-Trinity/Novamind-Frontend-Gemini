@@ -326,15 +326,18 @@ export function useNeuralActivityController(patientId: string) {
         }
 
         // Use 'any' for mapping due to missing type definition
-        const relevantMappings = mappingsResult.value.filter((mapping: any // eslint-disable-line @typescript-eslint/no-explicit-any) =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const relevantMappings = mappingsResult.value.filter((mapping: any) =>
           symptomIds.includes(mapping.symptomId)
         );
 
         const transforms: NeuralTransform[] = [];
 
-        relevantMappings.forEach((mapping: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        relevantMappings.forEach((mapping: any) => {
           if (Array.isArray(mapping.activationPatterns)) {
-            mapping.activationPatterns.forEach((pattern: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            mapping.activationPatterns.forEach((pattern: any) => {
               // Use optional chaining and nullish coalescing for safety
               if (
                 pattern &&
@@ -390,9 +393,11 @@ export function useNeuralActivityController(patientId: string) {
         const transforms: NeuralTransform[] = [];
 
         if (Array.isArray(medicationEffectsResult.value)) {
-          medicationEffectsResult.value.forEach((medication: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          medicationEffectsResult.value.forEach((medication: any) => {
             if (Array.isArray(medication.regionalEffects)) {
-              medication.regionalEffects.forEach((effect: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              medication.regionalEffects.forEach((effect: any) => {
                 if (
                   effect &&
                   typeof effect.regionId === 'string' &&

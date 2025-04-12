@@ -24,6 +24,17 @@ module.exports = {
           inactive: '#373737',
           highlight: '#FFE66D',
           muted: '#6C757D',
+          // Add numeric scale for consistency with other color palettes
+          50: '#FFEDEC',
+          100: '#FFD6D5',
+          200: '#FFADAB',
+          300: '#FF8482',
+          400: '#FF5E5B', // Same as active
+          500: '#FF3734',
+          600: '#FF0F0B',
+          700: '#D60300',
+          800: '#A30200',
+          900: '#700200',
         },
         brain: {
           cortex: '#FF6B6B',

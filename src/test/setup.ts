@@ -26,13 +26,16 @@ declare module 'vitest' {
 
 // --- Minimal Browser API Mocks ---
 
-// Mock IntersectionObserver
-window.IntersectionObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-  takeRecords: () => [],
-}));
+// Only mock browser APIs if window exists (browser environment)
+if (typeof window !== 'undefined') {
+  // Mock IntersectionObserver
+  window.IntersectionObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+    takeRecords: () => [],
+  }));
+}
 
 // Mock ResizeObserver
 window.ResizeObserver = vi.fn().mockImplementation(() => ({
