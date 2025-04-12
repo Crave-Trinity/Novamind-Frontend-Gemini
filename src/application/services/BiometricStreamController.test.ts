@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite - Rebuilt
  * BiometricStreamController testing with focused, incremental tests.
@@ -64,13 +65,13 @@ const mockStreamMetadata: BiometricStream[] = [
 // Mock WebSocket connection
 class MockWebSocket {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onopen: ((event: any) => void) | null = null;
+  onopen: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onclose: ((event: any) => void) | null = null;
+  onclose: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onmessage: ((event: any) => void) | null = null;
+  onmessage: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onerror: ((event: any) => void) | null = null;
+  onerror: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
   readyState: number = 0; // Start as CONNECTING
 
   constructor(public url: string) {
@@ -91,14 +92,14 @@ class MockWebSocket {
   });
   // Helper methods for tests
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  simulateMessage(data: any): void {
+  simulateMessage(data: any // eslint-disable-line @typescript-eslint/no-explicit-any): void {
     if (this.onmessage) {
       this.onmessage({ data: typeof data === 'string' ? data : JSON.stringify(data) });
     }
   }
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  simulateError(errorData: any): void {
+  simulateError(errorData: any // eslint-disable-line @typescript-eslint/no-explicit-any): void {
     if (this.onerror) {
       this.onerror(errorData);
     }

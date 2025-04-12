@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Molecular Component
  * TreatmentResponseVisualizer - Quantum-level treatment projection

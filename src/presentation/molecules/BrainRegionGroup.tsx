@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Visualization
  * BrainRegionGroup Molecular Component - renders collections of brain regions

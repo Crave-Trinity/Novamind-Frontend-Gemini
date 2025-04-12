@@ -18,6 +18,7 @@ vi.mock('three', async () => {
 
   return {
     __esModule: true, // Ensure ES module compatibility
+// eslint-disable-next-line
     WebGLRenderer: vi.fn().mockImplementation(() => {
       return {
         domElement: document.createElement('canvas'),

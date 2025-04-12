@@ -61,7 +61,7 @@ const CRITICAL_PATHS = [
  */
 export async function analyzeCoverage(coverageJsonPath: string): Promise<CoverageSummary> {
   // Load coverage data from file
-  let coverageData: any;
+  let coverageData: any // eslint-disable-line @typescript-eslint/no-explicit-any;
   try {
     const coverageJson = fs.readFileSync(coverageJsonPath, 'utf8');
     coverageData = JSON.parse(coverageJson);

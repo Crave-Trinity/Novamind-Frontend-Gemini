@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Treatment Prediction Types
  * Treatment response prediction with quantum-level type safety

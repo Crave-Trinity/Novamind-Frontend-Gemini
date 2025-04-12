@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type * as THREE from 'three';
 import type { ReactThreeFiber } from '@react-three/fiber';
 

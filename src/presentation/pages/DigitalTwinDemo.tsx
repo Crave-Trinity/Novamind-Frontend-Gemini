@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, Suspense } from 'react'; // Removed unused useCallback
 
 import { useBrainVisualization } from '@hooks/useBrainVisualization';

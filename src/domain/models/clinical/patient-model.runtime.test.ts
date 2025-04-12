@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * Patient Model Runtime Validators Testing

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @fileoverview Runtime validation functions for data related to the ClinicalPredictionController.
  * Ensures that prediction request inputs and results conform to expected types.

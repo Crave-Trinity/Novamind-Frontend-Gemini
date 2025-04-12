@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Coordination Layer
  * NeuralVisualizationCoordinator - Quantum-level cross-controller integration

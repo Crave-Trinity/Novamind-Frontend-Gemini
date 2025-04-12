@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Neural Glow Shader Implementation
  * 

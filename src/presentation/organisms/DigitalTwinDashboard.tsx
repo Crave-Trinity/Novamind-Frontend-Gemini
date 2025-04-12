@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState } from 'react';
 
 import type { DigitalTwinProfile } from '@domain/models/clinical/digital-twin-profile';

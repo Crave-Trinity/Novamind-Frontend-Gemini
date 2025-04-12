@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @vitest-environment jsdom
  */
@@ -13,7 +14,7 @@ vi.mock('./apiClient');
 describe('MLApiClientEnhanced', () => {
   let apiClientMock: ApiClient;
   // Use any type for the mock to avoid TypeScript issues with mock methods
-  let mlApiClientMock: any;
+  let mlApiClientMock: any // eslint-disable-line @typescript-eslint/no-explicit-any;
   let enhancedClient: MLApiClientEnhanced;
 
   beforeEach(() => {

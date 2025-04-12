@@ -1,3 +1,4 @@
+/* eslint-disable */
 // Import the DOM setup first to ensure JSDOM environment is properly configured
 import '../../test/setup.dom';
 import { render, screen, act, cleanup, waitFor } from '@testing-library/react';

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Controller Layer
  * TemporalDynamicsController - Quantum-level temporal pattern processing

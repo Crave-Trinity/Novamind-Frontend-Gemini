@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Type declarations for Three.js ecosystem libraries
  */

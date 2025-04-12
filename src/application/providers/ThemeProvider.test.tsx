@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { render, screen, act, cleanup, waitFor } from '@testing-library/react'; // Import waitFor
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';

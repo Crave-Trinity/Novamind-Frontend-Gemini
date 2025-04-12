@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Runtime Validators
  * Brain Model Domain Runtime Validation

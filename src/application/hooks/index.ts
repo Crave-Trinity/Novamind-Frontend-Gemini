@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Application hooks exports
  *

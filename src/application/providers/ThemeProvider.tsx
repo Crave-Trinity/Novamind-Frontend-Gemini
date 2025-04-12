@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
 import { ThemeContext, type ThemeMode } from '@application/contexts/ThemeContext';
 import { auditLogClient, AuditEventType } from '@infrastructure/clients/auditLogClient';

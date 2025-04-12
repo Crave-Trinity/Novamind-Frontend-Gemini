@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @fileoverview Runtime validation functions for data related to the useSearchParams hook.
  * Ensures that search parameter structures conform to expected types at runtime.

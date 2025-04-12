@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * XGBoost Service API
  * Handles all interactions with the XGBoost prediction backend

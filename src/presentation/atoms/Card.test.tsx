@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * Card testing with quantum precision

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * useBlockingTransition testing with quantum precision

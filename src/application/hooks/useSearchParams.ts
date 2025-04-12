@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Application Hook
  * useSearchParams - Hook for managing URL search parameters

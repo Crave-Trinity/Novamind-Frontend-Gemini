@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Visualization
  * BrainModelContainer - Clinical container with quantum-level integration

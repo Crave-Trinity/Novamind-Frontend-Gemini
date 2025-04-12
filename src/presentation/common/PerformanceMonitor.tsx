@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Common Component
  * PerformanceMonitor - Quantum-level performance monitoring

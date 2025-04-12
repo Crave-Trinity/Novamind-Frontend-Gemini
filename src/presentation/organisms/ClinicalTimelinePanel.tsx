@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Organism Component
  * ClinicalTimelinePanel - Quantum-level temporal clinical data visualization

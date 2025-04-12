@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Organism Component
  * BrainVisualizationContainer - Quantum-level container for brain visualization

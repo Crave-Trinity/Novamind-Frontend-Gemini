@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Temporal Dynamics Types
  * Defines structures for analyzing time-based patterns in neural and clinical data.

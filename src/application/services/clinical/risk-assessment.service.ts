@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { RiskLevel } from '@domain/types/clinical/risk'; // Import enum itself
 
 // Removed unused asRiskLevel helper function

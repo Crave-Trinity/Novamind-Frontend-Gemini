@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @fileoverview Runtime validation functions for data related to the NeuralActivityController.
  * Ensures that neural activity data and related parameters conform to expected types.

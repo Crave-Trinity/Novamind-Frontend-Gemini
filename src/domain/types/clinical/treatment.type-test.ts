@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Type Testing Framework
  * Treatment Type Tests

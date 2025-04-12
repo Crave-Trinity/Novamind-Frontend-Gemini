@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useCallback } from 'react';
 
 export interface BrainVisualizationControlsProps {

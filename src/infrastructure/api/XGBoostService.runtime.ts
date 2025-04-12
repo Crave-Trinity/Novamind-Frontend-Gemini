@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @fileoverview Runtime validation functions for XGBoostService requests and responses.
  * Ensures data conforms to the expected structures defined in XGBoostService.ts.

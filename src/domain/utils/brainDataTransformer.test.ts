@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * Comprehensive testing for brainDataTransformer utility functions

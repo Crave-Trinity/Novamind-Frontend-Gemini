@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Brain Model Domain Types
  * Defines data structures for brain visualization

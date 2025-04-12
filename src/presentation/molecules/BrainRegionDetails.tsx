@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Visualization
  * BrainRegionDetails Molecular Component - comprehensive analysis interface

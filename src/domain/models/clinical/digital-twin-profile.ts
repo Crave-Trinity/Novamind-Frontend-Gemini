@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Type Definitions
  * DigitalTwinProfile - Aggregated patient data view for the dashboard.

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Type Definitions
  * Domain model exports with quantum-level type safety

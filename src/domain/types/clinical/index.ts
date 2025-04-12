@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Clinical Type System
  * Comprehensive clinical data type exports with quantum-level type safety

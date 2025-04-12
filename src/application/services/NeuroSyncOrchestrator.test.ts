@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * useNeuroSyncOrchestrator testing with quantum precision

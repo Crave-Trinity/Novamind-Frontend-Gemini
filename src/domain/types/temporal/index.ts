@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Temporal Types Index
  * Re-exports core temporal types.

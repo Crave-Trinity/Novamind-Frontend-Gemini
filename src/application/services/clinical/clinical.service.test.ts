@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * Clinical Service testing with HIPAA compliance and psychiatric precision

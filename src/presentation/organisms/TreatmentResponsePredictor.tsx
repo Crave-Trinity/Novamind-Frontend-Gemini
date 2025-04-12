@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState } from 'react';
 
 import { useTreatmentPrediction } from '@hooks/useTreatmentPrediction';

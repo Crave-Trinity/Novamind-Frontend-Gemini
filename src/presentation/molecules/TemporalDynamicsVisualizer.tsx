@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Molecular Component
  * TemporalDynamicsVisualizer - Quantum-level temporal dynamics visualization

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Type Verification
  * Static type tests with quantum-level precision

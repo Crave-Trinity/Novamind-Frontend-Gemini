@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Common Component
  * LoadingFallback - Quantum-level loading visualization

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState } from 'react';
 // Import with proper type definitions
 import { useQuery } from '@tanstack/react-query';

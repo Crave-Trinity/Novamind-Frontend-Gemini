@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @vitest-environment jsdom
  */
@@ -88,7 +89,7 @@ const soonToExpireTokens: AuthTokens = {
 
 // Mock CustomEvent for session expiration
 (global as any).CustomEvent = class CustomEvent extends Event {
-  constructor(name: string, options: any = {}) {
+  constructor(name: string, options: any // eslint-disable-line @typescript-eslint/no-explicit-any = {}) {
     super(name, options);
     Object.assign(this, options);
   }

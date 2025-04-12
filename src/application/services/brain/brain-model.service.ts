@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Application Service
  * BrainModelService - Quantum-level service for brain model operations

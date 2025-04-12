@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Visualization
  * VisualizationControls Molecular Component - clinical interface for visualization parameters

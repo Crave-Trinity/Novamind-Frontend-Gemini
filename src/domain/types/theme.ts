@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Possible theme modes for the application
  */

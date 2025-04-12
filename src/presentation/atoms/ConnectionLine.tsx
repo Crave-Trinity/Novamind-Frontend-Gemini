@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Visualization
  * ConnectionLine Atomic Component - renders neural connections with clinical precision

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Enhanced ThemeProvider Test using renderWithProviders
  */

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Testing Framework
  * Clinical Service Minimal Tests

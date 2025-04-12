@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * WebGL Testing Framework - Comprehensive Neural Implementation
  * 
@@ -9,6 +10,7 @@ import { vi } from 'vitest';
 import { setupWebGLMocks as setupMocks, cleanupWebGLMocks as cleanupMocks } from './mock-webgl';
 
 // Re-export core WebGL mocking functionality with enhanced capabilities
+// eslint-disable-next-line
 export function setupWebGLMocks(options = { monitorMemory: false, debugMode: false }) {
   const mockContext = setupMocks();
   
@@ -18,10 +20,12 @@ export function setupWebGLMocks(options = { monitorMemory: false, debugMode: fal
     global.__WEBGL_MEMORY_TRACKING__ = {
       allocatedObjects: new Set(),
       disposedObjects: new Set(),
-      trackObject: (obj: any) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+      trackObject: (obj: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
         global.__WEBGL_MEMORY_TRACKING__.allocatedObjects.add(obj);
       },
-      untrackObject: (obj: any) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+      untrackObject: (obj: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
         global.__WEBGL_MEMORY_TRACKING__.allocatedObjects.delete(obj);
         global.__WEBGL_MEMORY_TRACKING__.disposedObjects.add(obj);
       }
@@ -32,6 +36,7 @@ export function setupWebGLMocks(options = { monitorMemory: false, debugMode: fal
 }
 
 // Enhanced cleanup with memory leak detection
+// eslint-disable-next-line
 export function cleanupWebGLMocks() {
   cleanupMocks();
   

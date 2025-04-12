@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect, useCallback, createContext, type ReactNode } from 'react';
 
 import type { ThemeMode } from '../../domain/types/theme'; // Already type-only

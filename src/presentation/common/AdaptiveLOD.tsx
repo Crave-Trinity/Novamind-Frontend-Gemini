@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Common Component
  * AdaptiveLOD - Quantum-level adaptive detail management

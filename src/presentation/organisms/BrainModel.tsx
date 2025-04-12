@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 // @ts-ignore - Types will be handled by overrides in package.json

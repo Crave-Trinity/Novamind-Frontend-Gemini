@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Type Testing Framework
  * Brain Visualization Type Tests

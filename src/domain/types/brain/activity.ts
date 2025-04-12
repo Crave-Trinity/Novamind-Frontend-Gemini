@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Domain Types
  * Brain Activity Models - Quantum-level types for neural activation

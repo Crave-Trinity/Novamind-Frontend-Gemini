@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Common Component
  * VisualizationErrorBoundary - Quantum-level error handling

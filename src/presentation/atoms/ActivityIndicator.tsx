@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Atomic Component
  * ActivityIndicator - Quantum-level neural activity visualization

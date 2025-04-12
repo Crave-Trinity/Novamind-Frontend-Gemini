@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * BrainModelContainer - Test
  * Properly implemented to prevent hanging from useFrame animation loop

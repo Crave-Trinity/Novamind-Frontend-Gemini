@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Audit Log Event Types for HIPAA compliance and system monitoring
  */

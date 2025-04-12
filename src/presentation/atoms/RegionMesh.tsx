@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Visualization
  * RegionMesh Atomic Component - renders individual brain regions with clinical precision

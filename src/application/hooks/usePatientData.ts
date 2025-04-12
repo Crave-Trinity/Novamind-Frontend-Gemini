@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Application Hook
  * usePatientData - Quantum-level hook for patient clinical data

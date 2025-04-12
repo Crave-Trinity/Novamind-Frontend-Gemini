@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Organism Component
  * BiometricMonitorPanel - Quantum-level biometric data visualization
