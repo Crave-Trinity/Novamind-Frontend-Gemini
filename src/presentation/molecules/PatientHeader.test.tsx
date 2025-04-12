@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'; // Removed unused vi
 import { render, screen } from '@testing-library/react'; // Restored render, removed unused fireEvent
 // Removed unused userEvent import
-import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Keep WebGL setup
+import { setupWebGLMocks, cleanupWebGLMocks } from '../../test/webgl'; // Fixed relative path
 import { PatientHeader } from './PatientHeader';
 // Removed unused renderWithProviders import
 import type { Patient } from '@domain/types/clinical/patient'; // Added import for Patient type
@@ -22,7 +22,7 @@ afterEach(() => {
     console.warn(
       `Memory leak detected in "PatientHeader": ${memoryReport.leakedObjectCount} objects not properly disposed`
     );
-    console.warn('Leaked objects by type:', memoryReport.leakedObjectTypes);
+    console.warn('Leaked objects:', memoryReport.leakedObjects);
   }
 });
 
