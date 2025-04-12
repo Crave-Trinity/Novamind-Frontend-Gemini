@@ -9,7 +9,7 @@ import {
   isApiPatient,
   isApiPatientArray,
   ApiPatient
-} from '@api/ApiClient.runtime';
+} from './ApiClient.runtime';
 
 // Import mock data generators or fixtures if available
 
