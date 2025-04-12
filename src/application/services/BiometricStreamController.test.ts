@@ -63,10 +63,14 @@ const mockStreamMetadata: BiometricStream[] = [
 
 // Mock WebSocket connection
 class MockWebSocket {
-  onopen: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
-  onclose: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
-  onmessage: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
-  onerror: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onopen: ((event: any) => void) | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onclose: ((event: any) => void) | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onmessage: ((event: any) => void) | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onerror: ((event: any) => void) | null = null;
   readyState: number = 0; // Start as CONNECTING
 
   constructor(public url: string) {
