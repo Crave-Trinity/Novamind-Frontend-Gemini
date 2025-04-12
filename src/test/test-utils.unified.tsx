@@ -9,16 +9,12 @@ import { render, type RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
-// Import contexts and their types
+
+// Import the relevant contexts and types
 import DataContext from '../application/contexts/DataContext';
 import { ThemeContext } from '../application/contexts/ThemeContext';
-import { UserContext } from '../application/contexts/UserContext';
-import { VisualizationContext } from '../application/contexts/VisualizationContext';
-
-// Import types needed for the mocks
-import type { ThemeContextType } from '../application/contexts/ThemeContext';
-import type { UserContextType, UserRole } from '../application/contexts/UserContext';
-import type { VisualizationContextType, RenderMode } from '../application/contexts/VisualizationContext';
+import UserContext from '../application/contexts/UserContext';
+import VisualizationContext from '../application/contexts/VisualizationContext';
 
 // Default mock data context for tests
 const mockDataContextValue = {
@@ -47,57 +43,26 @@ function createTestQueryClient() {
 /**
  * Mock implementation of ThemeProvider for tests
  */
-const MockThemeProvider: React.FC<{ children: ReactNode; defaultTheme?: ThemeMode }> = ({ 
+const MockThemeProvider: React.FC<{ children: ReactNode; defaultTheme?: string }> = ({ 
   children,
   defaultTheme = 'dark'
 }) => {
-  // Create a mock theme context that provides the necessary values
-  const themeContextValue: ThemeContextType = {
+  // Create a simple mock theme context with minimal values needed for components
+  const themeContextValue = {
     theme: defaultTheme,
     setTheme: vi.fn(),
-    colorScheme: 'blue',
-    setColorScheme: vi.fn(),
     isDark: defaultTheme === 'dark',
     colors: {
       primary: '#0062cc',
-      secondary: '#5195e5',
-      accent: '#1a73e8',
-      background: '#f8f9fa',
-      surface: '#ffffff',
       text: {
-        primary: '#202124',
-        secondary: '#5f6368',
-        muted: '#80868b',
-        accent: '#1a73e8'
+        primary: '#202124'
       },
       neural: {
         active: '#ff5e5b',
-        inactive: '#373737',
-        reference: '#4caf50',
-        marker: '#2196f3',
-        alert: '#f44336'
-      },
-      clinical: {
-        normal: '#4caf50',
-        mild: '#8bc34a',
-        moderate: '#ffc107',
-        severe: '#ff9800',
-        critical: '#f44336'
-      },
-      visualization: {
-        background: '#f8f9fa',
-        grid: '#e0e0e0',
-        axis: '#9e9e9e',
-        baseline: '#0062cc',
-        highlight: '#ff5e5b'
+        inactive: '#373737'
       }
     },
-    fontSize: 16,
-    setFontSize: vi.fn(),
-    highContrast: false,
-    setHighContrast: vi.fn(),
-    reducedMotion: false,
-    setReducedMotion: vi.fn()
+    fontSize: 16
   };
 
   return (
@@ -113,28 +78,20 @@ const MockThemeProvider: React.FC<{ children: ReactNode; defaultTheme?: ThemeMod
  * Mock implementation of UserProvider for tests
  */
 const MockUserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Create a basic mock user context
-  const userContextValue: UserContextType = {
+  // Create a basic mock user context with minimal values needed for tests
+  const userContextValue = {
     user: {
       id: 'test-user-id',
       name: 'Test User',
       email: 'test@example.com',
-      role: 'clinician' as UserRole,
+      role: 'clinician',
       organization: 'Test Hospital',
       preferences: {
         theme: 'clinical',
-        visualizationDefaults: {
-          detailLevel: 'medium',
-          colorScheme: 'clinical',
-          annotationsVisible: true,
-          timeScale: 1.0,
-        },
-        clinicalNotifications: true,
-        dataFilters: ['validated', 'clinical'],
-        saveClinicalNotes: true,
-        dashboardLayout: 'detailed',
+        visualizationDefaults: { detailLevel: 'medium', colorScheme: 'clinical', annotationsVisible: true, timeScale: 1.0 },
+        dashboardLayout: 'detailed'
       },
-      lastLogin: new Date().toISOString(),
+      lastLogin: new Date().toISOString()
     },
     isAuthenticated: true,
     isLoading: false,
@@ -157,10 +114,10 @@ const MockUserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
  * Mock implementation of VisualizationProvider for tests
  */
 const MockVisualizationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Mock visualization context values
-  const visualizationContextValue: VisualizationContextType = {
+  // Minimal mock visualization context values needed for tests
+  const visualizationContextValue = {
     settings: {
-      renderMode: 'standard' as RenderMode,
+      renderMode: 'standard',
       detailLevel: 'medium',
       showConnections: true,
       connectionThreshold: 0.3,
@@ -171,7 +128,7 @@ const MockVisualizationProvider: React.FC<{ children: ReactNode }> = ({ children
       colorMapping: 'clinical',
       transparencyLevel: 0.1,
       annotationsVisible: true,
-      showClinicalMarkers: true,
+      showClinicalMarkers: true
     },
     updateSettings: vi.fn(),
     resetSettings: vi.fn(),

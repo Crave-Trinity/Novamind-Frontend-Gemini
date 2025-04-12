@@ -6,14 +6,22 @@ import { describe, it, expect, vi } from 'vitest';
 import type { AxiosResponse } from 'axios'; // Import AxiosResponse type
 import {
   validateApiResponse,
-  // Import other guards as they are defined
+  isApiPatient,
+  isApiPatientArray,
+  ApiPatient
 } from '@api/ApiClient.runtime';
 
 // Import mock data generators or fixtures if available
 
 describe('ApiClient Runtime Validation', () => {
   // --- Mock Data ---
-  const mockValidPatient = { id: 1, name: 'John Doe', condition: 'Stable' };
+  const mockValidPatient: ApiPatient = { 
+    id: 'patient-1', 
+    firstName: 'John', 
+    lastName: 'Doe', 
+    dateOfBirth: '1980-01-01T00:00:00Z',
+    gender: 'male'
+  };
 
   // Helper to create a mock AxiosResponse
   const createMockResponse = <T>(
@@ -74,37 +82,37 @@ describe('ApiClient Runtime Validation', () => {
     });
   });
 
-  // --- Skipped tests for specific type guards --- 
-  describe.skip('isApiPatient', () => {
+  // Tests for patient type guards
+  describe('isApiPatient', () => {
     it('should return true for valid patient object', () => {
-      // expect(isApiPatient(mockValidPatient)).toBe(true);
+      expect(isApiPatient(mockValidPatient)).toBe(true);
     });
 
     it('should return false for invalid patient object (missing name)', () => {
-      // expect(isApiPatient({ id: 2, condition: 'Unknown' })).toBe(false);
+      expect(isApiPatient({ id: 'patient-2', firstName: 'Jane', dateOfBirth: '1985-05-05' })).toBe(false);
     });
 
     it('should return false for null', () => {
-      // expect(isApiPatient(null)).toBe(false);
+      expect(isApiPatient(null)).toBe(false);
     });
 
     it('should return false for non-object', () => {
-      // expect(isApiPatient('string')).toBe(false);
+      expect(isApiPatient('string')).toBe(false);
     });
   });
 
-  describe.skip('isApiPatientArray', () => {
+  describe('isApiPatientArray', () => {
     it('should return true for valid patient array', () => {
-      // expect(isApiPatientArray([mockValidPatient])).toBe(true);
+      expect(isApiPatientArray([mockValidPatient])).toBe(true);
     });
     it('should return false for invalid patient array', () => {
-      // Example: expect(isApiPatientArray([mockValidPatient, { id: 2, condition: 'Unknown' }])).toBe(false);
+      expect(isApiPatientArray([mockValidPatient, { id: 'patient-3', firstName: 'Invalid' }])).toBe(false);
     });
     it('should return false for non-array', () => {
-      // expect(isApiPatientArray(mockValidPatient)).toBe(false);
+      expect(isApiPatientArray(mockValidPatient)).toBe(false);
     });
     it('should return true for empty array', () => {
-      // expect(isApiPatientArray([])).toBe(true);
+      expect(isApiPatientArray([])).toBe(true);
     });
   });
 });
