@@ -161,7 +161,17 @@ vi.mock('@application/hooks/useBrainModel', () => ({
 
 vi.mock('@application/hooks/usePatientData', () => ({
   usePatientData: vi.fn(() => ({
-    patient: { id: 'test-patient', name: 'Test Patient' },
+    patient: { 
+      id: 'test-patient', 
+      name: 'Test Patient',
+      demographicData: {
+        age: 45,
+        gender: 'male',
+        ethnicity: 'caucasian',
+        weight: '180lbs',
+        height: '5\'10"'
+      } 
+    },
     symptoms: [],
     diagnoses: [],
     isLoading: false,
