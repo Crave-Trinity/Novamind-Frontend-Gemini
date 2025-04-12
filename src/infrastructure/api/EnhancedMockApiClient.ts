@@ -1,334 +1,309 @@
-import type { AxiosRequestConfig } from 'axios';
+/**
+ * NOVAMIND Enhanced Mock API Client
+ * Quantum-level mock implementation with neural precision
+ */
+
 import axios from 'axios';
-import type { IApiClient } from '@api/IApiClient';
-import { mockApi } from '@api/mockApi';
+import { IApiClient } from './IApiClient';
+import type { ApiPatient } from './ApiClient.runtime';
 
 /**
- * Enhanced Mock API Client - A fully-functional API client with no backend dependency
- *
- * This implementation follows the hexagonal architecture pattern by:
- * 1. Implementing the IApiClient interface fully
- * 2. Providing realistic mock data for all endpoints
- * 3. Including realistic delays and error handling
- * 4. Supporting offline development workflow
+ * Enhanced mock client for development and testing with simulated latency
  */
 export class EnhancedMockApiClient implements IApiClient {
-  private authToken: string | null = null;
-  private auditLogsEnabled = true;
+  private mockDelay: number;
+  private auditEnabled: boolean;
 
-  constructor() {
-    // Initialize from localStorage if available
-    this.authToken = localStorage.getItem('auth_token');
-
-    console.info('🧠 Enhanced Mock API Client initialized');
-    console.info('📡 HIPAA-compliant Novamind API simulation running');
+  constructor(config?: { mockDelay?: number; auditEnabled?: boolean }) {
+    this.mockDelay = config?.mockDelay ?? 400; // Default 400ms delay
+    this.auditEnabled = config?.auditEnabled ?? true; // Default audit enabled
   }
 
   /**
-   * Set authentication token for subsequent requests
+   * Simulate network delay
    */
-  public setAuthToken(token: string): void {
-    this.authToken = token;
-    localStorage.setItem('auth_token', token);
-
-    // Log token set (simulating audit logging)
-    if (this.auditLogsEnabled) {
-      this.logActivity('auth_token_set', { tokenLength: token.length });
-    }
-  }
-
-  /**
-   * Clear authentication token
-   */
-  public clearAuthToken(): void {
-    this.authToken = null;
-    localStorage.removeItem('auth_token');
-
-    // Log token cleared (simulating audit logging)
-    if (this.auditLogsEnabled) {
-      this.logActivity('auth_token_cleared', {});
-    }
-  }
-
-  /**
-   * Get authentication status
-   */
-  public isAuthenticated(): boolean {
-    return !!this.authToken || !!localStorage.getItem('auth_token');
-  }
-
-  /**
-   * Simulate network delays realistically
-   */
-  private async simulateNetworkDelay(min = 200, max = 800): Promise<void> {
-    const delay = Math.floor(Math.random() * (max - min + 1)) + min;
-    await new Promise((resolve) => setTimeout(resolve, delay));
+  private async delay(ms: number = this.mockDelay): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
    * Log audit activity
    */
-  private logActivity(action: string, details: any // eslint-disable-line @typescript-eslint/no-explicit-any): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private logActivity(action: string, details: any): void {
     // Try to send to audit log endpoint, but expect it to fail gracefully
     // This simulates the behavior we'd want in production
-    axios
-      .post('/api/audit-logs', {
-        action,
-        timestamp: new Date().toISOString(),
-        details,
-        userId: 'mock-user-123',
-      })
-      .catch(() => {
-        // We expect this to fail in mock mode - it's by design
-        // The error is already logged in the console by the API proxy
-      });
-  }
-
-  /**
-   * Generic GET request
-   */
-  public async get<T>(url: string, _config?: AxiosRequestConfig): Promise<T> {
-    // Prefixed unused config
-    // Log the request attempt
-    if (this.auditLogsEnabled) {
-      this.logActivity('api_request', { method: 'GET', url });
-    }
-
-    // Simulate network delay
-    await this.simulateNetworkDelay();
-
-    // Extract resource name from URL for mock data lookup
-    // Removed unused variable: const _resourceType = url.split('/')[1];
-
-    // Return appropriate mock data based on the URL
-    let result: any // eslint-disable-line @typescript-eslint/no-explicit-any;
-
-    if (url.includes('/patients') && url.length > 10) {
-      // Get single patient (URL format: /patients/123)
-      const patientId = url.split('/')[2] || 'default';
-      result = mockApi.getPatientById(patientId);
-    } else if (url === '/patients') {
-      // Get all patients
-      result = mockApi.getPatients();
-    } else if (url.includes('/brain-models')) {
-      // Get brain model
-      const modelId = url.split('/')[2] || 'default';
-      result = mockApi.getBrainModel(modelId);
-    } else if (url.includes('/risk-assessment')) {
-      // Get risk assessment
-      const patientId = url.split('/')[2] || 'default';
-      result = mockApi.getRiskAssessment(patientId);
+    if (typeof window !== 'undefined' && this.auditEnabled) {
+      // Safe access to potential window.axios
+      try {
+        axios
+          .post('/api/audit-logs', {
+            action,
+            timestamp: new Date().toISOString(),
+            details,
+            userId: 'mock-user-123',
+          })
+          .catch(() => {
+            // Expected to fail in mock/dev, just log to console
+            console.debug('[Mock Audit]', action, details);
+          });
+      } catch (e) {
+        console.debug('[Mock Audit]', action, details);
+      }
     } else {
-      // Unknown endpoint
-      console.error(`Mock API: Unknown GET endpoint ${url}`);
-      throw new Error(`No mock data available for GET ${url}`);
+      console.debug('[Mock Audit]', action, details);
     }
-
-    return result as T;
   }
 
+  // API Implementation methods
+  
+  // User/Authentication
+  // ===================================
+  
   /**
-   * Generic POST request
+   * Login implementation
    */
-  public async post<T>(url: string, data?: any // eslint-disable-line @typescript-eslint/no-explicit-any, _config?: AxiosRequestConfig): Promise<T> {
-    // Prefixed unused config
-    // Log the request attempt
-    if (this.auditLogsEnabled) {
-      this.logActivity('api_request', {
-        method: 'POST',
-        url,
-        dataKeys: Object.keys(data || {}),
-      });
-    }
-
-    // Simulate network delay
-    await this.simulateNetworkDelay();
-
-    // Handle specific endpoints
-    let result: any // eslint-disable-line @typescript-eslint/no-explicit-any;
-
-    if (url === '/auth/login') {
-      result = {
-        success: true,
-        token: 'mock_jwt_token_' + Date.now(),
-        user: {
-          id: 'user-123',
-          name: 'Dr. Jane Smith',
-          role: 'Neuropsychiatrist',
-          email: data.email,
-        },
-      };
-      // Set the token automatically
-      this.setAuthToken(result.token);
-    } else if (url.includes('/predict-treatment')) {
-      const patientId = url.split('/')[2] || 'default';
-      result = mockApi.predictTreatmentResponse(patientId, data.treatment);
-    } else {
-      // Default fallback
-      console.error(`Mock API: Unknown POST endpoint ${url}`);
-      result = { success: true, message: `Mock POST to ${url} successful` };
-    }
-    return result as T;
-  }
-
-  /**
-   * Generic PUT request
-   */
-  public async put<T>(url: string, data?: any // eslint-disable-line @typescript-eslint/no-explicit-any, _config?: AxiosRequestConfig): Promise<T> {
-    // Prefixed unused config
-    // Log the request attempt
-    if (this.auditLogsEnabled) {
-      this.logActivity('api_request', {
-        method: 'PUT',
-        url,
-        dataKeys: Object.keys(data || {}),
-      });
-    }
-
-    // Simulate network delay
-    await this.simulateNetworkDelay();
-
-    // Simple simulation for now
-    const result = {
-      success: true,
-      message: `Mock PUT to ${url} successful`,
-      updatedData: { ...data, id: url.split('/').pop(), updated: true },
+  async login(email: string, password: string): Promise<{
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    token: string;
+    organization: string;
+  }> {
+    await this.delay();
+    this.logActivity('login', { email });
+    
+    // Return mock user data
+    return {
+      id: 'user-mock-123',
+      name: 'Dr. Neural Smith',
+      email: email,
+      role: 'clinician',
+      token: 'mock-jwt-token-xyz',
+      organization: 'Quantum Psychiatry Center',
     };
-
-    return result as T;
   }
 
   /**
-   * Generic DELETE request
+   * Get user profile
    */
-  public async delete<T>(url: string, _config?: AxiosRequestConfig): Promise<T> {
-    // Prefixed unused config
-    // Log the request attempt
-    if (this.auditLogsEnabled) {
-      this.logActivity('api_request', { method: 'DELETE', url });
-    }
-
-    // Simulate network delay
-    await this.simulateNetworkDelay();
-
-    // Simple simulation for now
-    const result = {
-      success: true,
-      message: `Mock DELETE to ${url} successful`,
-      id: url.split('/').pop(),
-    };
-
-    return result as T;
-  }
-
-  /**
-   * Login with email and password
-   */
-  public async login(email: string, password: string): Promise<any> {
-    // Log the login attempt
-    if (this.auditLogsEnabled) {
-      this.logActivity('login_attempt', { email });
-    }
-
-    // Simulate network delay
-    await this.simulateNetworkDelay(500, 1200);
-
-    // Basic validation
-    if (!email || !password) {
-      throw new Error('Email and password are required');
-    }
-
-    // Always succeed in mock mode
-    const response = {
-      success: true,
-      token: 'mock_jwt_token_' + Date.now(),
-      user: {
-        id: 'user-123',
-        name: 'Dr. Jane Smith',
-        role: 'Neuropsychiatrist',
-        email,
+  async getUserProfile(userId: string): Promise<{
+    id: string;
+    name: string;
+    role: string;
+    preferences: Record<string, unknown>;
+  }> {
+    await this.delay();
+    this.logActivity('getUserProfile', { userId });
+    
+    return {
+      id: userId,
+      name: 'Dr. Neural Smith',
+      role: 'clinician',
+      preferences: {
+        theme: 'clinical',
+        dashboardLayout: 'compact',
+        notifications: true,
       },
     };
+  }
 
-    // Set the auth token
-    this.setAuthToken(response.token);
-    return response;
+  // Patient data operations
+  // ===================================
+  
+  /**
+   * Get patient by ID
+   */
+  async getPatient(patientId: string): Promise<ApiPatient> {
+    await this.delay();
+    this.logActivity('getPatient', { patientId });
+    
+    return {
+      id: patientId,
+      firstName: 'John',
+      lastName: 'Doe',
+      dateOfBirth: '1980-01-01',
+      gender: 'male', 
+      demographicData: {
+        age: 43,
+        ethnicity: 'caucasian',
+        weight: '180lbs',
+        height: '5\'10"'
+      },
+      medicalHistory: {
+        conditions: ['depression', 'anxiety'],
+        medications: ['fluoxetine', 'alprazolam'],
+        allergies: []
+      }
+    };
   }
 
   /**
    * Get all patients
    */
-  public async getPatients(): Promise<any[]> {
-    // Log the request
-    if (this.auditLogsEnabled) {
-      this.logActivity('fetch_patients', {});
-    }
+  async getPatients(): Promise<ApiPatient[]> {
+    await this.delay();
+    this.logActivity('getPatients', {});
+    
+    return [
+      {
+        id: 'patient-1',
+        firstName: 'John',
+        lastName: 'Doe',
+        dateOfBirth: '1980-01-01',
+        gender: 'male',
+        demographicData: {
+          age: 43,
+          ethnicity: 'caucasian'
+        }
+      },
+      {
+        id: 'patient-2',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        dateOfBirth: '1990-05-15',
+        gender: 'female',
+        demographicData: {
+          age: 33,
+          ethnicity: 'asian'
+        }
+      }
+    ];
+  }
 
-    return this.get<any[]>('/patients');
+  // Brain Model operations
+  // ===================================
+  
+  /**
+   * Get brain model data
+   */
+  async getBrainModel(modelId: string): Promise<{
+    id: string;
+    patientId: string;
+    scanDate: string;
+    regions: Array<{
+      id: string;
+      name: string;
+      coordinates: [number, number, number];
+      size: number;
+      connections: string[];
+    }>;
+    connections: Array<{
+      from: string;
+      to: string;
+      strength: number;
+    }>;
+  }> {
+    await this.delay();
+    this.logActivity('getBrainModel', { modelId });
+    
+    return {
+      id: modelId,
+      patientId: 'patient-1',
+      scanDate: '2023-10-15',
+      regions: [
+        {
+          id: 'r1',
+          name: 'prefrontal cortex',
+          coordinates: [0, 5, 0],
+          size: 3,
+          connections: ['r2', 'r3']
+        },
+        {
+          id: 'r2',
+          name: 'amygdala',
+          coordinates: [2, 0, 1],
+          size: 1,
+          connections: ['r1']
+        },
+        {
+          id: 'r3',
+          name: 'hippocampus',
+          coordinates: [-2, 0, 1],
+          size: 1.5,
+          connections: ['r1', 'r2']
+        }
+      ],
+      connections: [
+        { from: 'r1', to: 'r2', strength: 0.8 },
+        { from: 'r1', to: 'r3', strength: 0.6 },
+        { from: 'r2', to: 'r1', strength: 0.5 },
+        { from: 'r3', to: 'r1', strength: 0.7 },
+        { from: 'r3', to: 'r2', strength: 0.4 }
+      ]
+    };
   }
 
   /**
-   * Get patient by ID
+   * Update brain model activity levels
    */
-  public async getPatientById(patientId: string): Promise<any> {
-    // Log the request
-    if (this.auditLogsEnabled) {
-      this.logActivity('fetch_patient_detail', { patientId });
-    }
-
-    return this.get<any>(`/patients/${patientId}`);
+  async updateBrainActivity(modelId: string, activityData: {
+    regions: Array<{ id: string; activity: number }>;
+  }): Promise<{ success: boolean }> {
+    await this.delay();
+    this.logActivity('updateBrainActivity', { modelId, activityData });
+    
+    return { success: true };
   }
 
   /**
-   * Get brain model
+   * Get visualization data
    */
-  public async getBrainModel(modelId: string = 'default'): Promise<any> {
-    // Log the request
-    if (this.auditLogsEnabled) {
-      this.logActivity('fetch_brain_model', { modelId });
-    }
-
-    return this.get<any>(`/brain-models/${modelId}`);
-  }
-
-  /**
-   * Predict treatment response
-   */
-  public async predictTreatmentResponse(patientId: string, treatmentData: any // eslint-disable-line @typescript-eslint/no-explicit-any): Promise<any> {
-    // Log the request
-    if (this.auditLogsEnabled) {
-      this.logActivity('predict_treatment', {
-        patientId,
-        treatmentType: treatmentData?.treatment,
-      });
-    }
-
-    return this.post<any>(`/patients/${patientId}/predict-treatment`, treatmentData);
-  }
-
-  /**
-   * Get risk assessment
-   */
-  public async getRiskAssessment(patientId: string): Promise<any> {
-    // Log the request
-    if (this.auditLogsEnabled) {
-      this.logActivity('risk_assessment', { patientId });
-    }
-
-    return this.get<any>(`/patients/${patientId}/risk-assessment`);
-  }
-  /**
-   * Process data using mock logic for testing.
-   */
-  public processData(data: any // eslint-disable-line @typescript-eslint/no-explicit-any): any {
-    return { processed: true, data };
+  async getVisualizationData(
+    modelId: string,
+    params?: Record<string, string>
+  ): Promise<{
+    timestamps: string[];
+    activityData: Array<{
+      regionId: string;
+      values: number[];
+    }>;
+    connectivityData: Array<{
+      fromRegion: string;
+      toRegion: string;
+      values: number[];
+    }>;
+  }> {
+    await this.delay();
+    this.logActivity('getVisualizationData', { modelId, params });
+    
+    const timestamps = Array.from({ length: 10 }, (_, i) => 
+      new Date(Date.now() - i * 86400000).toISOString()
+    ).reverse();
+    
+    return {
+      timestamps,
+      activityData: [
+        {
+          regionId: 'r1',
+          values: Array.from({ length: 10 }, () => Math.random())
+        },
+        {
+          regionId: 'r2',
+          values: Array.from({ length: 10 }, () => Math.random())
+        },
+        {
+          regionId: 'r3',
+          values: Array.from({ length: 10 }, () => Math.random())
+        }
+      ],
+      connectivityData: [
+        {
+          fromRegion: 'r1',
+          toRegion: 'r2',
+          values: Array.from({ length: 10 }, () => Math.random() * 0.5 + 0.5)
+        },
+        {
+          fromRegion: 'r1',
+          toRegion: 'r3',
+          values: Array.from({ length: 10 }, () => Math.random() * 0.5 + 0.3)
+        }
+      ]
+    };
   }
 }
 
-// Export as callable singleton instance
-const instance = new EnhancedMockApiClient();
-function callableEnhancedMockApiClient(data: any // eslint-disable-line @typescript-eslint/no-explicit-any) {
-  return instance.processData(data);
-}
-Object.assign(callableEnhancedMockApiClient, instance);
-export const enhancedMockApiClient = callableEnhancedMockApiClient;
+// Export default instance
+const enhancedMockApiClient = new EnhancedMockApiClient();
+export default enhancedMockApiClient;

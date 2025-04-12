@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { setupWebGLMocks, cleanupWebGLMocks } from '@test/webgl'; // Removed unused ThreeMocks
+import { setupWebGLMocks, cleanupWebGLMocks } from '../../test/webgl'; // Fixed relative path import
 
 import * as Controller from '@application/services/NeuralActivityController'; // Corrected import path
 
