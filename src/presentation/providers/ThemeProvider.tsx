@@ -48,19 +48,16 @@ export function ThemeProvider({
       return defaultTheme;
     }
   });
+  // Initialize systemTheme state directly by calling matchMedia
   const [systemTheme, setSystemTheme] = useState<'dark' | 'light'>(() => {
-    // Safely check for window and matchMedia availability (for SSR and testing)
-    if (typeof window === 'undefined') return 'light';
-    if (!window.matchMedia) return 'light';
-    
-    try {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-    } catch (err) {
-      console.error('Error detecting system theme:', err);
-      return 'light';
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      try {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      } catch (err) {
+        console.error('Error reading initial system theme:', err);
+      }
     }
+    return 'light'; // Default to light if window/matchMedia not available or error occurs
   });
 
   useEffect(() => {
@@ -69,6 +66,7 @@ export function ThemeProvider({
 
     try {
       const root = window.document.documentElement;
+      // Use the systemTheme state variable, which should be correctly initialized
       const effectiveTheme = theme === 'system' ? systemTheme : theme;
 
       // Apply the correct class and remove the other

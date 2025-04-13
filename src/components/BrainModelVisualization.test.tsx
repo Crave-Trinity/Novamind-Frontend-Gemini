@@ -3,7 +3,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'; // Add cleanup
 import userEvent from '@testing-library/user-event';
 import { BrainModelVisualization } from '../presentation/molecules/BrainModelVisualization';
 import { BrainModelProvider } from '../presentation/providers/BrainModelProvider';
@@ -51,14 +51,35 @@ vi.mock('three', async () => {
     MeshStandardMaterial: vi.fn(() => ({
       color: { set: vi.fn() },
     })),
-    Mesh: vi.fn(() => ({
-      position: { set: vi.fn() },
-      scale: { set: vi.fn() },
-      name: '',
-      userData: {},
-      geometry: { dispose: vi.fn() },
-      material: { dispose: vi.fn() },
-    })),
+    // More robust Mesh mock
+    Mesh: vi.fn().mockImplementation(() => {
+      const mock = {
+        position: { x: 0, y: 0, z: 0, set: vi.fn((x, y, z) => { mock.position.x = x; mock.position.y = y; mock.position.z = z; }) },
+        scale: { x: 1, y: 1, z: 1, set: vi.fn((x, y, z) => { mock.scale.x = x; mock.scale.y = y; mock.scale.z = z; }) },
+        rotation: { x: 0, y: 0, z: 0, set: vi.fn((x, y, z) => { mock.rotation.x = x; mock.rotation.y = y; mock.rotation.z = z; }) },
+        geometry: { dispose: vi.fn() },
+        material: { dispose: vi.fn(), color: { set: vi.fn() } }, // Add color.set mock
+        name: '',
+        userData: {},
+        parent: null,
+        children: [],
+        visible: true,
+        add: vi.fn(),
+        remove: vi.fn(),
+        traverse: vi.fn((cb) => cb(mock)), // Basic traverse
+        dispose: vi.fn(() => {
+          mock.geometry.dispose();
+          if (mock.material) { // Check if material exists
+             if (Array.isArray(mock.material)) {
+               mock.material.forEach(m => m?.dispose());
+             } else {
+               mock.material.dispose();
+             }
+          }
+        }),
+      };
+      return mock;
+    }),
     Group: vi.fn(() => ({
       add: vi.fn(),
       remove: vi.fn(),
@@ -153,14 +174,15 @@ describe('BrainModelVisualization Component', () => {
 
   afterEach(() => {
     vi.resetAllMocks();
+    cleanup(); // Explicitly call cleanup
   });
 
   it('renders without crashing', () => {
-    renderWithProviders(<BrainModelVisualization modelId="test-model" />);
+    renderWithProviders(<BrainModelVisualization modelId="test-model" regionData={mockBrainRegionData} />);
     
     // Check that the canvas container and controls are present
-    expect(screen.getByTestId('brain-model-container')).toBeInTheDocument();
-    expect(screen.getByTestId('r3f-canvas')).toBeInTheDocument();
+    expect(screen.getByTestId('brain-model-container')).not.toBeNull(); // Check for existence
+    expect(screen.getByTestId('r3f-canvas')).not.toBeNull(); // Check for existence
   });
 
   it('displays loading state when data is being fetched', () => {
@@ -172,7 +194,7 @@ describe('BrainModelVisualization Component', () => {
     );
     
     // Check that loading indicator is showing
-    expect(screen.getByTestId('brain-model-loading')).toBeInTheDocument();
+    expect(screen.getByTestId('brain-model-loading')).not.toBeNull(); // Check for existence
   });
 
   it('displays error state when there is an error', () => {
@@ -184,8 +206,8 @@ describe('BrainModelVisualization Component', () => {
     );
     
     // Check that error message is showing
-    expect(screen.getByTestId('brain-model-error')).toBeInTheDocument();
-    expect(screen.getByText('Failed to load brain model')).toBeInTheDocument();
+    expect(screen.getByTestId('brain-model-error')).not.toBeNull(); // Check for existence
+    expect(screen.getByText('Failed to load brain model')).not.toBeNull(); // Check for existence
   });
 
   it('renders brain regions when data is provided', () => {
@@ -200,14 +222,14 @@ describe('BrainModelVisualization Component', () => {
     
     // Check that brain container is present
     const container = screen.getByTestId('brain-model-container');
-    expect(container).toBeInTheDocument();
+    expect(container).not.toBeNull(); // Check for existence
     
     // Check for region labels (mocked in drei HTML component)
     const htmlContainer = screen.getByTestId('drei-html');
-    expect(htmlContainer).toBeInTheDocument();
+    expect(htmlContainer).not.toBeNull(); // Check for existence
     
     // Verify controls are rendered
-    expect(screen.getByTestId('orbit-controls')).toBeInTheDocument();
+    expect(screen.getByTestId('orbit-controls')).not.toBeNull(); // Check for existence
   });
 
   it('applies highlight to selected region', async () => {
@@ -215,18 +237,7 @@ describe('BrainModelVisualization Component', () => {
     const selectRegionMock = vi.fn();
     const highlightRegionMock = vi.fn();
     
-    // Mock the hook to return our controlled functions
-    vi.mock('../presentation/hooks/useBrainModel', () => ({
-      useBrainModel: () => ({
-        selectedRegion: null,
-        selectRegion: selectRegionMock,
-        highlightRegion: highlightRegionMock,
-        // Include other required properties
-        regionData: mockBrainRegionData,
-        isLoading: false,
-        error: null,
-      }),
-    }));
+    // Remove the vi.mock for useBrainModel - rely on BrainModelProvider from renderWithProviders
     
     renderWithProviders(
       <BrainModelVisualization 
@@ -244,7 +255,7 @@ describe('BrainModelVisualization Component', () => {
     
     // Since actual WebGL interactions are mocked, we verify that our event handlers
     // are set up correctly and the container responds to mouse events
-    expect(container).toBeInTheDocument();
+    expect(container).not.toBeNull(); // Check for existence
     
     // Simulate clicking on the container to select a region
     fireEvent.click(container);
@@ -261,7 +272,7 @@ describe('BrainModelVisualization Component', () => {
     
     // Verify the component doesn't crash on resize
     const container = screen.getByTestId('brain-model-container');
-    expect(container).toBeInTheDocument();
+    expect(container).not.toBeNull(); // Check for existence
   });
 
   it('cleans up resources when unmounted', () => {
@@ -286,7 +297,7 @@ describe('BrainModelVisualization Component', () => {
     );
     
     // Verify the component renders with anatomical view
-    expect(screen.getByTestId('brain-model-container')).toBeInTheDocument();
+    expect(screen.getByTestId('brain-model-container')).not.toBeNull(); // Check for existence
     
     // Re-render with functional view
     rerender(
@@ -301,7 +312,7 @@ describe('BrainModelVisualization Component', () => {
     );
     
     // Verify the component still renders
-    expect(screen.getByTestId('brain-model-container')).toBeInTheDocument();
+    expect(screen.getByTestId('brain-model-container')).not.toBeNull(); // Check for existence
   });
 
   it('applies correct colormap based on data values', () => {
@@ -315,37 +326,39 @@ describe('BrainModelVisualization Component', () => {
     );
     
     // Verify the component renders with colormap options
-    expect(screen.getByTestId('brain-model-container')).toBeInTheDocument();
+    expect(screen.getByTestId('brain-model-container')).not.toBeNull(); // Check for existence
   });
 
   it('renders control panel when showControls is true', () => {
     renderWithProviders(
-      <BrainModelVisualization 
+      <BrainModelVisualization
         modelId="test-model"
+        regionData={mockBrainRegionData} // Add missing prop
         showControls={true}
       />
     );
     
     // Check for controls container
-    expect(screen.getByTestId('brain-model-controls')).toBeInTheDocument();
+    expect(screen.getByTestId('brain-model-controls')).not.toBeNull(); // Check for existence
   });
 
   it('responds to camera position controls', async () => {
     renderWithProviders(
-      <BrainModelVisualization 
+      <BrainModelVisualization
         modelId="test-model"
+        regionData={mockBrainRegionData} // Add missing prop
         showControls={true}
       />
     );
     
     // Find camera controls
     const topViewButton = screen.getByRole('button', { name: /top view/i });
-    expect(topViewButton).toBeInTheDocument();
+    expect(topViewButton).not.toBeNull(); // Check for existence
     
     // Click on top view button
     await userEvent.click(topViewButton);
     
     // Verify the component doesn't crash when view buttons are used
-    expect(screen.getByTestId('brain-model-container')).toBeInTheDocument();
+    expect(screen.getByTestId('brain-model-container')).not.toBeNull(); // Check for existence
   });
 });

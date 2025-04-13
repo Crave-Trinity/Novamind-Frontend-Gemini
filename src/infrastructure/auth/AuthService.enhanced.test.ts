@@ -3,6 +3,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { waitFor } from '@testing-library/react'; // Import waitFor
 import { EnhancedAuthService } from './AuthService.enhanced';
 import { AuthTokens, AuthUser } from './index';
 
@@ -144,7 +145,7 @@ describe('EnhancedAuthService', () => {
       const result = await authService.initializeAuth();
 
       // Verify refresh was attempted
-      expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken);
+      await waitFor(() => expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken));
       expect(localStorageMock.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens));
       expect(result.isAuthenticated).toBe(true);
       expect(result.user).toEqual(mockUser);
@@ -191,7 +192,7 @@ describe('EnhancedAuthService', () => {
       const result = await authService.initializeAuth();
 
       // Verify
-      expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken);
+      await waitFor(() => expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken));
       expect(result.isAuthenticated).toBe(false);
       expect(result.error).toBe('Session expired');
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens');
@@ -208,8 +209,8 @@ describe('EnhancedAuthService', () => {
       const result = await authService.initializeAuth();
 
       // Verify
-      expect(mockRefreshToken).toHaveBeenCalled();
-      expect(mockGetCurrentUser).toHaveBeenCalledTimes(2);
+      await waitFor(() => expect(mockRefreshToken).toHaveBeenCalled());
+      await waitFor(() => expect(mockGetCurrentUser).toHaveBeenCalledTimes(2));
       expect(result.isAuthenticated).toBe(true);
       expect(result.user).toEqual(mockUser);
     });
@@ -238,7 +239,7 @@ describe('EnhancedAuthService', () => {
       const token = await authService.ensureValidToken();
 
       // Verify refresh was performed
-      expect(mockRefreshToken).toHaveBeenCalled();
+      await waitFor(() => expect(mockRefreshToken).toHaveBeenCalled());
       expect(token).toBe(newTokens.accessToken);
       expect(localStorageMock.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(newTokens));
     });
@@ -261,9 +262,9 @@ describe('EnhancedAuthService', () => {
       const token = await authService.ensureValidToken();
 
       // Verify
-      expect(mockRefreshToken).toHaveBeenCalled();
+      await waitFor(() => expect(mockRefreshToken).toHaveBeenCalled());
       expect(token).toBeNull();
-      expect(dispatchEventSpy).toHaveBeenCalled();
+      await waitFor(() => expect(dispatchEventSpy).toHaveBeenCalled());
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens');
     });
   });
@@ -304,7 +305,7 @@ describe('EnhancedAuthService', () => {
       // Verify
       expect(result.error).toContain('Could not retrieve user information');
       expect(result.isAuthenticated).toBe(false);
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens');
+      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'));
     });
   });
 
@@ -343,7 +344,8 @@ describe('EnhancedAuthService', () => {
       authService.hasPermission('read:patients');
 
       // Verify - a background refresh should be triggered
-      expect(mockRefreshToken).toHaveBeenCalled();
+      // Need to wait for the async refresh triggered internally
+      await waitFor(() => expect(mockRefreshToken).toHaveBeenCalled());
     });
   });
 
@@ -357,11 +359,12 @@ describe('EnhancedAuthService', () => {
       const result = await authService.logout();
       
       // Verify tokens are cleared even when API call fails
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens');
+      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'));
       expect(result.isAuthenticated).toBe(false);
       expect(result.error).toBe('Logout API call failed, but session was ended locally');
       // Verify logout event was dispatched
-      expect(dispatchEventSpy).toHaveBeenCalled();
+      // Wait for the event dispatch which happens after clearing tokens
+      await waitFor(() => expect(dispatchEventSpy).toHaveBeenCalled());
       const event = dispatchEventSpy.mock.calls[dispatchEventSpy.mock.calls.length - 1][0];
       expect(event.type).toBe('auth:logout-complete');
     });
@@ -374,11 +377,12 @@ describe('EnhancedAuthService', () => {
       mockRefreshToken.mockRejectedValueOnce(new Error('Invalid refresh token'));
       
       // Execute
-      // Call a method that triggers token refresh
+      // Execute the refresh function
       await (authService as any).refreshTokenSilently();
       
       // Verify event was dispatched
-      expect(dispatchEventSpy).toHaveBeenCalled();
+      // Wait for the event dispatch within the catch block of refreshTokenSilently
+      await waitFor(() => expect(dispatchEventSpy).toHaveBeenCalled());
       const event = dispatchEventSpy.mock.calls[0][0];
       expect(event.type).toBe('auth:session-expired');
     });
@@ -395,11 +399,13 @@ describe('EnhancedAuthService', () => {
       // Verify
       // Use toStrictEqual to check the values, not the object reference
       expect(promise1).toStrictEqual(promise2); // Promises should be equivalent
-      expect(mockRefreshToken).toHaveBeenCalledTimes(1); // Only one API call
+      // Assertion should happen AFTER awaiting the promises to ensure the async operation completed
       
       // Wait for promises to resolve
-      await promise1;
-      await promise2;
+      await Promise.all([promise1, promise2]);
+
+      // Now verify the mock was only called once
+      expect(mockRefreshToken).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -6,19 +6,17 @@
  * No patchwork, no legacy code - just a proper foundation.
  */
 
-// Import Vitest globals first to make them available
-import { expect, vi, afterEach, beforeEach } from 'vitest';
-// Then import libraries that extend Vitest globals
-// Removed side-effect import: import '@testing-library/jest-dom';
+// Import Vitest expect first
+import { expect } from 'vitest';
+// Import and extend jest-dom matchers
+import * as matchers from '@testing-library/jest-dom/matchers';
+expect.extend(matchers);
+// Now import other Vitest globals and testing utilities
+import { vi, afterEach, beforeEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers';
 
-// PROPER JEST-DOM SETUP - FIXED VERSION
-// Import direct matchers (not through require which can cause issues)
-import * as matchers from '@testing-library/jest-dom/matchers';
-
-// Register matchers directly
-expect.extend(matchers);
+// PROPER JEST-DOM SETUP - COMPLETE
 
 // Rely on the standard matchers imported and extended above
 

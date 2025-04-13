@@ -3,6 +3,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { waitFor } from '@testing-library/react'; // Import waitFor
 import { AuthService, AuthTokens, AuthUser } from './index';
 
 // Mock localStorage
@@ -85,7 +86,8 @@ describe('AuthService', () => {
       // Verify
       expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
       expect(mockGetCurrentUser).toHaveBeenCalled();
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens));
+      // Wait for async operations within login to complete
+      await waitFor(() => expect(localStorageMock.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens)));
       expect(result).toEqual({
         user: mockUser,
         tokens: mockTokens,
@@ -139,7 +141,8 @@ describe('AuthService', () => {
 
       // Verify
       expect(mockLogout).toHaveBeenCalled();
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens');
+      // Wait for async operations within logout to complete
+      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'));
       expect(result).toEqual({
         user: null,
         tokens: null,
@@ -159,7 +162,8 @@ describe('AuthService', () => {
 
       // Verify
       expect(mockLogout).toHaveBeenCalled();
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens');
+      // Wait for async operations within logout to complete
+      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'));
       expect(result).toEqual({
         user: null,
         tokens: null,
@@ -195,7 +199,8 @@ describe('AuthService', () => {
       const result = await authService.initializeAuth();
 
       // Verify
-      expect(mockGetCurrentUser).toHaveBeenCalled();
+      // Wait for async getCurrentUser call within initializeAuth
+      await waitFor(() => expect(mockGetCurrentUser).toHaveBeenCalled());
       expect(result).toEqual({
         user: mockUser,
         tokens: mockTokens,
@@ -215,9 +220,10 @@ describe('AuthService', () => {
       const result = await authService.initializeAuth();
 
       // Verify
-      expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken);
-      expect(mockGetCurrentUser).toHaveBeenCalled();
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens));
+      // Wait for async refreshToken and subsequent calls
+      await waitFor(() => expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken));
+      await waitFor(() => expect(mockGetCurrentUser).toHaveBeenCalled());
+      await waitFor(() => expect(localStorageMock.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens)));
       expect(result).toEqual({
         user: mockUser,
         tokens: mockTokens,
@@ -236,8 +242,9 @@ describe('AuthService', () => {
       const result = await authService.initializeAuth();
 
       // Verify
-      expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken);
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens');
+      // Wait for async refreshToken and subsequent removeItem
+      await waitFor(() => expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken));
+      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'));
       expect(result).toEqual({
         user: null,
         tokens: null,
@@ -256,8 +263,9 @@ describe('AuthService', () => {
       const result = await authService.initializeAuth();
 
       // Verify
-      expect(mockGetCurrentUser).toHaveBeenCalled();
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens');
+      // Wait for async getCurrentUser and subsequent removeItem
+      await waitFor(() => expect(mockGetCurrentUser).toHaveBeenCalled());
+      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'));
       expect(result).toEqual({
         user: null,
         tokens: null,

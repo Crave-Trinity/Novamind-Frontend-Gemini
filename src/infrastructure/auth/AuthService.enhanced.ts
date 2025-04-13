@@ -100,36 +100,38 @@ export class EnhancedAuthService {
    */
   protected async refreshTokenSilently(): Promise<AuthTokens | null> {
     const tokens = this.getStoredTokens();
-    if (!tokens) {
-        console.log('[refreshTokenSilently] No stored tokens found.');
-        return null;
+    if (!tokens) return null;
+
+    // If a refresh is already in progress, return that promise
+    if (this.refreshPromise) {
+      console.log('[refreshTokenSilently] Refresh already in progress, returning existing promise.');
+      return this.refreshPromise;
     }
 
-    console.log('[refreshTokenSilently] Attempting token refresh...');
-    // Directly attempt refresh without promise caching for simplicity in testing
-    try {
-        // Ensure client exists before calling refreshToken
-        if (!this.client) {
-            console.error('[refreshTokenSilently] AuthApiClient not initialized.');
-            throw new Error('Auth client not available');
-        }
-        
-        const newTokens = await this.client.refreshToken(tokens.refreshToken);
+    console.log('[refreshTokenSilently] Starting new token refresh...');
+    // Create and store the promise reference first before execution
+    this.refreshPromise = this.client?.refreshToken(tokens.refreshToken)
+      .then(newTokens => {
         this.storeTokens(newTokens);
         console.log('[refreshTokenSilently] Token refreshed successfully.');
+        this.refreshPromise = null; // Clear promise on success
         return newTokens;
-    } catch (error) {
+      })
+      .catch(error => {
         console.error('[refreshTokenSilently] Failed to refresh token:', error);
-        this.clearTokens(); // Clear tokens on refresh failure
+        this.clearTokens();
         try {
-            // Attempt to dispatch session expired event
-            window.dispatchEvent(new CustomEvent('auth:session-expired'));
-            console.log('[refreshTokenSilently] Dispatched session-expired event.');
+          window.dispatchEvent(new CustomEvent('auth:session-expired'));
+          console.log('[refreshTokenSilently] Dispatched session-expired event on failure.');
         } catch (dispatchError) {
-            console.error('[refreshTokenSilently] Error dispatching session-expired event:', dispatchError);
+          console.error('[refreshTokenSilently] Error dispatching session-expired event:', dispatchError);
         }
-        return null; // Return null indicating refresh failure
-    }
+        this.refreshPromise = null; // Clear promise on failure
+        return null;
+      });
+      // Removed finally block as promise state is cleared in then/catch
+
+    return this.refreshPromise;
   }
 
   /**

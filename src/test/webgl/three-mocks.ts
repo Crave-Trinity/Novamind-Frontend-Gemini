@@ -83,14 +83,14 @@ export class MockObject3D {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
   raycast = vi.fn().mockImplementation((_raycaster: any // eslint-disable-line @typescript-eslint/no-explicit-any, _intersects: any[]) => {});
 
-// eslint-disable-next-line
-  getWorldPosition = vi.fn().mockImplementation((target: Vector3Like): Vector3Like => {
+  // Define as a standard method with the mock logic inside
+  getWorldPosition(target: Vector3Like): Vector3Like {
     // Simplified mock implementation
     target.x = this.position.x; // Assuming world position is same as local for mock
     target.y = this.position.y;
     target.z = this.position.z;
     return target; // Return the modified target vector
-  });
+  }
 
   worldToLocal = vi.fn().mockImplementation((vector: Vector3Like): Vector3Like => vector); // Identity for simplicity
 
