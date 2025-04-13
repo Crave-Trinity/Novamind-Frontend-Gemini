@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { Vector3 } from '@domain/types/shared/common'; // Use type import
 import type { BrainRegion, BrainModel, NeuralConnection } from '@domain/types/brain/models'; // Use type import
 import type { RenderMode } from '@domain/types/brain/visualization'; // Use type import
-import { apiClient } from '@infrastructure/api/apiClient'; // Corrected casing
+import { apiClient } from '../../infrastructure/api/apiClient'; // Use relative path
 
 // Keep local definition from remote
 interface BrainViewState {
@@ -56,7 +56,9 @@ export function useBrainVisualization(options?: UseBrainVisualizationOptions) {
     queryFn: async () => {
       console.log('[DEBUG] Fetching brain model for:', mergedOptions.patientId);
       // Assuming apiClient returns the correct BrainModel type or needs validation/mapping
-      const data = await apiClient.getBrainModel(mergedOptions.patientId);
+      // Construct the correct path and use apiClient.get
+      const modelPath = `brain-models/${mergedOptions.patientId}`;
+      const data = await apiClient.get(modelPath);
       console.log('[DEBUG] Received brain model:', data);
       // TODO: Add runtime validation if apiClient doesn't guarantee BrainModel structure
       return data as BrainModel; // Cast needed if getBrainModel has generic return

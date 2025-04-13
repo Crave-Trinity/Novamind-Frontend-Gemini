@@ -74,23 +74,37 @@ const BrainRegion: React.FC<BrainRegionProps> = ({
   useEffect(() => {
     if (!meshRef.current) return;
     
-    if (isSelected) {
-      const pulseAnimation = () => {
-        if (!meshRef.current) return;
-        const time = Date.now() * 0.001;
-        const pulse = 1 + Math.sin(time * 3) * 0.05;
-        meshRef.current.scale.set(pulse, pulse, pulse);
-      };
-      
-      const animationId = requestAnimationFrame(function animate() {
-        pulseAnimation();
-        requestAnimationFrame(animate);
-      });
-      
-      return () => cancelAnimationFrame(animationId);
-    } else {
-      // Reset scale when not selected
-      meshRef.current.scale.set(1, 1, 1);
+    // Ensure ref and scale property are available before accessing 'set'
+    if (meshRef.current && meshRef.current.scale) {
+      if (isSelected) {
+        const pulseAnimation = () => {
+          // Double-check ref inside animation frame
+          if (!meshRef.current || !meshRef.current.scale) return;
+          const time = Date.now() * 0.001;
+          const pulse = 1 + Math.sin(time * 3) * 0.05;
+          meshRef.current.scale.set(pulse, pulse, pulse);
+        };
+        
+        let animationId: number | null = null;
+        const animate = () => {
+          pulseAnimation();
+          animationId = requestAnimationFrame(animate);
+        };
+        animate(); // Start the animation loop
+        
+        return () => {
+          if (animationId !== null) {
+            cancelAnimationFrame(animationId);
+          }
+          // Reset scale when effect cleans up or isSelected becomes false
+          if (meshRef.current && meshRef.current.scale) {
+             meshRef.current.scale.set(1, 1, 1);
+          }
+        };
+      } else {
+        // Reset scale immediately if not selected
+        meshRef.current.scale.set(1, 1, 1);
+      }
     }
   }, [isSelected]);
   

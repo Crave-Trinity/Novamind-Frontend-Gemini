@@ -1,3 +1,6 @@
+/**
+ * @vitest-environment jsdom
+ */
 /* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
@@ -9,7 +12,7 @@ import React, { type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider, QueryObserverResult, RefetchOptions } from '@tanstack/react-query'; // Added missing types
 import { renderHook, waitFor } from '@testing-library/react';
 import { useBrainVisualization } from '../hooks/useBrainVisualization'; // Use relative path
-import { apiClient } from '../../infrastructure/api/ApiClient'; // Use relative path
+import { apiClient } from '../../infrastructure/api/apiClient'; // Correct casing to match hook
 import type { BrainModel } from '../../domain/types/brain/models'; // Use relative path
 import type { RenderMode } from '../../domain/types/brain/visualization'; // Use relative path
 
@@ -53,7 +56,7 @@ const mockBrainModelData: Partial<BrainModel> = {
   // Add other necessary fields if hook uses them
 };
 
-describe.skip('useBrainVisualization', () => {
+describe('useBrainVisualization Hook', () => { // Un-skip the suite
   // Re-skip due to persistent hangs - needs investigation into async/timing issues
   // Cast the mocked apiClient method
   // Cast the mocked 'get' method
@@ -61,7 +64,7 @@ describe.skip('useBrainVisualization', () => {
 
 
   beforeEach(() => {
-    vi.useFakeTimers(); // Use fake timers
+    // vi.useFakeTimers(); // Removed fake timers
     // Reset mocks
     vi.clearAllMocks();
     queryClient.clear(); // Clear query cache
@@ -79,7 +82,7 @@ describe.skip('useBrainVisualization', () => {
   });
 
   afterEach(() => {
-    vi.useRealTimers(); // Restore real timers
+    // vi.useRealTimers(); // Removed fake timers
     vi.restoreAllMocks();
   });
 
@@ -111,8 +114,9 @@ describe.skip('useBrainVisualization', () => {
 
     // Assertions need to wait for the query to fail
     await waitFor(() => expect(result.current.error).toBeDefined()); // Wait for error object
-
-    expect(result.current.isLoading).toBe(false);
+    
+    // Also wait for isLoading to become false after the error
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.error).toBeDefined(); // Check if error object exists
     expect(result.current.error).toBeInstanceOf(Error);
     expect(result.current.error?.message).toBe('Test Error');

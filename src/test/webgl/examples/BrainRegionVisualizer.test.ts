@@ -1,3 +1,6 @@
+/**
+ * @vitest-environment jsdom
+ */
 /* eslint-disable */
 /**
  * Example Test: Brain Region Visualizer
@@ -9,61 +12,19 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-// Explicitly mock the 'three' module for this test file ONLY
-// eslint-disable-next-line
-vi.mock('three', async () => {
-  // Import our mock classes
-  const { MockWebGLRenderer, MockWebGLTexture, MockWebGLGeometry, MockWebGLMaterial } =
-    await vi.importActual('../mock-webgl');
+// Remove local vi.mock('three') - Rely on global mocks or direct mock imports
 
-  return {
-    __esModule: true, // Ensure ES module compatibility
-// eslint-disable-next-line
-    WebGLRenderer: vi.fn().mockImplementation(() => {
-      return {
-        domElement: document.createElement('canvas'),
-        setSize: vi.fn(),
-        render: vi.fn(),
-        dispose: vi.fn(),
-      };
-    }),
-    Texture: MockWebGLTexture,
-    BufferGeometry: MockWebGLGeometry,
-    MeshStandardMaterial: MockWebGLMaterial, 
-    MeshBasicMaterial: MockWebGLMaterial,
-    SphereGeometry: vi.fn().mockReturnValue({ dispose: vi.fn() }), 
-    Scene: vi.fn(() => ({ add: vi.fn(), remove: vi.fn(), children: [] })),
-// eslint-disable-next-line
-    PerspectiveCamera: vi.fn().mockImplementation(() => ({
-      position: { x: 0, y: 0, z: 0, set: vi.fn() },
-      near: 0.1,
-      far: 1000,
-      fov: 75,
-      aspect: 1,
-      updateProjectionMatrix: vi.fn(),
-    })),
-// eslint-disable-next-line
-    Mesh: vi.fn().mockImplementation((geometry, material) => ({
-      // Mock Mesh constructor
-      geometry,
-      material,
-      position: { x: 0, y: 0, z: 0, set: vi.fn() },
-      userData: {},
-      dispose: vi.fn(), // Add dispose mock
-    })),
-    // Add other necessary mocks as needed by the application
-  };
-});
-import { setupWebGLMocks, cleanupWebGLMocks } from '../index'; // Keep setup/cleanup
-// Import standard Three.js names - alias will provide mocks
+// Import necessary mock types from the central mock system
 import {
-  Scene,
-  PerspectiveCamera,
-  WebGLRenderer,
-  SphereGeometry,
-  MeshStandardMaterial,
-  Mesh,
-} from 'three';
+  MockScene,
+  MockPerspectiveCamera,
+  MockWebGLRenderer,
+  MockSphereGeometry,
+  MockMeshStandardMaterial,
+  MockMesh
+} from '../three-mocks';
+import { setupWebGLMocks, cleanupWebGLMocks } from '../mock-webgl'; // Use mock-webgl setup/cleanup
+// Remove imports from 'three' as we use mocks directly
 
 /**
  * Simple mock Brain Region visualization component
@@ -71,17 +32,17 @@ import {
  */
 class BrainRegionVisualizer {
   // Use standard types
-  private scene: Scene;
-  private camera: PerspectiveCamera;
-  private renderer: WebGLRenderer;
-  private regions: Map<string, Mesh> = new Map();
+  private scene: MockScene; // Use Mock type
+  private camera: MockPerspectiveCamera; // Use Mock type
+  private renderer: MockWebGLRenderer; // Use Mock type
+  private regions: Map<string, MockMesh> = new Map(); // Use Mock type
   private disposed = false;
 
 // eslint-disable-next-line
   constructor(container: HTMLElement, regions: string[] = []) {
     // Initialize Three.js scene using standard constructors
-    this.scene = new Scene();
-    this.camera = new PerspectiveCamera();
+    this.scene = new MockScene(); // Use Mock type
+    this.camera = new MockPerspectiveCamera(); // Use Mock type
     // Setting properties individually since our mock doesn't use constructor parameters
     this.camera.fov = 75;
     this.camera.aspect = 1.5;
@@ -90,7 +51,7 @@ class BrainRegionVisualizer {
     this.camera.position.z = 5;
 
     // Initialize renderer using standard constructor
-    this.renderer = new WebGLRenderer({ antialias: true });
+    this.renderer = new MockWebGLRenderer({ antialias: true }); // Use Mock type
     this.renderer.setSize(900, 600);
     container.appendChild(this.renderer.domElement);
 
@@ -118,11 +79,11 @@ class BrainRegionVisualizer {
 // eslint-disable-next-line
     regionNames.forEach((name, index) => {
       // Create region mesh using standard constructors
-      const geometry = new SphereGeometry();
-      const material = new MeshStandardMaterial();
+      const geometry = new MockSphereGeometry(); // Use Mock type
+      const material = new MockMeshStandardMaterial(); // Use Mock type
 
       // Set position based on index
-      const mesh = new Mesh(geometry, material);
+      const mesh = new MockMesh(geometry, material); // Use Mock type
       mesh.position.x = Math.cos((index * Math.PI) / 4) * 3;
       mesh.position.y = Math.sin((index * Math.PI) / 4) * 3;
       mesh.position.z = 0;
@@ -219,7 +180,7 @@ describe('BrainRegionVisualizer', () => {
 // eslint-disable-next-line
   beforeEach(() => {
     // Set up WebGL mocks for all tests with memory monitoring
-    setupWebGLMocks({ monitorMemory: true, debugMode: false });
+    setupWebGLMocks(); // Call without arguments
 
     // Create container element
     container = document.createElement('div');

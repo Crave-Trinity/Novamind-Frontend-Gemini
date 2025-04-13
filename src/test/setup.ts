@@ -1,4 +1,3 @@
-
 /**
  * CANONICAL TEST ENVIRONMENT SETUP
  *
@@ -15,8 +14,6 @@ expect.extend(matchers);
 import { vi, afterEach, beforeEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers';
-
-// PROPER JEST-DOM SETUP - COMPLETE
 
 // Rely on the standard matchers imported and extended above
 

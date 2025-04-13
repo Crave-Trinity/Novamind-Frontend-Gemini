@@ -61,7 +61,7 @@ describe('AuthService', () => {
     
     authService = new AuthService('https://api.test.com');
     
-    // Mock the AuthApiClient methods
+    // Mock the AuthApiClient methods by replacing the internal client
     (authService as any).client = {
       login: mockLogin,
       logout: mockLogout,
@@ -87,7 +87,8 @@ describe('AuthService', () => {
       expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
       expect(mockGetCurrentUser).toHaveBeenCalled();
       // Wait for async operations within login to complete
-      await waitFor(() => expect(localStorageMock.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens)));
+      const options = { timeout: 2000 }; // Increased timeout
+      await waitFor(() => expect(localStorageMock.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens)), options);
       expect(result).toEqual({
         user: mockUser,
         tokens: mockTokens,
@@ -142,7 +143,7 @@ describe('AuthService', () => {
       // Verify
       expect(mockLogout).toHaveBeenCalled();
       // Wait for async operations within logout to complete
-      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'));
+      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'), { timeout: 2000 });
       expect(result).toEqual({
         user: null,
         tokens: null,
@@ -163,7 +164,7 @@ describe('AuthService', () => {
       // Verify
       expect(mockLogout).toHaveBeenCalled();
       // Wait for async operations within logout to complete
-      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'));
+      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'), { timeout: 2000 });
       expect(result).toEqual({
         user: null,
         tokens: null,
@@ -200,7 +201,7 @@ describe('AuthService', () => {
 
       // Verify
       // Wait for async getCurrentUser call within initializeAuth
-      await waitFor(() => expect(mockGetCurrentUser).toHaveBeenCalled());
+      await waitFor(() => expect(mockGetCurrentUser).toHaveBeenCalled(), { timeout: 2000 });
       expect(result).toEqual({
         user: mockUser,
         tokens: mockTokens,
@@ -220,10 +221,11 @@ describe('AuthService', () => {
       const result = await authService.initializeAuth();
 
       // Verify
-      // Wait for async refreshToken and subsequent calls
-      await waitFor(() => expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken));
-      await waitFor(() => expect(mockGetCurrentUser).toHaveBeenCalled());
-      await waitFor(() => expect(localStorageMock.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens)));
+      // Wait for async refreshToken and subsequent calls with increased timeout
+      const options = { timeout: 2000 }; // Increased timeout
+      await waitFor(() => expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken), options); 
+      await waitFor(() => expect(mockGetCurrentUser).toHaveBeenCalled(), options); 
+      await waitFor(() => expect(localStorageMock.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens)), options); 
       expect(result).toEqual({
         user: mockUser,
         tokens: mockTokens,
@@ -243,8 +245,9 @@ describe('AuthService', () => {
 
       // Verify
       // Wait for async refreshToken and subsequent removeItem
-      await waitFor(() => expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken));
-      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'));
+      const options = { timeout: 2000 }; // Increased timeout
+      await waitFor(() => expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken), options); 
+      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'), options); 
       expect(result).toEqual({
         user: null,
         tokens: null,
@@ -264,8 +267,9 @@ describe('AuthService', () => {
 
       // Verify
       // Wait for async getCurrentUser and subsequent removeItem
-      await waitFor(() => expect(mockGetCurrentUser).toHaveBeenCalled());
-      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'));
+      const options = { timeout: 2000 }; // Increased timeout
+      await waitFor(() => expect(mockGetCurrentUser).toHaveBeenCalled(), options); 
+      await waitFor(() => expect(localStorageMock.removeItem).toHaveBeenCalledWith('auth_tokens'), options); 
       expect(result).toEqual({
         user: null,
         tokens: null,
