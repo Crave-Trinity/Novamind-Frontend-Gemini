@@ -3,16 +3,16 @@ import { render, screen, act, cleanup, waitFor } from '@testing-library/react'; 
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ThemeProvider } from './ThemeProvider';
-import { useTheme } from '@application/hooks/useTheme';
+import ThemeContext, { useTheme } from '../contexts/ThemeContext';
 import React from 'react'; // Import React for JSX
 
 // Test component that uses the theme
 function TestComponent() {
-  const { mode, theme, setTheme } = useTheme(); // Use 'mode' for internal state, 'theme' for applied
+  const { theme, setTheme, isDark } = useTheme(); // Import correct properties from ThemeContext
   return (
     <div>
-      <span data-testid="mode">{mode}</span>
-      <span data-testid="theme">{theme}</span> {/* Display applied theme */}
+      <span data-testid="mode">{theme}</span>
+      <span data-testid="theme">{isDark ? 'dark' : 'light'}</span> {/* Display applied theme */}
       <button onClick={() => setTheme('light')}>Light</button>
       <button onClick={() => setTheme('dark')}>Dark</button>
       <button onClick={() => setTheme('system')}>System</button>
