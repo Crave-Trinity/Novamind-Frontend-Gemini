@@ -92,7 +92,13 @@ export default defineConfig({
     
     // Use environment directly instead of workspace to avoid TypeScript errors
     environment: 'jsdom', // Default environment for all tests
-    setupFiles: ['./src/test/setup.ts'],
+    setupFiles: [
+      // The jest-dom setup must come first to ensure matchers are properly extended
+      './src/test/jest-dom.setup.ts',
+      './src/test/setup.ts',
+      './src/test/dom-setup.ts',
+      './src/test/vitest.setup.ts'
+    ],
     
     // Special handling for puppeteer tests to run in node environment
     // We'll detect this in setup.ts and adjust accordingly

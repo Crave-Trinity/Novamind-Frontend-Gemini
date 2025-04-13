@@ -327,13 +327,24 @@ export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOpt
       </AllTheProviders>
     );
   };
-
-  // Only set light mode as default if there's no localStorage theme already set
-  const storedTheme = localStorage.getItem('theme');
-  if (!storedTheme) {
-    localStorage.removeItem('theme');
+// Only set light mode as default if there's no localStorage theme already set
+// Use optional chaining and nullish coalescing to safely access window properties
+const storedTheme = typeof window !== 'undefined' && window.localStorage
+  ? window.localStorage.getItem('theme')
+  : null;
+  
+if (!storedTheme) {
+  // Safely access localStorage
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.removeItem('theme');
+  }
+  
+  // Safely access document
+  if (typeof document !== 'undefined' && document.documentElement) {
     document.documentElement.classList.remove('dark', 'system');
     document.documentElement.classList.add('light');
+  }
+}
   }
 
   // Render with our wrapper
