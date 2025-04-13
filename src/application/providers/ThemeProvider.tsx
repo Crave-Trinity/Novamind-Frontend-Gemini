@@ -1,7 +1,29 @@
 /* eslint-disable */
-import React, { useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
-import { ThemeContext, type ThemeMode } from '@application/contexts/ThemeContext';
+import React, { useState, useEffect, useMemo, useCallback, type ReactNode, createContext, useContext } from 'react';
 import { auditLogClient, AuditEventType } from '@infrastructure/clients/auditLogClient';
+
+// Define ThemeMode type
+export type ThemeMode = 'light' | 'dark' | 'system' | 'clinical' | 'sleek-dark' | 'retro' | 'wes';
+
+// Create a context for the theme
+export const ThemeContext = createContext<{
+  mode: ThemeMode;
+  theme: 'light' | 'dark';
+  isDarkMode: boolean;
+  setTheme: (theme: ThemeMode) => void;
+  toggleTheme: () => void;
+} | undefined>(undefined);
+
+// Hook for using the theme context
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  
+  return context;
+};
 
 // Validate if a string is a valid theme mode
 const isValidTheme = (theme: string | null): theme is ThemeMode => {

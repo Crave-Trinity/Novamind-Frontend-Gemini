@@ -181,7 +181,7 @@ describe('ThemeProvider', () => {
   it('loads saved theme from localStorage', async () => {
     // Mock localStorage to return 'dark' for the ui-theme key
     mockGetItem.mockImplementation((key: string) => {
-      if (key === 'ui-theme') return 'dark';
+      if (key === 'theme') return 'dark';
       return null;
     });
 
@@ -223,7 +223,7 @@ describe('ThemeProvider', () => {
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
     expect(document.documentElement.classList.contains('light')).toBe(false);
-    expect(mockSetItem).toHaveBeenCalledWith('ui-theme', 'dark');
+    expect(mockSetItem).toHaveBeenCalledWith('theme', 'dark');
 
     // Change to light theme
     await act(async () => {
@@ -234,7 +234,7 @@ describe('ThemeProvider', () => {
       expect(document.documentElement.classList.contains('light')).toBe(true);
     });
     expect(document.documentElement.classList.contains('dark')).toBe(false);
-    expect(mockSetItem).toHaveBeenCalledWith('ui-theme', 'light');
+    expect(mockSetItem).toHaveBeenCalledWith('theme', 'light');
 
     // Change back to system theme
     await act(async () => {
@@ -247,7 +247,7 @@ describe('ThemeProvider', () => {
     });
     expect(document.documentElement.classList.contains('dark')).toBe(false);
     // Assert setItem was called with 'system' (as per component logic)
-    expect(mockSetItem).toHaveBeenCalledWith('ui-theme', 'system');
+    expect(mockSetItem).toHaveBeenCalledWith('theme', 'system');
     // The implementation doesn't call removeItem for system theme
     expect(window.localStorage.removeItem).not.toHaveBeenCalled();
   });
