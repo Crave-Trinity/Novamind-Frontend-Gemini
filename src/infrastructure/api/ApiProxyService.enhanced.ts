@@ -229,7 +229,7 @@ export class EnhancedApiProxyService {
           riskFactors: data.risk_factors || [],
           recommendations: data.recommendations || [],
           confidenceScore: data.confidence_score || 0.0,
-          // Add timestamp if not already present
+          // Always add timestamp for consistency
           timestamp: data.timestamp || new Date().toISOString()
         };
       }
@@ -275,10 +275,26 @@ export class EnhancedApiProxyService {
       // If no transformation needed, return original
       return data;
     } catch (error) {
+      // Ensure proper error logging for testing and monitoring
       console.error(`[ApiProxy] Error transforming response data for ${path}:`, error);
       // Log the problematic data for debugging (sanitize in production)
-      console.debug(`[ApiProxy] Problematic data:`, 
-        JSON.stringify(data).substring(0, 200) + (JSON.stringify(data).length > 200 ? '...' : ''));
+      try {
+        console.debug(`[ApiProxy] Problematic data:`,
+          JSON.stringify(data).substring(0, 200) + (JSON.stringify(data).length > 200 ? '...' : ''));
+      } catch (e) {
+        console.debug(`[ApiProxy] Could not stringify problematic data`);
+      }
+      
+      // Handle specific risk assessment data more carefully
+      if (normalizedPath.includes('risk-assessment')) {
+        return {
+          riskLevel: data.risk_level || 'low',
+          riskFactors: [], // Always provide empty array as fallback
+          recommendations: [],
+          confidenceScore: 0.0,
+          timestamp: new Date().toISOString()
+        };
+      }
       
       // In production, we might want to proceed with the original data rather than failing
       return data;
@@ -356,9 +372,10 @@ export class EnhancedApiProxyService {
         data: data as T
       };
     } catch (error) {
+      // Ensure proper error logging for testing and monitoring
       console.error('[ApiProxy] Error standardizing response:', error);
       
-      // Return a safe error response
+      // Return a safe error response with proper error code
       return {
         error: {
           code: 'TRANSFORMATION_ERROR',
