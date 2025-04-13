@@ -107,16 +107,16 @@ export function useNeuralActivityController(patientId: string) {
           result.value.regionActivations.forEach((activation: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
             // Use 'any' for activation
             // Ensure activation.level is a valid ActivationLevel before setting
-            const level = Object.values(ActivationLevel).includes(activation.level)
-              ? activation.level
-              : ActivationLevel.MEDIUM; // Default to MEDIUM if invalid
+            let level: ActivationLevel;
+            if (Object.values(ActivationLevel).includes(activation.level)) {
+              level = activation.level;
+            } else {
+              level = ActivationLevel.MEDIUM; // Default to MEDIUM if invalid
+            }
             neuralState.metrics.activationLevels.set(
               activation.regionId,
               level // Use validated level
             ); // Close set call
-            ); // Close set call
-          }); // Close forEach call
-            );
 
             // Set initially active regions
             if (
@@ -128,8 +128,7 @@ export function useNeuralActivityController(patientId: string) {
               // Assuming LOW/NONE map to suppressed? Adjust if needed
               neuralState.inhibitedRegions.add(activation.regionId);
             }
-          }); // Close forEach call
-          });
+          }); // Correct closing for forEach callback
         }
 
         // Initialize connection strengths

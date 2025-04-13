@@ -31,10 +31,11 @@ const expiredTokens: AuthTokens = {
 };
 
 // Mocks for the AuthApiClient methods
-const mockLogin = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK login] Called with:', args); throw new Error('Mock not configured for this call'); });
-const mockLogout = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK logout] Called with:', args); throw new Error('Mock not configured for this call'); });
-const mockRefreshToken = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK refreshToken] Called with:', args); throw new Error('Mock not configured for this call'); });
-const mockGetCurrentUser = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK getCurrentUser] Called with:', args); throw new Error('Mock not configured for this call'); });
+// Default implementations return rejected promises to prevent '.then of undefined' errors
+const mockLogin = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK login] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
+const mockLogout = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK logout] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
+const mockRefreshToken = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK refreshToken] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
+const mockGetCurrentUser = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK getCurrentUser] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
 
 describe('AuthService', () => {
   let authService: AuthService;

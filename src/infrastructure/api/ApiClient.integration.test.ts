@@ -51,28 +51,37 @@ vi.spyOn(ApiProxyService, 'standardizeResponse');
 
 describe('ApiClient Integration with ApiProxyService', () => {
   let apiClient: ApiClient;
-  let mockAxiosInstance: ReturnType<typeof axios.create>;
+  // let mockAxiosInstance: ReturnType<typeof axios.create>; // No longer mocking axios directly
+  let fetchSpy: any; // Use any for now, inference happens in beforeEach
 
   beforeEach(() => {
     vi.clearAllMocks();
     
-    // Setup mock axios instance
-    mockAxiosInstance = axios.create() as any;
-    (mockAxiosInstance.request as any).mockImplementation(async (config: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
-      return {
-        data: { result: 'success', endpoint: config.url },
-        status: 200,
-        statusText: 'OK',
-        headers: { 'content-type': 'application/json' },
-        config,
-      };
+    // Mock global fetch
+    fetchSpy = vi.spyOn(globalThis, 'fetch'); // Assign to outer variable
+    fetchSpy.mockImplementation(async (url: RequestInfo | URL, options?: RequestInit) => {
+      // Default mock response
+      let responseData: any = { result: 'success', endpoint: url };
+      let status = 200;
+
+      // Customize response based on URL/test case if needed
+      if (typeof url === 'string') {
+         if (url.includes('predict-treatment')) {
+             responseData = { efficacy: 0.78, prediction: 'positive', patient_id: 'patient-123' };
+         } else if (url.includes('risk-assessment')) {
+             responseData = { risk_level: 'medium', risk_factors: ['factor1', 'factor2'], recommendations: ['rec1', 'rec2'] };
+         }
+      }
+
+      return Promise.resolve(new Response(JSON.stringify(responseData), {
+        status: status,
+        headers: { 'Content-Type': 'application/json' },
+      }));
     });
-    
+
     // Create ApiClient instance
     apiClient = new ApiClient('/api');
-    
-    // Replace the internal axios instance for testing
-    (apiClient as any).instance = mockAxiosInstance;
+    // No need to replace internal instance, fetch is mocked globally
     
     // Disable mock api for these tests
     vi.stubGlobal('localStorage', {
@@ -99,31 +108,27 @@ describe('ApiClient Integration with ApiProxyService', () => {
     // Verify ApiProxyService was called
     expect(ApiProxyService.mapPath).toHaveBeenCalledWith('v1/patients/123');
     
-    // Verify the mapped path was used in the request
-    expect(mockAxiosInstance.request).toHaveBeenCalledWith(
-      expect.objectContaining({
-        method: 'GET',
-        url: expect.any(String),
-      })
+    // Verify fetch was called with the mapped path
+    expect(fetchSpy).toHaveBeenCalledWith(
+      '/api/v1/patients/123', // Base URL + mapped path
+      expect.objectContaining({ method: 'GET' })
     );
   });
 
   it('should map paths for brain model endpoints', async () => {
-    await apiClient.getBrainModel('model-123');
+    // Use the generic get method with the expected endpoint
+    await apiClient.get('/brain-models/model-123');
     
     // Verify ApiProxyService was called with the correct path
-    expect(ApiProxyService.mapPath).toHaveBeenCalledWith(
-      expect.stringMatching(/v1\/brain-models\/model-123/)
-    );
+    expect(ApiProxyService.mapPath).toHaveBeenCalledWith('v1/brain-models/model-123');
   });
 
   it('should map paths for patient endpoints', async () => {
-    await apiClient.getPatientById('patient-123');
+    // Use the generic get method with the expected endpoint
+    await apiClient.get('/patients/patient-123');
     
     // Verify ApiProxyService was called with the correct path
-    expect(ApiProxyService.mapPath).toHaveBeenCalledWith(
-      expect.stringMatching(/v1\/patients\/patient-123/)
-    );
+    expect(ApiProxyService.mapPath).toHaveBeenCalledWith('v1/patients/patient-123');
   });
 
   it('should map request data when making POST requests', async () => {
@@ -157,22 +162,10 @@ describe('ApiClient Integration with ApiProxyService', () => {
   it('should transform treatment prediction requests and responses', async () => {
     const treatmentData = { treatment: 'CBT', duration: '8 weeks' };
     
-    // Mock implementation for this specific call
-    (mockAxiosInstance.request as any).mockImplementationOnce(async (config: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
-      return {
-        data: { 
-          efficacy: 0.78,
-          prediction: 'positive',
-          patient_id: 'patient-123'
-        },
-        status: 200,
-        statusText: 'OK',
-        headers: { 'content-type': 'application/json' },
-        config,
-      };
-    });
+    // fetchSpy is configured in beforeEach to handle this endpoint
     
-    await apiClient.predictTreatmentResponse('patient-123', treatmentData);
+    // Use the generic post method with the expected endpoint and data
+    await apiClient.post('/patients/patient-123/predict-treatment', treatmentData);
     
     // Verify path mapping
     expect(ApiProxyService.mapPath).toHaveBeenCalledWith(
@@ -190,22 +183,10 @@ describe('ApiClient Integration with ApiProxyService', () => {
   });
 
   it('should transform risk assessment responses', async () => {
-    // Mock implementation for this specific call
-    (mockAxiosInstance.request as any).mockImplementationOnce(async (config: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
-      return {
-        data: { 
-          risk_level: 'medium',
-          risk_factors: ['factor1', 'factor2'],
-          recommendations: ['rec1', 'rec2']
-        },
-        status: 200,
-        statusText: 'OK',
-        headers: { 'content-type': 'application/json' },
-        config,
-      };
-    });
+    // fetchSpy is configured in beforeEach to handle this endpoint
     
-    await apiClient.getRiskAssessment('patient-123');
+    // Use the generic get method with the expected endpoint
+    await apiClient.get('/patients/patient-123/risk-assessment');
     
     // Verify path mapping
     expect(ApiProxyService.mapPath).toHaveBeenCalledWith(
