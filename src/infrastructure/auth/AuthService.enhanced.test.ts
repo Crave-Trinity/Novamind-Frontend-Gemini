@@ -7,22 +7,22 @@ import { waitFor } from '@testing-library/react'; // Import waitFor
 import { EnhancedAuthService } from './AuthService.enhanced';
 import { AuthTokens, AuthUser, AuthApiClient } from './index'; // Import AuthApiClient for mocking
 
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: vi.fn((key: string) => store[key] || null),
-    setItem: vi.fn((key: string, value: string) => {
-      store[key] = value;
-    }),
-    removeItem: vi.fn((key: string) => {
-      delete store[key];
-    }),
-    clear: vi.fn(() => {
-      store = {};
-    })
-  };
-})();
+// Define localStorage store structure
+let localStorageStore: Record<string, string> = {};
+
+// Define mock functions separately to re-apply them after reset
+const mockLocalStorageGetItem = vi.fn((key: string) => localStorageStore[key] || null);
+const mockLocalStorageSetItem = vi.fn((key: string, value: string) => { localStorageStore[key] = value; });
+const mockLocalStorageRemoveItem = vi.fn((key: string) => { delete localStorageStore[key]; });
+const mockLocalStorageClear = vi.fn(() => { localStorageStore = {}; });
+
+// Create the mock object structure
+const localStorageMock = {
+  getItem: mockLocalStorageGetItem,
+  setItem: mockLocalStorageSetItem,
+  removeItem: mockLocalStorageRemoveItem,
+  clear: mockLocalStorageClear,
+};
 
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 // Use more direct spies on the native objects that are guaranteed to work
@@ -97,29 +97,17 @@ const soonToExpireTokens: AuthTokens = {
   }
 };
 
-// Mocks for the AuthApiClient methods - define them outside vi.mock so they can be cleared
+// Mocks for the AuthApiClient methods
 const mockLogin = vi.fn();
 const mockLogout = vi.fn();
 const mockRefreshToken = vi.fn();
 const mockGetCurrentUser = vi.fn();
 
-// Mock the AuthApiClient specifically, preserving other exports
-vi.mock('./index', async (importOriginal) => {
-  const actual = await importOriginal() as typeof import('./index');
-  // Return the actual module but replace AuthApiClient constructor
-  return {
-    ...actual,
-    AuthApiClient: vi.fn().mockImplementation(() => {
-      // Return the object with mocked methods
-      return {
-        login: mockLogin,
-        logout: mockLogout,
-        refreshToken: mockRefreshToken,
-        getCurrentUser: mockGetCurrentUser,
-      };
-    }),
-  };
-});
+// Spy on AuthApiClient prototype methods
+vi.spyOn(AuthApiClient.prototype, 'login').mockImplementation(mockLogin);
+vi.spyOn(AuthApiClient.prototype, 'logout').mockImplementation(mockLogout);
+vi.spyOn(AuthApiClient.prototype, 'refreshToken').mockImplementation(mockRefreshToken);
+vi.spyOn(AuthApiClient.prototype, 'getCurrentUser').mockImplementation(mockGetCurrentUser);
 
 describe('EnhancedAuthService', () => {
   let authService: EnhancedAuthService;
@@ -134,16 +122,22 @@ describe('EnhancedAuthService', () => {
   });
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    localStorageMock.clear();
-    
+    vi.resetAllMocks(); // Reset all mocks (including spies)
+
+    // Reset localStorage store and re-apply mock implementations
+    localStorageStore = {};
+    localStorageMock.getItem.mockImplementation((key: string) => localStorageStore[key] || null);
+    localStorageMock.setItem.mockImplementation((key: string, value: string) => { localStorageStore[key] = value; });
+    localStorageMock.removeItem.mockImplementation((key: string) => { delete localStorageStore[key]; });
+    localStorageMock.clear.mockImplementation(() => { localStorageStore = {}; });
+
     authService = new EnhancedAuthService('https://api.test.com');
     
-    // No need to replace the client manually, vi.mock handles it
+    // No need to replace the client manually, spies handle it
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.restoreAllMocks(); // Restores original prototype methods
   });
 
   describe('initializeAuth with token auto-refresh', () => {
@@ -180,7 +174,7 @@ describe('EnhancedAuthService', () => {
       // Reset the tracking flag before the test
       testAuthService.resetTestFlags();
       
-      // No need to replace the client manually, vi.mock handles it
+      // No need to replace the client manually, spies handle it
       
       // Call setupRefreshTimeout explicitly
       (testAuthService as any).setupRefreshTimeout();
