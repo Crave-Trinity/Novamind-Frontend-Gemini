@@ -256,7 +256,7 @@ export const Vector3Factory = {
  * Brain processor function that converts raw data to a neurologically-valid model
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const BrainModelFactory = (data: any // eslint-disable-line @typescript-eslint/no-explicit-any = {}): BrainModel => {
+export const BrainModelFactory = (data: any = {}): BrainModel => { // Removed eslint disable comment for clarity
   // Generate a default processed model with clinical precision
   const defaultModel: BrainModel = {
     id: data.id || `model-${Date.now()}`,
@@ -267,9 +267,8 @@ export const BrainModelFactory = (data: any // eslint-disable-line @typescript-e
 
   // Process regions if provided
   const processedRegions = Array.isArray(data.regions)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ? data.regions.map((r: any // eslint-disable-line @typescript-eslint/no-explicit-any) => BrainRegion.create(r)) // Use the local BrainRegion factory
-    : [];
+    ? data.regions.map((r: any) => BrainRegion.create(r)) // If true, map and create regions
+    : []; // If false, return empty array
 
   return {
     ...defaultModel,
@@ -277,4 +276,4 @@ export const BrainModelFactory = (data: any // eslint-disable-line @typescript-e
     regions: processedRegions,
     // Removed settings property assignment
   };
-};
+}; // End of BrainModelFactory

@@ -16,18 +16,18 @@ export function setupWebGLMocks(options = { monitorMemory: false, debugMode: fal
   
   // Additional configuration based on options
   if (options.monitorMemory) {
-    // Enable memory tracking for neural visualization
-    global.__WEBGL_MEMORY_TRACKING__ = {
-      allocatedObjects: new Set(),
-      disposedObjects: new Set(),
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-      trackObject: (obj: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
-        global.__WEBGL_MEMORY_TRACKING__.allocatedObjects.add(obj);
+    // Define the structure for memory tracking on globalThis
+    (globalThis as any).__WEBGL_MEMORY_TRACKING__ = {
+      allocatedObjects: new Set<any>(), // Use Set<any> for simplicity
+      disposedObjects: new Set<any>(),
+      trackObject: (obj: any) => {
+        (globalThis as any).__WEBGL_MEMORY_TRACKING__?.allocatedObjects.add(obj);
       },
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-      untrackObject: (obj: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
-        global.__WEBGL_MEMORY_TRACKING__.allocatedObjects.delete(obj);
-        global.__WEBGL_MEMORY_TRACKING__.disposedObjects.add(obj);
+      untrackObject: (obj: any) => {
+        if ((globalThis as any).__WEBGL_MEMORY_TRACKING__) {
+           (globalThis as any).__WEBGL_MEMORY_TRACKING__.allocatedObjects.delete(obj);
+           (globalThis as any).__WEBGL_MEMORY_TRACKING__.disposedObjects.add(obj);
+        }
       }
     };
   }
@@ -40,16 +40,18 @@ export function setupWebGLMocks(options = { monitorMemory: false, debugMode: fal
 export function cleanupWebGLMocks() {
   cleanupMocks();
   
-  // Return memory tracking report if enabled
-  if (global.__WEBGL_MEMORY_TRACKING__) {
+  // Return memory tracking report if enabled, using globalThis
+  const trackingData = (globalThis as any).__WEBGL_MEMORY_TRACKING__;
+  if (trackingData) {
     const report = {
-      leakedObjectCount: global.__WEBGL_MEMORY_TRACKING__.allocatedObjects.size,
-      disposedObjectCount: global.__WEBGL_MEMORY_TRACKING__.disposedObjects.size,
-      leakedObjects: Array.from(global.__WEBGL_MEMORY_TRACKING__.allocatedObjects)
+      leakedObjectCount: trackingData.allocatedObjects.size,
+      disposedObjectCount: trackingData.disposedObjects.size,
+      leakedObjects: Array.from(trackingData.allocatedObjects)
     };
     
     // Clean up tracking
-    delete global.__WEBGL_MEMORY_TRACKING__;
+    // Clean up tracking from globalThis
+    delete (globalThis as any).__WEBGL_MEMORY_TRACKING__;
     
     return report;
   }

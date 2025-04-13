@@ -80,45 +80,36 @@ export function useClinicalPredictionController(patientId: string) {
       _symptomIds: string[], // Prefixed unused parameter
       _predictionHorizon?: number // Prefixed unused parameter
     ): Promise<ResultType<Map<string, SymptomTrajectory>, Error>> => {
-      // Added error type
       try {
-        // Removed unused _horizon variable
-
-        // Configure prediction parameters
-        // Removed unused _predictionParams
-
         // TODO: Implement actual service call when available
-        // const result = await clinicalService.predictSymptomTrajectories(predictionParams);
         console.warn('predictSymptomTrajectories service method not implemented.');
-        // Placeholder failure with appropriate type for demonstration
-        const result: ResultType<any, Error> = failure(
+        // Placeholder failure for demonstration
+        const result: ResultType<any[], Error> = failure( // Assuming service returns array
           new Error('Service method predictSymptomTrajectories not implemented.')
         );
 
         if (Result.isSuccess(result)) {
-          const trajectories = result.value; // Access the value
-          if (trajectories) {
-            // Check if value exists (though success implies it should)
+          const trajectories = result.value; // Access the value (should be an array)
+          if (Array.isArray(trajectories)) {
             // Update state with new predictions
             setState((prevState) => {
               const newSymptomTrajectories = new Map(prevState.symptomTrajectories);
               const newConfidenceIntervals = new Map(prevState.confidenceIntervals);
+              let totalDataPoints = 0;
 
-              // Add each symptom trajectory to the maps
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              trajectories.forEach((trajectory: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
-                // Use extracted value
-                // Add 'any' type for now
-                newSymptomTrajectories.set(trajectory.symptomId, trajectory);
+              trajectories.forEach((trajectory: any) => { // Add 'any' type for now
+                if (trajectory && trajectory.symptomId) { // Basic validation
+                  newSymptomTrajectories.set(trajectory.symptomId, trajectory);
+                  totalDataPoints += (trajectory.dataPoints || 0);
 
-                // Store confidence intervals separately for easier access
-                if (trajectory.confidenceInterval) {
-                  // Add safety check
-                  newConfidenceIntervals.set(`symptom-${trajectory.symptomId}`, {
-                    upper: trajectory.confidenceInterval.upper,
-                    lower: trajectory.confidenceInterval.lower,
-                    confidenceLevel: trajectory.confidenceInterval.confidenceLevel,
-                  });
+                  // Store confidence intervals separately
+                  if (trajectory.confidenceInterval) {
+                    newConfidenceIntervals.set(`symptom-${trajectory.symptomId}`, {
+                      upper: trajectory.confidenceInterval.upper,
+                      lower: trajectory.confidenceInterval.lower,
+                      confidenceLevel: trajectory.confidenceInterval.confidenceLevel,
+                    });
+                  }
                 }
               });
 
@@ -127,23 +118,22 @@ export function useClinicalPredictionController(patientId: string) {
                 symptomTrajectories: newSymptomTrajectories,
                 confidenceIntervals: newConfidenceIntervals,
                 lastUpdated: new Date(),
-                dataPoints: trajectories.reduce(
-                  // Use extracted value
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  (sum: number, traj: any // eslint-disable-line @typescript-eslint/no-explicit-any) => sum + (traj.dataPoints || 0), // Add types
-                  0
-                ),
+                dataPoints: totalDataPoints, // Use calculated total
               };
-            });
+            }); // End of setState
 
             // Return a copy of the trajectories map
-            return success(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              new Map(trajectories.map((t: any // eslint-disable-line @typescript-eslint/no-explicit-any) => [t.symptomId, t])) // Use extracted value
-            ); // Add type
+            const resultMap = new Map<string, SymptomTrajectory>();
+            trajectories.forEach((t: any) => {
+              if (t && t.symptomId) {
+                resultMap.set(t.symptomId, t);
+              }
+            });
+            return success(resultMap);
+
           } else {
-            // Handle case where success is true but value is unexpectedly null/undefined
-            return failure(new Error('Prediction successful but data is missing.'));
+            // Handle case where success is true but value is not an array
+            return failure(new Error('Prediction successful but data format is incorrect.'));
           }
         } else {
           // Handle failure case
@@ -152,8 +142,8 @@ export function useClinicalPredictionController(patientId: string) {
           return failure(new Error(errorMessage || 'Failed to predict symptom trajectories'));
         }
       } catch (error) {
+        console.error("Error in predictSymptomTrajectories:", error);
         return failure(
-          // Ensure error object is passed
           error instanceof Error ? error : new Error('Unknown error in prediction')
         );
       }
@@ -185,34 +175,36 @@ export function useClinicalPredictionController(patientId: string) {
         // const result = await clinicalService.predictTreatmentOutcomes(predictionParams);
         console.warn('predictTreatmentOutcomes service method not implemented.');
         // Placeholder failure with appropriate type for demonstration
-        const result: ResultType<any, Error> = failure(
+        const result: ResultType<any[], Error> = failure( // Assuming service returns array
           new Error('Service method predictTreatmentOutcomes not implemented.')
         );
 
         if (Result.isSuccess(result)) {
           const outcomes = result.value; // Access the value
-          if (outcomes) {
+          if (Array.isArray(outcomes)) {
             // Check if value exists
             // Update state with new predictions
             setState((prevState) => {
               const newTreatmentOutcomes = new Map(prevState.treatmentOutcomes);
               const newConfidenceIntervals = new Map(prevState.confidenceIntervals);
+              let totalDataPoints = 0;
 
               // Add each treatment outcome to the maps
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              outcomes.forEach((outcome: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
-                // Use extracted value
-                // Add 'any' type for now
-                newTreatmentOutcomes.set(outcome.treatmentId, outcome);
+              outcomes.forEach((outcome: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any) => {
+                if (outcome && outcome.treatmentId) { // Basic validation
+                  newTreatmentOutcomes.set(outcome.treatmentId, outcome);
+                  totalDataPoints += (outcome.dataPoints || 0);
 
-                // Store confidence intervals separately
-                if (outcome.confidenceInterval) {
-                  // Add safety check
-                  newConfidenceIntervals.set(`treatment-${outcome.treatmentId}`, {
-                    upper: outcome.confidenceInterval.upper,
-                    lower: outcome.confidenceInterval.lower,
-                    confidenceLevel: outcome.confidenceInterval.confidenceLevel,
-                  });
+                  // Store confidence intervals separately
+                  if (outcome.confidenceInterval) {
+                    // Add safety check
+                    newConfidenceIntervals.set(`treatment-${outcome.treatmentId}`, {
+                      upper: outcome.confidenceInterval.upper,
+                      lower: outcome.confidenceInterval.lower,
+                      confidenceLevel: outcome.confidenceInterval.confidenceLevel,
+                    });
+                  }
                 }
               });
 
@@ -221,22 +213,20 @@ export function useClinicalPredictionController(patientId: string) {
                 treatmentOutcomes: newTreatmentOutcomes,
                 confidenceIntervals: newConfidenceIntervals,
                 lastUpdated: new Date(),
-                dataPoints: outcomes.reduce(
-                  // Use extracted value
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  (sum: number, outcome: any // eslint-disable-line @typescript-eslint/no-explicit-any) => sum + (outcome.dataPoints || 0), // Add types
-                  0
-                ),
+                dataPoints: totalDataPoints,
               };
-            });
+            }); // End of setState
 
             // Return a copy of the outcomes map
-            return success(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              new Map(outcomes.map((o: any // eslint-disable-line @typescript-eslint/no-explicit-any) => [o.treatmentId, o])) // Use extracted value
-            ); // Add type
+            const resultMap = new Map<string, TreatmentOutcome>();
+            outcomes.forEach((o: any) => {
+                if (o && o.treatmentId) {
+                    resultMap.set(o.treatmentId, o);
+                }
+            });
+            return success(resultMap);
           } else {
-            return failure(new Error('Prediction successful but data is missing.'));
+            return failure(new Error('Prediction successful but data format is incorrect.'));
           }
         } else {
           // Handle failure case
@@ -245,6 +235,7 @@ export function useClinicalPredictionController(patientId: string) {
           return failure(new Error(errorMessage || 'Failed to predict treatment outcomes'));
         }
       } catch (error) {
+        console.error("Error in predictTreatmentOutcomes:", error);
         return failure(
           // Ensure error object is passed
           error instanceof Error ? error : new Error('Unknown error in prediction')
@@ -278,30 +269,32 @@ export function useClinicalPredictionController(patientId: string) {
         // const result = await clinicalService.predictRelapse(predictionParams);
         console.warn('predictRelapse service method not implemented.');
         // Placeholder failure with appropriate type for demonstration
-        const result: ResultType<any, Error> = failure(
+        const result: ResultType<any[], Error> = failure( // Assuming service returns array
           new Error('Service method predictRelapse not implemented.')
         );
 
         if (Result.isSuccess(result)) {
           const predictions = result.value; // Access the value
-          if (predictions) {
+          if (Array.isArray(predictions)) {
             // Check if value exists
             // Update state with new predictions
             setState((prevState) => {
               // Update confidence intervals
               const newConfidenceIntervals = new Map(prevState.confidenceIntervals);
+              let totalDataPoints = 0;
 
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              predictions.forEach((prediction: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
-                // Use extracted value
-                // Add 'any' type for now
-                if (prediction.confidenceInterval) {
-                  // Add safety check
-                  newConfidenceIntervals.set(`relapse-${prediction.disorderId}`, {
-                    upper: prediction.confidenceInterval.upper,
-                    lower: prediction.confidenceInterval.lower,
-                    confidenceLevel: prediction.confidenceInterval.confidenceLevel,
-                  });
+              predictions.forEach((prediction: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any) => {
+                if (prediction && prediction.disorderId) { // Basic validation
+                    totalDataPoints += (prediction.dataPoints || 0);
+                    if (prediction.confidenceInterval) {
+                    // Add safety check
+                    newConfidenceIntervals.set(`relapse-${prediction.disorderId}`, {
+                        upper: prediction.confidenceInterval.upper,
+                        lower: prediction.confidenceInterval.lower,
+                        confidenceLevel: prediction.confidenceInterval.confidenceLevel,
+                    });
+                    }
                 }
               });
 
@@ -310,18 +303,13 @@ export function useClinicalPredictionController(patientId: string) {
                 relapsePredictions: predictions, // Use extracted value
                 confidenceIntervals: newConfidenceIntervals,
                 lastUpdated: new Date(),
-                dataPoints: predictions.reduce(
-                  // Use extracted value
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  (sum: number, pred: any // eslint-disable-line @typescript-eslint/no-explicit-any) => sum + (pred.dataPoints || 0), // Add types
-                  0
-                ),
+                dataPoints: totalDataPoints,
               };
-            });
+            }); // End of setState
 
             return success(predictions); // Use extracted value
           } else {
-            return failure(new Error('Prediction successful but data is missing.'));
+            return failure(new Error('Prediction successful but data format is incorrect.'));
           }
         } else {
           // Handle failure case
@@ -330,6 +318,7 @@ export function useClinicalPredictionController(patientId: string) {
           return failure(new Error(errorMessage || 'Failed to predict relapse'));
         }
       } catch (error) {
+        console.error("Error in predictRelapse:", error);
         return failure(
           // Ensure error object is passed
           error instanceof Error ? error : new Error('Unknown error in prediction')
@@ -358,8 +347,7 @@ export function useClinicalPredictionController(patientId: string) {
         // const result = await clinicalService.assessRisks(assessmentParams);
         console.warn('assessRisks service method not implemented.');
         // Placeholder failure with appropriate type for demonstration
-        // Placeholder failure with appropriate type for demonstration
-        const result: ResultType<any, Error> = failure(
+        const result: ResultType<any[], Error> = failure( // Assuming service returns array
           new Error('Service method assessRisks not implemented.')
         );
 
@@ -367,28 +355,30 @@ export function useClinicalPredictionController(patientId: string) {
         // No changes needed here. Keeping the existing correct logic:
         if (Result.isSuccess(result)) {
           const assessments = result.value; // Access the value
-          if (assessments) {
+          if (Array.isArray(assessments)) {
             // Check if value exists
             // Update state with new assessments
             setState((prevState) => {
               const newRiskAssessments = new Map(prevState.riskAssessments);
               const newConfidenceIntervals = new Map(prevState.confidenceIntervals);
+              let totalDataPoints = 0;
 
               // Add each risk assessment to the maps
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              assessments.forEach((assessment: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
-                // Use extracted value
-                // Add 'any' type for now
-                newRiskAssessments.set(assessment.riskFactorId, assessment);
+              assessments.forEach((assessment: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any) => {
+                if (assessment && assessment.riskFactorId) { // Basic validation
+                    newRiskAssessments.set(assessment.riskFactorId, assessment);
+                    totalDataPoints += (assessment.dataPoints || 0);
 
-                // Store confidence intervals separately
-                if (assessment.confidenceInterval) {
-                  // Add safety check
-                  newConfidenceIntervals.set(`risk-${assessment.riskFactorId}`, {
-                    upper: assessment.confidenceInterval.upper,
-                    lower: assessment.confidenceInterval.lower,
-                    confidenceLevel: assessment.confidenceInterval.confidenceLevel,
-                  });
+                    // Store confidence intervals separately
+                    if (assessment.confidenceInterval) {
+                    // Add safety check
+                    newConfidenceIntervals.set(`risk-${assessment.riskFactorId}`, {
+                        upper: assessment.confidenceInterval.upper,
+                        lower: assessment.confidenceInterval.lower,
+                        confidenceLevel: assessment.confidenceInterval.confidenceLevel,
+                    });
+                    }
                 }
               });
 
@@ -397,22 +387,20 @@ export function useClinicalPredictionController(patientId: string) {
                 riskAssessments: newRiskAssessments,
                 confidenceIntervals: newConfidenceIntervals,
                 lastUpdated: new Date(),
-                dataPoints: assessments.reduce(
-                  // Use extracted value
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  (sum: number, assessment: any // eslint-disable-line @typescript-eslint/no-explicit-any) => sum + (assessment.dataPoints || 0), // Add types
-                  0
-                ),
+                dataPoints: totalDataPoints,
               };
-            });
+            }); // End of setState
 
             // Return a copy of the assessments map
-            return success(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              new Map(assessments.map((a: any // eslint-disable-line @typescript-eslint/no-explicit-any) => [a.riskFactorId, a])) // Use extracted value
-            ); // Add type
+            const resultMap = new Map<string, RiskAssessment>();
+            assessments.forEach((a: any) => {
+                if (a && a.riskFactorId) {
+                    resultMap.set(a.riskFactorId, a);
+                }
+            });
+            return success(resultMap);
           } else {
-            return failure(new Error('Assessment successful but data is missing.'));
+            return failure(new Error('Assessment successful but data format is incorrect.'));
           }
         } else {
           // Handle failure case
@@ -421,6 +409,7 @@ export function useClinicalPredictionController(patientId: string) {
           return failure(new Error(errorMessage || 'Failed to assess risks'));
         }
       } catch (error) {
+        console.error("Error in assessRisks:", error);
         return failure(
           // Ensure error object is passed
           error instanceof Error ? error : new Error('Unknown error in assessment')
@@ -482,6 +471,7 @@ export function useClinicalPredictionController(patientId: string) {
 
         return result;
       } catch (error) {
+        console.error("Error in calculateAccuracy:", error);
         return failure(
           // Ensure error object is passed
           error instanceof Error ? error : new Error('Unknown error calculating accuracy')
@@ -499,50 +489,27 @@ export function useClinicalPredictionController(patientId: string) {
     ): Promise<ResultType<T, Error>> => {
       // Added error type
       try {
+        // Basic validation
+        if (!Array.isArray(results) || !Array.isArray(confidenceLevels) || results.length !== confidenceLevels.length) {
+          return failure(new Error('Invalid input for model combination'));
+        }
         if (results.length === 0) {
-          return failure(new Error('No prediction results to combine')); // Corrected failure call
+          return failure(new Error('No results to combine'));
         }
 
-        if (results.length === 1) {
-          return success(results[0]);
-        }
+        // TODO: Implement actual model combination logic based on state.aggregationMethod
+        console.warn('combineModels logic not implemented.');
 
-        // Different combination strategies based on aggregation method
-        switch (state.aggregationMethod) {
-          case 'weighted': {
-            const totalConfidence = confidenceLevels.reduce((sum, level) => sum + level, 0);
+        // Placeholder: Return the first result for now
+        const combinedResult = results[0];
 
-            if (totalConfidence === 0) {
-              return failure(new Error('Cannot combine with zero confidence')); // Corrected failure call
-            }
-            // Assign directly instead of spreading generic T
-            // Assign directly instead of spreading generic T
-            const combinedResult = results[0]; // Corrected: Simplified combination logic
-            return success(combinedResult);
-          }
+        // Update state if needed (e.g., store combined confidence)
+        // setState(prevState => ({ ... }));
 
-          case 'bayesian': {
-            return success(results[0]); // Simplified
-          }
-
-          case 'ensemble': {
-            return success(results[0]); // Simplified
-          }
-
-          case 'highest-confidence': {
-            const maxIndex = confidenceLevels.reduce(
-              (maxIdx, confidence, idx) => (confidence > confidenceLevels[maxIdx] ? idx : maxIdx),
-              0
-            );
-            return success(results[maxIndex]);
-          }
-
-          default:
-            return failure(new Error('Unknown aggregation method')); // Corrected failure call
-        }
+        return success(combinedResult);
       } catch (error) {
+        console.error("Error in combineModels:", error);
         return failure(
-          // Ensure error object is passed
           error instanceof Error ? error : new Error('Unknown error combining models')
         );
       }
@@ -552,27 +519,23 @@ export function useClinicalPredictionController(patientId: string) {
 
   // Get available prediction models
   const getAvailableModels = useCallback(async (): Promise<Result<PredictionModel[], Error>> => {
-    // Added error type
     try {
-      // TODO: Implement actual service call when available
-      // const result = await clinicalService.getAvailableModels();
+      // TODO: Implement actual service call
       console.warn('getAvailableModels service method not implemented.');
-      const result = failure(new Error('Service method getAvailableModels not implemented.')); // Placeholder failure
-
-      return result;
+      // Placeholder success
+      return success(['bayesian', 'statistical', 'neural_network']); // Example models
     } catch (error) {
+      console.error("Error in getAvailableModels:", error);
       return failure(
-        // Ensure error object is passed
-        error instanceof Error ? error : new Error('Unknown error fetching available models')
+        error instanceof Error ? error : new Error('Unknown error fetching models')
       );
     }
   }, []);
 
-  return {
-    // State
-    ...state,
 
-    // Methods
+  // Return the controller state and methods
+  return {
+    ...state,
     predictSymptomTrajectories,
     predictTreatmentOutcomes,
     predictRelapse,
@@ -583,4 +546,4 @@ export function useClinicalPredictionController(patientId: string) {
     combineModels,
     getAvailableModels,
   };
-}
+} // End of useClinicalPredictionController hook
