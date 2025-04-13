@@ -31,10 +31,10 @@ const expiredTokens: AuthTokens = {
 };
 
 // Mocks for the AuthApiClient methods
-const mockLogin = vi.fn();
-const mockLogout = vi.fn();
-const mockRefreshToken = vi.fn();
-const mockGetCurrentUser = vi.fn();
+const mockLogin = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK login] Called with:', args); throw new Error('Mock not configured for this call'); });
+const mockLogout = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK logout] Called with:', args); throw new Error('Mock not configured for this call'); });
+const mockRefreshToken = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK refreshToken] Called with:', args); throw new Error('Mock not configured for this call'); });
+const mockGetCurrentUser = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK getCurrentUser] Called with:', args); throw new Error('Mock not configured for this call'); });
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -63,8 +63,8 @@ describe('AuthService', () => {
   describe('login', () => {
     it('should successfully login and store tokens', async () => {
       // Setup mocks
-      mockLogin.mockResolvedValueOnce(mockTokens);
-      mockGetCurrentUser.mockResolvedValueOnce(mockUser);
+      mockLogin.mockResolvedValueOnce(mockTokens); // Configure specific mock response
+      mockGetCurrentUser.mockResolvedValueOnce(mockUser); // Configure specific mock response
 
       // Execute
       const result = await authService.login('test@example.com', 'password123');
@@ -86,7 +86,7 @@ describe('AuthService', () => {
 
     it('should handle login failure', async () => {
       // Setup mock to simulate API error
-      mockLogin.mockRejectedValueOnce(new Error('Invalid credentials'));
+      mockLogin.mockRejectedValueOnce(new Error('Invalid credentials')); // Configure specific mock response
 
       // Execute
       const result = await authService.login('invalid@example.com', 'wrongpassword');
@@ -106,7 +106,7 @@ describe('AuthService', () => {
 
     it('should handle API timeouts and network errors', async () => {
       // Setup mock to simulate network error
-      mockLogin.mockRejectedValueOnce(new Error('Network error'));
+      mockLogin.mockRejectedValueOnce(new Error('Network error')); // Configure specific mock response
 
       // Execute
       const result = await authService.login('test@example.com', 'password123');
@@ -121,7 +121,7 @@ describe('AuthService', () => {
     it('should logout and clear tokens', async () => {
       // Setup
       mockLocalStorage.setItem('auth_tokens', JSON.stringify(mockTokens)); // Use global mock
-      mockLogout.mockResolvedValueOnce(undefined);
+      mockLogout.mockResolvedValueOnce(undefined); // Configure specific mock response
 
       // Execute
       const result = await authService.logout();
@@ -142,7 +142,7 @@ describe('AuthService', () => {
     it('should clear tokens even if API call fails', async () => {
       // Setup
       mockLocalStorage.setItem('auth_tokens', JSON.stringify(mockTokens)); // Use global mock
-      mockLogout.mockRejectedValueOnce(new Error('API error'));
+      mockLogout.mockRejectedValueOnce(new Error('API error')); // Configure specific mock response
 
       // Execute
       const result = await authService.logout();
@@ -180,7 +180,7 @@ describe('AuthService', () => {
     it('should initialize auth with valid tokens', async () => {
       // Setup
       mockLocalStorage.setItem('auth_tokens', JSON.stringify(mockTokens)); // Use global mock
-      mockGetCurrentUser.mockResolvedValueOnce(mockUser);
+      mockGetCurrentUser.mockResolvedValueOnce(mockUser); // Configure specific mock response
 
       // Execute
       const result = await authService.initializeAuth();
@@ -200,8 +200,8 @@ describe('AuthService', () => {
     it('should refresh expired tokens and fetch user', async () => {
       // Setup
       mockLocalStorage.setItem('auth_tokens', JSON.stringify(expiredTokens)); // Use global mock
-      mockRefreshToken.mockResolvedValueOnce(mockTokens);
-      mockGetCurrentUser.mockResolvedValueOnce(mockUser);
+      mockRefreshToken.mockResolvedValueOnce(mockTokens); // Configure specific mock response
+      mockGetCurrentUser.mockResolvedValueOnce(mockUser); // Configure specific mock response
 
       // Execute
       const result = await authService.initializeAuth();
@@ -223,7 +223,7 @@ describe('AuthService', () => {
     it('should clear tokens and return unauthenticated state if refresh fails', async () => {
       // Setup
       mockLocalStorage.setItem('auth_tokens', JSON.stringify(expiredTokens)); // Use global mock
-      mockRefreshToken.mockRejectedValueOnce(new Error('Token expired'));
+      mockRefreshToken.mockRejectedValueOnce(new Error('Token expired')); // Configure specific mock response
 
       // Execute
       const result = await authService.initializeAuth();
@@ -244,7 +244,7 @@ describe('AuthService', () => {
     it('should handle getCurrentUser failure and clear tokens', async () => {
       // Setup
       mockLocalStorage.setItem('auth_tokens', JSON.stringify(mockTokens)); // Use global mock
-      mockGetCurrentUser.mockRejectedValueOnce(new Error('User not found'));
+      mockGetCurrentUser.mockRejectedValueOnce(new Error('User not found')); // Configure specific mock response
 
       // Execute
       const result = await authService.initializeAuth();
