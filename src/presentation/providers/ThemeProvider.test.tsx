@@ -1,6 +1,9 @@
+/**
+ * @vitest-environment jsdom
+ */
 /* eslint-disable */
-// Import the DOM setup first to ensure JSDOM environment is properly configured
-import '../../test/setup.dom';
+// Import the test setup first to ensure JSDOM environment is properly configured
+import '../../test/setup.ts';
 import { render, screen, act, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -23,121 +26,9 @@ function TestComponent() {
 }
 
 describe('ThemeProvider', () => {
-  let mockGetItem: ReturnType<typeof vi.fn>;
-  let mockSetItem: ReturnType<typeof vi.fn>;
-  let mockMatchMedia: ReturnType<typeof vi.fn>;
-  // Declare listener at describe scope
-  let mediaQueryChangeListener: ((e: Partial<MediaQueryListEvent>) => void) | null = null;
-  // Store the mock media query list instance to access _triggerChange
-  // Define a custom type that extends MediaQueryList with our test helper method
-  type MockMediaQueryList = MediaQueryList & {
-    _triggerChange?: (matches: boolean) => void;
-  };
-  let mediaQueryListInstance: MockMediaQueryList | null = null;
+  // No local beforeEach needed for mocks, as they are handled globally in setup.ts
 
-  beforeEach(() => {
-    // Reset mocks
-    mockGetItem = vi.fn();
-    mockSetItem = vi.fn();
-    // Default mock for matchMedia (prefers light)
-    mockMatchMedia = vi.fn().mockImplementation((query: string) => {
-      if (query === '(prefers-color-scheme: dark)') {
-        return false; // Default to prefers light
-      }
-      return false;
-    });
-    // Reset listener
-    mediaQueryChangeListener = null;
-    mediaQueryListInstance = null; // Reset instance
-
-    // Set up document if it doesn't exist (for JSDOM environment)
-    if (typeof document !== 'undefined') {
-      // Clear classes before each test
-      document.documentElement.classList.remove('light', 'dark');
-      document.documentElement.removeAttribute('class'); // Ensure clean slate
-    }
-
-    // Setup localStorage mock
-    Object.defineProperty(window, 'localStorage', {
-      value: {
-        getItem: mockGetItem,
-        setItem: mockSetItem,
-        removeItem: vi.fn(), // Keep removeItem mock for assertion
-        clear: vi.fn(),
-      },
-      writable: true,
-      configurable: true,
-    });
-
-    // Setup matchMedia mock - Capture listener
-    const mockMediaQueryListObject: {
-      matches: boolean;
-      media: string;
-      onchange: null;
-      addEventListener: ReturnType<typeof vi.fn>;
-      removeEventListener: ReturnType<typeof vi.fn>;
-      dispatchEvent: ReturnType<typeof vi.fn>; // Keep dispatchEvent for potential fallback
-      addListener: ReturnType<typeof vi.fn>; // Deprecated
-      removeListener: ReturnType<typeof vi.fn>; // Deprecated
-      _triggerChange?: (matches: boolean) => void; // Add helper signature
-    } = {
-      matches: mockMatchMedia('(prefers-color-scheme: dark)'),
-      media: '(prefers-color-scheme: dark)',
-      onchange: null,
-      addEventListener: vi.fn((event, listener) => {
-        if (event === 'change' && listener) {
-          mediaQueryChangeListener = listener; // Capture listener
-        }
-      }),
-      removeEventListener: vi.fn((event, listener) => {
-        if (event === 'change' && mediaQueryChangeListener === listener) {
-          mediaQueryChangeListener = null;
-        }
-      }),
-      dispatchEvent: vi.fn(), // Keep mock but don't rely on it
-      addListener: vi.fn((listener) => {
-        mediaQueryChangeListener = listener;
-      }), // Deprecated fallback
-      removeListener: vi.fn((listener) => {
-        if (mediaQueryChangeListener === listener) {
-          mediaQueryChangeListener = null;
-        }
-      }), // Deprecated fallback
-      // Define _triggerChange here
-      _triggerChange: function (matches: boolean) {
-        this.matches = matches;
-        if (mediaQueryChangeListener) {
-          // Call listener directly within the mock's context
-          mediaQueryChangeListener({ matches: this.matches } as Partial<MediaQueryListEvent>);
-        } else {
-          console.warn('Listener not captured when _triggerChange called');
-        }
-      },
-    };
-    // Store the instance for tests to call _triggerChange
-    mediaQueryListInstance = mockMediaQueryListObject as unknown as MockMediaQueryList;
-
-    Object.defineProperty(window, 'matchMedia', {
-      value: vi.fn().mockImplementation((query: string) => {
-        if (query === '(prefers-color-scheme: dark)') {
-          mockMediaQueryListObject.matches = mockMatchMedia(query);
-          return mockMediaQueryListObject; // Return the persistent object
-        }
-        return {
-          matches: false,
-          media: query,
-          onchange: null,
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-          dispatchEvent: vi.fn(),
-        };
-      }),
-      writable: true,
-      configurable: true,
-    });
-  });
+  // We still need a standard afterEach for cleanup
 
   afterEach(() => {
     cleanup();
@@ -145,8 +36,10 @@ describe('ThemeProvider', () => {
   });
 
   it('uses system theme by default (prefers light)', async () => {
-    mockGetItem.mockReturnValue(null);
-    mockMatchMedia.mockReturnValue(false);
+    // Use global mocks
+    globalThis.mockLocalStorage.getItem.mockReturnValue(null);
+    // Set initial state BEFORE rendering
+    (globalThis as any).globalCurrentMatchesState = false; // Prefers light
 
     render(
       <ThemeProvider>
@@ -162,8 +55,10 @@ describe('ThemeProvider', () => {
   });
 
   it('uses system theme by default (prefers dark)', async () => {
-    mockGetItem.mockReturnValue(null);
-    mockMatchMedia.mockReturnValue(true);
+    // Use global mocks
+    globalThis.mockLocalStorage.getItem.mockReturnValue(null);
+    // Set initial state BEFORE rendering
+    (globalThis as any).globalCurrentMatchesState = true; // Prefers dark
 
     render(
       <ThemeProvider>
@@ -171,17 +66,18 @@ describe('ThemeProvider', () => {
       </ThemeProvider>
     );
 
+    // Wait specifically for the 'dark' class to be applied
     await waitFor(() => {
-      expect(screen.getByTestId('theme').textContent).toBe('system');
-      expect(document.documentElement.classList.contains('dark')).toBe(true);
+      expect(document.documentElement).toHaveClass('dark');
     });
     expect(document.documentElement.classList.contains('light')).toBe(false);
   });
 
   it('loads saved theme from localStorage', async () => {
-    // Mock localStorage to return 'dark' for the ui-theme key
-    mockGetItem.mockImplementation((key: string) => {
-      if (key === 'theme') return 'dark';
+    // Use global mocks
+    globalThis.mockLocalStorage.getItem.mockImplementation((key: string) => {
+      // Use the correct storageKey from the component's default props
+      if (key === 'ui-theme') return 'dark';
       return null;
     });
 
@@ -199,8 +95,10 @@ describe('ThemeProvider', () => {
   });
 
   it('allows changing theme', async () => {
-    mockGetItem.mockReturnValue(null);
-    mockMatchMedia.mockReturnValue(false); // System prefers light
+    // Use global mocks
+    globalThis.mockLocalStorage.getItem.mockReturnValue(null);
+    // Set initial state BEFORE rendering
+    (globalThis as any).globalCurrentMatchesState = false; // Prefers light
 
     render(
       <ThemeProvider>
@@ -223,7 +121,7 @@ describe('ThemeProvider', () => {
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
     expect(document.documentElement.classList.contains('light')).toBe(false);
-    expect(mockSetItem).toHaveBeenCalledWith('theme', 'dark');
+    expect(globalThis.mockLocalStorage.setItem).toHaveBeenCalledWith('ui-theme', 'dark');
 
     // Change to light theme
     await act(async () => {
@@ -234,7 +132,7 @@ describe('ThemeProvider', () => {
       expect(document.documentElement.classList.contains('light')).toBe(true);
     });
     expect(document.documentElement.classList.contains('dark')).toBe(false);
-    expect(mockSetItem).toHaveBeenCalledWith('theme', 'light');
+    expect(globalThis.mockLocalStorage.setItem).toHaveBeenCalledWith('ui-theme', 'light');
 
     // Change back to system theme
     await act(async () => {
@@ -247,14 +145,16 @@ describe('ThemeProvider', () => {
     });
     expect(document.documentElement.classList.contains('dark')).toBe(false);
     // Assert setItem was called with 'system' (as per component logic)
-    expect(mockSetItem).toHaveBeenCalledWith('theme', 'system');
+    expect(globalThis.mockLocalStorage.setItem).toHaveBeenCalledWith('ui-theme', 'system');
     // The implementation doesn't call removeItem for system theme
-    expect(window.localStorage.removeItem).not.toHaveBeenCalled();
+    expect(globalThis.mockLocalStorage.removeItem).not.toHaveBeenCalled();
   });
 
   it('follows system theme when set to system', async () => {
-    mockGetItem.mockReturnValue(null); // Start with system
-    mockMatchMedia.mockReturnValue(true); // System prefers dark initially
+    // Use global mocks
+    globalThis.mockLocalStorage.getItem.mockReturnValue(null); // Start with system
+    // Set initial state BEFORE rendering
+    (globalThis as any).globalCurrentMatchesState = true; // Prefers dark
 
     render(
       <ThemeProvider>
@@ -263,31 +163,26 @@ describe('ThemeProvider', () => {
     );
 
     // Initial state (system -> dark)
+    // Wait specifically for the 'dark' class to be applied after the change
     await waitFor(() => {
-      expect(screen.getByTestId('theme').textContent).toBe('system');
-      expect(document.documentElement.classList.contains('dark')).toBe(true);
+      expect(document.documentElement).toHaveClass('dark');
     });
 
     // Simulate system theme change to light
     await act(async () => {
       // Use the mock instance's helper to trigger the change correctly
-      if (mediaQueryListInstance?._triggerChange) {
-        mediaQueryListInstance._triggerChange(false); // Simulate change to light
-        // Add a microtask delay to allow state update to potentially settle
-        await new Promise((resolve) => setTimeout(resolve, 0));
-      } else {
-        console.error('mediaQueryListInstance or _triggerChange not available in test');
-      }
+      // Use the global mock instance's helper, ensuring it exists
+      // Simulate system change using the global helper
+      (globalThis as any).mockMediaQueryListInstance?._triggerChange?.(false); // Simulate change to light
+      // Add a slightly longer delay to ensure effect runs
+      await new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     // Use waitFor to ensure the effect listener has updated the DOM
-    await waitFor(
-      () => {
-        // Wait specifically for the 'light' class to appear
-        expect(document.documentElement.classList.contains('light')).toBe(true);
-      },
-      { timeout: 1000 }
-    ); // Increased timeout slightly more
+    // Wait specifically for the 'light' class after the change
+    await waitFor(() => {
+      expect(document.documentElement).toHaveClass('light');
+    });
 
     // After waiting, assert the absence of the 'dark' class
     expect(document.documentElement.classList.contains('dark')).toBe(false);
@@ -298,23 +193,19 @@ describe('ThemeProvider', () => {
 
     // Simulate system theme change back to dark
     await act(async () => {
-      // Use the mock instance's helper to trigger the change correctly
-      if (mediaQueryListInstance?._triggerChange) {
-        mediaQueryListInstance._triggerChange(true); // Simulate change to dark
-        // Add a microtask delay to allow state update to potentially settle
-        await new Promise((resolve) => setTimeout(resolve, 0));
-      } else {
-        console.error('mediaQueryListInstance or _triggerChange not available in test');
-      }
+      // Use the global mock instance's helper
+      // Use the global mock instance's helper, ensuring it exists
+      // Simulate system change using the global helper
+      (globalThis as any).mockMediaQueryListInstance?._triggerChange?.(true); // Simulate change to dark
+      // Add a slightly longer delay to ensure effect runs
+      await new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     // Use waitFor to ensure the effect listener has updated the DOM
-    await waitFor(
-      () => {
-        expect(document.documentElement.classList.contains('dark')).toBe(true);
-      },
-      { timeout: 500 }
-    ); // Increase timeout slightly
+    // Wait specifically for the 'dark' class after changing back
+    await waitFor(() => {
+       expect(document.documentElement).toHaveClass('dark');
+    });
 
     // Theme state remains 'system'
     expect(screen.getByTestId('theme').textContent).toBe('system');

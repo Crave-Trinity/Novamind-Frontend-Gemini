@@ -64,25 +64,25 @@ export function ThemeProvider({
   });
 
   useEffect(() => {
-    // Safely handle document manipulation in SSR/testing environments
+    // Safely handle document manipulation
     if (typeof window === 'undefined' || !window.document || !window.document.documentElement) return;
-    
+
     try {
       const root = window.document.documentElement;
-      
-      // Remove all theme classes
-      root.classList.remove('light', 'dark');
-      
-      // Apply appropriate theme class
-      if (theme === 'system') {
-        root.classList.add(systemTheme);
-      } else {
-        root.classList.add(theme);
+      const effectiveTheme = theme === 'system' ? systemTheme : theme;
+
+      // Apply the correct class and remove the other
+      if (effectiveTheme === 'dark') {
+        root.classList.remove('light');
+        root.classList.add('dark');
+      } else { // Default to light
+        root.classList.remove('dark');
+        root.classList.add('light');
       }
     } catch (err) {
       console.error('Error updating document theme classes:', err);
     }
-  }, [theme, systemTheme]);
+  }, [theme, systemTheme]); // Dependencies remain the same
 
   useEffect(() => {
     // Save theme selection to localStorage, with error handling

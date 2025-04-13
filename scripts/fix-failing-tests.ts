@@ -137,3 +137,53 @@ const fixThemeProvider = (): boolean => {
       } 
       // Older browsers (legacy support)
       else if (mediaQuery.addListener) {
+        mediaQuery.addListener(handleChange);
+        return () => {
+          mediaQuery.removeListener(handleChange);
+        };
+      }
+    } catch (err) {
+      console.error('Error setting up media query listener:', err);
+    }
+  }, []);`
+    );
+    
+    if (content !== updatedContent) {
+      fs.writeFileSync(filePath, updatedContent);
+      console.log('✅ Updated ThemeProvider with robust window and localStorage handling');
+      return true;
+    } else {
+      console.log('✓ ThemeProvider already has robust handling');
+      return false;
+    }
+  } catch (error) {
+    console.error(`Error fixing ThemeProvider: ${error}`);
+    return false;
+  }
+};
+
+// Main function
+const main = async (): Promise<void> => {
+  const results: boolean[] = [];
+  
+  // Apply fixes
+  results.push(fixTestSetup());
+  results.push(fixThemeProvider());
+  
+  // Summary
+  const successCount = results.filter(Boolean).length;
+  console.log(`\n🔍 SUMMARY: ${successCount}/${results.length} fix operations completed successfully.`);
+  
+  if (successCount === results.length) {
+    console.log('\n✨ All fixes have been applied! Run the tests to verify the fixes.');
+    console.log('   Run: npm test');
+  } else {
+    console.log('\n⚠️ Some fixes could not be applied. Check the logs above for details.');
+  }
+};
+
+// Run the script
+main().catch(error => {
+  console.error(`❌ Unexpected error: ${error}`);
+  process.exit(1);
+});

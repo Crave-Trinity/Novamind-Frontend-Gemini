@@ -77,7 +77,7 @@ export default defineConfig({
     
     // Single setup file that properly includes all needed functionality
     setupFiles: [
-      './src/test/setup.clean.ts',
+      './src/test/setup.ts', // Use the canonical setup file
     ],
     
     // Coverage configuration
