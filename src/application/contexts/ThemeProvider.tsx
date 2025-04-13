@@ -101,7 +101,7 @@ export const ThemeContext = createContext<ThemeContextType>({
 // Hook for accessing theme context
 export const useTheme = () => {
   const context = React.useContext(ThemeContext);
-  if (context === undefined) {
+  if (!context || context === undefined) {
     // This error ensures the hook is used correctly within the provider tree
     throw new Error('useTheme must be used within a ThemeProvider');
   }
@@ -124,7 +124,7 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, defaultTheme = 
   // Initialize theme from localStorage or default
   const [theme, setThemeState] = useState<ThemeType>(() => {
     try {
-      const savedTheme = localStorage.getItem('theme') as ThemeType;
+      const savedTheme = localStorage.getItem('ui-theme') as ThemeType;
       return savedTheme && ['light', 'dark', 'system', 'clinical', 'retro'].includes(savedTheme)
         ? savedTheme
         : defaultTheme;
@@ -146,7 +146,7 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, defaultTheme = 
   const setTheme = useCallback((newTheme: ThemeType) => {
     if (['light', 'dark', 'system', 'clinical', 'retro'].includes(newTheme)) {
       try {
-        localStorage.setItem('theme', newTheme);
+        localStorage.setItem('ui-theme', newTheme);
       } catch (e) {
         console.error('Error saving theme to localStorage', e);
       }
@@ -234,7 +234,7 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, defaultTheme = 
           // Define handleChange inline or ensure it's defined if used below
           const inlineHandleChange = (e: MediaQueryListEvent) => {
             // Renamed to avoid conflict if outer one is restored
-            const savedTheme = localStorage.getItem('theme');
+            const savedTheme = localStorage.getItem('ui-theme');
             // Only set theme based on system change if no theme is explicitly saved
             if (!savedTheme || savedTheme === 'system') {
               setTheme(e.matches ? 'dark' : 'light');

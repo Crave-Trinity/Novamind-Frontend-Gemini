@@ -67,7 +67,7 @@ export class EnhancedAuthService {
   /**
    * Schedule token refresh before expiration
    */
-  private setupRefreshTimeout(): void {
+  protected setupRefreshTimeout(): void {
     // Clear any existing timeout
     if (this.refreshTimeoutId !== null) {
       clearTimeout(this.refreshTimeoutId);
@@ -98,7 +98,7 @@ export class EnhancedAuthService {
   /**
    * Silently refresh token in the background
    */
-  private async refreshTokenSilently(): Promise<AuthTokens | null> {
+  protected async refreshTokenSilently(): Promise<AuthTokens | null> {
     const tokens = this.getStoredTokens();
     if (!tokens) return null;
 
