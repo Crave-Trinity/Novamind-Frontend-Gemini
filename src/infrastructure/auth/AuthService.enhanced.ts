@@ -100,39 +100,36 @@ export class EnhancedAuthService {
    */
   protected async refreshTokenSilently(): Promise<AuthTokens | null> {
     const tokens = this.getStoredTokens();
-    if (!tokens) return null;
-
-    // If a refresh is already in progress, return that promise
-    if (this.refreshPromise) {
-      return this.refreshPromise;
+    if (!tokens) {
+        console.log('[refreshTokenSilently] No stored tokens found.');
+        return null;
     }
 
-    // Create and store the promise reference first before execution
-    // Create the promise with the same reference that we'll return
-    const refreshPromiseObj = this.client?.refreshToken(tokens.refreshToken)
-      .then(newTokens => {
-        this.storeTokens(newTokens);
-        console.log('Token refreshed successfully');
-        return newTokens;
-      })
-      .catch(error => {
-        console.error('Failed to refresh token:', error);
-        this.clearTokens();
-        // Dispatch logout event without try-catch to ensure it propagates properly
-        try {
-          window.dispatchEvent(new CustomEvent('auth:session-expired'));
-        } catch (dispatchError) {
-          console.error('Error dispatching session-expired event:', dispatchError);
+    console.log('[refreshTokenSilently] Attempting token refresh...');
+    // Directly attempt refresh without promise caching for simplicity in testing
+    try {
+        // Ensure client exists before calling refreshToken
+        if (!this.client) {
+            console.error('[refreshTokenSilently] AuthApiClient not initialized.');
+            throw new Error('Auth client not available');
         }
-        return null;
-      })
-      .finally(() => {
-        this.refreshPromise = null;
-      });
-    
-    // Store the promise reference before returning it
-    this.refreshPromise = refreshPromiseObj;
-    return refreshPromiseObj;
+        
+        const newTokens = await this.client.refreshToken(tokens.refreshToken);
+        this.storeTokens(newTokens);
+        console.log('[refreshTokenSilently] Token refreshed successfully.');
+        return newTokens;
+    } catch (error) {
+        console.error('[refreshTokenSilently] Failed to refresh token:', error);
+        this.clearTokens(); // Clear tokens on refresh failure
+        try {
+            // Attempt to dispatch session expired event
+            window.dispatchEvent(new CustomEvent('auth:session-expired'));
+            console.log('[refreshTokenSilently] Dispatched session-expired event.');
+        } catch (dispatchError) {
+            console.error('[refreshTokenSilently] Error dispatching session-expired event:', dispatchError);
+        }
+        return null; // Return null indicating refresh failure
+    }
   }
 
   /**
