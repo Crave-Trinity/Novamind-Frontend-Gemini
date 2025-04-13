@@ -284,12 +284,15 @@ export class EnhancedAuthService {
       // Provide more specific error messages based on error type
       let errorMessage = 'Invalid credentials';
       
-      if (error instanceof Error) {
-        if (error.message.includes('network') || error.message.includes('timeout')) {
+      if (error instanceof Error && typeof error.message === 'string') {
+        const lowerCaseMessage = error.message.toLowerCase();
+        if (lowerCaseMessage.includes('network') || lowerCaseMessage.includes('timeout')) {
           errorMessage = 'Network error. Please check your connection and try again.';
-        } else if (error.message.includes('rate') || error.message.includes('429')) {
+        } else if (lowerCaseMessage.includes('rate') || lowerCaseMessage.includes('429')) {
           errorMessage = 'Too many login attempts. Please try again later.';
         }
+        // Add a log to see what error is actually caught
+        console.error('[EnhancedAuthService Login Catch] Caught Error:', error.message, ' | Assigned ErrorMessage:', errorMessage);
       }
       
       return {
