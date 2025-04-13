@@ -139,3 +139,6 @@ When extending the test environment:
 3. **Explicit Dependencies**: Clearly state what is being tested and mocked
 4. **Clean Teardown**: Ensure tests clean up after themselves using afterEach hooks
 5. **Minimal Assertions**: Test one thing per test case
+6. **Descriptive Names**: Use descriptive test and describe block names
+
+By following these guidelines, we maintain a stable, predictable test environment that supports our goal of 80% test coverage.
