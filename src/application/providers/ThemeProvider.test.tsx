@@ -133,8 +133,9 @@ describe('ThemeProvider', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('mode')).toHaveTextContent('system');
-      expect(screen.getByTestId('theme')).toHaveTextContent('light'); // Context theme reflects applied
+      // Use direct textContent property instead of toHaveTextContent
+      expect(screen.getByTestId('mode').textContent).toBe('system');
+      expect(screen.getByTestId('theme').textContent).toBe('light'); // Context theme reflects applied
       expect(document.documentElement.classList.contains('light')).toBe(true);
       expect(document.documentElement.classList.contains('dark')).toBe(false);
     });
@@ -151,8 +152,8 @@ describe('ThemeProvider', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('mode')).toHaveTextContent('system');
-      expect(screen.getByTestId('theme')).toHaveTextContent('dark'); // Context theme reflects applied
+      expect(screen.getByTestId('mode').textContent).toBe('system');
+      expect(screen.getByTestId('theme').textContent).toBe('dark'); // Context theme reflects applied
       expect(document.documentElement.classList.contains('dark')).toBe(true);
       expect(document.documentElement.classList.contains('light')).toBe(false);
     });
@@ -168,8 +169,8 @@ describe('ThemeProvider', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('mode')).toHaveTextContent('dark');
-      expect(screen.getByTestId('theme')).toHaveTextContent('dark');
+      expect(screen.getByTestId('mode').textContent).toBe('dark');
+      expect(screen.getByTestId('theme').textContent).toBe('dark');
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
     expect(document.documentElement.classList.contains('light')).toBe(false);
@@ -187,8 +188,8 @@ describe('ThemeProvider', () => {
 
     // Initial state (system -> light)
     await waitFor(() => {
-      expect(screen.getByTestId('mode')).toHaveTextContent('system');
-      expect(screen.getByTestId('theme')).toHaveTextContent('light');
+      expect(screen.getByTestId('mode').textContent).toBe('system');
+      expect(screen.getByTestId('theme').textContent).toBe('light');
       expect(document.documentElement.classList.contains('light')).toBe(true);
     });
 
@@ -197,11 +198,11 @@ describe('ThemeProvider', () => {
       await userEvent.click(screen.getByText('Dark'));
     });
     await waitFor(() => {
-      expect(screen.getByTestId('mode')).toHaveTextContent('dark');
-      expect(screen.getByTestId('theme')).toHaveTextContent('dark');
+      expect(screen.getByTestId('mode').textContent).toBe('dark');
+      expect(screen.getByTestId('theme').textContent).toBe('dark');
       expect(document.documentElement.classList.contains('dark')).toBe(true);
       expect(document.documentElement.classList.contains('light')).toBe(false);
-      expect(mockSetItem).toHaveBeenCalledWith('theme', 'dark');
+      expect(mockSetItem).toHaveBeenCalledWith('ui-theme', 'dark');
     });
 
     // Change to light theme
@@ -209,11 +210,11 @@ describe('ThemeProvider', () => {
       await userEvent.click(screen.getByText('Light'));
     });
     await waitFor(() => {
-      expect(screen.getByTestId('mode')).toHaveTextContent('light');
-      expect(screen.getByTestId('theme')).toHaveTextContent('light');
+      expect(screen.getByTestId('mode').textContent).toBe('light');
+      expect(screen.getByTestId('theme').textContent).toBe('light');
       expect(document.documentElement.classList.contains('light')).toBe(true);
       expect(document.documentElement.classList.contains('dark')).toBe(false);
-      expect(mockSetItem).toHaveBeenCalledWith('theme', 'light');
+      expect(mockSetItem).toHaveBeenCalledWith('ui-theme', 'light');
     });
 
     // Change back to system theme
@@ -221,12 +222,12 @@ describe('ThemeProvider', () => {
       await userEvent.click(screen.getByText('System'));
     });
     await waitFor(() => {
-      expect(screen.getByTestId('mode')).toHaveTextContent('system');
+      expect(screen.getByTestId('mode').textContent).toBe('system');
       // Should revert to system preference (light in this case)
-      expect(screen.getByTestId('theme')).toHaveTextContent('light');
+      expect(screen.getByTestId('theme').textContent).toBe('light');
       expect(document.documentElement.classList.contains('light')).toBe(true);
       expect(document.documentElement.classList.contains('dark')).toBe(false);
-      expect(window.localStorage.removeItem).toHaveBeenCalledWith('theme');
+      expect(window.localStorage.removeItem).toHaveBeenCalledWith('ui-theme');
     });
   });
 
@@ -242,8 +243,8 @@ describe('ThemeProvider', () => {
 
     // Initial state (system -> dark)
     await waitFor(() => {
-      expect(screen.getByTestId('mode')).toHaveTextContent('system');
-      expect(screen.getByTestId('theme')).toHaveTextContent('dark');
+      expect(screen.getByTestId('mode').textContent).toBe('system');
+      expect(screen.getByTestId('theme').textContent).toBe('dark');
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
 
@@ -258,10 +259,10 @@ describe('ThemeProvider', () => {
 
     // Use waitFor to ensure the effect listener has updated the DOM/context
     await waitFor(() => {
-      expect(screen.getByTestId('theme')).toHaveTextContent('light');
+      expect(screen.getByTestId('theme').textContent).toBe('light');
       expect(document.documentElement.classList.contains('light')).toBe(true);
     });
-    expect(screen.getByTestId('mode')).toHaveTextContent('system'); // Mode state shouldn't change
+    expect(screen.getByTestId('mode').textContent).toBe('system'); // Mode state shouldn't change
     expect(document.documentElement.classList.contains('dark')).toBe(false);
 
     // Simulate system theme change back to dark
@@ -275,10 +276,10 @@ describe('ThemeProvider', () => {
 
     // Use waitFor to ensure the effect listener has updated the DOM/context
     await waitFor(() => {
-      expect(screen.getByTestId('theme')).toHaveTextContent('dark');
+      expect(screen.getByTestId('theme').textContent).toBe('dark');
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
-    expect(screen.getByTestId('mode')).toHaveTextContent('system');
+    expect(screen.getByTestId('mode').textContent).toBe('system');
     expect(document.documentElement.classList.contains('light')).toBe(false);
   });
 

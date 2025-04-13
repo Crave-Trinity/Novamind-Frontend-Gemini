@@ -108,8 +108,8 @@ export class EnhancedAuthService {
     }
 
     // Create and store the promise reference first before execution
-    // to ensure the same reference is returned for concurrent calls
-    this.refreshPromise = this.client?.refreshToken(tokens.refreshToken)
+    // Create the promise with the same reference that we'll return
+    const refreshPromiseObj = this.client?.refreshToken(tokens.refreshToken)
       .then(newTokens => {
         this.storeTokens(newTokens);
         console.log('Token refreshed successfully');
@@ -119,14 +119,20 @@ export class EnhancedAuthService {
         console.error('Failed to refresh token:', error);
         this.clearTokens();
         // Dispatch logout event without try-catch to ensure it propagates properly
-        window.dispatchEvent(new CustomEvent('auth:session-expired'));
+        try {
+          window.dispatchEvent(new CustomEvent('auth:session-expired'));
+        } catch (dispatchError) {
+          console.error('Error dispatching session-expired event:', dispatchError);
+        }
         return null;
       })
       .finally(() => {
         this.refreshPromise = null;
       });
-
-    return this.refreshPromise;
+    
+    // Store the promise reference before returning it
+    this.refreshPromise = refreshPromiseObj;
+    return refreshPromiseObj;
   }
 
   /**
@@ -312,10 +318,18 @@ export class EnhancedAuthService {
       console.error('Logout API call failed, but proceeding with local logout:', logoutError);
       // Set error message to be returned in the state
       error = 'Logout API call failed, but session was ended locally';
-    } finally {
-      this.clearTokens();
-      // Ensure we dispatch an event when logout happens (whether successful or not)
-      window.dispatchEvent(new CustomEvent('auth:logout-complete'));
+    }
+    
+    // Clear tokens must happen outside the try-catch block
+    this.clearTokens();
+    
+    // Dispatch event in a separate try block to ensure it always attempts to execute
+    try {
+      // Use a more reliable event dispatch approach
+      const logoutEvent = new CustomEvent('auth:logout-complete');
+      window.dispatchEvent(logoutEvent);
+    } catch (dispatchError) {
+      console.error('Error dispatching logout event:', dispatchError);
     }
 
     return {

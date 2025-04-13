@@ -23,7 +23,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
 
 // Import the component after mocks
 import PatientProfile from '@presentation/pages/PatientProfile'; // Correct alias
-import { renderWithProviders } from '../../test/test-utils.unified.tsx'; // Correct filename and keep alias
+import { renderWithProviders } from '../../test/test-utils.unified'; // Correct filename and keep alias
 
 // Mock audit log service
 vi.mock('@infrastructure/services/AuditLogService', () => ({

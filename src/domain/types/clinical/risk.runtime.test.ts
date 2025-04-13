@@ -5,14 +5,14 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { RiskLevel } from '@domain/types/clinical/risk.ts'; // Add .ts extension
+import { RiskLevel } from '@domain/types/clinical/risk'; // Add .ts extension
 import {
   RiskLevelValidator,
   RiskAssessmentValidator,
   DomainRiskValidator,
   ContributingFactorValidator,
   ProtectiveFactorValidator,
-} from '@domain/types/clinical/risk.runtime.ts'; // Add .ts extension
+} from '@domain/types/clinical/risk.runtime'; // Add .ts extension
 
 describe('Risk runtime validators', () => {
   it('RiskLevelValidator validates correct RiskLevel values', () => {

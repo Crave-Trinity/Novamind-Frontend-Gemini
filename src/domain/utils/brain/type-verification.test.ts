@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { brainTypeVerifier } from '@domain/utils/brain/type-verification.ts';
+import { brainTypeVerifier } from '@domain/utils/brain/type-verification';
 import { RenderMode } from '@domain/types/brain/visualization';
 import { TypeVerificationError } from '@domain/utils/shared/type-verification';
 // Import SSoT types for mocks

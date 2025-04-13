@@ -11,28 +11,9 @@ import { expect, vi, afterEach, beforeEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers';
 
-// PROPER JEST-DOM SETUP - FIXED VERSION
-// Import direct matchers (not through require which can cause issues)
-import * as matchers from '@testing-library/jest-dom/matchers';
-
-// Register matchers directly
-expect.extend(matchers);
-
-// Explicitly define the critical toHaveTextContent matcher that's failing
-expect.extend({
-  toHaveTextContent(received, text) {
-    // Simple implementation that works reliably
-    const content = received.textContent;
-    const pass = content !== undefined &&
-                 (typeof text === 'string' ? content === text :
-                  text instanceof RegExp ? text.test(content) : false);
-    
-    return {
-      pass,
-      message: () => `Expected element ${pass ? 'not ' : ''}to have text content "${text}" but got "${content}"`
-    };
-  }
-});
+// PROPER JEST-DOM SETUP
+// 1. Import and register matchers correctly
+expect.extend(require('@testing-library/jest-dom').matchers);
 
 // 2. Type augmentation that correctly extends Vitest
 declare global {

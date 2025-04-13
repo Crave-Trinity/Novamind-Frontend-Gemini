@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { ClinicalTypeVerifier } from '@domain/utils/clinical/type-verification.ts'; // Removed unused BrainTypeVerifier (assuming it was here)
+import { ClinicalTypeVerifier } from '@domain/utils/clinical/type-verification'; // Removed unused BrainTypeVerifier (assuming it was here)
 import { RiskLevel } from '@domain/types/clinical/risk';
 import type {
   Patient,

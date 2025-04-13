@@ -68,7 +68,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 }) => {
   const getInitialTheme = (): ThemeMode => {
     try {
-      const savedTheme = localStorage.getItem('theme');
+      const savedTheme = localStorage.getItem('ui-theme');
       return isValidTheme(savedTheme) ? savedTheme : defaultTheme;
     } catch (e) {
       console.warn('[ThemeProvider] Failed to access localStorage:', e);
@@ -127,9 +127,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     // Save non-system theme preference to localStorage
     try {
       if (mode !== 'system') {
-        localStorage.setItem('theme', mode);
+        localStorage.setItem('ui-theme', mode);
       } else {
-        localStorage.removeItem('theme');
+        localStorage.removeItem('ui-theme');
       }
     } catch (e) {
       console.warn('[ThemeProvider] Failed to access localStorage:', e);

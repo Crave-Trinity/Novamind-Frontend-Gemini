@@ -11,7 +11,7 @@ import {
   DiagnosisValidator,
   SymptomValidator,
   MedicationValidator,
-} from '@domain/types/clinical/patient.runtime.ts';
+} from '@domain/types/clinical/patient.runtime';
 
 describe('Patient runtime validators', () => {
   it('PatientValidator validates correct Patient objects', () => {

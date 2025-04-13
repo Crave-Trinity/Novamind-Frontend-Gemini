@@ -12,7 +12,7 @@ import {
   SymptomValidator,
   TreatmentResponseValidator,
   PatientModelValidator,
-} from '@domain/models/clinical/patient-model.runtime.ts'; // Add .ts extension
+} from '@domain/models/clinical/patient-model.runtime'; // Add .ts extension
 
 describe('Patient Model Runtime Validators', () => {
   describe('PatientDemographicsValidator', () => {

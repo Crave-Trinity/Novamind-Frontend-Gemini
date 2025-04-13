@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { RiskLevelValidator } from '@domain/types/clinical/risk-level.runtime.ts'; // Add .ts extension
+import { RiskLevelValidator } from '@domain/types/clinical/risk-level.runtime'; // Add .ts extension
 
 describe('Risk Level runtime validators', () => {
   it('RiskLevelValidator validates correct risk levels', () => {

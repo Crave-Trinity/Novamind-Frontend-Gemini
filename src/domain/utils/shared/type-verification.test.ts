@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { typeVerifier, TypeVerificationError } from '@domain/utils/shared/type-verification.ts'; // Add .ts extension
+import { typeVerifier, TypeVerificationError } from '@domain/utils/shared/type-verification'; // Add .ts extension
 
 describe('Shared type verification', () => {
   describe('TypeVerificationError', () => {
