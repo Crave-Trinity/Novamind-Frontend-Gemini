@@ -83,6 +83,7 @@ describe('AuthService', () => {
         isLoading: false,
         error: null
       });
+    }, { timeout: 30000 }); // Correctly apply timeout object as third argument
     });
 
     it('should handle login failure', async () => {

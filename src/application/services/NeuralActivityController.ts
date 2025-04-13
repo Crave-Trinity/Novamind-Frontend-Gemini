@@ -104,15 +104,12 @@ export function useNeuralActivityController(patientId: string) {
         // Assuming result.value has regionActivations and connectionStrengths arrays
         if (result.value && Array.isArray(result.value.regionActivations)) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          result.value.regionActivations.forEach((activation: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
+          result.value.regionActivations.forEach((activation: any) => { // Add explicit any type, remove comment
             // Use 'any' for activation
             // Ensure activation.level is a valid ActivationLevel before setting
-            let level: ActivationLevel;
-            if (Object.values(ActivationLevel).includes(activation.level)) {
-              level = activation.level;
-            } else {
-              level = ActivationLevel.MEDIUM; // Default to MEDIUM if invalid
-            }
+            const level = Object.values(ActivationLevel).includes(activation.level)
+              ? activation.level
+              : ActivationLevel.MEDIUM; // Default to MEDIUM if invalid // Revert to ternary
             neuralState.metrics.activationLevels.set(
               activation.regionId,
               level // Use validated level

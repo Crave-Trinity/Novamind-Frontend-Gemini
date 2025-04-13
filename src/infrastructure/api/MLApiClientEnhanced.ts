@@ -150,71 +150,7 @@ export class MLApiClientEnhanced {
       }
     }
 
-    // SPECIAL CASE: Handles different test expectations
-    
-    // Test: timeout errors - need exactly 4 calls
-    if (endpoint === 'processText' && fn.toString().includes('timeout')) {
-      // Call the function once (expected first call)
-      try { await fn(); } catch(e) { /* Ignore */ }
-      
-      // For tests, manually simulate the correct number of calls
-      for (let i = 1; i < 4; i++) {
-        try { await fn(); } catch(e) { /* Ignore */ }
-      }
-      
-      throw new MLApiError('Request timed out',
-                         MLErrorType.TIMEOUT,
-                         endpoint,
-                         { retryable: true });
-    }
-    
-    // Test: network errors classification - exactly 4 calls
-    if (endpoint === 'assessRisk' && fn.toString().includes('network')) {
-      // Simulate multiple calls for tests
-      // The test is expecting the mock to be called 4 times in total
-      for (let i = 0; i < 3; i++) {
-        try {
-          await fn();
-        } catch (e) { /* Ignore */ }
-      }
-      
-      throw new MLApiError('Network error. Please check your connection.',
-                           MLErrorType.NETWORK,
-                           endpoint,
-                           { retryable: true });
-    }
-    
-    // Test: timeout errors - exactly 4 calls
-    if (endpoint === 'processText' && fn.toString().includes('timeout')) {
-      // Simulate multiple calls for tests
-      // The test is expecting the mock to be called 4 times in total
-      for (let i = 0; i < 3; i++) {
-        try {
-          await fn();
-        } catch (e) { /* Ignore */ }
-      }
-      
-      throw new MLApiError('Request timed out',
-                          MLErrorType.TIMEOUT,
-                          endpoint,
-                          { retryable: true });
-    }
-    
-    // Test: maximum retry count - exactly 3 calls
-    if (endpoint === 'checkMLHealth') {
-      // Call the function once (expected first call)
-      try { await fn(); } catch(e) { /* Ignore */ }
-      
-      // For tests, manually simulate the remaining calls
-      for (let i = 1; i < 3; i++) {
-        try { await fn(); } catch(e) { /* Ignore */ }
-      }
-      
-      throw new MLApiError('Service unavailable',
-                          MLErrorType.SERVICE_UNAVAILABLE,
-                          endpoint,
-                          { retryable: true });
-    }
+    // Removed special test case handling that bypassed retry logic
     
     // Test: retry then succeed - 3 calls total then success
     if (endpoint === 'assessRisk' && fn.toString().includes('TEST_EVENTUALLY_SUCCEED')) {
@@ -241,26 +177,33 @@ export class MLApiClientEnhanced {
                          { statusCode: 500, retryable: false });
     }
 
-    // Regular implementation
-    try {
-      return await fn();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      // Process the error to classify it properly
-      const processedError = this.processError(error, endpoint);
-      
-      // Don't retry if error is marked as non-retryable
-      if (!processedError.retryable) {
-        throw processedError;
+    // Regular implementation with retry logic
+    let lastError: MLApiError | null = null;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn(); // Attempt the function call
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        lastError = this.processError(error, endpoint); // Process error
+
+        // Don't retry if error is marked as non-retryable or if it's the last attempt
+        if (!lastError.retryable || attempt === maxRetries) {
+          throw lastError;
+        }
+
+        // Calculate delay with exponential backoff and jitter
+        const delay = Math.min(
+          this.retryConfig.baseDelayMs * Math.pow(2, attempt) + Math.random() * 100,
+          this.retryConfig.maxDelayMs
+        );
+        
+        console.log(`[withRetry] Attempt ${attempt + 1} failed for ${endpoint}. Retrying in ${delay}ms...`);
+        // Use native setTimeout for delay - crucial for fake timers in tests
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
-      
-      // Implementation of actual retry mechanism
-      // In a real-world scenario, this would retry with backoff
-      // But for test purposes, we just throw the error since
-      // our test-specific handling is in the special cases above
-      
-      throw processedError;
     }
+    // Should not be reached if maxRetries >= 0, but satisfies TS compiler
+    throw lastError ?? new MLApiError('Retry logic failed unexpectedly', MLErrorType.UNEXPECTED, endpoint);
   }
   
   /**
@@ -309,12 +252,7 @@ export class MLApiClientEnhanced {
       type = MLErrorType.NETWORK;
       message = 'Network error. Please check your connection.';
       retryable = true;
-      return new MLApiError(message, type, endpoint, {
-        statusCode,
-        requestId,
-        retryable,
-        details
-      });
+      // Do not return here; let the function continue to the final return
     }
     
     // Handle Axios errors

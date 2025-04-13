@@ -107,7 +107,7 @@ describe('MLApiClientEnhanced - Production Error Handling Tests', () => {
               fail('Should have thrown an error');
             } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
               // This is the correct catch block for the try on line 104
-              expect(error.type).toBe(MLErrorType.UNEXPECTED);
+              expect(error.type).toBe(MLErrorType.SERVICE_UNAVAILABLE); // Expect SERVICE_UNAVAILABLE for 503
               expect(error.statusCode).toBe(503);
               expect(error.requestId).toBe('phi-req-123');
               expect(error.endpoint).toBe('detectPHI');
@@ -130,7 +130,7 @@ describe('MLApiClientEnhanced - Production Error Handling Tests', () => {
       });
       
       // Test validation requirement
-      await expect(mlApiClientEnhanced.redactPHI('')).rejects.toThrow(/Validation failed/);
+      await expect(mlApiClientEnhanced.redactPHI('')).rejects.toThrow('Text is required and must be a string'); // Match exact validation message
     });
   });
 
@@ -182,7 +182,9 @@ describe('MLApiClientEnhanced - Production Error Handling Tests', () => {
       } catch (error) {
         // Expected to fail
       }
-      
+
+      // Advance timers to allow retry logic (including setTimeout) to execute
+      await vi.runAllTimersAsync();
       // First retry should be at baseDelayMs (10)
       // Second retry should be at baseDelayMs * 2^1 (20)
       expect(setTimeoutSpy).toHaveBeenNthCalledWith(1, expect.any(Function), 10);

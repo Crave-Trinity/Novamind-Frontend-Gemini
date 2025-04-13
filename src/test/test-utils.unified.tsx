@@ -5,7 +5,7 @@
  */
 
 import React, { type ReactElement, type ReactNode } from 'react';
-import { render, type RenderOptions } from '@testing-library/react';
+import { render, type RenderOptions, act } from '@testing-library/react'; // Import act
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
@@ -229,6 +229,15 @@ export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOpt
     throw new Error("ThemeContext value was not captured. Ensure ThemeProvider is correctly set up.");
   }
 
+  console.log('[DEBUG renderWithProviders] Returning helpers:', {
+    setTheme: !!themeContextValue.setTheme,
+    isDarkMode: typeof (() => themeContextValue?.theme === 'dark'),
+    getCurrentThemeMode: typeof (() => themeContextValue?.theme),
+    getCurrentAppliedTheme: typeof (() => themeContextValue?.theme),
+    enableDarkMode: typeof (() => { /* ... */ }),
+    disableDarkMode: typeof (() => { /* ... */ }),
+  });
+
   // Return standard render result plus theme context helpers
   return {
     ...renderResult,
@@ -238,17 +247,19 @@ export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOpt
     getCurrentAppliedTheme: () => themeContextValue?.theme, // Helper for applied theme
     // Add helpers to directly manipulate theme for testing purposes
     enableDarkMode: () => {
-      document.documentElement.classList.remove('light');
-      document.documentElement.classList.add('dark');
-      // Optionally update localStorage if tests rely on it
-      // localStorage.setItem('ui-theme', 'dark');
-      // Note: Directly manipulating context state from here is complex,
+      console.log('[DEBUG enableDarkMode] Calling setTheme("dark")');
+      // Use act to wrap state update
+      act(() => {
+        themeContextValue?.setTheme('dark');
+      });
+      // Note: DOM class update happens via ThemeProvider's useEffect
       // these helpers primarily affect the DOM for class assertions.
     },
     disableDarkMode: () => {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.classList.add('light');
-      // localStorage.setItem('ui-theme', 'light');
+      console.log('[DEBUG disableDarkMode] Calling setTheme("light")');
+      act(() => {
+        themeContextValue?.setTheme('light');
+      });
     }
   };
 };
