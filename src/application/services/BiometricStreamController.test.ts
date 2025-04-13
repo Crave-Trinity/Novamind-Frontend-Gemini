@@ -64,14 +64,11 @@ const mockStreamMetadata: BiometricStream[] = [
 
 // Mock WebSocket connection
 class MockWebSocket {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onopen: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onclose: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onmessage: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onerror: ((event: any // eslint-disable-line @typescript-eslint/no-explicit-any) => void) | null = null;
+  // Use 'any' for the event type for simplicity in the mock
+  onopen: ((event: any) => void) | null = null;
+  onclose: ((event: any) => void) | null = null;
+  onmessage: ((event: any) => void) | null = null;
+  onerror: ((event: any) => void) | null = null;
   readyState: number = 0; // Start as CONNECTING
 
   constructor(public url: string) {
@@ -92,19 +89,19 @@ class MockWebSocket {
   });
   // Helper methods for tests
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  simulateMessage(data: any // eslint-disable-line @typescript-eslint/no-explicit-any): void {
+  public simulateMessage(data: any): void { // Added public keyword
     if (this.onmessage) {
       this.onmessage({ data: typeof data === 'string' ? data : JSON.stringify(data) });
     }
   }
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  simulateError(errorData: any // eslint-disable-line @typescript-eslint/no-explicit-any): void {
+  public simulateError(errorData: any): void { // Added public keyword
     if (this.onerror) {
       this.onerror(errorData);
     }
   }
-}
+} // Closing brace for the class
 
 // Removed unused variable: lastMockWebSocketInstance
 global.WebSocket = vi.fn().mockImplementation((url: string) => {

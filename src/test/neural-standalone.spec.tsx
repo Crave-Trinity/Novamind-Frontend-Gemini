@@ -163,9 +163,10 @@ beforeAll(() => {
       _options?: any // eslint-disable-line @typescript-eslint/no-explicit-any // Prefixed unused options
  
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ): any // eslint-disable-line @typescript-eslint/no-explicit-any {  
+    ): any { // eslint-disable-line @typescript-eslint/no-explicit-any
       // Use 'any' return type initially for flexibility
-      if (contextId === 'webgl' || contextId === 'webgl2') {
+      // Function body starts here
+        if (contextId === 'webgl' || contextId === 'webgl2') {
         // Return a basic mock WebGL context
         return {
           clear: vi.fn(),
@@ -226,7 +227,9 @@ beforeAll(() => {
       //   return originalGetContext.call(this, contextId, options);
       // }
       return null; // Return null for unsupported contexts
-    } 
+      // Removed duplicate return null from line 232
+      // Removed misplaced closing brace from line 233
+    }; // This is the closing brace for the function assigned to getContext
   }
 
   console.log('🧠 All mocks registered with quantum precision');

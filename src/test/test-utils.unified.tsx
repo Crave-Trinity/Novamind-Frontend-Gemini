@@ -326,27 +326,30 @@ export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOpt
         {children}
       </AllTheProviders>
     );
-  };
-// Only set light mode as default if there's no localStorage theme already set
-// Use optional chaining and nullish coalescing to safely access window properties
-const storedTheme = typeof window !== 'undefined' && window.localStorage
-  ? window.localStorage.getItem('theme')
-  : null;
-  
-if (!storedTheme) {
-  // Safely access localStorage
-  if (typeof window !== 'undefined' && window.localStorage) {
-    window.localStorage.removeItem('theme');
-  }
-  
-  // Safely access document
-  if (typeof document !== 'undefined' && document.documentElement) {
-    document.documentElement.classList.remove('dark', 'system');
-    document.documentElement.classList.add('light');
-  }
-}
-  }
+  }; // End of WrapperComponent definition
 
+  // --- Start of code block to move ---
+  // Only set light mode as default if there's no localStorage theme already set
+  // Use optional chaining and nullish coalescing to safely access window properties
+  const storedTheme = typeof window !== 'undefined' && window.localStorage
+    ? window.localStorage.getItem('theme')
+    : null;
+    
+  if (!storedTheme) {
+    // Safely access localStorage
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.removeItem('theme');
+    }
+    
+    // Safely access document
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.classList.remove('dark', 'system');
+      document.documentElement.classList.add('light');
+    }
+  }
+  // --- End of code block to move ---
+
+  // Render with our wrapper
   // Render with our wrapper
   const result = render(ui, { wrapper: WrapperComponent, ...renderOptions });
   
@@ -368,7 +371,7 @@ if (!storedTheme) {
       localStorage.setItem('theme', 'light');
     },
   };
-};
+}; // <-- Add missing closing brace for renderWithProviders
 
 // Re-export testing-library utilities for convenience
 export * from '@testing-library/react';
