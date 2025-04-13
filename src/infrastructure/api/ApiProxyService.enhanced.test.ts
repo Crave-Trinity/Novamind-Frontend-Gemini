@@ -6,12 +6,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { EnhancedApiProxyService } from './ApiProxyService.enhanced';
 
 describe('EnhancedApiProxyService', () => {
-  // Spy on console methods to verify logging
-  const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
-  const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  // Global spies removed - now defined within specific tests
 
   beforeEach(() => {
+    // Clear mocks if any were set up globally (though they shouldn't be now)
     vi.clearAllMocks();
   });
 
@@ -49,10 +47,12 @@ describe('EnhancedApiProxyService', () => {
     });
 
     it('should log path mapping when requested', () => {
+      const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {}); // Spy inside test
       EnhancedApiProxyService.mapPath('ml/digital-twin/conversation', true);
       expect(consoleDebugSpy).toHaveBeenCalledWith(
         expect.stringContaining('Mapped path: ml/digital-twin/conversation → ml/mentalllama/conversation')
       );
+      consoleDebugSpy.mockRestore(); // Restore after test
     });
   });
 
@@ -221,6 +221,7 @@ describe('EnhancedApiProxyService', () => {
     });
 
     it('should log validation warnings but proceed with transformation', () => {
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {}); // Spy inside test
       const invalidInput = { treatmentType: 'cbt' }; // Missing patientId
       
       EnhancedApiProxyService.mapRequestData('patients/123/predict-treatment', invalidInput);
@@ -229,12 +230,16 @@ describe('EnhancedApiProxyService', () => {
         expect.stringContaining('Request validation failed'),
         expect.arrayContaining([expect.objectContaining({ field: 'patientId' })])
       );
+      consoleWarnSpy.mockRestore(); // Restore after test
     });
 
     it('should handle transformation errors gracefully', () => {
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {}); // Spy inside test
+      const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {}); // Also spy on debug for this case
+      
       // Create a scenario that would cause an error in transformation
       const problematicInput = Object.create(null);
-      Object.defineProperty(problematicInput, 'patientId', { 
+      Object.defineProperty(problematicInput, 'patientId', {
         get: () => { throw new Error('Simulated error'); }
       });
       
@@ -245,7 +250,15 @@ describe('EnhancedApiProxyService', () => {
         expect.stringContaining('Error transforming request data'),
         expect.any(Error)
       );
+      // Check for the debug log as well
+      expect(consoleDebugSpy).toHaveBeenCalledWith(
+         expect.stringContaining('Problematic data:'),
+         expect.any(String) // The stringified data might be truncated
+      );
       expect(result).toBe(problematicInput);
+
+      consoleErrorSpy.mockRestore(); // Restore after test
+      consoleDebugSpy.mockRestore(); // Restore after test
     });
   });
 
@@ -388,9 +401,12 @@ describe('EnhancedApiProxyService', () => {
     });
 
     it('should handle transformation errors gracefully', () => {
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {}); // Spy inside test
+      const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {}); // Also spy on debug for this case
+
       // Create a scenario that would cause an error in transformation
       const problematicInput = Object.create(null);
-      Object.defineProperty(problematicInput, 'risk_level', { 
+      Object.defineProperty(problematicInput, 'risk_level', {
         get: () => { throw new Error('Simulated error'); }
       });
       
@@ -401,7 +417,15 @@ describe('EnhancedApiProxyService', () => {
         expect.stringContaining('Error transforming response data'),
         expect.any(Error)
       );
+       // Check for the debug log as well
+      expect(consoleDebugSpy).toHaveBeenCalledWith(
+         expect.stringContaining('Problematic data:'),
+         expect.any(String) // The stringified data might be truncated
+      );
       expect(result).toBe(problematicInput);
+
+      consoleErrorSpy.mockRestore(); // Restore after test
+      consoleDebugSpy.mockRestore(); // Restore after test
     });
   });
 

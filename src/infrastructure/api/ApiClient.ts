@@ -140,22 +140,9 @@ export class ApiClient {
         headers
       };
       
-      // In test environments, we'll mock the fetch call
-      // In real environments, we'll make the actual fetch call
-      let response: Response;
-      
-      // This is a mock fetch for testing purposes
-      if (typeof window === 'undefined' || typeof fetch === 'undefined') {
-        // Mock response for tests
-        const mockResponse = new Response(JSON.stringify({ data: 'mock response' }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        });
-        response = mockResponse;
-      } else {
-        // Make the actual fetch call
-        response = await fetch(fullUrl, requestOptions);
-      }
+      // Always use the globally available fetch (provided by jsdom/node/undici)
+      // MSW will intercept this call in the test environment.
+      const response = await fetch(fullUrl, requestOptions);
       
       // Process through interceptors
       let processedResponse = response;
@@ -237,7 +224,9 @@ export class ApiClient {
     }
     
     // Combine baseUrl and path
-    const url = new URL(normalizedPath, baseUrl);
+    // Combine baseUrl and path correctly, ensuring no double slashes
+    const combinedPath = `${baseUrl.replace(/\/$/, '')}/${normalizedPath.replace(/^\//, '')}`;
+    const url = new URL(combinedPath, baseUrl.match(/^https?:\/\//) ? undefined : mockOrigin); // Use origin only if baseUrl is relative
     
     // Add query parameters if provided
     if (params && Object.keys(params).length > 0) {
