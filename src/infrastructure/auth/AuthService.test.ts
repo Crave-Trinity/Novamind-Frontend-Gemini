@@ -73,9 +73,9 @@ describe('AuthService', () => {
       // Verify
       expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
       expect(mockGetCurrentUser).toHaveBeenCalled();
-      // Wait for async operations within login to complete
-      const options = { timeout: 2000 }; // Increased timeout
-      await waitFor(() => expect(mockLocalStorage.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens)), options); // Use global mock
+      // Ensure async operations complete and check assertion
+      await vi.runAllTimersAsync(); // Advance timers
+      expect(mockLocalStorage.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens)); // Use global mock
       expect(result).toEqual({
         user: mockUser,
         tokens: mockTokens,

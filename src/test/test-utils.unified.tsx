@@ -236,6 +236,20 @@ export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOpt
     isDarkMode: () => themeContextValue?.theme === 'dark', // Helper based on context
     getCurrentThemeMode: () => themeContextValue?.theme, // Helper for selected mode (uses 'theme' property)
     getCurrentAppliedTheme: () => themeContextValue?.theme, // Helper for applied theme
+    // Add helpers to directly manipulate theme for testing purposes
+    enableDarkMode: () => {
+      document.documentElement.classList.remove('light');
+      document.documentElement.classList.add('dark');
+      // Optionally update localStorage if tests rely on it
+      // localStorage.setItem('ui-theme', 'dark');
+      // Note: Directly manipulating context state from here is complex,
+      // these helpers primarily affect the DOM for class assertions.
+    },
+    disableDarkMode: () => {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+      // localStorage.setItem('ui-theme', 'light');
+    }
   };
 };
 

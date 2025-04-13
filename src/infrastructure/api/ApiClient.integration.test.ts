@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ApiClient } from './apiClient';
-import { ApiProxyService } from './ApiProxyService';
+import { ApiProxyService } from './ApiProxyService'; // Import the original class
 import axios from 'axios';
 
 // Import mockApi directly instead of using path alias
@@ -43,7 +43,7 @@ vi.mock('axios', () => {
   };
 });
 
-// Spies will be set up in beforeEach
+// Spy on ApiProxyService static methods (outside beforeEach)
 
 describe('ApiClient Integration with ApiProxyService', () => {
   let apiClient: ApiClient;
@@ -52,13 +52,12 @@ describe('ApiClient Integration with ApiProxyService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks(); // Clear previous spies/mocks
-
-    // Spy on ApiProxyService methods *inside* beforeEach
-    vi.spyOn(ApiProxyService, 'mapPath');
-    vi.spyOn(ApiProxyService, 'mapRequestData');
-    vi.spyOn(ApiProxyService, 'mapResponseData');
-    vi.spyOn(ApiProxyService, 'standardizeResponse');
-
+    // Reset mocks defined outside
+    mockMapPath.mockClear().mockImplementation((path) => `v1/${path}`);
+    mockMapRequestData.mockClear().mockImplementation((_path, data) => data);
+    mockMapResponseData.mockClear().mockImplementation((_path, data) => data);
+    mockStandardizeResponse.mockClear().mockImplementation((response) => response);
+    
     // Mock global fetch
     fetchSpy = vi.spyOn(globalThis, 'fetch'); // Assign to outer variable
     fetchSpy.mockImplementation(async (url: RequestInfo | URL, options?: RequestInit) => {
@@ -108,7 +107,7 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.get('/patients/123');
     
     // Verify ApiProxyService was called
-    expect(ApiProxyService.mapPath).toHaveBeenCalledWith('v1/patients/123');
+    expect(mockMapPath).toHaveBeenCalledWith('patients/123'); // Check input to mock
     
     // Verify fetch was called with the mapped path
     expect(fetchSpy).toHaveBeenCalledWith(
@@ -122,7 +121,7 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.get('/brain-models/model-123');
     
     // Verify ApiProxyService was called with the correct path
-    expect(ApiProxyService.mapPath).toHaveBeenCalledWith('v1/brain-models/model-123');
+    expect(mockMapPath).toHaveBeenCalledWith('brain-models/model-123'); // Check input to mock
   });
 
   it('should map paths for patient endpoints', async () => {
@@ -130,7 +129,7 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.get('/patients/patient-123');
     
     // Verify ApiProxyService was called with the correct path
-    expect(ApiProxyService.mapPath).toHaveBeenCalledWith('v1/patients/patient-123');
+    expect(mockMapPath).toHaveBeenCalledWith('patients/patient-123'); // Check input to mock
   });
 
   it('should map request data when making POST requests', async () => {
@@ -138,7 +137,7 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.post('/patients', data);
     
     // Verify mapRequestData was called
-    expect(ApiProxyService.mapRequestData).toHaveBeenCalledWith(
+    expect(mockMapRequestData).toHaveBeenCalledWith(
       expect.any(String), 
       data
     );
@@ -148,7 +147,7 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.get('/patients/123');
     
     // Verify mapResponseData was called
-    expect(ApiProxyService.mapResponseData).toHaveBeenCalledWith(
+    expect(mockMapResponseData).toHaveBeenCalledWith(
       expect.any(String),
       expect.any(Object)
     );
@@ -158,7 +157,7 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.get('/patients/123');
     
     // Verify standardizeResponse was called
-    expect(ApiProxyService.standardizeResponse).toHaveBeenCalled();
+    expect(mockStandardizeResponse).toHaveBeenCalled();
   });
 
   it('should transform treatment prediction requests and responses', async () => {
@@ -170,18 +169,18 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.post('/patients/patient-123/predict-treatment', treatmentData);
     
     // Verify path mapping
-    expect(ApiProxyService.mapPath).toHaveBeenCalledWith(
+    expect(mockMapPath).toHaveBeenCalledWith(
       expect.stringContaining('predict-treatment')
     );
     
     // Verify request data transformation
-    expect(ApiProxyService.mapRequestData).toHaveBeenCalledWith(
+    expect(mockMapRequestData).toHaveBeenCalledWith(
       expect.any(String),
       treatmentData
     );
     
     // Verify response data transformation
-    expect(ApiProxyService.mapResponseData).toHaveBeenCalled();
+    expect(mockMapResponseData).toHaveBeenCalled();
   });
 
   it('should transform risk assessment responses', async () => {
@@ -191,11 +190,11 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.get('/patients/patient-123/risk-assessment');
     
     // Verify path mapping
-    expect(ApiProxyService.mapPath).toHaveBeenCalledWith(
+    expect(mockMapPath).toHaveBeenCalledWith(
       expect.stringContaining('risk-assessment')
     );
     
     // Verify response data transformation
-    expect(ApiProxyService.mapResponseData).toHaveBeenCalled();
+    expect(mockMapResponseData).toHaveBeenCalled();
   });
 });

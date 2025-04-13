@@ -13,7 +13,7 @@ import type { BrainModel } from '@domain/types/brain/models';
 import { useBrainVisualization } from './useBrainVisualization';
 
 // Mock the apiClient singleton
-vi.mock('@infrastructure/api/ApiClient', () => {
+vi.mock('../../infrastructure/api/apiClient', () => { // Use the correct relative path
   const mockBrainModel: BrainModel = {
     id: 'test-brain-model',
     patientId: 'test-patient',
