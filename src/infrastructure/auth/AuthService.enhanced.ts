@@ -360,10 +360,13 @@ export class EnhancedAuthService {
     try {
       // Get user from storage or state management
       const userJson = localStorage.getItem('auth_user');
-      if (!userJson) return false;
+      if (!userJson) {
+          return false;
+      }
       
       const user = JSON.parse(userJson) as AuthUser;
-      return user.permissions.includes(permission);
+      // Check if user object and permissions array exist before accessing includes
+      return user && Array.isArray(user.permissions) && user.permissions.includes(permission);
     } catch (error) {
       console.error('Error checking permissions:', error);
       return false;

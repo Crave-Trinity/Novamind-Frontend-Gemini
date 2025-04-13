@@ -5,7 +5,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { waitFor } from '@testing-library/react'; // Import waitFor
 import { EnhancedAuthService } from './AuthService.enhanced';
-import { AuthTokens, AuthUser } from './index';
+import { AuthTokens, AuthUser, AuthApiClient } from './index'; // Import AuthApiClient for mocking
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -97,14 +97,32 @@ const soonToExpireTokens: AuthTokens = {
   }
 };
 
+// Mocks for the AuthApiClient methods - define them outside vi.mock so they can be cleared
+const mockLogin = vi.fn();
+const mockLogout = vi.fn();
+const mockRefreshToken = vi.fn();
+const mockGetCurrentUser = vi.fn();
+
+// Mock the AuthApiClient specifically, preserving other exports
+vi.mock('./index', async (importOriginal) => {
+  const actual = await importOriginal() as typeof import('./index');
+  // Return the actual module but replace AuthApiClient constructor
+  return {
+    ...actual,
+    AuthApiClient: vi.fn().mockImplementation(() => {
+      // Return the object with mocked methods
+      return {
+        login: mockLogin,
+        logout: mockLogout,
+        refreshToken: mockRefreshToken,
+        getCurrentUser: mockGetCurrentUser,
+      };
+    }),
+  };
+});
+
 describe('EnhancedAuthService', () => {
   let authService: EnhancedAuthService;
-  
-  // Mocks for the AuthApiClient methods
-  const mockLogin = vi.fn();
-  const mockLogout = vi.fn();
-  const mockRefreshToken = vi.fn();
-  const mockGetCurrentUser = vi.fn();
   // Create a mock for dispatchEvent
   const dispatchEventSpy = vi.fn().mockReturnValue(true);
   
@@ -121,13 +139,7 @@ describe('EnhancedAuthService', () => {
     
     authService = new EnhancedAuthService('https://api.test.com');
     
-    // Mock the AuthApiClient methods
-    (authService as any).client = {
-      login: mockLogin,
-      logout: mockLogout,
-      refreshToken: mockRefreshToken,
-      getCurrentUser: mockGetCurrentUser
-    };
+    // No need to replace the client manually, vi.mock handles it
   });
 
   afterEach(() => {
@@ -168,13 +180,7 @@ describe('EnhancedAuthService', () => {
       // Reset the tracking flag before the test
       testAuthService.resetTestFlags();
       
-      // Mock the client methods
-      (testAuthService as any).client = {
-        login: mockLogin,
-        logout: mockLogout,
-        refreshToken: mockRefreshToken,
-        getCurrentUser: mockGetCurrentUser
-      };
+      // No need to replace the client manually, vi.mock handles it
       
       // Call setupRefreshTimeout explicitly
       (testAuthService as any).setupRefreshTimeout();
@@ -322,6 +328,7 @@ describe('EnhancedAuthService', () => {
       expect(hasPermission).toBe(false);
     });
 
+    // Ensure this specific test is not skipped (remove .skip if present)
     it('should return true when user has permission', async () => {
       // Setup
       localStorageMock.setItem('auth_tokens', JSON.stringify(mockTokens));

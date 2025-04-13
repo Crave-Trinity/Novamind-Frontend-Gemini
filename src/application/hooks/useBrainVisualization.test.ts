@@ -71,9 +71,15 @@ vi.mock('@infrastructure/api/ApiClient', () => {
 
   return {
     apiClient: {
-      getBrainModel: vi.fn().mockImplementation(async (patientId: string) => {
-        console.log('[MOCK] Getting brain model for:', patientId);
-        return mockBrainModel;
+      // Mock the 'get' method used by the hook
+      get: vi.fn().mockImplementation(async (path: string) => {
+        console.log('[MOCK] apiClient.get called with path:', path);
+        if (path === 'brain-models/test-patient') {
+          console.log('[MOCK] Returning mockBrainModel for path:', path);
+          return mockBrainModel;
+        }
+        console.warn(`[MOCK] Unexpected path requested: ${path}. Returning undefined.`);
+        return undefined; // Or throw an error for unexpected paths
       }),
     },
   };

@@ -64,8 +64,7 @@ describe('ThemeProvider (Enhanced Tests)', () => {
         <div>Test Child</div>
       </ThemeProvider>
     );
-    // Add a small delay to ensure effects run after initial render
-    await act(async () => { await new Promise(r => setTimeout(r, 10)); });
+    // waitFor should handle waiting for the useEffect hook to apply the class
     await waitFor(() => {
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
