@@ -8,17 +8,17 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type Theme = 'dark' | 'light' | 'system';
+export type ThemeMode = 'dark' | 'light' | 'system'; // Export as ThemeMode
 
 interface ThemeProviderProps {
   children: React.ReactNode;
-  defaultTheme?: Theme;
+  defaultTheme?: ThemeMode;
   storageKey?: string;
 }
 
-interface ThemeProviderState {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
+export interface ThemeProviderState { // Export state type
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
   systemTheme: 'dark' | 'light';
 }
 
@@ -28,7 +28,7 @@ const initialState: ThemeProviderState = {
   systemTheme: 'light',
 };
 
-const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
+export const ThemeProviderContext = createContext<ThemeProviderState>(initialState); // Export context
 
 export function ThemeProvider({
   children,
@@ -36,13 +36,13 @@ export function ThemeProvider({
   storageKey = 'ui-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => {
+  const [theme, setTheme] = useState<ThemeMode>(() => {
     // Safely handle localStorage access in SSR/testing environments
     if (typeof window === 'undefined') return defaultTheme;
     
     try {
       const storedTheme = localStorage.getItem(storageKey);
-      return (storedTheme as Theme) || defaultTheme;
+      return (storedTheme as ThemeMode) || defaultTheme;
     } catch (err) {
       console.error('Error accessing localStorage:', err);
       return defaultTheme;

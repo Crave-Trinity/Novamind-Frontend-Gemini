@@ -117,14 +117,24 @@ export class EnhancedAuthService {
 
     console.log('[refreshTokenSilently] Starting new token refresh...');
     // Create and store the promise reference first before execution
-    this.refreshPromise = this.client?.refreshToken(tokens.refreshToken)
-      .then(newTokens => {
-        this.storeTokens(newTokens);
-        console.log('[refreshTokenSilently] Token refreshed successfully.');
-        this.refreshPromise = null; // Clear promise on success
-        return newTokens;
-      })
-      .catch(error => {
+    // Wrap the call in a new Promise to handle potential undefined return from mock
+    this.refreshPromise = new Promise(async (resolve, reject) => {
+      try {
+        const refreshCallResult = this.client?.refreshToken(tokens.refreshToken);
+        // Check if the result is promise-like before chaining .then
+        if (refreshCallResult && typeof refreshCallResult.then === 'function') {
+          const newTokens = await refreshCallResult;
+          this.storeTokens(newTokens);
+          console.log('[refreshTokenSilently] Token refreshed successfully.');
+          resolve(newTokens);
+        } else {
+           // Handle cases where mock doesn't return a promise (e.g., default mock)
+           console.warn('[refreshTokenSilently] refreshToken mock did not return a promise.');
+           // Depending on desired behavior, either reject or resolve with null
+           reject(new Error('refreshToken mock did not return a promise.'));
+           // or resolve(null);
+        }
+      } catch (error) {
         console.error('[refreshTokenSilently] Failed to refresh token:', error);
         this.clearTokens();
         try {
@@ -133,9 +143,13 @@ export class EnhancedAuthService {
         } catch (dispatchError) {
           console.error('[refreshTokenSilently] Error dispatching session-expired event:', dispatchError);
         }
-        this.refreshPromise = null; // Clear promise on failure
-        return null;
-      });
+        // Resolve with null on failure as per original catch block logic
+        resolve(null);
+      } finally {
+         // Ensure refreshPromise is cleared regardless of outcome
+         this.refreshPromise = null;
+      }
+    });
       // Removed finally block as promise state is cleared in then/catch
 
     return this.refreshPromise;

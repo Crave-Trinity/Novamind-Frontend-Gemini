@@ -8,6 +8,7 @@
  */
 
 import { MLApiClientEnhanced, MLErrorType } from './MLApiClientEnhanced';
+import { Mocked } from 'vitest'; // Import Mocked type
 import { ApiClient } from './apiClient';
 import { MLApiClient } from './MLApiClient';
 
@@ -16,45 +17,45 @@ vi.mock('./MLApiClient');
 vi.mock('./apiClient');
 
 // Mock setTimeout and clearTimeout for faster tests
-jest.useFakeTimers();
+vi.useFakeTimers();
 
 describe('MLApiClientEnhanced - Production Error Handling Tests', () => {
   let mlApiClientEnhanced: MLApiClientEnhanced;
-  let apiClientMock: jest.Mocked<ApiClient>;
-  let mlApiClientMock: jest.Mocked<MLApiClient>;
+  let apiClientMock: Mocked<ApiClient>;
+  let mlApiClientMock: Mocked<MLApiClient>;
 
   beforeEach(() => {
     // Clear all mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     
     // Set up the ApiClient mock
     apiClientMock = {
       baseUrl: 'https://api.test.com',
       headers: {},
-      fetch: jest.fn()
-    } as unknown as jest.Mocked<ApiClient>;
+      fetch: vi.fn()
+    } as unknown as Mocked<ApiClient>;
     
     // Set up the MLApiClient mock
     mlApiClientMock = {
-      processText: jest.fn(),
-      detectDepression: jest.fn(),
-      assessRisk: jest.fn(),
-      analyzeSentiment: jest.fn(),
-      analyzeWellnessDimensions: jest.fn(),
-      generateDigitalTwin: jest.fn(),
-      createDigitalTwinSession: jest.fn(),
-      getDigitalTwinSession: jest.fn(),
-      sendMessageToSession: jest.fn(),
-      endDigitalTwinSession: jest.fn(),
-      getSessionInsights: jest.fn(),
-      detectPHI: jest.fn(),
-      redactPHI: jest.fn(),
-      checkMLHealth: jest.fn(),
-      checkPHIHealth: jest.fn()
-    } as unknown as jest.Mocked<MLApiClient>;
+      processText: vi.fn(),
+      detectDepression: vi.fn(),
+      assessRisk: vi.fn(),
+      analyzeSentiment: vi.fn(),
+      analyzeWellnessDimensions: vi.fn(),
+      generateDigitalTwin: vi.fn(),
+      createDigitalTwinSession: vi.fn(),
+      getDigitalTwinSession: vi.fn(),
+      sendMessageToSession: vi.fn(),
+      endDigitalTwinSession: vi.fn(),
+      getSessionInsights: vi.fn(),
+      detectPHI: vi.fn(),
+      redactPHI: vi.fn(),
+      checkMLHealth: vi.fn(),
+      checkPHIHealth: vi.fn()
+    } as unknown as Mocked<MLApiClient>;
     
     // Mock MLApiClient constructor
-    (MLApiClient as jest.Mock).mockImplementation(() => mlApiClientMock);
+    (MLApiClient as any).mockImplementation(() => mlApiClientMock); // Use 'any' for simplicity here
     
     // Create the enhanced client
     mlApiClientEnhanced = new MLApiClientEnhanced(apiClientMock);
@@ -67,7 +68,7 @@ describe('MLApiClientEnhanced - Production Error Handling Tests', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   /**
@@ -173,7 +174,7 @@ describe('MLApiClientEnhanced - Production Error Handling Tests', () => {
       mlApiClientMock.processText.mockRejectedValue(timeoutError);
       
       // Spy on setTimeout
-      const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+      const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
       
       // Attempt call (will fail eventually)
       try {
@@ -321,7 +322,7 @@ describe('MLApiClientEnhanced - Production Error Handling Tests', () => {
       // Test with each error format
       for (const errorValue of errors) {
         // Reset mock
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         mlApiClientMock.getSessionInsights.mockRejectedValue(errorValue);
         
         // Attempt call

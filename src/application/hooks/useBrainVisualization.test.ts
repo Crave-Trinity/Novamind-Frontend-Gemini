@@ -142,7 +142,13 @@ describe('useBrainVisualization Hook', () => {
       data: result.current.brainModel,
     });
 
+    // Wait for the query to be successful and data to be defined
     await waitFor(() => {
+      // First, ensure the query itself succeeded
+      const queryStatus = queryClient.getQueryState(['brainModel', 'test-patient'])?.status;
+      expect(queryStatus).toBe('success');
+      
+      // Then check loading state and data
       expect(result.current.isLoading).toBe(false);
       expect(result.current.brainModel).toBeDefined();
       expect(result.current.brainModel).toMatchObject({

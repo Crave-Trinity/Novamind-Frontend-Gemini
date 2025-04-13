@@ -84,7 +84,7 @@ const soonToExpireTokens: AuthTokens = {
 // Default implementations return rejected promises to prevent '.then of undefined' errors
 const mockLogin = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK login] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
 const mockLogout = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK logout] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
-const mockRefreshToken = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK refreshToken] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
+const mockRefreshToken = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK refreshToken] Called with:', args); console.warn('[MOCK refreshToken] Default implementation resolving null.'); return Promise.resolve(null); }); // Default to resolving null
 const mockGetCurrentUser = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK getCurrentUser] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
 
 describe('EnhancedAuthService', () => {
@@ -377,12 +377,15 @@ describe('EnhancedAuthService', () => {
       const result = await authService.logout();
       
       // Verify tokens are cleared even when API call fails
-      await waitFor(() => expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('auth_tokens'), { timeout: 3000 }); // Use global mock, Increased timeout
+      // removeItem is called synchronously within clearTokens
+      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('auth_tokens'); // Use global mock
       expect(result.isAuthenticated).toBe(false);
-      // The enhanced service currently returns null error even on API fail, adjust expectation
-      expect(result.error).toBeNull();
+      // The enhanced service correctly sets an error message in this case
+      expect(result.error).toBe('Logout API call failed, but session was ended locally');
       // Verify logout event was dispatched
       // Event dispatch happens synchronously after clearTokens
+      // Run timers just in case any related async task needs to resolve before checking dispatch
+      await vi.runAllTimersAsync();
       expect(dispatchEventSpy).toHaveBeenCalled();
       const event = dispatchEventSpy.mock.calls[dispatchEventSpy.mock.calls.length - 1][0];
       expect(event.type).toBe('auth:logout-complete');

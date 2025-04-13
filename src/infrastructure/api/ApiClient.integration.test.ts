@@ -43,11 +43,7 @@ vi.mock('axios', () => {
   };
 });
 
-// Spy on ApiProxyService
-vi.spyOn(ApiProxyService, 'mapPath');
-vi.spyOn(ApiProxyService, 'mapRequestData');
-vi.spyOn(ApiProxyService, 'mapResponseData');
-vi.spyOn(ApiProxyService, 'standardizeResponse');
+// Spies will be set up in beforeEach
 
 describe('ApiClient Integration with ApiProxyService', () => {
   let apiClient: ApiClient;
@@ -55,8 +51,14 @@ describe('ApiClient Integration with ApiProxyService', () => {
   let fetchSpy: any; // Use any for now, inference happens in beforeEach
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    
+    vi.clearAllMocks(); // Clear previous spies/mocks
+
+    // Spy on ApiProxyService methods *inside* beforeEach
+    vi.spyOn(ApiProxyService, 'mapPath');
+    vi.spyOn(ApiProxyService, 'mapRequestData');
+    vi.spyOn(ApiProxyService, 'mapResponseData');
+    vi.spyOn(ApiProxyService, 'standardizeResponse');
+
     // Mock global fetch
     fetchSpy = vi.spyOn(globalThis, 'fetch'); // Assign to outer variable
     fetchSpy.mockImplementation(async (url: RequestInfo | URL, options?: RequestInit) => {

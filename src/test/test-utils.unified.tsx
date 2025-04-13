@@ -12,8 +12,7 @@ import { vi } from 'vitest';
 
 // Import the relevant contexts and types
 import DataContext from '../application/contexts/DataContext';
-import { ThemeContext } from '../application/contexts/ThemeContext';
-import type { ThemeContextType } from '../application/contexts/ThemeContext'; // Keep type import
+// Removed incorrect ThemeContext imports
 import UserContext from '../application/contexts/UserContext';
 import VisualizationContext from '../application/contexts/VisualizationContext';
 
@@ -41,7 +40,7 @@ function createTestQueryClient() {
   });
 }
 // MockThemeProvider removed - Use the actual ThemeProvider from the application
-import { ThemeProvider } from '../presentation/providers/ThemeProvider';
+import { ThemeProvider, useTheme, ThemeProviderContext, ThemeMode, type ThemeProviderState } from '../presentation/providers/ThemeProvider'; // Import necessary items from provider
 
 /**
  * Mock implementation of UserProvider for tests
@@ -129,7 +128,7 @@ interface AllTheProvidersProps {
   initialRoute?: string;
   queryClient?: QueryClient;
   mockDataContext?: typeof mockDataContextValue;
-  currentTheme?: 'light' | 'dark' | 'system';
+  currentTheme?: ThemeMode; // Use the imported ThemeMode type
   setCurrentTheme?: React.Dispatch<React.SetStateAction<'light' | 'dark' | 'system'>>;
 }
 
@@ -138,12 +137,13 @@ const AllTheProviders = ({
   initialRoute = '/',
   queryClient = createTestQueryClient(),
   mockDataContext = mockDataContextValue,
-  currentTheme = 'dark',
-  setCurrentTheme,
+  currentTheme = 'light', // Default to light for consistency
+  // setCurrentTheme is removed as ThemeProvider manages its own state
 }: AllTheProvidersProps) => {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Use the actual ThemeProvider, passing only necessary props */}
+      {/* Use the actual ThemeProvider */}
       <ThemeProvider defaultTheme={currentTheme}>
         <MockUserProvider>
           <MockVisualizationProvider>
@@ -175,7 +175,7 @@ interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   initialRoute?: string;
   queryClient?: QueryClient;
   mockDataContext?: typeof mockDataContextValue;
-  defaultTheme?: 'light' | 'dark' | 'system';
+  defaultTheme?: ThemeMode; // Use ThemeMode type
 }
 
 /**
@@ -191,30 +191,51 @@ export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOpt
     ...renderOptions
   } = options;
 
-  // Define the wrapper directly using AllTheProviders
+  // Define the wrapper directly using AllTheProviders, passing the defaultTheme
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <AllTheProviders
       initialRoute={initialRoute}
       queryClient={queryClient}
       mockDataContext={mockDataContext}
-      currentTheme={defaultTheme}
-      // MockThemeProvider within AllTheProviders handles theme state internally
+      currentTheme={defaultTheme} // Pass defaultTheme to AllTheProviders
     >
       {children}
     </AllTheProviders>
   );
 
   // Render with the simplified wrapper
-  const renderResult = render(ui, { wrapper: Wrapper, ...renderOptions });
+  // Removed duplicate renderResult declaration
 
-  // Return standard render result and potentially simplified helpers if needed
-  // Note: isDarkMode, enable/disableDarkMode helpers might need adjustment
-  // as they directly manipulate DOM/localStorage outside the React context now.
-  // For robust testing, prefer interacting via component UI (e.g., clicking buttons).
+  // Store the theme context value to return it
+  let themeContextValue: ThemeProviderState | undefined; // Use type imported from provider
+
+  // Create a consumer component to capture the context value
+  const ContextConsumer = () => {
+    themeContextValue = useTheme();
+    return null; // This component doesn't render anything itself
+  };
+
+  // Render with the wrapper and the consumer
+  const renderResult = render(
+    <>
+      {ui}
+      <ContextConsumer />
+    </>,
+    { wrapper: Wrapper, ...renderOptions }
+  );
+
+  // Ensure themeContextValue is defined before returning
+  if (!themeContextValue) {
+    throw new Error("ThemeContext value was not captured. Ensure ThemeProvider is correctly set up.");
+  }
+
+  // Return standard render result plus theme context helpers
   return {
     ...renderResult,
-    // Example simplified helper (use with caution):
-    // getCurrentDocumentTheme: () => document.documentElement.className,
+    setTheme: themeContextValue.setTheme,
+    isDarkMode: () => themeContextValue?.theme === 'dark', // Helper based on context
+    getCurrentThemeMode: () => themeContextValue?.theme, // Helper for selected mode (uses 'theme' property)
+    getCurrentAppliedTheme: () => themeContextValue?.theme, // Helper for applied theme
   };
 };
 
