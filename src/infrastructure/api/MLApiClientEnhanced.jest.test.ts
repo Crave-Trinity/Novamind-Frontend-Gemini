@@ -105,14 +105,14 @@ describe('MLApiClientEnhanced - Production Error Handling Tests', () => {
               await mlApiClientEnhanced.detectPHI('Test content with PHI');
               fail('Should have thrown an error');
             } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-        expect(error.type).toBe(MLErrorType.UNEXPECTED);
-        expect(error.statusCode).toBe(503);
-        expect(error.requestId).toBe('phi-req-123');
-        expect(error.endpoint).toBe('detectPHI');
-        // Errors should include contextual info for debugging
-        expect(error.details).toBeDefined();
-      }
+              // This is the correct catch block for the try on line 104
+              expect(error.type).toBe(MLErrorType.UNEXPECTED);
+              expect(error.statusCode).toBe(503);
+              expect(error.requestId).toBe('phi-req-123');
+              expect(error.endpoint).toBe('detectPHI');
+              // Errors should include contextual info for debugging
+              expect(error.details).toBeDefined();
+            } // Correctly closing the catch block
     });
     
     it('should handle PHI redaction with proper error context', async () => {
