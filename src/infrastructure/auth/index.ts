@@ -103,7 +103,9 @@ export class AuthService {
    * Check if the current token is expired
    */
   private isTokenExpired(tokens: AuthTokens): boolean {
-    return tokens.expiresAt < Date.now();
+    const isExpired = tokens.expiresAt < Date.now();
+    console.log(`[AuthService isTokenExpired] expiresAt: ${tokens.expiresAt}, now: ${Date.now()}, isExpired: ${isExpired}`);
+    return isExpired;
   }
 
   /**

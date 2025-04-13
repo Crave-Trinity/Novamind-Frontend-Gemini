@@ -113,6 +113,9 @@ export function useNeuralActivityController(patientId: string) {
             neuralState.metrics.activationLevels.set(
               activation.regionId,
               level // Use validated level
+            ); // Close set call
+            ); // Close set call
+          }); // Close forEach call
             );
 
             // Set initially active regions
@@ -125,6 +128,7 @@ export function useNeuralActivityController(patientId: string) {
               // Assuming LOW/NONE map to suppressed? Adjust if needed
               neuralState.inhibitedRegions.add(activation.regionId);
             }
+          }); // Close forEach call
           });
         }
 

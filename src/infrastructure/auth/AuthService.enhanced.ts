@@ -23,7 +23,8 @@ export class EnhancedAuthService {
    */
   private getStoredTokens(): AuthTokens | null {
     try {
-      const tokensJson = localStorage.getItem(this.tokenStorageKey);
+      // Ensure interaction with the potentially mocked window.localStorage
+      const tokensJson = window.localStorage.getItem(this.tokenStorageKey);
       if (!tokensJson) return null;
       return JSON.parse(tokensJson) as AuthTokens;
     } catch (error) {
@@ -38,7 +39,8 @@ export class EnhancedAuthService {
    * Store auth tokens and schedule refresh
    */
   private storeTokens(tokens: AuthTokens): void {
-    localStorage.setItem(this.tokenStorageKey, JSON.stringify(tokens));
+    // Ensure interaction with the potentially mocked window.localStorage
+    window.localStorage.setItem(this.tokenStorageKey, JSON.stringify(tokens));
     // Set up refresh timeout
     this.setupRefreshTimeout();
   }
@@ -47,7 +49,8 @@ export class EnhancedAuthService {
    * Clear stored tokens
    */
   private clearTokens(): void {
-    localStorage.removeItem(this.tokenStorageKey);
+    // Ensure interaction with the potentially mocked window.localStorage
+    window.localStorage.removeItem(this.tokenStorageKey);
     // Clear any pending refresh operations
     if (this.refreshTimeoutId !== null) {
       window.clearTimeout(this.refreshTimeoutId);
@@ -60,8 +63,12 @@ export class EnhancedAuthService {
    * Check if the current token is expired or will expire soon
    */
   private isTokenExpiredOrExpiring(tokens: AuthTokens, expiryBuffer = 300000): boolean {
+    const now = Date.now();
+    const threshold = now + expiryBuffer;
+    const isExpiring = tokens.expiresAt < threshold;
+    console.log(`[EnhancedAuthService isTokenExpiredOrExpiring] expiresAt: ${tokens.expiresAt}, now: ${now}, buffer: ${expiryBuffer}, threshold: ${threshold}, isExpiring: ${isExpiring}`);
     // Token is considered expired if it will expire within expiryBuffer ms (default 5 minutes)
-    return tokens.expiresAt < (Date.now() + expiryBuffer);
+    return isExpiring;
   }
 
   /**
@@ -139,23 +146,35 @@ export class EnhancedAuthService {
    * This can be used as middleware for API requests
    */
   async ensureValidToken(): Promise<string | null> {
+    console.log('[DEBUG ensureValidToken] Starting token validation.');
     const tokens = this.getStoredTokens();
+    console.log('[DEBUG ensureValidToken] Tokens from storage:', tokens ? 'Found' : 'None');
     if (!tokens) return null;
 
     // If token is expiring soon, refresh it
-    if (this.isTokenExpiredOrExpiring(tokens)) {
+    const isExpiring = this.isTokenExpiredOrExpiring(tokens);
+    console.log('[DEBUG ensureValidToken] Is token expiring soon?', isExpiring);
+    if (isExpiring) {
+      console.log('[DEBUG ensureValidToken] Token expiring, attempting refresh.');
       try {
         const newTokens = await this.refreshTokenSilently();
+        console.log('[DEBUG ensureValidToken] Refresh result:', newTokens ? 'Success' : 'Failed');
         return newTokens?.accessToken || null;
       } catch (error) {
-        console.error('Token refresh failed in ensureValidToken:', error);
+        console.error('[DEBUG ensureValidToken] Token refresh failed:', error);
         this.clearTokens();
         // Explicitly dispatch event here to ensure it happens
-        window.dispatchEvent(new CustomEvent('auth:session-expired'));
+        try {
+          window.dispatchEvent(new CustomEvent('auth:session-expired'));
+          console.log('[DEBUG ensureValidToken] Dispatched session-expired event on refresh failure.');
+        } catch (dispatchError) {
+           console.error('[DEBUG ensureValidToken] Error dispatching session-expired event:', dispatchError);
+        }
         return null;
       }
     }
 
+    console.log('[DEBUG ensureValidToken] Token is valid, returning access token.');
     return tokens.accessToken;
   }
 
@@ -347,29 +366,42 @@ export class EnhancedAuthService {
    * Check if user has specific permission
    */
   hasPermission(permission: string): boolean {
+    console.log('[DEBUG hasPermission] Checking permission:', permission);
     const tokens = this.getStoredTokens();
+    console.log('[DEBUG hasPermission] Tokens from storage:', tokens ? 'Found' : 'None');
     if (!tokens) return false;
-    
+
     // First check if token is expired
-    if (this.isTokenExpiredOrExpiring(tokens, 0)) {
+    const isStrictlyExpired = this.isTokenExpiredOrExpiring(tokens, 0);
+    console.log('[DEBUG hasPermission] Strictly expired check:', isStrictlyExpired);
+    if (isStrictlyExpired) {
       return false;
     }
     
     // Then trigger background refresh if needed
-    if (this.isTokenExpiredOrExpiring(tokens)) {
+    const isExpiringSoon = this.isTokenExpiredOrExpiring(tokens);
+     console.log('[DEBUG hasPermission] Expiring soon check:', isExpiringSoon);
+    if (isExpiringSoon) {
+      console.log('[DEBUG hasPermission] Triggering background refresh.');
       this.refreshTokenSilently().catch(err => console.error('Background token refresh failed:', err));
     }
     
     try {
       // Get user from storage or state management
-      const userJson = localStorage.getItem('auth_user');
+      // Ensure interaction with the potentially mocked window.localStorage
+      const userJson = window.localStorage.getItem('auth_user');
+      console.log('[DEBUG hasPermission] User JSON from storage:', userJson);
       if (!userJson) {
+          console.log('[DEBUG hasPermission] No user JSON found.');
           return false;
       }
-      
+
       const user = JSON.parse(userJson) as AuthUser;
+      console.log('[DEBUG hasPermission] Parsed user:', user);
+      const hasPerm = user && Array.isArray(user.permissions) && user.permissions.includes(permission);
+      console.log('[DEBUG hasPermission] Permission check result:', hasPerm);
       // Check if user object and permissions array exist before accessing includes
-      return user && Array.isArray(user.permissions) && user.permissions.includes(permission);
+      return hasPerm;
     } catch (error) {
       console.error('Error checking permissions:', error);
       return false;

@@ -40,9 +40,8 @@ describe('AuthService', () => {
   let authService: AuthService;
 
   beforeEach(() => {
-    // vi.resetAllMocks() is called by the global setup's afterEach/beforeEach
-    // We only need to clear specific spies if necessary, the global setup handles localStorage reset
-    vi.clearAllMocks(); // Clear mocks before setting up spies for this test suite
+    // The global setup's afterEach handles vi.clearAllMocks().
+    vi.useFakeTimers(); // Use fake timers for consistent Date.now()
 
     // Spy on AuthApiClient prototype methods *inside* beforeEach
     vi.spyOn(AuthApiClient.prototype, 'login').mockImplementation(mockLogin);
@@ -57,6 +56,7 @@ describe('AuthService', () => {
 
 
   afterEach(() => {
+    vi.useRealTimers(); // Restore real timers
     vi.restoreAllMocks(); // Restores original prototype methods
   });
 
@@ -163,6 +163,7 @@ describe('AuthService', () => {
 
   describe('initializeAuth', () => {
     it('should return unauthenticated state if no tokens are stored', async () => {
+      vi.setSystemTime(new Date()); // Set time for consistency
       // Execute
       const result = await authService.initializeAuth();
 
@@ -179,6 +180,7 @@ describe('AuthService', () => {
 
     it('should initialize auth with valid tokens', async () => {
       // Setup
+      vi.setSystemTime(new Date(mockTokens.expiresAt - 10000)); // Set time well before expiry
       mockLocalStorage.setItem('auth_tokens', JSON.stringify(mockTokens)); // Use global mock
       mockGetCurrentUser.mockResolvedValueOnce(mockUser); // Configure specific mock response
 
@@ -199,6 +201,7 @@ describe('AuthService', () => {
 
     it('should refresh expired tokens and fetch user', async () => {
       // Setup
+      vi.setSystemTime(new Date(expiredTokens.expiresAt + 10000)); // Set time well AFTER expiry
       mockLocalStorage.setItem('auth_tokens', JSON.stringify(expiredTokens)); // Use global mock
       mockRefreshToken.mockResolvedValueOnce(mockTokens); // Configure specific mock response
       mockGetCurrentUser.mockResolvedValueOnce(mockUser); // Configure specific mock response
@@ -222,6 +225,7 @@ describe('AuthService', () => {
 
     it('should clear tokens and return unauthenticated state if refresh fails', async () => {
       // Setup
+      vi.setSystemTime(new Date(expiredTokens.expiresAt + 10000)); // Set time well AFTER expiry
       mockLocalStorage.setItem('auth_tokens', JSON.stringify(expiredTokens)); // Use global mock
       mockRefreshToken.mockRejectedValueOnce(new Error('Token expired')); // Configure specific mock response
 
@@ -243,6 +247,7 @@ describe('AuthService', () => {
 
     it('should handle getCurrentUser failure and clear tokens', async () => {
       // Setup
+      vi.setSystemTime(new Date(mockTokens.expiresAt - 10000)); // Set time well before expiry
       mockLocalStorage.setItem('auth_tokens', JSON.stringify(mockTokens)); // Use global mock
       mockGetCurrentUser.mockRejectedValueOnce(new Error('User not found')); // Configure specific mock response
 
@@ -264,6 +269,7 @@ describe('AuthService', () => {
 
     it('should handle malformed token JSON in localStorage', async () => {
       // Setup with invalid JSON
+      vi.setSystemTime(new Date()); // Set time for consistency
       mockLocalStorage.setItem('auth_tokens', 'invalid-json'); // Use global mock
 
       // Execute

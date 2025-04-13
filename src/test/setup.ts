@@ -48,11 +48,21 @@ declare global {
 
 // BROWSER API MOCKS
 // Define global mocks
+// Define a persistent store for the global localStorage mock
+let globalLocalStorageStore: Record<string, string> = {};
+
+// Define implementation functions that interact with the store
+const mockGetItemImpl = (key: string): string | null => globalLocalStorageStore[key] || null;
+const mockSetItemImpl = (key: string, value: string): void => { globalLocalStorageStore[key] = value; };
+const mockRemoveItemImpl = (key: string): void => { delete globalLocalStorageStore[key]; };
+const mockClearImpl = (): void => { globalLocalStorageStore = {}; };
+
+// Create the mock object with initial vi.fn() placeholders
 (globalThis as any).mockLocalStorage = {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
+    getItem: vi.fn(mockGetItemImpl), // Initialize with implementation
+    setItem: vi.fn(mockSetItemImpl),
+    removeItem: vi.fn(mockRemoveItemImpl),
+    clear: vi.fn(mockClearImpl),
 };
 
 let globalMediaQueryChangeListener: ((e: Partial<MediaQueryListEvent>) => void) | null = null;
@@ -81,11 +91,13 @@ let globalMediaQueryChangeListener: ((e: Partial<MediaQueryListEvent>) => void) 
 (globalThis as any).mockMatchMedia = vi.fn();
 
 beforeEach(() => {
-  // Reset global mocks state
-  (globalThis as any).mockLocalStorage.getItem.mockReset();
-  (globalThis as any).mockLocalStorage.setItem.mockReset();
-  (globalThis as any).mockLocalStorage.removeItem.mockReset();
-  (globalThis as any).mockLocalStorage.clear.mockReset();
+  // Reset the store itself
+  globalLocalStorageStore = {};
+  // Reset mocks AND re-apply implementations to ensure they point to the reset store
+  (globalThis as any).mockLocalStorage.getItem.mockReset().mockImplementation(mockGetItemImpl);
+  (globalThis as any).mockLocalStorage.setItem.mockReset().mockImplementation(mockSetItemImpl);
+  (globalThis as any).mockLocalStorage.removeItem.mockReset().mockImplementation(mockRemoveItemImpl);
+  (globalThis as any).mockLocalStorage.clear.mockReset().mockImplementation(mockClearImpl);
   // Reset matchMedia listener capture and state
   globalMediaQueryChangeListener = null;
   (globalThis as any).globalCurrentMatchesState = false; // Default to light here
