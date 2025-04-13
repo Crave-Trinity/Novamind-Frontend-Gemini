@@ -227,13 +227,19 @@ export class EnhancedApiProxyService {
     try {
       // Handle specific endpoint transformations
       if (normalizedPath.includes('predict-risk') || normalizedPath.includes('risk-assessment')) {
-        // Transform risk assessment response
+        // Transform risk assessment response - critical to handle all edge cases for testing
         const timestamp = data.timestamp || new Date().toISOString();
+        
+        // Defensive coding to handle all possible missing fields
+        if (typeof data !== 'object') {
+          throw new Error(`Invalid risk assessment data: ${JSON.stringify(data)}`);
+        }
+        
         return {
           riskLevel: data.risk_level || 'low',
-          riskFactors: data.risk_factors || [],
-          recommendations: data.recommendations || [],
-          confidenceScore: data.confidence_score || 0.0,
+          riskFactors: Array.isArray(data.risk_factors) ? data.risk_factors : [],
+          recommendations: Array.isArray(data.recommendations) ? data.recommendations : [],
+          confidenceScore: typeof data.confidence_score === 'number' ? data.confidence_score : 0.0,
           timestamp // Always ensure timestamp is present
         };
       }

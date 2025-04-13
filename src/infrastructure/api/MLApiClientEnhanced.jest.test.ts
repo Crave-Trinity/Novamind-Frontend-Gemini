@@ -97,15 +97,15 @@ describe('MLApiClientEnhanced - Production Error Handling Tests', () => {
           headers: { 'x-request-id': 'phi-req-123' }
         }
       };
-      
-const mlApiClientMock: any // eslint-disable-line @typescript-eslint/no-explicit-any = {};
-      mlApiClientMock.detectPHI.mockRejectedValue(errorResponse);
-      
-      // Execute and verify error contains proper diagnostics
-      try {
-        await mlApiClientEnhanced.detectPHI('Test content with PHI');
-        fail('Should have thrown an error');
-      } catch (error: any // eslint-disable-line @typescript-eslint/no-explicit-any) {
+            // Set the error on the mock
+            mlApiClientMock.detectPHI.mockRejectedValue(errorResponse);
+            
+            // Execute and verify error contains proper diagnostics
+            try {
+              await mlApiClientEnhanced.detectPHI('Test content with PHI');
+              fail('Should have thrown an error');
+            } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
         expect(error.type).toBe(MLErrorType.UNEXPECTED);
         expect(error.statusCode).toBe(503);
         expect(error.requestId).toBe('phi-req-123');
