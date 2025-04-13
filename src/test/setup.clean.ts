@@ -13,7 +13,8 @@ import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers'
 
 // PROPER JEST-DOM SETUP
 // 1. Import and register matchers correctly
-expect.extend(require('@testing-library/jest-dom').matchers);
+import * as matchers from '@testing-library/jest-dom/matchers';
+expect.extend(matchers);
 
 // 2. Type augmentation that correctly extends Vitest
 declare global {
