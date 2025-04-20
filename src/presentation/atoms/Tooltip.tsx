@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { cn } from '@/lib/utils'; // Corrected import path

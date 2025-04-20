@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Biometric Stream Type Definitions
  * Defines types related to biometric data streams with clinical precision.

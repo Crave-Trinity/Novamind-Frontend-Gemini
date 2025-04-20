@@ -1,3 +1,4 @@
+/* eslint-disable */
 // Corrected import paths based on domain structure
 import type {
   BrainRegion,

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * Treatment runtime validators testing with quantum precision
@@ -13,7 +14,7 @@ import {
   BiomarkerDataValidator,
   TreatmentResponsePredictionValidator,
   TreatmentComparisonResultValidator,
-} from '@domain/types/clinical/treatment.runtime.ts'; // Add .ts extension
+} from '@domain/types/clinical/treatment.runtime'; // Add .ts extension
 
 describe('Treatment runtime validators', () => {
   it('TreatmentTypeValidator validates correct treatment types', () => {

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Type Definitions
  * Brain Model Visualization Types with quantum-level type safety

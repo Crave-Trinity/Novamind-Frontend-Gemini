@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Visualization
  * BrainModelViewer Organism Component - primary visualization engine

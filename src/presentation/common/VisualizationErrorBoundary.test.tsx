@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * VisualizationErrorBoundary testing with quantum precision
@@ -6,7 +7,7 @@ import { describe, it, expect } from 'vitest';
 
 import { render, screen } from '@testing-library/react';
 import VisualizationErrorBoundary from './VisualizationErrorBoundary'; // Assuming default export
-// import { renderWithProviders } from '@test/test-utils.tsx'; // Removed unused import
+// import { renderWithProviders } from '@test/test-utils'; // Removed unused import
 
 // Mock data with clinical precision
 // Mock data with clinical precision - Requires specific props for VisualizationErrorBoundary

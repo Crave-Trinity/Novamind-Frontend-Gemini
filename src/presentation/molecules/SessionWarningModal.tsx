@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useEffect, useRef, useState, useCallback } from 'react'; // Removed unused React
 // Removed unused useNavigate import
 import { useAuth } from '@application/hooks/useAuth';

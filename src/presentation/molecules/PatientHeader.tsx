@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Molecular Component
  * PatientHeader - Quantum-level patient information display

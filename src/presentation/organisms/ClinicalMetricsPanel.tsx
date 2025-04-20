@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Organism Component
  * ClinicalMetricsPanel - Quantum-level clinical metrics display

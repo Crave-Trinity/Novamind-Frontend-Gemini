@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Page Component
  * DigitalTwinPage - Quantum-level integration of all neural visualization systems

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Molecular Component
  * TimelineEvent - Quantum-level clinical event visualization

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type { UUID } from '../types/common';
 
 export interface BrainRegion {

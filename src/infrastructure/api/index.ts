@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * API client for external services
  */

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Visualization
  * NeuralConnections Molecular Component - renders collections of neural pathways

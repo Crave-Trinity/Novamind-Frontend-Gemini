@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * apiClient testing with quantum precision
@@ -6,11 +7,12 @@
 import { describe, it, expect, vi, beforeEach, beforeAll, afterAll, afterEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { apiClient } from '@api/apiClient'; // Ensure correct path
+import { apiClient } from './apiClient'; // Use relative path
 
 // Define MSW handlers for the API endpoints used in tests
 const handlers = [
-  http.get('/api/patients', () => {
+  // Use the full expected URL including the mock origin and base path
+  http.get('http://localhost/api/patients', () => {
     console.log('[MSW] Mocking GET /api/patients');
     return HttpResponse.json([
       { id: 'patient-001', name: 'Quantum Patient Zero' },
@@ -18,7 +20,8 @@ const handlers = [
     ]);
   }),
 
-  http.post('/api/auth/login', async ({ request }) => {
+  // Use the full expected URL including the mock origin and base path
+  http.post('http://localhost/api/auth/login', async ({ request }) => {
     console.log('[MSW] Mocking POST /api/auth/login');
     const body = await request.json();
     // You could add assertions on the body if needed

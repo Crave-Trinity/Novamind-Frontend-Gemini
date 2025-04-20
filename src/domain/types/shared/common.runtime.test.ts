@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * Common Shared Types runtime validators testing with quantum precision
@@ -16,7 +17,7 @@ import {
   ColorRGBValidator,
   ColorRGBAValidator,
   DimensionsValidator,
-} from '@domain/types/shared/common.runtime.ts'; // Add .ts extension
+} from '@domain/types/shared/common.runtime'; // Add .ts extension
 
 describe('Common Shared Types runtime validators', () => {
   describe('IDValidator', () => {

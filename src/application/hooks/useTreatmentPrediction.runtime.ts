@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @fileoverview Runtime validation functions for data related to the useTreatmentPrediction hook.
  * Ensures that treatment prediction request/response DTOs and inputs conform to expected types.

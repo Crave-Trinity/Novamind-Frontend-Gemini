@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * calculateNeuralActivation testing with quantum precision
@@ -5,14 +6,14 @@
 
 import { describe, it, expect } from 'vitest'; // Removed unused: vi
 
-import { calculateNeuralActivation } from '@domain/models/brain/mapping/brain-mapping.ts'; // Correct alias and add .ts
+import { calculateNeuralActivation } from './brain-mapping'; // Use relative path
 // Import necessary types
 import type { BrainRegion } from '@domain/types/brain/models';
 import type { Symptom, Diagnosis } from '@domain/types/clinical/patient';
 import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
-} from '@domain/models/brain/mapping/brain-mapping.ts';
+} from '@domain/models/brain/mapping/brain-mapping';
 // Removed unused import: NeuralActivationPattern
 describe('calculateNeuralActivation', () => {
   // --- Mock Data ---

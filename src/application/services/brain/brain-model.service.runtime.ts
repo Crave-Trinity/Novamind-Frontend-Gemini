@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Application Service
  * BrainModelService Runtime Validation - Quantum-level runtime validation

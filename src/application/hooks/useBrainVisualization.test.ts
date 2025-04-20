@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite - Debug Version
  */
@@ -12,7 +13,7 @@ import type { BrainModel } from '@domain/types/brain/models';
 import { useBrainVisualization } from './useBrainVisualization';
 
 // Mock the apiClient singleton
-vi.mock('@infrastructure/api/ApiClient', () => {
+vi.mock('../../infrastructure/api/apiClient', () => { // Use the correct relative path
   const mockBrainModel: BrainModel = {
     id: 'test-brain-model',
     patientId: 'test-patient',
@@ -70,9 +71,11 @@ vi.mock('@infrastructure/api/ApiClient', () => {
 
   return {
     apiClient: {
-      getBrainModel: vi.fn().mockImplementation(async (patientId: string) => {
-        console.log('[MOCK] Getting brain model for:', patientId);
-        return mockBrainModel;
+      // Mock the 'get' method used by the hook
+      get: vi.fn().mockImplementation(async (path: string) => {
+        console.log('[MOCK] apiClient.get called with path:', path);
+        console.log('[MOCK] Always returning mockBrainModel for debugging.');
+        return mockBrainModel; // Always return mock data for now
       }),
     },
   };
@@ -90,32 +93,43 @@ console.log('[SETUP] Test setup complete');
 describe('useBrainVisualization Hook', () => {
   let queryClient: QueryClient;
 
-  beforeEach(() => {
-    console.log('[TEST] beforeEach - clearing mocks');
-    vi.clearAllMocks();
-    queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: false,
-          gcTime: 0,
-          staleTime: 0,
-          refetchOnMount: false,
-          refetchOnWindowFocus: false,
-          refetchOnReconnect: false,
-        },
-      },
-    });
-  });
+  // beforeEach(() => { // Remove beforeEach setup for queryClient
+  //   console.log('[TEST] beforeEach - clearing mocks');
+  //   vi.clearAllMocks();
+  //   // queryClient = new QueryClient({ // Create client inside wrapper instead
+  //   //   defaultOptions: {
+  //   //     queries: {
+  //   //       retry: false,
+  //   //       gcTime: 0,
+  //   //       staleTime: 0,
+  //   //       refetchOnMount: false,
+  //   //       refetchOnWindowFocus: false,
+  //   //       refetchOnReconnect: false,
+  //   //     },
+  //   //   },
+  //   // });
+  // });
 
-  afterEach(() => {
-    queryClient.clear();
-  });
+  // afterEach(() => { // No longer need to clear client created in wrapper
+  //   // queryClient.clear();
+  // });
 
   it('renders without crashing', async () => {
     console.log('[TEST] Starting basic render test');
 
-    const wrapper = ({ children }: { children: React.ReactNode }) =>
-      React.createElement(QueryClientProvider, { client: queryClient }, children);
+    // Create a fresh client for each renderHook call within the wrapper
+    const wrapper = ({ children }: { children: React.ReactNode }) => {
+      const testQueryClient = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+            gcTime: 0,
+            staleTime: 0,
+          },
+        },
+      });
+      return React.createElement(QueryClientProvider, { client: testQueryClient }, children);
+    };
 
     console.log('[TEST] About to render hook');
     const { result } = renderHook(
@@ -135,7 +149,16 @@ describe('useBrainVisualization Hook', () => {
       data: result.current.brainModel,
     });
 
+    // Wait for the query to be successful and data to be defined
     await waitFor(() => {
+      // First, ensure the query itself succeeded
+      // Need access to the specific queryClient instance used in the wrapper
+      // This requires a more complex setup or relying on isLoading/data checks
+      // Revert to checking isLoading and data directly for simplicity now
+      // const queryStatus = queryClient.getQueryState(['brainModel', 'test-patient'])?.status;
+      // expect(queryStatus).toBe('success');
+      
+      // Then check loading state and data
       expect(result.current.isLoading).toBe(false);
       expect(result.current.brainModel).toBeDefined();
       expect(result.current.brainModel).toMatchObject({

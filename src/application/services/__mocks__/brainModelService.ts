@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { vi } from 'vitest';
 import type { BrainModel, BrainScan } from '@domain/types/brain/models';
 

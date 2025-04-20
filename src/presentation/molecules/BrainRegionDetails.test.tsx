@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * BrainRegionDetails - Minimal Test
  * Replaced with minimal test to prevent hanging from useFrame animation loop

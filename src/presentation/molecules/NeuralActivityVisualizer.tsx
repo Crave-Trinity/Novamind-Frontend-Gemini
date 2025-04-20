@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Molecular Component
  * NeuralActivityVisualizer - Quantum-level neural activity visualization

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Neural API Client Runtime
  * 

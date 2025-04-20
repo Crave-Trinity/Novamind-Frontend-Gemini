@@ -53,6 +53,7 @@
   "include": [
     "src",
     "src/test", // Explicitly include test directory
+    "test-puppeteer", // Include Puppeteer tests
     "config",
     "*.ts",
     "*.tsx",

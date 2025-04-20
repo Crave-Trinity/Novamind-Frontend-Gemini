@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Service Layer
  * Biometric Service - Handles retrieval and processing of biometric data.

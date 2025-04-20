@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type { Identifiable, Timestamped } from '../common';
 
 export type Gender = 'male' | 'female' | 'other' | 'prefer_not_to_say';

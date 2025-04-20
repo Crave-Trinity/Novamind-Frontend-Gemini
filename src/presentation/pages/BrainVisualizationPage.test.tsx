@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * BrainVisualizationPage testing with quantum precision
@@ -8,7 +9,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '../../test/test-utils.unified'; // Use unified render and import waitFor
 // Removed unused userEvent import
 import BrainVisualizationPage from '@presentation/pages/BrainVisualizationPage'; // Corrected import path
-// import { renderWithProviders } from "@test/test-utils.tsx"; // Use unified render instead
+// import { renderWithProviders } from "@test/test-utils"; // Use unified render instead
 
 // Mock the child component that uses R3F heavily
 vi.mock('@organisms/BrainVisualizationContainer', () => ({

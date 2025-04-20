@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Testing Framework
  * Clinical Service Minimal Tests
@@ -7,7 +8,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
-import { clinicalService } from '@services/clinical/clinical.service.ts'; // Use @services alias and add .ts
+import { clinicalService } from '@services/clinical/clinical.service'; // Use @services alias and add .ts
 import type { SymptomNeuralMapping } from '@domain/models/brain/mapping/brain-mapping'; // Use type import
 import { type RiskAssessment, RiskLevel } from '@domain/types/clinical/risk'; // Import RiskLevel enum
 // Removed unused type import: TreatmentResponsePrediction

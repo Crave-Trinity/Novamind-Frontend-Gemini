@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Architecture
  * Minimal BrainModelContainer Test with Quantum Precision

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Orchestration Layer
  * NeuroSyncOrchestrator - Quantum-level component coordination

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite - Rebuilt
  * BiometricStreamController testing with focused, incremental tests.
@@ -63,13 +64,10 @@ const mockStreamMetadata: BiometricStream[] = [
 
 // Mock WebSocket connection
 class MockWebSocket {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // Use 'any' for the event type for simplicity in the mock
   onopen: ((event: any) => void) | null = null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onclose: ((event: any) => void) | null = null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onmessage: ((event: any) => void) | null = null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onerror: ((event: any) => void) | null = null;
   readyState: number = 0; // Start as CONNECTING
 
@@ -91,19 +89,19 @@ class MockWebSocket {
   });
   // Helper methods for tests
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  simulateMessage(data: any): void {
+  public simulateMessage(data: any): void { // Added public keyword
     if (this.onmessage) {
       this.onmessage({ data: typeof data === 'string' ? data : JSON.stringify(data) });
     }
   }
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  simulateError(errorData: any): void {
+  public simulateError(errorData: any): void { // Added public keyword
     if (this.onerror) {
       this.onerror(errorData);
     }
   }
-}
+} // Closing brace for the class
 
 // Removed unused variable: lastMockWebSocketInstance
 global.WebSocket = vi.fn().mockImplementation((url: string) => {

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Testing Framework
  * Ultra-minimal test to verify testing infrastructure

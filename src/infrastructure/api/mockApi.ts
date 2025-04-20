@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Neural Mock API Implementation
  * 

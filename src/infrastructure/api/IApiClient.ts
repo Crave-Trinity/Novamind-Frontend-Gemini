@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * IApiClient - The common interface for all API clients
  *

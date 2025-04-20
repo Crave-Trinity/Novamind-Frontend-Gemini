@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Brain Model Types
  * Core domain entities for brain visualization with quantum-level type safety

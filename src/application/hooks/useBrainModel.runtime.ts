@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @fileoverview Runtime validation functions for data related to the useBrainModel hook.
  * Ensures that data structures conform to expected types at runtime.

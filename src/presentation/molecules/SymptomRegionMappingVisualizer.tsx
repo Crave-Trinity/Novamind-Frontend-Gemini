@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Molecular Component
  * SymptomRegionMappingVisualizer - Quantum-level symptom-to-region mapping

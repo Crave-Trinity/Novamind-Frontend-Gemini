@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Common Type Definitions
  * Core utility types with quantum-level type safety

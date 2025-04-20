@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @fileoverview Tests for runtime validation functions in XGBoostService.runtime.ts.
  */

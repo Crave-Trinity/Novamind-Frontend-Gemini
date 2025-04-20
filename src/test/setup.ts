@@ -1,270 +1,256 @@
 /**
- * Global test setup for the Novamind Digital Twin frontend application
+ * CANONICAL TEST ENVIRONMENT SETUP
+ *
+ * This is a complete, clean solution for all test environment needs.
+ * No patchwork, no legacy code - just a proper foundation.
  */
-// Remove unused React import
-import '@testing-library/jest-dom';
+
+// Import Vitest expect first
+import { expect } from 'vitest';
+// Import and extend jest-dom matchers
+import * as matchers from '@testing-library/jest-dom/matchers';
+expect.extend(matchers);
+// Now import other Vitest globals and testing utilities
+import { vi, afterEach, beforeEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
-import { afterEach, beforeAll, vi } from 'vitest';
 import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers';
 
-// Vitest Assertion extension
-declare module 'vitest' {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  interface Assertion extends TestingLibraryMatchers<any, void> {
-    // Phantom property to satisfy TS no-empty-interface rule
-    _brand: 'vitest-assertion';
+// Rely on the standard matchers imported and extended above
+
+// 2. Type augmentation and global mock definitions
+declare global {
+  namespace Vi {
+    interface AsymmetricMatchersContaining extends TestingLibraryMatchers<unknown, void> {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    interface Assertion<T = any> extends TestingLibraryMatchers<T, void> {}
   }
-}
-
-// Mock extension
-declare module 'vitest' {
-  interface Mock {
-    mockReturnValue<T>(val: T): Mock;
-    mockImplementation<T, Y extends unknown[]>(fn: (...args: Y) => T): Mock;
-  }
-}
-
-// --- Minimal Browser API Mocks ---
-
-// Only mock browser APIs if window exists (browser environment)
-if (typeof window !== 'undefined') {
-  // Mock IntersectionObserver
-  window.IntersectionObserver = vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-    takeRecords: () => [],
-  }));
-}
-
-// Mock ResizeObserver
-window.ResizeObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-}));
-
-// Mock window.matchMedia (Simple global version - needed for non-enhanced tests)
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  configurable: true,
-  value: vi.fn().mockImplementation((query) => ({
-    matches: false, // Default to false (light mode)
-    media: query,
-    onchange: null,
-    addListener: vi.fn(), // deprecated
-    removeListener: vi.fn(), // deprecated
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
-
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => {
-      store[key] = value.toString();
-    },
-    removeItem: (key: string) => {
-      delete store[key];
-    },
-    clear: () => {
-      store = {};
-    },
-    get length() {
-      return Object.keys(store).length;
-    },
-    key: (index: number) => Object.keys(store)[index] || null,
+  // Define global types for our mocks using var
+  var mockLocalStorage: {
+      getItem: ReturnType<typeof vi.fn>;
+      setItem: ReturnType<typeof vi.fn>;
+      removeItem: ReturnType<typeof vi.fn>;
+      clear: ReturnType<typeof vi.fn>;
   };
-})();
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
-
-// Mock sessionStorage (if needed)
-const sessionStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => {
-      store[key] = value.toString();
-    },
-    removeItem: (key: string) => {
-      delete store[key];
-    },
-    clear: () => {
-      store = {};
-    },
-    get length() {
-      return Object.keys(store).length;
-    },
-    key: (index: number) => Object.keys(store)[index] || null,
+  var mockMatchMedia: ReturnType<typeof vi.fn>;
+  var mockMediaQueryListInstance: { // Make the instance globally accessible if needed
+      matches: boolean;
+      media: string;
+      onchange: null;
+      addEventListener: ReturnType<typeof vi.fn>;
+      removeEventListener: ReturnType<typeof vi.fn>;
+      dispatchEvent: ReturnType<typeof vi.fn>;
+      addListener: ReturnType<typeof vi.fn>;
+      removeListener: ReturnType<typeof vi.fn>;
+      _triggerChange?: (matches: boolean) => void;
   };
-})();
-Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
+  var globalCurrentMatchesState: boolean;
+}
 
-// Mock URL.createObjectURL and revokeObjectURL
-window.URL.createObjectURL = vi.fn(() => 'mock-object-url');
-window.URL.revokeObjectURL = vi.fn();
+// BROWSER API MOCKS
+// Define global mocks
+// Define a persistent store for the global localStorage mock
+let globalLocalStorageStore: Record<string, string> = {};
 
-// Mock CanvasRenderingContext2D methods (add more as needed)
-// This avoids errors when libraries try to use canvas methods in tests
-const mockCanvasContext: Partial<CanvasRenderingContext2D> = {
-  fillRect: vi.fn(),
-  clearRect: vi.fn(),
-  getImageData: vi.fn(() => ({
-    data: new Uint8ClampedArray(0),
-    width: 0,
-    height: 0,
-    colorSpace: 'srgb' as PredefinedColorSpace,
-  })),
-  putImageData: vi.fn(),
-  createImageData: vi.fn(() => ({
-    data: new Uint8ClampedArray(0),
-    width: 0,
-    height: 0,
-    colorSpace: 'srgb' as PredefinedColorSpace,
-  })),
-  setTransform: vi.fn(),
-  drawImage: vi.fn(),
-  save: vi.fn(),
-  restore: vi.fn(),
-  beginPath: vi.fn(),
-  moveTo: vi.fn(),
-  lineTo: vi.fn(),
-  closePath: vi.fn(),
-  stroke: vi.fn(),
-  translate: vi.fn(),
-  scale: vi.fn(),
-  rotate: vi.fn(),
-  arc: vi.fn(),
-  fill: vi.fn(),
-  fillText: vi.fn(),
-  strokeText: vi.fn(),
-  measureText: vi.fn(() => ({
-    width: 0,
-    actualBoundingBoxAscent: 0,
-    actualBoundingBoxDescent: 0,
-    actualBoundingBoxLeft: 0,
-    actualBoundingBoxRight: 0,
-    fontBoundingBoxAscent: 0,
-    fontBoundingBoxDescent: 0,
-    emHeightAscent: 0,
-    emHeightDescent: 0,
-    hangingBaseline: 0,
-    alphabeticBaseline: 0,
-    ideographicBaseline: 0,
-  })),
-  // Add other 2D context methods if tests fail due to missing implementations
+// Define implementation functions that interact with the store
+const mockGetItemImpl = (key: string): string | null => globalLocalStorageStore[key] || null;
+const mockSetItemImpl = (key: string, value: string): void => { globalLocalStorageStore[key] = value; };
+const mockRemoveItemImpl = (key: string): void => { delete globalLocalStorageStore[key]; };
+const mockClearImpl = (): void => { globalLocalStorageStore = {}; };
+
+// Create the mock object with initial vi.fn() placeholders
+(globalThis as any).mockLocalStorage = {
+    getItem: vi.fn(mockGetItemImpl), // Initialize with implementation
+    setItem: vi.fn(mockSetItemImpl),
+    removeItem: vi.fn(mockRemoveItemImpl),
+    clear: vi.fn(mockClearImpl),
 };
 
-// Extend the prototype if necessary, or mock getContext
-// Mock HTMLCanvasElement.prototype.getContext to return our mock context
-Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
-  writable: true,
-  configurable: true,
-  value: vi.fn((contextId) => {
-    if (contextId === '2d') {
-      return mockCanvasContext;
+let globalMediaQueryChangeListener: ((e: Partial<MediaQueryListEvent>) => void) | null = null;
+// Initialize the state on globalThis
+(globalThis as any).globalCurrentMatchesState = false;
+
+(globalThis as any).mockMediaQueryListInstance = {
+    matches: (globalThis as any).globalCurrentMatchesState, // Read from globalThis
+    media: '(prefers-color-scheme: dark)',
+    onchange: null,
+    addEventListener: vi.fn((event, listener) => { if (event === 'change') globalMediaQueryChangeListener = listener; }),
+    removeEventListener: vi.fn((event, listener) => { if (event === 'change' && globalMediaQueryChangeListener === listener) globalMediaQueryChangeListener = null; }),
+    dispatchEvent: vi.fn(),
+    addListener: vi.fn((listener) => { globalMediaQueryChangeListener = listener; }), // Deprecated
+    removeListener: vi.fn((listener) => { if (globalMediaQueryChangeListener === listener) globalMediaQueryChangeListener = null; }), // Deprecated
+    _triggerChange: (newMatchesState: boolean) => {
+        (globalThis as any).globalCurrentMatchesState = newMatchesState; // Write to globalThis
+        (globalThis as any).mockMediaQueryListInstance.matches = newMatchesState;
+        if (globalMediaQueryChangeListener) {
+            globalMediaQueryChangeListener({ matches: newMatchesState } as Partial<MediaQueryListEvent>);
+        }
     }
-    // Return a basic WebGL mock if requested, handled by vi.mock('three', ...) below
-    if (contextId === 'webgl' || contextId === 'webgl2') {
-      // This will be overridden by the vi.mock('three', ...) below for more detail
-      // but provides a fallback.
-      return {
-        getParameter: vi.fn(),
-        getExtension: vi.fn(),
-        // Add minimal required methods if needed
-      };
+};
+
+// Define the mock function structure but leave implementation for beforeEach
+(globalThis as any).mockMatchMedia = vi.fn();
+
+beforeEach(() => {
+  // Reset the store itself
+  globalLocalStorageStore = {};
+  // Reset mocks AND re-apply implementations to ensure they point to the reset store
+  (globalThis as any).mockLocalStorage.getItem.mockReset().mockImplementation(mockGetItemImpl);
+  (globalThis as any).mockLocalStorage.setItem.mockReset().mockImplementation(mockSetItemImpl);
+  (globalThis as any).mockLocalStorage.removeItem.mockReset().mockImplementation(mockRemoveItemImpl);
+  (globalThis as any).mockLocalStorage.clear.mockReset().mockImplementation(mockClearImpl);
+  // Reset matchMedia listener capture and state
+  globalMediaQueryChangeListener = null;
+  (globalThis as any).globalCurrentMatchesState = false; // Default to light here
+  if ((globalThis as any).mockMediaQueryListInstance) {
+      (globalThis as any).mockMediaQueryListInstance.matches = false;
+  }
+
+  // Define the mock implementation *within* beforeEach
+  const matchMediaImplementation = (query: string): MediaQueryList => {
+      if (!(globalThis as any).mockMediaQueryListInstance) {
+           console.error("CRITICAL SETUP ERROR: mockMediaQueryListInstance is not defined!");
+           return { matches: false, media: query, onchange: null, addListener: vi.fn(), removeListener: vi.fn(), addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn() } as unknown as MediaQueryList;
+      }
+      if (query === '(prefers-color-scheme: dark)') {
+          (globalThis as any).mockMediaQueryListInstance.matches = (globalThis as any).globalCurrentMatchesState;
+          return (globalThis as any).mockMediaQueryListInstance as unknown as MediaQueryList;
+      }
+      return { matches: false, media: query, onchange: null, addListener: vi.fn(), removeListener: vi.fn(), addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn() } as unknown as MediaQueryList;
+  };
+  
+  // Clear previous mocks/implementations and set the new one
+  (globalThis as any).mockMatchMedia.mockClear().mockImplementation(matchMediaImplementation);
+
+  // Ensure mocks are attached to the window object if it exists (JSDOM)
+  if (typeof window !== 'undefined') {
+    Object.defineProperty(window, 'localStorage', {
+      value: (globalThis as any).mockLocalStorage,
+      writable: true,
+      configurable: true
+    });
+    // Attach the freshly configured mock
+    Object.defineProperty(window, 'matchMedia', {
+      value: (globalThis as any).mockMatchMedia,
+      writable: true,
+      configurable: true,
+    });
+    // Basic mock for sessionStorage if needed by other tests
+    Object.defineProperty(window, 'sessionStorage', {
+       value: { getItem: vi.fn(), setItem: vi.fn(), removeItem: vi.fn(), clear: vi.fn() },
+       writable: true,
+       configurable: true
+    });
+
+    // Mock other browser APIs needed
+    window.IntersectionObserver = vi.fn().mockImplementation(() => ({
+      observe: vi.fn(),
+      unobserve: vi.fn(),
+      disconnect: vi.fn(),
+      takeRecords: () => [],
+    }));
+    window.ResizeObserver = vi.fn().mockImplementation(() => ({
+      observe: vi.fn(),
+      unobserve: vi.fn(),
+      disconnect: vi.fn(),
+    }));
+    if (window.URL) {
+      window.URL.createObjectURL = vi.fn(() => 'mock-object-url');
+      window.URL.revokeObjectURL = vi.fn();
     }
-    return null; // Default case
-  }),
+
+    // Reset document state for theme tests
+    if (document.documentElement) {
+      document.documentElement.removeAttribute('class');
+      // Optionally set a default class if needed, but resetting is safer
+      // document.documentElement.classList.add('light');
+    }
+  }
 });
 
-// --- Global Mocks ---
+// CANVAS & WEBGL MOCKS
+if (typeof window !== 'undefined' && typeof HTMLCanvasElement !== 'undefined') {
+  // Mock canvas context
+  const mockCanvasContext: Partial<CanvasRenderingContext2D> = {
+    fillRect: vi.fn(),
+    clearRect: vi.fn(),
+    getImageData: vi.fn(() => ({
+      data: new Uint8ClampedArray(0),
+      width: 0,
+      height: 0,
+      colorSpace: 'srgb' as PredefinedColorSpace,
+    })),
+    putImageData: vi.fn(),
+    setTransform: vi.fn(),
+    drawImage: vi.fn(),
+    save: vi.fn(),
+    restore: vi.fn(),
+    beginPath: vi.fn(),
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
+    closePath: vi.fn(),
+    stroke: vi.fn(),
+    fill: vi.fn(),
+    // Add other methods as needed
+  };
 
-// Example: Mocking a global function or module if needed
-// vi.mock('some-module', () => ({
-//   default: vi.fn(),
-//   someNamedExport: vi.fn(),
-// }));
+  // Mock getContext method
+  Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+    writable: true,
+    configurable: true,
+    value: vi.fn((contextId) => {
+      if (contextId === '2d') {
+        return mockCanvasContext;
+      }
+      if (contextId === 'webgl' || contextId === 'webgl2') {
+        return {
+          getParameter: vi.fn(),
+          getExtension: vi.fn(),
+          createShader: vi.fn(() => ({})),
+          shaderSource: vi.fn(),
+          compileShader: vi.fn(),
+          getShaderParameter: vi.fn(() => true),
+          createProgram: vi.fn(() => ({})),
+          attachShader: vi.fn(),
+          linkProgram: vi.fn(),
+          getProgramParameter: vi.fn(() => true),
+        };
+      }
+      return null;
+    }),
+  });
+}
 
-// --- Cleanup ---
-
-// Ensure DOM is cleaned up after each test
-afterEach(() => {
-  cleanup();
-});
-
-// Optional: Reset mocks before each test if needed
-// beforeEach(() => {
-//   vi.clearAllMocks(); // Or vi.resetAllMocks(); depending on desired behavior
-// });
-
-// Optional: Global setup before all tests
-beforeAll(() => {
-  console.log('[TEST SETUP] Running global setup...');
-  // Setup global state or mocks needed before any test runs
-});
-
-// Mock WebGLRenderingContext partially
+// THREE.JS MOCK
 vi.mock('three', async (importOriginal) => {
-  // Await the dynamic import first. Let TypeScript infer the type.
   const threeModule = (await importOriginal()) as Record<string, unknown>;
-
+  
   return {
     ...threeModule,
-    WebGLRenderingContext: vi.fn().mockImplementation(() => ({
-      getExtension: vi.fn(),
-      getParameter: vi.fn(),
-      createShader: vi.fn(() => ({})),
-      shaderSource: vi.fn(),
-      compileShader: vi.fn(),
-      getShaderParameter: vi.fn((/* shader, pname */) => {
-        // Simplified logic for mock
-        return true;
-      }),
-      attachShader: vi.fn(),
-      linkProgram: vi.fn(),
-      getProgramParameter: vi.fn((/* program, pname */) => {
-        // Simplified logic for mock
-        return true;
-      }),
-      createProgram: vi.fn(() => ({})),
-      // Add other methods as needed by tests
-      viewport: vi.fn(),
-      clearColor: vi.fn(),
-      clear: vi.fn(),
-      enable: vi.fn(),
-      depthFunc: vi.fn(),
-      cullFace: vi.fn(),
-      frontFace: vi.fn(),
-      bindBuffer: vi.fn(),
-      createBuffer: vi.fn(() => ({})),
-      bufferData: vi.fn(),
-      vertexAttribPointer: vi.fn(),
-      enableVertexAttribArray: vi.fn(),
-      drawArrays: vi.fn(),
-      drawElements: vi.fn(),
-      useProgram: vi.fn(),
-      getUniformLocation: vi.fn(() => ({})),
-      uniformMatrix4fv: vi.fn(),
-      uniform1i: vi.fn(),
-      uniform1f: vi.fn(),
-      uniform2f: vi.fn(),
-      uniform3f: vi.fn(),
-      uniform4f: vi.fn(),
-      activeTexture: vi.fn(),
-      bindTexture: vi.fn(),
-      createTexture: vi.fn(() => ({})),
-      texParameteri: vi.fn(),
-      texImage2D: vi.fn(),
-      pixelStorei: vi.fn(),
-      // Re-add the cast to use the interface
+    WebGLRenderer: vi.fn().mockImplementation(() => ({
+      setSize: vi.fn(),
+      render: vi.fn(),
+      setClearColor: vi.fn(),
+      setPixelRatio: vi.fn(),
+      domElement: document.createElement('canvas'),
+      dispose: vi.fn(),
     })),
   };
 });
 
-// --- Setup Complete ---
-console.log('[TEST SETUP] Global setup complete (with simplified mocks).');
+// CLEANUP
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
+
+// Test helper utilities
+export const TestHelpers = {
+  setTheme: (theme: 'light' | 'dark' | 'system' | 'clinical') => {
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.classList.remove('light', 'dark', 'system', 'clinical');
+      document.documentElement.classList.add(theme);
+    }
+  }
+};
+
+console.log('[CANONICAL SETUP] Clean test environment initialized');

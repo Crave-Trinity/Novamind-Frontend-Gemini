@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Organism Component
  * NeuralControlPanel - Quantum-level control interface

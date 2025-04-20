@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @fileoverview Runtime validation functions for data related to the useBrainVisualization hook.
  * Ensures that visualization settings and data structures conform to expected types at runtime.

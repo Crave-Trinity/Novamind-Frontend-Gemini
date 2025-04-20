@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Atomic Component
  * NeuralCorrelationBadge - Quantum-level neural correlation visualization

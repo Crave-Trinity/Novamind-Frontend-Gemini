@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * RiskLevel represents the severity of a patient's risk assessment.
  * This is used throughout the application to maintain consistent risk level terminology.

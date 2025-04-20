@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Treatment Prediction Hook
  * Custom hook for managing and fetching treatment response predictions

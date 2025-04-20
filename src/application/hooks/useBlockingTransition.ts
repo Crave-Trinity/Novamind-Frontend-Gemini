@@ -29,9 +29,9 @@ export function useBlockingTransition<T>(initialState: T) {
    * like neural pathway calculations or treatment response predictions
    */
   const setState = useCallback(
-// eslint-disable-next-line
+    // eslint-disable-next-line
     (newState: T | ((prevState: T) => T)) => {
-// eslint-disable-next-line
+      // eslint-disable-next-line
       startTransition(() => {
         setStateDirectly(newState);
       });
@@ -71,12 +71,12 @@ export function useFilteredListTransition<T>(initialItems: T[]) {
    * @param newItems - New array to replace current items
    */
   const updateItems = useCallback(
-// eslint-disable-next-line
+    // eslint-disable-next-line
     (newItems: T[]) => {
       setItems(newItems);
 
       // Update filtered items in a non-blocking transition
-// eslint-disable-next-line
+      // eslint-disable-next-line
       startTransition(() => {
         setFilteredItems(newItems);
       });
@@ -89,9 +89,9 @@ export function useFilteredListTransition<T>(initialItems: T[]) {
    * @param filterFn - Predicate function to filter items
    */
   const filterItems = useCallback(
-// eslint-disable-next-line
+    // eslint-disable-next-line
     (filterFn: (item: T) => boolean) => {
-// eslint-disable-next-line
+      // eslint-disable-next-line
       startTransition(() => {
         setFilteredItems(items.filter(filterFn));
       });
@@ -102,9 +102,9 @@ export function useFilteredListTransition<T>(initialItems: T[]) {
   /**
    * Resets filters to show all items
    */
-// eslint-disable-next-line
+  // eslint-disable-next-line
   const resetFilters = useCallback(() => {
-// eslint-disable-next-line
+    // eslint-disable-next-line
     startTransition(() => {
       setFilteredItems(items);
     });
@@ -112,7 +112,7 @@ export function useFilteredListTransition<T>(initialItems: T[]) {
 
   // Memoize the return value to prevent unnecessary re-renders
   const api = useMemo(
-// eslint-disable-next-line
+    // eslint-disable-next-line
     () => ({
       items,
       filteredItems,
@@ -135,7 +135,7 @@ export function useFilteredListTransition<T>(initialItems: T[]) {
  * @param initialState - Initial state object
  * @returns Functions for queuing and applying batched updates
  */
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useBatchedUpdates<T extends Record<string, any>>(initialState: T) {
   const [state, setState] = useState<T>(initialState);
   const [pendingUpdates, setPendingUpdates] = useState<Partial<T>>({});
@@ -146,51 +146,43 @@ export function useBatchedUpdates<T extends Record<string, any>>(initialState: T
    * @param key - State property key to update
    * @param value - New value for the property
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const queueUpdate = useCallback((key: keyof T, value: any) => {
-    // eslint-disable-next-line
-    setPendingUpdates((prev) => ({
+  const queueUpdate = useCallback((key: keyof T, value: T[keyof T]) => { // Use T[keyof T] for better type safety
+    setPendingUpdates(prev => ({
       ...prev,
       [key]: value,
     }));
-  }, []);
+  }, []); // Dependency array is empty as setPendingUpdates is stable
 
   /**
    * Applies all pending updates in a single transition
    */
-// eslint-disable-next-line
   const applyUpdates = useCallback(() => {
     if (Object.keys(pendingUpdates).length === 0) {
-      return;
+      return; // No updates to apply
     }
 
-// eslint-disable-next-line
     startTransition(() => {
-// eslint-disable-next-line
       setState((prev) => ({
         ...prev,
-        ...pendingUpdates,
+        ...pendingUpdates, // Apply all queued updates
       }));
-      setPendingUpdates({});
+      setPendingUpdates({}); // Clear the queue after applying
     });
-  }, [pendingUpdates, startTransition]);
+  }, [pendingUpdates, startTransition, setState, setPendingUpdates]); // Include all dependencies
 
   /**
    * Immediately applies a single update, bypassing the batch
    * Use only for critical updates that can't wait
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const applyImmediate = useCallback((key: keyof T, value: any) => {
-    // eslint-disable-next-line
+  const applyImmediate = useCallback((key: keyof T, value: T[keyof T]) => { // Use T[keyof T]
     setState((prev) => ({
       ...prev,
       [key]: value,
     }));
-  }, []);
+  }, [setState]); // Include setState dependency
 
   // Memoize the return value to prevent unnecessary re-renders
   const api = useMemo(
-// eslint-disable-next-line
     () => ({
       state,
       queueUpdate,
@@ -199,9 +191,9 @@ export function useBatchedUpdates<T extends Record<string, any>>(initialState: T
       pendingUpdates,
       isPending,
       // Helper to check if specific keys have pending updates
-      hasPendingUpdate: (key: keyof T) => key in pendingUpdates,
+      hasPendingUpdate: (key: keyof T): boolean => key in pendingUpdates,
     }),
-    [state, queueUpdate, applyUpdates, applyImmediate, pendingUpdates, isPending]
+    [state, queueUpdate, applyUpdates, applyImmediate, pendingUpdates, isPending] // Match dependencies
   );
 
   return api;

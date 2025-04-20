@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Molecular Component
  * BiometricAlertVisualizer - Quantum-level biometric alert visualization

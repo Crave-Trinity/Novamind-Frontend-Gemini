@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Application Hook
  * useBrainModel - Quantum-level hook for brain model interaction

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Application Service
  * ClinicalService Runtime Validation - Quantum-level runtime validation

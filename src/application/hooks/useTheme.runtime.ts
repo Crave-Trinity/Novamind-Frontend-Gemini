@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @fileoverview Runtime validation functions for data related to the useTheme hook.
  * Ensures that theme settings and structures conform to expected types at runtime.

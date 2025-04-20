@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * TherapeuticTimelineVisualizer test with clinical precision

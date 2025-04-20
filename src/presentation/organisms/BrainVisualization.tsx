@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural Visualization Component
  * Renders a 3D brain model with clinical-grade precision

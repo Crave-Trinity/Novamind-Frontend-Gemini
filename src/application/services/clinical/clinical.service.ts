@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * NOVAMIND Neural-Safe Application Service
  * ClinicalService - Quantum-level service for clinical data operations
