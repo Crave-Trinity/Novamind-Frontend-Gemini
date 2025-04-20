@@ -22,7 +22,7 @@ import {
   Scene,
   PerspectiveCamera,
 } from 'three';
-describe.skip('WebGL Mocking', () => {
+describe('WebGL Mocking', () => {
   // Re-skip due to persistent mock issues
   beforeEach(() => {
     // Set up WebGL mocks before each test
