@@ -283,6 +283,8 @@ export class MockWebGLRenderer {
   constructor() {
     this.domElement = document.createElement('canvas');
   }
+  // Provide a shadowMap property for compatibility with Three.js behavior
+  shadowMap = { enabled: false };
 
   setSize(): void {}
   setPixelRatio(): void {}
@@ -312,3 +314,10 @@ export function createThreeMock() {
     // Add more Three.js classes as needed
   };
 }
+// Expose mock classes under Three.js names for test aliasing
+export { MockWebGLRenderer as WebGLRenderer };
+export { MockWebGLTexture as Texture };
+export { MockWebGLGeometry as BufferGeometry };
+export { MockWebGLMaterial as MeshBasicMaterial };
+export class Scene {}
+export class PerspectiveCamera {}

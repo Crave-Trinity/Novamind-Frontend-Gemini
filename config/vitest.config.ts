@@ -49,6 +49,8 @@ const commonResolve = {
       projectRoot,
       'src/infrastructure/workers/connectivity.worker.ts?worker'
     ),
+    // Alias Three.js to our test WebGL mocks during testing
+    'three': path.resolve(projectRoot, 'src/test/webgl/mock-webgl.ts'),
   },
 };
 
