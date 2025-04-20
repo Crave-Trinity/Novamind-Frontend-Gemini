@@ -15,7 +15,7 @@ import {
 // Import clinical utils directly from source
 import { ClinicalTypeVerifier, clinicalTypeVerifier } from './clinical/type-verification';
 
-describe.skip('Domain utilities exports', () => {
+describe('Domain utilities exports', () => {
   // Skip due to persistent resolution issue
   it('exports shared type verification utilities', () => {
     expect(typeVerifier).toBeDefined();

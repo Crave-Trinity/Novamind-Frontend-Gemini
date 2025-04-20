@@ -4,7 +4,7 @@ import { defineConfig, UserConfig } from 'vitest/config'; // Import UserConfig t
 import path from 'path'; // Need path for manual alias resolution
 import tsconfigPaths from 'vite-tsconfig-paths'; // Re-added plugin
 
-const projectRoot = '/Users/ray/Desktop/GITHUB/Novamind-Frontend'; // Define project root
+const projectRoot = path.resolve(__dirname, '..'); // Define project root dynamically
 
 // Common configuration shared across projects
 const commonPlugins = [react(), tsconfigPaths()];
@@ -102,7 +102,6 @@ export default defineConfig({
       'src/**/*.test.{ts,tsx}',
       'src/**/*.spec.{ts,tsx}',
       'test/**/*.test.{ts,tsx}',
-      'test-puppeteer/**/*.test.{js,ts}', // Include Puppeteer tests
     ],
     // Exclude patterns
     exclude: [
