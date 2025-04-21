@@ -8,7 +8,7 @@ import { describe, it, expect, vi } from 'vitest';
 import type { IApiClient } from '@api/IApiClient';
 
 describe('IApiClient', () => {
-  it('processes data with mathematical precision', () => {
+  it('processes data with mathematical precision', async () => {
     // Create a mock implementation of IApiClient
     const mockApiClient: IApiClient = {
       setAuthToken: vi.fn(),
@@ -30,11 +30,11 @@ describe('IApiClient', () => {
     const result = mockApiClient.get<{ data: string }>('test/endpoint');
 
     // Assert
-    expect(result).resolves.toEqual({ data: 'test data' });
+    await expect(result).resolves.toEqual({ data: 'test data' });
     expect(mockApiClient.get).toHaveBeenCalledWith('test/endpoint');
   });
 
-  it('handles edge cases with clinical precision', () => {
+  it('handles edge cases with clinical precision', async () => {
     // Create a mock implementation of IApiClient
     const mockApiClient: IApiClient = {
       setAuthToken: vi.fn(),
@@ -54,7 +54,7 @@ describe('IApiClient', () => {
 
     // Test edge case - error handling
     // Act & Assert
-    expect(mockApiClient.login('test@example.com', 'password')).rejects.toThrow(
+    await expect(mockApiClient.login('test@example.com', 'password')).rejects.toThrow(
       'Invalid credentials'
     );
     expect(mockApiClient.isAuthenticated()).toBe(false);

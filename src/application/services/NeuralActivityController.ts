@@ -131,7 +131,7 @@ export function useNeuralActivityController(patientId: string) {
         // Initialize connection strengths
         if (result.value && Array.isArray(result.value.connectionStrengths)) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          result.value.connectionStrengths.forEach((connection: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
+          result.value.connectionStrengths.forEach((connection: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
             // Use 'any' for connection
             neuralState.metrics.connectionStrengths.set(
               `${connection.sourceId}-${connection.targetId}`,

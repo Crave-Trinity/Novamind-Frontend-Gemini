@@ -11,6 +11,9 @@
  * - HTTP verb convenience methods (get, post, put, delete)
  */
 
+import { ApiResponse } from './types';
+import { ApiProxyService } from './ApiProxyService';
+
 // Request options type
 export interface RequestOptions extends RequestInit {
   params?: Record<string, any>;
@@ -73,7 +76,10 @@ export class ApiClient {
    * Make a GET request
    */
   async get<T = any>(url: string, options: Omit<RequestOptions, 'method' | 'body'> = {}): Promise<T> {
-    return this.fetch(url, { 
+    // Map frontend path to backend path
+    const rawPath = url.startsWith('/') ? url.slice(1) : url;
+    const mappedPath = ApiProxyService.mapPath(rawPath);
+    return this.fetch(mappedPath, { 
       ...options, 
       method: 'GET' 
     });
@@ -83,8 +89,12 @@ export class ApiClient {
    * Make a POST request
    */
   async post<T = any>(url: string, data?: any /* eslint-disable-next-line @typescript-eslint/no-explicit-any */, options: Omit<RequestOptions, 'method' | 'body'> = {}): Promise<T> {
-    const body = data ? JSON.stringify(data) : undefined;
-    return this.fetch(url, { 
+    // Map and transform request data
+    const rawPath = url.startsWith('/') ? url.slice(1) : url;
+    const mappedPath = ApiProxyService.mapPath(rawPath);
+    const mappedData = ApiProxyService.mapRequestData(rawPath, data);
+    const body = mappedData ? JSON.stringify(mappedData) : undefined;
+    return this.fetch(mappedPath, { 
       ...options, 
       method: 'POST',
       body
@@ -95,8 +105,11 @@ export class ApiClient {
    * Make a PUT request
    */
   async put<T = any>(url: string, data?: any /* eslint-disable-next-line @typescript-eslint/no-explicit-any */, options: Omit<RequestOptions, 'method' | 'body'> = {}): Promise<T> {
-    const body = data ? JSON.stringify(data) : undefined;
-    return this.fetch(url, { 
+    const rawPath = url.startsWith('/') ? url.slice(1) : url;
+    const mappedPath = ApiProxyService.mapPath(rawPath);
+    const mappedData = ApiProxyService.mapRequestData(rawPath, data);
+    const body = mappedData ? JSON.stringify(mappedData) : undefined;
+    return this.fetch(mappedPath, { 
       ...options, 
       method: 'PUT',
       body
@@ -107,7 +120,9 @@ export class ApiClient {
    * Make a DELETE request
    */
   async delete<T = any>(url: string, options: Omit<RequestOptions, 'method' | 'body'> = {}): Promise<T> {
-    return this.fetch(url, { 
+    const rawPath = url.startsWith('/') ? url.slice(1) : url;
+    const mappedPath = ApiProxyService.mapPath(rawPath);
+    return this.fetch(mappedPath, { 
       ...options, 
       method: 'DELETE' 
     });
@@ -152,45 +167,27 @@ export class ApiClient {
       
       // Handle JSON responses
       if (processedResponse.headers.get('Content-Type')?.includes('application/json')) {
-        const data = await processedResponse.json();
+        const rawData = await processedResponse.json();
         
-        // Throw error for non-200 responses
-        if (!processedResponse.ok) {
-          const error: any /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ = new Error(data.message || 'API request failed');
-          error.response = processedResponse;
-          error.data = data;
-          error.status = processedResponse.status;
-          throw error;
-        }
-        
-        return data as T;
+        // Map and standardize response
+        const mapped = ApiProxyService.mapResponseData(url, rawData);
+        const standardized = ApiProxyService.standardizeResponse(mapped);
+        return (standardized.data as T);
       }
       
       // Handle text responses
       if (processedResponse.headers.get('Content-Type')?.includes('text/')) {
-        const text = await processedResponse.text();
+        const rawText = await processedResponse.text();
         
-        // Throw error for non-200 responses
-        if (!processedResponse.ok) {
-          const error: any /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ = new Error(text || 'API request failed');
-          error.response = processedResponse;
-          error.text = text;
-          error.status = processedResponse.status;
-          throw error;
-        }
-        
-        return text as unknown as T;
+        // Standardize text response
+        const mappedText = ApiProxyService.mapResponseData(url, rawText);
+        const standardizedText = ApiProxyService.standardizeResponse(mappedText);
+        return (standardizedText.data as unknown as T);
       }
       
-      // Handle other response types
-      if (!processedResponse.ok) {
-        const error: any /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ = new Error(`API request failed with status ${processedResponse.status}`);
-        error.response = processedResponse;
-        error.status = processedResponse.status;
-        throw error;
-      }
-      
-      return processedResponse as unknown as T;
+      // Return other response types as is
+      const standardized = ApiProxyService.standardizeResponse(processedResponse as any);
+      return (standardized.data as unknown as T);
     } catch (error: any /* eslint-disable-next-line @typescript-eslint/no-explicit-any */) {
       // Add isAxiosError property for compatibility with axios error handling
       if (error.response) {
