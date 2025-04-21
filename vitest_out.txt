@@ -1,0 +1,121 @@
+
+ RUN  v3.1.1 /Users/ray/Desktop/GITHUB/Novamind-Frontend
+
+stdout | src/infrastructure/api/ApiProxyService.enhanced.test.ts
+[CANONICAL SETUP] Clean test environment initialized
+
+stdout | src/application/services/clinical/clinical.service.runtime.test.ts
+[CANONICAL SETUP] Clean test environment initialized
+
+stdout | src/application/services/clinical/clinical.service.test.ts
+[CANONICAL SETUP] Clean test environment initialized
+
+stdout | src/components/ui/select.test.tsx
+[CANONICAL SETUP] Clean test environment initialized
+
+stdout | src/infrastructure/api/MLApiClientEnhanced.test.ts
+[CANONICAL SETUP] Clean test environment initialized
+
+stdout | src/infrastructure/auth/AuthService.enhanced.test.ts
+[CANONICAL SETUP] Clean test environment initialized
+
+stdout | src/domain/models/shared/type-verification.runtime.test.ts
+[CANONICAL SETUP] Clean test environment initialized
+
+stdout | src/domain/utils/clinical/type-verification.test.ts
+[CANONICAL SETUP] Clean test environment initialized
+
+stdout | src/domain/utils/brain/type-verification.test.ts
+[CANONICAL SETUP] Clean test environment initialized
+
+stderr | src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapRequestData > should handle transformation errors gracefully
+[ApiProxy] Request validation failed for patients/123/predict-treatment: [ { field: [32m'unknown'[39m, message: [32m'Validation error occurred'[39m } ]
+
+stderr | src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > standardizeResponse > should handle transformation errors
+[ApiProxy] Error standardizing response: Error: Simulated error
+    at Object.get [90m(/Users/ray/Desktop/GITHUB/Novamind-Frontend/[39msrc/infrastructure/api/ApiProxyService.enhanced.test.ts:465:28[90m)[39m
+    at Function.standardizeResponse [90m(/Users/ray/Desktop/GITHUB/Novamind-Frontend/[39msrc/infrastructure/api/ApiProxyService.enhanced.ts:349:24[90m)[39m
+    at [90m/Users/ray/Desktop/GITHUB/Novamind-Frontend/[39msrc/infrastructure/api/ApiProxyService.enhanced.test.ts:468:48
+    at [90mfile:///Users/ray/Desktop/GITHUB/Novamind-Frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:103:11
+    at [90mfile:///Users/ray/Desktop/GITHUB/Novamind-Frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:595:26
+    at [90mfile:///Users/ray/Desktop/GITHUB/Novamind-Frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:877:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/ray/Desktop/GITHUB/Novamind-Frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:850:10[90m)[39m
+    at runTest [90m(file:///Users/ray/Desktop/GITHUB/Novamind-Frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/index.js:1345:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapPath > should handle digital twin paths correctly 1ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapPath > should handle PHI paths correctly 1ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapPath > should handle general ML paths correctly 1ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapPath > should handle brain model paths correctly 1ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapPath > should handle patient paths correctly 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapPath > should handle auth paths correctly 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapPath > should log path mapping when requested 2ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > validateRequest > should validate treatment prediction requests 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > validateRequest > should validate digital twin conversation requests 1ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > validateRequest > should validate login requests 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > validateRequest > should skip validation for null/undefined data 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapRequestData > should transform treatment prediction data correctly 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapRequestData > should transform digital twin conversation data correctly 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapRequestData > should respect default sender_type but allow override 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapRequestData > should transform login data correctly 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapRequestData > should transform PHI detection data correctly 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapRequestData > should use default detection_level if not provided 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapRequestData > should convert camelCase to snake_case for other endpoints 1ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapRequestData > should log validation warnings but proceed with transformation 1ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapRequestData > should handle transformation errors gracefully 1ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapResponseData > should transform risk assessment response correctly 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapResponseData > should handle missing fields in risk assessment 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapResponseData > should transform session data correctly 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapResponseData > should handle empty messages array in session data 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapResponseData > should transform user data correctly 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapResponseData > should handle both email_address and email fields in user data 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapResponseData > should convert snake_case to camelCase for brain models 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapResponseData > should convert general snake_case to camelCase for unknown endpoints 1ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > mapResponseData > should handle transformation errors gracefully 1ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > standardizeResponse > should wrap data in ApiResponse format if not already 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > standardizeResponse > should not modify existing ApiResponse format 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > standardizeResponse > should normalize error responses 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > standardizeResponse > should handle transformation errors 4ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > convertToCamelOrSnakeCase > should convert object keys from camelCase to snake_case 1ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > convertToCamelOrSnakeCase > should convert object keys from snake_case to camelCase 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > convertToCamelOrSnakeCase > should handle arrays of objects correctly 0ms
+ ✓ src/infrastructure/api/ApiProxyService.enhanced.test.ts > EnhancedApiProxyService > convertToCamelOrSnakeCase > should handle primitive values correctly 0ms
+Exception in PromiseRejectCallback:
+file:///Users/ray/Desktop/GITHUB/Novamind-Frontend/node_modules/tinypool/dist/index.js:176
+  }
+  ^
+
+RangeError: Maximum call stack size exceeded
+
+Exception in PromiseRejectCallback:
+file:///Users/ray/Desktop/GITHUB/Novamind-Frontend/node_modules/tinypool/dist/index.js:533
+    void this.worker.terminate().then(() => {
+                                 ^
+
+RangeError: Maximum call stack size exceeded
+
+Exception in PromiseRejectCallback:
+node:internal/process/promises:259
+function unhandledRejection(promise, reason) {
+                           ^
+
+RangeError: Maximum call stack size exceeded
+
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+RangeError: Maximum call stack size exceeded
+ ❯ Timeout node:internal/timers:180:14
+ ❯ setTimeout node:timers:163:19
+ ❯ ProcessWorker.terminate node_modules/tinypool/dist/index.js:166:28
+ ❯ WorkerInfo.destroy node_modules/tinypool/dist/index.js:533:22
+ ❯ ThreadPool._removeWorker node_modules/tinypool/dist/index.js:787:23
+ ❯ node_modules/tinypool/dist/index.js:751:17
+ ❯ ChildProcess.<anonymous> node_modules/tinypool/dist/index.js:213:16
+ ❯ ChildProcess.emit node:events:507:28
+ ❯ ChildProcess.kill node:internal/child_process:512:12
+ ❯ ProcessWorker.terminate node_modules/tinypool/dist/index.js:170:18
+
+
+
+

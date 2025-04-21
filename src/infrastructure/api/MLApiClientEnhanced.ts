@@ -200,10 +200,11 @@ export class MLApiClientEnhanced {
         console.log(`[withRetry] Attempt ${attempt + 1} failed for ${endpoint}. Retrying in ${delay}ms...`);
         // Wait for delay but bypass actual wait in test environment to prevent hanging on fake timers
         await new Promise(resolve => {
-          setTimeout(resolve, delay);
+          // In test environment, resolve immediately without scheduling a timer
           if (process.env.NODE_ENV === 'test') {
-            resolve(undefined);
+            return resolve(undefined);
           }
+          setTimeout(resolve, delay);
         });
       }
     }
