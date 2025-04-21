@@ -7,6 +7,9 @@ import { waitFor } from '@testing-library/react'; // Import waitFor
 import { EnhancedAuthService } from './AuthService.enhanced';
 import { AuthTokens, AuthUser, AuthApiClient } from './index'; // Import AuthApiClient for mocking
 
+// Define mockLocalStorage in module scope to reference the window.localStorage mock from setup
+const mockLocalStorage = window.localStorage;
+
 // Rely on the global mockLocalStorage defined in src/test/setup.ts
 // No need for local definition or Object.defineProperty here.
 // Use more direct spies on the native objects that are guaranteed to work
