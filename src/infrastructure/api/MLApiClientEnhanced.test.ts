@@ -175,17 +175,13 @@ describe('MLApiClientEnhanced', () => {
       // Set up the mock to fail with a rate limit error
       mlApiClientMock.detectPHI.mockRejectedValue(rateLimitError);
       
-      // Attempt the call
-      try {
-        await enhancedClient.detectPHI('sample text');
-        fail('Expected an error but none was thrown');
-      } catch (error) {
-        const mlError = error as MLApiError;
-        expect(mlError.type).toBe(MLErrorType.RATE_LIMIT);
-        expect(mlError.statusCode).toBe(429);
-        expect(mlError.requestId).toBe('req-123');
-        expect(mlError.retryable).toBe(true);
-      }
+      // The call should reject with an MLApiError classified as rate-limited
+      await expect(enhancedClient.detectPHI('sample text')).rejects.toMatchObject({
+        type: MLErrorType.RATE_LIMIT,
+        statusCode: 429,
+        requestId: 'req-123',
+        retryable: true
+      });
     });
     
     it('should handle authentication errors', async () => {
@@ -203,16 +199,14 @@ describe('MLApiClientEnhanced', () => {
       // Set up the mock to fail with an auth error
       mlApiClientMock.generateDigitalTwin.mockRejectedValue(authError);
       
-      // Attempt the call
-      try {
-        await enhancedClient.generateDigitalTwin('patient-123', { name: 'Test Patient' });
-        fail('Expected an error but none was thrown');
-      } catch (error) {
-        const mlError = error as MLApiError;
-        expect(mlError.type).toBe(MLErrorType.TOKEN_REVOKED);
-        expect(mlError.statusCode).toBe(401);
-        expect(mlError.retryable).toBe(false); // Auth errors should not be retried
-      }
+      // The call should reject with an MLApiError classified as token-revoked
+      await expect(
+        enhancedClient.generateDigitalTwin('patient-123', { name: 'Test Patient' })
+      ).rejects.toMatchObject({
+        type: MLErrorType.TOKEN_REVOKED,
+        statusCode: 401,
+        retryable: false
+      });
     });
     
     it('should handle general API errors', async () => {
@@ -230,17 +224,13 @@ describe('MLApiClientEnhanced', () => {
       // Set up the mock to fail with an API error
       mlApiClientMock.analyzeWellnessDimensions.mockRejectedValue(apiError);
       
-      // Attempt the call
-      try {
-        await enhancedClient.analyzeWellnessDimensions('sample text');
-        fail('Expected an error but none was thrown');
-      } catch (error) {
-        const mlError = error as MLApiError;
-        expect(mlError.type).toBe(MLErrorType.UNEXPECTED);
-        expect(mlError.statusCode).toBe(500);
-        expect(mlError.message).toBe('Internal server error');
-        expect(mlError.retryable).toBe(false);
-      }
+      // The call should reject with an MLApiError classified as unexpected
+      await expect(enhancedClient.analyzeWellnessDimensions('sample text')).rejects.toMatchObject({
+        type: MLErrorType.UNEXPECTED,
+        statusCode: 500,
+        message: 'Internal server error',
+        retryable: false
+      });
     });
   });
 
