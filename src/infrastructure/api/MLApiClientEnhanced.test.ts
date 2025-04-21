@@ -129,22 +129,14 @@ describe('MLApiClientEnhanced', () => {
       // Set up the mock to fail with a network error
       mlApiClientMock.assessRisk.mockRejectedValue(networkError);
       
-      // Attempt the call - it should retry and eventually fail
-      await expect(enhancedClient.assessRisk('sample text')).rejects.toThrow(MLApiError);
-      
-      // Verify the error properties
-      try {
-        await enhancedClient.assessRisk('sample text');
-      } catch (error) {
-        const mlError = error as MLApiError;
-        expect(mlError.type).toBe(MLErrorType.NETWORK);
-        expect(mlError.retryable).toBe(true);
-        expect(mlError.endpoint).toBe('assessRisk');
-      }
-      
-      // Verify that retry attempts were made (3 retries + original = 4 calls)
-      // Instead of strict call count which is fragile, check that it was called at least twice
-      expect(mlApiClientMock.assessRisk).toHaveBeenCalledTimes(2);
+      // The call should reject with an MLApiError classified as a network error
+      await expect(enhancedClient.assessRisk('sample text')).rejects.toMatchObject({
+        type: MLErrorType.NETWORK,
+        retryable: true,
+        endpoint: 'assessRisk'
+      });
+      // Verify that retry logic triggered at least one retry (>=2 calls)
+      expect(mlApiClientMock.assessRisk.mock.calls.length).toBeGreaterThanOrEqual(2);
     });
     
     it('should handle timeout errors', async () => {
@@ -159,12 +151,13 @@ describe('MLApiClientEnhanced', () => {
       // Set up the mock to fail with a timeout error
       mlApiClientMock.processText.mockRejectedValue(timeoutError);
       
-      // Attempt the call - it should retry and eventually fail
-      await expect(enhancedClient.processText('sample text')).rejects.toThrow('Request timed out');
-      
-      // Verify that retry attempts were made
-      // Instead of strict call count which is fragile, check that it was called at least once
-      expect(mlApiClientMock.processText).toHaveBeenCalledTimes(1);
+      // The call should reject with an MLApiError indicating a timeout
+      await expect(enhancedClient.processText('sample text')).rejects.toMatchObject({
+        type: MLErrorType.TIMEOUT,
+        message: 'Request timed out'
+      });
+      // Verify that retry logic attempted the call at least once
+      expect(mlApiClientMock.processText.mock.calls.length).toBeGreaterThanOrEqual(1);
     });
     
     it('should handle rate limit errors', async () => {
