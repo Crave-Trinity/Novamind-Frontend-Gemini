@@ -16,12 +16,10 @@ import { apiClient } from '../../infrastructure/api/apiClient'; // Correct casin
 import type { BrainModel } from '../../domain/types/brain/models'; // Use relative path
 import type { RenderMode } from '../../domain/types/brain/visualization'; // Use relative path
 
-// Mock the apiClient's getBrainModel method
-// Mock the specific method used by the hook (likely apiClient.get)
-vi.mock('../../infrastructure/api/ApiClient', () => ({
+// Mock the apiClient's get method to intercept API calls
+vi.mock('../../infrastructure/api/apiClient', () => ({
   apiClient: {
     get: vi.fn(), // Mock the 'get' method
-    // Add other methods if needed, ensure constructor/instance is handled if necessary
   },
 }));
 

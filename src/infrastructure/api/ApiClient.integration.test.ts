@@ -43,36 +43,18 @@ vi.mock('axios', () => {
   };
 });
 
-// Define mocks for ApiProxyService static methods
-const mockMapPath = vi.fn((path) => `v1/${path}`);
-const mockMapRequestData = vi.fn((_path, data) => data);
-const mockMapResponseData = vi.fn((_path, data) => data);
-const mockStandardizeResponse = vi.fn((response) => response);
-
-// Mock the ApiProxyService module
-vi.mock('./ApiProxyService', () => ({
-  ApiProxyService: {
-    mapPath: mockMapPath,
-    mapRequestData: mockMapRequestData,
-    mapResponseData: mockMapResponseData,
-    standardizeResponse: mockStandardizeResponse,
-  }
-}));
-
 describe('ApiClient Integration with ApiProxyService', () => {
   let apiClient: ApiClient;
   // let mockAxiosInstance: ReturnType<typeof axios.create>; // No longer mocking axios directly
   let fetchSpy: any; // Use any for now, inference happens in beforeEach
+  let mapPathSpy: any;
+  let mapRequestDataSpy: any;
+  let mapResponseDataSpy: any;
+  let standardizeResponseSpy: any;
 
   beforeEach(() => {
     vi.clearAllMocks(); // Clear previous spies/mocks
 
-    // Reset mocks defined outside before each test
-    mockMapPath.mockClear().mockImplementation((path) => `v1/${path}`);
-    mockMapRequestData.mockClear().mockImplementation((_path, data) => data);
-    mockMapResponseData.mockClear().mockImplementation((_path, data) => data);
-    mockStandardizeResponse.mockClear().mockImplementation((response) => response);
-    
     // Mock global fetch
     fetchSpy = vi.spyOn(globalThis, 'fetch'); // Assign to outer variable
     fetchSpy.mockImplementation(async (url: RequestInfo | URL, options?: RequestInit) => {
@@ -112,6 +94,12 @@ describe('ApiClient Integration with ApiProxyService', () => {
         NODE_ENV: 'production',
       },
     });
+
+    // Spy and mock ApiProxyService methods for this test
+    mapPathSpy = vi.spyOn(ApiProxyService, 'mapPath').mockImplementation((path: string) => `v1/${path}`);
+    mapRequestDataSpy = vi.spyOn(ApiProxyService, 'mapRequestData').mockImplementation((_path: string, data: any) => data);
+    mapResponseDataSpy = vi.spyOn(ApiProxyService, 'mapResponseData').mockImplementation((_path: string, data: any) => data);
+    standardizeResponseSpy = vi.spyOn(ApiProxyService, 'standardizeResponse').mockImplementation((response: any) => response);
   });
 
   afterEach(() => {
@@ -135,7 +123,7 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.get('/brain-models/model-123');
     
     // Verify fetch was called with the correct path (base + relative)
-    expect(mockMapPath).toHaveBeenCalledWith('brain-models/model-123'); // Use mock variable
+    expect((mapPathSpy as any)).toHaveBeenCalledWith('brain-models/model-123'); // Verify path mapping
   });
 
   it('should map paths for patient endpoints', async () => {
@@ -143,7 +131,7 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.get('/patients/patient-123');
     
     // Verify ApiProxyService was called
-    expect(mockMapPath).toHaveBeenCalledWith('patients/patient-123'); // Use mock variable
+    expect((mapPathSpy as any)).toHaveBeenCalledWith('patients/patient-123');
   });
 
   it('should map request data when making POST requests', async () => {
@@ -151,7 +139,7 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.post('/patients', data);
     
     // Verify mapRequestData was called
-    expect(mockMapRequestData).toHaveBeenCalledWith( // Use mock variable
+    expect((mapRequestDataSpy as any)).toHaveBeenCalledWith(
       expect.any(String),
       data
     );
@@ -161,7 +149,7 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.get('/patients/123');
     
     // Verify mapResponseData was called
-    expect(mockMapResponseData).toHaveBeenCalledWith( // Use mock variable
+    expect((mapResponseDataSpy as any)).toHaveBeenCalledWith(
       expect.any(String),
       expect.any(Object)
     );
@@ -171,7 +159,7 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.get('/patients/123');
     
     // Verify standardizeResponse was called
-    expect(mockStandardizeResponse).toHaveBeenCalled(); // Use mock variable
+    expect((standardizeResponseSpy as any)).toHaveBeenCalled();
   });
 
   it('should transform treatment prediction requests and responses', async () => {
@@ -183,16 +171,16 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.post('/patients/patient-123/predict-treatment', treatmentData);
     
     // Verify path mapping
-    expect(mockMapPath).toHaveBeenCalledWith( // Use mock variable
+    expect((mapPathSpy as any)).toHaveBeenCalledWith(
       expect.stringContaining('predict-treatment')
     );
     // Verify request data transformation
-    expect(mockMapRequestData).toHaveBeenCalledWith( // Use mock variable
+    expect((mapRequestDataSpy as any)).toHaveBeenCalledWith(
       expect.any(String),
       treatmentData
     );
     // Verify response data transformation
-    expect(mockMapResponseData).toHaveBeenCalled(); // Use mock variable
+    expect((mapResponseDataSpy as any)).toHaveBeenCalled();
   });
 
   it('should transform risk assessment responses', async () => {
@@ -202,10 +190,10 @@ describe('ApiClient Integration with ApiProxyService', () => {
     await apiClient.get('/patients/patient-123/risk-assessment');
     
     // Verify path mapping
-    expect(mockMapPath).toHaveBeenCalledWith( // Use mock variable
+    expect((mapPathSpy as any)).toHaveBeenCalledWith(
       expect.stringContaining('risk-assessment')
     );
     // Verify response data transformation
-    expect(mockMapResponseData).toHaveBeenCalled(); // Use mock variable
+    expect((mapResponseDataSpy as any)).toHaveBeenCalled();
   });
 });
