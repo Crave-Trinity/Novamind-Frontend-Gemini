@@ -326,15 +326,15 @@ export function useNeuralActivityController(patientId: string) {
           return failure(new Error(errorMessage || 'Failed to load symptom mappings'));
         }
 
-        // Use 'any' for mapping due to missing type definition
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const relevantMappings = mappingsResult.value.filter((mapping: any // eslint-disable-line @typescript-eslint/no-explicit-any) =>
-          symptomIds.includes(mapping.symptomId)
+        const relevantMappings = mappingsResult.value.filter(
+          (mapping: any) => symptomIds.includes(mapping.symptomId)
         );
 
         const transforms: NeuralTransform[] = [];
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        relevantMappings.forEach((mapping: any) => {
         relevantMappings.forEach((mapping: any // eslint-disable-line @typescript-eslint/no-explicit-any) => {
           if (Array.isArray(mapping.activationPatterns)) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
