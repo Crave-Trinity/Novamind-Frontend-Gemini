@@ -59,13 +59,13 @@ describe('apiClient', () => {
 
   it('processes GET requests with mathematical precision', async () => {
     // No need to force USE_MOCK_API, MSW intercepts the real call
-    const result = await apiClient.get('/patients');
+    const result = await apiClient.get('/ml/patients/');
 
     // Assert with quantum verification based on MSW handler response
     expect(result).toBeDefined();
     expect(Array.isArray(result)).toBe(true);
     expect(result).toHaveLength(2);
-    expect((result as any[])[0].id).toBe('patient-001');
+    expect((result as any[])[0].id).toBe('ml-patient-001');
   });
 
   it('processes POST requests with clinical precision', async () => {
