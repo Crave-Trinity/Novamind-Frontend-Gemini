@@ -27,14 +27,14 @@ export default defineConfig({
       '@infrastructure': path.resolve(projectRoot, 'src/infrastructure'),
       '@presentation': path.resolve(projectRoot, 'src/presentation'),
       '@shared': path.resolve(projectRoot, 'src/shared'),
-      
+
       // Component path aliases
       '@atoms': path.resolve(projectRoot, 'src/presentation/atoms'),
       '@molecules': path.resolve(projectRoot, 'src/presentation/molecules'),
       '@organisms': path.resolve(projectRoot, 'src/presentation/organisms'),
       '@templates': path.resolve(projectRoot, 'src/presentation/templates'),
       '@pages': path.resolve(projectRoot, 'src/presentation/pages'),
-      
+
       // Feature path aliases
       '@hooks': path.resolve(projectRoot, 'src/application/hooks'),
       '@contexts': path.resolve(projectRoot, 'src/application/contexts'),
@@ -45,7 +45,7 @@ export default defineConfig({
       '@clients': path.resolve(projectRoot, 'src/infrastructure/clients'),
       '@utils': path.resolve(projectRoot, 'src/shared/utils'),
       '@constants': path.resolve(projectRoot, 'src/shared/constants'),
-      
+
       // Other path aliases
       '@config': path.resolve(projectRoot, 'config'),
       '@test': path.resolve(projectRoot, 'test'),
@@ -53,29 +53,28 @@ export default defineConfig({
     },
   },
   test: {
-    // Run in a single process without worker threads to avoid tinypool issues
-    threads: false,
-    isolate: false,
-    singleThread: true,
-    
+    // Single thread execution
+    poolOptions: { threads: { singleThread: true } },
+    pool: 'vmThreads',
+
     // Core settings
     globals: true, // Enable global test APIs
     environment: 'jsdom', // Use JSDOM for browser environment
-    
+
     // Mock behavior configuration
     mockReset: true, // Reset mocks between tests
     restoreMocks: true, // Restore original implementations after tests
     clearMocks: true, // Clear mock call history between tests
-    
+
     // Timeout configuration
     testTimeout: 20000, // Increase default timeout per test
     hookTimeout: 20000, // Increase default timeout for hooks
-    
+
     // Single setup file that properly includes all needed functionality
     setupFiles: [
       './src/test/setup.ts', // Use the canonical setup file
     ],
-    
+
     // Coverage configuration
     coverage: {
       provider: 'v8',
@@ -93,14 +92,10 @@ export default defineConfig({
       ],
       all: true, // Report coverage on all files, not just tested ones
     },
-    
+
     // File patterns
-    include: [
-      'src/**/*.test.{ts,tsx}',
-      'src/**/*.spec.{ts,tsx}',
-      'test/**/*.test.{ts,tsx}',
-    ],
-    
+    include: ['src/**/*.test.{ts,tsx}', 'src/**/*.spec.{ts,tsx}', 'test/**/*.test.{ts,tsx}'],
+
     exclude: [
       'node_modules/**/*',
       'dist/**/*',
@@ -109,4 +104,4 @@ export default defineConfig({
       'test-puppeteer/**/*', // Puppeteer tests need separate runner
     ],
   },
-}); 
+});

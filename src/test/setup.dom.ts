@@ -1,6 +1,6 @@
 /**
  * DOM Testing Environment Setup
- * 
+ *
  * This file provides essential DOM-specific setup for React component tests.
  * It's used as a common import across test files that need DOM manipulation.
  */
@@ -23,7 +23,7 @@ if (typeof window !== 'undefined') {
       dispatchEvent: vi.fn(),
     })),
   });
-  
+
   // Set up localStorage mock for tests
   if (!window.localStorage) {
     Object.defineProperty(window, 'localStorage', {
@@ -39,7 +39,7 @@ if (typeof window !== 'undefined') {
       configurable: true,
     });
   }
-  
+
   // Set up sessionStorage mock for tests
   if (!window.sessionStorage) {
     Object.defineProperty(window, 'sessionStorage', {

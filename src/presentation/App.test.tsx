@@ -1,4 +1,3 @@
-/* eslint-disable */
 /**
  * NOVAMIND Neural Test Suite
  * index testing with quantum precision

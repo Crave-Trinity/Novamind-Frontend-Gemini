@@ -20,21 +20,21 @@ expect.extend({
   toHaveTextContent(received, expected) {
     if (received && typeof received.textContent === 'string') {
       const textContent = received.textContent;
-      const pass = expected instanceof RegExp 
-        ? expected.test(textContent)
-        : textContent === expected;
-        
+      const pass =
+        expected instanceof RegExp ? expected.test(textContent) : textContent === expected;
+
       return {
         pass,
-        message: () => `Expected element ${pass ? 'not ' : ''}to have text content "${expected}" but got "${textContent}"`,
+        message: () =>
+          `Expected element ${pass ? 'not ' : ''}to have text content "${expected}" but got "${textContent}"`,
       };
     }
-    
+
     return {
       pass: false,
       message: () => `Element does not have textContent property`,
     };
-  }
+  },
 });
 
 // ==========================================
@@ -46,10 +46,18 @@ beforeEach(() => {
     let store: Record<string, string> = {};
     return {
       getItem: vi.fn((key: string) => store[key] || null),
-      setItem: vi.fn((key: string, value: string) => { store[key] = value.toString(); }),
-      removeItem: vi.fn((key: string) => { delete store[key]; }),
-      clear: vi.fn(() => { store = {}; }),
-      get length() { return Object.keys(store).length; },
+      setItem: vi.fn((key: string, value: string) => {
+        store[key] = value.toString();
+      }),
+      removeItem: vi.fn((key: string) => {
+        delete store[key];
+      }),
+      clear: vi.fn(() => {
+        store = {};
+      }),
+      get length() {
+        return Object.keys(store).length;
+      },
       key: vi.fn((index: number) => Object.keys(store)[index] || null),
     };
   };
@@ -57,13 +65,13 @@ beforeEach(() => {
   Object.defineProperty(window, 'localStorage', {
     value: createStorageMock(),
     writable: true,
-    configurable: true
+    configurable: true,
   });
-  
+
   Object.defineProperty(window, 'sessionStorage', {
     value: createStorageMock(),
     writable: true,
-    configurable: true
+    configurable: true,
   });
 
   // Mock matchMedia for theme tests - critical fix
@@ -84,10 +92,16 @@ beforeEach(() => {
 
   // Reset document classes
   if (typeof document !== 'undefined' && document.documentElement) {
-    document.documentElement.classList.remove('dark', 'light', 'system', 'theme-dark', 'theme-light');
+    document.documentElement.classList.remove(
+      'dark',
+      'light',
+      'system',
+      'theme-dark',
+      'theme-light'
+    );
     document.documentElement.classList.add('light');
   }
-  
+
   // Mock other browser APIs commonly used
   if (typeof window !== 'undefined') {
     // Observer APIs
@@ -97,19 +111,19 @@ beforeEach(() => {
       disconnect: vi.fn(),
       takeRecords: vi.fn().mockReturnValue([]),
     }));
-    
+
     window.ResizeObserver = vi.fn().mockImplementation(() => ({
       observe: vi.fn(),
       unobserve: vi.fn(),
       disconnect: vi.fn(),
     }));
-    
+
     // URL methods
     if (window.URL) {
       window.URL.createObjectURL = vi.fn(() => 'mock-object-url');
       window.URL.revokeObjectURL = vi.fn();
     }
-    
+
     // CustomEvent for auth tests
     if (typeof CustomEvent !== 'function') {
       window.CustomEvent = class CustomEvent extends Event {

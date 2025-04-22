@@ -1,12 +1,14 @@
 /**
  * Core Test Utilities for Novamind Frontend
- * 
+ *
  * This file provides standardized testing utilities for React components,
  * including a custom render function with all necessary providers.
  * It is the SINGLE SOURCE OF TRUTH for component testing utilities.
  */
-import React, { ReactElement, ReactNode } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import type { ReactElement, ReactNode } from 'react';
+import React from 'react';
+import type { RenderOptions } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
@@ -144,13 +146,7 @@ interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
  */
 export function renderWithProviders(
   ui: ReactElement,
-  {
-    initialRoute,
-    theme,
-    queryClient,
-    mockData,
-    ...renderOptions
-  }: ExtendedRenderOptions = {}
+  { initialRoute, theme, queryClient, mockData, ...renderOptions }: ExtendedRenderOptions = {}
 ) {
   // Apply theme to document if provided
   if (theme && typeof document !== 'undefined') {
@@ -173,7 +169,7 @@ export function renderWithProviders(
   // Render with extended utilities
   return {
     ...render(ui, { wrapper: Wrapper, ...renderOptions }),
-    
+
     // Additional helper functions
     setTheme: (newTheme: ThemeMode) => {
       if (typeof document !== 'undefined') {
@@ -181,7 +177,7 @@ export function renderWithProviders(
         document.documentElement.classList.add(newTheme as string);
       }
     },
-    
+
     // MockQueryClient for making assertions/manipulations
     queryClient: queryClient || createTestQueryClient(),
   };

@@ -1,6 +1,6 @@
 /**
  * CANONICAL TEST ENVIRONMENT SETUP
- * 
+ *
  * This is a complete, clean solution for all test environment needs.
  * No patchwork, no legacy code - just a proper foundation.
  */
@@ -33,10 +33,18 @@ beforeEach(() => {
       let store: Record<string, string> = {};
       return {
         getItem: (key: string) => store[key] || null,
-        setItem: (key: string, value: string) => { store[key] = value.toString(); },
-        removeItem: (key: string) => { delete store[key]; },
-        clear: () => { store = {}; },
-        get length() { return Object.keys(store).length; },
+        setItem: (key: string, value: string) => {
+          store[key] = value.toString();
+        },
+        removeItem: (key: string) => {
+          delete store[key];
+        },
+        clear: () => {
+          store = {};
+        },
+        get length() {
+          return Object.keys(store).length;
+        },
         key: (index: number) => Object.keys(store)[index] || null,
       };
     };
@@ -44,15 +52,15 @@ beforeEach(() => {
     Object.defineProperty(window, 'localStorage', {
       value: createStorageMock(),
       writable: true,
-      configurable: true
+      configurable: true,
     });
-    
+
     Object.defineProperty(window, 'sessionStorage', {
       value: createStorageMock(),
       writable: true,
-      configurable: true
+      configurable: true,
     });
-    
+
     // MATCH MEDIA (Critical for ThemeProvider tests)
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
@@ -68,13 +76,13 @@ beforeEach(() => {
         dispatchEvent: vi.fn(),
       })),
     });
-    
+
     // URL OBJECT
     if (window.URL) {
       window.URL.createObjectURL = vi.fn(() => 'mock-object-url');
       window.URL.revokeObjectURL = vi.fn();
     }
-    
+
     // DOCUMENT DEFAULTS
     if (typeof document !== 'undefined' && document.documentElement) {
       document.documentElement.classList.remove('dark', 'light', 'system', 'clinical');
@@ -139,7 +147,7 @@ if (typeof window !== 'undefined' && typeof HTMLCanvasElement !== 'undefined') {
 // THREE.JS MOCK
 vi.mock('three', async (importOriginal) => {
   const threeModule = (await importOriginal()) as Record<string, unknown>;
-  
+
   return {
     ...threeModule,
     WebGLRenderer: vi.fn().mockImplementation(() => ({
@@ -166,7 +174,7 @@ export const TestHelpers = {
       document.documentElement.classList.remove('light', 'dark', 'system', 'clinical');
       document.documentElement.classList.add(theme);
     }
-  }
+  },
 };
 
 console.log('[CANONICAL SETUP] Clean test environment initialized');

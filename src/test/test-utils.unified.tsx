@@ -40,7 +40,13 @@ function createTestQueryClient() {
   });
 }
 // MockThemeProvider removed - Use the actual ThemeProvider from the application
-import { ThemeProvider, useTheme, ThemeProviderContext, ThemeMode, type ThemeProviderState } from '../presentation/providers/ThemeProvider'; // Import necessary items from provider
+import type { ThemeMode } from '../presentation/providers/ThemeProvider';
+import {
+  ThemeProvider,
+  useTheme,
+  ThemeProviderContext,
+  type ThemeProviderState,
+} from '../presentation/providers/ThemeProvider'; // Import necessary items from provider
 
 /**
  * Mock implementation of UserProvider for tests
@@ -56,15 +62,15 @@ const MockUserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       organization: 'Test Hospital',
       preferences: {
         theme: 'clinical',
-        visualizationDefaults: { 
-          detailLevel: 'medium', 
-          colorScheme: 'clinical', 
-          annotationsVisible: true, 
+        visualizationDefaults: {
+          detailLevel: 'medium',
+          colorScheme: 'clinical',
+          annotationsVisible: true,
           timeScale: 1.0,
         },
-        dashboardLayout: 'detailed'
+        dashboardLayout: 'detailed',
       },
-      lastLogin: new Date().toISOString()
+      lastLogin: new Date().toISOString(),
     },
     isAuthenticated: true,
     isLoading: false,
@@ -73,7 +79,7 @@ const MockUserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     logout: vi.fn(),
     updateProfile: vi.fn(),
     updatePreferences: vi.fn(),
-    resetPreferences: vi.fn()
+    resetPreferences: vi.fn(),
   };
 
   return (
@@ -91,7 +97,7 @@ const MockVisualizationProvider: React.FC<{ children: ReactNode }> = ({ children
   const visualizationContextValue = {
     settings: {
       renderMode: 'standard', // This will be cast to RenderMode enum
-      detailLevel: 'medium',  // This will be cast to DetailLevel enum
+      detailLevel: 'medium', // This will be cast to DetailLevel enum
       showConnections: true,
       connectionThreshold: 0.3,
       activationThreshold: 0.2,
@@ -101,7 +107,7 @@ const MockVisualizationProvider: React.FC<{ children: ReactNode }> = ({ children
       colorMapping: 'clinical', // This will be cast to ColorMapping enum
       transparencyLevel: 0.1,
       annotationsVisible: true,
-      showClinicalMarkers: true
+      showClinicalMarkers: true,
     },
     updateSettings: vi.fn(),
     resetSettings: vi.fn(),
@@ -110,7 +116,7 @@ const MockVisualizationProvider: React.FC<{ children: ReactNode }> = ({ children
     activeRegions: new Map(),
     setActiveRegion: vi.fn(),
     clearActiveRegions: vi.fn(),
-    captureSnapshot: vi.fn().mockResolvedValue('data:image/png;base64,test')
+    captureSnapshot: vi.fn().mockResolvedValue('data:image/png;base64,test'),
   };
 
   return (
@@ -226,7 +232,9 @@ export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOpt
 
   // Ensure themeContextValue is defined before returning
   if (!themeContextValue) {
-    throw new Error("ThemeContext value was not captured. Ensure ThemeProvider is correctly set up.");
+    throw new Error(
+      'ThemeContext value was not captured. Ensure ThemeProvider is correctly set up.'
+    );
   }
 
   console.log('[DEBUG renderWithProviders] Returning helpers:', {
@@ -234,8 +242,12 @@ export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOpt
     isDarkMode: typeof (() => themeContextValue?.theme === 'dark'),
     getCurrentThemeMode: typeof (() => themeContextValue?.theme),
     getCurrentAppliedTheme: typeof (() => themeContextValue?.theme),
-    enableDarkMode: typeof (() => { /* ... */ }),
-    disableDarkMode: typeof (() => { /* ... */ }),
+    enableDarkMode: typeof (() => {
+      /* ... */
+    }),
+    disableDarkMode: typeof (() => {
+      /* ... */
+    }),
   });
 
   // Return standard render result plus theme context helpers
@@ -260,7 +272,7 @@ export const renderWithProviders = (ui: ReactElement, options: ExtendedRenderOpt
       act(() => {
         themeContextValue?.setTheme('light');
       });
-    }
+    },
   };
 };
 

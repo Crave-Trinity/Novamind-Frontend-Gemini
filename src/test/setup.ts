@@ -3,7 +3,7 @@
  *
  * This is a complete, clean solution for all test environment needs.
  * No patchwork, no legacy code - just a proper foundation.
-*/
+ */
 // Monkey-patch tinypool to prevent stack overflow on worker termination
 import * as tinypool from 'tinypool';
 if ((tinypool as any).ProcessWorker?.prototype) {
@@ -41,22 +41,23 @@ declare global {
   }
   // Define global types for our mocks using var
   var mockLocalStorage: {
-      getItem: ReturnType<typeof vi.fn>;
-      setItem: ReturnType<typeof vi.fn>;
-      removeItem: ReturnType<typeof vi.fn>;
-      clear: ReturnType<typeof vi.fn>;
+    getItem: ReturnType<typeof vi.fn>;
+    setItem: ReturnType<typeof vi.fn>;
+    removeItem: ReturnType<typeof vi.fn>;
+    clear: ReturnType<typeof vi.fn>;
   };
   var mockMatchMedia: ReturnType<typeof vi.fn>;
-  var mockMediaQueryListInstance: { // Make the instance globally accessible if needed
-      matches: boolean;
-      media: string;
-      onchange: null;
-      addEventListener: ReturnType<typeof vi.fn>;
-      removeEventListener: ReturnType<typeof vi.fn>;
-      dispatchEvent: ReturnType<typeof vi.fn>;
-      addListener: ReturnType<typeof vi.fn>;
-      removeListener: ReturnType<typeof vi.fn>;
-      _triggerChange?: (matches: boolean) => void;
+  var mockMediaQueryListInstance: {
+    // Make the instance globally accessible if needed
+    matches: boolean;
+    media: string;
+    onchange: null;
+    addEventListener: ReturnType<typeof vi.fn>;
+    removeEventListener: ReturnType<typeof vi.fn>;
+    dispatchEvent: ReturnType<typeof vi.fn>;
+    addListener: ReturnType<typeof vi.fn>;
+    removeListener: ReturnType<typeof vi.fn>;
+    _triggerChange?: (matches: boolean) => void;
   };
   var globalCurrentMatchesState: boolean;
 }
@@ -68,16 +69,22 @@ let globalLocalStorageStore: Record<string, string> = {};
 
 // Define implementation functions that interact with the store
 const mockGetItemImpl = (key: string): string | null => globalLocalStorageStore[key] || null;
-const mockSetItemImpl = (key: string, value: string): void => { globalLocalStorageStore[key] = value; };
-const mockRemoveItemImpl = (key: string): void => { delete globalLocalStorageStore[key]; };
-const mockClearImpl = (): void => { globalLocalStorageStore = {}; };
+const mockSetItemImpl = (key: string, value: string): void => {
+  globalLocalStorageStore[key] = value;
+};
+const mockRemoveItemImpl = (key: string): void => {
+  delete globalLocalStorageStore[key];
+};
+const mockClearImpl = (): void => {
+  globalLocalStorageStore = {};
+};
 
 // Create the mock object with initial vi.fn() placeholders
 (globalThis as any).mockLocalStorage = {
-    getItem: vi.fn(mockGetItemImpl), // Initialize with implementation
-    setItem: vi.fn(mockSetItemImpl),
-    removeItem: vi.fn(mockRemoveItemImpl),
-    clear: vi.fn(mockClearImpl),
+  getItem: vi.fn(mockGetItemImpl), // Initialize with implementation
+  setItem: vi.fn(mockSetItemImpl),
+  removeItem: vi.fn(mockRemoveItemImpl),
+  clear: vi.fn(mockClearImpl),
 };
 
 let globalMediaQueryChangeListener: ((e: Partial<MediaQueryListEvent>) => void) | null = null;
@@ -85,21 +92,30 @@ let globalMediaQueryChangeListener: ((e: Partial<MediaQueryListEvent>) => void) 
 (globalThis as any).globalCurrentMatchesState = false;
 
 (globalThis as any).mockMediaQueryListInstance = {
-    matches: (globalThis as any).globalCurrentMatchesState, // Read from globalThis
-    media: '(prefers-color-scheme: dark)',
-    onchange: null,
-    addEventListener: vi.fn((event, listener) => { if (event === 'change') globalMediaQueryChangeListener = listener; }),
-    removeEventListener: vi.fn((event, listener) => { if (event === 'change' && globalMediaQueryChangeListener === listener) globalMediaQueryChangeListener = null; }),
-    dispatchEvent: vi.fn(),
-    addListener: vi.fn((listener) => { globalMediaQueryChangeListener = listener; }), // Deprecated
-    removeListener: vi.fn((listener) => { if (globalMediaQueryChangeListener === listener) globalMediaQueryChangeListener = null; }), // Deprecated
-    _triggerChange: (newMatchesState: boolean) => {
-        (globalThis as any).globalCurrentMatchesState = newMatchesState; // Write to globalThis
-        (globalThis as any).mockMediaQueryListInstance.matches = newMatchesState;
-        if (globalMediaQueryChangeListener) {
-            globalMediaQueryChangeListener({ matches: newMatchesState } as Partial<MediaQueryListEvent>);
-        }
+  matches: (globalThis as any).globalCurrentMatchesState, // Read from globalThis
+  media: '(prefers-color-scheme: dark)',
+  onchange: null,
+  addEventListener: vi.fn((event, listener) => {
+    if (event === 'change') globalMediaQueryChangeListener = listener;
+  }),
+  removeEventListener: vi.fn((event, listener) => {
+    if (event === 'change' && globalMediaQueryChangeListener === listener)
+      globalMediaQueryChangeListener = null;
+  }),
+  dispatchEvent: vi.fn(),
+  addListener: vi.fn((listener) => {
+    globalMediaQueryChangeListener = listener;
+  }), // Deprecated
+  removeListener: vi.fn((listener) => {
+    if (globalMediaQueryChangeListener === listener) globalMediaQueryChangeListener = null;
+  }), // Deprecated
+  _triggerChange: (newMatchesState: boolean) => {
+    (globalThis as any).globalCurrentMatchesState = newMatchesState; // Write to globalThis
+    (globalThis as any).mockMediaQueryListInstance.matches = newMatchesState;
+    if (globalMediaQueryChangeListener) {
+      globalMediaQueryChangeListener({ matches: newMatchesState } as Partial<MediaQueryListEvent>);
     }
+  },
 };
 
 // Define the mock function structure but leave implementation for beforeEach
@@ -111,28 +127,50 @@ beforeEach(() => {
   // Reset mocks AND re-apply implementations to ensure they point to the reset store
   (globalThis as any).mockLocalStorage.getItem.mockReset().mockImplementation(mockGetItemImpl);
   (globalThis as any).mockLocalStorage.setItem.mockReset().mockImplementation(mockSetItemImpl);
-  (globalThis as any).mockLocalStorage.removeItem.mockReset().mockImplementation(mockRemoveItemImpl);
+  (globalThis as any).mockLocalStorage.removeItem
+    .mockReset()
+    .mockImplementation(mockRemoveItemImpl);
   (globalThis as any).mockLocalStorage.clear.mockReset().mockImplementation(mockClearImpl);
   // Reset matchMedia listener capture and state
   globalMediaQueryChangeListener = null;
   (globalThis as any).globalCurrentMatchesState = false; // Default to light here
   if ((globalThis as any).mockMediaQueryListInstance) {
-      (globalThis as any).mockMediaQueryListInstance.matches = false;
+    (globalThis as any).mockMediaQueryListInstance.matches = false;
   }
 
   // Define the mock implementation *within* beforeEach
   const matchMediaImplementation = (query: string): MediaQueryList => {
-      if (!(globalThis as any).mockMediaQueryListInstance) {
-           console.error("CRITICAL SETUP ERROR: mockMediaQueryListInstance is not defined!");
-           return { matches: false, media: query, onchange: null, addListener: vi.fn(), removeListener: vi.fn(), addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn() } as unknown as MediaQueryList;
-      }
-      if (query === '(prefers-color-scheme: dark)') {
-          (globalThis as any).mockMediaQueryListInstance.matches = (globalThis as any).globalCurrentMatchesState;
-          return (globalThis as any).mockMediaQueryListInstance as unknown as MediaQueryList;
-      }
-      return { matches: false, media: query, onchange: null, addListener: vi.fn(), removeListener: vi.fn(), addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn() } as unknown as MediaQueryList;
+    if (!(globalThis as any).mockMediaQueryListInstance) {
+      console.error('CRITICAL SETUP ERROR: mockMediaQueryListInstance is not defined!');
+      return {
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      } as unknown as MediaQueryList;
+    }
+    if (query === '(prefers-color-scheme: dark)') {
+      (globalThis as any).mockMediaQueryListInstance.matches = (
+        globalThis as any
+      ).globalCurrentMatchesState;
+      return (globalThis as any).mockMediaQueryListInstance as unknown as MediaQueryList;
+    }
+    return {
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    } as unknown as MediaQueryList;
   };
-  
+
   // Clear previous mocks/implementations and set the new one
   (globalThis as any).mockMatchMedia.mockClear().mockImplementation(matchMediaImplementation);
 
@@ -141,7 +179,7 @@ beforeEach(() => {
     Object.defineProperty(window, 'localStorage', {
       value: (globalThis as any).mockLocalStorage,
       writable: true,
-      configurable: true
+      configurable: true,
     });
     // Attach the freshly configured mock
     Object.defineProperty(window, 'matchMedia', {
@@ -151,9 +189,9 @@ beforeEach(() => {
     });
     // Basic mock for sessionStorage if needed by other tests
     Object.defineProperty(window, 'sessionStorage', {
-       value: { getItem: vi.fn(), setItem: vi.fn(), removeItem: vi.fn(), clear: vi.fn() },
-       writable: true,
-       configurable: true
+      value: { getItem: vi.fn(), setItem: vi.fn(), removeItem: vi.fn(), clear: vi.fn() },
+      writable: true,
+      configurable: true,
     });
 
     // Mock other browser APIs needed
@@ -238,7 +276,7 @@ if (typeof window !== 'undefined' && typeof HTMLCanvasElement !== 'undefined') {
 // THREE.JS MOCK
 vi.mock('three', async (importOriginal) => {
   const threeModule = (await importOriginal()) as Record<string, unknown>;
-  
+
   return {
     ...threeModule,
     WebGLRenderer: vi.fn().mockImplementation(() => ({
@@ -265,7 +303,7 @@ export const TestHelpers = {
       document.documentElement.classList.remove('light', 'dark', 'system', 'clinical');
       document.documentElement.classList.add(theme);
     }
-  }
+  },
 };
 
 console.log('[CANONICAL SETUP] Clean test environment initialized');
