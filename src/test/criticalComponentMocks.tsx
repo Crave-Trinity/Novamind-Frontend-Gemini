@@ -1,4 +1,3 @@
-/* eslint-disable */
 /**
  * NOVAMIND Neural Test Framework
  * Critical Component Mocks with Quantum Precision
