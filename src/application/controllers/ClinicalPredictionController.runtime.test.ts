@@ -15,7 +15,7 @@ import {
   // Import locally defined types/enums if needed for mock data clarity
   // AggregationMethod, SymptomPredictionParams, ...
 } from '@application/controllers/ClinicalPredictionController.runtime';
-import { type RiskAssessment, RiskLevel } from '../../../domain/types/clinical/risk'; // Import the actual type and Enum
+import { type RiskAssessment, RiskLevel } from '@domain/types/clinical/risk'; // Fixed import path
 
 // --- Mock Data (Based on inferred types) ---
 

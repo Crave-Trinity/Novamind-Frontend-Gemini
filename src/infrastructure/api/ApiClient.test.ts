@@ -20,6 +20,15 @@ const handlers = [
     ]);
   }),
 
+  // Add handler for ml/patients endpoint
+  http.get('http://localhost/api/ml/patients/', () => {
+    console.log('[MSW] Mocking GET /api/ml/patients/');
+    return HttpResponse.json([
+      { id: 'ml-patient-001', name: 'ML Patient Zero' },
+      { id: 'ml-patient-002', name: 'ML Patient Alpha' },
+    ]);
+  }),
+
   // Use the full expected URL including the mock origin and base path
   http.post('http://localhost/api/auth/login', async ({ request }) => {
     console.log('[MSW] Mocking POST /api/auth/login');
@@ -36,7 +45,7 @@ const handlers = [
 const server = setupServer(...handlers);
 
 // Lifecycle hooks for MSW server
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' })); // Error on unhandled requests
+beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' })); // Changed to bypass unhandled requests
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 

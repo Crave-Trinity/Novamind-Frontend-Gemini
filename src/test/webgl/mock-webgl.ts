@@ -300,7 +300,7 @@ export class MockWebGLRenderer {
   constructor() {
     this.domElement = document.createElement('canvas');
   }
-  // Provide a shadowMap property for compatibility with Three.js behavior
+
   shadowMap = { enabled: false };
 
   setSize(): void {}

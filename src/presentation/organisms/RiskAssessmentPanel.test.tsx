@@ -4,15 +4,12 @@
  * RiskAssessmentPanel testing with quantum precision
  */
 
-import { describe, it, expect } from 'vitest'; // Removed unused vi import
-
-import { screen } from '@testing-library/react';
-import '@testing-library/jest-dom'; // Removed unused render, fireEvent
-// Removed unused userEvent import
-import RiskAssessmentPanel from './RiskAssessmentPanel'; // Correct to default import
-import { renderWithProviders } from '../../test/test-utils.unified'; // Correct import path
-import type { RiskAssessment } from '../../../domain/types/clinical/risk';
-import { RiskLevel } from '../../../domain/types/clinical/risk'; // Add missing RiskLevel import
+import { describe, it, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import RiskAssessmentPanel from "./RiskAssessmentPanel";
+import { renderWithProviders } from "../../test/test-utils.unified";
+import { RiskLevel, type RiskAssessment } from "@domain/types/clinical/risk";
 
 // Mock data with clinical precision
 const mockRiskAssessments: RiskAssessment[] = [
