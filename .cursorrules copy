@@ -1,0 +1,535 @@
+# Novamind Digital Twin: Development Rules
+- PURE TYPESCRIPT TS NO JS 
+
+## Environment
+```bash
+node >= 18.0.0
+npm >= 9.0.0
+```
+
+## Required Extensions
+- ESLint + Prettier
+- TypeScript
+- Tailwind CSS IntelliSense
+- Error Lens
+
+## Editor Config
+```json
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  }
+}
+```
+
+## Core Architecture Rules
+
+### Module System
+- ESM only (type: "module")
+- TypeScript only (.ts/.tsx)
+- Path aliases required (@domain/...)
+- No CommonJS (except .cjs configs)
+- PURE TYPESCRIPT TS NO JS 
+
+### Directory Structure
+```
+src/
+├── domain/           # Core business logic
+├── application/      # Use cases, state
+├── infrastructure/   # External services
+└── presentation/     # UI (Atomic Design)
+    ├── atoms/       # Basic components
+    ├── molecules/   # Combined atoms
+    ├── organisms/   # Complex UI
+    ├── templates/   # Layouts
+    └── pages/       # Routes
+```
+
+### Import Rules
+- Domain → No external imports
+- Application → Domain only
+- Infrastructure → Domain, Application
+- Presentation → All layers
+
+### Type Safety
+- Strict mode enabled
+- No any, use unknown
+- Type guards required
+- Explicit error types
+
+### Component Rules
+- Props interface with JSDoc
+- Explicit return type
+- Error boundary wrapper
+- Memoize when needed
+```typescript
+// ✅ Performance optimization
+const Component = memo(({ data }: Props) => {
+  const memoizedCallback = useCallback(() => {}, []);
+  const memoizedValue = useMemo(() => compute(data), [data]);
+  return <div>{/* Implementation */}</div>;
+});
+```
+
+### State Management
+- Local state for UI
+- Context for theme/auth
+- Query hooks for server state
+- Form state via React Hook Form
+
+### HIPAA Compliance
+- Mask sensitive data
+- Secure data transmission
+- Role-based access
+- Audit logging
+
+### Error Handling
+```typescript
+try {
+  await secureOperation();
+} catch (error) {
+  errorBoundary.capture(error);
+  logger.error('Operation failed', { context: error });
+}
+```
+
+### Documentation
+- TSDoc for public APIs
+- README per directory
+- OpenAPI for HTTP endpoints
+- Architecture decisions recorded
+
+## Scripts & Commands
+
+1. **Development**
+   ```bash
+   # Start dev server
+   npm run dev
+   
+   # Type checking
+   npm run typecheck
+   
+   # Linting
+   npm run lint
+   
+   # Formatting
+   npm run format
+   ```
+
+2. **Testing**
+   ```bash
+   # Run all tests
+   npm test
+   
+   # Watch mode
+   npm run test:watch
+   
+   # Coverage
+   npm run test:coverage
+   
+   # Specific tests
+   npm test -- path/to/test.test.ts
+   ```
+
+3. **Building**
+   ```bash
+   # Production build
+   npm run build
+   
+   # Preview build
+   npm run preview
+   ```
+
+## Git Workflow
+
+1. **Branch Naming**
+   ```bash
+   feature/brain-visualization
+   fix/memory-leak
+   refactor/api-client
+   test/brain-model
+   ```
+
+2. **Commit Messages**
+   ```bash
+   # Format: <type>(<scope>): <description>
+   
+   feat(visualization): add neural pathway highlighting
+   fix(memory): resolve WebGL context leak
+   refactor(api): implement clean architecture pattern
+   test(model): add brain region tests
+   ```
+
+3. **Pre-commit Checks**
+   ```bash
+   # Runs automatically on commit
+   - Type checking
+   - Linting
+   - Tests
+   - Format checking
+   ```
+
+## Code Quality
+
+1. **Linting**
+   ```bash
+   # Check all files
+   npm run lint
+   
+   # Fix automatically
+   npm run lint -- --fix
+   
+   # Check specific files
+   npm run lint src/domain/**/*.ts
+   ```
+
+2. **Type Checking**
+   ```bash
+   # Check all files
+   npm run typecheck
+   
+   # Watch mode
+   npm run typecheck -- --watch
+   ```
+
+3. **Testing**
+   ```bash
+   # Run specific test suites
+   npm test -- --testPathPattern=brain
+   
+   # Update snapshots
+   npm test -- -u
+   
+   # Run with coverage
+   npm run test:coverage
+   ```
+
+## Debugging
+
+1. **Development**
+   ```bash
+   # Start with debugger
+   npm run dev -- --inspect
+   
+   # Debug tests
+   npm run test:debug
+   ```
+
+2. **Browser Tools**
+   - React DevTools
+   - Redux DevTools
+   - Performance profiler
+   - Network inspector
+
+3. **Logging**
+   ```typescript
+   // Use structured logging
+   logger.info('Brain model loaded', {
+     modelId,
+     regions: regions.length
+   });
+   ```
+
+## Performance Monitoring
+
+1. **Build Analysis**
+   ```bash
+   # Analyze bundle size
+   npm run analyze
+   
+   # Check performance
+   npm run lighthouse
+   ```
+
+2. **Runtime Metrics**
+   - FPS monitoring
+   - Memory usage
+   - Network requests
+   - React renders
+
+3. **Error Tracking**
+   ```typescript
+   // Use error boundaries
+   window.onerror = (error) => {
+     errorTracker.capture(error);
+   };
+   ```
+
+## Deployment
+
+1. **Environment Setup**
+   ```bash
+   # Set environment
+   export NODE_ENV=production
+   
+   # Build for production
+   npm run build
+   ```
+
+2. **Verification**
+   ```bash
+   # Preview build
+   npm run preview
+   
+   # Run e2e tests
+   npm run test:e2e
+   ```
+
+3. **Release**
+   ```bash
+   # Create release
+   npm version patch
+   
+   # Deploy
+   npm run deploy
+   ```
+
+## Documentation
+
+1. **Code Comments**
+   ```typescript
+   /** 
+    * Processes neural pathway data
+    * @param data - Raw neural data
+    * @returns Processed pathway model
+    */
+   ```
+
+2. **README Updates**
+   - Feature documentation
+   - API changes
+   - Breaking changes
+   - Migration guides
+
+3. **Architecture Docs**
+   - Design decisions
+   - System diagrams
+   - Data flow
+   - Performance considerations
+
+# Novamind Digital Twin: UI Implementation Rules
+
+## Component Architecture
+
+1. **Atomic Design**
+   ```
+   atoms/          # Basic UI elements (Button, Input, etc.)
+   molecules/      # Simple combinations (SearchBar, Card, etc.)
+   organisms/      # Complex components (Header, Sidebar, etc.)
+   templates/      # Page layouts (DashboardLayout, etc.)
+   pages/          # Full pages (Dashboard, Settings, etc.)
+   ```
+
+2. **Component Rules**
+   - Single Responsibility Principle
+   - Props interface with JSDoc
+   - Explicit return type
+   - Error boundary wrapper
+   - Loading state handling
+
+3. **Performance**
+   ```typescript
+   // ✅ Memoize expensive components
+   export const BrainRegion = memo(({ data }: Props) => {
+     // Implementation
+   });
+
+   // ✅ Memoize callbacks
+   const handleUpdate = useCallback((id: string) => {
+     // Implementation
+   }, []);
+
+   // ✅ Memoize expensive computations
+   const processedData = useMemo(() => {
+     return heavyComputation(data);
+   }, [data]);
+   ```
+
+## Tailwind Implementation
+
+1. **Class Organization**
+   ```tsx
+   // ✅ Logical grouping
+   <div className={clsx(
+     // Layout
+     'grid grid-cols-12 gap-4',
+     // Typography
+     'text-base font-medium text-gray-900',
+     // Colors & Effects
+     'bg-white shadow-lg',
+     // Interactivity
+     'hover:bg-gray-50 focus:ring-2',
+     // Responsive
+     'md:grid-cols-6 lg:grid-cols-4'
+   )}>
+   ```
+
+2. **Custom Classes**
+   ```css
+   @layer components {
+     .neural-card {
+       @apply rounded-lg bg-white shadow-xl p-6;
+       @apply hover:shadow-2xl transition-shadow;
+       @apply dark:bg-gray-800 dark:text-white;
+     }
+   }
+   ```
+
+3. **Theme Extensions**
+   ```js
+   // tailwind.config.cjs
+   module.exports = {
+     theme: {
+       extend: {
+         colors: {
+           neural: {
+            active: '#FF5E5B',
+            inactive: '#373737'
+          }
+         }
+       }
+     }
+   }
+   ```
+
+## State Management
+
+1. **Local State**
+   ```typescript
+   // ✅ Use for UI state
+   const [isOpen, setIsOpen] = useState(false);
+   ```
+
+2. **Complex State**
+   ```typescript
+   // ✅ Use reducers for complex logic
+   const [state, dispatch] = useReducer(brainModelReducer, initialState);
+   ```
+
+3. **Form State**
+   ```typescript
+   // ✅ Use React Hook Form
+   const { register, handleSubmit } = useForm<PatientData>();
+   ```
+
+## Performance Optimization
+
+1. **Virtualization**
+   ```typescript
+   // ✅ Use for long lists
+   import { FixedSizeList } from 'react-window';
+   
+   <FixedSizeList
+     height={400}
+     width={600}
+     itemCount={1000}
+     itemSize={50}
+   >
+     {Row}
+   </FixedSizeList>
+   ```
+
+2. **Code Splitting**
+   ```typescript
+   // ✅ Lazy load components
+   const BrainVisualizer = lazy(() => 
+     import('@presentation/organisms/BrainVisualizer')
+   );
+   ```
+
+3. **Resource Cleanup**
+   ```typescript
+   // ✅ Always cleanup
+   useEffect(() => {
+     const subscription = subscribe();
+     return () => subscription.unsubscribe();
+   }, []);
+   ```
+
+## Three.js Integration
+
+1. **Scene Setup**
+   ```typescript
+   // ✅ Proper scene management
+   const BrainScene = () => (
+     <Canvas>
+       <React.Suspense fallback={<Loader />}>
+         <BrainModel />
+         <Effects />
+         <Controls />
+       </React.Suspense>
+     </Canvas>
+   );
+   ```
+
+2. **Performance**
+   ```typescript
+   // ✅ Use instances for repeated elements
+   const Neurons = memo(({ data }) => (
+     <InstancedMesh count={data.length}>
+       <sphereGeometry args={[0.1, 32, 32]} />
+       <neuronMaterial />
+     </InstancedMesh>
+   ));
+   ```
+
+3. **Resource Management**
+   ```typescript
+   // ✅ Dispose resources
+   useEffect(() => {
+     return () => {
+       geometry.dispose();
+       material.dispose();
+       texture.dispose();
+     };
+   }, []);
+   ```
+
+## HIPAA Compliance
+
+1. **Data Display**
+   ```typescript
+   // ✅ Mask sensitive data
+   const PatientInfo = ({ data }: Props) => (
+     <div>
+       <MaskedField value={data.ssn} />
+       <RedactedText text={data.notes} />
+     </div>
+   );
+   ```
+
+2. **Form Handling**
+   ```typescript
+   // ✅ Secure form submission
+   const onSubmit = async (data: PatientData) => {
+     await secureApiClient.post('/patients', data);
+   };
+   ```
+
+## Error Handling
+
+1. **Component Errors**
+   ```typescript
+   // ✅ Use error boundaries
+   const VisualizationErrorBoundary = ({
+     children
+   }: PropsWithChildren) => (
+     <ErrorBoundary
+       fallback={<ErrorFallback />}
+       onError={logError}
+     >
+       {children}
+     </ErrorBoundary>
+   );
+   ```
+
+2. **Async Errors**
+   ```typescript
+   // ✅ Handle loading states
+   const { data, error, isLoading } = useQuery({
+     queryKey: ['brainModel', id],
+     queryFn: () => fetchBrainModel(id)
+   });
+   ```

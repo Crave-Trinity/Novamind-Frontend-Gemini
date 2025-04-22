@@ -2,20 +2,21 @@
 /**
  * @vitest-environment jsdom
  */
+// Ensure global test setup is applied
+import '../../test/setup';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { waitFor } from '@testing-library/react'; // Import waitFor
 import { EnhancedAuthService } from './AuthService.enhanced';
 import { AuthTokens, AuthUser, AuthApiClient } from './index'; // Import AuthApiClient for mocking
 
-// Define mockLocalStorage in module scope to reference the window.localStorage mock from setup
-const mockLocalStorage = window.localStorage;
 
-// Rely on the global mockLocalStorage defined in src/test/setup.ts
-// No need for local definition or Object.defineProperty here.
+
+// Rely on the global window.localStorage mock defined in src/test/setup.ts
+// Use window.localStorage.* spies for storage interactions
 // Use more direct spies on the native objects that are guaranteed to work
 beforeEach(() => {
-  // Clear all mocks
-  vi.resetAllMocks();
+  // Clear mock call history but preserve implementations
+  vi.clearAllMocks();
   
   // Reset localStorage - Handled by global setup (src/test/setup.ts)
 });
@@ -106,28 +107,33 @@ describe('EnhancedAuthService', () => {
     // The global setup's afterEach handles vi.clearAllMocks().
     vi.useFakeTimers(); // Use fake timers for consistent Date.now()
 
-    // Spy on AuthApiClient prototype methods *inside* beforeEach
+    // Spy on AuthApiClient prototype methods
     vi.spyOn(AuthApiClient.prototype, 'login').mockImplementation(mockLogin);
     vi.spyOn(AuthApiClient.prototype, 'logout').mockImplementation(mockLogout);
     vi.spyOn(AuthApiClient.prototype, 'refreshToken').mockImplementation(mockRefreshToken);
     vi.spyOn(AuthApiClient.prototype, 'getCurrentUser').mockImplementation(mockGetCurrentUser);
+    // Spy on JSDOM localStorage methods
+    vi.spyOn(window.localStorage, 'getItem');
+    vi.spyOn(window.localStorage, 'setItem');
+    vi.spyOn(window.localStorage, 'removeItem');
 
-    // The global setup handles resetting the mockLocalStorage state
+
+    // Instantiate the service after spies
     authService = new EnhancedAuthService('https://api.test.com');
-    
-    // No need to replace the client manually, spies handle it
   });
 
   afterEach(() => {
     vi.useRealTimers(); // Restore real timers
     vi.restoreAllMocks(); // Restores original prototype methods
+    // Clear mock storage after each test
+    window.localStorage.clear();
   });
 
   describe('initializeAuth with token auto-refresh', () => {
     it('should attempt to refresh token when it has expired', async () => {
       // Setup with expired token
       vi.setSystemTime(new Date(expiredTokens.expiresAt + 10000)); // Set time AFTER expiry
-      localStorage.setItem('auth_tokens', JSON.stringify(expiredTokens));
+      window.localStorage.setItem('auth_tokens', JSON.stringify(expiredTokens));
       mockRefreshToken.mockResolvedValueOnce(mockTokens); // Configure specific mock response
       mockGetCurrentUser.mockResolvedValueOnce(mockUser); // Configure specific mock response
 
@@ -137,7 +143,7 @@ describe('EnhancedAuthService', () => {
       // Verify refresh was attempted
       await vi.runAllTimersAsync(); // Ensure timers related to refresh logic run
       expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken);
-      expect(localStorage.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens));
+      expect(window.localStorage.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens));
       expect(result.isAuthenticated).toBe(true);
       expect(result.user).toEqual(mockUser);
     });
@@ -152,7 +158,7 @@ describe('EnhancedAuthService', () => {
       };
       
       // Store tokens first
-      localStorage.setItem('auth_tokens', JSON.stringify(testTokens));
+      window.localStorage.setItem('auth_tokens', JSON.stringify(testTokens));
       
       // Create a testable service instance
       const testAuthService = new TestableAuthService('https://api.test.com');
@@ -172,7 +178,7 @@ describe('EnhancedAuthService', () => {
     it('should handle token refresh failure during initialization', async () => {
       // Setup
       vi.setSystemTime(new Date(expiredTokens.expiresAt + 10000)); // Set time AFTER expiry
-      localStorage.setItem('auth_tokens', JSON.stringify(expiredTokens));
+      window.localStorage.setItem('auth_tokens', JSON.stringify(expiredTokens));
       mockRefreshToken.mockRejectedValueOnce(new Error('Refresh token expired')); // Configure specific mock response
 
       // Execute
@@ -183,13 +189,13 @@ describe('EnhancedAuthService', () => {
       expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken);
       expect(result.isAuthenticated).toBe(false);
       expect(result.error).toBe('Session expired');
-      expect(localStorage.removeItem).toHaveBeenCalledWith('auth_tokens');
+      expect(window.localStorage.removeItem).toHaveBeenCalledWith('auth_tokens');
     });
 
     it('should attempt token refresh on 401 error from getCurrentUser', async () => {
       // Setup
       vi.setSystemTime(new Date(mockTokens.expiresAt - 10000)); // Set time BEFORE expiry
-      localStorage.setItem('auth_tokens', JSON.stringify(mockTokens));
+      window.localStorage.setItem('auth_tokens', JSON.stringify(mockTokens));
       mockGetCurrentUser.mockRejectedValueOnce(new Error('401 Unauthorized')); // Configure specific mock response
       mockRefreshToken.mockResolvedValueOnce({...mockTokens, accessToken: 'new-token'}); // Configure specific mock response
       mockGetCurrentUser.mockResolvedValueOnce(mockUser); // Configure specific mock response (Second call succeeds)
@@ -210,7 +216,7 @@ describe('EnhancedAuthService', () => {
     it('should return token when valid and not expiring soon', async () => {
       vi.setSystemTime(new Date(mockTokens.expiresAt - 400000)); // Set time well before expiry buffer
       // Setup
-      localStorage.setItem('auth_tokens', JSON.stringify(mockTokens));
+      window.localStorage.setItem('auth_tokens', JSON.stringify(mockTokens));
 
       // Execute
       const token = await authService.ensureValidToken();
@@ -223,7 +229,7 @@ describe('EnhancedAuthService', () => {
     it('should refresh token when it is expiring soon', async () => {
       // Setup
       vi.setSystemTime(new Date(soonToExpireTokens.expiresAt - 10000)); // Set time WITHIN expiry buffer
-      localStorage.setItem('auth_tokens', JSON.stringify(soonToExpireTokens));
+      window.localStorage.setItem('auth_tokens', JSON.stringify(soonToExpireTokens));
       const newTokens = {...mockTokens, accessToken: 'fresh-token'};
       mockRefreshToken.mockResolvedValueOnce(newTokens); // Configure specific mock response
 
@@ -238,7 +244,7 @@ describe('EnhancedAuthService', () => {
       // Timer advancement happened before awaiting tokenPromise
       expect(mockRefreshToken).toHaveBeenCalled();
       expect(token).toBe(newTokens.accessToken);
-      expect(localStorage.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(newTokens));
+      expect(window.localStorage.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(newTokens));
     });
 
     it('should return null when no token is stored', async () => {
@@ -254,7 +260,7 @@ describe('EnhancedAuthService', () => {
     it('should return null when refresh fails', async () => {
       // Setup
       vi.setSystemTime(new Date(soonToExpireTokens.expiresAt - 10000)); // Set time WITHIN expiry buffer
-      mockLocalStorage.setItem('auth_tokens', JSON.stringify(soonToExpireTokens)); // Use global mock
+      window.localStorage.setItem('auth_tokens', JSON.stringify(soonToExpireTokens)); // Use global mock
       mockRefreshToken.mockRejectedValueOnce(new Error('Refresh failed')); // Configure specific mock response
 
       // Execute
@@ -271,7 +277,7 @@ describe('EnhancedAuthService', () => {
       // Event dispatch happens within the catch block of the refresh promise
       await vi.runAllTimersAsync(); // Ensure timers/promises resolve
       expect(dispatchEventSpy).toHaveBeenCalled();
-      expect(localStorage.removeItem).toHaveBeenCalledWith('auth_tokens');
+      expect(window.localStorage.removeItem).toHaveBeenCalledWith('auth_tokens');
     });
   });
 
@@ -312,21 +318,21 @@ describe('EnhancedAuthService', () => {
       expect(result.error).toContain('Could not retrieve user information');
       expect(result.isAuthenticated).toBe(false);
       // removeItem is called synchronously within clearTokens after getCurrentUser fails
-      expect(localStorage.removeItem).toHaveBeenCalledWith('auth_tokens');
+      expect(window.localStorage.removeItem).toHaveBeenCalledWith('auth_tokens');
     });
   });
 
   describe('permission checking', () => {
     beforeEach(() => {
       // Ensure user data is in localStorage for permission checks
-      localStorage.setItem('auth_user', JSON.stringify(mockUser));
+      window.localStorage.setItem('auth_user', JSON.stringify(mockUser));
     });
 
     it('should return false when user has no permission', async () => {
       vi.setSystemTime(new Date(mockTokens.expiresAt - 10000)); // Set time BEFORE expiry
       // Setup
-      localStorage.setItem('auth_tokens', JSON.stringify(mockTokens));
-      localStorage.setItem('auth_user', JSON.stringify(mockUser));
+      window.localStorage.setItem('auth_tokens', JSON.stringify(mockTokens));
+      window.localStorage.setItem('auth_user', JSON.stringify(mockUser));
 
       // Execute
       const hasPermission = authService.hasPermission('admin:dashboard');
@@ -340,7 +346,7 @@ describe('EnhancedAuthService', () => {
       // Set time well BEFORE expiry buffer so no refresh is triggered
       vi.setSystemTime(new Date(mockTokens.expiresAt - 400000));
       // Setup
-      localStorage.setItem('auth_tokens', JSON.stringify(mockTokens));
+      window.localStorage.setItem('auth_tokens', JSON.stringify(mockTokens));
       // auth_user is set in beforeEach for this describe block
 
       // Execute
@@ -353,7 +359,7 @@ describe('EnhancedAuthService', () => {
     it('should trigger background refresh for expiring token', async () => {
       vi.setSystemTime(new Date(soonToExpireTokens.expiresAt - 10000)); // Set time WITHIN expiry buffer
       // Setup
-      localStorage.setItem('auth_tokens', JSON.stringify(soonToExpireTokens));
+      window.localStorage.setItem('auth_tokens', JSON.stringify(soonToExpireTokens));
       // auth_user is set in beforeEach for this describe block
       mockRefreshToken.mockResolvedValueOnce(mockTokens); // Configure specific mock response
 
@@ -373,7 +379,7 @@ describe('EnhancedAuthService', () => {
     it('should handle API call failure during logout', async () => {
       vi.setSystemTime(new Date()); // Set time for consistency
       // Setup
-      mockLocalStorage.setItem('auth_tokens', JSON.stringify(mockTokens)); // Use global mock
+      window.localStorage.setItem('auth_tokens', JSON.stringify(mockTokens)); // Use global mock
       mockLogout.mockRejectedValueOnce(new Error('Network error during logout')); // Configure specific mock response
       
       // Execute
@@ -381,7 +387,7 @@ describe('EnhancedAuthService', () => {
       
       // Verify tokens are cleared even when API call fails
       // removeItem is called synchronously within clearTokens
-      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('auth_tokens'); // Use global mock
+      expect(window.localStorage.removeItem).toHaveBeenCalledWith('auth_tokens'); // Use global mock
       expect(result.isAuthenticated).toBe(false);
       // The enhanced service correctly sets an error message in this case
       expect(result.error).toBe('Logout API call failed, but session was ended locally');
@@ -399,7 +405,7 @@ describe('EnhancedAuthService', () => {
     it('should dispatch session-expired event when refresh fails', async () => {
       vi.setSystemTime(new Date(expiredTokens.expiresAt + 10000)); // Set time AFTER expiry
       // Setup
-      mockLocalStorage.setItem('auth_tokens', JSON.stringify(expiredTokens)); // Use global mock
+      window.localStorage.setItem('auth_tokens', JSON.stringify(expiredTokens)); // Use global mock
       mockRefreshToken.mockRejectedValueOnce(new Error('Invalid refresh token')); // Configure specific mock response
       
       // Execute
@@ -420,7 +426,7 @@ describe('EnhancedAuthService', () => {
     it('should reuse in-progress refresh promise', async () => {
       vi.setSystemTime(new Date(expiredTokens.expiresAt + 10000)); // Set time AFTER expiry
       // Setup
-      mockLocalStorage.setItem('auth_tokens', JSON.stringify(expiredTokens)); // Use global mock
+      window.localStorage.setItem('auth_tokens', JSON.stringify(expiredTokens)); // Use global mock
       mockRefreshToken.mockResolvedValueOnce(mockTokens); // Configure specific mock response
       
       // Execute - make two calls in quick succession

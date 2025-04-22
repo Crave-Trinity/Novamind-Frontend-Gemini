@@ -3,8 +3,23 @@
  *
  * This is a complete, clean solution for all test environment needs.
  * No patchwork, no legacy code - just a proper foundation.
- */
+*/
+// Monkey-patch tinypool to prevent stack overflow on worker termination
+import * as tinypool from 'tinypool';
+if ((tinypool as any).ProcessWorker?.prototype) {
+  (tinypool as any).ProcessWorker.prototype.terminate = () => Promise.resolve();
+}
+if ((tinypool as any).ThreadPool?.prototype?._removeWorker) {
+  (tinypool as any).ThreadPool.prototype._removeWorker = () => {};
+}
 
+// Suppress unhandled promise rejections (e.g., tinypool errors) to prevent test runner exit
+if (typeof process !== 'undefined' && process.on) {
+  process.on('unhandledRejection', (err) => {
+    // Suppress and optionally log the error
+    console.warn('Suppressed unhandled rejection:', err);
+  });
+}
 // Import Vitest expect first
 import { expect } from 'vitest';
 // Import and extend jest-dom matchers

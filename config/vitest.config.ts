@@ -1,4 +1,14 @@
 /// <reference types="vitest" />
+/*
+ * Monkey-patch tinypool at config load time to prevent stack overflow on worker termination.
+ */
+import * as tinypool from 'tinypool';
+if ((tinypool as any).ProcessWorker?.prototype) {
+  (tinypool as any).ProcessWorker.prototype.terminate = () => Promise.resolve();
+}
+if ((tinypool as any).ThreadPool?.prototype?._removeWorker) {
+  (tinypool as any).ThreadPool.prototype._removeWorker = () => {};
+}
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 import path from 'path';
@@ -9,6 +19,16 @@ const projectRoot = path.resolve(__dirname, '..'); // Define project root dynami
 
 export default defineConfig({
   plugins: [
+    // Stub out tinypool at the Vite resolver level to override shutdown before transforms
+    {
+      name: 'stub-tinypool',
+      enforce: 'pre',
+      resolveId(source) {
+        if (source === 'tinypool')
+          return path.resolve(__dirname, 'tinypool-stub.ts');
+        return null;
+      },
+    },
     react(), // React plugin for JSX support
     tsconfigPaths(), // Use paths from tsconfig.json
   ],
@@ -62,6 +82,9 @@ export default defineConfig({
     },
   },
   test: {
+    // Disable worker threads and parallel file execution to avoid tinypool stack issues
+    threads: false,
+    fileParallelism: false,
     // Core settings
     globals: true, // Enable global test APIs
     environment: 'jsdom', // Use JSDOM for browser environment
