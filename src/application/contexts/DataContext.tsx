@@ -1,7 +1,7 @@
 /* eslint-disable */
 /**
  * Neural Data Context Provider
- * 
+ *
  * Manages the quantum-level data state for the psychiatric digital twin platform
  * with clinical precision and HIPAA-compliant data handling
  */
@@ -67,12 +67,15 @@ export interface PatientData {
       notes?: string;
     }>;
   }[];
-  assessmentScores?: Record<string, {
-    date: string;
-    score: number;
-    clinicianId: string;
-    notes?: string;
-  }[]>;
+  assessmentScores?: Record<
+    string,
+    {
+      date: string;
+      score: number;
+      clinicianId: string;
+      notes?: string;
+    }[]
+  >;
   cognitiveMetrics?: {
     date: string;
     domain: string;
@@ -90,7 +93,7 @@ interface DataContextType {
   isLoadingPatient: boolean;
   patientError: Error | null;
   refreshPatientData: (patientId: string) => Promise<void>;
-  
+
   // Brain models
   brainModels: BrainModel[];
   isLoadingModels: boolean;
@@ -182,14 +185,11 @@ interface DataProviderProps {
 }
 
 // Neural data provider implementation
-export const DataProvider: React.FC<DataProviderProps> = ({
-  children,
-  mockData = false,
-}) => {
+export const DataProvider: React.FC<DataProviderProps> = ({ children, mockData = false }) => {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [isLoadingPatient, setIsLoadingPatient] = useState(false);
   const [patientError, setPatientError] = useState<Error | null>(null);
-  
+
   const [brainModels, setBrainModels] = useState<BrainModel[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [modelsError, setModelsError] = useState<Error | null>(null);
@@ -198,13 +198,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({
   const refreshPatientData = async (patientId: string) => {
     setIsLoadingPatient(true);
     setPatientError(null);
-    
+
     try {
       // In a real app, this would call an API
       // Mock implementation for testing
       if (mockData || process.env.NODE_ENV === 'development') {
         // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
         setPatientData(mockPatient);
       } else {
         // Would normally fetch from API:
@@ -223,13 +223,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({
   const refreshBrainModels = async (patientId: string) => {
     setIsLoadingModels(true);
     setModelsError(null);
-    
+
     try {
       // In a real app, this would call an API
       // Mock implementation for testing
       if (mockData || process.env.NODE_ENV === 'development') {
         // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 700));
+        await new Promise((resolve) => setTimeout(resolve, 700));
         setBrainModels(mockBrainModels);
       } else {
         // Would normally fetch from API:
@@ -270,11 +270,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({
 // Custom hook for using the data context
 export const useData = (): DataContextType => {
   const context = useContext(DataContext);
-  
+
   if (context === undefined) {
     throw new Error('useData must be used within a DataProvider');
   }
-  
+
   return context;
 };
 

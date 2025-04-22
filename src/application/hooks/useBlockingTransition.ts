@@ -146,8 +146,9 @@ export function useBatchedUpdates<T extends Record<string, any>>(initialState: T
    * @param key - State property key to update
    * @param value - New value for the property
    */
-  const queueUpdate = useCallback((key: keyof T, value: T[keyof T]) => { // Use T[keyof T] for better type safety
-    setPendingUpdates(prev => ({
+  const queueUpdate = useCallback((key: keyof T, value: T[keyof T]) => {
+    // Use T[keyof T] for better type safety
+    setPendingUpdates((prev) => ({
       ...prev,
       [key]: value,
     }));
@@ -174,12 +175,16 @@ export function useBatchedUpdates<T extends Record<string, any>>(initialState: T
    * Immediately applies a single update, bypassing the batch
    * Use only for critical updates that can't wait
    */
-  const applyImmediate = useCallback((key: keyof T, value: T[keyof T]) => { // Use T[keyof T]
-    setState((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  }, [setState]); // Include setState dependency
+  const applyImmediate = useCallback(
+    (key: keyof T, value: T[keyof T]) => {
+      // Use T[keyof T]
+      setState((prev) => ({
+        ...prev,
+        [key]: value,
+      }));
+    },
+    [setState]
+  ); // Include setState dependency
 
   // Memoize the return value to prevent unnecessary re-renders
   const api = useMemo(

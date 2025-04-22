@@ -14,12 +14,12 @@ vi.mock('@react-three/fiber', () => ({
 
 // eslint-disable-next-line
 describe('ThemeContext Module', () => {
-// eslint-disable-next-line
+  // eslint-disable-next-line
   it('exports the ThemeContext', () => {
     expect(ThemeContext).toBeDefined();
   });
 
-// eslint-disable-next-line
+  // eslint-disable-next-line
   it('exports the useTheme hook', () => {
     expect(useTheme).toBeDefined();
     expect(typeof useTheme).toBe('function');

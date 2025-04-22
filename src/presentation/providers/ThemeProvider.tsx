@@ -1,7 +1,7 @@
 /* eslint-disable */
 /**
  * ThemeProvider Component
- * 
+ *
  * A context provider for theme management, supporting light/dark mode
  * and custom theme configurations.
  */
@@ -16,7 +16,8 @@ interface ThemeProviderProps {
   storageKey?: string;
 }
 
-export interface ThemeProviderState { // Export state type
+export interface ThemeProviderState {
+  // Export state type
   theme: ThemeMode;
   setTheme: (theme: ThemeMode) => void;
   systemTheme: 'dark' | 'light';
@@ -39,7 +40,7 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<ThemeMode>(() => {
     // Safely handle localStorage access in SSR/testing environments
     if (typeof window === 'undefined') return defaultTheme;
-    
+
     try {
       const storedTheme = localStorage.getItem(storageKey);
       return (storedTheme as ThemeMode) || defaultTheme;
@@ -62,7 +63,8 @@ export function ThemeProvider({
 
   useEffect(() => {
     // Safely handle document manipulation
-    if (typeof window === 'undefined' || !window.document || !window.document.documentElement) return;
+    if (typeof window === 'undefined' || !window.document || !window.document.documentElement)
+      return;
 
     try {
       const root = window.document.documentElement;
@@ -73,7 +75,8 @@ export function ThemeProvider({
       if (effectiveTheme === 'dark') {
         root.classList.remove('light');
         root.classList.add('dark');
-      } else { // Default to light
+      } else {
+        // Default to light
         root.classList.remove('dark');
         root.classList.add('light');
       }
@@ -85,7 +88,7 @@ export function ThemeProvider({
   useEffect(() => {
     // Save theme selection to localStorage, with error handling
     if (typeof window === 'undefined') return;
-    
+
     try {
       // Always save theme selection to localStorage, regardless of whether it's 'system', 'light', or 'dark'
       localStorage.setItem(storageKey, theme);
@@ -97,14 +100,14 @@ export function ThemeProvider({
   useEffect(() => {
     // Safely handle cases where window or matchMedia might not be available (SSR/testing)
     if (typeof window === 'undefined' || !window.matchMedia) return;
-    
+
     try {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      
+
       const handleChange = () => {
         setSystemTheme(mediaQuery.matches ? 'dark' : 'light');
       };
-      
+
       // Modern browsers
       if (mediaQuery.addEventListener) {
         mediaQuery.addEventListener('change', handleChange);
@@ -139,10 +142,10 @@ export function ThemeProvider({
 
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
-  
+
   if (!context || context === initialState) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
-  
+
   return context;
 };

@@ -12,7 +12,7 @@ import {
   mapSymptomsToRegions,
   mapDiagnosesToRegions,
   calculateTreatmentImpact,
-} from "@domain/models/brain/mapping/brain-mapping";
+} from '@domain/models/brain/mapping/brain-mapping';
 
 describe('Domain models index exports', () => {
   it('exports brain model functions', () => {

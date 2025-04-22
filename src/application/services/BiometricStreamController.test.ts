@@ -90,14 +90,16 @@ class MockWebSocket {
   });
   // Helper methods for tests
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public simulateMessage(data: any): void { // Added public keyword
+  public simulateMessage(data: any): void {
+    // Added public keyword
     if (this.onmessage) {
       this.onmessage({ data: typeof data === 'string' ? data : JSON.stringify(data) });
     }
   }
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public simulateError(errorData: any): void { // Added public keyword
+  public simulateError(errorData: any): void {
+    // Added public keyword
     if (this.onerror) {
       this.onerror(errorData);
     }

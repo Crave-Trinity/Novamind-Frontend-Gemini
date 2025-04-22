@@ -10,15 +10,13 @@ import '@testing-library/jest-dom'; // Import waitFor
 import { EnhancedAuthService } from './AuthService.enhanced';
 import { AuthTokens, AuthUser, AuthApiClient } from './index'; // Import AuthApiClient for mocking
 
-
-
 // Rely on the global window.localStorage mock defined in src/test/setup.ts
 // Use window.localStorage.* spies for storage interactions
 // Use more direct spies on the native objects that are guaranteed to work
 beforeEach(() => {
   // Clear mock call history but preserve implementations
   vi.clearAllMocks();
-  
+
   // Reset localStorage - Handled by global setup (src/test/setup.ts)
 });
 
@@ -30,19 +28,19 @@ afterEach(() => {
 class TestableAuthService extends EnhancedAuthService {
   // Flag to track if setupRefreshTimeout was called
   public refreshTimeoutWasScheduled = false;
-  
+
   // Override to make the refresh timeout testable
   protected setupRefreshTimeout(): void {
     this.refreshTimeoutWasScheduled = true;
     // Call original method but with spy tracking
     super.setupRefreshTimeout();
   }
-  
+
   // Expose private methods for testing
   public exposedRefreshTokenSilently(): Promise<AuthTokens | null> {
     return this.refreshTokenSilently();
   }
-  
+
   // Reset the tracking flag
   public resetTestFlags(): void {
     this.refreshTimeoutWasScheduled = false;
@@ -54,26 +52,26 @@ const mockUser: AuthUser = {
   id: 'user-123',
   username: 'testuser',
   email: 'test@example.com',
-  role: 'clinician', 
-  permissions: ['read:patients', 'write:notes']
+  role: 'clinician',
+  permissions: ['read:patients', 'write:notes'],
 };
 
 const mockTokens: AuthTokens = {
   accessToken: 'mock-access-token',
   refreshToken: 'mock-refresh-token',
-  expiresAt: Date.now() + 3600000 // 1 hour from now
+  expiresAt: Date.now() + 3600000, // 1 hour from now
 };
 
 const expiredTokens: AuthTokens = {
   accessToken: 'expired-access-token',
   refreshToken: 'expired-refresh-token',
-  expiresAt: Date.now() - 3600000 // 1 hour ago
+  expiresAt: Date.now() - 3600000, // 1 hour ago
 };
 
 const soonToExpireTokens: AuthTokens = {
   accessToken: 'soon-to-expire-token',
   refreshToken: 'soon-to-expire-refresh',
-  expiresAt: Date.now() + 60000 // 1 minute from now
+  expiresAt: Date.now() + 60000, // 1 minute from now
 };
 
 // Mock CustomEvent for session expiration
@@ -87,21 +85,33 @@ const soonToExpireTokens: AuthTokens = {
 
 // Mocks for the AuthApiClient methods
 // Default implementations return rejected promises to prevent '.then of undefined' errors
-const mockLogin = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK login] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
-const mockLogout = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK logout] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
-const mockRefreshToken = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK refreshToken] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
-const mockGetCurrentUser = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK getCurrentUser] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
+const mockLogin = vi.fn().mockImplementation(async (...args) => {
+  console.log('[MOCK login] Called with:', args);
+  return Promise.reject(new Error('Mock not configured for this call'));
+});
+const mockLogout = vi.fn().mockImplementation(async (...args) => {
+  console.log('[MOCK logout] Called with:', args);
+  return Promise.reject(new Error('Mock not configured for this call'));
+});
+const mockRefreshToken = vi.fn().mockImplementation(async (...args) => {
+  console.log('[MOCK refreshToken] Called with:', args);
+  return Promise.reject(new Error('Mock not configured for this call'));
+});
+const mockGetCurrentUser = vi.fn().mockImplementation(async (...args) => {
+  console.log('[MOCK getCurrentUser] Called with:', args);
+  return Promise.reject(new Error('Mock not configured for this call'));
+});
 
 describe('EnhancedAuthService', () => {
   let authService: EnhancedAuthService;
   // Create a mock for dispatchEvent
   const dispatchEventSpy = vi.fn().mockReturnValue(true);
-  
+
   // Replace window.dispatchEvent with our mock
   Object.defineProperty(window, 'dispatchEvent', {
     value: dispatchEventSpy,
     writable: true,
-    configurable: true
+    configurable: true,
   });
 
   beforeEach(() => {
@@ -117,7 +127,6 @@ describe('EnhancedAuthService', () => {
     vi.spyOn(window.localStorage, 'getItem');
     vi.spyOn(window.localStorage, 'setItem');
     vi.spyOn(window.localStorage, 'removeItem');
-
 
     // Instantiate the service after spies
     authService = new EnhancedAuthService('https://api.test.com');
@@ -144,7 +153,10 @@ describe('EnhancedAuthService', () => {
       // Verify refresh was attempted
       await vi.runAllTimersAsync(); // Ensure timers related to refresh logic run
       expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken);
-      expect(window.localStorage.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens));
+      expect(window.localStorage.setItem).toHaveBeenCalledWith(
+        'auth_tokens',
+        JSON.stringify(mockTokens)
+      );
       expect(result.isAuthenticated).toBe(true);
       expect(result.user).toEqual(mockUser);
     });
@@ -155,23 +167,23 @@ describe('EnhancedAuthService', () => {
       const testTokens = {
         accessToken: 'test-token',
         refreshToken: 'test-refresh',
-        expiresAt: Date.now() + 60000 // 1 minute from now
+        expiresAt: Date.now() + 60000, // 1 minute from now
       };
-      
+
       // Store tokens first
       window.localStorage.setItem('auth_tokens', JSON.stringify(testTokens));
-      
+
       // Create a testable service instance
       const testAuthService = new TestableAuthService('https://api.test.com');
-      
+
       // Reset the tracking flag before the test
       testAuthService.resetTestFlags();
-      
+
       // No need to replace the client manually, spies handle it
-      
+
       // Call setupRefreshTimeout explicitly
       (testAuthService as any).setupRefreshTimeout();
-      
+
       // Verify our tracking flag was set to true
       expect(testAuthService.refreshTimeoutWasScheduled).toBe(true);
     });
@@ -198,7 +210,7 @@ describe('EnhancedAuthService', () => {
       vi.setSystemTime(new Date(mockTokens.expiresAt - 10000)); // Set time BEFORE expiry
       window.localStorage.setItem('auth_tokens', JSON.stringify(mockTokens));
       mockGetCurrentUser.mockRejectedValueOnce(new Error('401 Unauthorized')); // Configure specific mock response
-      mockRefreshToken.mockResolvedValueOnce({...mockTokens, accessToken: 'new-token'}); // Configure specific mock response
+      mockRefreshToken.mockResolvedValueOnce({ ...mockTokens, accessToken: 'new-token' }); // Configure specific mock response
       mockGetCurrentUser.mockResolvedValueOnce(mockUser); // Configure specific mock response (Second call succeeds)
 
       // Execute
@@ -231,7 +243,7 @@ describe('EnhancedAuthService', () => {
       // Setup
       vi.setSystemTime(new Date(soonToExpireTokens.expiresAt - 10000)); // Set time WITHIN expiry buffer
       window.localStorage.setItem('auth_tokens', JSON.stringify(soonToExpireTokens));
-      const newTokens = {...mockTokens, accessToken: 'fresh-token'};
+      const newTokens = { ...mockTokens, accessToken: 'fresh-token' };
       mockRefreshToken.mockResolvedValueOnce(newTokens); // Configure specific mock response
 
       // Execute
@@ -245,7 +257,10 @@ describe('EnhancedAuthService', () => {
       // Timer advancement happened before awaiting tokenPromise
       expect(mockRefreshToken).toHaveBeenCalled();
       expect(token).toBe(newTokens.accessToken);
-      expect(window.localStorage.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(newTokens));
+      expect(window.localStorage.setItem).toHaveBeenCalledWith(
+        'auth_tokens',
+        JSON.stringify(newTokens)
+      );
     });
 
     it('should return null when no token is stored', async () => {
@@ -382,10 +397,10 @@ describe('EnhancedAuthService', () => {
       // Setup
       window.localStorage.setItem('auth_tokens', JSON.stringify(mockTokens)); // Use global mock
       mockLogout.mockRejectedValueOnce(new Error('Network error during logout')); // Configure specific mock response
-      
+
       // Execute
       const result = await authService.logout();
-      
+
       // Verify tokens are cleared even when API call fails
       // removeItem is called synchronously within clearTokens
       expect(window.localStorage.removeItem).toHaveBeenCalledWith('auth_tokens'); // Use global mock
@@ -408,7 +423,7 @@ describe('EnhancedAuthService', () => {
       // Setup
       window.localStorage.setItem('auth_tokens', JSON.stringify(expiredTokens)); // Use global mock
       mockRefreshToken.mockRejectedValueOnce(new Error('Invalid refresh token')); // Configure specific mock response
-      
+
       // Execute
       // Execute the refresh function
       const refreshPromise = (authService as any).refreshTokenSilently();
@@ -416,29 +431,29 @@ describe('EnhancedAuthService', () => {
       // Advance timers to allow async operations within refreshTokenSilently to proceed
       await vi.runOnlyPendingTimersAsync();
       await refreshPromise; // Wait for the refresh process itself to complete
-      
+
       // Verify event was dispatched
       // Timer advancement happened before awaiting refreshPromise
       expect(dispatchEventSpy).toHaveBeenCalled();
       const event = dispatchEventSpy.mock.calls[0][0];
       expect(event.type).toBe('auth:session-expired');
     });
-    
+
     it('should reuse in-progress refresh promise', async () => {
       vi.setSystemTime(new Date(expiredTokens.expiresAt + 10000)); // Set time AFTER expiry
       // Setup
       window.localStorage.setItem('auth_tokens', JSON.stringify(expiredTokens)); // Use global mock
       mockRefreshToken.mockResolvedValueOnce(mockTokens); // Configure specific mock response
-      
+
       // Execute - make two calls in quick succession
       const promise1 = (authService as any).refreshTokenSilently();
       const promise2 = (authService as any).refreshTokenSilently();
-      
+
       // Verify
       // Use toStrictEqual to check the values, not the object reference
       expect(promise1).toStrictEqual(promise2); // Promises should be equivalent
       // Assertion should happen AFTER awaiting the promises to ensure the async operation completed
-      
+
       // Wait for promises to resolve
       await Promise.all([promise1, promise2]);
 

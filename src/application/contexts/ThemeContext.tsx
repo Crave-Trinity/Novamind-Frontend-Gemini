@@ -1,7 +1,7 @@
 /* eslint-disable */
 /**
  * Neural Theme Context
- * 
+ *
  * Provides quantum-level theme management for the psychiatric digital twin platform
  * with neural accessibility optimization and clinical visualization modes
  */
@@ -441,33 +441,31 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   const [fontSize, setFontSize] = useState(16);
   const [highContrast, setHighContrast] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  
+
   // Derived state
-  const isDark = 
-    theme === 'dark' || 
-    (theme === 'system' && 
-      typeof window !== 'undefined' && 
+  const isDark =
+    theme === 'dark' ||
+    (theme === 'system' &&
+      typeof window !== 'undefined' &&
       window.matchMedia?.('(prefers-color-scheme: dark)').matches);
 
   // Get current color palette
-  const colors = isDark 
-    ? COLOR_PALETTES[colorScheme].dark 
-    : COLOR_PALETTES[colorScheme].light;
+  const colors = isDark ? COLOR_PALETTES[colorScheme].dark : COLOR_PALETTES[colorScheme].light;
 
   // Apply theme to document
   useEffect(() => {
     if (typeof document === 'undefined') return;
-    
+
     // Dark/light mode
     document.documentElement.classList.toggle('dark', isDark);
     document.documentElement.classList.toggle('light', !isDark);
-    
+
     // Color scheme
     document.documentElement.dataset.colorScheme = colorScheme;
-    
+
     // High contrast
     document.documentElement.classList.toggle('high-contrast', highContrast);
-    
+
     // Set theme colors on root element
     if (isDark) {
       document.documentElement.style.setProperty('--color-background', colors.background);
@@ -480,10 +478,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       document.documentElement.style.setProperty('--color-primary', colors.primary);
       document.documentElement.style.setProperty('--color-text', colors.text.primary);
     }
-    
+
     // Set font size
     document.documentElement.style.fontSize = `${fontSize}px`;
-    
+
     // Set reduced motion preference
     document.documentElement.classList.toggle('reduce-motion', reducedMotion);
   }, [isDark, colorScheme, colors, highContrast, fontSize, reducedMotion]);
@@ -491,14 +489,14 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   // Listen for system theme changes
   useEffect(() => {
     if (typeof window === 'undefined' || theme !== 'system') return;
-    
+
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
+
     // Force re-render when system preference changes
     const handleChange = () => {
       setThemeState('system'); // This forces a re-render while keeping the value the same
     };
-    
+
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme]);
@@ -506,17 +504,17 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   // Listen for system reduced motion preference
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    
+
     // Set reduced motion based on system preference
     const handleChange = () => {
       setReducedMotion(mediaQuery.matches);
     };
-    
+
     // Initialize
     handleChange();
-    
+
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
@@ -524,7 +522,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   // Set theme with persistence
   const setTheme = (newTheme: ThemeMode) => {
     setThemeState(newTheme);
-    
+
     // Save to localStorage
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('novamind-theme', newTheme);
@@ -553,11 +551,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 // Hook for using the theme context
 export const useTheme = (): ThemeContextType => {
   const context = useContext(ThemeContext);
-  
+
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
-  
+
   return context;
 };
 

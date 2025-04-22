@@ -48,7 +48,7 @@ const App: React.FC = () => {
               </ThemeProvider>
             }
           />
-          
+
           {/* Test route for BrainModelContainer */}
           <Route
             path="/brain-model-container/demo"

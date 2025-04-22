@@ -7,10 +7,14 @@ import { vi } from 'vitest';
 
 // Mock Radix UI Slot component
 vi.mock('@radix-ui/react-slot', () => ({
-  Slot: ({ children, className, ...props }: {
+  Slot: ({
+    children,
+    className,
+    ...props
+  }: {
     children: React.ReactNode;
     className?: string;
-    [key: string]: any
+    [key: string]: any;
   }) => (
     <div data-testid="slot-component" className={className} {...props}>
       {children}
@@ -21,15 +25,15 @@ vi.mock('@radix-ui/react-slot', () => ({
 describe('Button Component', () => {
   it('renders with default props', () => {
     renderWithProviders(<Button data-testid="button">Click me</Button>);
-    
+
     const button = screen.getByTestId('button');
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('Click me');
-    
+
     // Should have the default variant classes
     expect(button).toHaveClass('bg-primary');
     expect(button).toHaveClass('text-primary-foreground');
-    
+
     // Should have the default size classes
     expect(button).toHaveClass('h-9');
     expect(button).toHaveClass('px-4');
@@ -42,7 +46,7 @@ describe('Button Component', () => {
         Delete
       </Button>
     );
-    
+
     const button = screen.getByTestId('button');
     expect(button).toHaveClass('bg-destructive');
     expect(button).toHaveClass('text-destructive-foreground');
@@ -54,7 +58,7 @@ describe('Button Component', () => {
         Outline
       </Button>
     );
-    
+
     const button = screen.getByTestId('button');
     expect(button).toHaveClass('border');
     expect(button).toHaveClass('border-input');
@@ -67,7 +71,7 @@ describe('Button Component', () => {
         Secondary
       </Button>
     );
-    
+
     const button = screen.getByTestId('button');
     expect(button).toHaveClass('bg-secondary');
     expect(button).toHaveClass('text-secondary-foreground');
@@ -79,11 +83,11 @@ describe('Button Component', () => {
         Ghost
       </Button>
     );
-    
+
     const button = screen.getByTestId('button');
     expect(button).toHaveClass('hover:bg-accent');
     expect(button).toHaveClass('hover:text-accent-foreground');
-    
+
     // Ghost buttons don't have background color by default
     expect(button).not.toHaveClass('bg-primary');
   });
@@ -94,7 +98,7 @@ describe('Button Component', () => {
         Link
       </Button>
     );
-    
+
     const button = screen.getByTestId('button');
     expect(button).toHaveClass('text-primary');
     expect(button).toHaveClass('hover:underline');
@@ -107,7 +111,7 @@ describe('Button Component', () => {
         Small
       </Button>
     );
-    
+
     const button = screen.getByTestId('button');
     expect(button).toHaveClass('h-8');
     expect(button).toHaveClass('px-3');
@@ -120,7 +124,7 @@ describe('Button Component', () => {
         Large
       </Button>
     );
-    
+
     const button = screen.getByTestId('button');
     expect(button).toHaveClass('h-10');
     expect(button).toHaveClass('px-8');
@@ -132,11 +136,11 @@ describe('Button Component', () => {
         <svg data-testid="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" />
       </Button>
     );
-    
+
     const button = screen.getByTestId('button');
     expect(button).toHaveClass('h-9');
     expect(button).toHaveClass('w-9');
-    
+
     // Icon should be rendered
     const icon = screen.getByTestId('icon');
     expect(icon).toBeInTheDocument();
@@ -148,7 +152,7 @@ describe('Button Component', () => {
         Custom Button
       </Button>
     );
-    
+
     const button = screen.getByTestId('button');
     expect(button).toHaveClass('custom-class');
     // Should still have the default classes
@@ -158,18 +162,20 @@ describe('Button Component', () => {
   it('renders as a Slot component when asChild is true', () => {
     renderWithProviders(
       <Button asChild data-testid="button">
-        <a href="#" data-testid="anchor">Link Button</a>
+        <a href="#" data-testid="anchor">
+          Link Button
+        </a>
       </Button>
     );
-    
+
     // When asChild is true, it should render the child component (anchor in this case)
     const button = screen.getByTestId('button');
     const anchor = screen.getByTestId('anchor');
-    
+
     expect(button).toBeInTheDocument();
     expect(anchor).toBeInTheDocument();
     expect(button).toHaveTextContent('Link Button');
-    
+
     // The button classes should be applied to the container
     expect(button).toHaveClass('bg-primary');
   });
@@ -180,7 +186,7 @@ describe('Button Component', () => {
         Disabled
       </Button>
     );
-    
+
     const button = screen.getByTestId('button');
     expect(button).toBeDisabled();
     expect(button).toHaveClass('disabled:opacity-50');
@@ -189,43 +195,43 @@ describe('Button Component', () => {
 
   it('handles click events correctly', () => {
     const handleClick = vi.fn();
-    
+
     renderWithProviders(
       <Button onClick={handleClick} data-testid="button">
         Click Me
       </Button>
     );
-    
+
     const button = screen.getByTestId('button');
     fireEvent.click(button);
-    
+
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
   it('does not trigger click when disabled', () => {
     const handleClick = vi.fn();
-    
+
     renderWithProviders(
       <Button onClick={handleClick} disabled data-testid="button">
         Disabled Button
       </Button>
     );
-    
+
     const button = screen.getByTestId('button');
     fireEvent.click(button);
-    
+
     expect(handleClick).not.toHaveBeenCalled();
   });
 
   it('forwards ref to the button element', () => {
     const ref = React.createRef<HTMLButtonElement>();
-    
+
     renderWithProviders(
       <Button ref={ref} data-testid="button">
         Ref Button
       </Button>
     );
-    
+
     expect(ref.current).toBe(screen.getByTestId('button'));
   });
 
@@ -235,7 +241,7 @@ describe('Button Component', () => {
         Big Destructive
       </Button>
     );
-    
+
     const button = screen.getByTestId('button');
     expect(button).toHaveClass('bg-destructive');
     expect(button).toHaveClass('h-10');
@@ -245,7 +251,7 @@ describe('Button Component', () => {
   it('exposes buttonVariants for use outside the component', () => {
     // Test that buttonVariants function returns expected classes
     const classes = buttonVariants({ variant: 'outline', size: 'sm' });
-    
+
     expect(classes).toContain('border');
     expect(classes).toContain('h-8');
     expect(classes).toContain('px-3');

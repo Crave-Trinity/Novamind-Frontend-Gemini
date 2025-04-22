@@ -85,7 +85,9 @@ export class MockObject3D {
     return target; // Return the modified target vector
   }
 
-  worldToLocal(vector: Vector3Like): Vector3Like { return vector; } // Identity for simplicity
+  worldToLocal(vector: Vector3Like): Vector3Like {
+    return vector;
+  } // Identity for simplicity
   setRotationFromEuler(_euler: Vector3Like): void {}
   applyMatrix4(_matrix: { elements: number[] }): void {}
 }
@@ -95,12 +97,12 @@ export class MockObject3D {
  */
 export class MockScene extends MockObject3D {
   override type = 'Scene';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  background: any // eslint-disable-line @typescript-eslint/no-explicit-any = null;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  environment: any // eslint-disable-line @typescript-eslint/no-explicit-any = null;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fog: any // eslint-disable-line @typescript-eslint/no-explicit-any = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  background: any; // eslint-disable-line @typescript-eslint/no-explicit-any = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  environment: any; // eslint-disable-line @typescript-eslint/no-explicit-any = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fog: any; // eslint-disable-line @typescript-eslint/no-explicit-any = null;
 }
 
 export class MockPerspectiveCamera extends MockObject3D {
@@ -110,8 +112,8 @@ export class MockPerspectiveCamera extends MockObject3D {
   near: number = 0.1;
   far: number = 2000;
   zoom: number = 1;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  view: any // eslint-disable-line @typescript-eslint/no-explicit-any = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  view: any; // eslint-disable-line @typescript-eslint/no-explicit-any = null;
   filmGauge: number = 35;
   filmOffset: number = 0;
 
@@ -135,28 +137,23 @@ export class MockMesh extends MockObject3D {
   geometry: MockBufferGeometry;
   material: MockMaterial | MockMaterial[];
 
-  constructor(
-    geometry?: MockBufferGeometry,
-    material?: MockMaterial | MockMaterial[],
-  ) {
+  constructor(geometry?: MockBufferGeometry, material?: MockMaterial | MockMaterial[]) {
     super();
     this.geometry = geometry ?? new MockBufferGeometry();
     this.material = material ?? new MockMaterial();
   }
 
   // Override dispose to clean up geometry and material
-// eslint-disable-next-line
+  // eslint-disable-next-line
   override dispose = vi.fn().mockImplementation(() => {
-// eslint-disable-next-line
+    // eslint-disable-next-line
     if (this.geometry && typeof this.geometry.dispose === 'function') {
       this.geometry.dispose();
     }
     if (this.material) {
       if (Array.isArray(this.material)) {
-        this.material.forEach(
-          (mat) => mat && typeof mat.dispose === 'function' && mat.dispose(),
-        );
-// eslint-disable-next-line
+        this.material.forEach((mat) => mat && typeof mat.dispose === 'function' && mat.dispose());
+        // eslint-disable-next-line
       } else if (typeof this.material.dispose === 'function') {
         this.material.dispose();
       }
@@ -177,7 +174,7 @@ export class MockLine extends MockObject3D {
   geometry: MockBufferGeometry;
   material: MockMaterial;
 
-// eslint-disable-next-line
+  // eslint-disable-next-line
   constructor(geometry?: MockBufferGeometry, material?: MockMaterial) {
     super();
     this.geometry = geometry || new MockBufferGeometry();
@@ -185,13 +182,13 @@ export class MockLine extends MockObject3D {
   }
 
   // Override dispose to clean up geometry and material
-// eslint-disable-next-line
+  // eslint-disable-next-line
   override dispose = vi.fn().mockImplementation(() => {
-// eslint-disable-next-line
+    // eslint-disable-next-line
     if (this.geometry && typeof this.geometry.dispose === 'function') {
       this.geometry.dispose();
     }
-// eslint-disable-next-line
+    // eslint-disable-next-line
     if (this.material && typeof this.material.dispose === 'function') {
       this.material.dispose();
     }
@@ -213,12 +210,12 @@ export class MockMaterial {
   opacity: number = 1;
   visible: boolean = true;
   side: number = 0; // FrontSide
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  color: any // eslint-disable-line @typescript-eslint/no-explicit-any = { r: 1, g: 1, b: 1, set: () => {} };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  color: any; // eslint-disable-line @typescript-eslint/no-explicit-any = { r: 1, g: 1, b: 1, set: () => {} };
   userData: Record<string, any> = {};
 
   dispose = vi.fn().mockImplementation(() => {});
-// eslint-disable-next-line
+  // eslint-disable-next-line
   clone = vi.fn().mockImplementation((): MockMaterial => {
     const material = new MockMaterial();
     material.name = this.name;
@@ -232,18 +229,18 @@ export class MockMaterial {
 export class MockMeshBasicMaterial extends MockMaterial {
   override type = 'MeshBasicMaterial';
   wireframe: boolean = false;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  map: any // eslint-disable-line @typescript-eslint/no-explicit-any = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  map: any; // eslint-disable-line @typescript-eslint/no-explicit-any = null;
 }
 
 export class MockMeshStandardMaterial extends MockMaterial {
   override type = 'MeshStandardMaterial';
   roughness: number = 0.5;
   metalness: number = 0.5;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  map: any // eslint-disable-line @typescript-eslint/no-explicit-any = null;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  normalMap: any // eslint-disable-line @typescript-eslint/no-explicit-any = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  map: any; // eslint-disable-line @typescript-eslint/no-explicit-any = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  normalMap: any; // eslint-disable-line @typescript-eslint/no-explicit-any = null;
 }
 
 export class MockLineBasicMaterial extends MockMaterial {
@@ -284,10 +281,16 @@ export class MockBufferGeometry {
   }
 
   // Standard method definitions
-  setAttribute(_name: string, _attribute: any): this { return this; }
-  getAttribute(_name: string): any { return undefined; } // Return undefined or a mock attribute
+  setAttribute(_name: string, _attribute: any): this {
+    return this;
+  }
+  getAttribute(_name: string): any {
+    return undefined;
+  } // Return undefined or a mock attribute
   setIndex(_index: any): void {}
-  toNonIndexed(): this { return this; }
+  toNonIndexed(): this {
+    return this;
+  }
   computeVertexNormals(): void {}
   computeBoundingBox(): void {}
   computeBoundingSphere(): void {}
@@ -302,9 +305,15 @@ export class MockBufferGeometry {
     clone.userData = { ...this.userData };
     return clone;
   }
-  setFromPoints(_points: Vector3Like[]): this { return this; }
-  copy(_source: MockBufferGeometry): this { return this; }
-  applyMatrix4(_matrix: { elements: number[] }): this { return this; }
+  setFromPoints(_points: Vector3Like[]): this {
+    return this;
+  }
+  copy(_source: MockBufferGeometry): this {
+    return this;
+  }
+  applyMatrix4(_matrix: { elements: number[] }): this {
+    return this;
+  }
 }
 
 export class MockSphereGeometry extends MockBufferGeometry {
@@ -389,7 +398,10 @@ export class MockOrbitControls {
   enablePan: boolean = true;
   autoRotate: boolean = false;
 
-  constructor(_camera: MockPerspectiveCamera | MockOrthographicCamera, _domElement?: HTMLElement | Document) {}
+  constructor(
+    _camera: MockPerspectiveCamera | MockOrthographicCamera,
+    _domElement?: HTMLElement | Document
+  ) {}
 
   update = vi.fn().mockImplementation((): boolean => false);
   dispose = vi.fn().mockImplementation(() => {});
@@ -404,10 +416,10 @@ export class MockTexture {
   id: number = Math.floor(Math.random() * 1000000);
   name: string = '';
   uuid: string = 'texture-' + Math.random().toString(36).substring(2, 15);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  image: any // eslint-disable-line @typescript-eslint/no-explicit-any = null;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mipmaps: any // eslint-disable-line @typescript-eslint/no-explicit-any[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  image: any; // eslint-disable-line @typescript-eslint/no-explicit-any = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mipmaps: any; // eslint-disable-line @typescript-eslint/no-explicit-any[] = [];
   mapping: number = 0;
   wrapS: number = 0;
   wrapT: number = 0;
@@ -421,7 +433,9 @@ export class MockTexture {
   rotation: number = 0;
   matrixAutoUpdate: boolean = true;
 
-  constructor(image?: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement /* Add other valid types */) {
+  constructor(
+    image?: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement /* Add other valid types */
+  ) {
     this.image = image;
   }
 

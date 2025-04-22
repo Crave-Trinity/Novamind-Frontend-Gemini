@@ -17,16 +17,17 @@ import { renderWithProviders } from '../../test/test-utils.unified'; // Removed 
 import React from 'react';
 
 vi.mock('@presentation/templates/BrainModelContainer', () => ({
-  default: function MockBrainModelContainer(props: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+  default: function MockBrainModelContainer(props: any) {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     return React.createElement(
       'div',
-      { 
-        'data-testid': 'mock-brain-model-container', 
-        ...props 
+      {
+        'data-testid': 'mock-brain-model-container',
+        ...props,
       },
       'Mocked Container'
     );
-  }
+  },
 }));
 
 // Import the component under test after mocking its dependencies

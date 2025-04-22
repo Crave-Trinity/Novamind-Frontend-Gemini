@@ -53,7 +53,7 @@ vi.mock('@application/hooks/useTheme', () => ({
       lg: '0.5rem',
       full: '9999px',
     },
-  })
+  }),
 }));
 
 // Custom render function with Router wrapper
@@ -141,10 +141,10 @@ describe('MainLayout', () => {
     // Find the theme toggle button using its data-testid
     const themeToggleButton = screen.getByTestId('theme-toggle-button');
     expect(themeToggleButton).toBeInTheDocument();
-    
+
     // Click the button
     await user.click(themeToggleButton);
-    
+
     // Since we've mocked toggleTheme, we just verify the interaction occurred
   });
 

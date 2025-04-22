@@ -1,6 +1,6 @@
 /**
  * NOVAMIND WebGL Test Setup
- * 
+ *
  * Provides quantum-level test configuration for WebGL-based neurological visualization components
  */
 
@@ -10,7 +10,7 @@ import { vi } from 'vitest';
 export function setupWebGLMocks() {
   // Create a canvas element for the tests
   const mockCanvas = document.createElement('canvas');
-  
+
   // Create mock WebGL context with all necessary methods
   const mockWebGLContext = {
     canvas: mockCanvas,
@@ -66,7 +66,11 @@ export function setupWebGLMocks() {
   // Mock canvas getContext method
   const originalGetContext = HTMLCanvasElement.prototype.getContext;
   HTMLCanvasElement.prototype.getContext = vi.fn().mockImplementation((contextType) => {
-    if (contextType === 'webgl' || contextType === 'webgl2' || contextType === 'experimental-webgl') {
+    if (
+      contextType === 'webgl' ||
+      contextType === 'webgl2' ||
+      contextType === 'experimental-webgl'
+    ) {
       return mockWebGLContext;
     }
     return null;
@@ -90,24 +94,24 @@ export function setupWebGLMocks() {
       add: vi.fn(),
       remove: vi.fn(),
       traverse: vi.fn(),
-      dispose: vi.fn()
+      dispose: vi.fn(),
     })),
     Scene: vi.fn().mockImplementation(() => ({
       add: vi.fn(),
-      remove: vi.fn()
+      remove: vi.fn(),
     })),
     PerspectiveCamera: vi.fn().mockImplementation(() => ({
       position: { x: 0, y: 0, z: 5 },
       lookAt: vi.fn(),
-      updateProjectionMatrix: vi.fn()
+      updateProjectionMatrix: vi.fn(),
     })),
     WebGLRenderer: vi.fn().mockImplementation(() => ({
       domElement: mockCanvas,
       setSize: vi.fn(),
       setPixelRatio: vi.fn(),
       render: vi.fn(),
-      dispose: vi.fn()
-    }))
+      dispose: vi.fn(),
+    })),
   };
 
   // Add to global for easy reference
@@ -117,7 +121,7 @@ export function setupWebGLMocks() {
     canvas: mockCanvas,
     gl: mockWebGLContext,
     originalGetContext,
-    threeObjects: mockThreeObjects
+    threeObjects: mockThreeObjects,
   };
 }
 
@@ -139,7 +143,7 @@ export function cleanupWebGLMocks() {
   return {
     leakedObjects: 0, // Mock memory monitoring report
     disposedObjects: 0,
-    memoryUsage: '0 MB'
+    memoryUsage: '0 MB',
   };
 }
 

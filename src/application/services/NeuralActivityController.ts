@@ -104,7 +104,8 @@ export function useNeuralActivityController(patientId: string) {
         // Assuming result.value has regionActivations and connectionStrengths arrays
         if (result.value && Array.isArray(result.value.regionActivations)) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          result.value.regionActivations.forEach((activation: any) => { // Add explicit any type, remove comment
+          result.value.regionActivations.forEach((activation: any) => {
+            // Add explicit any type, remove comment
             // Use 'any' for activation
             // Ensure activation.level is a valid ActivationLevel before setting
             const level = Object.values(ActivationLevel).includes(activation.level)
@@ -131,7 +132,8 @@ export function useNeuralActivityController(patientId: string) {
         // Initialize connection strengths
         if (result.value && Array.isArray(result.value.connectionStrengths)) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          result.value.connectionStrengths.forEach((connection: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+          result.value.connectionStrengths.forEach((connection: any) => {
+            // eslint-disable-line @typescript-eslint/no-explicit-any
             // Use 'any' for connection
             neuralState.metrics.connectionStrengths.set(
               `${connection.sourceId}-${connection.targetId}`,
@@ -327,13 +329,14 @@ export function useNeuralActivityController(patientId: string) {
         }
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const relevantMappings = mappingsResult.value.filter(
-          (mapping: any) => symptomIds.includes(mapping.symptomId)
+        const relevantMappings = mappingsResult.value.filter((mapping: any) =>
+          symptomIds.includes(mapping.symptomId)
         );
 
         const transforms: NeuralTransform[] = [];
 
-        relevantMappings.forEach((mapping: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+        relevantMappings.forEach((mapping: any) => {
+          // eslint-disable-line @typescript-eslint/no-explicit-any
           if (Array.isArray(mapping.activationPatterns)) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             mapping.activationPatterns.forEach((pattern: any) => {

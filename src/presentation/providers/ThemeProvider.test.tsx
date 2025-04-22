@@ -205,7 +205,7 @@ describe('ThemeProvider', () => {
     // Use waitFor to ensure the effect listener has updated the DOM
     // Wait specifically for the 'dark' class after changing back
     await waitFor(() => {
-       expect(document.documentElement).toHaveClass('dark');
+      expect(document.documentElement).toHaveClass('dark');
     });
 
     // Theme state remains 'system'

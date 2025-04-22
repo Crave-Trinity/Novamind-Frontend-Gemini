@@ -1,7 +1,7 @@
 /* eslint-disable */
 /**
  * BrainModelVisualization Component
- * 
+ *
  * A 3D visualization of brain regions using Three.js and React Three Fiber.
  * Supports different view modes (anatomical, functional, connectivity),
  * region selection, highlighting, and various visualization parameters.
@@ -18,8 +18,8 @@ import { BrainRegionData } from '../../test/mocks/mockBrainData';
 const getColorForValue = (value: number, min: number, max: number, colormap: string): string => {
   // Normalize value to [0,1] range
   const normalized = Math.max(0, Math.min(1, (value - min) / (max - min)));
-  
-  switch(colormap) {
+
+  switch (colormap) {
     case 'heatmap':
       // Simple heatmap from blue to red
       const r = Math.floor(normalized * 255);
@@ -61,19 +61,19 @@ const BrainRegion: React.FC<BrainRegionProps> = ({
   isSelected,
   isHighlighted,
   onClick,
-  onHover
+  onHover,
 }) => {
   // Apply scaling or other effects for selection/highlighting
   const scale = isSelected ? 1.2 : isHighlighted ? 1.1 : 1.0;
   const finalSize = size * scale;
-  
+
   // Use a ref to access the mesh for animations
   const meshRef = useRef<Mesh>(null);
-  
+
   // Add a pulsing animation effect for selected regions
   useEffect(() => {
     if (!meshRef.current) return;
-    
+
     // Ensure ref and scale property are available before accessing 'set'
     if (meshRef.current && meshRef.current.scale) {
       if (isSelected) {
@@ -84,21 +84,21 @@ const BrainRegion: React.FC<BrainRegionProps> = ({
           const pulse = 1 + Math.sin(time * 3) * 0.05;
           meshRef.current.scale.set(pulse, pulse, pulse);
         };
-        
+
         let animationId: number | null = null;
         const animate = () => {
           pulseAnimation();
           animationId = requestAnimationFrame(animate);
         };
         animate(); // Start the animation loop
-        
+
         return () => {
           if (animationId !== null) {
             cancelAnimationFrame(animationId);
           }
           // Reset scale when effect cleans up or isSelected becomes false
           if (meshRef.current && meshRef.current.scale) {
-             meshRef.current.scale.set(1, 1, 1);
+            meshRef.current.scale.set(1, 1, 1);
           }
         };
       } else {
@@ -107,7 +107,7 @@ const BrainRegion: React.FC<BrainRegionProps> = ({
       }
     }
   }, [isSelected]);
-  
+
   return (
     <group>
       <mesh
@@ -118,15 +118,15 @@ const BrainRegion: React.FC<BrainRegionProps> = ({
         onPointerOut={() => onHover(null)}
       >
         <sphereGeometry args={[finalSize, 32, 32]} />
-        <meshStandardMaterial 
-          color={isSelected || isHighlighted ? '#ffffff' : color} 
+        <meshStandardMaterial
+          color={isSelected || isHighlighted ? '#ffffff' : color}
           emissive={color}
           emissiveIntensity={isSelected ? 0.8 : isHighlighted ? 0.5 : 0.2}
           metalness={0.5}
           roughness={0.3}
         />
       </mesh>
-      
+
       {/* Region label */}
       {/* Labels rendered with DOM elements in 3D space */}
       {(isSelected || isHighlighted) && (
@@ -150,42 +150,38 @@ interface ConnectionProps {
   strength?: number; // Connection strength (0-1)
 }
 
-const Connection: React.FC<ConnectionProps> = ({ 
-  startPosition, 
-  endPosition,
-  strength = 0.5 
-}) => {
+const Connection: React.FC<ConnectionProps> = ({ startPosition, endPosition, strength = 0.5 }) => {
   // Calculate connection properties based on strength
   const color = `rgba(255,255,255,${strength * 0.8})`;
   const thickness = 0.05 * Math.max(0.3, strength);
-  
+
   // Memo of the cylinder geometry
   const cylinderArgs = useMemo(() => {
     // Calculate distance between points
     const start = new Vector3(...startPosition);
     const end = new Vector3(...endPosition);
     const distance = start.distanceTo(end);
-    
+
     // Calculate center point and rotation for the cylinder
     const midPoint = new Vector3().addVectors(start, end).multiplyScalar(0.5);
-    
+
     return {
       position: [midPoint.x, midPoint.y, midPoint.z] as [number, number, number],
       rotation: [
-        Math.atan2(end.z - start.z, Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2))),
+        Math.atan2(
+          end.z - start.z,
+          Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2))
+        ),
         0,
-        Math.atan2(end.y - start.y, end.x - start.x)
+        Math.atan2(end.y - start.y, end.x - start.x),
       ] as [number, number, number],
       height: distance,
-      radius: thickness
+      radius: thickness,
     };
   }, [startPosition, endPosition, thickness]);
-  
+
   return (
-    <mesh
-      position={new Vector3(...cylinderArgs.position)}
-      rotation={cylinderArgs.rotation}
-    >
+    <mesh position={new Vector3(...cylinderArgs.position)} rotation={cylinderArgs.rotation}>
       <cylinderGeometry args={[cylinderArgs.radius, cylinderArgs.radius, cylinderArgs.height, 8]} />
       <meshBasicMaterial color={color} transparent opacity={0.7} />
     </mesh>
@@ -216,11 +212,11 @@ export const BrainModelVisualization: React.FC<BrainModelVisualizationProps> = (
   onRegionHover,
   isLoading = false,
   error = null,
-  showControls = true
+  showControls = true,
 }) => {
   // Use the brain model context for state management
   const contextValue = useBrainModel();
-  
+
   // Use either props or context values
   const data = regionData || contextValue.regionData;
   const mode = viewMode || contextValue.viewMode;
@@ -232,48 +228,48 @@ export const BrainModelVisualization: React.FC<BrainModelVisualizationProps> = (
   const highlightedRegion = contextValue.highlightedRegion;
   const loading = isLoading || contextValue.isLoading;
   const errorMsg = error || contextValue.error;
-  
+
   // Scene container reference for raycasting
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   // State for camera positions
   const [cameraPosition, setCameraPosition] = useState<[number, number, number]>([0, 0, 5]);
-  
+
   // Handle region click
   const handleRegionClick = (id: string) => {
     selectRegion(id === selectedRegion ? null : id);
   };
-  
+
   // Handle region hover
   const handleRegionHover = (id: string | null) => {
     highlightRegion(id);
   };
-  
+
   // Camera position presets
   const cameraPresets = {
     front: [0, 0, 5] as [number, number, number],
     top: [0, 5, 0] as [number, number, number],
     left: [-5, 0, 0] as [number, number, number],
-    right: [5, 0, 0] as [number, number, number]
+    right: [5, 0, 0] as [number, number, number],
   };
-  
+
   // Reset view
   const resetView = () => {
     setCameraPosition(cameraPresets.front);
     selectRegion(null);
   };
-  
+
   // If no data and not loading, show empty state
   if (!data && !loading && !errorMsg) {
     return (
-      <div 
+      <div
         data-testid="brain-model-container"
         className="w-full h-full flex items-center justify-center"
-        style={{ 
-          minHeight: '400px', 
+        style={{
+          minHeight: '400px',
           backgroundColor: '#111',
           borderRadius: '8px',
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
         <div className="text-white text-center p-4">
@@ -283,138 +279,133 @@ export const BrainModelVisualization: React.FC<BrainModelVisualizationProps> = (
       </div>
     );
   }
-  
+
   // If loading, show loading state
   if (loading) {
     return (
-      <div 
+      <div
         data-testid="brain-model-container"
         className="w-full h-full flex items-center justify-center"
-        style={{ 
-          minHeight: '400px', 
+        style={{
+          minHeight: '400px',
           backgroundColor: '#111',
           borderRadius: '8px',
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
-        <div 
-          data-testid="brain-model-loading"
-          className="text-white text-center p-4"
-        >
+        <div data-testid="brain-model-loading" className="text-white text-center p-4">
           <h3>Loading brain model...</h3>
           <div className="w-8 h-8 border-4 border-t-blue-500 border-solid rounded-full animate-spin mx-auto mt-4"></div>
         </div>
       </div>
     );
   }
-  
+
   // If error, show error state
   if (errorMsg) {
     return (
-      <div 
+      <div
         data-testid="brain-model-container"
         className="w-full h-full flex items-center justify-center"
-        style={{ 
-          minHeight: '400px', 
+        style={{
+          minHeight: '400px',
           backgroundColor: '#111',
           borderRadius: '8px',
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       >
-        <div 
-          data-testid="brain-model-error"
-          className="text-white text-center p-4"
-        >
+        <div data-testid="brain-model-error" className="text-white text-center p-4">
           <h3>Error loading brain model</h3>
           <p className="text-red-500">{errorMsg}</p>
         </div>
       </div>
     );
   }
-  
+
   return (
-    <div 
+    <div
       ref={containerRef}
       data-testid="brain-model-container"
-      style={{ 
-        width: '100%', 
-        height: '100%', 
-        minHeight: '400px', 
+      style={{
+        width: '100%',
+        height: '100%',
+        minHeight: '400px',
         position: 'relative',
         backgroundColor: '#111',
         borderRadius: '8px',
-        overflow: 'hidden'
+        overflow: 'hidden',
       }}
     >
       {/* 3D Visualization */}
       <Canvas style={{ background: 'linear-gradient(to bottom, #1a1a2e, #000)' }}>
         {/* Camera setup handled by r3f */}
-        <camera
-          position={cameraPosition}
-        />
-        
+        <camera position={cameraPosition} />
+
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
         <directionalLight position={[-10, -10, -5]} intensity={0.3} />
-        
+
         {/* Controls */}
         <OrbitControls
-          // OrbitControls options differ across libraries, simplified for tests
+        // OrbitControls options differ across libraries, simplified for tests
         />
-        
+
         {/* Brain regions */}
         <group>
-          {data && Object.values(data).map((region) => {
-            // Determine region color based on view mode
-            let regionColor = region.color || '#ffffff';
-            
-            if (mode === 'functional' && region.value !== undefined) {
-              regionColor = getColorForValue(region.value, range[0], range[1], colormap);
-            }
-            
-            return (
-              <BrainRegion
-                key={region.id}
-                id={region.id}
-                name={region.name}
-                position={region.coordinates}
-                size={region.size}
-                color={regionColor}
-                isSelected={selectedRegion === region.id}
-                isHighlighted={highlightedRegion === region.id}
-                onClick={handleRegionClick}
-                onHover={handleRegionHover}
-              />
-            );
-          })}
-          
-          {/* Connections between regions (in connectivity mode) */}
-          {mode === 'connectivity' && data && Object.values(data).map((region) => {
-            if (!region.connections) return null;
-            
-            return region.connections.map((targetId) => {
-              const targetRegion = data[targetId];
-              if (!targetRegion) return null;
-              
-              // Skip duplicate connections
-              if (targetId < region.id) return null;
-              
+          {data &&
+            Object.values(data).map((region) => {
+              // Determine region color based on view mode
+              let regionColor = region.color || '#ffffff';
+
+              if (mode === 'functional' && region.value !== undefined) {
+                regionColor = getColorForValue(region.value, range[0], range[1], colormap);
+              }
+
               return (
-                <Connection
-                  key={`${region.id}-${targetId}`}
-                  startPosition={region.coordinates}
-                  endPosition={targetRegion.coordinates}
-                  strength={0.7} // This could be dynamic based on connection strength
+                <BrainRegion
+                  key={region.id}
+                  id={region.id}
+                  name={region.name}
+                  position={region.coordinates}
+                  size={region.size}
+                  color={regionColor}
+                  isSelected={selectedRegion === region.id}
+                  isHighlighted={highlightedRegion === region.id}
+                  onClick={handleRegionClick}
+                  onHover={handleRegionHover}
                 />
               );
-            });
-          })}
+            })}
+
+          {/* Connections between regions (in connectivity mode) */}
+          {mode === 'connectivity' &&
+            data &&
+            Object.values(data).map((region) => {
+              if (!region.connections) return null;
+
+              return region.connections.map((targetId) => {
+                const targetRegion = data[targetId];
+                if (!targetRegion) return null;
+
+                // Skip duplicate connections
+                if (targetId < region.id) return null;
+
+                return (
+                  <Connection
+                    key={`${region.id}-${targetId}`}
+                    startPosition={region.coordinates}
+                    endPosition={targetRegion.coordinates}
+                    strength={0.7} // This could be dynamic based on connection strength
+                  />
+                );
+              });
+            })}
         </group>
       </Canvas>
-      
+
       {/* Controls overlay */}
       {showControls && (
-        <div 
+        <div
           data-testid="brain-model-controls"
           style={{
             position: 'absolute',
@@ -425,12 +416,14 @@ export const BrainModelVisualization: React.FC<BrainModelVisualizationProps> = (
             borderRadius: '4px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '5px'
+            gap: '5px',
           }}
         >
-          <div style={{ marginBottom: '5px', color: 'white', fontSize: '12px' }}>Camera Controls</div>
+          <div style={{ marginBottom: '5px', color: 'white', fontSize: '12px' }}>
+            Camera Controls
+          </div>
           <div style={{ display: 'flex', gap: '5px' }}>
-            <button 
+            <button
               onClick={() => setCameraPosition(cameraPresets.front)}
               style={{
                 padding: '5px 10px',
@@ -439,12 +432,12 @@ export const BrainModelVisualization: React.FC<BrainModelVisualizationProps> = (
                 borderRadius: '3px',
                 fontSize: '12px',
                 border: 'none',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               Front View
             </button>
-            <button 
+            <button
               onClick={() => setCameraPosition(cameraPresets.top)}
               style={{
                 padding: '5px 10px',
@@ -453,12 +446,12 @@ export const BrainModelVisualization: React.FC<BrainModelVisualizationProps> = (
                 borderRadius: '3px',
                 fontSize: '12px',
                 border: 'none',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               Top View
             </button>
-            <button 
+            <button
               onClick={resetView}
               style={{
                 padding: '5px 10px',
@@ -467,7 +460,7 @@ export const BrainModelVisualization: React.FC<BrainModelVisualizationProps> = (
                 borderRadius: '3px',
                 fontSize: '12px',
                 border: 'none',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               Reset

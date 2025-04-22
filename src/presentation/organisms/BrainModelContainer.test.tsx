@@ -44,7 +44,7 @@ vi.mock('three', () => {
     clone = vi.fn(() => new MockVector3(this.x, this.y, this.z));
     multiplyScalar = vi.fn(() => this);
   }
-  
+
   return {
     __esModule: true,
     Vector3: MockVector3,
@@ -95,17 +95,17 @@ vi.mock('three', () => {
 
 // Mock for BrainModelViewer
 vi.mock('@presentation/organisms/BrainModelViewer', () => {
-  const MockBrainModelViewer = function(props) {
+  const MockBrainModelViewer = function (props) {
     return React.createElement(
       'div',
       { 'data-testid': 'mock-brain-model-viewer', ...props },
       props.children
     );
   };
-  
+
   return {
     default: MockBrainModelViewer,
-    BrainModelViewer: MockBrainModelViewer
+    BrainModelViewer: MockBrainModelViewer,
   };
 });
 
@@ -113,11 +113,11 @@ vi.mock('@presentation/organisms/BrainModelViewer', () => {
 vi.mock('@presentation/molecules/VisualizationControls', () => ({
   default: function MockVisualizationControls(props) {
     return React.createElement(
-      'div', 
+      'div',
       { 'data-testid': 'mock-visualization-controls', ...props },
       'Mock Controls'
     );
-  }
+  },
 }));
 
 // Mock for @react-three/drei
@@ -132,7 +132,7 @@ vi.mock('@react-three/drei', () => {
       );
     };
   };
-  
+
   return {
     Html: createDreiMock('html'),
     OrbitControls: createDreiMock('orbit-controls'),
@@ -162,16 +162,16 @@ vi.mock('@application/hooks/useBrainModel', () => ({
 
 vi.mock('@application/hooks/usePatientData', () => ({
   usePatientData: vi.fn(() => ({
-    patient: { 
-      id: 'test-patient', 
+    patient: {
+      id: 'test-patient',
       name: 'Test Patient',
       demographicData: {
         age: 45,
         gender: 'male',
         ethnicity: 'caucasian',
         weight: '180lbs',
-        height: '5\'10"'
-      } 
+        height: '5\'10"',
+      },
     },
     symptoms: [],
     diagnoses: [],

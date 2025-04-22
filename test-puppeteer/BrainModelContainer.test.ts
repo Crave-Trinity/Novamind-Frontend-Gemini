@@ -4,7 +4,7 @@ import puppeteer, { Browser, Page } from 'puppeteer';
 import assert from 'assert';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { setupApiMocking } from './utils/mockApi.js'; // Import the utility
+import { setupApiMocking } from './utils/mockApi.ts'; // Include .ts extension explicitly
 
 // Get the directory name equivalent to __dirname in CommonJS
 const __filename = fileURLToPath(import.meta.url);

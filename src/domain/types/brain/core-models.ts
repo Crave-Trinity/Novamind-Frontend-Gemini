@@ -63,12 +63,12 @@ export interface BrainModel {
   scanDate?: Date | string; // Allow Date or string
   isTemplate?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata?: any // eslint-disable-line @typescript-eslint/no-explicit-any; // Use 'any' for now, refine if specific structure is known
+  metadata?: any; // eslint-disable-line @typescript-eslint/no-explicit-any; // Use 'any' for now, refine if specific structure is known
   lastUpdated?: Date | string;
   createdBy?: string;
   updatedBy?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  scan?: any // eslint-disable-line @typescript-eslint/no-explicit-any; // Use 'any' for now as BrainScan interface is removed
+  scan?: any; // eslint-disable-line @typescript-eslint/no-explicit-any; // Use 'any' for now as BrainScan interface is removed
 }
 
 // Neural connection between regions
@@ -256,7 +256,8 @@ export const Vector3Factory = {
  * Brain processor function that converts raw data to a neurologically-valid model
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const BrainModelFactory = (data: any = {}): BrainModel => { // Removed eslint disable comment for clarity
+export const BrainModelFactory = (data: any = {}): BrainModel => {
+  // Removed eslint disable comment for clarity
   // Generate a default processed model with clinical precision
   const defaultModel: BrainModel = {
     id: data.id || `model-${Date.now()}`,

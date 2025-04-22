@@ -89,21 +89,21 @@ describe('useTheme', () => {
     expect(result.current.settings).toEqual(mockSettings); // Check settings object
     expect(result.current.setTheme).toBe(mockThemeContextValue.setTheme); // Check function reference
   });
-  it.skip('throws an error when used outside a provider', () => {
-    // Skip due to inconsistent error throwing in test env
-    // Arrange: Render without the wrapper (useContext should return undefined by default)
 
-    const originalConsoleError = console.error;
-    console.error = vi.fn(); // Suppress expected console error
+  it('throws an error when used outside a provider', () => {
+    // Mock React.useContext to return null, simulating use outside of provider
+    vi.spyOn(React, 'useContext').mockReturnValue(null);
 
-    // Act & Assert: Expect the hook to throw the specific error
-    expect(() => renderHook(() => useTheme())).toThrow(
-      'useTheme must be used within a ThemeProvider'
-    );
+    // Suppress React error boundary logs during test
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    // expect(useContextSpy).toHaveBeenCalledWith(ThemeContext); // No longer using spy
-    expect(console.error).toHaveBeenCalled(); // Ensure the error was logged internally by React/hook
-    console.error = originalConsoleError; // Restore console.error
+    // Act & Assert: Expect the hook to throw when used outside a provider
+    expect(() => {
+      renderHook(() => useTheme());
+    }).toThrow('useTheme must be used within a ThemeProvider');
+
+    // Restore console.error
+    consoleSpy.mockRestore();
   });
 
   // Add more utility-specific tests if needed, e.g., testing setTheme functionality

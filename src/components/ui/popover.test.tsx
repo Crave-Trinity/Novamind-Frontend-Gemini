@@ -15,12 +15,12 @@ vi.mock('@radix-ui/react-popover', () => {
     onOpenChange?: (open: boolean) => void;
     [key: string]: any;
   };
-  
+
   type TriggerProps = {
     children: React.ReactNode;
     [key: string]: any;
   };
-  
+
   type ContentProps = {
     children: React.ReactNode;
     align?: 'start' | 'center' | 'end';
@@ -28,12 +28,12 @@ vi.mock('@radix-ui/react-popover', () => {
     className?: string;
     [key: string]: any;
   };
-  
+
   type AnchorProps = {
     children: React.ReactNode;
     [key: string]: any;
   };
-  
+
   type PortalProps = {
     children: React.ReactNode;
   };
@@ -43,7 +43,7 @@ vi.mock('@radix-ui/react-popover', () => {
       {children}
     </div>
   );
-  
+
   const Trigger = React.forwardRef<HTMLButtonElement, TriggerProps>(
     ({ children, ...props }, ref) => (
       <button data-testid="popover-trigger" ref={ref} {...props}>
@@ -70,27 +70,21 @@ vi.mock('@radix-ui/react-popover', () => {
   );
   Content.displayName = 'PopoverContent';
 
-  const Anchor = React.forwardRef<HTMLDivElement, AnchorProps>(
-    ({ children, ...props }, ref) => (
-      <div data-testid="popover-anchor" ref={ref} {...props}>
-        {children}
-      </div>
-    )
-  );
-  Anchor.displayName = 'PopoverAnchor';
-
-  const Portal = ({ children }: PortalProps) => (
-    <div data-testid="popover-portal">
+  const Anchor = React.forwardRef<HTMLDivElement, AnchorProps>(({ children, ...props }, ref) => (
+    <div data-testid="popover-anchor" ref={ref} {...props}>
       {children}
     </div>
-  );
+  ));
+  Anchor.displayName = 'PopoverAnchor';
+
+  const Portal = ({ children }: PortalProps) => <div data-testid="popover-portal">{children}</div>;
 
   return {
     Root,
     Trigger,
     Content,
     Anchor,
-    Portal
+    Portal,
   };
 });
 
@@ -104,20 +98,20 @@ describe('Popover Component', () => {
         </PopoverContent>
       </Popover>
     );
-    
+
     // Verify the root component is rendered
     const popoverRoot = screen.getByTestId('popover-root');
     expect(popoverRoot).toBeInTheDocument();
-    
+
     // Verify trigger is rendered with correct text
     const trigger = screen.getByTestId('popover-trigger');
     expect(trigger).toBeInTheDocument();
     expect(trigger).toHaveTextContent('Open Popover');
-    
+
     // Verify content is rendered within portal
     const portal = screen.getByTestId('popover-portal');
     expect(portal).toBeInTheDocument();
-    
+
     const content = screen.getByTestId('popover-content');
     expect(content).toBeInTheDocument();
     expect(content).toHaveTextContent('Popover content');
@@ -132,7 +126,7 @@ describe('Popover Component', () => {
         </PopoverContent>
       </Popover>
     );
-    
+
     const content = screen.getByTestId('popover-content');
     expect(content).toHaveClass('custom-popover-class');
     expect(content).toHaveClass('z-50'); // Default class
@@ -148,7 +142,7 @@ describe('Popover Component', () => {
         </PopoverContent>
       </Popover>
     );
-    
+
     const content = screen.getByTestId('popover-content');
     expect(content).toHaveAttribute('data-align', 'start');
   });
@@ -165,7 +159,7 @@ describe('Popover Component', () => {
         </PopoverContent>
       </Popover>
     );
-    
+
     const anchor = screen.getByTestId('popover-anchor');
     expect(anchor).toBeInTheDocument();
     expect(anchor).toHaveTextContent('Anchor Element');
@@ -173,7 +167,7 @@ describe('Popover Component', () => {
 
   it('forwards ref to PopoverContent', () => {
     const ref = React.createRef<HTMLDivElement>();
-    
+
     renderWithProviders(
       <Popover>
         <PopoverTrigger>Open Popover</PopoverTrigger>
@@ -182,7 +176,7 @@ describe('Popover Component', () => {
         </PopoverContent>
       </Popover>
     );
-    
+
     // Ref should be forwarded to the content element
     expect(ref.current).toBe(screen.getByTestId('popover-content'));
   });
@@ -196,7 +190,7 @@ describe('Popover Component', () => {
         </PopoverContent>
       </Popover>
     );
-    
+
     const content = screen.getByTestId('popover-content');
     expect(content).toHaveAttribute('data-custom', 'test');
     expect(content).toHaveAttribute('aria-label', 'Popover label');

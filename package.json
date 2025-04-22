@@ -29,8 +29,9 @@
     "test:puppeteer:brain-vis": "npx ts-node --esm test-puppeteer/BrainVisualizationPage.test.ts",
     "test:puppeteer:theme": "npx ts-node --esm test-puppeteer/ThemeProvider.system.test.ts",
     "test:puppeteer:container": "npx ts-node --esm test-puppeteer/BrainModelContainer.test.ts",
+    "test:puppeteer:viewer": "npx ts-node --esm test-puppeteer/BrainModelViewer.test.ts",
     "test:puppeteer:controls": "npx ts-node --esm test-puppeteer/NeuralControlPanel.test.ts",
-    "test:puppeteer:all": "npm run test:puppeteer:theme && npm run test:puppeteer:container && npm run test:puppeteer:brain-vis && npm run test:puppeteer:controls && npm run test:puppeteer"
+    "test:puppeteer:all": "npm run test:puppeteer:theme && sleep 2 && npm run test:puppeteer:container && sleep 2 && npm run test:puppeteer:brain-vis && sleep 2 && npm run test:puppeteer:controls && sleep 2 && npm run test:puppeteer && sleep 2 && npm run test:puppeteer:viewer"
   },
   "dependencies": {
     "@alloc/quick-lru": "^5.2.0",
@@ -57,6 +58,7 @@
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
+    "crypto-js": "^4.2.0",
     "framer-motion": "^12.6.3",
     "lucide-react": "^0.487.0",
     "nanoid": "5.1.5",
@@ -84,6 +86,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/crypto-js": "^4.2.2",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.14.0",
     "@types/react": "^18.3.20",

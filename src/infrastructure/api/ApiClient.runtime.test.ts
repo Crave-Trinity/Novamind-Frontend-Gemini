@@ -9,19 +9,19 @@ import {
   validateApiResponse,
   isApiPatient,
   isApiPatientArray,
-  ApiPatient
+  ApiPatient,
 } from './ApiClient.runtime';
 
 // Import mock data generators or fixtures if available
 
 describe('ApiClient Runtime Validation', () => {
   // --- Mock Data ---
-  const mockValidPatient: ApiPatient = { 
-    id: 'patient-1', 
-    firstName: 'John', 
-    lastName: 'Doe', 
+  const mockValidPatient: ApiPatient = {
+    id: 'patient-1',
+    firstName: 'John',
+    lastName: 'Doe',
     dateOfBirth: '1980-01-01T00:00:00Z',
-    gender: 'male'
+    gender: 'male',
   };
 
   // Helper to create a mock AxiosResponse
@@ -90,7 +90,9 @@ describe('ApiClient Runtime Validation', () => {
     });
 
     it('should return false for invalid patient object (missing name)', () => {
-      expect(isApiPatient({ id: 'patient-2', firstName: 'Jane', dateOfBirth: '1985-05-05' })).toBe(false);
+      expect(isApiPatient({ id: 'patient-2', firstName: 'Jane', dateOfBirth: '1985-05-05' })).toBe(
+        false
+      );
     });
 
     it('should return false for null', () => {
@@ -107,7 +109,9 @@ describe('ApiClient Runtime Validation', () => {
       expect(isApiPatientArray([mockValidPatient])).toBe(true);
     });
     it('should return false for invalid patient array', () => {
-      expect(isApiPatientArray([mockValidPatient, { id: 'patient-3', firstName: 'Invalid' }])).toBe(false);
+      expect(isApiPatientArray([mockValidPatient, { id: 'patient-3', firstName: 'Invalid' }])).toBe(
+        false
+      );
     });
     it('should return false for non-array', () => {
       expect(isApiPatientArray(mockValidPatient)).toBe(false);

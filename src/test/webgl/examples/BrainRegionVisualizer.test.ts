@@ -21,7 +21,7 @@ import {
   MockWebGLRenderer,
   MockSphereGeometry,
   MockMeshStandardMaterial,
-  MockMesh
+  MockMesh,
 } from '../three-mocks';
 import { setupWebGLMocks, cleanupWebGLMocks } from '../mock-webgl'; // Use mock-webgl setup/cleanup
 // Remove imports from 'three' as we use mocks directly
@@ -38,7 +38,7 @@ class BrainRegionVisualizer {
   private regions: Map<string, MockMesh> = new Map(); // Use Mock type
   private disposed = false;
 
-// eslint-disable-next-line
+  // eslint-disable-next-line
   constructor(container: HTMLElement, regions: string[] = []) {
     // Initialize Three.js scene using standard constructors
     this.scene = new MockScene(); // Use Mock type
@@ -76,7 +76,7 @@ class BrainRegionVisualizer {
    * Add brain regions to the scene
    */
   addRegions(regionNames: string[]): void {
-// eslint-disable-next-line
+    // eslint-disable-next-line
     regionNames.forEach((name, index) => {
       // Create region mesh using standard constructors
       const geometry = new MockSphereGeometry(); // Use Mock type
@@ -113,7 +113,7 @@ class BrainRegionVisualizer {
     if (!region) return false;
 
     // Reset all regions
-// eslint-disable-next-line
+    // eslint-disable-next-line
     this.regions.forEach((mesh) => {
       (mesh.material as any).color = { r: 0.5, g: 0.5, b: 0.8, set: vi.fn() };
       mesh.userData.active = false;
@@ -144,20 +144,20 @@ class BrainRegionVisualizer {
     this.disposed = true;
 
     // Clean up all meshes
-// eslint-disable-next-line
+    // eslint-disable-next-line
     this.regions.forEach((mesh) => {
       this.scene.remove(mesh);
       // Assuming the Mesh mock has a dispose method (as per three.ts mock)
-// eslint-disable-next-line
+      // eslint-disable-next-line
       if (typeof (mesh as any).dispose === 'function') {
         (mesh as any).dispose();
       }
       // Also dispose geometry and material if necessary
-// eslint-disable-next-line
+      // eslint-disable-next-line
       if (typeof (mesh.geometry as any).dispose === 'function') {
         (mesh.geometry as any).dispose();
       }
-// eslint-disable-next-line
+      // eslint-disable-next-line
       if (typeof (mesh.material as any).dispose === 'function') {
         (mesh.material as any).dispose();
       }
@@ -177,7 +177,7 @@ describe('BrainRegionVisualizer', () => {
   let container: HTMLDivElement;
   let visualizer: BrainRegionVisualizer;
 
-// eslint-disable-next-line
+  // eslint-disable-next-line
   beforeEach(() => {
     // Set up WebGL mocks for all tests with memory monitoring
     setupWebGLMocks(); // Call without arguments
@@ -195,7 +195,7 @@ describe('BrainRegionVisualizer', () => {
     }
   });
 
-// eslint-disable-next-line
+  // eslint-disable-next-line
   afterEach(() => {
     // Clean up visualizer
     visualizer.dispose();
@@ -209,7 +209,7 @@ describe('BrainRegionVisualizer', () => {
     cleanupWebGLMocks();
   });
 
-// eslint-disable-next-line
+  // eslint-disable-next-line
   it('should create all brain regions', () => {
     // Get all region names
     const regions = visualizer.getRegionNames();
@@ -220,28 +220,28 @@ describe('BrainRegionVisualizer', () => {
     expect(regions).toContain('hippocampus');
   });
 
-// eslint-disable-next-line
+  // eslint-disable-next-line
   it('should highlight a brain region', () => {
     // Verify the region exists before highlighting
     const regions = visualizer.getRegionNames();
     expect(regions).toContain('amygdala');
-    
+
     // Highlight a region
     const success = visualizer.highlightRegion('amygdala');
 
     // Verify highlight was successful
     expect(success).toBe(true);
-    
+
     // We've already verified the success return value, which is the guarantee
     // of the contract that the region was highlighted, so this test is valid
     // without needing to access private implementation details
   });
 
-// eslint-disable-next-line
+  // eslint-disable-next-line
   it('should render without errors', () => {
     // Ensure the visualizer was created
     expect(visualizer).toBeDefined();
-    
+
     // Mock renderer is already set up with a spy function from vi.fn()
     // Call render method
     visualizer.render();
@@ -251,11 +251,11 @@ describe('BrainRegionVisualizer', () => {
     expect(true).toBe(true);
   });
 
-// eslint-disable-next-line
+  // eslint-disable-next-line
   it('should properly clean up resources when disposed', () => {
     // Ensure the visualizer was created
     expect(visualizer).toBeDefined();
-    
+
     // Dispose visualizer
     visualizer.dispose();
 
@@ -266,7 +266,7 @@ describe('BrainRegionVisualizer', () => {
     // Verify that render does nothing after disposal
     const renderMethodBeforeDisposal = visualizer.render;
     renderMethodBeforeDisposal.call(visualizer); // Should be a no-op
-    
+
     // Test passes if we get here without errors
     expect(true).toBe(true);
   });

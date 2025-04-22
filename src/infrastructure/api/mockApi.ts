@@ -1,7 +1,7 @@
 /* eslint-disable */
 /**
  * Neural Mock API Implementation
- * 
+ *
  * Mathematically elegant mock API system for the psychiatric digital twin platform
  * with quantum-level precision and architectural purity
  */
@@ -14,7 +14,7 @@ const generateId = (prefix: string): string => {
 // Helper for simulating real-world network latency with neural precision
 const simulateLatency = (min = 200, max = 600): Promise<void> => {
   const latency = Math.floor(Math.random() * (max - min + 1)) + min;
-  return new Promise(resolve => setTimeout(resolve, latency));
+  return new Promise((resolve) => setTimeout(resolve, latency));
 };
 
 // Neural brain regions for mock data generation
@@ -88,7 +88,7 @@ const initializeDb = (): void => {
       },
     ],
     assessmentScores: {
-      'depression': [
+      depression: [
         {
           date: '2024-01-10',
           score: 18,
@@ -102,7 +102,7 @@ const initializeDb = (): void => {
           notes: 'Follow-up assessment',
         },
       ],
-      'anxiety': [
+      anxiety: [
         {
           date: '2024-01-10',
           score: 16,
@@ -146,29 +146,22 @@ const initializeDb = (): void => {
       scanType: 'fMRI',
       dataQualityScore: 0.95,
     },
-    regions: BRAIN_REGIONS.map(region => ({
+    regions: BRAIN_REGIONS.map((region) => ({
       id: region.id,
       name: region.name,
       volume: Math.random() * 100 + 50,
-      coordinates: [
-        Math.random() * 50 - 25,
-        Math.random() * 50 - 25,
-        Math.random() * 50 - 25,
-      ],
-      connections: BRAIN_REGIONS
-        .filter(() => Math.random() > 0.7) // Only connect some regions
-        .map(target => ({
+      coordinates: [Math.random() * 50 - 25, Math.random() * 50 - 25, Math.random() * 50 - 25],
+      connections: BRAIN_REGIONS.filter(() => Math.random() > 0.7) // Only connect some regions
+        .map((target) => ({
           targetId: target.id,
           strength: Math.random() * 0.9 + 0.1, // 0.1 - 1.0
         })),
       clinicalSignificance: region.clinical ? ['diagnostic', 'treatment'] : undefined,
     })),
-    diagnosticMarkers: BRAIN_REGIONS
-      .filter(region => region.clinical && Math.random() > 0.5) // Only some clinical regions have markers
-      .flatMap(region => 
-        DIAGNOSTIC_MARKERS
-          .filter(() => Math.random() > 0.7) // Only some markers per region
-          .map(marker => ({
+    diagnosticMarkers: BRAIN_REGIONS.filter((region) => region.clinical && Math.random() > 0.5) // Only some clinical regions have markers
+      .flatMap((region) =>
+        DIAGNOSTIC_MARKERS.filter(() => Math.random() > 0.7) // Only some markers per region
+          .map((marker) => ({
             id: generateId('dmark'),
             regionId: region.id,
             markerType: marker.name,
@@ -194,12 +187,12 @@ export const mockApi = {
   // User authentication and profile
   async login(email: string, password: string) {
     await simulateLatency();
-    
+
     // Basic validation
     if (!email || !password) {
       throw new Error('Invalid credentials');
     }
-    
+
     return {
       id: 'user-001',
       name: 'Dr. Neural Smith',
@@ -209,10 +202,10 @@ export const mockApi = {
       organization: 'NovaMind Psychiatric Research',
     };
   },
-  
+
   async getUserProfile(userId: string) {
     await simulateLatency();
-    
+
     return {
       id: userId,
       name: 'Dr. Neural Smith',
@@ -226,127 +219,125 @@ export const mockApi = {
       lastLogin: new Date().toISOString(),
     };
   },
-  
+
   // Patient data
   async getPatient(patientId: string) {
     await simulateLatency();
-    
+
     const patient = db.patients.get(patientId);
     if (!patient) {
       throw new Error(`Patient not found: ${patientId}`);
     }
-    
+
     return patient;
   },
-  
+
   async searchPatients(query: string) {
     await simulateLatency();
-    
+
     // Mock search - in real API would filter by query
     return Array.from(db.patients.values());
   },
-  
+
   // Brain models
   async getBrainModels(patientId: string) {
     await simulateLatency();
-    
+
     // Filter brain models by patient ID
-    const models = Array.from(db.brainModels.values())
-      .filter(model => model.patientId === patientId);
-    
+    const models = Array.from(db.brainModels.values()).filter(
+      (model) => model.patientId === patientId
+    );
+
     return models;
   },
-  
+
   async getBrainModel(modelId: string) {
     await simulateLatency();
-    
+
     const model = db.brainModels.get(modelId);
     if (!model) {
       throw new Error(`Brain model not found: ${modelId}`);
     }
-    
+
     return model;
   },
-  
+
   // Diagnostics and treatment
   async getDiagnosticMarkers(modelId: string) {
     await simulateLatency();
-    
+
     const model = db.brainModels.get(modelId);
     if (!model) {
       throw new Error(`Brain model not found: ${modelId}`);
     }
-    
+
     return model.diagnosticMarkers || [];
   },
-  
+
   async getRegionalActivation(modelId: string) {
     await simulateLatency();
-    
+
     const model = db.brainModels.get(modelId);
     if (!model) {
       throw new Error(`Brain model not found: ${modelId}`);
     }
-    
+
     // Generate activation data for each brain region
-    return (model.regions || []).map(region => ({
+    return (model.regions || []).map((region) => ({
       regionId: region.id,
       regionName: region.name,
       activation: Math.random() * 0.9 + 0.1, // 0.1 - 1.0
       timeSeriesData: Array.from({ length: 20 }, () => Math.random() * 0.9 + 0.1),
     }));
   },
-  
+
   async getTreatmentRecommendations(modelId: string) {
     await simulateLatency();
-    
+
     const model = db.brainModels.get(modelId);
     if (!model) {
       throw new Error(`Brain model not found: ${modelId}`);
     }
-    
+
     // Find regions with diagnostic markers
     const affectedRegions = model.diagnosticMarkers
-      ? model.diagnosticMarkers.map(marker => marker.regionId)
+      ? model.diagnosticMarkers.map((marker) => marker.regionId)
       : [];
-    
+
     // Filter treatments that target affected regions
-    return TREATMENT_OPTIONS
-      .filter(treatment => 
-        treatment.target.some(targetRegion => 
-          affectedRegions.includes(targetRegion)
-        )
-      )
-      .map(treatment => ({
-        id: treatment.id,
-        name: treatment.name,
-        efficacy: treatment.efficacy,
-        targetRegions: treatment.target,
-        description: `Treatment targeting ${treatment.target.join(', ')}`,
-      }));
+    return TREATMENT_OPTIONS.filter((treatment) =>
+      treatment.target.some((targetRegion) => affectedRegions.includes(targetRegion))
+    ).map((treatment) => ({
+      id: treatment.id,
+      name: treatment.name,
+      efficacy: treatment.efficacy,
+      targetRegions: treatment.target,
+      description: `Treatment targeting ${treatment.target.join(', ')}`,
+    }));
   },
-  
+
   // Visualization API
   async getVisualizationData(modelId: string, params: Record<string, unknown> = {}) {
     await simulateLatency();
-    
+
     const model = db.brainModels.get(modelId);
     if (!model) {
       throw new Error(`Brain model not found: ${modelId}`);
     }
-    
+
     // Generate visualization data based on the brain model
     // In a real API, this would return complex data for 3D rendering
     return {
       regions: model.regions,
-      connections: model.regions?.flatMap(region => 
-        (region.connections || []).map(conn => ({
-          sourceId: region.id,
-          targetId: conn.targetId,
-          strength: conn.strength,
-        }))
-      ) || [],
-      activationData: (model.regions || []).map(region => ({
+      connections:
+        model.regions?.flatMap((region) =>
+          (region.connections || []).map((conn) => ({
+            sourceId: region.id,
+            targetId: conn.targetId,
+            strength: conn.strength,
+          }))
+        ) || [],
+      activationData: (model.regions || []).map((region) => ({
         regionId: region.id,
         activation: Math.random() * 0.9 + 0.1, // 0.1 - 1.0
       })),

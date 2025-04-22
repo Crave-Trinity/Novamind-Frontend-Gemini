@@ -12,20 +12,26 @@ import {
   SelectLabel,
   SelectSeparator,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from './select';
 
 // Mock the Lucide React icons
 vi.mock('lucide-react', () => ({
   ChevronDown: () => <div data-testid="chevron-down-icon" />,
   ChevronUp: () => <div data-testid="chevron-up-icon" />,
-  Check: () => <div data-testid="check-icon" />
+  Check: () => <div data-testid="check-icon" />,
 }));
 
 // Mock Radix UI Select components
 vi.mock('@radix-ui/react-select', () => {
   // Create mock components
-  const Root = ({ children, onValueChange, value, defaultValue, ...props }: {
+  const Root = ({
+    children,
+    onValueChange,
+    value,
+    defaultValue,
+    ...props
+  }: {
     children: React.ReactNode;
     onValueChange?: (value: string) => void;
     value?: string;
@@ -37,16 +43,17 @@ vi.mock('@radix-ui/react-select', () => {
     </div>
   );
 
-  const Group = ({ children, ...props }: {
-    children: React.ReactNode;
-    [key: string]: any;
-  }) => (
+  const Group = ({ children, ...props }: { children: React.ReactNode; [key: string]: any }) => (
     <div data-testid="select-group" {...props}>
       {children}
     </div>
   );
 
-  const Value = ({ children, placeholder, ...props }: {
+  const Value = ({
+    children,
+    placeholder,
+    ...props
+  }: {
     children?: React.ReactNode;
     placeholder?: string;
     [key: string]: any;
@@ -56,20 +63,26 @@ vi.mock('@radix-ui/react-select', () => {
     </span>
   );
 
-  const Trigger = React.forwardRef<HTMLButtonElement, any>(({ children, className, disabled, ...props }, ref) => (
-    <button
-      data-testid="select-trigger"
-      className={className}
-      disabled={disabled}
-      ref={ref}
-      {...props}
-    >
-      {children}
-    </button>
-  ));
+  const Trigger = React.forwardRef<HTMLButtonElement, any>(
+    ({ children, className, disabled, ...props }, ref) => (
+      <button
+        data-testid="select-trigger"
+        className={className}
+        disabled={disabled}
+        ref={ref}
+        {...props}
+      >
+        {children}
+      </button>
+    )
+  );
   Trigger.displayName = 'Trigger';
 
-  const Icon = ({ children, asChild, ...props }: {
+  const Icon = ({
+    children,
+    asChild,
+    ...props
+  }: {
     children: React.ReactNode;
     asChild?: boolean;
     [key: string]: any;
@@ -79,36 +92,34 @@ vi.mock('@radix-ui/react-select', () => {
     </span>
   );
 
-  const Portal = ({ children, ...props }: {
-    children: React.ReactNode;
-    [key: string]: any;
-  }) => (
+  const Portal = ({ children, ...props }: { children: React.ReactNode; [key: string]: any }) => (
     <div data-testid="select-portal" {...props}>
       {children}
     </div>
   );
 
-  const Content = React.forwardRef<HTMLDivElement, any>(({ 
-    children, 
-    className,
-    position,
-    ...props
-  }, ref) => (
-    <div
-      data-testid="select-content"
-      className={className}
-      data-position={position}
-      data-state="open"
-      ref={ref}
-      style={{ '--radix-select-content-transform-origin': '0' } as React.CSSProperties}
-      {...props}
-    >
-      {children}
-    </div>
-  ));
+  const Content = React.forwardRef<HTMLDivElement, any>(
+    ({ children, className, position, ...props }, ref) => (
+      <div
+        data-testid="select-content"
+        className={className}
+        data-position={position}
+        data-state="open"
+        ref={ref}
+        style={{ '--radix-select-content-transform-origin': '0' } as React.CSSProperties}
+        {...props}
+      >
+        {children}
+      </div>
+    )
+  );
   Content.displayName = 'Content';
 
-  const Viewport = ({ children, className, ...props }: {
+  const Viewport = ({
+    children,
+    className,
+    ...props
+  }: {
     children: React.ReactNode;
     className?: string;
     [key: string]: any;
@@ -118,36 +129,32 @@ vi.mock('@radix-ui/react-select', () => {
     </div>
   );
 
-  const Item = React.forwardRef<HTMLDivElement, any>(({ 
-    children,
-    className,
-    value,
-    disabled,
-    ...props
-  }, ref) => (
-    <div
-      data-testid="select-item"
-      className={className}
-      data-value={value}
-      data-disabled={disabled ? 'true' : undefined}
-      ref={ref}
-      {...props}
-    >
-      {children}
-    </div>
-  ));
+  const Item = React.forwardRef<HTMLDivElement, any>(
+    ({ children, className, value, disabled, ...props }, ref) => (
+      <div
+        data-testid="select-item"
+        className={className}
+        data-value={value}
+        data-disabled={disabled ? 'true' : undefined}
+        ref={ref}
+        {...props}
+      >
+        {children}
+      </div>
+    )
+  );
   Item.displayName = 'Item';
 
-  const ItemText = ({ children, ...props }: {
-    children: React.ReactNode;
-    [key: string]: any;
-  }) => (
+  const ItemText = ({ children, ...props }: { children: React.ReactNode; [key: string]: any }) => (
     <span data-testid="select-item-text" {...props}>
       {children}
     </span>
   );
 
-  const ItemIndicator = ({ children, ...props }: {
+  const ItemIndicator = ({
+    children,
+    ...props
+  }: {
     children: React.ReactNode;
     [key: string]: any;
   }) => (
@@ -156,58 +163,27 @@ vi.mock('@radix-ui/react-select', () => {
     </span>
   );
 
-  const Label = React.forwardRef<HTMLLabelElement, any>(({ 
-    children, 
-    className,
-    ...props
-  }, ref) => (
-    <label
-      data-testid="select-label"
-      className={className}
-      ref={ref}
-      {...props}
-    >
-      {children}
-    </label>
-  ));
+  const Label = React.forwardRef<HTMLLabelElement, any>(
+    ({ children, className, ...props }, ref) => (
+      <label data-testid="select-label" className={className} ref={ref} {...props}>
+        {children}
+      </label>
+    )
+  );
   Label.displayName = 'Label';
 
-  const Separator = React.forwardRef<HTMLDivElement, any>(({ 
-    className,
-    ...props
-  }, ref) => (
-    <div
-      data-testid="select-separator"
-      className={className}
-      ref={ref}
-      {...props}
-    />
+  const Separator = React.forwardRef<HTMLDivElement, any>(({ className, ...props }, ref) => (
+    <div data-testid="select-separator" className={className} ref={ref} {...props} />
   ));
   Separator.displayName = 'Separator';
 
-  const ScrollUpButton = React.forwardRef<HTMLDivElement, any>(({ 
-    className,
-    ...props
-  }, ref) => (
-    <div
-      data-testid="select-scroll-up-button"
-      className={className}
-      ref={ref}
-      {...props}
-    />
+  const ScrollUpButton = React.forwardRef<HTMLDivElement, any>(({ className, ...props }, ref) => (
+    <div data-testid="select-scroll-up-button" className={className} ref={ref} {...props} />
   ));
   ScrollUpButton.displayName = 'ScrollUpButton';
 
-  const ScrollDownButton = React.forwardRef<HTMLDivElement, any>(({ 
-    className,
-    ...props
-  }, ref) => (
-    <div
-      data-testid="select-scroll-down-button"
-      className={className}
-      ref={ref}
-      {...props}
-    />
+  const ScrollDownButton = React.forwardRef<HTMLDivElement, any>(({ className, ...props }, ref) => (
+    <div data-testid="select-scroll-down-button" className={className} ref={ref} {...props} />
   ));
   ScrollDownButton.displayName = 'ScrollDownButton';
 
@@ -226,7 +202,7 @@ vi.mock('@radix-ui/react-select', () => {
     Label,
     Separator,
     ScrollUpButton,
-    ScrollDownButton
+    ScrollDownButton,
   };
 });
 
@@ -247,11 +223,11 @@ describe('Select Component', () => {
         </SelectContent>
       </Select>
     );
-    
+
     const root = screen.getByTestId('select-root');
     const trigger = screen.getByTestId('trigger');
     const value = screen.getByTestId('select-value');
-    
+
     expect(root).toBeInTheDocument();
     expect(trigger).toBeInTheDocument();
     expect(value).toBeInTheDocument();
@@ -269,7 +245,7 @@ describe('Select Component', () => {
         </SelectContent>
       </Select>
     );
-    
+
     const trigger = screen.getByTestId('trigger');
     expect(trigger).toHaveClass('custom-trigger');
     expect(trigger).toHaveClass('flex');
@@ -291,10 +267,10 @@ describe('Select Component', () => {
         </SelectContent>
       </Select>
     );
-    
+
     const group = screen.getByTestId('select-group');
     const label = screen.getByTestId('select-label');
-    
+
     expect(group).toBeInTheDocument();
     expect(label).toBeInTheDocument();
     expect(label).toHaveTextContent('Fruits');
@@ -311,15 +287,17 @@ describe('Select Component', () => {
           <SelectValue placeholder="Select an option" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="apple" data-testid="apple-item">Apple</SelectItem>
+          <SelectItem value="apple" data-testid="apple-item">
+            Apple
+          </SelectItem>
         </SelectContent>
       </Select>
     );
-    
+
     const item = screen.getByTestId('apple-item');
     const itemText = screen.getByTestId('select-item-text');
     const itemIndicator = screen.getByTestId('select-item-indicator');
-    
+
     expect(item).toBeInTheDocument();
     expect(itemText).toBeInTheDocument();
     expect(itemIndicator).toBeInTheDocument();
@@ -346,7 +324,7 @@ describe('Select Component', () => {
         </SelectContent>
       </Select>
     );
-    
+
     const item = screen.getByTestId('disabled-item');
     expect(item).toHaveAttribute('data-disabled', 'true');
     expect(item).toHaveClass('data-[disabled]:pointer-events-none');
@@ -372,7 +350,7 @@ describe('Select Component', () => {
         </SelectContent>
       </Select>
     );
-    
+
     const separator = screen.getByTestId('select-separator');
     expect(separator).toBeInTheDocument();
     expect(separator).toHaveClass('-mx-1');
@@ -393,7 +371,7 @@ describe('Select Component', () => {
         </SelectContent>
       </Select>
     );
-    
+
     const root = screen.getByTestId('select-root');
     expect(root).toHaveAttribute('data-value', 'banana');
   });
@@ -409,14 +387,14 @@ describe('Select Component', () => {
         </SelectContent>
       </Select>
     );
-    
+
     const content = screen.getByTestId('select-content');
     expect(content).toHaveAttribute('data-position', 'item-aligned');
   });
 
   it('forwards ref to trigger element', () => {
     const ref = React.createRef<HTMLButtonElement>();
-    
+
     renderWithProviders(
       <Select>
         <SelectTrigger ref={ref} data-testid="trigger-with-ref">
@@ -427,7 +405,7 @@ describe('Select Component', () => {
         </SelectContent>
       </Select>
     );
-    
+
     expect(ref.current).toBe(screen.getByTestId('trigger-with-ref'));
   });
 
@@ -442,7 +420,7 @@ describe('Select Component', () => {
         </SelectContent>
       </Select>
     );
-    
+
     const trigger = screen.getByTestId('disabled-trigger');
     expect(trigger).toBeDisabled();
     expect(trigger).toHaveClass('disabled:cursor-not-allowed');
@@ -460,7 +438,7 @@ describe('Select Component', () => {
         </SelectContent>
       </Select>
     );
-    
+
     // Get the trigger element first
     const trigger = screen.getByTestId('trigger-with-icon');
     // Then find the icon within the trigger
@@ -479,7 +457,7 @@ describe('Select Component', () => {
         </SelectContent>
       </Select>
     );
-    
+
     const check = screen.getByTestId('check-icon');
     expect(check).toBeInTheDocument();
   });

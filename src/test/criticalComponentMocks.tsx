@@ -8,11 +8,11 @@ import React from 'react';
 import { vi } from 'vitest';
 
 // Mock Three.js with surgical precision
- 
+
 vi.mock('@react-three/fiber', () => ({
   Canvas: ({ children }: { children: React.ReactNode }) =>
     React.createElement('div', { 'data-testid': 'neural-canvas' }, children), // Replaced JSX with React.createElement
- 
+
   useThree: () => ({
     camera: { position: { set: vi.fn() }, lookAt: vi.fn() },
     gl: { setPixelRatio: vi.fn(), setSize: vi.fn() },
@@ -22,7 +22,6 @@ vi.mock('@react-three/fiber', () => ({
   extend: vi.fn(),
 }));
 
- 
 vi.mock('@react-three/drei', () => ({
   Sphere: ({ position, scale, color }: { position: unknown; scale: unknown; color: unknown }) =>
     React.createElement(
@@ -47,7 +46,7 @@ vi.mock('@react-three/drei', () => ({
 }));
 
 // Mock react-spring/three
- 
+
 vi.mock('@react-spring/three', () => ({
   useSpring: () => ({ position: [0, 0, 0], scale: [1, 1, 1] }),
   animated: {
@@ -59,7 +58,7 @@ vi.mock('@react-spring/three', () => ({
 }));
 
 // Mock Chart.js
- 
+
 vi.mock('chart.js', () => ({
   Chart: class {
     static register() {}
@@ -75,7 +74,7 @@ vi.mock('chart.js', () => ({
 }));
 
 // Mock react-chartjs-2
- 
+
 vi.mock('react-chartjs-2', () => ({
   Line: () => React.createElement('div', { 'data-testid': 'chart-line' }, 'Chart'),
   Bar: () => React.createElement('div', { 'data-testid': 'chart-bar' }, 'Chart'),

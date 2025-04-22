@@ -31,7 +31,10 @@ export class EnhancedMockApiClient implements IApiClient {
    * Log audit activity
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private logActivity(action: string, details: any /* eslint-disable-line @typescript-eslint/no-explicit-any */): void {
+  private logActivity(
+    action: string,
+    details: any /* eslint-disable-line @typescript-eslint/no-explicit-any */
+  ): void {
     // Try to send to audit log endpoint, but expect it to fail gracefully
     // This simulates the behavior we'd want in production
     if (typeof window !== 'undefined' && this.auditEnabled) {
@@ -57,14 +60,17 @@ export class EnhancedMockApiClient implements IApiClient {
   }
 
   // API Implementation methods
-  
+
   // User/Authentication
   // ===================================
-  
+
   /**
    * Login implementation
    */
-  async login(email: string, password: string): Promise<{
+  async login(
+    email: string,
+    password: string
+  ): Promise<{
     id: string;
     name: string;
     email: string;
@@ -74,7 +80,7 @@ export class EnhancedMockApiClient implements IApiClient {
   }> {
     await this.delay();
     this.logActivity('login', { email });
-    
+
     // Return mock user data
     return {
       id: 'user-mock-123',
@@ -97,7 +103,7 @@ export class EnhancedMockApiClient implements IApiClient {
   }> {
     await this.delay();
     this.logActivity('getUserProfile', { userId });
-    
+
     return {
       id: userId,
       name: 'Dr. Neural Smith',
@@ -134,39 +140,39 @@ export class EnhancedMockApiClient implements IApiClient {
     // Simulate a generic successful response for GET requests
     // Tests needing specific GET responses should mock this method specifically
     if (endpoint.includes('brain-models')) {
-       // Provide a minimal mock BrainModel structure if needed
-       return Promise.resolve({ id: 'mock-model', regions: [], connections: [] } as unknown as T);
+      // Provide a minimal mock BrainModel structure if needed
+      return Promise.resolve({ id: 'mock-model', regions: [], connections: [] } as unknown as T);
     }
     return Promise.resolve({ message: 'Mock GET success' } as unknown as T);
   }
 
   // Patient data operations
   // ===================================
-  
+
   /**
    * Get patient by ID
    */
   async getPatient(patientId: string): Promise<ApiPatient> {
     await this.delay();
     this.logActivity('getPatient', { patientId });
-    
+
     return {
       id: patientId,
       firstName: 'John',
       lastName: 'Doe',
       dateOfBirth: '1980-01-01',
-      gender: 'male', 
+      gender: 'male',
       demographicData: {
         age: 43,
         ethnicity: 'caucasian',
         weight: '180lbs',
-        height: '5\'10"'
+        height: '5\'10"',
       },
       medicalHistory: {
         conditions: ['depression', 'anxiety'],
         medications: ['fluoxetine', 'alprazolam'],
-        allergies: []
-      }
+        allergies: [],
+      },
     };
   }
 
@@ -176,7 +182,7 @@ export class EnhancedMockApiClient implements IApiClient {
   async getPatients(): Promise<ApiPatient[]> {
     await this.delay();
     this.logActivity('getPatients', {});
-    
+
     return [
       {
         id: 'patient-1',
@@ -186,8 +192,8 @@ export class EnhancedMockApiClient implements IApiClient {
         gender: 'male',
         demographicData: {
           age: 43,
-          ethnicity: 'caucasian'
-        }
+          ethnicity: 'caucasian',
+        },
       },
       {
         id: 'patient-2',
@@ -197,15 +203,15 @@ export class EnhancedMockApiClient implements IApiClient {
         gender: 'female',
         demographicData: {
           age: 33,
-          ethnicity: 'asian'
-        }
-      }
+          ethnicity: 'asian',
+        },
+      },
     ];
   }
 
   // Brain Model operations
   // ===================================
-  
+
   /**
    * Get brain model data
    */
@@ -228,7 +234,7 @@ export class EnhancedMockApiClient implements IApiClient {
   }> {
     await this.delay();
     this.logActivity('getBrainModel', { modelId });
-    
+
     return {
       id: modelId,
       patientId: 'patient-1',
@@ -239,42 +245,45 @@ export class EnhancedMockApiClient implements IApiClient {
           name: 'prefrontal cortex',
           coordinates: [0, 5, 0],
           size: 3,
-          connections: ['r2', 'r3']
+          connections: ['r2', 'r3'],
         },
         {
           id: 'r2',
           name: 'amygdala',
           coordinates: [2, 0, 1],
           size: 1,
-          connections: ['r1']
+          connections: ['r1'],
         },
         {
           id: 'r3',
           name: 'hippocampus',
           coordinates: [-2, 0, 1],
           size: 1.5,
-          connections: ['r1', 'r2']
-        }
+          connections: ['r1', 'r2'],
+        },
       ],
       connections: [
         { from: 'r1', to: 'r2', strength: 0.8 },
         { from: 'r1', to: 'r3', strength: 0.6 },
         { from: 'r2', to: 'r1', strength: 0.5 },
         { from: 'r3', to: 'r1', strength: 0.7 },
-        { from: 'r3', to: 'r2', strength: 0.4 }
-      ]
+        { from: 'r3', to: 'r2', strength: 0.4 },
+      ],
     };
   }
 
   /**
    * Update brain model activity levels
    */
-  async updateBrainActivity(modelId: string, activityData: {
-    regions: Array<{ id: string; activity: number }>;
-  }): Promise<{ success: boolean }> {
+  async updateBrainActivity(
+    modelId: string,
+    activityData: {
+      regions: Array<{ id: string; activity: number }>;
+    }
+  ): Promise<{ success: boolean }> {
     await this.delay();
     this.logActivity('updateBrainActivity', { modelId, activityData });
-    
+
     return { success: true };
   }
 
@@ -298,39 +307,39 @@ export class EnhancedMockApiClient implements IApiClient {
   }> {
     await this.delay();
     this.logActivity('getVisualizationData', { modelId, params });
-    
-    const timestamps = Array.from({ length: 10 }, (_, i) => 
+
+    const timestamps = Array.from({ length: 10 }, (_, i) =>
       new Date(Date.now() - i * 86400000).toISOString()
     ).reverse();
-    
+
     return {
       timestamps,
       activityData: [
         {
           regionId: 'r1',
-          values: Array.from({ length: 10 }, () => Math.random())
+          values: Array.from({ length: 10 }, () => Math.random()),
         },
         {
           regionId: 'r2',
-          values: Array.from({ length: 10 }, () => Math.random())
+          values: Array.from({ length: 10 }, () => Math.random()),
         },
         {
           regionId: 'r3',
-          values: Array.from({ length: 10 }, () => Math.random())
-        }
+          values: Array.from({ length: 10 }, () => Math.random()),
+        },
       ],
       connectivityData: [
         {
           fromRegion: 'r1',
           toRegion: 'r2',
-          values: Array.from({ length: 10 }, () => Math.random() * 0.5 + 0.5)
+          values: Array.from({ length: 10 }, () => Math.random() * 0.5 + 0.5),
         },
         {
           fromRegion: 'r1',
           toRegion: 'r3',
-          values: Array.from({ length: 10 }, () => Math.random() * 0.5 + 0.3)
-        }
-      ]
+          values: Array.from({ length: 10 }, () => Math.random() * 0.5 + 0.3),
+        },
+      ],
     };
   }
 }

@@ -9,7 +9,12 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import React, { type ReactNode } from 'react';
-import { QueryClient, QueryClientProvider, QueryObserverResult, RefetchOptions } from '@tanstack/react-query'; // Added missing types
+import {
+  QueryClient,
+  QueryClientProvider,
+  QueryObserverResult,
+  RefetchOptions,
+} from '@tanstack/react-query'; // Added missing types
 import { renderHook, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useBrainVisualization } from '../hooks/useBrainVisualization'; // Use relative path
@@ -37,30 +42,32 @@ const QueryWrapper = ({ children }: { children: ReactNode }): React.ReactElement
 const mockBrainModelData: Partial<BrainModel> = {
   id: 'mock-model-123',
   patientId: 'default',
-  regions: [{
-    id: 'r1',
-    name: 'Region 1',
-    activityLevel: 0.8,
-    position: { x: 0, y: 0, z: 0 },
-    color: 'red',
-    connections: [],
-    isActive: true,
-    // Add missing required properties with default values
-    hemisphereLocation: 'left',
-    dataConfidence: 1,
-    volume: 100,
-    activity: 0.8
-  }],
+  regions: [
+    {
+      id: 'r1',
+      name: 'Region 1',
+      activityLevel: 0.8,
+      position: { x: 0, y: 0, z: 0 },
+      color: 'red',
+      connections: [],
+      isActive: true,
+      // Add missing required properties with default values
+      hemisphereLocation: 'left',
+      dataConfidence: 1,
+      volume: 100,
+      activity: 0.8,
+    },
+  ],
   connections: [], // Use 'connections' instead of 'pathways' if that's the correct type property
   // Add other necessary fields if hook uses them
 };
 
-describe('useBrainVisualization Hook', () => { // Un-skip the suite
+describe('useBrainVisualization Hook', () => {
+  // Un-skip the suite
   // Re-skip due to persistent hangs - needs investigation into async/timing issues
   // Cast the mocked apiClient method
   // Cast the mocked 'get' method
   const mockedGet = apiClient.get as Mock;
-
 
   beforeEach(() => {
     // vi.useFakeTimers(); // Removed fake timers
@@ -72,7 +79,8 @@ describe('useBrainVisualization Hook', () => { // Un-skip the suite
     // Ensure the resolved value matches the expected BrainModel structure or use 'as any' if structure is complex/partial
     // Setup mock response for apiClient.get for the specific brain model path
     mockedGet.mockImplementation(async (path: string) => {
-      if (path.includes('brain-models/')) { // Check if the path matches what the hook calls
+      if (path.includes('brain-models/')) {
+        // Check if the path matches what the hook calls
         return Promise.resolve(mockBrainModelData as BrainModel);
       }
       // Handle other paths or throw an error if needed
@@ -113,7 +121,7 @@ describe('useBrainVisualization Hook', () => { // Un-skip the suite
 
     // Assertions need to wait for the query to fail
     await waitFor(() => expect(result.current.error).toBeDefined()); // Wait for error object
-    
+
     // Also wait for isLoading to become false after the error
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.error).toBeDefined(); // Check if error object exists

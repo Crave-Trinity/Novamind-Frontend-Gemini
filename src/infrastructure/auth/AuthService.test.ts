@@ -16,27 +16,39 @@ const mockUser: AuthUser = {
   username: 'testuser',
   email: 'test@example.com',
   role: 'clinician',
-  permissions: ['read:patients', 'write:notes']
+  permissions: ['read:patients', 'write:notes'],
 };
 
 const mockTokens: AuthTokens = {
   accessToken: 'mock-access-token',
   refreshToken: 'mock-refresh-token',
-  expiresAt: Date.now() + 3600000 // 1 hour from now
+  expiresAt: Date.now() + 3600000, // 1 hour from now
 };
 
 const expiredTokens: AuthTokens = {
   accessToken: 'expired-access-token',
   refreshToken: 'expired-refresh-token',
-  expiresAt: Date.now() - 3600000 // 1 hour ago
+  expiresAt: Date.now() - 3600000, // 1 hour ago
 };
 
 // Mocks for the AuthApiClient methods
 // Default implementations return rejected promises to prevent '.then of undefined' errors
-const mockLogin = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK login] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
-const mockLogout = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK logout] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
-const mockRefreshToken = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK refreshToken] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
-const mockGetCurrentUser = vi.fn().mockImplementation(async (...args) => { console.log('[MOCK getCurrentUser] Called with:', args); return Promise.reject(new Error('Mock not configured for this call')); });
+const mockLogin = vi.fn().mockImplementation(async (...args) => {
+  console.log('[MOCK login] Called with:', args);
+  return Promise.reject(new Error('Mock not configured for this call'));
+});
+const mockLogout = vi.fn().mockImplementation(async (...args) => {
+  console.log('[MOCK logout] Called with:', args);
+  return Promise.reject(new Error('Mock not configured for this call'));
+});
+const mockRefreshToken = vi.fn().mockImplementation(async (...args) => {
+  console.log('[MOCK refreshToken] Called with:', args);
+  return Promise.reject(new Error('Mock not configured for this call'));
+});
+const mockGetCurrentUser = vi.fn().mockImplementation(async (...args) => {
+  console.log('[MOCK getCurrentUser] Called with:', args);
+  return Promise.reject(new Error('Mock not configured for this call'));
+});
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -56,35 +68,41 @@ describe('AuthService', () => {
     // No need to replace the client manually, spies handle it
   });
 
-
   afterEach(() => {
     vi.useRealTimers(); // Restore real timers
     vi.restoreAllMocks(); // Restores original prototype methods
   });
 
   describe('login', () => {
-    it('should successfully login and store tokens', async () => {
-      // Setup mocks
-      mockLogin.mockResolvedValueOnce(mockTokens); // Configure specific mock response
-      mockGetCurrentUser.mockResolvedValueOnce(mockUser); // Configure specific mock response
+    it(
+      'should successfully login and store tokens',
+      async () => {
+        // Setup mocks
+        mockLogin.mockResolvedValueOnce(mockTokens); // Configure specific mock response
+        mockGetCurrentUser.mockResolvedValueOnce(mockUser); // Configure specific mock response
 
-      // Execute
-      const result = await authService.login('test@example.com', 'password123');
+        // Execute
+        const result = await authService.login('test@example.com', 'password123');
 
-      // Verify
-      expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
-      expect(mockGetCurrentUser).toHaveBeenCalled();
-      // Ensure async operations complete and check assertion
-      await vi.runAllTimersAsync(); // Advance timers
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens)); // Use global mock
-      expect(result).toEqual({
-        user: mockUser,
-        tokens: mockTokens,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null
-      });
-    }, { timeout: 30000 }); // Correctly apply timeout object as third argument
+        // Verify
+        expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
+        expect(mockGetCurrentUser).toHaveBeenCalled();
+        // Ensure async operations complete and check assertion
+        await vi.runAllTimersAsync(); // Advance timers
+        expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+          'auth_tokens',
+          JSON.stringify(mockTokens)
+        ); // Use global mock
+        expect(result).toEqual({
+          user: mockUser,
+          tokens: mockTokens,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        });
+      },
+      { timeout: 30000 }
+    ); // Correctly apply timeout object as third argument
 
     it('should handle login failure', async () => {
       // Setup mock to simulate API error
@@ -102,7 +120,7 @@ describe('AuthService', () => {
         tokens: null,
         isAuthenticated: false,
         isLoading: false,
-        error: 'Invalid credentials'
+        error: 'Invalid credentials',
       });
     });
 
@@ -137,7 +155,7 @@ describe('AuthService', () => {
         tokens: null,
         isAuthenticated: false,
         isLoading: false,
-        error: null
+        error: null,
       });
     });
 
@@ -158,7 +176,7 @@ describe('AuthService', () => {
         tokens: null,
         isAuthenticated: false,
         isLoading: false,
-        error: null
+        error: null,
       });
     });
   });
@@ -176,7 +194,7 @@ describe('AuthService', () => {
         tokens: null,
         isAuthenticated: false,
         isLoading: false,
-        error: null
+        error: null,
       });
     });
 
@@ -197,7 +215,7 @@ describe('AuthService', () => {
         tokens: mockTokens,
         isAuthenticated: true,
         isLoading: false,
-        error: null
+        error: null,
       });
     });
 
@@ -215,13 +233,16 @@ describe('AuthService', () => {
       // await initializeAuth ensures internal calls complete
       expect(mockRefreshToken).toHaveBeenCalledWith(expiredTokens.refreshToken);
       expect(mockGetCurrentUser).toHaveBeenCalled();
-      expect(mockLocalStorage.setItem).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockTokens)); // Use global mock
+      expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+        'auth_tokens',
+        JSON.stringify(mockTokens)
+      ); // Use global mock
       expect(result).toEqual({
         user: mockUser,
         tokens: mockTokens,
         isAuthenticated: true,
         isLoading: false,
-        error: null
+        error: null,
       });
     });
 
@@ -243,7 +264,7 @@ describe('AuthService', () => {
         tokens: null,
         isAuthenticated: false,
         isLoading: false,
-        error: 'Session expired'
+        error: 'Session expired',
       });
     });
 
@@ -265,7 +286,7 @@ describe('AuthService', () => {
         tokens: null,
         isAuthenticated: false,
         isLoading: false,
-        error: 'Failed to get user info'
+        error: 'Failed to get user info',
       });
     });
 
@@ -283,7 +304,7 @@ describe('AuthService', () => {
         tokens: null,
         isAuthenticated: false,
         isLoading: false,
-        error: null
+        error: null,
       });
     });
   });

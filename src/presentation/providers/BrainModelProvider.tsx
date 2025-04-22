@@ -1,7 +1,7 @@
 /* eslint-disable */
 /**
  * BrainModelProvider
- * 
+ *
  * Context provider for the brain model visualization, handling state management
  * for region selection, highlighting, and data visualization.
  */
@@ -106,10 +106,7 @@ export const BrainModelProvider: React.FC<{
   children: React.ReactNode;
   initialState?: Partial<BrainModelState>;
 }> = ({ children, initialState: initialProps }) => {
-  const [state, dispatch] = useReducer(
-    brainModelReducer,
-    { ...initialState, ...initialProps }
-  );
+  const [state, dispatch] = useReducer(brainModelReducer, { ...initialState, ...initialProps });
 
   // API to expose for consuming components
   const selectRegion = (id: string | null) => {

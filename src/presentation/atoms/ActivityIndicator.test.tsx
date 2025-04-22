@@ -18,11 +18,11 @@ vi.mock('@react-three/fiber', () => ({
     camera: { position: { set: vi.fn() }, lookAt: vi.fn() },
     scene: { add: vi.fn(), remove: vi.fn() },
     size: { width: 800, height: 600 },
-    clock: { getElapsedTime: vi.fn(() => 0) }
+    clock: { getElapsedTime: vi.fn(() => 0) },
   })),
   Canvas: function MockCanvas(props) {
     return React.createElement('div', { 'data-testid': 'mock-canvas' }, props.children);
-  }
+  },
 }));
 
 // Mock Three.js
@@ -40,7 +40,7 @@ vi.mock('three', () => {
     clone = vi.fn(() => new MockVector3(this.x, this.y, this.z));
     multiplyScalar = vi.fn(() => this);
   }
-  
+
   return {
     __esModule: true,
     Vector3: MockVector3,
@@ -51,7 +51,7 @@ vi.mock('three', () => {
     BoxGeometry: vi.fn(),
     DoubleSide: 2,
     MeshBasicMaterial: vi.fn(() => ({ dispose: vi.fn() })),
-    MeshStandardMaterial: vi.fn(() => ({ dispose: vi.fn() }))
+    MeshStandardMaterial: vi.fn(() => ({ dispose: vi.fn() })),
   };
 });
 
@@ -59,25 +59,28 @@ vi.mock('three', () => {
 vi.mock('@react-spring/three', () => {
   return {
     useSpring: vi.fn(() => ({
-      springActivity: { get: vi.fn(() => 0.5) }
+      springActivity: { get: vi.fn(() => 0.5) },
     })),
-    animated: new Proxy({}, {
-      get: function(target, prop) {
-        const MockAnimatedComponent = React.forwardRef(function(props, ref) {
-          return React.createElement(
-            'div',
-            {
-              'data-testid': `mock-animated-${String(prop)}`,
-              ref,
-              ...props
-            },
-            props.children
-          );
-        });
-        MockAnimatedComponent.displayName = `animated.${String(prop)}`;
-        return MockAnimatedComponent;
+    animated: new Proxy(
+      {},
+      {
+        get: function (target, prop) {
+          const MockAnimatedComponent = React.forwardRef(function (props, ref) {
+            return React.createElement(
+              'div',
+              {
+                'data-testid': `mock-animated-${String(prop)}`,
+                ref,
+                ...props,
+              },
+              props.children
+            );
+          });
+          MockAnimatedComponent.displayName = `animated.${String(prop)}`;
+          return MockAnimatedComponent;
+        },
       }
-    })
+    ),
   };
 });
 

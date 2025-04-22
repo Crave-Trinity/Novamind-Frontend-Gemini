@@ -104,7 +104,9 @@ export class AuthService {
    */
   private isTokenExpired(tokens: AuthTokens): boolean {
     const isExpired = tokens.expiresAt < Date.now();
-    console.log(`[AuthService isTokenExpired] expiresAt: ${tokens.expiresAt}, now: ${Date.now()}, isExpired: ${isExpired}`);
+    console.log(
+      `[AuthService isTokenExpired] expiresAt: ${tokens.expiresAt}, now: ${Date.now()}, isExpired: ${isExpired}`
+    );
     return isExpired;
   }
 
@@ -213,7 +215,7 @@ export class AuthService {
         window.dispatchEvent(new CustomEvent('auth:logout-complete'));
       }
     }
-    
+
     return {
       user: null,
       tokens: null,

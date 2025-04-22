@@ -302,7 +302,6 @@ describe('Basic Validation Logic (formerly validate* functions)', () => {
   });
 
   // Removed describe block for createObjectValidator as it's covered by isObjectWithProperties tests
-
 });
 
 // Test conversion functions

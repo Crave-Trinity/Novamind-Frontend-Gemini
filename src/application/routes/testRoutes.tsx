@@ -2,7 +2,7 @@
 /**
  * NOVAMIND Neural Digital Twin
  * Test Routes Configuration
- * 
+ *
  * This module provides dedicated routes for testing components
  * with mathematical precision and architectural elegance.
  */
@@ -98,7 +98,7 @@ const testData = {
       metadata: { acquisitionTime: 300, sequence: 'EPI' },
       dataQualityScore: 0.95,
     },
-  }
+  },
 };
 
 /**
@@ -136,10 +136,7 @@ const BrainModelContainerTestPage = () => (
   <div className="min-h-screen bg-gray-900 p-4">
     <h1 className="text-white text-2xl mb-6">Brain Model Container Test</h1>
     <div className="h-[80vh] border border-gray-700 rounded-lg overflow-hidden">
-      <BrainModelContainer
-        modelId="DEMO_SCAN_001"
-        patientId="DEMO_PATIENT_001"
-      />
+      <BrainModelContainer modelId="DEMO_SCAN_001" patientId="DEMO_PATIENT_001" />
     </div>
   </div>
 );

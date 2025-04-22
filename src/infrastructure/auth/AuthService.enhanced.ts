@@ -66,7 +66,9 @@ export class EnhancedAuthService {
     const now = Date.now();
     const threshold = now + expiryBuffer;
     const isExpiring = tokens.expiresAt < threshold;
-    console.log(`[EnhancedAuthService isTokenExpiredOrExpiring] expiresAt: ${tokens.expiresAt}, now: ${now}, buffer: ${expiryBuffer}, threshold: ${threshold}, isExpiring: ${isExpiring}`);
+    console.log(
+      `[EnhancedAuthService isTokenExpiredOrExpiring] expiresAt: ${tokens.expiresAt}, now: ${now}, buffer: ${expiryBuffer}, threshold: ${threshold}, isExpiring: ${isExpiring}`
+    );
     // Token is considered expired if it will expire within expiryBuffer ms (default 5 minutes)
     return isExpiring;
   }
@@ -111,7 +113,9 @@ export class EnhancedAuthService {
 
     // If a refresh is already in progress, return that promise
     if (this.refreshPromise) {
-      console.log('[refreshTokenSilently] Refresh already in progress, returning existing promise.');
+      console.log(
+        '[refreshTokenSilently] Refresh already in progress, returning existing promise.'
+      );
       return this.refreshPromise;
     }
 
@@ -122,33 +126,40 @@ export class EnhancedAuthService {
     // Check if the call returned a promise-like object before chaining
     if (refreshTokenCall && typeof refreshTokenCall.then === 'function') {
       this.refreshPromise = refreshTokenCall
-        .then(newTokens => {
+        .then((newTokens) => {
           this.storeTokens(newTokens);
           console.log('[refreshTokenSilently] Token refreshed successfully.');
           this.refreshPromise = null; // Clear promise on success
           return newTokens;
         })
-        .catch(error => {
+        .catch((error) => {
           console.error('[refreshTokenSilently] Failed to refresh token:', error);
           this.clearTokens();
           try {
             window.dispatchEvent(new CustomEvent('auth:session-expired'));
             console.log('[refreshTokenSilently] Dispatched session-expired event on failure.');
           } catch (dispatchError) {
-            console.error('[refreshTokenSilently] Error dispatching session-expired event:', dispatchError);
+            console.error(
+              '[refreshTokenSilently] Error dispatching session-expired event:',
+              dispatchError
+            );
           }
           this.refreshPromise = null; // Clear promise on failure
           return null; // Resolve null on caught error
         });
     } else {
       // Handle cases where the mock didn't return a promise (e.g., default mock was hit)
-      console.warn('[refreshTokenSilently] refreshToken call did not return a promise. Resolving null.');
+      console.warn(
+        '[refreshTokenSilently] refreshToken call did not return a promise. Resolving null.'
+      );
       this.refreshPromise = Promise.resolve(null); // Immediately resolve null
       // Clear the promise reference *after* assigning the resolved promise
-      Promise.resolve().then(() => { this.refreshPromise = null; });
+      Promise.resolve().then(() => {
+        this.refreshPromise = null;
+      });
     }
-      // Removed finally block as promise state is cleared in then/catch
-      // Removed finally block as promise state is cleared in then/catch
+    // Removed finally block as promise state is cleared in then/catch
+    // Removed finally block as promise state is cleared in then/catch
 
     return this.refreshPromise;
   }
@@ -178,9 +189,14 @@ export class EnhancedAuthService {
         // Explicitly dispatch event here to ensure it happens
         try {
           window.dispatchEvent(new CustomEvent('auth:session-expired'));
-          console.log('[DEBUG ensureValidToken] Dispatched session-expired event on refresh failure.');
+          console.log(
+            '[DEBUG ensureValidToken] Dispatched session-expired event on refresh failure.'
+          );
         } catch (dispatchError) {
-           console.error('[DEBUG ensureValidToken] Error dispatching session-expired event:', dispatchError);
+          console.error(
+            '[DEBUG ensureValidToken] Error dispatching session-expired event:',
+            dispatchError
+          );
         }
         return null;
       }
@@ -206,7 +222,8 @@ export class EnhancedAuthService {
       };
     }
 
-    if (this.isTokenExpiredOrExpiring(tokens, 0)) { // Strict expiry check for initialization
+    if (this.isTokenExpiredOrExpiring(tokens, 0)) {
+      // Strict expiry check for initialization
       try {
         const newTokens = await this.refreshTokenSilently();
         if (!newTokens) {
@@ -250,10 +267,12 @@ export class EnhancedAuthService {
       };
     } catch (error) {
       // Check if error is due to token issues
-      if (error instanceof Error && 
-          (error.message.includes('401') || 
-           error.message.includes('unauthorized') || 
-           error.message.includes('Unauthorized'))) {
+      if (
+        error instanceof Error &&
+        (error.message.includes('401') ||
+          error.message.includes('unauthorized') ||
+          error.message.includes('Unauthorized'))
+      ) {
         // Try token refresh once
         try {
           const newTokens = await this.refreshTokenSilently();
@@ -271,7 +290,7 @@ export class EnhancedAuthService {
           console.error('Refresh attempt failed:', refreshError);
         }
       }
-      
+
       this.clearTokens();
       return {
         user: null,
@@ -290,7 +309,7 @@ export class EnhancedAuthService {
     try {
       const tokens = await this.client?.login(email, password);
       this.storeTokens(tokens);
-      
+
       try {
         const user = await this.client?.getCurrentUser();
         return {
@@ -314,7 +333,7 @@ export class EnhancedAuthService {
     } catch (error) {
       // Provide more specific error messages based on error type
       let errorMessage = 'Invalid credentials';
-      
+
       if (error instanceof Error && typeof error.message === 'string') {
         const lowerCaseMessage = error.message.toLowerCase();
         if (lowerCaseMessage.includes('network') || lowerCaseMessage.includes('timeout')) {
@@ -323,9 +342,14 @@ export class EnhancedAuthService {
           errorMessage = 'Too many login attempts. Please try again later.';
         }
         // Add a log to see what error is actually caught
-        console.error('[EnhancedAuthService Login Catch] Caught Error:', error.message, ' | Assigned ErrorMessage:', errorMessage);
+        console.error(
+          '[EnhancedAuthService Login Catch] Caught Error:',
+          error.message,
+          ' | Assigned ErrorMessage:',
+          errorMessage
+        );
       }
-      
+
       return {
         user: null,
         tokens: null,
@@ -342,7 +366,7 @@ export class EnhancedAuthService {
   async logout(): Promise<AuthState> {
     const tokens = this.getStoredTokens();
     let error = null;
-    
+
     try {
       if (tokens) {
         await this.client?.logout();
@@ -352,10 +376,10 @@ export class EnhancedAuthService {
       // Set error message to be returned in the state
       error = 'Logout API call failed, but session was ended locally';
     }
-    
+
     // Clear tokens must happen outside the try-catch block
     this.clearTokens();
-    
+
     // Dispatch event in a separate try block to ensure it always attempts to execute
     try {
       // Use a more reliable event dispatch approach
@@ -389,28 +413,31 @@ export class EnhancedAuthService {
     if (isStrictlyExpired) {
       return false;
     }
-    
+
     // Then trigger background refresh if needed
     const isExpiringSoon = this.isTokenExpiredOrExpiring(tokens);
-     console.log('[DEBUG hasPermission] Expiring soon check:', isExpiringSoon);
+    console.log('[DEBUG hasPermission] Expiring soon check:', isExpiringSoon);
     if (isExpiringSoon) {
       console.log('[DEBUG hasPermission] Triggering background refresh.');
-      this.refreshTokenSilently().catch(err => console.error('Background token refresh failed:', err));
+      this.refreshTokenSilently().catch((err) =>
+        console.error('Background token refresh failed:', err)
+      );
     }
-    
+
     try {
       // Get user from storage or state management
       // Ensure interaction with the potentially mocked window.localStorage
       const userJson = window.localStorage.getItem('auth_user');
       console.log('[DEBUG hasPermission] User JSON from storage:', userJson);
       if (!userJson) {
-          console.log('[DEBUG hasPermission] No user JSON found.');
-          return false;
+        console.log('[DEBUG hasPermission] No user JSON found.');
+        return false;
       }
 
       const user = JSON.parse(userJson) as AuthUser;
       console.log('[DEBUG hasPermission] Parsed user:', user);
-      const hasPerm = user && Array.isArray(user.permissions) && user.permissions.includes(permission);
+      const hasPerm =
+        user && Array.isArray(user.permissions) && user.permissions.includes(permission);
       console.log('[DEBUG hasPermission] Permission check result:', hasPerm);
       // Check if user object and permissions array exist before accessing includes
       return hasPerm;

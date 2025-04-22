@@ -8,7 +8,13 @@ import userEvent from '@testing-library/user-event';
 
 // Mock Radix UI Tooltip components
 vi.mock('@radix-ui/react-tooltip', () => {
-  const Root = ({ children, open, defaultOpen, onOpenChange, ...props }: {
+  const Root = ({
+    children,
+    open,
+    defaultOpen,
+    onOpenChange,
+    ...props
+  }: {
     children: React.ReactNode;
     open?: boolean;
     defaultOpen?: boolean;
@@ -21,48 +27,34 @@ vi.mock('@radix-ui/react-tooltip', () => {
   );
 
   const Trigger = React.forwardRef<HTMLButtonElement, any>(({ children, ...props }, ref) => (
-    <button 
-      data-testid="tooltip-trigger" 
-      ref={ref} 
-      {...props}
-    >
+    <button data-testid="tooltip-trigger" ref={ref} {...props}>
       {children}
     </button>
   ));
 
-  const Portal = ({ children, ...props }: { 
-    children: React.ReactNode; 
-    [key: string]: any 
-  }) => (
+  const Portal = ({ children, ...props }: { children: React.ReactNode; [key: string]: any }) => (
     <div data-testid="tooltip-portal" {...props}>
       {children}
     </div>
   );
 
-  const Content = React.forwardRef<HTMLDivElement, any>(({ 
-    children, 
-    className, 
-    sideOffset,
-    side = 'top',
-    ...props 
-  }, ref) => (
-    <div 
-      data-testid="tooltip-content" 
-      data-side={side} 
-      data-state="open" 
-      ref={ref}
-      className={className}
-      style={{ '--radix-tooltip-content-transform-origin': '0' } as React.CSSProperties}
-      {...props}
-    >
-      {children}
-    </div>
-  ));
+  const Content = React.forwardRef<HTMLDivElement, any>(
+    ({ children, className, sideOffset, side = 'top', ...props }, ref) => (
+      <div
+        data-testid="tooltip-content"
+        data-side={side}
+        data-state="open"
+        ref={ref}
+        className={className}
+        style={{ '--radix-tooltip-content-transform-origin': '0' } as React.CSSProperties}
+        {...props}
+      >
+        {children}
+      </div>
+    )
+  );
 
-  const Provider = ({ children, ...props }: { 
-    children: React.ReactNode; 
-    [key: string]: any 
-  }) => (
+  const Provider = ({ children, ...props }: { children: React.ReactNode; [key: string]: any }) => (
     <div data-testid="tooltip-provider" {...props}>
       {children}
     </div>
@@ -76,7 +68,7 @@ vi.mock('@radix-ui/react-tooltip', () => {
     Trigger,
     Portal,
     Content,
-    Provider
+    Provider,
   };
 });
 
@@ -90,19 +82,19 @@ describe('Tooltip Component', () => {
         </Tooltip>
       </TooltipProvider>
     );
-    
+
     const provider = screen.getByTestId('tooltip-provider');
     const root = screen.getByTestId('tooltip-root');
     const trigger = screen.getByTestId('trigger');
     const portal = screen.getByTestId('tooltip-portal');
     const content = screen.getByTestId('content');
-    
+
     expect(provider).toBeInTheDocument();
     expect(root).toBeInTheDocument();
     expect(trigger).toBeInTheDocument();
     expect(portal).toBeInTheDocument();
     expect(content).toBeInTheDocument();
-    
+
     expect(trigger).toHaveTextContent('Hover me');
     expect(content).toHaveTextContent('Tooltip text');
   });
@@ -116,7 +108,7 @@ describe('Tooltip Component', () => {
         </Tooltip>
       </TooltipProvider>
     );
-    
+
     const content = screen.getByTestId('tooltip-content');
     expect(content).toHaveClass('z-50');
     expect(content).toHaveClass('rounded-md');
@@ -125,7 +117,7 @@ describe('Tooltip Component', () => {
     expect(content).toHaveClass('py-1.5');
     expect(content).toHaveClass('text-xs');
     expect(content).toHaveClass('text-primary-foreground');
-    
+
     // Animation classes
     expect(content).toHaveClass('animate-in');
     expect(content).toHaveClass('fade-in-0');
@@ -137,13 +129,11 @@ describe('Tooltip Component', () => {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>Hover me</TooltipTrigger>
-          <TooltipContent className="custom-tooltip">
-            Tooltip text
-          </TooltipContent>
+          <TooltipContent className="custom-tooltip">Tooltip text</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
-    
+
     const content = screen.getByTestId('tooltip-content');
     expect(content).toHaveClass('custom-tooltip');
     expect(content).toHaveClass('bg-primary'); // Still has default classes
@@ -151,18 +141,16 @@ describe('Tooltip Component', () => {
 
   it('sets custom sideOffset correctly', () => {
     const customOffset = 10;
-    
+
     renderWithProviders(
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>Hover me</TooltipTrigger>
-          <TooltipContent sideOffset={customOffset}>
-            Tooltip text
-          </TooltipContent>
+          <TooltipContent sideOffset={customOffset}>Tooltip text</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
-    
+
     const content = screen.getByTestId('tooltip-content');
     // Since we're mocking, we just need to verify the sideOffset was passed to the component
     expect(content).toBeInTheDocument();
@@ -173,31 +161,27 @@ describe('Tooltip Component', () => {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>Hover me</TooltipTrigger>
-          <TooltipContent side="bottom">
-            Tooltip text
-          </TooltipContent>
+          <TooltipContent side="bottom">Tooltip text</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
-    
+
     const content = screen.getByTestId('tooltip-content');
     expect(content).toHaveAttribute('data-side', 'bottom');
   });
 
   it('forwards ref to tooltip content', () => {
     const ref = React.createRef<HTMLDivElement>();
-    
+
     renderWithProviders(
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>Hover me</TooltipTrigger>
-          <TooltipContent ref={ref}>
-            Tooltip text
-          </TooltipContent>
+          <TooltipContent ref={ref}>Tooltip text</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
-    
+
     expect(ref.current).toBe(screen.getByTestId('tooltip-content'));
   });
 
@@ -206,13 +190,11 @@ describe('Tooltip Component', () => {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>Hover me</TooltipTrigger>
-          <TooltipContent aria-label="Additional tooltip info">
-            Tooltip text
-          </TooltipContent>
+          <TooltipContent aria-label="Additional tooltip info">Tooltip text</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
-    
+
     const content = screen.getByTestId('tooltip-content');
     expect(content).toHaveAttribute('aria-label', 'Additional tooltip info');
   });
@@ -222,31 +204,27 @@ describe('Tooltip Component', () => {
       <TooltipProvider>
         <Tooltip open={true}>
           <TooltipTrigger>Hover me</TooltipTrigger>
-          <TooltipContent>
-            Tooltip text
-          </TooltipContent>
+          <TooltipContent>Tooltip text</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
-    
+
     const root = screen.getByTestId('tooltip-root');
     expect(root).toHaveAttribute('data-state', 'open');
   });
 
   it('supports controlled tooltip with onOpenChange', () => {
     const handleOpenChange = vi.fn();
-    
+
     renderWithProviders(
       <TooltipProvider>
         <Tooltip onOpenChange={handleOpenChange}>
           <TooltipTrigger>Hover me</TooltipTrigger>
-          <TooltipContent>
-            Tooltip text
-          </TooltipContent>
+          <TooltipContent>Tooltip text</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
-    
+
     // We can't directly test onOpenChange as it's a React prop not a DOM attribute
     // Instead, we verify the component renders correctly with this prop
     const root = screen.getByTestId('tooltip-root');

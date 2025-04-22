@@ -145,10 +145,10 @@ export const NeuralControlPanel: React.FC<NeuralControlPanelProps> = ({
     selectedRegions: [] as string[],
     treatmentPredictions: [] as Array<{ id: string; name: string; efficacy: number }>, // Properly typed treatment predictions
     selectedTreatmentId: null as string | null, // Add missing property
-    performanceMetrics: { 
-      frameRate: 60, 
-      memoryUsage: 100, 
-      dataPointsProcessed: 0 
+    performanceMetrics: {
+      frameRate: 60,
+      memoryUsage: 100,
+      dataPointsProcessed: 0,
     }, // Properly typed performance metrics
     neuralActivation: new Map<string, ActivationLevel>(), // Add missing property
     temporalPatterns: [] as Array<{ id: string; timestamp: string; pattern: number[] }>, // Properly typed temporal patterns

@@ -1,7 +1,7 @@
 /* eslint-disable */
 /**
  * Neural API Client Runtime
- * 
+ *
  * Quantum-level validation utilities for API responses with neural precision
  * and HIPAA-compliant data validation for psychiatric digital twin platform
  */
@@ -98,8 +98,8 @@ function isAxiosError(error: unknown): error is {
     typeof error === 'object' &&
     error !== null &&
     'message' in error &&
-    (('response' in error && typeof error.response === 'object') || 
-     ('isAxiosError' in error && (error as { isAxiosError: boolean }).isAxiosError))
+    (('response' in error && typeof error.response === 'object') ||
+      ('isAxiosError' in error && (error as { isAxiosError: boolean }).isAxiosError))
   );
 }
 
@@ -115,7 +115,7 @@ export function transformNestedDates<T>(data: T): T {
   if (!data || typeof data !== 'object') return data;
 
   if (Array.isArray(data)) {
-    return data.map(item => transformNestedDates(item)) as unknown as T;
+    return data.map((item) => transformNestedDates(item)) as unknown as T;
   }
 
   const transformed = { ...data };
@@ -204,18 +204,18 @@ export function validateStandardResponse<T>(
 ): ApiResponse<T> {
   // Validate the response
   const validatedResponse = validateApiResponse(response);
-  
+
   // Apply transformations if needed
   let processedData = validatedResponse.data;
-  
+
   if (options.transformDates) {
     processedData = transformNestedDates(processedData);
   }
-  
+
   if (options.sanitize) {
     processedData = sanitizeResponseData(processedData);
   }
-  
+
   return {
     ...validatedResponse,
     data: processedData,

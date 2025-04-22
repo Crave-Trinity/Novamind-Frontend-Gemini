@@ -1,7 +1,7 @@
 /* eslint-disable */
 /**
  * Neural Glow Shader Implementation
- * 
+ *
  * Advanced shader implementation for quantum-level brain visualization
  * Creates an elegant, mathematically precise glow effect for neural activation
  * visualization with customizable parameters for clinically meaningful output.
@@ -38,7 +38,7 @@ export function createNeuralGlowUniforms(
     baseColor = new Color(0x4287f5),
     intensity = 1.0,
     pulseRate = 0.8,
-    noiseScale = 0.35
+    noiseScale = 0.35,
   } = options;
 
   return {
@@ -49,7 +49,7 @@ export function createNeuralGlowUniforms(
     noiseScale: { value: noiseScale },
     fadeDistance: { value: 2.5 },
     resolution: { value: new Vector3(1024, 768, 1.0) },
-    activationThreshold: { value: 0.2 }
+    activationThreshold: { value: 0.2 },
   };
 }
 
@@ -235,7 +235,7 @@ export function createNeuralGlowMaterial(
     transparent = true,
     depthWrite = false,
     blending = AdditiveBlending,
-    side = DoubleSide
+    side = DoubleSide,
   } = options;
 
   const uniforms = createNeuralGlowUniforms(options);
@@ -247,20 +247,20 @@ export function createNeuralGlowMaterial(
     transparent,
     depthWrite,
     blending,
-    side
+    side,
   });
 }
 
 // Export a single update function to animate the glow effect
 export function updateNeuralGlow(
-  material: ShaderMaterial, 
-  deltaTime: number, 
+  material: ShaderMaterial,
+  deltaTime: number,
   activationLevel: number = 1.0
 ): void {
   if (material.uniforms.time) {
     material.uniforms.time.value += deltaTime;
   }
-  
+
   if (material.uniforms.intensity) {
     // Smoothly approach the target activation level
     const currentIntensity = material.uniforms.intensity.value;

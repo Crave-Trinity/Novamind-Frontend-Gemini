@@ -1,7 +1,7 @@
 /* eslint-disable */
 /**
  * Neural Visualization Context Provider
- * 
+ *
  * Provides quantum-level control and state management for neural visualizations
  * with mathematically precise rendering control and adaptive clinical visualization
  */
@@ -82,11 +82,9 @@ export const VisualizationProvider: React.FC<VisualizationProviderProps> = ({
 
   // Loading state for asynchronous operations
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Active regions with activation levels
-  const [activeRegions, setActiveRegions] = useState<Map<string, ActivationLevel>>(
-    new Map()
-  );
+  const [activeRegions, setActiveRegions] = useState<Map<string, ActivationLevel>>(new Map());
 
   // Update visualization settings
   const updateSettings = (newSettings: Partial<VisualizationSettings>) => {
@@ -134,11 +132,7 @@ export const VisualizationProvider: React.FC<VisualizationProviderProps> = ({
     captureSnapshot,
   };
 
-  return (
-    <VisualizationContext.Provider value={value}>
-      {children}
-    </VisualizationContext.Provider>
-  );
+  return <VisualizationContext.Provider value={value}>{children}</VisualizationContext.Provider>;
 };
 
 // Custom hook for using the visualization context

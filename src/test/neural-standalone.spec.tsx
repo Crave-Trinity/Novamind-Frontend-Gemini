@@ -12,15 +12,11 @@ import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
 // Mock all external dependencies in a single place with quantum precision
- 
- 
+
 beforeAll(() => {
   // Mock Three.js with clinical precision
- 
- 
+
   vi.mock('three', () => ({
- 
- 
     Object3D: vi.fn().mockImplementation(() => ({
       position: { x: 0, y: 0, z: 0 },
       rotation: { x: 0, y: 0, z: 0 },
@@ -28,21 +24,18 @@ beforeAll(() => {
       add: vi.fn(),
       remove: vi.fn(),
     })),
- 
- 
+
     Scene: vi.fn().mockImplementation(() => ({
       add: vi.fn(),
       remove: vi.fn(),
       children: [],
     })),
- 
- 
+
     PerspectiveCamera: vi.fn().mockImplementation(() => ({
       position: { x: 0, y: 0, z: 5 },
       lookAt: vi.fn(),
     })),
- 
- 
+
     WebGLRenderer: vi.fn().mockImplementation(() => ({
       setSize: vi.fn(),
       render: vi.fn(),
@@ -50,8 +43,7 @@ beforeAll(() => {
     })),
     Color: vi.fn(),
     Vector3: vi.fn().mockImplementation((x = 0, y = 0, z = 0) => ({ x, y, z })),
- 
- 
+
     Group: vi.fn().mockImplementation(() => ({
       add: vi.fn(),
       remove: vi.fn(),
@@ -69,8 +61,7 @@ beforeAll(() => {
   }));
 
   // Mock React Three Fiber with mathematical elegance
- 
- 
+
   vi.mock('@react-three/fiber', () => ({
     Canvas: vi
       .fn()
@@ -84,8 +75,7 @@ beforeAll(() => {
   }));
 
   // Mock React Three Drei with quantum precision
- 
- 
+
   vi.mock('@react-three/drei', () => ({
     OrbitControls: vi.fn().mockImplementation(() => null),
     Html: vi.fn().mockImplementation(({ children }) => children),
@@ -98,8 +88,7 @@ beforeAll(() => {
   }));
 
   // Mock React Three A11y with clinical precision
- 
- 
+
   vi.mock('@react-three/a11y', () => ({
     A11y: vi.fn().mockImplementation(({ children }) => children),
     useA11y: vi.fn().mockReturnValue({
@@ -137,8 +126,7 @@ beforeAll(() => {
     // Corrected requestAnimationFrame mock signature
     window.requestAnimationFrame = vi
       .fn()
- 
- 
+
       .mockImplementation((callback: FrameRequestCallback): number => {
         // Return a number as expected by cancelAnimationFrame
         return window.setTimeout(() => callback(performance.now()), 16); // Use performance.now and simulate ~60fps
@@ -146,8 +134,7 @@ beforeAll(() => {
 
     // Mock cancelAnimationFrame
     // Corrected cancelAnimationFrame mock signature
- 
- 
+
     window.cancelAnimationFrame = vi.fn().mockImplementation((id: number): void => {
       window.clearTimeout(id);
     });
@@ -158,15 +145,12 @@ beforeAll(() => {
     // Further refined getContext mock to align with overloaded signatures
     HTMLCanvasElement.prototype.getContext = function (
       contextId: string,
- 
- 
+
       _options?: any // eslint-disable-line @typescript-eslint/no-explicit-any // Prefixed unused options
- 
- 
-    ): any {  
+    ): any {
       // Use 'any' return type initially for flexibility
       // Function body starts here
-        if (contextId === 'webgl' || contextId === 'webgl2') {
+      if (contextId === 'webgl' || contextId === 'webgl2') {
         // Return a basic mock WebGL context
         return {
           clear: vi.fn(),
@@ -236,8 +220,7 @@ beforeAll(() => {
 });
 
 // Define a standalone component that mimics the structure of BrainModelContainer
- 
- 
+
 const NeuralBrainContainer = ({ patientId = 'TEST-PATIENT-123' }) => {
   return (
     <div data-testid="neural-container" className="w-full h-full flex flex-col">
@@ -255,11 +238,7 @@ const NeuralBrainContainer = ({ patientId = 'TEST-PATIENT-123' }) => {
   );
 };
 
- 
- 
 describe('Neural Standalone Test', () => {
- 
- 
   it('renders the neural container with quantum precision', () => {
     // Render the component with clinical precision
     render(<NeuralBrainContainer />);
@@ -276,8 +255,6 @@ describe('Neural Standalone Test', () => {
     expect(screen.getByText(/Neural Controls for Patient: TEST-PATIENT-123/)).toBeInTheDocument();
   });
 
- 
- 
   it('handles patient ID with clinical precision', () => {
     // Render with custom patient ID
     render(<NeuralBrainContainer patientId="NOVA-456" />);

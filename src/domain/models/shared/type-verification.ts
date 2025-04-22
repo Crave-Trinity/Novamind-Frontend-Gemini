@@ -36,8 +36,7 @@ export class TypeVerificationError extends Error {
 
     // Format the error message to match expected test patterns
     const message =
-      customMessage ||
-      `Expected ${expectedType}${path}, but received ${typeDescription}`;
+      customMessage || `Expected ${expectedType}${path}, but received ${typeDescription}`;
 
     super(message);
 
@@ -65,7 +64,10 @@ export function assertDefined<T>(value: T | undefined, propertyPath?: string): a
 /**
  * Asserts that a value is present (not null or undefined)
  */
-export function assertPresent<T>(value: T | null | undefined, propertyPath?: string): asserts value is T {
+export function assertPresent<T>(
+  value: T | null | undefined,
+  propertyPath?: string
+): asserts value is T {
   if (value === null || value === undefined) {
     throw new TypeVerificationError('non-null and defined value', value, propertyPath);
   }
@@ -110,7 +112,10 @@ export function assertArray(value: unknown, propertyPath?: string): asserts valu
 /**
  * Asserts that a value is an object (not null, not an array)
  */
-export function assertObject(value: unknown, propertyPath?: string): asserts value is Record<string, unknown> {
+export function assertObject(
+  value: unknown,
+  propertyPath?: string
+): asserts value is Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     throw new TypeVerificationError('object', value, propertyPath);
   }
@@ -204,7 +209,7 @@ export function isOneOf<T extends string | number>(
   allowedValues: readonly T[]
 ): (value: unknown) => value is T {
   return (value: unknown): value is T => {
-    return typeof value === (typeof allowedValues[0]) && allowedValues.includes(value as T);
+    return typeof value === typeof allowedValues[0] && allowedValues.includes(value as T);
   };
 }
 
@@ -256,11 +261,9 @@ export function isArrayOf<T>(
 /**
  * Creates a type guard for objects with specific properties
  */
-export function isObjectWithProperties<T extends Record<string, unknown>>(
-  propertyTypeGuards: {
-    [K in keyof T]-?: (v: unknown) => v is T[K];
-  }
-): (value: unknown) => value is T {
+export function isObjectWithProperties<T extends Record<string, unknown>>(propertyTypeGuards: {
+  [K in keyof T]-?: (v: unknown) => v is T[K];
+}): (value: unknown) => value is T {
   return (value: unknown): value is T => {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       return false;
@@ -272,7 +275,7 @@ export function isObjectWithProperties<T extends Record<string, unknown>>(
     for (const prop of properties) {
       const propValue = obj[prop as string];
       const typeGuard = propertyTypeGuards[prop];
-      
+
       if (!typeGuard(propValue)) {
         return false;
       }
@@ -285,9 +288,7 @@ export function isObjectWithProperties<T extends Record<string, unknown>>(
 /**
  * @param propertyPath Optional path for error messages
  */
-export function isNumber(
-  value: unknown, propertyPath?: string
-): value is number {
+export function isNumber(value: unknown, propertyPath?: string): value is number {
   if (typeof value !== 'number') {
     throw new TypeVerificationError('number', value, propertyPath);
   }
@@ -311,7 +312,10 @@ export function assertIsOneOf<T extends string | number | boolean>(
 /**
  * Asserts that a value is a string array
  */
-export function assertStringArray(value: unknown, propertyPath?: string): asserts value is string[] {
+export function assertStringArray(
+  value: unknown,
+  propertyPath?: string
+): asserts value is string[] {
   if (!Array.isArray(value)) {
     throw new TypeVerificationError('string[]', value, propertyPath);
   }
@@ -360,10 +364,10 @@ export function assertObjectWithProperties<T extends Record<string, unknown>>(
   for (const prop of properties) {
     const propValue = obj[prop as string];
     const typeGuard = propertyTypeGuards[prop];
-    
+
     if (!typeGuard(propValue)) {
       throw new TypeVerificationError(
-        `property '${String(prop)}'`, 
+        `property '${String(prop)}'`,
         propValue,
         `${propertyPath ?? 'object'}.${String(prop)}`
       );

@@ -1,11 +1,19 @@
 /* eslint-disable */
-import React, { useState, useEffect, useMemo, useCallback, type ReactNode, createContext, useContext } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  type ReactNode,
+  createContext,
+  useContext,
+} from 'react';
 
 // Define the audit log event types enum
 enum AuditEventType {
   SYSTEM_CONFIG_CHANGE = 'SYSTEM_CONFIG_CHANGE',
   USER_LOGIN = 'USER_LOGIN',
-  USER_LOGOUT = 'USER_LOGOUT'
+  USER_LOGOUT = 'USER_LOGOUT',
 }
 
 // Mock audit log client for tests
@@ -13,29 +21,32 @@ const auditLogClient = {
   log: (eventType: AuditEventType, data: any) => {
     // Mock implementation that does nothing in tests
     return;
-  }
+  },
 };
 
 // Define ThemeMode type
 export type ThemeMode = 'light' | 'dark' | 'system' | 'clinical' | 'sleek-dark' | 'retro' | 'wes';
 
 // Create a context for the theme
-export const ThemeContext = createContext<{
-  mode: ThemeMode;
-  theme: 'light' | 'dark';
-  isDarkMode: boolean;
-  setTheme: (theme: ThemeMode) => void;
-  toggleTheme: () => void;
-} | undefined>(undefined);
+export const ThemeContext = createContext<
+  | {
+      mode: ThemeMode;
+      theme: 'light' | 'dark';
+      isDarkMode: boolean;
+      setTheme: (theme: ThemeMode) => void;
+      toggleTheme: () => void;
+    }
+  | undefined
+>(undefined);
 
 // Hook for using the theme context
 export const useTheme = () => {
   const context = useContext(ThemeContext);
-  
+
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
-  
+
   return context;
 };
 

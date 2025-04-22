@@ -1,7 +1,7 @@
 /* eslint-disable */
 /**
  * Neural User Context Provider
- * 
+ *
  * Manages quantum-level user state and authentication with clinical precision
  * for psychiatric digital twin platform operations
  */
@@ -96,10 +96,7 @@ const mockUser: UserProfile = {
 };
 
 // Neural provider implementation
-export const UserProvider: React.FC<UserProviderProps> = ({
-  children,
-  initialUser = null,
-}) => {
+export const UserProvider: React.FC<UserProviderProps> = ({ children, initialUser = null }) => {
   const [user, setUser] = useState<UserProfile | null>(initialUser);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -126,7 +123,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       // Mock login logic for testing
       if (email && password) {
@@ -146,7 +143,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   // Logout with neural security
   const logout = async () => {
     setIsLoading(true);
-    
+
     try {
       // Mock logout logic
       setUser(null);
@@ -162,7 +159,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   // Update user profile with neural precision
   const updateProfile = async (updates: Partial<UserProfile>) => {
     setIsLoading(true);
-    
+
     try {
       // Mock update logic
       if (user) {
@@ -184,7 +181,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     if (!user) {
       throw new Error('User not authenticated');
     }
-    
+
     try {
       const updatedPreferences = {
         ...user.preferences,
@@ -194,7 +191,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
           ...(updates.visualizationDefaults || {}),
         },
       };
-      
+
       // In a real app, would call an API
       setUser({
         ...user,
@@ -211,7 +208,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     if (!user) {
       throw new Error('User not authenticated');
     }
-    
+
     try {
       // In a real app, would call an API
       setUser({
@@ -243,11 +240,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({
 // Custom hook for using the user context
 export const useUser = (): UserContextType => {
   const context = useContext(UserContext);
-  
+
   if (context === undefined) {
     throw new Error('useUser must be used within a UserProvider');
   }
-  
+
   return context;
 };
 

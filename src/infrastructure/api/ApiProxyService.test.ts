@@ -10,8 +10,12 @@ describe('ApiProxyService', () => {
     });
 
     it('should map Digital Twin endpoints correctly', () => {
-      expect(ApiProxyService.mapPath('/v1/ml/digital-twin/conversation')).toBe('ml/mentalllama/conversation');
-      expect(ApiProxyService.mapPath('v1/ml/digital-twin/sessions')).toBe('ml/mentalllama/sessions');
+      expect(ApiProxyService.mapPath('/v1/ml/digital-twin/conversation')).toBe(
+        'ml/mentalllama/conversation'
+      );
+      expect(ApiProxyService.mapPath('v1/ml/digital-twin/sessions')).toBe(
+        'ml/mentalllama/sessions'
+      );
     });
 
     it('should map PHI endpoints correctly', () => {
@@ -21,7 +25,9 @@ describe('ApiProxyService', () => {
 
     it('should map Brain Model endpoints correctly', () => {
       expect(ApiProxyService.mapPath('/v1/brain-models')).toBe('ml/brain/brain-models');
-      expect(ApiProxyService.mapPath('v1/brain-models/123/regions')).toBe('ml/brain/brain-models/123/regions');
+      expect(ApiProxyService.mapPath('v1/brain-models/123/regions')).toBe(
+        'ml/brain/brain-models/123/regions'
+      );
     });
 
     it('should map Patient endpoints correctly', () => {
@@ -30,11 +36,15 @@ describe('ApiProxyService', () => {
     });
 
     it('should map risk assessment endpoints correctly', () => {
-      expect(ApiProxyService.mapPath('/v1/patients/123/risk-assessment')).toBe('xgboost/predict-risk/123');
+      expect(ApiProxyService.mapPath('/v1/patients/123/risk-assessment')).toBe(
+        'xgboost/predict-risk/123'
+      );
     });
 
     it('should map treatment prediction endpoints correctly', () => {
-      expect(ApiProxyService.mapPath('/v1/patients/123/predict-treatment')).toBe('xgboost/predict-treatment-response');
+      expect(ApiProxyService.mapPath('/v1/patients/123/predict-treatment')).toBe(
+        'xgboost/predict-treatment-response'
+      );
     });
 
     it('should map auth endpoints correctly', () => {
@@ -49,16 +59,16 @@ describe('ApiProxyService', () => {
         patientId: '123',
         treatmentType: 'medication',
         details: { dose: '10mg' },
-        factors: { age: 45 }
+        factors: { age: 45 },
       };
-      
+
       const result = ApiProxyService.mapRequestData('patients/123/predict-treatment', data);
-      
+
       expect(result).toEqual({
         patient_id: '123',
         treatment_type: 'medication',
         treatment_details: { dose: '10mg' },
-        contextual_factors: { age: 45 }
+        contextual_factors: { age: 45 },
       });
     });
 
@@ -66,16 +76,16 @@ describe('ApiProxyService', () => {
       const data = {
         sessionId: '123',
         message: 'Hello',
-        senderId: 'user-456'
+        senderId: 'user-456',
       };
-      
+
       const result = ApiProxyService.mapRequestData('ml/digital-twin/conversation', data);
-      
+
       expect(result).toEqual({
         session_id: '123',
         message: 'Hello',
         sender_id: 'user-456',
-        sender_type: 'user'
+        sender_type: 'user',
       });
     });
 
@@ -92,16 +102,16 @@ describe('ApiProxyService', () => {
         risk_level: 'medium',
         risk_factors: ['factor1', 'factor2'],
         recommendations: ['rec1', 'rec2'],
-        confidence_score: 0.85
+        confidence_score: 0.85,
       };
-      
+
       const result = ApiProxyService.mapResponseData('xgboost/predict-risk/123', data);
-      
+
       expect(result).toEqual({
         riskLevel: 'medium',
         riskFactors: ['factor1', 'factor2'],
         recommendations: ['rec1', 'rec2'],
-        confidenceScore: 0.85
+        confidenceScore: 0.85,
       });
     });
 
@@ -116,14 +126,14 @@ describe('ApiProxyService', () => {
             message_id: 'm1',
             content: 'Hello',
             sender_type: 'user',
-            timestamp: '2023-01-01T12:00:00Z'
-          }
+            timestamp: '2023-01-01T12:00:00Z',
+          },
         ],
-        insights: ['insight1', 'insight2']
+        insights: ['insight1', 'insight2'],
       };
-      
+
       const result = ApiProxyService.mapResponseData('ml/mentalllama/sessions/123', data);
-      
+
       expect(result).toEqual({
         id: '123',
         status: 'active',
@@ -134,10 +144,10 @@ describe('ApiProxyService', () => {
             id: 'm1',
             content: 'Hello',
             sender: 'user',
-            timestamp: '2023-01-01T12:00:00Z'
-          }
+            timestamp: '2023-01-01T12:00:00Z',
+          },
         ],
-        insights: ['insight1', 'insight2']
+        insights: ['insight1', 'insight2'],
       });
     });
 
@@ -152,9 +162,9 @@ describe('ApiProxyService', () => {
     it('should return existing ApiResponse structure unchanged', () => {
       const response = {
         data: { key: 'value' },
-        meta: { page: 1 }
+        meta: { page: 1 },
       };
-      
+
       const result = ApiProxyService.standardizeResponse(response);
       expect(result).toEqual(response);
     });
@@ -163,7 +173,7 @@ describe('ApiProxyService', () => {
       const data = { key: 'value' };
       const result = ApiProxyService.standardizeResponse(data);
       expect(result).toEqual({
-        data: { key: 'value' }
+        data: { key: 'value' },
       });
     });
   });
