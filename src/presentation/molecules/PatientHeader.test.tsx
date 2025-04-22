@@ -5,12 +5,13 @@
  */
 // Removed unused React import (new JSX transform)
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'; // Removed unused vi
-import { render, screen } from '@testing-library/react'; // Restored render, removed unused fireEvent
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Restored render, removed unused fireEvent
 // Removed unused userEvent import
 import { setupWebGLMocks, cleanupWebGLMocks } from '../../test/webgl'; // Fixed relative path
 import { PatientHeader } from './PatientHeader';
 // Removed unused renderWithProviders import
-import type { Patient } from '@domain/types/clinical/patient'; // Added import for Patient type
+import type { Patient } from '../../../domain/types/clinical/patient'; // Added import for Patient type
 
 // Setup WebGL mocks with memory monitoring - Moved outside describe block
 beforeEach(() => {

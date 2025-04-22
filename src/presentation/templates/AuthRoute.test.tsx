@@ -6,7 +6,8 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'; // Removed unused afterEach
 // Removed unused React import
-import { screen } from '@testing-library/react'; // Removed unused render
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Removed unused render
 import { renderWithProviders } from '../../test/test-utils.unified';
 
 // Mock react-router-dom components needed by AuthRoute

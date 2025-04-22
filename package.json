@@ -14,7 +14,7 @@
     "test:coverage": "vitest run --coverage --config config/vitest.config.ts",
     "test:safe": "npx ts-node --esm scripts/run-with-timeout.ts",
     "test:tailwind": "npx ts-node --esm scripts/run-tailwind-tests.ts",
-    "test:unified": "vitest run --no-threads --config vitest.config.unified.ts",
+    "test:unified": "vitest run --config vitest.config.unified.ts",
     "test:webgl": "npx ts-node --esm scripts/run-all-tests-with-webgl.ts",
     "test:visualization": "npx ts-node --esm scripts/run-3d-visualization-tests.ts --dir=src/presentation --pattern=\"**/*{Visua,Render,Brain,3D,Three}*.test.tsx\"",
     "lint": "eslint src/**/*.ts src/**/*.tsx",

@@ -1,5 +1,6 @@
 /* eslint-disable */
-import { render, screen, act, cleanup, waitFor } from '@testing-library/react'; // Import waitFor
+import { render, screen, act, cleanup, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Import waitFor
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ThemeProvider, useTheme } from './ThemeProvider';

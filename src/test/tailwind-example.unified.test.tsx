@@ -3,7 +3,8 @@
  */
 import React from 'react';
 import { describe, it, expect } from 'vitest'; // Removed unused beforeEach, afterEach
-import { screen, act, waitFor } from '@testing-library/react'; // Import act and waitFor
+import { screen, act, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Import act and waitFor
 import { renderWithProviders } from './test-utils.unified'; // Use correct import
 
 // Sample component that uses Tailwind classes including dark mode variants

@@ -5,6 +5,7 @@
 // Import the test setup first to ensure JSDOM environment is properly configured
 import '../../test/setup.ts';
 import { render, screen, act, cleanup, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ThemeProvider, useTheme } from './ThemeProvider'; // Import from presentation layer

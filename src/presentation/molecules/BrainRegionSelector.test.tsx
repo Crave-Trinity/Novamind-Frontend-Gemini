@@ -6,6 +6,7 @@
 // Removed unused React import (new JSX transform)
 import { describe, it, expect, vi } from 'vitest'; // Added vi import
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import BrainRegionSelector from './BrainRegionSelector';
 
 describe('BrainRegionSelector', () => {

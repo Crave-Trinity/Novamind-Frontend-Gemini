@@ -5,7 +5,8 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 
-import { screen } from '@testing-library/react'; // Removed unused render, fireEvent
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Removed unused render, fireEvent
 // Removed unused React import
 // Removed unused userEvent import
 import { NeuralControlPanel } from './NeuralControlPanel'; // Corrected to named import

@@ -5,7 +5,8 @@
  */
 import { describe, it, expect } from 'vitest'; // Removed unused vi import
 
-import { screen } from '@testing-library/react'; // render is imported from unified utils, Removed unused fireEvent
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // render is imported from unified utils, Removed unused fireEvent
 import React from 'react';
 // Removed unused userEvent import
 import ErrorBoundary from './ErrorBoundary'; // Assuming default export

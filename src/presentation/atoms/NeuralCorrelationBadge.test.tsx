@@ -5,7 +5,8 @@
  */
 
 import { describe, it, expect, afterEach } from 'vitest'; // Import afterEach
-import { cleanup } from '@testing-library/react'; // Import cleanup
+import { cleanup } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Import cleanup
 import { render, screen } from '@testing-library/react';
 import { NeuralCorrelationBadge } from './NeuralCorrelationBadge';
 

@@ -6,6 +6,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
 // Create mock implementation for useTheme
 const mockThemeData = {

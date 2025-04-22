@@ -5,7 +5,8 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 
-import { screen } from '@testing-library/react'; // render is imported from unified utils, removed unused fireEvent
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // render is imported from unified utils, removed unused fireEvent
 // Removed unused React import (new JSX transform)
 // Removed unused userEvent import
 import RegionSelectionPanel from './RegionSelectionPanel'; // Assuming default export

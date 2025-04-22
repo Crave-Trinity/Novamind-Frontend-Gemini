@@ -6,7 +6,8 @@
 import React from 'react'; // Import React
 import type { Mock } from 'vitest';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'; // Import Mock
-import { screen, cleanup } from '@testing-library/react'; // Import cleanup, Removed unused render
+import { screen, cleanup } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Import cleanup, Removed unused render
 // Removed unused userEvent import
 import * as ReactRouterDom from 'react-router-dom'; // Import all for mocking
 

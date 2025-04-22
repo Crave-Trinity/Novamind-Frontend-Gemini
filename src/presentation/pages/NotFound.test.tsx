@@ -5,7 +5,8 @@
  */
 import { describe, it, expect } from 'vitest'; // Removed unused vi import
 
-import { render, screen } from '@testing-library/react'; // Removed unused fireEvent import
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Removed unused fireEvent import
 import { MemoryRouter } from 'react-router-dom';
 // Removed unused userEvent import
 import NotFound from '@presentation/pages/NotFound'; // Corrected import path

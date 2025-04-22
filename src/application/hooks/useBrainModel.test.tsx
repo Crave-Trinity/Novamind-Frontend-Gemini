@@ -5,6 +5,7 @@
 import * as React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { useBrainModel } from '@hooks/useBrainModel';
 import { createMockBrainRegions } from '../../test/three-test-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

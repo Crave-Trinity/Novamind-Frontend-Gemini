@@ -7,7 +7,8 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react'; // Re-added React import for type usage
-import { screen, within } from '@testing-library/react'; // Import within
+import { screen, within } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Import within
 import { renderWithProviders } from '../../test/test-utils.unified'; // Import unified render
 
 // Mock next-themes

@@ -6,7 +6,8 @@
 
 import { describe, it, expect } from 'vitest'; // Removed unused vi
 
-import { render, screen } from '@testing-library/react'; // Restored render, removed unused fireEvent
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Restored render, removed unused fireEvent
 // Removed unused userEvent import
 import { ClinicalMetricCard } from './ClinicalMetricsCard';
 // Removed incorrect import: import { renderWithProviders } from '@test/test-utils';

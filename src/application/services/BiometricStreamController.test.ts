@@ -6,6 +6,7 @@
 
 import { describe, it, expect, vi, beforeEach, type Mocked } from 'vitest'; // Already correct
 import { renderHook, act, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { biometricService } from '@application/services/biometricService';
 import { useBiometricStreamController } from '@application/services/BiometricStreamController'; // Corrected path
 import {

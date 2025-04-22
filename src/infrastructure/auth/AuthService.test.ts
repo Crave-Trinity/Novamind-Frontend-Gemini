@@ -3,7 +3,8 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { waitFor } from '@testing-library/react'; // Import waitFor
+import { waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Import waitFor
 import { AuthService, AuthTokens, AuthUser, AuthApiClient } from './index'; // Import AuthApiClient for mocking
 
 // Rely on the global mockLocalStorage defined in src/test/setup.ts

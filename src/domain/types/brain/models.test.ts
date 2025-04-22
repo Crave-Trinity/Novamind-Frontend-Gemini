@@ -16,7 +16,7 @@ import type {
   // 'undefined' is not a type to import
   // BrainModelOps is not used in these tests
 } from '@domain/types/brain/models'; // Corrected path
-import type { Vector3 } from '@domain/types/shared/common'; // Import Vector3
+import type { Vector3 } from '../../../domain/types/shared/common'; // Import Vector3
 // ActivationLevel is not used here directly
 
 describe('models type definitions', () => {

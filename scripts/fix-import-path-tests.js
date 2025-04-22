@@ -5,9 +5,14 @@
  * path aliases and ensure tests can find their dependencies.
  */
 
-const fs = require('fs');
-const path = require('path');
-const glob = require('glob');
+import fs from 'fs';
+import path from 'path';
+import * as glob from 'glob';
+import { fileURLToPath } from 'url';
+
+// Get __dirname equivalent in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Map of paths that need fixing
 const importPathReplacements = {
@@ -61,7 +66,7 @@ const updateImportsInFile = (filePath) => {
 };
 
 // Main function
-const main = () => {
+const main = async () => {
   const files = findTestFiles();
   console.log(`Found ${files.length} test files to process.`);
   
@@ -76,4 +81,4 @@ const main = () => {
 };
 
 // Run the script
-main();
+await main();

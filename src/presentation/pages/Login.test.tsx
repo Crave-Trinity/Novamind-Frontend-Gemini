@@ -6,7 +6,8 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { render, screen, within, cleanup } from '@testing-library/react'; // Import cleanup
+import { render, screen, within, cleanup } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Import cleanup
 // Removed unused userEvent import
 
 // Mock dependencies before importing the component

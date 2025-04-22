@@ -11,6 +11,7 @@ import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vite
 import React, { type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider, QueryObserverResult, RefetchOptions } from '@tanstack/react-query'; // Added missing types
 import { renderHook, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { useBrainVisualization } from '../hooks/useBrainVisualization'; // Use relative path
 import { apiClient } from '../../infrastructure/api/apiClient'; // Correct casing to match hook
 import type { BrainModel } from '../../domain/types/brain/models'; // Use relative path

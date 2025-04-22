@@ -3,6 +3,7 @@
  */
 import React from 'react';
 import { screen, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { useTheme } from '@application/hooks/useTheme'; // Correct import path for the hook
 import type { Mock } from 'vitest';
 import { vi, describe, it, expect, beforeEach } from 'vitest'; // Import vi, Mock, etc.

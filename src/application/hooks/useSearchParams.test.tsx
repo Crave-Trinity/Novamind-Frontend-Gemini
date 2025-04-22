@@ -6,7 +6,8 @@
 
 import React, { type PropsWithChildren } from 'react'; // Already correct
 import { describe, it, expect, vi, type Mock } from 'vitest'; // Already correct
-import { renderHook } from '@testing-library/react'; // Removed unused render, screen, fireEvent
+import { renderHook } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Removed unused render, screen, fireEvent
 import { MemoryRouter, useSearchParams as useReactRouterSearchParams } from 'react-router-dom'; // Keep single import
 import { useSearchParams } from '@hooks/useSearchParams'; // Import the custom hook
 

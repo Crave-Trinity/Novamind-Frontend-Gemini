@@ -5,7 +5,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'; // Removed SpyInstance
-import { renderHook } from '@testing-library/react'; // Updated import source
+import { renderHook } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Updated import source
 import React from 'react';
 // Import the hook itself and the context type, but not the provider
 // Import hook and context from ThemeProvider

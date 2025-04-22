@@ -5,7 +5,8 @@
  */
 import { describe, it, expect } from 'vitest'; // Removed unused vi import
 
-import { screen } from '@testing-library/react'; // Removed unused render, fireEvent
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Removed unused render, fireEvent
 // Removed unused React import
 // Removed unused userEvent import
 import TreatmentResponsePredictor from './TreatmentResponsePredictor'; // Assuming default export
@@ -18,7 +19,7 @@ import type {
   NeuralData,
   DataPermissions,
   TreatmentData,
-} from '@domain/types/clinical/patient';
+} from '../../../domain/types/clinical/patient';
 // Removed unused imports from @domain/types/clinical/patient
 // Removed unused RiskAssessment import
 // TreatmentResponse type is likely in treatment.ts, but not needed for this mock setup yet

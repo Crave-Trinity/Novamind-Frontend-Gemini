@@ -5,7 +5,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react'; // Import renderHook and act
+import { renderHook, act } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Import renderHook and act
 
 import useNeuroSyncOrchestrator from '@application/services/NeuroSyncOrchestrator'; // Removed unused: NeuroSyncState // Corrected path
 

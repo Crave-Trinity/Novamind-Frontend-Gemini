@@ -1,5 +1,6 @@
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { renderWithProviders } from '../../test/test-utils.unified';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
 import userEvent from '@testing-library/user-event';

@@ -7,7 +7,8 @@
  * test hanging or memory leaks.
  */
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
-import { screen, fireEvent } from '@testing-library/react'; // Remove render
+import { screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Remove render
 import {
   setupWebGLMocks as setupWebGLForTest,
   cleanupWebGLMocks as cleanupWebGLAfterTest,

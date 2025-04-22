@@ -8,6 +8,7 @@
 import React from 'react';
 // Import render and act from testing-library directly
 import { render, waitFor, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
 // No userEvent needed as we removed button interactions
 // import userEvent from '@testing-library/user-event'; 
 import { vi, afterEach, describe, it, expect } from 'vitest'; // Removed unused beforeEach

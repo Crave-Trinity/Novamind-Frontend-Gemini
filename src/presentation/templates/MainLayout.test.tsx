@@ -4,7 +4,8 @@
  * MainLayout testing with quantum precision
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'; // Import hooks
-import { screen } from '@testing-library/react'; // render is imported from unified utils
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // render is imported from unified utils
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import MainLayout from './MainLayout'; // Assuming default export

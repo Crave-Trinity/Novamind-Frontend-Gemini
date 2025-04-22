@@ -1,5 +1,6 @@
 import React from 'react';
-import { screen, act, waitFor } from '@testing-library/react'; // Import act and waitFor
+import { screen, act, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Import act and waitFor
 import { renderWithProviders } from './test-utils.unified'; // Use unified setup
 
 /**

@@ -57,7 +57,7 @@ beforeEach(() => {
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       configurable: true,
-      value: vi.fn().mockImplementation((query: string) => ({
+      value: vi.fn().mockImplementation((query) => ({
         matches: query.includes('(prefers-color-scheme: dark)'),
         media: query,
         onchange: null,
@@ -68,21 +68,6 @@ beforeEach(() => {
         dispatchEvent: vi.fn(),
       })),
     });
-    
-    // INTERSECTION OBSERVER
-    window.IntersectionObserver = vi.fn().mockImplementation(() => ({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-      takeRecords: () => [],
-    }));
-    
-    // RESIZE OBSERVER
-    window.ResizeObserver = vi.fn().mockImplementation(() => ({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-    }));
     
     // URL OBJECT
     if (window.URL) {

@@ -5,7 +5,8 @@
  */
 import { describe, it, expect } from 'vitest'; // Removed unused vi import
 
-import { screen } from '@testing-library/react'; // Removed unused fireEvent import
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Removed unused fireEvent import
 // Remove MemoryRouter import, it's provided by renderWithProviders
 // Removed unused userEvent import
 import Dashboard from '@pages/Dashboard'; // Use correct alias

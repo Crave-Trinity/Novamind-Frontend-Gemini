@@ -6,7 +6,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { ClinicalTypeVerifier } from './type-verification'; // Use relative path
-import { RiskLevel } from '@domain/types/clinical/risk';
+import { RiskLevel } from '../../../domain/types/clinical/risk';
 import type {
   Patient,
   Symptom,
@@ -16,8 +16,8 @@ import type {
   MedicalHistoryItem,
   Treatment,
   TreatmentResponse,
-} from '@domain/types/clinical/patient'; // Import necessary types
-// Removed unused import: import { TypeVerificationError } from '@domain/utils/shared/type-verification';
+} from '../../../domain/types/clinical/patient'; // Import necessary types
+// Removed unused import: import { TypeVerificationError } from '../../../domain/utils/shared/type-verification';
 
 describe('Clinical type verification', () => {
   const verifierInstance = new ClinicalTypeVerifier(); // Instantiate the class

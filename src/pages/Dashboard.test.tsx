@@ -4,7 +4,8 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 
-import { screen, within } from '@testing-library/react'; // Added 'within' import, removed fireEvent
+import { screen, within } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Added 'within' import, removed fireEvent
 // Remove MemoryRouter import, it's provided by renderWithProviders
 import userEvent from '@testing-library/user-event';
 import Dashboard from '@pages/Dashboard'; // Use correct alias

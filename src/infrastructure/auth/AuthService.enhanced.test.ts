@@ -5,7 +5,8 @@
 // Ensure global test setup is applied
 import '../../test/setup';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { waitFor } from '@testing-library/react'; // Import waitFor
+import { waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Import waitFor
 import { EnhancedAuthService } from './AuthService.enhanced';
 import { AuthTokens, AuthUser, AuthApiClient } from './index'; // Import AuthApiClient for mocking
 

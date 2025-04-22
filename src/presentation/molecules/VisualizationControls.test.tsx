@@ -9,7 +9,8 @@ import { describe, it, expect, vi } from 'vitest'; // Removed unused beforeEach,
 // import { setupWebGLMocks, cleanupWebGLMocks } from '../../test/webgl';
 // Removed beforeEach import
 
-import { screen } from '@testing-library/react'; // Removed unused render, fireEvent
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Removed unused render, fireEvent
 import userEvent from '@testing-library/user-event';
 import VisualizationControls from './VisualizationControls';
 import { renderWithProviders } from '../../test/test-utils.unified';

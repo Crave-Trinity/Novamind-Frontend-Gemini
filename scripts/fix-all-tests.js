@@ -8,6 +8,11 @@
 import { execSync } from 'child_process';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+// Get __dirname equivalent in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 console.log('🧠 NOVAMIND TEST FIX UTILITY 🧠');
 console.log('Applying comprehensive fixes to all failing tests...');
@@ -112,7 +117,4 @@ const main = async () => {
 };
 
 // Run the main function
-main().catch(error => {
-  console.error(`❌ Unexpected error: ${error.message}`);
-  process.exit(1);
-});
+await main();

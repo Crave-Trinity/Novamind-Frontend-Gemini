@@ -6,12 +6,13 @@
 
 import { describe, it, expect } from 'vitest'; // Removed unused vi import
 
-import { screen } from '@testing-library/react'; // Removed unused render, fireEvent
+import { screen } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Removed unused render, fireEvent
 // Removed unused userEvent import
 import RiskAssessmentPanel from './RiskAssessmentPanel'; // Correct to default import
 import { renderWithProviders } from '../../test/test-utils.unified'; // Correct import path
-import type { RiskAssessment } from '@domain/types/clinical/risk';
-import { RiskLevel } from '@domain/types/clinical/risk'; // Add missing RiskLevel import
+import type { RiskAssessment } from '../../../domain/types/clinical/risk';
+import { RiskLevel } from '../../../domain/types/clinical/risk'; // Add missing RiskLevel import
 
 // Mock data with clinical precision
 const mockRiskAssessments: RiskAssessment[] = [

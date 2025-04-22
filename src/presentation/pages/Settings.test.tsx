@@ -8,6 +8,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // Removed unused React import
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
 // These mocks must come BEFORE importing the component
 vi.mock('../../application/contexts/SettingsContext', () => ({

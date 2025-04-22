@@ -5,7 +5,8 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'; // Import hooks
 
-import { screen, cleanup } from '@testing-library/react'; // render is imported from unified utils
+import { screen, cleanup } from '@testing-library/react';
+import '@testing-library/jest-dom'; // render is imported from unified utils
 // Removed unused React import
 // Removed unused userEvent import
 // Adjust import path based on actual file location if needed

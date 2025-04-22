@@ -10,7 +10,7 @@ import type {
   Patient,
   // Removed unused types: PatientDemographics, ClinicalData, TreatmentData, NeuralData, DataPermissions
   // Import nested types if needed for more specific invalid mocks
-} from '@domain/types/clinical/patient';
+} from '../../../domain/types/clinical/patient';
 
 // Helper to create a basic valid Patient object for testing
 const createValidMockPatient = (): Patient => ({

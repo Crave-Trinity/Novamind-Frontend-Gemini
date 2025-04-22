@@ -18,11 +18,11 @@ import {
   isTreatmentResponsePrediction,
   validateTreatmentResponsePrediction,
 } from '@services/clinical/clinical.service.runtime'; // Use @services alias
-import type { Symptom, Diagnosis, Treatment } from '@domain/types/clinical/patient'; // Use type import
-import type { RiskAssessment } from '@domain/types/clinical/risk';
-import { RiskLevel } from '@domain/types/clinical/risk';
+import type { Symptom, Diagnosis, Treatment } from '../../../domain/types/clinical/patient'; // Use type import
+import type { RiskAssessment } from '../../../domain/types/clinical/risk';
+import { RiskLevel } from '../../../domain/types/clinical/risk';
 import type { TreatmentResponsePrediction } from '@domain/types/clinical/treatment';
-import type { Result } from '@domain/types/shared/common'; // Use type import
+import type { Result } from '../../../domain/types/shared/common'; // Use type import
 
 // Custom type for TypeVerificationError for proper type assertion
 type TypeVerificationError = Error & {

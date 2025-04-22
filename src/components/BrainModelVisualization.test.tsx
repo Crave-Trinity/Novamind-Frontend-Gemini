@@ -3,7 +3,8 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'; // Add cleanup
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Add cleanup
 import userEvent from '@testing-library/user-event';
 import { BrainModelVisualization } from '../presentation/molecules/BrainModelVisualization';
 import { BrainModelProvider } from '../presentation/providers/BrainModelProvider';
@@ -167,6 +168,18 @@ describe('BrainModelVisualization Component', () => {
       unobserve: vi.fn(),
       disconnect: vi.fn(),
     }));
+    // Mock window.matchMedia
+    window.matchMedia = vi.fn().mockImplementation((query) => ({
+      matches: query.includes('(prefers-color-scheme: dark)'),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
     
     // Suppress console errors for WebGL errors
     vi.spyOn(console, 'error').mockImplementation(() => {});

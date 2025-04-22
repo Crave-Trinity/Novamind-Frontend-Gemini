@@ -6,6 +6,7 @@
 // Removed unused React import (new JSX transform)
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { renderWithProviders } from '../../test/test-utils.unified';
 import { setupWebGLMocks, cleanupWebGLMocks } from '../../test/webgl/setup-test';
 import { TimelineEvent } from './TimelineEvent';

@@ -9,8 +9,8 @@ import { describe, it, expect, vi } from 'vitest'; // Remove beforeEach, afterEa
 import { render, screen } from '../../test/test-utils.unified'; // Use unified render
 import { SymptomRegionMappingVisualizer } from './SymptomRegionMappingVisualizer';
 import type { BrainRegion } from '@domain/types/brain/models';
-import type { Symptom } from '@domain/types/clinical/patient';
-import type { SymptomNeuralMapping } from '@domain/models/brain/mapping/brain-mapping'; // Corrected import path
+import type { Symptom } from '../../../domain/types/clinical/patient';
+import type { SymptomNeuralMapping } from '../../../domain/models/brain/mapping/brain-mapping'; // Corrected import path
 // Remove WebGL mock imports
 // Import Vector3 *after* vi.mock('three', ...)
 // import { Vector3 } from 'three';

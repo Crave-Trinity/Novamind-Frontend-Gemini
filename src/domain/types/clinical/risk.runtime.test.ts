@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { RiskLevel } from '@domain/types/clinical/risk'; // Add .ts extension
+import { RiskLevel } from '../../../domain/types/clinical/risk'; // Add .ts extension
 import {
   RiskLevelValidator,
   RiskAssessmentValidator,

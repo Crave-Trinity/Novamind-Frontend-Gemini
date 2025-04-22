@@ -6,7 +6,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { RiskAssessmentService } from '@services/clinical/risk-assessment.service'; // Use @services alias and add .ts
-import { RiskLevel } from '@domain/types/clinical/risk'; // Import the enum
+import { RiskLevel } from '../../../domain/types/clinical/risk'; // Import the enum
 
 describe('RiskAssessmentService', () => {
   let riskAssessmentService: RiskAssessmentService;

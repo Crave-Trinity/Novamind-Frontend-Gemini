@@ -8,6 +8,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 // Removed unused React import (new JSX transform)
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
 // Add global TextEncoder polyfill to ensure compatibility
 class MockTextEncoder {

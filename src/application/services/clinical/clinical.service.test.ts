@@ -11,11 +11,11 @@ import type {
   SymptomNeuralMapping,
   DiagnosisNeuralMapping,
   TreatmentNeuralMapping,
-} from '@domain/models/brain/mapping/brain-mapping'; // Corrected path and use type import
-import type { RiskAssessment } from '@domain/types/clinical/risk'; // Use type import
-import { RiskLevel } from '@domain/types/clinical/risk'; // Import RiskLevel enum
+} from '../../../domain/models/brain/mapping/brain-mapping'; // Corrected path and use type import
+import type { RiskAssessment } from '../../../domain/types/clinical/risk'; // Use type import
+import { RiskLevel } from '../../../domain/types/clinical/risk'; // Import RiskLevel enum
 import type { TreatmentResponsePrediction } from '@domain/types/clinical/treatment'; // Use type import
-import type { Symptom } from '@domain/types/clinical/patient'; // Use type import
+import type { Symptom } from '../../../domain/types/clinical/patient'; // Use type import
 
 // Mock axios for isolated testing
 vi.mock('axios');

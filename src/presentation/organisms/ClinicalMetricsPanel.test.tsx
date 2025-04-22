@@ -5,7 +5,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen, waitFor } from '@testing-library/react'; // Import waitFor
+import { screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Import waitFor
 // Removed unused userEvent import
 import { ClinicalMetricsPanel } from './ClinicalMetricsPanel';
 import { renderWithProviders } from '../../test/test-utils.unified'; // Import the correct render function

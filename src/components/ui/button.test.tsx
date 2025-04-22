@@ -1,5 +1,6 @@
 import React from 'react';
 import { screen, render, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { renderWithProviders } from '../../test/test-utils.unified';
 import { Button, buttonVariants } from './button';
 import { vi } from 'vitest';
